@@ -135,7 +135,7 @@ class ClassicEscalatableCreator
                                             
                 String detail = act.executeAction(alert, execInfo);
                 
-                alertMan.logActionDetail(alert, act, detail);
+                alertMan.logActionDetail(alert, act, detail, null);
             } catch(Exception e) {
                 // For any exception, just log it.  We can't afford not
                 // letting the other actions go un-processed.

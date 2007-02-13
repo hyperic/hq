@@ -204,7 +204,7 @@ public class PortalAction extends ResourceController {
             
             if (aeid.isGroup()) {
                 eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
-                                    alertId, pause);
+                                    alertId, pause, null);
                 return viewAlert(mapping, form, request, response);
             }
         } catch (ParameterNotFoundException e) {
@@ -214,7 +214,7 @@ public class PortalAction extends ResourceController {
         // XXX:  Right now this only works with classic alerts
         eb.acknowledgeAlert(sessionID, 
                             ClassicEscalationAlertType.CLASSIC,
-                            alertId, pause);
+                            alertId, pause, null);
         
         return viewAlert(mapping, form, request, response);
     }
@@ -235,7 +235,7 @@ public class PortalAction extends ResourceController {
             
             if (aeid.isGroup()) {
                 eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
-                            alertId);
+                            alertId, null);
                 return viewAlert(mapping, form, request, response);
             }
         } catch (ParameterNotFoundException e) {
@@ -243,7 +243,8 @@ public class PortalAction extends ResourceController {
         }
 
         // Fix alert the old fashion way
-        eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId); 
+        eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
+                    null); 
 
         return viewAlert(mapping, form, request, response);
     }

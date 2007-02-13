@@ -117,13 +117,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Mark an alert as fixed, adding the correct logs, etc. 
+     * Simply mark an alert object as fixed
      *
      * @ejb:interface-method
      */
-    public void fixAlert(Alert alert, AuthzSubject fixer) {
+    public void setAlertFixed(Alert alert) {
         alert.setFixed(true);
-        alert.createActionLog("Fixed by " + fixer.getFullName(), null, fixer);
     }
     
     /**
@@ -131,8 +130,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public void logActionDetail(Alert alert, Action action, String detail) {
-        alert.createActionLog(detail, action, null);
+    public void logActionDetail(Alert alert, Action action, String detail,
+                                AuthzSubject subject) 
+    {
+        alert.createActionLog(detail, action, subject);
     }
 
     /**

@@ -1698,15 +1698,15 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void acknowledgeAlert(int sessionID, 
-                                 EscalationAlertType alertType,
-                                 Integer alertID, long pauseWaitTime)
+    public void acknowledgeAlert(int sessionID, EscalationAlertType alertType, 
+                                 Integer alertID, long pauseWaitTime,
+                                 String moreInfo)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
 
-        getEscMan().acknowledgeAlert(subject, alertType, alertID);
+        getEscMan().acknowledgeAlert(subject, alertType, alertID, moreInfo);
     }
 
     /**
@@ -1714,13 +1714,13 @@ public class EventsBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
-                         Integer alertID)
+                         Integer alertID, String moreInfo)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
-        getEscMan().fixAlert(subject, alertType, alertID);
+        getEscMan().fixAlert(subject, alertType, alertID, moreInfo);
     }
 
     /**

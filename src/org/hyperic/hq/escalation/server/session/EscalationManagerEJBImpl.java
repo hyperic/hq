@@ -396,7 +396,8 @@ public class EscalationManagerEJBImpl
             
             String detail = action.executeAction(esc.getAlertInfo(), execInfo);
             
-            s.getAlertType().logActionDetails(esc.getId(), action, detail);
+            s.getAlertType().logActionDetails(esc.getId(), action, detail, 
+                                              null);
         } catch(Exception exc) {
             _log.error("Unable to execute action [" + 
                        action.getClassName() + "] for escalation definition [" +
@@ -434,10 +435,11 @@ public class EscalationManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void acknowledgeAlert(AuthzSubject subject, 
-                                 EscalationAlertType type, Integer alertId) 
+    public void acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, 
+                                 Integer alertId, String moreInfo)  
+                                 
     { 
-        fixOrNotify(subject, type, alertId, false);
+        fixOrNotify(subject, type, alertId, false, moreInfo);
     }
 
     /**
@@ -449,13 +451,13 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void fixAlert(AuthzSubject subject, EscalationAlertType type, 
-                         Integer alertId)
+                         Integer alertId, String moreInfo)
     { 
-        fixOrNotify(subject, type, alertId, true);
+        fixOrNotify(subject, type, alertId, true, moreInfo);
     } 
     
     private void fixOrNotify(AuthzSubject subject, EscalationAlertType type, 
-                             Integer alertId, boolean fixed)
+                             Integer alertId, boolean fixed, String moreInfo)
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
@@ -476,10 +478,18 @@ public class EscalationManagerEJBImpl
             return;
         }
         
+        if (moreInfo != null)
+            moreInfo = " (" + moreInfo + ")";
+        else
+            moreInfo = "";
+        
         if (fixed) {  
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
             type.changeAlertState(alertId, subject, 
-                                  EscalationStateChange.FIXED);
+                                  EscalationStateChange.FIXED); 
+            type.logActionDetails(alertId, null, 
+                                  subject.getFullName() + " fixed the alert" +
+                                  moreInfo, subject);
             if (state != null)
                 endEscalation(state);
         } else {
@@ -494,12 +504,17 @@ public class EscalationManagerEJBImpl
                        alertId);
             type.changeAlertState(alertId, subject, 
                                   EscalationStateChange.ACKNOWLEDGED);
+            type.logActionDetails(alertId, null, 
+                                  subject.getFullName() + " acknowledged " +
+                                  "the alert" + moreInfo, subject);
+                                  
             state.setAcknowledgedBy(subject);
         }
 
         if (state != null)
             sendNotifications(state, esc, subject, 
-                              state.getEscalation().isNotifyAll(), fixed);
+                              state.getEscalation().isNotifyAll(), fixed,
+                              moreInfo);
     }
 
     /**
@@ -510,11 +525,11 @@ public class EscalationManagerEJBImpl
      */
     private void sendNotifications(EscalationState state, Escalatable alert,
                                    AuthzSubject subject, boolean notifyAll, 
-                                   boolean fixed)
+                                   boolean fixed, String moreInfo)
     {
         String msg = subject.getFullName() + " has " + 
             (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
-            alert.getDefinition().getName() + "]";
+            alert.getDefinition().getName() + "] " + moreInfo;
 
         List actions = state.getEscalation().getActions();
         int idx = (notifyAll ? actions.size() : state.getNextAction()) - 1;

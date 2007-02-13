@@ -81,5 +81,6 @@ public abstract class EscalationAlertType
      * the subsytem's log objects.
      */
     protected abstract void logActionDetails(Integer alertId, Action action,
-                                             String detail);
+                                             String detail, 
+                                             AuthzSubject subject);
 }

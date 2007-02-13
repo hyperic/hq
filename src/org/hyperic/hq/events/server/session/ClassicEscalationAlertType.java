@@ -97,18 +97,15 @@ public final class ClassicEscalationAlertType
         Alert alert = getAlertMan().findAlertById(alertId);
 
         if (newState.isFixed()) 
-            getAlertMan().fixAlert(alert, who);
-        else if (newState.isAcknowledged()) 
-            getAlertMan().logActionDetail(alert, null, "Acknowledged by " + 
-                                          who.getFullName()); 
+            getAlertMan().setAlertFixed(alert);
     }
     
     protected void logActionDetails(Integer alertId, Action action, 
-                                    String detail) 
+                                    String detail, AuthzSubject subject) 
     {
         Alert alert = getAlertMan().findAlertById(alertId);
         
-        getAlertMan().logActionDetail(alert, action, detail);
+        getAlertMan().logActionDetail(alert, action, detail, subject);
     }
 
     private ClassicEscalationAlertType(int code, String desc) {

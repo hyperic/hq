@@ -110,7 +110,7 @@ public class RemoveAction extends BaseAction {
                     // XXX:  This only works for classic alert types ATM
                     boss.acknowledgeAlert(sessionId.intValue(), 
                                           ClassicEscalationAlertType.CLASSIC,
-                                          alertIds[i], 0);
+                                          alertIds[i], 0, null);
                 }
             } else if ("FIXED".equals(nwForm.getButtonAction())) { 
                 log.debug("Fixed alerts");
@@ -119,7 +119,7 @@ public class RemoveAction extends BaseAction {
                     // XXX:  This only works for classic alert types ATM
                     boss.fixAlert(sessionId.intValue(), 
                                   ClassicEscalationAlertType.CLASSIC,
-                                  alertIds[i]);
+                                  alertIds[i], null);
                 }
             }
         }

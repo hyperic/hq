@@ -70,18 +70,15 @@ public final class GalertEscalationAlertType
         GalertLog alert = gMan.findAlertLog(alertId);
 
         if (newState.isFixed()) 
-            gMan.fixAlert(alert, who);
-        else if (newState.isAcknowledged())
-            gMan.createActionLog(alert, "Acknowledged by " + who.getFullName(),
-                                 null, who);
+            gMan.fixAlert(alert);
     }
 
     protected void logActionDetails(Integer alertId, Action action, 
-                                    String detail) 
+                                    String detail, AuthzSubject subject) 
     {
         GalertLog alert = getGalertMan().findAlertLog(alertId);
         
-        getGalertMan().createActionLog(alert, detail, action, null);
+        getGalertMan().createActionLog(alert, detail, action, subject);
     }
 
     private GalertEscalationAlertType(int code, String desc) {
