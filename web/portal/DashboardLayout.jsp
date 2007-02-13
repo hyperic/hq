@@ -83,8 +83,11 @@
 </script>
 <script language="JavaScript" type="text/javascript">
     function refreshPortlets() {
+        var problemPortlet = $('problemResourcesTable');
         setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
+        if (problemPortlet){
         setTimeout("requestProblemResponse()", 60000);
+            }
         setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
         setTimeout("requestFavoriteResources()", 60000);
 
