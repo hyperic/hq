@@ -52,7 +52,7 @@
 
 <table width="100%" cellpadding="2" cellspacing="0" border="0">
   <tr>
-    <td>
+    <td style="background-color:#DBE3F5;">
 <html:form action="/resource/group/monitor/visibility/GroupMetrics">
 
 <tiles:insert definition=".resource.common.monitor.visibility.metricsDisplay">
@@ -62,11 +62,17 @@
   <tiles:put name="useChartMulti" value="false"/>
   <tiles:put name="useCurrent" value="true"/>
 </tiles:insert>
-
+  <%--
   <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.monitor.visibility.CurrentHealthOfCollecting"/>
   <tiles:put name="tabName" beanName="memberTypeLabel" />
 </tiles:insert>
+ --%>
+    <div style="padding-top:4px;padding-bottom:4px;border-top:1px solid #ABB1C7;font-weight:bold;">
+    <fmt:message key="resource.group.monitor.visibility.CurrentHealthOfCollecting">
+        <fmt:param value="${memberTypeLabel}"/>
+    </fmt:message>
+    </div>
 <tiles:insert definition=".resource.common.monitor.visibility.childResourcesCurrentHealthByType">
   <tiles:put name="summaries" beanName="GroupMemberHealthSummaries"/>
   <tiles:put name="memberTypeLabel" beanName="memberTypeLabel" />
