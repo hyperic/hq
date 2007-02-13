@@ -26,6 +26,8 @@
 package org.hyperic.hq.ui.json.action.escalation.crud;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -45,7 +47,10 @@ import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.StringUtil;
 import org.json.JSONException;
+
 
 /**
  * Called when UI wants to create an escalation action
@@ -110,7 +115,9 @@ public class SaveAction extends BaseAction {
             throw new SystemException("Unknown email type [" + sType + "]");
         }
         
-        cfg.setNames(((String[])p.get(nameVar))[0]);
+        String[] nameArr = (String[])p.get(nameVar);
+        List nameList = Arrays.asList(nameArr);
+        cfg.setNames(StringUtil.implode(nameList, ","));
         cfg.setSms(sms);
         return cfg;
     }
