@@ -135,9 +135,11 @@ public class SNMPMeasurementPlugin
         final String pdkDir =
             manager.getProperty(ProductPluginManager.PROP_PDK_DIR);
 
-        if (pdkDir != null) {
-            MIBTree.setMibDir(pdkDir + "/mibs");
+        if (pdkDir == null) {
+            return; //dont load MIBs in the server
         }
+
+        MIBTree.setMibDir(pdkDir + "/mibs");
 
         try {
             if (this.client.init(manager.getProperties())) {
