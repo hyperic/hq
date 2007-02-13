@@ -41,12 +41,12 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
@@ -144,7 +144,7 @@ public class PortalAction extends ResourceController {
                 GalertBoss gb = ContextUtils.getGalertBoss(ctx);
                 
                 // properties
-                GalertLog av = gb.findAlertLog(sessionID, alertId);
+                Escalatable av = gb.findEscalatableAlert(sessionID, alertId);
 
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR,
                                      av.getDefinition().getName());

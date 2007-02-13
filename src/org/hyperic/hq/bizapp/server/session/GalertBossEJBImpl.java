@@ -31,9 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
+import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.ejb.FinderException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -48,6 +48,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.AlertDefinitionBean;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
@@ -264,11 +265,11 @@ public class GalertBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public GalertLog findAlertLog(int sessionId, Integer id)
+    public Escalatable findEscalatableAlert(int sessionId, Integer id)
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _galertMan.findAlertLog(id);
+        return _galertMan.findEscalatableAlert(id);
     }    
 
     /**

@@ -315,7 +315,7 @@
                     var ackAnchor = document.createElement("a");
                     td6.appendChild(ackAnchor);
                     ackAnchor.appendChild(document.createTextNode('Acknowledge'));
-                    ackAnchor.setAttribute('href', (ackUrl + aList[i].alertId));
+                    ackAnchor.setAttribute('href', (ackUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
                 } else {
                     td6.innerHTML = "&nbsp;";
                 }

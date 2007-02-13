@@ -25,9 +25,12 @@
 
 package org.hyperic.hq.events;
 
+import java.util.Collection;
+
 public interface AlertInterface {
     Integer getId();
     boolean isFixed();
     long getTimestamp();
+    Collection getActionLog();
     AlertDefinitionInterface getAlertDefinitionInterface();
 }

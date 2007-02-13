@@ -34,7 +34,7 @@
 
 <c:set var="widgetInstanceName" value="alerts"/>
 <html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
-<html:link page="/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" linkName="ackAlertUrl" styleId="ackAlertUrl" style="visibility:hidden;"></html:link>
+<html:link page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid=" linkName="ackAlertUrl" styleId="ackAlertUrl" style="visibility:hidden;"></html:link>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">

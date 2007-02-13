@@ -47,6 +47,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
@@ -211,6 +212,13 @@ public class GalertManagerEJBImpl
         alert.setFixed(true);
     }
     
+    /**
+     * @ejb:interface-method  
+     */
+    public Escalatable findEscalatableAlert(Integer id) {
+        return new GalertEscalable(_logDAO.findById(id));
+    }
+
     /**
      * @ejb:interface-method  
      */
