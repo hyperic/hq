@@ -56,6 +56,7 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
+import org.hyperic.hq.galerts.server.session.GalertEscalable;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
@@ -325,20 +326,23 @@ public class GalertBossEJBImpl
 
         JSONArray jarr = new JSONArray();
         for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
-            GalertLog log = (GalertLog)i.next();
+            // Look up escalatable
+            Escalatable alert = new GalertEscalable((GalertLog) i.next());
             
             // Format the alertTime
             SimpleDateFormat df =
                 new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
-            String date = df.format(new Date(log.getTimestamp()));
+            String date =
+                df.format(new Date(alert.getAlertInfo().getTimestamp()));
             
             jarr.put(new JSONObject()
-                .put("id", log.getId())
+                .put("id", alert.getId())
                 .put("time", date)
-                .put("name", log.getAlertDef().getName())
-                .put("defId", log.getAlertDef().getId())
-                .put("reason", log.getExecutionReason().getShortReason())
-                .put("fixed", log.isFixed()));
+                .put("name", alert.getDefinition().getName())
+                .put("defId", alert.getDefinition().getId())
+                .put("reason", alert.getShortReason())
+                .put("fixed", alert.getAlertInfo().isFixed())
+                .put("acknowledgeable", alert.isAcknowledgeable()));
         }
         
         JSONObject jobj = new JSONObject();
