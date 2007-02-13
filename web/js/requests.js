@@ -254,6 +254,9 @@
                 tbody.removeChild(tbody.childNodes[i - 1]);
             }
 
+            var alertUrl = $('viewAlertUrl').href;
+            var ackUrl = $('ackAlertUrl').href;
+
             for (i = 0; i < aList.length; i++) {
 
                 var tr = document.createElement('tr');
@@ -262,11 +265,10 @@
                 var td3 = document.createElement('td');
                 var td4 = document.createElement('td');
                 var td5 = document.createElement('td');
+                var td6 = document.createElement('td');
                 var alertAnchor = document.createElement("a");
                 var checkBox = document.createElement("input");
                 var urlAmp = "&a="
-                var alertUrl = $('viewAlertUrl').href;
-
 
                 tbody.appendChild(tr);
                 tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
@@ -304,6 +306,18 @@
                     td5.appendChild(document.createTextNode("Yes"));
                 } else {
                     td5.appendChild(document.createTextNode("No"));
+                }
+
+                tr.appendChild(td6);
+                td6.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
+
+                if (aList[i].acknowledgeable) {
+                    var ackAnchor = document.createElement("a");
+                    td6.appendChild(ackAnchor);
+                    ackAnchor.appendChild(document.createTextNode('Acknowledge'));
+                    ackAnchor.setAttribute('href', (ackUrl + aList[i].alertId));
+                } else {
+                    td6.innerHTML = "&nbsp;";
                 }
             }
         } else {

@@ -34,6 +34,7 @@
 
 <c:set var="widgetInstanceName" value="alerts"/>
 <html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
+<html:link page="/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" linkName="ackAlertUrl" styleId="ackAlertUrl" style="visibility:hidden;"></html:link>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -86,9 +87,10 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 			<td width="30%" class="ListHeaderInactive">
 				<fmt:message key="dash.home.TableHeader.ResourceName"/>
 			</td>
-			<td width="10%" class="ListHeaderInactive">
+			<td width="5%" class="ListHeaderInactive">
 				<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
 			</td>
+			<td width="5%" class="ListHeaderInactive">&nbsp;</td>
 		</tr>
      </thead>
      <tbody>
@@ -99,7 +101,7 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
       		<td class="ListCell" colspan="5"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
     	</tr>
         <tr>
-             <td colspan="4">
+             <td colspan="5">
     <tiles:insert definition=".toolbar.list">                
       <tiles:put name="noButtons" value="true"/>
       <tiles:put name="alerts" value="true"/>

@@ -1292,8 +1292,9 @@ public class EventsBossEJBImpl
         alerts = getAM().convertAlertsToEscalatables(alerts);
     
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-        alerts.addAll(gMan.findAlerts(subject, count, priority, newRange,  
-                                      lateTime, appentResources)); 
+        List galerts = gMan.findAlerts(subject, count, priority, newRange,  
+                                       lateTime, appentResources); 
+        alerts.addAll(gMan.convertGalertsToEscalatables(galerts)); 
 
         Collections.sort(alerts, new Comparator() {
             public int compare(Object o1, Object o2) {

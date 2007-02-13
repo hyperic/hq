@@ -39,6 +39,7 @@ class GalertEscalatableCreator
     }
     
     public Escalatable createEscalatable() {
-        return GalertManagerEJBImpl.getOne().createAlertLog(_def, _reason);
+        return new GalertEscalable(
+            GalertManagerEJBImpl.getOne().createAlertLog(_def, _reason));
     }
 }

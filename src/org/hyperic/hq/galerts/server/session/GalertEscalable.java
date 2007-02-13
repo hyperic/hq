@@ -23,53 +23,48 @@
  * USA.
  */
 
-package org.hyperic.hq.escalation.server.session;
+package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.events.AlertInterface;
 
-/**
- * This is a utility class meant to provide some of the basic pieces needed
- * for things to implement {@link Escalatable} 
- */
-public abstract class EscalatableBase 
-    implements Escalatable
-{
-    private PerformsEscalations _def;
-    private Integer             _id;
-    private String              _shortReason;
-    private String              _longReason;
-    private boolean             _acknowledgeable;
+public class GalertEscalable implements Escalatable {
     
-    protected EscalatableBase(PerformsEscalations def, Integer id,
-                              String shortReason, String longReason) 
-    {
-        _def         = def;
-        _id          = id;
-        _shortReason = shortReason;
-        _longReason  = longReason;
-        
+    private GalertLog _galert;
+    private boolean   _acknowledgeable;
+    
+    public GalertEscalable(GalertLog galert) {
+        _galert = galert;
+
         EscalationManagerLocal esc = EscalationManagerEJBImpl.getOne();
         _acknowledgeable = esc.isAlertAcknowledgeable(getId(), getDefinition());
     }
-    
+
+    public AlertInterface getAlertInfo() {
+        return _galert.getAlertInfo();
+    }
+
     public PerformsEscalations getDefinition() {
-        return _def;
+        return _galert.getAlertDef();
     }
 
     public Integer getId() {
-        return _id;
+        return _galert.getId();
     }
 
     public String getLongReason() {
-        return _longReason;
+        return _galert.getLongReason();
     }
 
     public String getShortReason() {
-        return _shortReason;
+        return _galert.getShortReason();
     }
 
     public boolean isAcknowledgeable() {
         return _acknowledgeable;
     }
+
 }

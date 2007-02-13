@@ -441,6 +441,29 @@ public class EscalationManagerEJBImpl
     { 
         fixOrNotify(subject, type, alertId, false, moreInfo);
     }
+    
+    /**
+     * See if an alert is acknowledgeable
+     * 
+     * @return true if the alert is currently acknowledgeable
+     * 
+     * @ejb:interface-method
+     */
+    public boolean isAlertAcknowledgeable(Integer alertId,
+                                          PerformsEscalations def) {
+        if (def.getEscalation() != null) {
+            EscalationState escState =
+                new EscalationStateDAO(DAOFactory.getDAOFactory()).find(def);
+            
+            if (escState != null) {
+                if (escState.getAlertId() == alertId.intValue() &&
+                    escState.getAcknowledgedBy() == null) {
+                    return true;
+                }
+            }            
+        }
+        return false;
+    }
 
     /**
      * Fix an alert, potentially sending out notifications.  The state of

@@ -147,6 +147,7 @@ public class ViewAction extends BaseAction {
             jAlert.put("alertDefName", def.getName()); 
             jAlert.put("cTime", date);
             jAlert.put("fixed", alert.getAlertInfo().isFixed()); 
+            jAlert.put("acknowledgeable", alert.isAcknowledgeable());
 
             a.add(jAlert);
         }

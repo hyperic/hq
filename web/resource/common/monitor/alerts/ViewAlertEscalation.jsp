@@ -71,7 +71,7 @@
     </fmt:message>
     </td>
     <td colspan="3"  class="BlockContent" style="padding-left: 4px;">
-      <hq:dateFormatter value="${log.timeStamp}"/><br/>
+      <hq:dateFormatter value="${log.timeStamp}"/>
       <c:out value="${log.detail}"/>
     </td>
   </tr>
@@ -79,7 +79,7 @@
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px; border-bottom: solid #D5D8DE 1px;">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
-  <c:if test="${escalation.pauseAllowed && not alert.acknowledged}">
+  <c:if test="${escalation.pauseAllowed && not alert.acknowledgeable}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
@@ -109,7 +109,7 @@
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
   <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
   <c:choose>
-    <c:when test="${alert.acknowledged}">
+    <c:when test="${alert.acknowledgeable}">
       <tiles:put name="disabled" value="true"/>
     </c:when>
     <c:otherwise>

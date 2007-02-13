@@ -54,6 +54,8 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.ClassicEscalatable;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
@@ -455,6 +457,21 @@ public class GalertManagerEJBImpl
         GalertDef def = findById(id);
 
         _escMan.startEscalation(def, new GalertEscalatableCreator(def, reason));
+    }
+
+    /**
+     * Convert GalertLogs to Escalatable
+     * @ejb:interface-method
+     */
+    public List convertGalertsToEscalatables(Collection galerts) {
+        List res = new ArrayList(galerts.size());
+
+        for (Iterator i = galerts.iterator(); i.hasNext();) {
+            GalertLog a = (GalertLog) i.next();
+            res.add(new GalertEscalable(a));
+        }
+
+        return res;
     }
 
     /**

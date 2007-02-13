@@ -140,7 +140,7 @@
 </c:url>
 
 <!-- FORM -->
-<html:form method="GET" action="/alerts/RemoveAlerts.do">
+<html:form method="GET" action="/alerts/RemoveAlerts">
 <html:hidden property="eid" value="${Resource.entityId}"/>
   <c:if test="${not empty param.year}">
     <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
@@ -323,7 +323,7 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
 </display:column>
 
 <display:column width="11%" property="acknowledgeable"
-                title="alerts.alert.AlertList.ListHeader.Acknowledge"
+                title="nbsp"
                 href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
   <display:booleandecorator flagKey="acknowledgeable"/>
 </display:column>

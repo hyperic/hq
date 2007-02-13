@@ -48,4 +48,6 @@ public interface Escalatable {
      * Get specific information about the alert.
      */
     AlertInterface getAlertInfo();
+    
+    boolean isAcknowledgeable();
 }

@@ -140,12 +140,17 @@ public class RSSAction extends BaseRSSAction {
                           alert.getId() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.fixed.label") +
-                          "</a></td><td><a href='" + feed.getBaseUrl() +
+                          "</a></td>";
+                
+                if (alert.isAcknowledgeable()) {
+                    desc += "<td><a href='" + feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
                           alert.getId() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.acknowledge.label")+
                           "</a></td></tr></table>";
+                    
+                }
             }
             
             AuthzSubject subject = aBoss.getCurrentSubject(user);

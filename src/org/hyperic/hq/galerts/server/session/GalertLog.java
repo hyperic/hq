@@ -31,7 +31,6 @@ import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -39,7 +38,7 @@ import org.hyperic.hq.events.server.session.Action;
 
 public class GalertLog
     extends PersistedObject 
-    implements AlertInterface, Escalatable
+    implements AlertInterface
 { 
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
