@@ -1085,7 +1085,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     .getLiveMeasurementValues(subject, mids)[0];
     }
 
-     /** Get the last metric value
+     /**
+      * Get the last metric values for the given entity and template ids.  This
+      * method ignores the collection interval and will go back as far as needed
+      * to return data, so use with caution.
+      * 
       * @param tids The template IDs to get
       * @ejb:interface-method
       */
@@ -1097,14 +1101,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
          AuthzSubjectValue subject = manager.getSubject(sessionId);
          
          Integer mids[] = new Integer[tids.length];
-         long interval = 0;
          for (int i = 0; i < tids.length; i++) {
              try {
                 DerivedMeasurementValue dmv =
                      getDerivedMeasurementManager()
                         .findMeasurement(subject, tids[i], aeid.getId());
                 mids[i] = dmv.getId();
-                interval = Math.max(interval, dmv.getInterval());
             } catch (MeasurementNotFoundException e) {
                 mids[i] = new Integer(0);
             }             
@@ -1112,7 +1114,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
          
          MetricValue[] ret = new MetricValue[tids.length];
          Map data = getDataMan().getLastDataPoints(mids,
-                                                   System.currentTimeMillis() - interval);
+                                                   MeasurementConstants.TIMERANGE_UNLIMITED);
              
          for (int i = 0; i < mids.length; i++) {
              if (data.containsKey(mids[i]))
