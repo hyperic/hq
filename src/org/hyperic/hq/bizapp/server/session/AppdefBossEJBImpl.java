@@ -146,6 +146,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * @ejb:bean name="AppdefBoss"
@@ -2864,6 +2865,9 @@ public class AppdefBossEJBImpl
         AppdefPagerFilterGroupMemExclude groupMemberFilter;
         boolean groupEntContext = false;
 
+        StopWatch watch = new StopWatch();
+        watch.markTimeBegin("findCompatInventory");
+
         // init our (never-null) page and filter lists
         if (filterList == null) {
             filterList = new ArrayList();
@@ -2935,13 +2939,17 @@ public class AppdefBossEJBImpl
         // translate to appdef entities.
         // We have to create a new page control because we are no
         // longer limiting the size of the record set in authz.
+        watch.markTimeBegin("findViewableEntityIds");
         toBePaged = findViewableEntityIds(subject,  appdefTypeId,
                                           resourceName, pc);
-        log.debug("Found " + toBePaged.size() + " viewable resources");
+        watch.markTimeEnd("findViewableEntityIds");
 
         // Page it, then convert to AppdefResourceValue
         List finalList = new ArrayList();
+        watch.markTimeBegin("getPageList");
         PageList pl = getPageList (toBePaged, pc, filterList);
+        watch.markTimeEnd("getPageList");
+
         for (Iterator itr = pl.iterator();itr.hasNext();){
             AppdefEntityID ent = (AppdefEntityID) itr.next();
             AppdefResourceValue resourceValue;
@@ -2979,6 +2987,8 @@ public class AppdefBossEJBImpl
 
         int adjustedSize = toBePaged.size() - erFilterSize - pendingSize -
                            assignedSvcFilterSize - groupMemberFilterSize;
+        watch.markTimeEnd("findCompatInventory");
+        log.debug("findCompatInventory(): " + watch);
         return new PageList(finalList,adjustedSize);
     }
 
