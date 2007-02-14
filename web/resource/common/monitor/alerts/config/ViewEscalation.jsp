@@ -240,17 +240,17 @@ function showViewEscResponse() {
     }
 
       if (allowPause) {
-        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxPauseTime;
+        $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
       }
       else {
-        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+        $('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
       }
 
       if (notifyAll) {
-        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
+        $('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.all" />';
       }
       else {
-        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+        $('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.previous" />';
       }
    }    
 
@@ -268,7 +268,7 @@ function showViewEscResponse() {
         sel.appendChild(o);
         o.appendChild(document.createTextNode(txt));
     }
-
+   /*
     function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
@@ -293,8 +293,8 @@ function showViewEscResponse() {
             escalationSel.options[0].value = 0;
         }
    }
-
-   onloads.push( initEsc );
+   */
+   //onloads.push( initEsc );
 
     function configure(id) {
       var sel = $('who' + id);
