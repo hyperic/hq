@@ -27,11 +27,14 @@ package org.hyperic.hq.ui.json.action.escalation.crud;
 
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -53,6 +56,7 @@ import org.json.JSONException;
  * Called when UI wants to create an escalation action
  */
 public class SaveAction extends BaseAction {
+    private final Log _log = LogFactory.getLog(SaveAction.class);
     
     public void execute(JsonActionContext context) 
         throws PermissionException, SessionTimeoutException,
@@ -107,6 +111,9 @@ public class SaveAction extends BaseAction {
         } else if (sType.equals("Others")) {
             cfg.setType(EmailActionConfig.TYPE_EMAILS);
             nameVar = "emailinput";
+        } else if (sType.equals("Roles")) {
+            cfg.setType(EmailActionConfig.TYPE_ROLES);
+            nameVar = "roles";
         } else {
             throw new SystemException("Unknown email type [" + sType + "]");
         }
