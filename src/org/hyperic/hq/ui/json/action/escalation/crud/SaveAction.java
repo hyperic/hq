@@ -32,8 +32,6 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -47,7 +45,6 @@ import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.json.JSONException;
 
@@ -56,8 +53,7 @@ import org.json.JSONException;
  * Called when UI wants to create an escalation action
  */
 public class SaveAction extends BaseAction {
-    private final Log _log = LogFactory.getLog(SaveAction.class);
-
+    
     public void execute(JsonActionContext context) 
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException, JSONException, RemoteException
