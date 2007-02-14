@@ -90,6 +90,7 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
@@ -1316,18 +1317,15 @@ public class EventsBossEJBImpl
         
         List res = new ArrayList();
         for (Iterator i = alerts.iterator();
-             i.hasNext() && res.size() <= count; ) {
+             i.hasNext() && res.size() <= count; ) 
+        {
             Escalatable alert = (Escalatable) i.next();
             PerformsEscalations def = alert.getDefinition();
+            AlertDefinitionInterface defInfo = def.getDefinitionInfo();
             AppdefEntityID aeid;
 
-            try {
-                aeid = getADM().getAppdefEntityIdById(def.getId());
-            } catch (FinderException e) {
-                _log.error("Alert definition: " + def.getId() + 
-                           " not found for alert ID: " + alert.getId());
-                continue;
-            }
+            aeid = new AppdefEntityID(defInfo.getAppdefType(),
+                                      defInfo.getAppdefId());
 
             if (badIds.contains(aeid))
                 continue;
