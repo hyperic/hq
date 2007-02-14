@@ -46,7 +46,6 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
-import org.hyperic.hq.bizapp.shared.uibeans.AlertDefinitionBean;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -200,8 +199,6 @@ public class GalertBossEJBImpl
     public PageList findDefinitions(int sessionId, Integer gid, PageControl pc)
         throws SessionException, PermissionException
     {
-        PageList res = new PageList();
-        
         AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
         
         // Find the ResourceGroup
@@ -217,16 +214,7 @@ public class GalertBossEJBImpl
             throw new SystemException(e);
         }
         
-        PageList alertDefs = _galertMan.findAlertDefs(g, pc);
-        for (Iterator i= alertDefs.iterator(); i.hasNext(); ) {
-            GalertDef def = (GalertDef)i.next();
-            
-            res.add(new AlertDefinitionBean(def.getId(), def.getCtime(), 
-                                            def.getName(), def.getDescription(),
-                                            def.isEnabled(), null));
-        }
-        res.setTotalSize(alertDefs.getTotalSize());
-        return res;
+        return _galertMan.findAlertDefs(g, pc);
     }
 
     /**
