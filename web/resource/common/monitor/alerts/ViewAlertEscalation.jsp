@@ -66,12 +66,9 @@
   <c:forEach var="log" varStatus="status" items="${alert.escalationLogs}">
   <tr>
     <td width="20%" class="BlockLabel" style="padding-bottom:3px;">
-    <fmt:message key="alert.current.detail.escalation.action">
-      <fmt:param value="${status.count}"/>
-    </fmt:message>
+      <span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
     </td>
     <td colspan="3"  class="BlockContent" style="padding-left: 4px;padding-bottom:3px;">
-      <span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
       <c:out value="${log.detail}"/>
     </td>
   </tr>
