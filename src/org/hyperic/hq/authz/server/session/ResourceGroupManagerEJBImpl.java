@@ -47,6 +47,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
@@ -715,6 +717,13 @@ public class ResourceGroupManagerEJBImpl
         groupLocal.setModifiedBy(whoami.getName());
     }
 
+    public static ResourceGroupManagerLocal getOne() {
+        try {
+            return ResourceGroupManagerUtil.getLocalHome().create();
+        } catch(Exception e) { 
+            throw new SystemException(e);
+        }
+    }
     public void ejbCreate() throws CreateException {
         try {
             _resourcePager   = Pager.getPager(RESOURCE_PAGER);
