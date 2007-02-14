@@ -39,6 +39,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.util.Messenger;
@@ -166,9 +167,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
                     alertDef.isWillRecover()) {
             	// Disable the alert definition now that we've fired
-                aman.updateAlertDefinitionsEnable(AuthzSubjectManagerUtil
-                    .getLocalHome().create().getOverlord(),
-                    new Integer[]{ alertDef.getId() }, false);
+                aman.updateAlertDefinitionEnable(
+                    AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
+                    alertDef, false);
             }
             
             if (log.isDebugEnabled())
@@ -191,12 +192,6 @@ public abstract class AbstractTrigger implements TriggerInterface {
         } catch (PermissionException e) {
             throw new ActionExecuteException(
                 "Overlord does not have permission to disable definition");
-        } catch (CreateException e) {
-            throw new ActionExecuteException(
-                "Cannot create AuthzSubjectManagerLocal");
-        } catch (NamingException e) {
-            throw new ActionExecuteException(
-                "Cannot look up AuthzSubjectManagerLocal interface");
         }
     }
     
