@@ -4222,7 +4222,7 @@ has already been defined.
                   CREATE INDEX metric_prob_id_idx ON eam_metric_prob (measurement_id)
                 </statement>
           <statement>
-            UPDATE eam_metric_prob SET additional = 0 WHERE additional IS NULL;
+            UPDATE eam_metric_prob SET additional = 0 WHERE additional IS NULL
           </statement>
           <statement>
             DELETE FROM  eam_metric_prob WHERE measurement_id IN (SELECT measurement_id FROM (SELECT measurement_id, timestamp, count(*) AS count FROM  eam_metric_prob WHERE additional = 0 GROUP BY measurement_id, timestamp) p WHERE count > 1)
