@@ -4599,7 +4599,7 @@ has already been defined.
               update eam_alert_action_log
                 set timestamp = (select ctime from eam_alert a 
                                  where a.id = alert_id) 
-                where alert_id is not null;              
+                where alert_id is not null
           </initializer>
         </schema-addColumn>
         <schema-directSQL>
@@ -4607,7 +4607,7 @@ has already been defined.
             update eam_alert_action_log
               set timestamp = (select timestamp from eam_galert_logs a 
                                where a.id = galert_id) 
-              where galert_id is not null;              
+              where galert_id is not null
           </statement>
         </schema-directSQL>
         <schema-alterColumn table="EAM_ALERT_ACTION_LOG"
