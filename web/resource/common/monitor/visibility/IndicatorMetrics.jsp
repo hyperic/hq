@@ -168,7 +168,7 @@
       <th class="ListHeaderInactive">
           <fmt:message key="resource.common.monitor.visibility.MiniTab.All"/>
       </th>
-      <th class="ListHeaderInactive" colspan="2"width="4%"><fmt:message key="resource.common.monitor.visibility.MiniTab.More"/></th>
+      <th class="ListHeaderInactive" colspan="2"width="4%"><fmt:message key="nbsp"/></th>
     </tr>
   <c:forEach var="metric" items="${problems}">
     <c:choose>

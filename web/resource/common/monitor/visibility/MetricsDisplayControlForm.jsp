@@ -150,8 +150,8 @@
 <!--
               <html:option value="1" key="resource.common.monitor.visibility.metricsToolbar.CollectionPoints"/>
 -->
-              <html:option value="2" key="resource.common.monitor.visibility.metricsToolbar.Minutes"/>
-              <html:option value="3" key="resource.common.monitor.visibility.metricsToolbar.Hours"/>
+              <html:option value="2" key="resource.common.monitor.visibility.Minutes"/>
+              <html:option value="3" key="resource.common.monitor.visibility.Hours"/>
               <html:option value="4" key="resource.common.monitor.visibility.metricsToolbar.Days"/>
             </html:select>
           </td>
