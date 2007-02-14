@@ -150,6 +150,10 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (!alertDef.isEnabled())
                 return;
             
+            // Don't fire if it's up to us
+            if (!alertDef.getActOnTrigger().getId().equals(getId()))
+                return;
+            
             if (log.isDebugEnabled())
                 log.debug("Trigger ID " + getId() +
                           " causing alert definition ID " + adId + " to fire");
