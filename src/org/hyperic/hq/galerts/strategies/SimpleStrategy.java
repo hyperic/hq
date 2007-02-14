@@ -54,6 +54,10 @@ public class SimpleStrategy
                    " defName=" + defName + " triggers=" + triggers);
     }
 
+    public void setDefinitionName(String name) {
+        _defName = name;
+    }
+    
     public void reset() {
         _lastReason = null;
     }

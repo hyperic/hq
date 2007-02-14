@@ -113,16 +113,35 @@ public class GalertManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void update(GalertDef def, String name, String desc, Boolean enabled)
+    public void update(GalertDef def, String name, String desc, 
+                       AlertSeverity severity, Boolean enabled)
     {
-        if (name != null)
-            def.setName(name);
-        if (desc != null)
-            def.setDescription(desc);
-        if (enabled != null)
-            def.setEnabled(enabled.booleanValue());
+        boolean seriousUpdate = false;
+        boolean updateName = false;
         
-        GalertProcessor.getInstance().alertDefUpdated(def);
+        if (name != null) {
+            def.setName(name);
+            updateName = true;
+        }
+        
+        if (desc != null) {
+            def.setDescription(desc);
+        }
+
+        if (severity != null) {
+            def.setSeverity(severity);
+        }
+
+        if (enabled != null) {
+            def.setEnabled(enabled.booleanValue());
+            seriousUpdate = true;
+        }
+        
+        if (seriousUpdate) {
+            GalertProcessor.getInstance().loadReloadOrUnload(def);
+        } else if (updateName) {
+            GalertProcessor.getInstance().alertDefUpdated(def, name);
+        }
     }
     
     /**
@@ -134,7 +153,7 @@ public class GalertManagerEJBImpl
         
         // End any escalation we were previously doing.
         EscalationManagerEJBImpl.getOne().endEscalation(def);
-        GalertProcessor.getInstance().alertDefUpdated(def);
+        GalertProcessor.getInstance().loadReloadOrUnload(def);
     }
     
     /**
@@ -388,7 +407,7 @@ public class GalertManagerEJBImpl
  
             _defDAO.save(t);
         }
-        GalertProcessor.getInstance().alertDefUpdated(def);
+        GalertProcessor.getInstance().loadReloadOrUnload(def);
     }
     
     /**
@@ -404,7 +423,7 @@ public class GalertManagerEJBImpl
                                                      stratCrispo); 
         
         _stratTypeDAO.save(res);
-        GalertProcessor.getInstance().alertDefUpdated(def);
+        GalertProcessor.getInstance().loadReloadOrUnload(def);
         return res;
     }
     

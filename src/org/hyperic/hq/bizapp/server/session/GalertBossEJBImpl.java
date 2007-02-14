@@ -43,6 +43,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
@@ -204,12 +205,8 @@ public class GalertBossEJBImpl
         // Find the ResourceGroup
         ResourceGroup g;
         try {
-            g = ResourceGroupManagerUtil.getLocalHome().create()
-                .findResourceGroupById(subj, gid);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj, 
+                                                                           gid);
         } catch (FinderException e) {
             throw new SystemException(e);
         }
@@ -265,11 +262,11 @@ public class GalertBossEJBImpl
      * @ejb:interface-method  
      */
     public void update(int sessionId, GalertDef def, String name, String desc, 
-                       Boolean enabled)
+                       AlertSeverity severity, Boolean enabled)
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        _galertMan.update(def, name, desc, enabled);
+        _galertMan.update(def, name, desc, severity, enabled);
     }
     
     /**

@@ -56,6 +56,12 @@ public interface ExecutionStrategy {
     void configure(GalertDefPartition partition, String defName, List triggers);
     
     /**
+     * Called when the name of the definition to which the strategy is bound
+     * has been changed
+     */
+    void setDefinitionName(String defName);
+    
+    /**
      * Called when a trigger has fired.   
      */
     void triggerFired(Gtrigger trigger, FireReason reason);

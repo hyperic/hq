@@ -48,8 +48,6 @@ import org.hyperic.hq.galerts.server.session.GtriggerInfo;
 /**
  * Represents an in-memory alert definition.  Different than the persisted
  * objects such as {@link GalertDef}
- * 
- * This class is immutable
  */
 class MemGalertDef {
     private final Log _log = LogFactory.getLog(MemGalertDef.class);
@@ -72,6 +70,18 @@ class MemGalertDef {
 
     Integer getId() {
         return _id;
+    }
+
+    void setName(String name) {
+        _name = name;
+        
+        synchronized (_strategies) {
+            for (Iterator i=_strategies.iterator(); i.hasNext(); ) {
+                ExecutionStrategy strat = (ExecutionStrategy)i.next();
+                
+                strat.setDefinitionName(name);
+            }
+        }
     }
     
     private void initializeStrategy(ExecutionStrategyInfo sInfo,
@@ -118,7 +128,7 @@ class MemGalertDef {
     void triggerFired(Gtrigger trigger, FireReason reason) {
         ExecutionStrategy strat = trigger.getStrategy();
 
-        _log.info("Trigger[" + _name + "," + trigger + "] fired");
+        _log.debug("Trigger[" + _name + "," + trigger + "] fired");
         strat.triggerFired(trigger, reason);
         fireWhenReady(strat);
     }
@@ -126,7 +136,7 @@ class MemGalertDef {
     void triggerNotFired(Gtrigger trigger) {
         ExecutionStrategy strat = trigger.getStrategy();
 
-        _log.info("Trigger[" + _name + ", " + trigger + "] no longer fired");
+        _log.debug("Trigger[" + _name + ", " + trigger + "] no longer fired");
         strat.triggerNotFired(trigger);
         fireWhenReady(strat);
     }
@@ -137,8 +147,8 @@ class MemGalertDef {
         if (execReason == null) 
             return;
         
-        _log.info("Alert def [" + _name + " firing");
-        _log.info(execReason);
+        _log.debug("Alert def [" + _name + " firing");
+        _log.debug(execReason);
 
         // Dispatch to alert escalation
         GalertManagerEJBImpl.getOne().startEscalation(_id, execReason);

@@ -208,11 +208,38 @@ public class GalertProcessor {
     }
     
     /**
+     * Called when primitive information has been updated which doens't
+     * require a reload of the entire definition.
+     */
+    public void alertDefUpdated(GalertDef def, final String newName) {
+        final Integer defId = def.getId();
+        
+        HQApp.getInstance().addTransactionListener(new TransactionListener() {
+            public void afterCommit(boolean success) {
+                if (success) {
+                    synchronized (CFG_LOCK) {
+                        MemGalertDef memDef = (MemGalertDef)
+                            _alertDefs.get(defId);
+                        
+                        if (memDef != null)
+                            memDef.setName(newName);
+                    }
+                }
+            }
+        });
+    }
+    
+    /**
      * Call this if an alert-def is created or updated.  The internal state
      * of the processor will be updated after the current transaction 
-     * successfully commits.
+     * successfully commits.  
+     * 
+     * This method should be called for major changes to the definition, such
+     * as conditions, enablement, etc., since it fully unloads the existing
+     * definition and reloads it (meaning that internal state of the 
+     * triggers, such as previously processed metrics, etc. will be reset)
      */
-    public void alertDefUpdated(GalertDef def) {
+    public void loadReloadOrUnload(GalertDef def) {
         final boolean isUnload = !def.isEnabled(); 
         final Integer defId = def.getId();
         final MemGalertDef memDef;

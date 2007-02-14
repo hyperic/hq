@@ -112,14 +112,6 @@ public class GalertDef
         _desc = desc;
     }
     
-    public AlertSeverity getSeverity() {
-        return _severity;
-    }
-    
-    protected int getSeverityEnum() {
-        return _severity.getCode();
-    }
-    
     public boolean isEnabled() {
         return _enabled;
     }
@@ -128,8 +120,20 @@ public class GalertDef
         _enabled = enabled;
     }
     
+    protected int getSeverityEnum() {
+        return _severity.getCode();
+    }
+    
     protected void setSeverityEnum(int code) {
         _severity = AlertSeverity.findByCode(code);
+    }
+    
+    public AlertSeverity getSeverity() {
+        return _severity;
+    }
+
+    void setSeverity(AlertSeverity severity) {
+        setSeverityEnum(severity.getCode());
     }
     
     public ResourceGroup getGroup() {
