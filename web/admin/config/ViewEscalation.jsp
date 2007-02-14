@@ -1016,6 +1016,10 @@ function showViewEscResponse(originalRequest) {
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="1800000">30 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="2700000">45 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="3600000">60 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
             </select></td>
           </tr>
           <tr>
