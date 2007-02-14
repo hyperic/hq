@@ -114,13 +114,13 @@ function setActiveInactive() {
 <display:table cellspacing="0" cellpadding="0" width="100%" action="${sortAction}"
                items="${Definitions}" >
   
-  <display:column width="1%" property="alertDefId" 
+  <display:column width="1%" property="id" 
                    title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
                    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
     <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
   </display:column>
   <display:column width="20%" property="name" sort="true" sortAttr="1"
-                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&aetid=${param.aetid}" paramId="ad" paramProperty="alertDefId"/>
+                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&aetid=${param.aetid}" paramId="ad" paramProperty="id"/>
     
   <display:column width="20%" property="description"
                   title="common.header.Description" >

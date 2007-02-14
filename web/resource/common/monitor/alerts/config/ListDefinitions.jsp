@@ -217,7 +217,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <tiles:insert definition=".portlet.confirm"/>
 <display:table cellspacing="0" cellpadding="0" width="100%"
                action="${sortAction}" items="${Definitions}" >
-  <display:column width="1%" property="alertDefId" 
+  <display:column width="1%" property="id" 
                   title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
                    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
   <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
@@ -227,18 +227,23 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <display:equalsdecorator flagKey="alerts.config.service.DefinitionList.isResourceAlert" value="null"/>
   </display:column>
 
-  <display:column width="20%" property="name" sort="true" sortAttr="1"
-                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}" paramId="ad" paramProperty="alertDefId"/>
+  <display:column width="18%" property="name" sort="true" sortAttr="1"
+                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}" paramId="ad" paramProperty="id"/>
     
   <display:column width="20%" property="description"
                   title="common.header.Description" />
 
-  <display:column width="20%" property="ctime" sort="true" sortAttr="2"
+  <display:column width="15%" property="ctime" sort="true" sortAttr="2"
                   defaultSort="false" title="alerts.config.DefinitionList.ListHeader.DateCreated" >
     <display:datedecorator/>
   </display:column>
+
+   <display:column width="15%" property="mtime" sort="true" sortAttr="2"
+                  defaultSort="false" title="resource.common.monitor.visibility.metricmetadata.collection.lastModified" >
+    <display:datedecorator/>
+  </display:column>
                   
-  <display:column width="20%" property="enabled"
+  <display:column width="10%" property="enabled"
                   title="alerts.config.DefinitionList.ListHeader.Active">
     <display:booleandecorator flagKey="yesno"/>
   </display:column>

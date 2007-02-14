@@ -99,23 +99,13 @@ public class ListDefinitionsAction extends TilesAction {
             }
         }        
         
-        PageList uiBeans  = new PageList();
-        for(Iterator itr = alertDefs.iterator();itr.hasNext();) {
-            AlertDefinitionValue adValue = (AlertDefinitionValue) itr.next();
-            AlertDefinitionBean bean = new AlertDefinitionBean(adValue.getId(),
-                adValue.getCtime(), adValue.getName(), adValue.getDescription(),
-                adValue.getEnabled(), adValue.getParentId());
-            bean.setAppdefEntityID(appEntId);
-           uiBeans.add(bean);
-        }
-
         context.putAttribute(Constants.RESOURCE_ATTR,
                              RequestUtils.getResource(request));
         context.putAttribute(Constants.RESOURCE_OWNER_ATTR, request
                              .getAttribute(Constants.RESOURCE_OWNER_ATTR));
         context.putAttribute(Constants.RESOURCE_MODIFIER_ATTR, request
                              .getAttribute(Constants.RESOURCE_MODIFIER_ATTR));
-        request.setAttribute( Constants.ALERT_DEFS_ATTR, uiBeans );
+        request.setAttribute( Constants.ALERT_DEFS_ATTR, alertDefs );
 
         return null;
     }
