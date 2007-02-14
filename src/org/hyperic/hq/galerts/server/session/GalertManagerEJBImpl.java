@@ -445,6 +445,16 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * Reload an alert definition.  Probably should only be called internally
+     * here.
+     * 
+     * @ejb:interface-method
+     */  
+    public void reloadAlertDef(GalertDef def) {
+        GalertProcessor.getInstance().loadReloadOrUnload(def);
+    }
+
+    /**
      * Delete an alert definition.  
      * 
      * @ejb:interface-method
@@ -522,10 +532,29 @@ public class GalertManagerEJBImpl
                 for (Iterator i=defs.iterator(); i.hasNext(); ) {
                     GalertDef def = (GalertDef)i.next();
                     
-                    _log.info("Cascade deleting GalertDef[" + 
-                              def.getName() + "]");
+                    _log.debug("Cascade deleting GalertDef[" + 
+                               def.getName() + "]");
                     deleteAlertDef(def);
                 }
+            }
+
+            /**
+             * When the group system changes the members, we reload the
+             * in-memory alert definition. 
+             * 
+             * This may be undesirable if the frequency of the changes to
+             * the alert definition is high, since the in-memory state is
+             * reset every time this operation is performed.
+             */
+            public void groupMembersChanged(ResourceGroup g) {
+                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);
+                
+                for (Iterator i=defs.iterator(); i.hasNext(); ) {
+                    GalertDef def = (GalertDef)i.next();
+                    
+                    reloadAlertDef(def);
+                }
+                _log.debug("Group members changed for group [" + g + "]");
             }
         });
         

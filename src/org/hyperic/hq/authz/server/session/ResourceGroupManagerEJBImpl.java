@@ -261,6 +261,8 @@ public class ResourceGroupManagerEJBImpl
             Resource resource = resDao.findById(resources[i].getId());
             resGroup.addResource(resource);
         }
+
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
     }
 
     /**
@@ -287,6 +289,7 @@ public class ResourceGroupManagerEJBImpl
         ResourceType resType = getResourceTypeDAO().findByName(type.getName());
         Resource resource = getResourceDAO().findByInstanceId(resType, instId);
         resGroup.addResource(resource);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
         return resGroup.getResourceGroupValue();
     }
  
@@ -316,6 +319,7 @@ public class ResourceGroupManagerEJBImpl
             resources[i] = resDao.findById(resVals[i].getId());
         }
         grpDao.removeResources(groupLocal, resources);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(groupLocal);
     }
 
     /**
@@ -338,6 +342,7 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.perm_modifyResourceGroup);
 
         dao.removeAllResources(resGroup);
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
     }
 
     /**
@@ -364,6 +369,7 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.groupOpModifyResourceGroup);
 
         groupLocal.setResourceSet(toPojos(resources));
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(groupLocal);
     }
 
     /**

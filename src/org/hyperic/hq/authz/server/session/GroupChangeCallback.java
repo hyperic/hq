@@ -26,6 +26,18 @@
 package org.hyperic.hq.authz.server.session;
 
 public interface GroupChangeCallback {
+    /**
+     * Called after a group has been created
+     */
     void postGroupCreate(ResourceGroup g);
+    
+    /**
+     * Called before a group is deleted 
+     */
     void preGroupDelete(ResourceGroup g);
+    
+    /**
+     * Called after group members for a group have changed.
+     */
+    void groupMembersChanged(ResourceGroup g);
 }
