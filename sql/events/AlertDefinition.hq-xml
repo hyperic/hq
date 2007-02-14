@@ -104,7 +104,7 @@
       <one-to-many class="Action" />
     </bag>
 
-    <bag name="conditionsBag" table="EAM_ALERT_CONDITION">
+    <bag name="conditionsBag" order-by="id" table="EAM_ALERT_CONDITION">
       <cache usage="read-write" />
       <key column="ALERT_DEFINITION_ID" />
       <one-to-many class="AlertCondition" />
