@@ -366,19 +366,25 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            AlertDefinition ad = (AlertDefinition) i.next();
-            
-            if (ad.isEnabled() == enable) {
-                continue;
-            }
-
-            canManageAlerts(subj, ad);
-
-            ad.setEnabled(enable);
-            ad.setMtime(System.currentTimeMillis());
+            updateAlertDefinitionEnable(subj, (AlertDefinition) i.next(),
+                                        enable);
         }
     }
 
+    /** 
+     * Enable/Disable alert definitions
+     * @ejb:interface-method
+     */
+    public void updateAlertDefinitionEnable(AuthzSubjectValue subj,
+                                            AlertDefinition def, boolean enable)
+        throws PermissionException {
+        if (def.isEnabled() != enable) {
+            canManageAlerts(subj, def);
+            def.setEnabled(enable);
+            def.setMtime(System.currentTimeMillis());
+        }
+    }
+    
     /** 
      * Set the escalation on the alertdefinition
      * 
