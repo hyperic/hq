@@ -51,16 +51,6 @@
     classname="org.hyperic.hq.appdef.shared.AIQueueConstants" 
     symbol="Q_STATUS_PLACEHOLDER" var="CONST_UNCHANGED" />
 
-<!--  TYPE AND HOST PROPERTIES TITLE -->
-
-<c:set var="tmpTitle"> - <fmt:message key="resource.autodiscovery.typeAndNetworkProperties.NewModifiedEtc"/></c:set>
-
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.platform.inventory.TypeAndNetworkPropertiesTab"/>
-  <tiles:put name="subTitle" beanName="tmpTitle"/>
-</tiles:insert>
-<!--  /  -->
-
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 <c:set var="ignorePlatformForm" value="AIPlatformResultsForm"/>
 
@@ -117,25 +107,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:if test="${aiResource.ignored}">
     <c:set var="trClass" value="AutoDiscRowIgnored"/>
 </c:if>
-    
-<!--  DISCOVERED IPS FILTERING -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-  	<td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td class="FilterLabelText" nowrap align="right">View:</td>
-    <td class="FilterLabelText" width="100%">
-        <html:select property="ipsStatusFilter" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'ipsStatusFilter', '${ipsStatusFilterAction}');">
-            <html:option value="-1" key="resource.autodiscovery.discoveredServers.states.AllStates"/>
-            <html:option value="${CONST_ADDED}" key="resource.autodiscovery.discoveredServers.states.NewAndModified"/>
-            <html:option value="${CONST_UNCHANGED}" key="resource.autodiscovery.discoveredServers.states.Unchanged"/>
-        </html:select>
-    </td>
-  </tr>
-</table>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tiles:insert definition=".header.tab">
+  <tiles:put name="tabKey" value="resource.platform.inventory.type.field.MachineType"/>
+</tiles:insert>
+
+ <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding-bottom: 10px;">
   <tr valign="top" class="<c:out value='${trClass}'/>">
 	<td width="20%" class="AutoDiscLabel"><fmt:message key="resource.platform.inventory.type.MachineTypeLabel"/></td>
 	<td width="30%" class="AutoDiscContent"><c:out value="${aiResource.platformTypeName}"/></td>
@@ -166,8 +143,37 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
+</table>
+   
+<!--  TYPE AND HOST PROPERTIES TITLE -->
 
-  
+<c:set var="tmpTitle"> - <fmt:message key="resource.autodiscovery.typeAndNetworkProperties.NewModifiedEtc"/></c:set>
+
+<tiles:insert definition=".header.tab">
+  <tiles:put name="tabKey" value="resource.platform.inventory.NetworkPropertiesTab"/>
+  <tiles:put name="subTitle" beanName="tmpTitle"/>
+</tiles:insert>
+<!--  /  -->
+
+<!--  DISCOVERED IPS FILTERING -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+  	<td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+  <tr>
+    <td class="FilterLabelText" nowrap align="right">View:</td>
+    <td class="FilterLabelText" width="100%">
+        <html:select property="ipsStatusFilter" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'ipsStatusFilter', '${ipsStatusFilterAction}');">
+            <html:option value="-1" key="resource.autodiscovery.discoveredServers.states.AllStates"/>
+            <html:option value="${CONST_ADDED}" key="resource.autodiscovery.discoveredServers.states.NewAndModified"/>
+            <html:option value="${CONST_UNCHANGED}" key="resource.autodiscovery.discoveredServers.states.Unchanged"/>
+        </html:select>
+    </td>
+  </tr>
+</table>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+ 
 <!-- IPS 1 -->
 
 <c:forEach var="ip" items="${AIIps}">
