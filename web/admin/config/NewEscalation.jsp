@@ -240,8 +240,8 @@ function showViewEscResponse(originalRequest) {
         addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
         addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
         addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
+        addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
+        addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
 
         if($('usersList')) {
           usersEditDiv.innerHTML = $('usersList').innerHTML;
@@ -322,10 +322,10 @@ function showViewEscResponse(originalRequest) {
         addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="30"/>
                                     </fmt:message>');
-        addOption(select1, '2400000', '<fmt:message key="alert.config.escalation.wait">
+        addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="45"/>
                                     </fmt:message>');
-        addOption(select1, '3000000', '<fmt:message key="alert.config.escalation.wait">
+        addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait">
                                       <fmt:param value="60"/>
                                     </fmt:message>');
 
@@ -893,6 +893,10 @@ function showViewEscResponse(originalRequest) {
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="1800000">30 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="2700000">45 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="3600000">60 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
             </select></td>
           </tr>
           <tr>
@@ -1002,6 +1006,10 @@ function showViewEscResponse(originalRequest) {
               <option value="1200000">20 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
               <option value="1800000">30 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="2700000">45 <fmt:message
+                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
+              <option value="3600000">60 <fmt:message
                 key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
             </select></div>
             </td>
