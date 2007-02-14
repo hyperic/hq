@@ -98,15 +98,22 @@ class ClassicEscalatableCreator
     
         // Create a alert condition logs for every condition
         Collection conds = _def.getConditions();
-        for (Iterator i = conds.iterator(); i.hasNext(); ) {
-            AlertCondition cond = (AlertCondition)i.next();
+        for (Iterator i = conds.iterator(); i.hasNext();) {
+            AlertCondition cond = (AlertCondition) i.next();
+            
+            if (cond.getType() == EventConstants.TYPE_ALERT) {
+                // Don't create a log for recovery alerts, so that we don't
+                // get the multi-condition effect in the logs
+                continue;
+            }
+            
             AlertConditionLogValue clog = new AlertConditionLogValue();
             Integer trigId = cond.getTrigger().getId();
-            
+
             clog.setCondition(cond.getAlertConditionValue());
             if (trigMap.containsKey(trigId)) {
                 clog.setValue(trigMap.get(trigId).toString());
-            } 
+            }
             aVal.addConditionLog(clog);
         }
     
