@@ -283,8 +283,16 @@
 <td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
 </tr></table>
 
-<display:table cellspacing="0" cellpadding="0" width="100%"
-action="${sortAction}" items="${Alerts}" var="Alert">
+<c:choose>
+  <c:when test="${not empty param.so}">
+    <c:set var="so" value="${param.so}"/>
+  </c:when>
+  <c:otherwise>
+    <c:set var="so" value="dec"/>
+  </c:otherwise>
+</c:choose>
+
+<display:table cellspacing="0" cellpadding="0" width="100%" order="${so}" action="${sortAction}" items="${Alerts}" var="Alert">
 
 <display:column width="1%" property="id" title="<input
 type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\"
