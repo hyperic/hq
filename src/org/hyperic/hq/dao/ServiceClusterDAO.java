@@ -1,13 +1,16 @@
 package org.hyperic.hq.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -57,8 +60,20 @@ public class ServiceClusterDAO extends HibernateDAO {
         super.save(entity);
     }
 
-    public void remove(ServiceCluster entity)
-    {
+    public void remove(ServiceCluster entity) {
+        for (Iterator i=entity.getAppServices().iterator(); i.hasNext(); ) {
+            AppService appSvc = (AppService)i.next();
+            
+            appSvc.setServiceCluster(null);
+        }
+        
+        for (Iterator i=entity.getServices().iterator(); i.hasNext(); ) {
+            Service svc = (Service)i.next();
+            
+            svc.setServiceCluster(null);
+        }
+        entity.clearAppServices();
+        entity.clearServices();
         super.remove(entity);
     }
 

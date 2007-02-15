@@ -25,15 +25,15 @@
 
 package org.hyperic.hq.appdef;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
-
-import java.util.Collection;
-import java.util.List;
+import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 
 public class ServiceCluster extends AppdefBean
 {
@@ -42,8 +42,8 @@ public class ServiceCluster extends AppdefBean
     private String _description;
     private Integer _groupId;
     private ServiceType _serviceType;
-    private Collection _appServices;
-    private Collection _services;
+    private Collection _appServices = new ArrayList();
+    private Collection _services = new ArrayList();
 
     public ServiceCluster() {
         super();
@@ -98,6 +98,14 @@ public class ServiceCluster extends AppdefBean
         _appServices = appServices;
     }
 
+    public void clearAppServices() {
+        _appServices.clear();
+    }
+    
+    public void clearServices() {
+        _services.clear();
+    }
+    
     public Collection getServices() {
         return _services;
     }
