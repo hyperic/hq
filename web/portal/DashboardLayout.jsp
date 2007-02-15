@@ -84,13 +84,16 @@
 <script language="JavaScript" type="text/javascript">
     function refreshPortlets() {
         var problemPortlet = $('problemResourcesTable');
+        var favoritePortlet = $('favoriteTable');
         setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
+
         if (problemPortlet){
         setTimeout("requestProblemResponse()", 60000);
             }
         setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+        if (favoritePortlet) {
         setTimeout("requestFavoriteResources()", 60000);
-
+        }
     }
 
     onloads.push(refreshPortlets);
