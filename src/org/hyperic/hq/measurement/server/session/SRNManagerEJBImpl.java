@@ -176,6 +176,7 @@ public class SRNManagerEJBImpl extends SessionEJB
                 Long defaultMin = getScheduleRevNumDAO().getMinInterval(aid);
                 srn.setMinInterval(defaultMin.longValue());
             }
+            getScheduleRevNumDAO().save(srn);
         }
         _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
         return srn.getSrn();
