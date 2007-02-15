@@ -28,6 +28,8 @@ import java.util.List;
 
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -184,13 +186,20 @@ public class AlertDAO extends HibernateDAO {
             .executeUpdate();
     }
     
-    public int countAlerts(AlertDefinition def) {
-        String sql = "select count(*) from Alert a " +
-            "where a.alertDefinition = :alertDef";
-        
-        return ((Integer)getSession().createQuery(sql)
-                                     .setParameter("alertDef", def)
-                                     .uniqueResult()).intValue();
+    public Integer countAlerts(AlertDefinition def) {
+        return (Integer) createCriteria()
+            .add(Restrictions.eq("alertDefinition", def))
+            .setProjection(Projections.rowCount())
+            .uniqueResult(); 
+    }
+    
+    public Integer countAlerts(AppdefEntityID aeid) {
+        return (Integer) createCriteria()
+            .createAlias("alertDefinition", "d")
+            .add(Restrictions.eq("d.appdefType", new Integer(aeid.getType())))
+            .add(Restrictions.eq("d.appdefId", aeid.getId()))
+            .setProjection(Projections.rowCount())
+            .uniqueResult(); 
     }
     
     void remove(Alert alert) {

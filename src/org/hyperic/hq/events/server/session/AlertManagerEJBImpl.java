@@ -89,19 +89,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public AlertManagerEJBImpl() {}
 
     private AlertDefinitionDAO getAlertDefDAO() {
-        return DAOFactory.getDAOFactory().getAlertDefDAO();
+        return new AlertDefinitionDAO(DAOFactory.getDAOFactory());
     }
     
     private AlertDAO getAlertDAO() {
-        return DAOFactory.getDAOFactory().getAlertDAO();
+        return new AlertDAO(DAOFactory.getDAOFactory());
     }
 
     private AlertConditionDAO getAlertConDAO() {
-        return DAOFactory.getDAOFactory().getAlertConditionDAO();
+        return new AlertConditionDAO(DAOFactory.getDAOFactory());
     }
 
     private ActionDAO getActionDAO() {
-        return DAOFactory.getDAOFactory().getActionDAO();
+        return new ActionDAO(DAOFactory.getDAOFactory());
     }
     
     /**
@@ -261,16 +261,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Get the number of alerts for a given appdef entity
-     *
-     * @ejb:interface-method
-     */
-    public int getAlertCount(AppdefEntityID id) {
-        // XXX:  This is no good -- we should count in the DB
-        return getAlertDAO().findByEntity(id).size();
-    }
-
-    /**
      * Get a the number of alerts for a given alert definition
      *
      * @ejb:interface-method
@@ -278,7 +268,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public int getAlertCount(Integer alertDefId) {
         AlertDefinition def = getAlertDefDAO().findById(alertDefId);
     
-        return getAlertDAO().countAlerts(def);
+        return getAlertDAO().countAlerts(def).intValue();
     }
 
     /**
@@ -286,9 +276,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public int[] getAlertCount(AppdefEntityID[] ids) {
+        AlertDAO dao = getAlertDAO();
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            counts[i] = getAlertCount(ids[i]);
+            counts[i] = dao.countAlerts(ids[i]).intValue();
         }
         return counts;
     }
