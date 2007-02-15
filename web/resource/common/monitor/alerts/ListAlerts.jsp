@@ -6,6 +6,7 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="hq" prefix="hq" %>
 <%@ taglib uri="display" prefix="display" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -276,11 +277,16 @@
 <tiles:insert definition=".portlet.error"/>
 
 <table width="100%"><tr>
-<td width="100%">&nbsp;</td>
 <td><a href="javascript:previousDay()"><html:img page="/images/schedule_left.gif" border="0"/></a></td>
 <td nowrap="true" class="BoldText"><hq:dateFormatter value="${date}" showTime="false"/></td>
 <td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
 <td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
+<td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
+    <c:url var="path" value="/"/>
+    <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+      <fmt:param value="${path}"/>
+    </fmt:message>
+</td>
 </tr></table>
 
 <c:choose>
