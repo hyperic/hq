@@ -111,6 +111,14 @@ public class ListAlertAction extends TilesAction {
         cal.set(Calendar.SECOND, 0);
 
         PageControl pc = RequestUtils.getPageControl(request);
+        
+        try {
+            RequestUtils.getIntParameter(request, Constants.SORTCOL_PARAM);
+        } catch (ParameterNotFoundException e) {
+            // By default we sort by descending ctime
+            pc.setSortorder(PageControl.SORT_DESC);
+        }
+        
         PageList alerts;
         try {
             long begin = cal.getTimeInMillis();
