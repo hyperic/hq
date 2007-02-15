@@ -268,7 +268,7 @@ function showViewEscResponse() {
         sel.appendChild(o);
         o.appendChild(document.createTextNode(txt));
     }
-   /*
+   
     function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
@@ -293,8 +293,8 @@ function showViewEscResponse() {
             escalationSel.options[0].value = 0;
         }
    }
-   */
-   //onloads.push( initEsc );
+
+   onloads.push( initEsc );
 
     function configure(id) {
       var sel = $('who' + id);
@@ -411,6 +411,7 @@ function showViewEscResponse() {
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation" style="display: none;">
   <tbody>
+
     <tr>
       <td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
       <td id="acknowledged" class="BlockContent"></td>
