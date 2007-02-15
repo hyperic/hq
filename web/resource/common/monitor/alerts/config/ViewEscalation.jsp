@@ -269,6 +269,7 @@ function showViewEscResponse() {
         o.appendChild(document.createTextNode(txt));
     }
    
+    <c:if test="${chooseScheme}">
     function initEsc () {
         // Set up the escalation dropdown
         var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false"/> })' );
@@ -296,23 +297,11 @@ function showViewEscResponse() {
 
    onloads.push( initEsc );
 
-    function configure(id) {
-      var sel = $('who' + id);
-      var selval = sel.options[sel.selectedIndex].value;
-
-      if (selval == 'Users') {
-        // Select checkboxes based on existing configs
-        insertUsers(this.id);
-      }
-      else if (selval == 'Others') {
-        // Set the inner text
-        insertOthers(this.id);
-      }
-      else if (selval == 'Roles') {
-        // Select checkboxes based on existing configs
-        insertRoles(this.id);
-      }
+    function hideExample() {
+            $('example').style.display= 'none';
     }
+
+   </c:if>
 
     function schemeChange(sel) {
       if (sel.options[sel.selectedIndex].value != "") {
@@ -320,10 +309,6 @@ function showViewEscResponse() {
             sel.options[sel.selectedIndex].value;
         document.EscalationSchemeForm.submit();
       }
-    }
-
-    function hideExample() {
-            $('example').style.display= 'none';
     }
 
 </script>

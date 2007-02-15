@@ -194,6 +194,7 @@
                 tr.appendChild(td5);
                 td5.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
+                td5.setAttribute("align", "center");
                 if (aList[i].fixed) {
                     td5.appendChild(document.createTextNode("Yes"));
                 } else {
@@ -203,10 +204,15 @@
                 tr.appendChild(td6);
                 td6.setAttribute((document.all ? 'className' : 'class'), "resourceNameAlert");
 
+                td6.setAttribute("align", "center");
                 if (aList[i].acknowledgeable) {
                     var ackAnchor = document.createElement("a");
                     td6.appendChild(ackAnchor);
-                    ackAnchor.appendChild(document.createTextNode('Acknowledge'));
+                    var imgNode = document.createElement('img');
+                    imgNode.setAttribute("src", imagePath + "acknowledge.gif");
+                    imgNode.setAttribute("border", "0");
+                    imgNode.setAttribute("alt", "Acknowledge");
+                    ackAnchor.appendChild(imgNode);
                     ackAnchor.setAttribute('href', (ackUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
                 } else {
                     td6.innerHTML = "&nbsp;";

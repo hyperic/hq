@@ -1112,3 +1112,9 @@ border-left:1px solid #D5D8DE;
 #usersConfigWindow .BlockContent {
   color:#000000;
 }
+
+#fixedSection {
+  margin-bottom: 10px;
+  border-top: 1px solid #D5D8DE;
+  border-bottom: 1px solid #D5D8DE;
+}

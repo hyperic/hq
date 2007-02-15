@@ -317,13 +317,13 @@ title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
 <display:column width="12%" property="value"
 title="alerts.alert.AlertList.ListHeader.ActualValue" />
 
-<display:column width="7%" property="fixed"
+<display:column width="7%" property="fixed" align="center"
                 title="alerts.alert.AlertList.ListHeader.Fixed">
   <display:booleandecorator flagKey="yesno"/>
 </display:column>
 
-<display:column width="11%" property="acknowledgeable"
-                title="nbsp"
+<display:column width="11%" property="acknowledgeable" align="center"
+                title="alerts.alert.AlertList.ListHeader.Acknowledge"
                 href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
   <display:booleandecorator flagKey="acknowledgeable"/>
 </display:column>

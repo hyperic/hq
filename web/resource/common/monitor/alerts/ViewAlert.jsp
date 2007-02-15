@@ -56,13 +56,10 @@
   <tiles:insert beanName="action"/>
 </c:forEach>
 
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
-<tr>
-  <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
-</tr>
+<table cellpadding="10" cellspacing="0" border="0" width="100%" id="fixedSection">
 <tr>
   <td class="BlockContent" width="40%">&nbsp;</td>
-  <td class="BlockContent">
+  <td class="BlockContent" width="5%" style="padding-top: 6px; padding-bottom: 6px;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
@@ -70,12 +67,18 @@
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
   </td>
-</tr>
-<tr>
-  <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
+  <td class="BlockContent" style="font-style: italic;">
+    <c:choose>
+      <c:when test="${alert.fixed}">
+        <fmt:message key="resource.common.alert.beenFixed"/>
+      </c:when>
+      <c:otherwise>
+        <fmt:message key="resource.common.alert.clickToFix"/>
+      </c:otherwise>
+    </c:choose>
+  </td>
 </tr>
 </table>
-<br/>
 
 <tiles:insert definition=".events.alert.view.nav" flush="true"/>
 

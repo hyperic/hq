@@ -87,10 +87,12 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 			<td width="30%" class="ListHeaderInactive">
 				<fmt:message key="dash.home.TableHeader.ResourceName"/>
 			</td>
-			<td width="5%" class="ListHeaderInactive">
+			<td width="5%" class="ListHeaderInactive" align="center">
 				<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
 			</td>
-			<td width="5%" class="ListHeaderInactive">&nbsp;</td>
+			<td width="5%" class="ListHeaderInactive" align="center">
+				<fmt:message key="alerts.alert.AlertList.ListHeader.Acknowledge"/>
+			</td>
 		</tr>
      </thead>
      <tbody>
