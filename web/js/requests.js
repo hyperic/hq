@@ -21,8 +21,8 @@
         var urlColon = ":"
         var resUrl = $('viewResUrl').href;
         var noProblemResources = $('noProblemResources');
+        $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
 
-        if (problemTable) {
 
             if (mList && mList.length > 0) {
 
@@ -98,22 +98,13 @@
                     td5.setAttribute("nowrap", "true");
                     td5.appendChild(document.createTextNode(mList[i].latest));
 
-                    /*
-                    tbody.appendChild(trTime);
-                    trTime.appendChild(td5);
-
-                    td5.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                    td5.setAttribute('colSpan', '4');
-                    td5.setAttribute('id','problemTime')
-                    $('problemTime').innerHTML = 'Updated: ' + refreshTime();
-                    */
                 }
 
-            }
+            
         } else {
             $('noProblemResources').style.display = '';
         }
-        $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
+
 
 
     }
