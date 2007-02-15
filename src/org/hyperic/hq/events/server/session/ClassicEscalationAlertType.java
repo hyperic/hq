@@ -24,6 +24,9 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
+import java.util.List;
+
 import javax.ejb.FinderException;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -85,7 +88,16 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         try {
-            getDefMan().getByIdNoCheck(defId).setEscalation(escalation);
+            AlertDefinitionManagerLocal defMan = getDefMan();
+            AlertDefinition def = defMan.getByIdNoCheck(defId);
+            def.setEscalation(escalation);
+            
+            List children = defMan.findAlertDefinitionChildren(def);
+            for (Iterator it = children.iterator(); it.hasNext(); ) {
+                def = (AlertDefinition) it.next();
+                def.setEscalation(escalation);
+            }
+
         } catch(FinderException e) {
             throw new SystemException(e);
         }
