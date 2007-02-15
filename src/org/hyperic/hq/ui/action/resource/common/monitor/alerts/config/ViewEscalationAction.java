@@ -73,8 +73,10 @@ public class ViewEscalationAction extends ViewDefinitionAction {
         
         // Get the list of escalations
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        JSONArray arr = eb.listAllEscalationName(sessionId);
-        request.setAttribute("escalations", arr);
+        if (request.getAttribute("escalations") == null) {
+            JSONArray arr = eb.listAllEscalationName(sessionId);
+            request.setAttribute("escalations", arr);
+        }
 
         // Get the list of users
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
