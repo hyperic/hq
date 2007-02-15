@@ -57,8 +57,7 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByCreateTime(long begin, long end) {
-        String sql = "delete Alert a where a.ctime between :timeStart and " +
-            ":timeEnd order by a.ctime desc";
+        String sql = "delete Alert where ctime between :timeStart and :timeEnd";
 
         return getSession().createQuery(sql)
             .setLong("timeStart", begin)
@@ -96,26 +95,14 @@ public class AlertDAO extends HibernateDAO {
     }
     
     public List findByAppdefEntityInRange(AppdefEntityID id, long begin,
-                                          long end)
+                                          long end, boolean nameSort,
+                                          boolean asc)
     {
         String sql = "from Alert a where a.alertDefinition.appdefType = :aType " +
             "and a.alertDefinition.appdefId = :aId and a.ctime between :begin " +
-            "and :end order by a.ctime desc";
-        
-        return getSession().createQuery(sql)
-            .setInteger("aType", id.getType())
-            .setInteger("aId", id.getID())
-            .setLong("begin", begin)
-            .setLong("end", end)
-            .list();
-    }
-    
-    public List findByAppdefEntityInRangeSortByAlertDef(AppdefEntityID id,
-                                                        long begin, long end)
-    {
-        String sql = "from Alert a WHERE a.alertDefinition.appdefType = :aType " +
-            "and a.alertDefinition.appdefId = :aId and a.ctime between :begin " +
-            "and :end order by a.alertDefinition.name DESC";
+            "and :end order by " +
+            (nameSort ? "a.alertDefinition.name" : "a.ctime") + 
+            (asc ? " asc" : " desc");
         
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())
@@ -178,11 +165,11 @@ public class AlertDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    int deleteByAlertDefinition(Integer def) {
-        String sql = "delete Alert a WHERE a.alertDefinition.id = :alertDef";
+    int deleteByAlertDefinition(AlertDefinition def) {
+        String sql = "delete Alert WHERE alertDefinition = :alertDef";
 
         return getSession().createQuery(sql)
-            .setInteger("alertDef", def.intValue())
+            .setParameter("alertDef", def)
             .executeUpdate();
     }
     

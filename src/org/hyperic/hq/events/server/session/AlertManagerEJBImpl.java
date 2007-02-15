@@ -55,6 +55,7 @@ import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
@@ -195,11 +196,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public int deleteAlerts(AuthzSubjectValue subj, Integer defId)
+    public int deleteAlerts(AuthzSubjectValue subj, AlertDefinition ad)
         throws RemoveException, PermissionException {
-        AlertDefinition ad = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, ad);
-        return getAlertDAO().deleteByAlertDefinition(defId);
+        return getAlertDAO().deleteByAlertDefinition(ad);
     }
 
     /** 
@@ -258,17 +258,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         canManageAlerts(subj, def);
         
         return getAlertDAO().findLastUnfixedByDefinition(def);
-    }
-
-    /**
-     * Get a the number of alerts for a given alert definition
-     *
-     * @ejb:interface-method
-     */
-    public int getAlertCount(Integer alertDefId) {
-        AlertDefinition def = getAlertDefDAO().findById(alertDefId);
-    
-        return getAlertDAO().countAlerts(def).intValue();
     }
 
     /**
@@ -337,18 +326,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         throws PermissionException 
     {
         canManageAlerts(subj, id);
-        AlertDAO aDao = getAlertDAO();
-        List alerts;
-
-        if (pc.getSortattribute() == SortAttribute.NAME) {
-            alerts = aDao.findByAppdefEntityInRangeSortByAlertDef(id, begin, 
-                                                                  end);
-        } else {
-            alerts = aDao.findByAppdefEntityInRange(id, begin, end);
-        }
-
-        if (pc.getSortorder() == PageControl.SORT_DESC)
-            Collections.reverse(alerts);
+        List alerts = getAlertDAO().findByAppdefEntityInRange(id, begin, end,
+                               pc.getSortattribute() == SortAttribute.NAME,
+                               pc.isAscending());
 
         return valuePager.seek(alerts, pc);
     }

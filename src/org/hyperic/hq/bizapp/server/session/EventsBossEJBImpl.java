@@ -960,27 +960,28 @@ public class EventsBossEJBImpl
     
     /**
      * Delete all alerts for a list of alert definitions
+     * @throws FinderException if alert definition is not found
      *
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
         throws SessionNotFoundException, SessionTimeoutException,
-               RemoveException, PermissionException 
+               RemoveException, PermissionException, FinderException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        // XXX - check security
         
         // Delete alerts for definition and its children
         int count = 0;
         for (int i = 0; i < adids.length; i++) {
-            count += getAM().deleteAlerts(subject, adids[i]);
+            AlertDefinition def = getADM().getByIdAndCheck(subject, adids[i]);
+            count += getAM().deleteAlerts(subject, def);
             
-            List cids = getADM().findAlertDefinitionChildrenIds(adids[i]);
+            List children = getADM().findAlertDefinitionChildren(def);
             
-            for (Iterator it = cids.iterator(); it.hasNext(); ) {
-                Integer id = (Integer) it.next();
-                count += getAM().deleteAlerts(subject, id);
+            for (Iterator it = children.iterator(); it.hasNext(); ) {
+                AlertDefinition child = (AlertDefinition) it.next();
+                count += getAM().deleteAlerts(subject, child);
             }
         }
         return count;

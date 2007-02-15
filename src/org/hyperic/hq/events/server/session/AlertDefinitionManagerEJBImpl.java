@@ -88,19 +88,19 @@ public class AlertDefinitionManagerEJBImpl
     private Pager _valuePager;
     
     private AlertDefinitionDAO getAlertDefDAO() {
-        return DAOFactory.getDAOFactory().getAlertDefDAO();
+        return new AlertDefinitionDAO(DAOFactory.getDAOFactory());
     }
     
     private ActionDAO getActionDAO() {
-        return DAOFactory.getDAOFactory().getActionDAO();
+        return new ActionDAO(DAOFactory.getDAOFactory());
     }
 
     private TriggerDAO getTriggerDAO() {
-        return DAOFactory.getDAOFactory().getTriggerDAO();
+        return new TriggerDAO(DAOFactory.getDAOFactory());
     }
 
-    private AlertManagerLocal getAlertMan() {
-        return AlertManagerEJBImpl.getOne();
+    private AlertDAO getAlertDAO() {
+        return new AlertDAO(DAOFactory.getDAOFactory());
     }
 
     /** 
@@ -110,19 +110,20 @@ public class AlertDefinitionManagerEJBImpl
                                        AlertDefinition alertdef, boolean force)
         throws RemoveException, PermissionException 
     {
+        canManageAlerts(subj, alertdef);
+
         boolean survivors = false;
         
         // If there are any children, delete them, too
-        for (Iterator i=alertdef.getChildren().iterator(); i.hasNext(); ) { 
+        for (Iterator i = alertdef.getChildren().iterator(); i.hasNext();) {
             AlertDefinition child = (AlertDefinition) i.next();
-            if (deleteAlertDefinition(subj, child, force)) {
-                survivors = true;
-            }
+            survivors |= deleteAlertDefinition(subj, child, force);
         }
 
+        AlertDAO dao = getAlertDAO();
         // See if there are any alerts
         if (!force &&
-            (getAlertMan().getAlertCount(alertdef.getId()) > 0 || survivors)) {
+            (dao.countAlerts(alertdef).intValue() > 0 || survivors)) {
             alertdef.setDeleted(true);
             
             // Make sure to disassociated from all triggers
@@ -155,7 +156,7 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         // Delete the alerts
-        getAlertMan().deleteAlerts(subj, alertdef.getId());
+        dao.deleteByAlertDefinition(alertdef);
 
         // Actually remove the definition
         getAlertDefDAO().remove(alertdef);
@@ -676,6 +677,13 @@ public class AlertDefinitionManagerEJBImpl
         return ((AlertDefinition)res.iterator().next()).getId();
     }
 
+    /** Get list of children alert definitions for a parent alert definition
+     * @ejb:interface-method
+     */
+    public List findAlertDefinitionChildren(AlertDefinition def) {
+        return getAlertDefDAO().findChildAlertDefinitions(def);
+    }
+
     /** 
      * Get list of alert conditions for a resource
      * @ejb:interface-method
@@ -737,22 +745,6 @@ public class AlertDefinitionManagerEJBImpl
         PageControl pc = PageControl.PAGE_ALL;
         return _valuePager.seek(def.getChildren(), pc.getPagenum(), 
                                pc.getPagesize());
-    }
-
-    /** Get list of children alert definition IDs for a parent alert definition
-     * @ejb:interface-method
-     */
-    public List findAlertDefinitionChildrenIds(Integer id) {
-        AlertDefinition def = getAlertDefDAO().findById(id);
-        List ids = new ArrayList(def.getChildren().size());
-        
-        for (Iterator i = def.getChildren().iterator(); i.hasNext(); ) {
-            AlertDefinition child = (AlertDefinition) i.next();
-
-            ids.add(child.getId());    
-        }
-        
-        return ids;
     }
 
     /** 
