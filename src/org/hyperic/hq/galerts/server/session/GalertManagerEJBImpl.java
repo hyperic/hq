@@ -157,6 +157,14 @@ public class GalertManagerEJBImpl
     }
     
     /**
+     * Enable/disable an alert def
+     * @ejb:interface-method
+     */
+    public void enable(GalertDef def, boolean enable) {
+        def.setEnabled(enable);
+    }
+    
+    /**
      * Find all alert definitions for the specified group
      * @ejb:interface-method  
      */

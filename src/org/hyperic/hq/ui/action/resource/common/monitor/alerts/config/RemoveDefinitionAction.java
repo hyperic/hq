@@ -32,21 +32,21 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.GalertBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
+import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * An Action that removes an alert definition
@@ -97,7 +97,12 @@ public class RemoveDefinitionAction extends BaseAction {
             enable = rdForm.getActive().intValue() == 1;
 
             if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-                // XXX - implement enable function in gboss
+                GalertDef[] defPojos = new GalertDef[defs.length];
+                for (int i = 0; i < defs.length; i++) {
+                    defPojos[i] = gBoss.findDefinition(sessionId.intValue(),
+                                                       defs[i]);
+                }
+                gBoss.enable(sessionId.intValue(), defPojos, enable);
             } else {
                 boss.enableAlertDefinitions(sessionId.intValue(), defs, enable);
             }

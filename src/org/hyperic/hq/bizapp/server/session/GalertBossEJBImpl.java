@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -277,6 +278,20 @@ public class GalertBossEJBImpl
     {
         _sessMan.authenticate(sessionId);
         _galertMan.update(def, escalation);
+    }
+    
+    /**
+     * Bulk enable or disable GalertDefs
+     * @throws SessionException if user session cannot be authenticated
+     * @ejb:interface-method
+     */
+    public void enable(int sessionId, GalertDef[] defs, boolean enable)
+        throws SessionException
+    {
+        _sessMan.authenticate(sessionId);
+        for (int i = 0; i < defs.length; i++) {
+            _galertMan.enable(defs[i], enable);
+        }
     }
 
     /**
