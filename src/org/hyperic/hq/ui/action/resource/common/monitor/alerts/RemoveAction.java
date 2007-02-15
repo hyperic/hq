@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -63,11 +65,9 @@ public class RemoveAction extends BaseAction {
                 
         RemoveForm nwForm = (RemoveForm) form;
         log.debug("entering removeAlertsAction");
-        Integer rid = nwForm.getRid();
         Integer type = nwForm.getType();
         Map params = new HashMap();
-        params.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
-        params.put(Constants.RESOURCE_PARAM, rid);
+        params.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
         
         ActionForward forward = checkSubmit(request, mapping, form, params);
         // if the remove button was clicked, we are coming from
@@ -86,11 +86,14 @@ public class RemoveAction extends BaseAction {
         }
 
         Integer[] alertIds = nwForm.getAlerts();
+        String[] escalatables = nwForm.getEalerts();
+
         if ( log.isDebugEnabled() ) {
             log.debug("removing: " + Arrays.asList(alertIds) );
         }
 
-        if (alertIds == null || alertIds.length == 0){
+        if ((alertIds == null || alertIds.length == 0) &&
+            (escalatables == null || escalatables.length == 0)){
             return returnSuccess(request, mapping, params);
         }
 
@@ -114,17 +117,33 @@ public class RemoveAction extends BaseAction {
                 }
             } else if ("FIXED".equals(nwForm.getButtonAction())) { 
                 log.debug("Fixed alerts");
-                
-                for (int i=0; i<alertIds.length; i++) {
-                    // XXX:  This only works for classic alert types ATM
-                    boss.fixAlert(sessionId.intValue(), 
-                                  ClassicEscalationAlertType.CLASSIC,
-                                  alertIds[i], null);
+
+                if (alertIds != null) {
+                    for (int i = 0; i < alertIds.length; i++) {
+                        // This only works for classic alert types
+                        boss.fixAlert(sessionId.intValue(), 
+                                      ClassicEscalationAlertType.CLASSIC,
+                                      alertIds[i], null);
+                    }
+                }
+
+                if (escalatables != null) {
+                    for (int i = 0; i < escalatables.length; i++) {
+                        StringTokenizer st =
+                            new StringTokenizer(escalatables[i], ":");
+                        
+                        int code = Integer.parseInt(st.nextToken());
+                        Integer alert = Integer.valueOf(st.nextToken());
+                        
+                        boss.fixAlert(sessionId.intValue(),
+                                      EscalationAlertType.findByCode(code),
+                                      alert, null);
+                    }
                 }
             }
         }
 
-        if (type == null || type.intValue() == 0) {
+        if (nwForm.getEid() == null) {
             return returnNoResource(request, mapping);
         } else {
             return returnSuccess(request, mapping, params);

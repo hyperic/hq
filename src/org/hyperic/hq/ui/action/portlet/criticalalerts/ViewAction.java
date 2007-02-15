@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -148,6 +149,8 @@ public class ViewAction extends BaseAction {
             jAlert.put("cTime", date);
             jAlert.put("fixed", alert.getAlertInfo().isFixed()); 
             jAlert.put("acknowledgeable", alert.isAcknowledgeable());
+            jAlert.put("alertType",
+                       alert.getDefinition().getAlertType().getCode());
 
             a.add(jAlert);
         }

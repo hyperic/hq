@@ -49,6 +49,7 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
+
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
@@ -99,8 +100,15 @@ onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 		 <!-- table rows are inserted here dynamically -->
  	 </tbody>
      <tfoot>
-         <tr class="ListRow" id="noCritAlerts<c:out value="${portlet.token}"/>">
+         <tr class="ListRow" id="<c:out value="noCritAlerts${portlet.token}"/>">
       		<td class="ListCell" colspan="6"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+    	</tr>
+         <tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
+           <td class="ListCell" colspan="6" align="right" style="font-style: italic;">
+              <c:url var="path" value="/"/>
+              <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+                <fmt:param value="${path}"/>
+              </fmt:message>
     	</tr>
         <tr>
              <td colspan="5">

@@ -130,6 +130,11 @@
         var noCritAlerts = alertText.token != null ?
                            $('noCritAlerts' + token) : $('noCritAlerts');
 
+        var ackInstruction = alertText.token != null ?
+                           $('ackInstruction' + token) : $('ackInstruction');
+
+        ackInstruction.style.display = 'none';
+
         if (aList.length != 0) {
             noCritAlerts.style.display = 'none';
 
@@ -159,7 +164,14 @@
                 tr.appendChild(td1);
                 td1.setAttribute((document.all ? 'className' : 'class'), "ListCellCheckbox");
 
-                td1.innerHTML = "<input type=checkbox name=alerts value=" + aList[i].alertId + " onclick=\"ToggleSelection(this, widgetProperties, false);\" class=listMember>";
+                var checkbox = document.createElement('input');
+                checkbox.setAttribute("type", "checkbox");
+                checkbox.setAttribute("name", "ealerts");
+                checkbox.setAttribute("class", "listMember");
+                checkbox.setAttribute("onclick", "ToggleSelection(this, widgetProperties, false);");
+                checkbox.setAttribute("value",
+                                      aList[i].alertType + ":" + aList[i].alertId);
+                td1.appendChild(checkbox);
 
                 tr.appendChild(td2);
                 td2.setAttribute((document.all ? 'className' : 'class'), "ListCell");
@@ -204,7 +216,8 @@
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
                     ackAnchor.appendChild(imgNode);
-                    ackAnchor.setAttribute('href', (ackUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
+                    ackAnchor.setAttribute('href', (ackUrl + aList[i].alertId));
+                    ackInstruction.style.display = "";
                 } else {
                     td6.innerHTML = "&nbsp;";
                 }

@@ -38,6 +38,7 @@ public class RemoveForm extends ResourceForm  {
 
     /** Holds value of  alerts. */
     private Integer[] _alerts;
+    private String[] _ealerts;
     private Integer _ad;
     
     private String _buttonAction;
@@ -68,6 +69,14 @@ public class RemoveForm extends ResourceForm  {
         _alerts = alerts;
     }
 
+    public String[] getEalerts() {
+        return _ealerts;
+    }
+
+    public void setEalerts(String[] ealerts) {
+        this._ealerts = ealerts;
+    }
+
     public Integer getAd() {
         return _ad;
     }
@@ -87,6 +96,7 @@ public class RemoveForm extends ResourceForm  {
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         _alerts = null;
+        _ealerts = null;
         _ad = null;
         _buttonAction = null;
     }
