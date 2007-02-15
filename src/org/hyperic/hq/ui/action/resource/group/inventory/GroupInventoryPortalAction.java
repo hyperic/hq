@@ -208,10 +208,8 @@ public class GroupInventoryPortalAction extends ResourceInventoryPortalAction {
 
     protected void findAndSetResource(HttpServletRequest request)
         throws Exception {
-        setResource(request);
+        AppdefEntityID aeid = setResource(request);
         
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
-
         // If this is a cluster, then it's possible that it's also part of an
         // application
         ServletContext ctx = getServlet().getServletContext();

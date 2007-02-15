@@ -33,17 +33,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.action.BaseValidatorForm;
-
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.action.resource.ResourceForm;
 
-public class RemoveGroupResourcesForm extends BaseValidatorForm {
+public class RemoveGroupResourcesForm extends ResourceForm {
 
     private String[] _resources;
     protected Integer _resourceType;
     protected List _resourceTypes;
-    private Integer _rid;
-    private Integer _type;
 
     public RemoveGroupResourcesForm() {
         super();
@@ -90,27 +87,16 @@ public class RemoveGroupResourcesForm extends BaseValidatorForm {
         _resourceTypes = resourceTypes;
     }
 
-    public Integer getRid() {
-        return _rid;
-    }
-
-    public void setRid(Integer rid) {
-        _rid = rid;
-    }
-
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         _resources = new String[0];
         _resourceType = null;
         _resourceTypes = null;
-        _rid = null;
     }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 
-        s.append(" rid=");
-        s.append(_rid);
         s.append(" resources=");
         s.append(_resources);
         s.append(" resourceType=");
@@ -119,14 +105,6 @@ public class RemoveGroupResourcesForm extends BaseValidatorForm {
         s.append(_resourceTypes);
 
         return s.toString();
-    }
-
-    public Integer getType() {
-        return _type;
-    }
-
-    public void setType(Integer type) {
-        _type = type;
     }
 
 }

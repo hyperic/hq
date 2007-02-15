@@ -35,22 +35,20 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public class RemoveAction extends BaseAction {
 
@@ -64,8 +62,8 @@ public class RemoveAction extends BaseAction {
     {
         RemoveGroupResourcesForm nwForm = (RemoveGroupResourcesForm) form;
         HashMap forwardParams = new HashMap(2);
-        forwardParams.put(Constants.RESOURCE_PARAM, nwForm.getRid());
-        forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, nwForm.getType());
+        forwardParams.put(Constants.ENTITY_ID_PARAM, nwForm.getEid());
+        forwardParams.put(Constants.ACCORDION_PARAM, "1");
         
         try {
             
@@ -80,11 +78,9 @@ public class RemoveAction extends BaseAction {
             
             //get the spiderSubjectValue of the user to be deleated.
             ServletContext ctx = getServlet().getServletContext();            
-            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);            
-            
-            log.trace("removing resource");                                                      
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
             
+            log.trace("removing resource");                                                      
             AppdefGroupValue group = boss.findGroup(sessionId.intValue(), 
                             groupId);
             
