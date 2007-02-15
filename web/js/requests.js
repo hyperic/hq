@@ -19,6 +19,7 @@
         var table = document.getElementById('favoriteTable');
         var tbody = document.createElement('tbody');
 
+        if (table) {
         if (fList && fList.length > 0) {
 
             for (var i = table.childNodes.length - 1; i > 2; i--) {
@@ -122,6 +123,7 @@
         } else {
             $('noFaveResources').style.display = '';
         }
+      }
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
     }
 
@@ -414,11 +416,11 @@
             td4.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
             if (token != null) {
-            td4.setAttribute('id','time'+ token);
-                $('time' + token).innerHTML = 'Updated: '+refreshTime();
+            td4.setAttribute('id','availTime'+ token);
+                $('availTime' + token).innerHTML = 'Updated: '+refreshTime();
             } else {
-             td4.setAttribute('id','time');
-                $('time').innerHTML = 'Updated: '+refreshTime();
+             td4.setAttribute('id','availTime');
+                $('availTime').innerHTML = 'Updated: '+refreshTime();
             }
 
         }
@@ -511,11 +513,13 @@
             td3.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
 
             if (token != null) {
-            td3.setAttribute('id','time'+ token);
-                $('time' + token).innerHTML = 'Updated: '+refreshTime();
+
+            td3.setAttribute('id','metricTime' + token);
+                $('metricTime' + token).innerHTML = 'Updated: '+refreshTime();
             } else {
-             td3.setAttribute('id','time');
-                $('time').innerHTML = 'Updated: '+refreshTime();
+                
+             td3.setAttribute('id','metricTime');
+                $('metricTime').innerHTML = 'Updated: '+refreshTime();
             }
 
         //$('modifiedMetricTime').innerHTML = 'Updated: '+refreshTime();
