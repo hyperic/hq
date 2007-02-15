@@ -541,6 +541,12 @@ function showViewEscResponse(originalRequest) {
             return false;
         }
 
+        var escDesc = $('escDesc').value;
+        if (escName.match(/['"]/) || escDesc.match(/['"]/)) {
+            alert('<fmt:message key="error.input.badquotes"/>');
+            return false;
+        }
+
         sendEscForm();
         return false;
       }
@@ -848,25 +854,13 @@ function showViewEscResponse(originalRequest) {
       <td style="padding:3px;" align="left">
           <input type="text" size="23" name="name" id="escName" />
       </td>
-      <!--<td width="40%" id="infoText" rowspan="2" valign="top">
-          <div style="float:right;">
-          <table cellpadding="3" cellspacing="0" border="0" style="border:1px solid #236d2b;">
-                <tr>
-                    <td class="BlockTitle">Escalations and Actions</td>
-                </tr>
-                <tr>
-                    <td style="background-color:#d5dae5">With an escalation you can control alerting.</td>
-                </tr>
-          </table>
-              </div>
-      </td>-->
     </tr>
     <tr class="ListRow">
       <td class="BlockLabel" valign="top" style="padding:3px;" width="100">
           <fmt:message key="common.label.Description" />
       </td>
       <td style="padding:3px;" align="left">
-          <textarea name="description"></textarea>
+          <textarea name="description" id="escDesc"></textarea>
       </td>
     </tr>
   </tbody>

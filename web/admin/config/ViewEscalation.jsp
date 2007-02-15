@@ -319,6 +319,18 @@ function showViewEscResponse(originalRequest) {
     }
 
     function saveEscalation () {
+        var escName = $('escName').value;
+        if (escName == "") {
+            alert('<fmt:message key="alert.config.error.escalation.name.required"/>');
+            return false;
+        }
+
+        var escDesc = $('escDesc').value;
+        if (escName.match(/['"]/) || escDesc.match(/['"]/)) {
+            alert('<fmt:message key="error.input.badquotes"/>');
+            return false;
+        }
+
         var pars = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/updateEscalation"/>';
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
