@@ -99,9 +99,11 @@ function showViewEscResponse(originalRequest) {
     }
 
     if (actions.length == 0) {
+        $('step2create').style.display = '';
         $('noActions').style.display = "";
     }
     else {
+        $('step2create').style.display = 'none';
         $('viewSection').style.display = "";
     }
 
@@ -1130,7 +1132,7 @@ function showViewEscResponse(originalRequest) {
              <td class="BlockTitle" valign="top" nowrap colspan="2">
                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
                      <tr>
-                         <td class="BlockTitle" valign="top" nowrap>Step 2 - Create <fmt:message key="common.label.EscalationSchemeActions"/></td>
+                         <td class="BlockTitle" valign="top" nowrap><span id="step2create" style="display:none;">Step 2 - Create </span><fmt:message key="common.label.EscalationSchemeActions"/></td>
                          <td align="right" style="padding-right:3px;">
                          <html:img page="/images/icon_info2-60A5EA.gif" onmouseover="menuLayers.show('actionsInfoPopup', event)" onmouseout="menuLayers.hide()" border="0"/>
                         </td>
