@@ -47,7 +47,7 @@
   }
 </script>
 
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 10px; border-bottom: 1px solid #D5D8DE;">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="common.header.EscalationName"/></td>
     <td class="BlockContent" colspan="2"><c:out value="${escalation.name}"/></td>
@@ -76,7 +76,7 @@
   <tr>
     <td rowspan="2" width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px; border-bottom: solid #D5D8DE 1px;">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
-  <c:if test="${escalation.pauseAllowed && not alert.acknowledgeable}">
+  <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
       <select name="pauseTime">
@@ -116,9 +116,5 @@
 </tiles:insert>
     </td>
   </tr>
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" height="1" width="1" border="0"/></td>
-  </tr>
 </table>
-<br/>
 </c:if>
