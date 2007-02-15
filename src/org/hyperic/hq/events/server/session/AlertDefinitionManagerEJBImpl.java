@@ -106,22 +106,23 @@ public class AlertDefinitionManagerEJBImpl
     /** 
      * Remove alert definitions
      */
-    private void deleteAlertDefinition(AuthzSubjectValue subj,
+    private boolean deleteAlertDefinition(AuthzSubjectValue subj,
                                        AlertDefinition alertdef, boolean force)
         throws RemoveException, PermissionException 
     {
+        boolean survivors = false;
+        
         // If there are any children, delete them, too
         for (Iterator i=alertdef.getChildren().iterator(); i.hasNext(); ) { 
             AlertDefinition child = (AlertDefinition) i.next();
-            
-            if (getAlertMan().getAlertCount(child.getId()) > 0)
-                child.setDeleted(true);
-            else
-                deleteAlertDefinition(subj, child, true);
+            if (deleteAlertDefinition(subj, child, force)) {
+                survivors = true;
+            }
         }
 
         // See if there are any alerts
-        if (!force && getAlertMan().getAlertCount(alertdef.getId()) > 0) {
+        if (!force &&
+            (getAlertMan().getAlertCount(alertdef.getId()) > 0 || survivors)) {
             alertdef.setDeleted(true);
             
             // Make sure to disassociated from all triggers
@@ -133,10 +134,19 @@ public class AlertDefinitionManagerEJBImpl
                 cond.setTrigger(null);
             }
             
+            for (Iterator it = alertdef.getActionsBag().iterator();
+                 it.hasNext(); ) {
+                Action act = (Action) it.next();
+                act.setParent(null);
+            }
+            
+            // Disassociated from escalations
+            alertdef.setEscalation(null);
+            
             // Disassociate from parent, too
             alertdef.setParent(null);
             
-            return;
+            return true;
         }
         
         // Delete escalation state
@@ -149,6 +159,8 @@ public class AlertDefinitionManagerEJBImpl
 
         // Actually remove the definition
         getAlertDefDAO().remove(alertdef);
+        
+        return false;
     }
 
     /** 
