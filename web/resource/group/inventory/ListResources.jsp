@@ -90,11 +90,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
 </c:url>
 
-
-
 <html:form action="/resource/group/inventory/RemoveApp">
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
+<html:hidden property="eid" value="${Resource.entityId}"/>
 
 <!--  RESOURCES, COMPATIBLE CONTENTS -->
 <div id="listDiv">
