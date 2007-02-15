@@ -536,12 +536,7 @@
                         td5.innerHTML = "0";
                     }
 
-                    tbody.appendChild(trTime);
-                    trTime.appendChild(td6);
-                    td6.setAttribute('colSpan', '5');
-                    td6.setAttribute((document.all ? 'className' : 'class'), "modifiedDate");
-                    td6.setAttribute('id', 'faveTime');
-                    $('faveTime').innerHTML = 'Updated: ' + refreshTime();
+
 
                 }
             } else {
@@ -549,6 +544,7 @@
             }
         }
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
+         $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
     }
 }
 

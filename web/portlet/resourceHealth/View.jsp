@@ -86,4 +86,11 @@ onloads.push(requestFavoriteResources);
         </tr>
         </tbody>
   </table>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+
+          <tr>
+              <td colspan="4" id="modifiedFavoriteTime" class="modifiedDate">Updated: </td>
+          </tr>
+
+    </table>
 </div>
