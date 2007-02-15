@@ -36,6 +36,7 @@
 
 <tiles:importAttribute name="tabKey"/>
 <tiles:importAttribute name="tabName" ignore="true"/>
+<tiles:importAttribute name="icon" ignore="true"/>
 <tiles:importAttribute name="subTitle" ignore="true"/>
 <tiles:importAttribute name="useFromSideBar" ignore="true"/>
 <tiles:importAttribute name="useToSideBar" ignore="true"/>
@@ -63,6 +64,11 @@
     <c:if test="${dragDrop}">
       <div style="cursor: move;">
     </c:if>
+
+    <c:if test="${not empty icon}">
+    <c:out value="${icon}" escapeXml="false"/>
+    </c:if>
+
 <c:choose>
   <c:when test="${not empty tabKey}">
     <fmt:message var="title" key="${tabKey}">

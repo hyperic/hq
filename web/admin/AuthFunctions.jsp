@@ -32,6 +32,7 @@
 
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="admin.home.AuthAuthZTab"/>
+  <tiles:put name="icon"><html:img page="/images/group_key.gif" alt=""/></tiles:put>
 </tiles:insert>
 <tiles:insert definition=".portlet.confirm"/>
 <!--  GENERAL PROPERTIES CONTENTS -->

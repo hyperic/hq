@@ -34,6 +34,7 @@
 
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="admin.home.CompanyWideSettingsTab"/>
+  <tiles:put name="icon"><html:img page="/images/application_edit.gif" alt=""/></tiles:put>
 </tiles:insert>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
