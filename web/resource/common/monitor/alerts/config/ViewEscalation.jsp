@@ -289,10 +289,12 @@ function showViewEscResponse() {
                       schemes[i].id == document.EscalationSchemeForm.escId.value);
         }
 
+        <c:if test="${empty gad}">
         if (escalationSel.selectedIndex > 0) {
             escalationSel.options[0].text = '<fmt:message key="alert.config.escalation.unset"/>';
             escalationSel.options[0].value = 0;
         }
+        </c:if>
    }
 
    onloads.push( initEsc );
