@@ -24,7 +24,7 @@ A.NotBold:hover, .DropDown A:hover {color: #003399; font-weight: normal; text-de
 .BoldText {font-weight: bold;}
 
 /* BUTTON */
-.Button { font-weight: bold; background-repeat: repeat-x; }
+.Button { font-weight: bold; background-repeat: repeat-x; height: 20px;}
 .Button A:hover { color: #C6CFE5; text-decoration: none; }
 
 input.CompactButton, input.CompactButtonInactive {

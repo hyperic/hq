@@ -218,7 +218,7 @@
                     td6.appendChild(ackAnchor);
 
                     var imgNode = document.createElement('img');
-                    imgNode.setAttribute("src", imagePath + "acknowledge.gif");
+                    imgNode.setAttribute("src", imagePath + "icon_ack.gif");
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
                     imgNode.setAttribute("onClick", "acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");

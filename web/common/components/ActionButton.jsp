@@ -32,13 +32,14 @@
 <tiles:importAttribute name="labelKey"/>
 <tiles:importAttribute name="buttonHref"/>
 <tiles:importAttribute name="buttonClick"/>
+<tiles:importAttribute name="icon" ignore="true"/>
 <tiles:importAttribute name="disabled" ignore="true"/>
 
 <table cellspacing="0" cellpadding="0">
 <tr><td>
 <html:img page="/images/button_left.gif"/>
 </td>
-<td class="Button" style="background-image: url(<html:rewrite page="/images/button_middle.gif"/>); height: 17px;">
+<td class="Button" valign="middle" style="background-image: url(<html:rewrite page="/images/button_middle.gif"/>);">
 <c:choose>
 <c:when test="${disabled}">
   <span class="InactiveText"><fmt:message key="${labelKey}"/></span>
@@ -48,6 +49,21 @@
 </c:otherwise>
 </c:choose>
 </td>
+
+<c:if test="${not empty icon}">
+<td class="Button" valign="middle" style="background-image: url(<html:rewrite page="/images/button_middle.gif"/>); padding-left: 3px;">
+
+<c:if test="${disabled}">
+  <span style="filter: alpha(opacity=50); opacity: 0.5;">
+</c:if>
+    <c:out value="${icon}" escapeXml="false"/>
+<c:if test="${disabled}">
+  </span>
+</c:if>
+
+</td>
+</c:if>
+
 <td>
 <html:img page="/images/button_right.gif"/>
 </td></tr>

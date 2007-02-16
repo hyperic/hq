@@ -113,6 +113,7 @@
       <tiles:put name="disabled" value="true"/>
     </c:otherwise>
   </c:choose>
+  <tiles:put name="icon"><html:img page="/images/icon_ack.gif" alt="Click to Acknowledge" align="middle"/></tiles:put>
 </tiles:insert>
     </td>
   </tr>

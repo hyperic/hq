@@ -65,6 +65,7 @@
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
   <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.fixed.label"/>')</tiles:put>
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
+  <tiles:put name="icon"><html:img page="/images/icon_fixed.gif" alt="Click to mark as Fixed" align="middle"/></tiles:put>
 </tiles:insert>
   </td>
   <td class="BlockContent" style="font-style: italic;">
