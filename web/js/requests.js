@@ -216,7 +216,7 @@
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
                     ackAnchor.appendChild(imgNode);
-                    ackAnchor.setAttribute('href', (ackUrl + aList[i].alertId));
+                    ackAnchor.setAttribute('href', (ackUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
                     ackInstruction.style.display = "";
                 } else {
                     td6.innerHTML = "&nbsp;";
