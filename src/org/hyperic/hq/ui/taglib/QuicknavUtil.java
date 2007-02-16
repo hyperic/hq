@@ -70,18 +70,21 @@ public class QuicknavUtil {
         return true;
     }
 
-    public static boolean isAlertable(AppdefResourceValue rv) {
+    public static boolean isAlertable(AppdefResourceValue rv, PageContext ctx) {
         switch (rv.getEntityId().getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return true;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                return ContextUtils.getUIUtils(ctx.getServletContext()) != null;
             default:
                 return false;
         }
     }
 
-    public static boolean isControllable(AppdefResourceValue rv, PageContext context)
+    public static boolean isControllable(AppdefResourceValue rv,
+                                         PageContext context)
         throws Exception {
         HttpServletRequest request =
             (HttpServletRequest)context.getRequest();
@@ -92,7 +95,8 @@ public class QuicknavUtil {
         return boss.isControlSupported(sessionId, rv);
     }
 
-    public static boolean canControl(AppdefResourceValue rv, PageContext context) {
+    public static boolean canControl(AppdefResourceValue rv,
+                                     PageContext context) {
         List perms = (List) context.getRequest()
             .getAttribute(Constants.ALL_RESOURCES_CONTROLLABLE);
     
@@ -177,9 +181,11 @@ public class QuicknavUtil {
         QuicknavUtil.makeLinkedIcon(rv, buf, QuicknavUtil.ICON_HREF_I,
                        QuicknavUtil.ICON_SRC_I, context);
     
-        if (QuicknavUtil.isAlertable(rv)) {
-            QuicknavUtil.makeLinkedIconWithRef(rv, buf, QuicknavUtil.ICON_HREF_A,
-                                  QuicknavUtil.ICON_SRC_A, context);
+        if (QuicknavUtil.isAlertable(rv, context)) {
+            QuicknavUtil.makeLinkedIconWithRef(rv, buf,
+                                               QuicknavUtil.ICON_HREF_A,
+                                               QuicknavUtil.ICON_SRC_A,
+                                               context);
         }
     
         if (QuicknavUtil.isControllable(rv, context)) {
@@ -194,8 +200,10 @@ public class QuicknavUtil {
                 if (!QuicknavUtil.canControl(rv, context)) {
                     QuicknavUtil.makeLockedIcon(buf, context);
                 } else {
-                    QuicknavUtil.makeLinkedIcon(rv, buf, QuicknavUtil.ICON_HREF_C,
-                                   QuicknavUtil.ICON_SRC_C, context);
+                    QuicknavUtil.makeLinkedIcon(rv, buf,
+                                                QuicknavUtil.ICON_HREF_C,
+                                                QuicknavUtil.ICON_SRC_C,
+                                                context);
                 }
             }
         }
