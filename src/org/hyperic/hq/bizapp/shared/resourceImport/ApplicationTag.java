@@ -69,7 +69,7 @@ class ApplicationTag
 
     public void handleAttribute(int idx, String value){
         try {
-            this.appValue.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.appValue.setValue(this.attrs[idx].getName(),
                                    value);
         } catch(XmlInvalidAttrException exc){
             throw new IllegalStateException("Should never occur");

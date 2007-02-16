@@ -66,7 +66,7 @@ class ServiceTag
 
     public void handleAttribute(int idx, String value){
         try {
-            this.serviceVal.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.serviceVal.setValue(this.attrs[idx].getName(),
                                      value);
         } catch(XmlInvalidAttrException exc){
             throw new IllegalStateException("Should never occur");

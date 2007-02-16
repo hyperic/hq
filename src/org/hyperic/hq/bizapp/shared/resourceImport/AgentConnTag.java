@@ -67,7 +67,7 @@ class AgentConnTag
         throws XmlAttrException
     {
         try {
-            this.agentConn.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.agentConn.setValue(this.attrs[idx].getName(),
                                     value);
         } catch(XmlInvalidAttrException exc){
             throw new XmlAttrException(exc.getMessage());

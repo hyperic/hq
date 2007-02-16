@@ -84,7 +84,7 @@ class PlatformTag
         throws XmlAttrException
     {
         try {
-            this.platVal.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.platVal.setValue(this.attrs[idx].getName(),
                                   value);
         } catch(XmlInvalidAttrException exc){
             throw new XmlAttrException(exc.getMessage());

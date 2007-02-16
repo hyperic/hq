@@ -71,7 +71,7 @@ class GroupMemberTag
     {
         String attr;
 
-        attr = this.attrs[idx].getName().toLowerCase();
+        attr = this.attrs[idx].getName();
         try {
             this.groupMemberVal.setValue(attr, value);
         } catch(XmlInvalidAttrException exc){

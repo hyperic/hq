@@ -69,7 +69,7 @@ class CollectTag
         throws XmlAttrException
     {
         try {
-            this.collectInfo.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.collectInfo.setValue(this.attrs[idx].getName(),
                                       value);
         } catch(XmlInvalidAttrException exc){
             throw new XmlAttrException(exc.getMessage());

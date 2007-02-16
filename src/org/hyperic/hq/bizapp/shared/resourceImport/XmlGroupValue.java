@@ -73,7 +73,7 @@ public class XmlGroupValue
     }
 
     public String getName(){
-        return this.getValue(XmlResourceValue.ATTR_NAME).toLowerCase();
+        return this.getValue(XmlResourceValue.ATTR_NAME);
     }
 
     public String getCapName(){
@@ -81,11 +81,11 @@ public class XmlGroupValue
     }
 
     public String getType(){
-        return this.getValue(XmlResourceValue.ATTR_TYPE).toLowerCase();
+        return this.getValue(XmlResourceValue.ATTR_TYPE);
     }
 
     public String getMemberType(){
-        return this.getValue(ATTR_MEMBERTYPE).toLowerCase();
+        return this.getValue(ATTR_MEMBERTYPE);
     }
 
     public String getMemberTypeName(){

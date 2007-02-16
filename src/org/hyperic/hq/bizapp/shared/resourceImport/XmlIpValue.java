@@ -54,7 +54,7 @@ public class XmlIpValue
     }
 
     public String getAddress(){
-        return this.getValue(ATTR_ADDRESS).toLowerCase();
+        return this.getValue(ATTR_ADDRESS);
     }
 
     public String getNetmask(){

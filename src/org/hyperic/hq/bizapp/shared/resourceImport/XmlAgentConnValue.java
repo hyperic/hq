@@ -52,7 +52,7 @@ public class XmlAgentConnValue
     }
 
     public String getAddress(){
-        return this.getValue(ATTR_ADDR).toLowerCase();
+        return this.getValue(ATTR_ADDR);
     }
 
     public Integer getPort(){

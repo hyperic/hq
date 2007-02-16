@@ -231,7 +231,7 @@ class ImportHelper
         Integer agentPk;
         int agtPort;
 
-        name     = platform.getCapName();
+        name     = platform.getName();
         fqdn     = platform.getFqdn();
         typeName = platform.getType();
 
@@ -332,7 +332,7 @@ class ImportHelper
         boolean create;
         String name;
 
-        name = platform.getCapName();
+        name = platform.getName();
         create = false;
         try {
             aPlatform = this.findPlatformByName(name);
@@ -393,7 +393,7 @@ class ImportHelper
         ServerTypeValue sType;
         String name, typeName, version, iPath, aiid;
 
-        name     = server.getCapName();
+        name     = server.getName();
         typeName = server.getType();
         iPath    = server.getInstallPath();
         aiid     = server.getAutoinventoryIdentifier();
@@ -467,7 +467,7 @@ class ImportHelper
         boolean create;
         String name;
 
-        name = server.getCapName();
+        name = server.getName();
 
         try {
             aServers = this.findServersByName(name);
@@ -510,7 +510,7 @@ class ImportHelper
         ServiceTypeValue sType;
         String name, typeName, parentServiceName;
 
-        name     = service.getCapName();
+        name     = service.getName();
         typeName = service.getType();
 
         try {
@@ -601,7 +601,7 @@ class ImportHelper
         ServiceValue[] aServices;
         ServiceValue aService;
         boolean create;
-        String name = service.getCapName();
+        String name = service.getName();
 
         try {
             aServices = this.serviceMan.findServicesByName(this.subject, name);
@@ -684,20 +684,20 @@ class ImportHelper
         } catch(ApplicationNotFoundException exc){
             throw new SystemException("Unable to find application that " +
                                          "was just created, '" + 
-                                         app.getCapName() + "'");
+                                         app.getName() + "'");
         } catch(RemoveException exc){
             throw new SystemException("Unable to set new service deps " +
                                          "for application '" + 
-                                         app.getCapName() + "': " + 
+                                         app.getName() + "': " +
                                          exc.getMessage());
         } catch(CreateException exc){
             throw new BatchImportException("Error creating application '" +
-                                           app.getCapName() + "': " +
+                                           app.getName() + "': " +
                                            "failed to setup services - " +
                                            exc.getMessage());
         } catch(PermissionException exc){
             throw new BatchImportException("Error creating application '" +
-                                           app.getCapName() + "': " +
+                                           app.getName() + "': " +
                                            "failed to setup services - " +
                                            "Permission denied");
         }
@@ -711,7 +711,7 @@ class ImportHelper
         ArrayList serviceList;
         String name;
 
-        name = app.getCapName();
+        name = app.getName();
 
         aApp = new ApplicationValue();
         aApp.setName(name);
@@ -789,7 +789,7 @@ class ImportHelper
         String name;
         boolean create;
 
-        name = app.getCapName();
+        name = app.getName();
         create = false;
         try {
             aApp = this.findApplicationByName(name);

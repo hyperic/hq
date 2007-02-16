@@ -73,7 +73,7 @@ class ServerTag
 
     public void handleAttribute(int idx, String value){
         try {
-            this.servVal.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.servVal.setValue(this.attrs[idx].getName(),
                                   value);
         } catch(XmlInvalidAttrException exc){
             throw new IllegalStateException("Should never occur");

@@ -52,15 +52,11 @@ public class XmlResourceValue
     }
 
     public String getName(){
-        return this.getValue(ATTR_NAME).toLowerCase();
-    }
-
-    public String getCapName(){
         return this.getValue(ATTR_NAME);
     }
 
     public String getType(){
-        return this.getValue(ATTR_TYPE).toLowerCase();
+        return this.getValue(ATTR_TYPE);
     }
 
     public String getDescription(){

@@ -49,14 +49,14 @@ public class XmlGroupMemberValue
     }
 
     public String getName(){
-        return this.getValue(XmlResourceValue.ATTR_NAME).toLowerCase();
+        return this.getValue(XmlResourceValue.ATTR_NAME);
     }
 
     public String getType(){
         String res;
 
         if((res = this.getValue(XmlResourceValue.ATTR_TYPE)) != null){
-            return res.toLowerCase();
+            return res;
         }
 
         return null;

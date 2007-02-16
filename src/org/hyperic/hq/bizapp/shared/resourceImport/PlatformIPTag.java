@@ -68,7 +68,7 @@ class PlatformIPTag
         throws XmlAttrException
     {
         try {
-            this.ipVal.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.ipVal.setValue(this.attrs[idx].getName(),
                                 value);
         } catch(XmlInvalidAttrException exc){
             throw new XmlAttrException(exc.getMessage());

@@ -75,7 +75,7 @@ class GroupTag
         throws XmlAttrException
     {
         try {
-            this.groupValue.setValue(this.attrs[idx].getName().toLowerCase(),
+            this.groupValue.setValue(this.attrs[idx].getName(),
                                      value);
         } catch(XmlInvalidAttrException exc){
             throw new XmlAttrException(exc.getMessage());

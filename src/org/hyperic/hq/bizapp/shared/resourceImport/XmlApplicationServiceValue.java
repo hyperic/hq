@@ -56,7 +56,7 @@ public class XmlApplicationServiceValue
     }
 
     public String getName(){
-        return this.getValue(XmlResourceValue.ATTR_NAME).toLowerCase();
+        return this.getValue(XmlResourceValue.ATTR_NAME);
     }
 
     public void addDependency(String depServiceName){
@@ -89,7 +89,7 @@ public class XmlApplicationServiceValue
                 throw new XmlValidationException("Service dependency '" +
                            svc + "' declared more than one time " +
                            "for Application Service '" + this.getName() + "'" +
-                           " in Application '" + appValue.getCapName() + "'");
+                           " in Application '" + appValue.getName() + "'");
             }
             depNames.add(svc);
 
@@ -113,7 +113,7 @@ public class XmlApplicationServiceValue
                 continue;
 
             throw new XmlValidationException("Service '" + this.getName() +
-                          "' in Application '" + appValue.getCapName() + 
+                          "' in Application '" + appValue.getName() +
                           "' depends on service '" + svc + "' which could " +
                           "not be found within the same Application");
         }

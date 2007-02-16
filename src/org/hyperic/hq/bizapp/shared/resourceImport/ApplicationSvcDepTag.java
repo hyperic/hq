@@ -59,6 +59,6 @@ class ApplicationSvcDepTag
     public void handleAttribute(int idx, String value)
         throws XmlAttrException
     {
-        this.svcValue.addDependency(value.toLowerCase());
+        this.svcValue.addDependency(value);
     }
 }

@@ -57,7 +57,7 @@ public class XmlServiceValue
         String res;
 
         if((res = this.getValue(ATTR_PARENTSERVICE)) != null){
-            return res.toLowerCase();
+            return res;
         }
 
         return res;
