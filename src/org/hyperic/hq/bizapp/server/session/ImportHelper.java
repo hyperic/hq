@@ -26,8 +26,6 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +56,6 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -87,7 +84,6 @@ import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlAgentConnValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlApplicationServiceValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlApplicationValue;
-import org.hyperic.hq.bizapp.shared.resourceImport.XmlCollectInfo;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlConfigInfo;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlCustomPropsValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlResourceValue;
@@ -104,14 +100,9 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
-import org.hyperic.hq.measurement.MeasurementCreateException;
-import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.util.TextIndenter;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -119,70 +110,37 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.util.pager.PageControl;
-
 
 class ImportHelper 
     extends BizappSessionEJB
 {
-    private AgentManagerLocal       agentMan;
-    private PlatformManagerLocal    platMan;
-    private ServerManagerLocal      servMan;
-    private ServiceManagerLocal     serviceMan;
-    private ApplicationManagerLocal appMan;
-    private ProductManagerLocal     prodMan;
-    private ConfigManagerLocal      confMan;
-    private ProductBossLocal        prodBoss;
-    private AppdefGroupManagerLocal groupMan;
+    private AgentManagerLocal       _agentMan;
+    private PlatformManagerLocal    _platMan;
+    private ServerManagerLocal      _servMan;
+    private ServiceManagerLocal     _serviceMan;
+    private ApplicationManagerLocal _appMan;
+    private ProductBossLocal        _prodBoss;
+    private AppdefGroupManagerLocal _groupMan;
 
-    private AuthzSubjectValue subject;
-    private BatchImportData    data;
-    private HashMap            appCache;      // Cache of names to apps
-    private HashMap            groupCache;    // Cache of names to groups
-    private HashMap            platformCache; // Cache of names to platforms
-    private HashMap            serviceCache;  // Cache of names to services
-
-    private HashMap            platformTCache; // Cache of names to platTypes
-    private HashMap            serverTCache;   // Cache of names to servTypes
-    private HashMap            serviceTCache;  // Cache of names to svcTypes
-
-    private HashMap            entIDCache;    /* Cache of AppdefEntityIDs to 
-                                                 AppdefResourceValues */
-    private HashMap            schedMetrics;  // IDs to scheduled metrics
-    private HashMap            monTemplates;  // Monitorable types->templates
+    private AuthzSubjectValue       _subject;
+    private BatchImportData         _data;
     
     ImportHelper(AuthzSubjectValue subject, BatchImportData data){
-        this.subject      = subject;
-        this.data         = data;
+        _subject      = subject;
+        _data         = data;
 
         try {
-            this.agentMan    = this.getAgentManager();
-            this.platMan     = PlatformManagerUtil.getLocalHome().create();
-            this.servMan     = ServerManagerUtil.getLocalHome().create();
-            this.serviceMan  = ServiceManagerUtil.getLocalHome().create();
-            this.appMan      = ApplicationManagerUtil.getLocalHome().create();
-            this.prodMan     = this.getProductManager();
-            this.confMan     = this.getConfigManager();
-            this.prodBoss    = ProductBossUtil.getLocalHome().create();
-            this.groupMan    = this.getAppdefGroupManager();
+            _agentMan    = this.getAgentManager();
+            _platMan     = PlatformManagerUtil.getLocalHome().create();
+            _servMan     = ServerManagerUtil.getLocalHome().create();
+            _serviceMan  = ServiceManagerUtil.getLocalHome().create();
+            _appMan      = ApplicationManagerUtil.getLocalHome().create();
+            _prodBoss    = ProductBossUtil.getLocalHome().create();
+            _groupMan    = this.getAppdefGroupManager();
         } catch(NamingException exc){
             throw new SystemException("Internal error setting up managers");
         } catch(CreateException exc){
             throw new SystemException("Internal error setting up managers");
-        }
-    }
-
-    /**
-     * Helper class which contains the interval and associated templateID
-     * needed for scheduling.
-     */
-    private class ScheduledMetric {
-        long    interval;
-        Integer templateID;
-
-        private ScheduledMetric(long interval, Integer templateID){
-            this.interval   = interval;
-            this.templateID = templateID;
         }
     }
 
@@ -226,8 +184,7 @@ class ImportHelper
         XmlAgentConnValue agentInfo;
         PlatformValue aPlatform;
         PlatformTypeValue pType;
-        String typeName, name, fqdn, val;
-        Integer iVal;
+        String typeName, name, fqdn;
         Integer agentPk;
         int agtPort;
 
@@ -275,7 +232,7 @@ class ImportHelper
         try {
             AgentValue agentVal;
 
-            agentVal = this.agentMan.getAgent(agentInfo.getAddress(), agtPort);
+            agentVal = _agentMan.getAgent(agentInfo.getAddress(), agtPort);
             agentPk  = agentVal.getId();
         } catch(AgentNotFoundException exc){
             throw new BatchImportException("Error creating platform '" + 
@@ -287,10 +244,10 @@ class ImportHelper
 
         try {
             try {
-                Integer pk  = this.platMan.createPlatform(this.subject, 
-                                                    pType.getId(), 
-                                                    aPlatform, agentPk);
-                aPlatform = this.platMan.getPlatformValueById(this.subject, pk);
+                Integer pk  = _platMan.createPlatform(_subject,
+                                                      pType.getId(),
+                                                      aPlatform, agentPk);
+                aPlatform = _platMan.getPlatformValueById(_subject, pk);
             } catch (PlatformNotFoundException e) {
                 throw new BatchImportException("Unable to find the platform " +
                                                " we just created");
@@ -354,15 +311,8 @@ class ImportHelper
             buf.append("Processing platform: " + name + "\n");
         }
 
-        this.platformCache.put(platform.getName(), aPlatform);
-        this.entIDCache.put(
-            new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, aPlatform.getId()),
-            aPlatform);
-
         buf.pushIndent();
         this.handleAllConfigs(aPlatform.getEntityId(), name, platform, buf);
-        this.handleMetrics(aPlatform, name, platform, buf);
         buf.popIndent();
 
         for(Iterator i=platform.getServers().iterator(); i.hasNext(); ){
@@ -375,7 +325,7 @@ class ImportHelper
         
         buf.append("Running auto-scan for platform: " + name + "...");
         try {
-            this.getAutoInventoryManager().startScan(this.subject,
+            this.getAutoInventoryManager().startScan(_subject,
                                                      aPlatform.getEntityId(),
                                                      new ScanConfigurationCore(),
                                                      null, null, null);
@@ -391,7 +341,7 @@ class ImportHelper
     {
         ServerValue aServer;
         ServerTypeValue sType;
-        String name, typeName, version, iPath, aiid;
+        String name, typeName, iPath, aiid;
 
         name     = server.getName();
         typeName = server.getType();
@@ -422,12 +372,12 @@ class ImportHelper
         aServer.setLocation(server.getLocation());
 
         try {
-            Integer pk  = this.servMan.createServer(this.subject,
-                                                    plat.getId(),
-                                                    sType.getId(),
-                                                    aServer);
+            Integer pk  = _servMan.createServer(_subject,
+                                                plat.getId(),
+                                                sType.getId(),
+                                                aServer);
             try {
-                aServer = this.servMan.getServerById(this.subject, pk);
+                aServer = _servMan.getServerById(_subject, pk);
             } catch (ServerNotFoundException e) {
                 throw new BatchImportException("Could not find server we " +
                                                " just created");
@@ -464,7 +414,6 @@ class ImportHelper
     {
         ServerValue[] aServers;
         ServerValue aServer;
-        boolean create;
         String name;
 
         name = server.getName();
@@ -483,13 +432,8 @@ class ImportHelper
             buf.popIndent();
         }
 
-        this.entIDCache.put(new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVER, aServer.getId()),
-                            (AppdefResourceValue)aServer);
-
         buf.pushIndent();
         this.handleAllConfigs(aServer.getEntityId(), name, server, buf);
-        this.handleMetrics(aServer, name, server, buf);
         buf.popIndent();
         
         for(Iterator i=server.getServices().iterator(); i.hasNext(); ){
@@ -557,13 +501,12 @@ class ImportHelper
         }
 
         try {
-            Integer pk = serviceMan.createService(this.subject,
-                                                  server.getId(),
-                                                  sType.getId(),
-                                                  aService);
+            Integer pk = _serviceMan.createService(_subject,
+                                                   server.getId(),
+                                                   sType.getId(),
+                                                   aService);
             try {
-                aService = serviceMan.getServiceById(this.subject,
-                                                     pk);
+                aService = _serviceMan.getServiceById(_subject, pk);
             } catch (ServiceNotFoundException e) {  
                 throw new BatchImportException("Could not find service we " +
                                                "just created");
@@ -600,11 +543,10 @@ class ImportHelper
     {
         ServiceValue[] aServices;
         ServiceValue aService;
-        boolean create;
         String name = service.getName();
 
         try {
-            aServices = this.serviceMan.findServicesByName(this.subject, name);
+            aServices = _serviceMan.findServicesByName(_subject, name);
             if (aServices.length > 1) {
                 throw new BatchImportException("Multiple matches for " + name);
             }
@@ -620,17 +562,9 @@ class ImportHelper
                                            "service '" + name + "': " + 
                                            exc.getMessage());
         }
-
-        entIDCache.put(new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE, aService.getId()),
-                       (AppdefResourceValue)aService);
-
         buf.pushIndent();
         this.handleAllConfigs(aService.getEntityId(), name, service, buf);
-        this.handleMetrics(aService, name, service, buf);
         buf.popIndent();
-
-        this.serviceCache.put(service.getName(), aService);
     }
 
     private AppServiceValue findAppServiceForAdd(ApplicationValue aApp, 
@@ -664,7 +598,6 @@ class ImportHelper
         for(Iterator i=app.getServices().iterator(); i.hasNext(); ){
             XmlApplicationServiceValue svc;
             AppServiceValue addSvc;
-            ArrayList children;
 
             svc = (XmlApplicationServiceValue)i.next();
             addSvc = this.findAppServiceForAdd(aApp, svc.getName());
@@ -680,7 +613,7 @@ class ImportHelper
         }
 
         try {
-            this.appMan.setServiceDepsForApp(this.subject, dt);
+            _appMan.setServiceDepsForApp(_subject, dt);
         } catch(ApplicationNotFoundException exc){
             throw new SystemException("Unable to find application that " +
                                          "was just created, '" + 
@@ -754,10 +687,10 @@ class ImportHelper
         }
 
         try {
-            Integer pk = this.appMan.createApplication(this.subject, aApp,
-                                                       serviceList);
+            Integer pk = _appMan.createApplication(_subject, aApp,
+                                                   serviceList);
             try {
-                aApp = this.appMan.getApplicationById(this.subject, pk);
+                aApp = _appMan.getApplicationById(_subject, pk);
             } catch (ApplicationNotFoundException e) {
                 throw new BatchImportException(
                     "Failed to find app we just created");
@@ -809,102 +742,11 @@ class ImportHelper
         } else {
             buf.append("Processing application: " + name + "\n");
         }
-
-        this.appCache.put(app.getName(), aApp);
-    }
-
-    /**
-     * Look at all the metrics for a resource, and add them to the list
-     * of things to enable later.
-     */
-    private void handleMetrics(AppdefResourceValue resource, String fullName,
-                               XmlResourceValue entityVal,
-                               TextIndenter buf)
-        throws BatchImportException
-    {
-        MeasurementTemplateValue template;
-        HashMap aliasToTemplate, toAdd;
-        String monType;
-        List templates, metrics;
-
-        if((metrics = entityVal.getMetricsToCollect()) == null ||
-           metrics.size() == 0)
-        {
-            return;
-        }
-
-        monType   = resource.getAppdefResourceTypeValue().getName();
-        templates = (List)this.monTemplates.get(monType);
-        if(templates == null){
-            templates = 
-                this.getTemplateManager().findTemplates(monType, null, null,
-                                                        PageControl.PAGE_ALL);
-            this.monTemplates.put(monType, templates);
-        }
-
-        aliasToTemplate = new HashMap();
-        for(Iterator i=templates.iterator(); i.hasNext(); ){
-            template = (MeasurementTemplateValue)i.next();
-            aliasToTemplate.put(template.getAlias().toLowerCase(), template);
-        }
-
-        toAdd = new HashMap();
-        for(Iterator i=metrics.iterator(); i.hasNext(); ){
-            XmlCollectInfo collect = (XmlCollectInfo)i.next();
-            ScheduledMetric sched;
-            boolean isDefault;
-            String metric;
-            int interval;
-
-            metric    = collect.getMetric();
-            interval  = collect.getInterval();
-            isDefault = metric.equalsIgnoreCase("default");
-            if(metric.equalsIgnoreCase("all") || isDefault){
-                for(Iterator j=templates.iterator(); j.hasNext(); ){
-                    template = (MeasurementTemplateValue)j.next();
-                    if((isDefault == false) || 
-                       (isDefault && template.getDefaultOn()))
-                    {
-                        sched = new ScheduledMetric(interval,template.getId());
-                        toAdd.put(template.getAlias(), sched);
-                    }
-                }
-                buf.append("- Collecting all " + (isDefault ? "(default)":"")+
-                           " metrics every " + interval + " seconds\n");
-            } else {
-                template = (MeasurementTemplateValue)
-                    aliasToTemplate.get(metric.toLowerCase());
-                if(template == null){
-                    throw new BatchImportException("Unable to collect metric" +
-                                                   " '" + metric + "' from '" +
-                                                   fullName + 
-                                                   "': no such metric exists");
-                }
-                
-                sched = new ScheduledMetric(interval, template.getId());
-                toAdd.put(template.getAlias(), sched);
-                buf.append("- Collecting '" + template.getAlias() + 
-                           "' every " + interval + " seconds\n");
-            }
-        }
-
-        this.schedMetrics.put(resource.getEntityId(), toAdd.values());
     }
 
     private String getConfigFailMsg(ConfigFetchException exc){
-        AppdefResourceValue val;
-        AppdefEntityID id;
-        String res;
-
-        id  = exc.getEntity();
-        if((val = (AppdefResourceValue)this.entIDCache.get(id)) == null){
-            res = id.toString();
-        } else {
-            res = id.getTypeName() + " '" + val.getName() + "'";
-        }
-
-        return res + " must have a " + exc.getProductType() + 
-            " configuration ";
+        return exc.getEntity().toString() + " must have a " +
+            exc.getProductType() + " configuration ";
     }
 
     private void handleAllConfigs(AppdefEntityID id, String name,
@@ -941,9 +783,9 @@ class ImportHelper
         config = ghettoConfig.getValues();
         fullName = id.getTypeName() + " '" + name + "'";
         try {
-            schema = this.prodBoss.getConfigSchema(this.subject, id, 
-                                                   ghettoConfig.getType(),
-                                                   true);
+            schema = _prodBoss.getConfigSchema(_subject, id,
+                                               ghettoConfig.getType(),
+                                               true);
         } catch(PermissionException exc){
             throw new BatchImportException("Permission denied, " +
                                            "configuring " + fullName + 
@@ -1014,8 +856,8 @@ class ImportHelper
         }
 
         try {
-            this.prodBoss.setConfigResponse(this.subject, id, response,
-                                            ghettoConfig.getType());
+            _prodBoss.setConfigResponse(_subject, id, response,
+                                        ghettoConfig.getType());
         } catch(ConfigFetchException exc){
             throw new BatchImportException("Failed to set configuration for " +
                                            fullName + ": " + 
@@ -1032,74 +874,6 @@ class ImportHelper
             throw new BatchImportException("Internal server error");
         } catch(FinderException exc){
             throw new BatchImportException("Internal server error");
-        }
-    }
-
-    /**
-     * Enable metrics which have been setup previously by calls
-     * to handleMetrics.
-     */
-    private void enableMetrics()
-        throws NamingException, BatchImportException, PermissionException
-    {
-        DerivedMeasurementManagerLocal dmmMan;
-
-        dmmMan = this.getDerivedMeasurementManager();
-
-        for(Iterator i=this.schedMetrics.entrySet().iterator(); i.hasNext(); ){
-            Map.Entry ent = (Map.Entry)i.next();
-            AppdefEntityID id;
-            Integer[] templates;
-            long[] intervals;
-            Collection sched;
-            ConfigResponse response;
-
-            id    = (AppdefEntityID)ent.getKey();
-            sched = (Collection)ent.getValue();
-
-            templates = new Integer[sched.size()];
-            intervals = new long[sched.size()];
-            int ind = 0;
-            for(Iterator j=sched.iterator(); j.hasNext(); ind++){
-                ScheduledMetric met = (ScheduledMetric)j.next();
-
-                templates[ind] = met.templateID;
-                intervals[ind] = met.interval * 1000;
-            }
-
-            try {
-                response = this.confMan.getMergedConfigResponse(this.subject,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
-            } catch(AppdefEntityNotFoundException exc){
-                throw new BatchImportException("Unable to find configuration" +
-                                               " for " + id + ": " +
-                                               exc.getMessage());
-            } catch(PermissionException exc){
-                throw new BatchImportException("Unauthorized to process " +
-                                               "configuration for " + id +
-                                               ": " + exc.getMessage());
-            } catch(ConfigFetchException exc){
-                throw new BatchImportException("Failed to get configuration " +
-                                               "for " + id + ": " +
-                                               this.getConfigFailMsg(exc));
-            } catch(EncodingException exc){
-                throw new SystemException("Corrupted configuration " +
-                                             "encoding detected");
-            }
-
-            try {
-                dmmMan.createMeasurements(this.subject, id, templates,
-                                          intervals, response);
-            } catch(MeasurementCreateException exc){
-                throw new BatchImportException("Unable to create metrics"+
-                                               " for " + id + ": " +
-                                               exc.getMessage());
-            } catch(TemplateNotFoundException exc) {
-                throw new BatchImportException("Unable to find metrics"+
-                                               " for " + id + ": " +
-                                               exc.getMessage());
-            }
         }
     }
 
@@ -1135,21 +909,21 @@ class ImportHelper
                                                     memberType + "'");
                 }
                 
-                aGroup = this.groupMan.createGroup(this.subject, 
-                                                   resVal.getAppdefTypeId(),
-                                                   resVal.getId().intValue(),
-                                                   name, description, 
-                                                   location);
+                aGroup = _groupMan.createGroup(_subject,
+                                               resVal.getAppdefTypeId(),
+                                               resVal.getId().intValue(),
+                                               name, description,
+                                               location);
             } else if(groupType.equals(XmlGroupValue.T_ADHOC)){
                 if(memberType.equals(XmlGroupValue.N_MIXED)){
-                    aGroup = this.groupMan.createGroup(this.subject, name,
-                                                       description, location);
+                    aGroup = _groupMan.createGroup(_subject, name,
+                                                   description, location);
                 } else if(memberType.equals(XmlGroupValue.N_GROUP)){
-                    aGroup = this.groupMan.createGroup(this.subject,
+                    aGroup = _groupMan.createGroup(_subject,
                                       AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                       name, description, location);
                 } else if(memberType.equals(XmlGroupValue.N_APP)){
-                    aGroup = this.groupMan.createGroup(this.subject,
+                    aGroup = _groupMan.createGroup(_subject,
                                AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
                                name, description, location);
                 } else {
@@ -1227,7 +1001,7 @@ class ImportHelper
         }
 
         try {
-            this.groupMan.saveGroup(this.subject, aGroup);
+            _groupMan.saveGroup(_subject, aGroup);
         } catch(GroupNotCompatibleException exc){
             throw new BatchImportException(ERR_BEGIN + exc.getMessage());
         } catch(GroupModificationException exc){
@@ -1275,106 +1049,62 @@ class ImportHelper
         } else {
             buf.append("Processing group: " + name + "\n");
         }
-
-        this.groupCache.put(group.getName(), aGroup);
     }
 
     private ServiceValue[] findServicesByName(String name)
         throws ServiceNotFoundException, PermissionException
     {
-        return this.serviceMan.findServicesByName(this.subject, name);
+        return _serviceMan.findServicesByName(_subject, name);
     }
 
     private ServerValue[] findServersByName(String name)
         throws ServerNotFoundException
     {
-        return this.servMan.findServersByName(this.subject, name);
+        return _servMan.findServersByName(_subject, name);
     }
 
     private PlatformValue findPlatformByName(String name)
         throws PlatformNotFoundException, PermissionException
     {
-        PlatformValue res;
-
-        if((res = (PlatformValue)this.platformCache.get(name)) == null){
-            res = this.platMan.getPlatformByName(this.subject, name);
-            this.platformCache.put(name, res);
-        }
-
-        return res;
+        return _platMan.getPlatformByName(_subject, name);
     }
 
     private ApplicationValue findApplicationByName(String name)
         throws ApplicationNotFoundException, PermissionException
     {
-        ApplicationValue res;
-
-        if((res = (ApplicationValue)this.appCache.get(name)) == null){
-            res = this.appMan.findApplicationByName(this.subject, name);
-            this.appCache.put(name, res);
-        }
-
-        return res;
+        return _appMan.findApplicationByName(_subject, name);
     }
 
     private AppdefGroupValue findGroupByName(String name)
         throws AppdefGroupNotFoundException, PermissionException
     {
-        AppdefGroupValue res;
-
-        if((res = (AppdefGroupValue)this.groupCache.get(name)) == null){
-            res = this.groupMan.findGroupByName(this.subject, name);
-            this.groupCache.put(name, res);
-        }
-
-        return res;
+        return _groupMan.findGroupByName(_subject, name);
     }
 
     private PlatformTypeValue findPlatformTypeByName(String typeName)
         throws PlatformNotFoundException
     {
-        PlatformTypeValue res;
-
-        if((res = (PlatformTypeValue)this.platformTCache.get(typeName))==null){
-            res = this.platMan.findPlatformTypeByName(typeName);
-            this.platformTCache.put(typeName, res);
-        }
-
-        return res;
+        return _platMan.findPlatformTypeByName(typeName);
     }
 
     private ServerTypeValue findServerTypeByName(String typeName)
         throws ServerNotFoundException
     {
-        ServerTypeValue res;
-
-        if((res = (ServerTypeValue)this.serverTCache.get(typeName)) == null){
-            try {
-                res = this.servMan.findServerTypeByName(typeName);
-            } catch(FinderException exc){
-                throw new ServerNotFoundException(exc.getMessage());
-            }
-            this.serverTCache.put(typeName, res);
+        try {
+            return _servMan.findServerTypeByName(typeName);
+        } catch (FinderException e) {
+            throw new ServerNotFoundException(e.getMessage());
         }
-
-        return res;
     }
 
     private ServiceTypeValue findServiceTypeByName(String typeName)
         throws ServiceNotFoundException
     {
-        ServiceTypeValue res;
-
-        if((res = (ServiceTypeValue)this.serviceTCache.get(typeName)) == null){
-            try {
-                res = this.serviceMan.findServiceTypeByName(typeName);
-            } catch(FinderException exc){
-                throw new ServiceNotFoundException(exc.getMessage());
-            }
-            this.serviceTCache.put(typeName, res);
+        try {
+            return _serviceMan.findServiceTypeByName(typeName);
+        } catch (FinderException exc) {
+            throw new ServiceNotFoundException(exc.getMessage());
         }
-
-        return res;
     }
 
     String process()
@@ -1382,27 +1112,14 @@ class ImportHelper
     {
         TextIndenter res = new TextIndenter(2);
 
-        this.appCache       = new HashMap();
-        this.groupCache     = new HashMap();
-        this.platformCache  = new HashMap();
-        this.serviceCache   = new HashMap();
-
-        this.platformTCache = new HashMap();
-        this.serverTCache   = new HashMap();
-        this.serviceTCache  = new HashMap();
-
-        this.entIDCache     = new HashMap();
-        this.schedMetrics   = new HashMap();
-        this.monTemplates   = new HashMap();
-
         try {
             List apps;
 
-            for(Iterator i=this.data.getPlatforms().iterator(); i.hasNext(); ){
+            for(Iterator i=_data.getPlatforms().iterator(); i.hasNext(); ){
                 this.processPlatform((XmlPlatformValue)i.next(), res);
             }
 
-            apps = this.data.getApplications();
+            apps = _data.getApplications();
             if(apps.size() > 0)
                 res.append("\nProcessing Applications:\n");
                 
@@ -1410,11 +1127,9 @@ class ImportHelper
                 this.processApp((XmlApplicationValue)i.next(), res);
             }
 
-            for(Iterator i=this.data.getGroups().iterator(); i.hasNext(); ){
+            for(Iterator i=_data.getGroups().iterator(); i.hasNext(); ){
                 this.processGroup((XmlGroupValue)i.next(), res);
             }
-
-            this.enableMetrics();
         } catch(NamingException exc){
             throw new SystemException(exc);
         }
