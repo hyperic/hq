@@ -34,21 +34,27 @@
 
 <c:set var="widgetInstanceName" value="alerts"/>
 <html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
-<html:link page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid=" linkName="ackAlertUrl" styleId="ackAlertUrl" style="visibility:hidden;"></html:link>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
 var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
-</script>
 
-<script type="text/javascript">
 function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>"
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
+
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
+
+function acknowledgeAlert(img, aid, eid) {
+    new Effect.Shrink(img, {duration: 1.5});
+    var ackAlertUrl = "<html:rewrite page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid="/>" +
+        eid + "&a=" + aid;
+
+	new Ajax.Request(ackAlertUrl);
+}
 
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
