@@ -54,6 +54,7 @@ function acknowledgeAlert(img, eid, aid) {
         eid + "&a=" + aid;
 
 	new Ajax.Request(ackAlertUrl);
+    return false;
 }
 
 </script>

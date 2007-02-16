@@ -214,14 +214,14 @@
                 td6.setAttribute("align", "center");
                 if (aList[i].acknowledgeable) {
                     var ackAnchor = document.createElement("a");
-                    ackAnchor .setAttribute("href", "#");
+                    ackAnchor .setAttribute("href", ".");
                     td6.appendChild(ackAnchor);
 
                     var imgNode = document.createElement('img');
                     imgNode.setAttribute("src", imagePath + "icon_ack.gif");
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
-                    imgNode.setAttribute("onClick", "acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");
+                    imgNode.setAttribute("onClick", "return acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");
                     ackAnchor.appendChild(imgNode);
 
                     imgNode = document.createElement('img');
