@@ -48,7 +48,7 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 
-function acknowledgeAlert(img, aid, eid) {
+function acknowledgeAlert(img, eid, aid) {
     new Effect.Shrink(img, {duration: 1.5});
     var ackAlertUrl = "<html:rewrite page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid="/>" +
         eid + "&a=" + aid;
