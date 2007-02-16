@@ -299,8 +299,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
             NAME="modifyEscalation"/>
         <data ID="414" CID="414" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
             NAME="removeEscalation"/>
-        <data ID="415" CID="415" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-            NAME="viewEscalation"/>
 
     </table>
 

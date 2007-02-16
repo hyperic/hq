@@ -189,11 +189,6 @@ public abstract class SessionBase {
         checkEscalation(subjectId, AuthzConstants.escOpCreateEscalation);
     }
     
-    public static void canViewEscalation(Integer subjectId)
-        throws PermissionException {
-        checkEscalation(subjectId, AuthzConstants.escOpViewEscalation);
-    }
-    
     public static void canModifyEscalation(Integer subjectId)
         throws PermissionException {
         checkEscalation(subjectId, AuthzConstants.escOpModifyEscalation);

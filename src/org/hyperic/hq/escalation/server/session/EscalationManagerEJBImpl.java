@@ -214,7 +214,6 @@ public class EscalationManagerEJBImpl
     public Escalation findById(AuthzSubject subject, Integer id) 
         throws PermissionException
     {
-        SessionBase.canViewEscalation(subject.getId());
         return _esclDAO.findById(id);
     }
 
@@ -224,7 +223,6 @@ public class EscalationManagerEJBImpl
     public Collection findAll(AuthzSubject subject)
         throws PermissionException
     {
-        SessionBase.canViewEscalation(subject.getId());
         return _esclDAO.findAllOrderByName();
     }
 
@@ -234,7 +232,6 @@ public class EscalationManagerEJBImpl
     public Escalation findByName(AuthzSubject subject, String name) 
         throws PermissionException
     {
-        SessionBase.canViewEscalation(subject.getId());
         return _esclDAO.findByName(name);
     }
 

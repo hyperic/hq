@@ -160,7 +160,6 @@ public final class AuthzConstants {
     public static final String escOpCreateEscalation = "createEscalation";
     public static final String escOpModifyEscalation = "modifyEscalation";
     public static final String escOpRemoveEscalation = "removeEscalation";
-    public static final String escOpViewEscalation   = "viewEscalation";
 
     public static final String privateRoleGroupName = "camPrivateRoleGroup:";
     public static final int authzDefaultResourceGroupType = 13;
