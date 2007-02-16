@@ -4614,6 +4614,28 @@ has already been defined.
                             column="TIMESTAMP" nullable="NOT NULL"/>
     </schemaSpec>
 
+    <!-- Remove the on delete cascade from svc cluster to svc and agent to 
+         platform -->
+    <schemaSpec version="3.12">
+      <schema-directSQL>
+        <statement>
+          ALTER TABLE eam_service DROP CONSTRAINT fkee7e4387a14c9e5b CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE eam_service ADD CONSTRAINT fkee7e4387a14c9e5b 
+            FOREIGN KEY (svc_cluster_id) REFERENCES eam_svc_cluster(id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_platform DROP CONSTRAINT fkfed285c1559691a3 CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE eam_platform ADD CONSTRAINT 
+            fkfed285c1559691a3 FOREIGN KEY (agent_id) REFERENCES eam_agent(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+      
+
 </dbupgrade>
 
 </target>
