@@ -477,4 +477,8 @@ public abstract class SessionEJB {
                             start + "=" + (end - start));
         }
     }
+
+    protected void deleteMetricProblems(Integer[] mids) {
+        getMetricProblemDAO().deleteByMetricIds(mids);
+    }
 }

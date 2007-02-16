@@ -53,4 +53,12 @@ public class MetricProblemDAO extends HibernateDAO {
         save(p);
         return p;
     }
+    
+    int deleteByMetricIds(Integer[] ids) {
+        String sql = "delete MetricProblem where measurement_id in (:ids)";
+
+        return getSession().createQuery(sql)
+            .setParameterList("ids", ids)
+            .executeUpdate();
+    }
 }
