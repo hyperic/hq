@@ -69,12 +69,18 @@ public class RemoveServiceAction extends BaseAction {
         Log log = LogFactory.getLog(RemoveServiceAction.class.getName());
                 
         RemoveResourceForm nwForm = (RemoveResourceForm) form;
-            
+
+        AppdefEntityID aeid = new AppdefEntityID(nwForm.getEid());
         Integer[] resources = nwForm.getResources();
         Map params = new HashMap(2);
-        params.put(Constants.ENTITY_ID_PARAM,
-                   new AppdefEntityID(nwForm.getEid()));
-        params.put(Constants.ACCORDION_PARAM, "1");
+        params.put(Constants.ENTITY_ID_PARAM, aeid);
+        
+        if (aeid.isPlatform()) {
+            params.put(Constants.ACCORDION_PARAM, "3");
+        }
+        else {
+            params.put(Constants.ACCORDION_PARAM, "1");
+        }
             
         if (resources == null || resources.length == 0) {
             returnSuccess(request, mapping, params); 
