@@ -198,24 +198,29 @@ public class PortalAction extends ResourceController {
         } catch(ParameterNotFoundException e) {
             // Don't need to pause
         }
+        
         // pass pause escalation time
+        AppdefEntityID aeid = null;
         try {
-            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
                 eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
                                     alertId, pause, null);
-                return viewAlert(mapping, form, request, response);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
         }
 
-        // XXX:  Right now this only works with classic alerts
-        eb.acknowledgeAlert(sessionID, 
-                            ClassicEscalationAlertType.CLASSIC,
-                            alertId, pause, null);
+        if (aeid == null || !aeid.isGroup()) {
+            // Classic alerts
+            eb.acknowledgeAlert(sessionID, 
+                                ClassicEscalationAlertType.CLASSIC,
+                                alertId, pause, null);
+        }
         
+        RequestUtils.setConfirmation(request,
+                                     "alert.view.confirm.acknowledged");
         return viewAlert(mapping, form, request, response);
     }
 
@@ -230,22 +235,25 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = RequestUtils.getIntParameter(request, "a");
+        AppdefEntityID aeid = null;
         try {
-            AppdefEntityID aeid = RequestUtils.getEntityId(request);
+            aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
                 eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
                             alertId, null);
-                return viewAlert(mapping, form, request, response);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
         }
 
-        // Fix alert the old fashion way
-        eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
-                    null); 
+        if (aeid == null || !aeid.isGroup()) {
+            // Fix alert the old fashion way
+            eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
+                        null); 
+        }
 
+        RequestUtils.setConfirmation(request, "alert.view.confirm.fixed");
         return viewAlert(mapping, form, request, response);
     }
 }

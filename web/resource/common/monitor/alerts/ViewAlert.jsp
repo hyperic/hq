@@ -44,6 +44,9 @@
 
 <tiles:insert definition=".events.alert.view.nav" flush="true"/>
 
+<tiles:insert definition=".portlet.confirm"/>
+<tiles:insert definition=".portlet.error"/>
+
 <tiles:insert definition=".events.alert.view.properties"/>
 
 &nbsp;<br>
