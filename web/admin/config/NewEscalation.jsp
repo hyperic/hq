@@ -821,6 +821,7 @@ function showViewEscResponse(originalRequest) {
       </table>
  </div>
 
+<c:if test="${useroperations['createEscalation']}">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
     <tr>
@@ -1022,4 +1023,5 @@ function showViewEscResponse(originalRequest) {
 <input type="hidden" value="" id="modifiedTime"> <input type="hidden"
   value="" id="allowPause"> <input type="hidden" value="" id="escName">
 <input type="hidden" value="" id="id"></form>
+</c:if>
 

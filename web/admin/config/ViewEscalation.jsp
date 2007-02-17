@@ -183,11 +183,13 @@ function showViewEscResponse(originalRequest) {
       td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
       td6.innerHTML = '<div style="cursor:move;width:100%;background:#cccccc;padding:2px; border:1px solid #aeb0b5;">Action Details</div>';
 
+      <c:if test="${useroperations['modifyEscalation']}">
       escTrHeader.appendChild(td8);
       td8.setAttribute('vAlign','top');
       td8.setAttribute('rowSpan', '3');
       td8.setAttribute((document.all ? 'className' : 'class'), "remove");
       td8.innerHTML ='<a href="#" onclick="removeRow(this);removeAction(' + actionId + ');"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+      </c:if>
 
       escTr1.appendChild(td1);
       td1.setAttribute((document.all ? 'className' : 'class'), "waitTd");
@@ -971,6 +973,7 @@ function showViewEscResponse(originalRequest) {
       <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
       <td id="changed" class="BlockContent"></td>
     </tr>
+    <c:if test="${useroperations['modifyEscalation']}">
     <tr class="ToolbarContent"><!-- EDIT TOOLBAR -->
       <td colSpan="2">
         <tiles:insert page="/common/components/ActionButton.jsp">
@@ -980,6 +983,7 @@ function showViewEscResponse(originalRequest) {
         </tiles:insert>
       </td>
     </tr>
+    </c:if>
   </tbody>
 </table>
 
@@ -1178,6 +1182,7 @@ function showViewEscResponse(originalRequest) {
       </ul>
       </td>
     </tr>
+    <c:if test="${useroperations['modifyEscalation']}">
     <tr class="ToolbarContent">
       <td id="addRowButton">
         <table cellspacing="4" cellpadding="0">
@@ -1193,6 +1198,7 @@ function showViewEscResponse(originalRequest) {
        </table>
        </td>
     </tr>
+    </c:if>
     <tr class="ToolbarContent">
       <td id="addEscButtons" style="display:none">
         <table cellspacing="4" cellpadding="0" border="0">

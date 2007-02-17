@@ -29,33 +29,28 @@
   USA.
  --%>
 
-
-<c:if test="${useroperations['administerCAM']}">
-
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="admin.home.CompanyWideSettingsTab"/>
   <tiles:put name="icon"><html:img page="/images/application_edit.gif" alt=""/></tiles:put>
 </tiles:insert>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-bottom: 1px solid #D5D8DE; margin-bottom: 24px;">
+<c:if test="${useroperations['administerCAM']}">
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link></td>
 	</tr>
+</c:if>
 	<tr>
-		<td class="BlockLabel"></td>
+		<td  width="20%" class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
 	</tr>
 	<tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link></td>
 	</tr>
-	<tr>
-    	<td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
 </table>
 <!--  /  -->
-<br><br>
-</c:if>
+
 
