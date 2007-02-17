@@ -88,7 +88,7 @@ public class RemoveAction extends BaseAction {
         log.trace("removing users");                                                      
         authzBoss.removeSubject(sessionId, users );                    
 
+        RequestUtils.setConfirmation(request, "admin.role.confirm.RemoveUsers");
         return returnSuccess(request, mapping, params, false);
-        
     }
 }

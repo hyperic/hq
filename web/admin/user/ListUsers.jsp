@@ -83,6 +83,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <html:hidden property="sc" value="${param.sc}"/>
 </c:if>
 
+<tiles:insert definition=".portlet.error"/>
+<tiles:insert definition=".portlet.confirm"/>
+
 <tiles:insert definition=".admin.auth.functions"/>
 
   <display:table cellspacing="0" cellpadding="0" width="100%" action="${sortAction}" pageSize="${pageSize}" items="${AllUsers}" var="user">

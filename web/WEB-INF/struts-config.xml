@@ -466,11 +466,11 @@
               type="org.hyperic.hq.ui.action.admin.user.RemoveAction"
               name="RemoveUserForm"
               scope="request"
-              input="/admin/user/ListUsers.jsp"> 
+              input="/admin/user/UserAdmin.do?mode=list">
               <exception key="exception.cant.remove"
                          type="javax.ejb.RemoveException"
                          path="/common/GenericError.jsp"/>             
-              <forward name="success" path="/admin/user/UserAdmin.do?mode=list" redirect="true"/>
+              <forward name="success" path="/admin/user/UserAdmin.do?mode=list"/>
       </action>
 
       <action path="/admin/user/EditPassword"
