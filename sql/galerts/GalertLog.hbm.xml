@@ -47,7 +47,7 @@
          cascade="all-delete-orphan" inverse="true"
          order-by="TIMESTAMP, ID">
       <cache usage="read-write" />
-      <key column="GALERT_ID" />
+      <key on-delete="cascade" column="GALERT_ID" not-null="true"/>
       <one-to-many class="GalertActionLog" />
     </bag>
 

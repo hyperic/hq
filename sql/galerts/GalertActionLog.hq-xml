@@ -6,12 +6,12 @@
 
 <hibernate-mapping package="org.hyperic.hq.galerts.server.session">
 
-  <class name="GalertActionLog" table="EAM_ALERT_ACTION_LOG">
+  <class name="GalertActionLog" table="EAM_GALERT_ACTION_LOG">
     <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_ALERT_ACTION_LOG_ID_SEQ</param>
+        <param name="sequence">EAM_GALERT_ACTION_LOG_ID_SEQ</param>
       </generator>
     </id>
 
@@ -24,7 +24,7 @@
     </property>
 
     <many-to-one name="galertLog">
-      <column name="GALERT_ID" index="GALERT_ACTION_LOG_IDX" />
+      <column name="GALERT_ID" not-null="true" index="GALERT_ACTION_LOG_IDX" />
     </many-to-one>
 
 	<property name="alertTypeEnum">

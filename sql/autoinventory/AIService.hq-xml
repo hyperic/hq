@@ -74,7 +74,7 @@
 
     <many-to-one name="server" 
                  class="org.hyperic.hq.appdef.server.session.Server">
-      <column name="SERVER_ID" not-null="false" />
+      <column name="SERVER_ID" not-null="true" />
     </many-to-one>
   </class>
 

@@ -68,7 +68,7 @@
     </property>
 
     <many-to-one name="applicationType" class="ApplicationType">
-      <column name="APPLICATION_TYPE_ID" not-null="false" />
+      <column name="APPLICATION_TYPE_ID" not-null="true" />
     </many-to-one>
 
     <bag name="appServices" table="EAM_APP_SERVICE">
