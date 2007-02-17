@@ -125,6 +125,7 @@ public class AlertDefinitionManagerEJBImpl
         if (!force &&
             (dao.countAlerts(alertdef).intValue() > 0 || survivors)) {
             alertdef.setDeleted(true);
+            alertdef.setEnabled(false);
             
             // Make sure to disassociated from all triggers
             alertdef.setActOnTrigger(null);

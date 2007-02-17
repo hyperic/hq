@@ -1,6 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -40,7 +41,9 @@
 
 <tiles:insert definition=".events.config.view.conditionsbox"/>
 
+<c:if test="${not alertDef.deleted}">
 <tiles:insert beanName="notificationsTile"/>
+</c:if>
 
 <tiles:insert definition=".events.config.view.nav"/>
 
