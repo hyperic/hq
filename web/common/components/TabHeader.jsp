@@ -65,6 +65,10 @@
       <div style="cursor: move;">
     </c:if>
 
+    <c:if test="${not empty rssUrl}">
+      <html:link href="${rssUrl}"><html:img border="0" page="/images/icon_feed.gif"/></html:link>
+    </c:if>
+
     <c:if test="${not empty icon}">
     <c:out value="${icon}" escapeXml="false"/>
     </c:if>
@@ -85,9 +89,6 @@
 <c:if test="${not empty subTitle}">
   <span id="<c:out value="${subTitle}_span${adminToken}"/>" class="BlockSubTitle"><c:out value="${subTitle}"/></span>
 </c:if>
-      <c:if test="${not empty rssUrl}">
-        <html:link href="${rssUrl}"><html:img border="0" page="/images/xml.gif"/></html:link>
-      </c:if>
     <c:if test="${dragDrop}">
       </div>
     </c:if>
