@@ -3141,6 +3141,13 @@ has already been defined.
           <statement targetDB="oracle">
             CREATE INDEX alert_time_idx ON eam_alert (ctime)
           </statement>
+          <statement targetDB="postgresql">
+            CREATE INDEX alert_alertdefinition_idx ON eam_alert 
+                    USING btree (alert_definition_id)
+          </statement>
+          <statement targetDB="oracle">
+            CREATE INDEX alert_alertdefinition_idx ON eam_alert (alert_definition_id)
+          </statement>
           <statement>
             ALTER TABLE eam_alert ADD CONSTRAINT fke5b216aeb5af9d12 FOREIGN KEY (alert_definition_id) REFERENCES eam_alert_definition(id)
           </statement>
@@ -3202,6 +3209,13 @@ has already been defined.
           </statement>
           <statement>
             ALTER TABLE eam_alert_condition_log ADD CONSTRAINT fkd1647e0f2eaa2a9f FOREIGN KEY (condition_id) REFERENCES eam_alert_condition(id) ON DELETE CASCADE
+          </statement>
+          <statement targetDB="postgresql">
+            CREATE INDEX alert_cond_log_idx ON eam_alert_condition_log 
+              USING btree (alert_id)
+          </statement>
+          <statement targetDB="oracle">
+            CREATE INDEX alert_cond_log_idx ON eam_alert_condition_log (alert_id)
           </statement>
         </schema-directSQL>
         <schema-update table="EAM_APP_SERVICE" column="FENTRY_POINT"
@@ -3783,6 +3797,12 @@ has already been defined.
           <statement>
             ALTER TABLE eam_server ADD CONSTRAINT fkeeeb4c116796aa86 FOREIGN KEY (platform_id) REFERENCES eam_platform(id) ON DELETE CASCADE
           </statement>
+          <statement targetDB="postgresql">
+            CREATE INDEX eam_server_platform_idx ON eam_server USING btree (platform_id)
+          </statement>
+          <statement targetDB="oracle">
+            CREATE INDEX eam_server_platform_idx ON eam_server (platform_id)
+          </statement>
           <statement desc="Create new virtual servers view.">
           CREATE VIEW EAM_VIRT_SVR_VIEW AS
           SELECT 
@@ -4030,11 +4050,16 @@ has already been defined.
           <statement>
             DROP SEQUENCE eam_tier_type_id_seq
           </statement>          
-             <statement>
-               ALTER TABLE EAM_USER_CONFIG_RESP DROP COLUMN subject_id
-             </statement>            
+           <statement>
+             ALTER TABLE EAM_USER_CONFIG_RESP DROP COLUMN subject_id
+           </statement>            
+           <statement>
+             ALTER TABLE eam_user_config_resp
+                ADD CONSTRAINT fk622ab78723193fc9 FOREIGN KEY (id) 
+                REFERENCES eam_subject(id)  ON DELETE CASCADE
+           </statement>
           <statement>
-            DROP SEQUENCE eam_user_config_resp_id_seq
+             DROP SEQUENCE eam_user_config_resp_id_seq
           </statement>          
         </schema-directSQL>
         <schema-addColumn table="EAM_AGENT"
@@ -4202,6 +4227,11 @@ has already been defined.
           </statement>
           <statement>
              ALTER TABLE eam_cprop ADD CONSTRAINT eam_cprop_keyid_key UNIQUE (keyid, appdef_id, value_idx)
+          </statement>
+          <statement>
+            ALTER TABLE eam_cprop_key
+               ADD CONSTRAINT eam_cprop_key_appdef_type_key UNIQUE 
+                    (appdef_type, appdef_typeid, propkey)
           </statement>
           <statement>
             ALTER TABLE eam_cprop ADD CONSTRAINT fke5d047984eaeab4a FOREIGN KEY (keyid) REFERENCES eam_cprop_key(id) ON DELETE CASCADE
@@ -4469,6 +4499,38 @@ has already been defined.
           <statement targetDB="postgresql">
             ALTER TABLE ONLY eam_qrtz_triggers ADD CONSTRAINT eam_fk_qt_qjd FOREIGN KEY (job_name, job_group) REFERENCES eam_qrtz_job_details(job_name, job_group) ON DELETE CASCADE
           </statement>
+          <statement targetDB="postgresql">
+              CREATE INDEX measurement_arg_templ_idx ON eam_measurement_arg 
+                  USING btree (measurement_template_id)
+          </statement>
+          <statement targetDB="oracle">
+              CREATE INDEX measurement_arg_templ_idx ON eam_measurement_arg 
+                  (measurement_template_id)
+          </statement>
+          <statement targetDB="postgresql">
+              CREATE INDEX templ_desig_mt_idx ON eam_measurement_templ 
+                  USING btree (designate, monitorable_type_id)
+          </statement>
+          <statement targetDB="oracle">
+              CREATE INDEX templ_desig_mt_idx ON eam_measurement_templ 
+                  (designate, monitorable_type_id)
+          </statement>
+          <statement targetDB="postgresql">
+              CREATE INDEX templ_monitorable_type_idx ON eam_measurement_templ 
+                  USING btree (monitorable_type_id)
+          </statement>
+          <statement targetDB="oracle">
+              CREATE INDEX templ_monitorable_type_idx ON eam_measurement_templ 
+                  (monitorable_type_id)
+          </statement>
+          <statement targetDB="postgresql">
+              CREATE INDEX alert_def_trigger_idx ON eam_registered_trigger 
+                  USING btree (alert_definition_id)
+          </statement>
+          <statement targetDB="oracle">
+              CREATE INDEX alert_def_trigger_idx ON eam_registered_trigger 
+                  (alert_definition_id)
+          </statement>
         </schema-directSQL>
      </schemaSpec>
 
@@ -4650,7 +4712,7 @@ has already been defined.
         <statement targetDB="oracle">
             CREATE TABLE eam_galert_action_log (
                id integer NOT NULL,
-               "timestamp" number(19, 0) NOT NULL,
+               timestamp number(19, 0) NOT NULL,
                detail character varying(500) NOT NULL,
                galert_id integer NOT NULL,
                alert_type integer NOT NULL,
@@ -4687,74 +4749,35 @@ has already been defined.
         <statement>
             alter table eam_alert_action_log drop column galert_id
         </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX alert_alertdefinition_idx ON eam_alert 
-                    USING btree (alert_definition_id)
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX alert_action_log_idx ON eam_alert_action_log 
-                USING btree (alert_id)
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX alert_cond_log_idx ON eam_alert_condition_log 
-                USING btree (alert_id)
-        </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_cprop_key
-               ADD CONSTRAINT eam_cprop_key_appdef_type_key UNIQUE 
-                    (appdef_type, appdef_typeid, propkey)
-        </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_galert_action_log
+        <statement>
+            ALTER TABLE eam_galert_action_log
                 ADD CONSTRAINT eam_galert_action_log_pkey PRIMARY KEY (id)
         </statement>
         <statement targetDB="postgresql">
             CREATE INDEX galert_action_log_idx ON eam_galert_action_log 
                 USING btree (galert_id)
         </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_galert_action_log
+        <statement targetDB="oracle">
+            CREATE INDEX galert_action_log_idx ON eam_galert_action_log (galert_id)
+        </statement>
+        <statement>
+            ALTER TABLE eam_galert_action_log
                 ADD CONSTRAINT fkef4421379c76c3bb FOREIGN KEY (action_id) 
                 REFERENCES eam_action(id)
         </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_galert_action_log
+        <statement>
+            ALTER TABLE eam_galert_action_log
                 ADD CONSTRAINT fkef442137c7d09794 FOREIGN KEY (galert_id) 
                 REFERENCES eam_galert_logs(id) ON DELETE CASCADE
-                    
         </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_galert_action_log
+        <statement>
+            ALTER TABLE eam_galert_action_log
                 ADD CONSTRAINT fkef442137e82fbc FOREIGN KEY (subject_id) 
                 REFERENCES eam_subject(id)
         </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX measurement_arg_templ_idx ON eam_measurement_arg 
-                USING btree (measurement_template_id)
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX templ_desig_mt_idx ON eam_measurement_templ 
-                USING btree (designate, monitorable_type_id)
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX templ_monitorable_type_idx ON eam_measurement_templ 
-                USING btree (monitorable_type_id)
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX eam_server_platform_idx ON eam_server 
-                USING btree (platform_id)
-        </statement>
-        <statement targetDB="postgresql">
-            ALTER TABLE ONLY eam_user_config_resp
-                ADD CONSTRAINT fk622ab78723193fc9 FOREIGN KEY (id) 
-                REFERENCES eam_subject(id)  ON DELETE CASCADE
-        </statement>
-        <statement targetDB="postgresql">
-            CREATE INDEX alert_def_trigger_idx ON eam_registered_trigger 
-                USING btree (alert_definition_id)
-        </statement>
       </schema-directSQL>
     </schemaSpec>
+
    </dbupgrade>
 
 </target>
