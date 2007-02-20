@@ -52,11 +52,13 @@ public class IntegerConfigOption extends ConfigOption implements Serializable {
         }
 
         if (val < getMinValue()) {
-            throw invalidOption("must be >= " + getMinValue());
+            throw invalidOption("must be >= " + getMinValue() + " was [" + val+
+                                "]");
         }
 
         if (val > getMaxValue()) {
-            throw invalidOption("must be <= " + getMaxValue());
+            throw invalidOption("must be <= " + getMaxValue() + " was [" + val+ 
+                                "]");
         }
     } 
 
