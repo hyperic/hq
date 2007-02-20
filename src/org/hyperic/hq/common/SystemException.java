@@ -25,11 +25,10 @@
 
 package org.hyperic.hq.common;
 
-import org.hyperic.util.NestedRuntimeException;
 import java.io.Serializable;
 
 public class SystemException 
-    extends NestedRuntimeException 
+    extends RuntimeException 
     implements Serializable 
 {
     public SystemException() {
