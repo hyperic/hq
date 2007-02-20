@@ -60,17 +60,21 @@
     <c:if test="${not empty useToSideBar}">
       <td rowspan="2"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
     </c:if>
-    <td class="BlockTitle" width="100%" valign="middle">
-    <c:if test="${dragDrop}">
-      <div style="cursor: move;">
-    </c:if>
-
     <c:if test="${not empty rssUrl}">
+    <td class="BlockTitle">
       <html:link href="${rssUrl}"><html:img border="0" page="/images/icon_feed.gif"/></html:link>
+    </td>
     </c:if>
 
     <c:if test="${not empty icon}">
-    <c:out value="${icon}" escapeXml="false"/>
+    <td class="BlockTitle">
+      <c:out value="${icon}" escapeXml="false"/>
+    </td>
+    </c:if>
+
+    <td class="BlockTitle" width="100%" valign="middle">
+    <c:if test="${dragDrop}">
+      <div style="cursor: move;">
     </c:if>
 
 <c:choose>
