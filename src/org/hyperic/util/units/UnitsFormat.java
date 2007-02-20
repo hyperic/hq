@@ -47,6 +47,8 @@ public class UnitsFormat {
                        new BytesFormatter());
         formatters.put(new Integer(UnitsConstants.UNIT_BITS),
                        new BitRateFormatter());
+        formatters.put(new Integer(UnitsConstants.UNIT_BYTES2BITS),
+                       new BytesToBitsFormatter());
         formatters.put(new Integer(UnitsConstants.UNIT_DURATION),
                        new DurationFormatter());
         formatters.put(new Integer(UnitsConstants.UNIT_DATE),
