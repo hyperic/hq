@@ -43,6 +43,10 @@
       <column name="MTIME" not-null="true" />
     </property>
 
+    <property name="deleted">
+      <column name="DELETED" not-null="true" />
+    </property>
+
     <many-to-one name="group">
       <column name="GROUP_ID" not-null="true"/>
     </many-to-one>

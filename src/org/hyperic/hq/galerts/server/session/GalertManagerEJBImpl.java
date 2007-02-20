@@ -116,6 +116,12 @@ public class GalertManagerEJBImpl
         boolean seriousUpdate = false;
         boolean updateName = false;
         
+        if (def.isDeleted()) {
+            throw new IllegalArgumentException("Unable to update a def " + 
+                                               "which has already been " + 
+                                               "deleted");
+        }
+        
         if (name != null) {
             def.setName(name);
             updateName = true;
@@ -458,13 +464,25 @@ public class GalertManagerEJBImpl
     public void reloadAlertDef(GalertDef def) {
         GalertProcessor.getInstance().loadReloadOrUnload(def);
     }
-
+    
+    /**
+     * Mark an alert definition as deleted.  This will remove it from all
+     * dialogues, but will leave all the data (specific alerts) in place.  
+     *
+     * @ejb:interface-method
+     */
+    public void markDefDeleted(GalertDef def) {
+        update(def, null, null, null, Boolean.FALSE);
+        def.setEscalation(null);
+        def.setDeleted(true);
+    }
+    
     /**
      * Delete an alert definition along with all logs which are tied to it.
      * 
      * @ejb:interface-method
      */  
-    public void deleteAlertDef(GalertDef def) {
+    public void nukeAlertDef(GalertDef def) {
         List nukeCrispos = new ArrayList();
         Integer defId = def.getId();
         
@@ -540,7 +558,7 @@ public class GalertManagerEJBImpl
                     
                     _log.debug("Cascade deleting GalertDef[" + 
                                def.getName() + "]");
-                    deleteAlertDef(def);
+                    nukeAlertDef(def);
                 }
             }
 

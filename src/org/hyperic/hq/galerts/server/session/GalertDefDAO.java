@@ -26,6 +26,7 @@
 package org.hyperic.hq.galerts.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -58,8 +59,15 @@ class GalertDefDAO
         super.save(t);
     }
 
+    public Collection findAll() {
+        return getSession().createQuery("from GalertDef d " + 
+                                        "where d.deleted = false " +
+                                        "order by name").list();
+    }
+
     Collection findAll(ResourceGroup g) {
-        String sql = "from GalertDef d where d.group = :group order by name";
+        String sql = "from GalertDef d where d.group = :group " + 
+                     "and d.deleted = false order by name";
         
         return getSession().createQuery(sql)
             .setParameter("group", g)

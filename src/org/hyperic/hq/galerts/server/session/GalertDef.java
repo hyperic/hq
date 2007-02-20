@@ -54,6 +54,7 @@ public class GalertDef
     private Set           _strategies = new HashSet();
     private long          _ctime;
     private long          _mtime;
+    private boolean       _deleted;
     
     protected GalertDef() {}
     
@@ -68,6 +69,7 @@ public class GalertDef
         _escalation = null;
         _ctime      = System.currentTimeMillis();
         _mtime      = _ctime;
+        _deleted    = false;
     }
         
     ExecutionStrategyInfo 
@@ -223,6 +225,14 @@ public class GalertDef
 
     protected void setMtime(long mtime) {
         _mtime = mtime;
+    }
+    
+    protected void setDeleted(boolean deleted) {
+        _deleted = deleted;
+    }
+    
+    public boolean isDeleted() {
+        return _deleted;
     }
 
     public EscalationAlertType getAlertType() {

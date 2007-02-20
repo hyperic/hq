@@ -121,7 +121,7 @@ public class RemoveDefinitionAction extends BaseAction {
             else {
                 if (adeId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
                 {
-                    gBoss.deleteAlertDefs(sessionId.intValue(), defs);
+                    gBoss.markDefsDeleted(sessionId.intValue(), defs);
                 } else {
                     boss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 }

@@ -4778,7 +4778,16 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
-   </dbupgrade>
+    <schemaSpec version="3.14">
+      <schema-addColumn table="EAM_GALERT_DEFS" column="DELETED" 
+                        columnType="BOOLEAN"/>
+      <schema-update table="EAM_GALERT_DEFS" column="DELETED"
+                         columnType="BOOLEAN" value="FALSE" />
+      <schema-alterColumn table="EAM_GALERT_DEFS" column="DELETED" 
+                          nullable="NOT NULL"/>
+    </schemaSpec>
+
+</dbupgrade>
 
 </target>
 
