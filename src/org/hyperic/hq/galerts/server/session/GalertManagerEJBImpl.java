@@ -243,7 +243,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public Escalatable findEscalatableAlert(Integer id) {
-        return new GalertEscalable(_logDAO.findById(id));
+        return GalertEscalatableCreator.createEscalatable(_logDAO.findById(id));
     }
 
     /**
@@ -463,7 +463,7 @@ public class GalertManagerEJBImpl
     }
 
     /**
-     * Delete an alert definition.  
+     * Delete an alert definition along with all logs which are tied to it.
      * 
      * @ejb:interface-method
      */  
@@ -513,7 +513,8 @@ public class GalertManagerEJBImpl
 
         for (Iterator i = galerts.iterator(); i.hasNext();) {
             GalertLog a = (GalertLog) i.next();
-            res.add(new GalertEscalable(a));
+
+            res.add(GalertEscalatableCreator.createEscalatable(a));
         }
 
         return res;

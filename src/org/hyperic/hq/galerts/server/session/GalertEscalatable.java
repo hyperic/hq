@@ -26,21 +26,16 @@
 package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.AlertInterface;
 
-public class GalertEscalable implements Escalatable {
-    
+public class GalertEscalatable implements Escalatable {
     private GalertLog _galert;
     private boolean   _acknowledgeable;
     
-    public GalertEscalable(GalertLog galert) {
-        _galert = galert;
-
-        EscalationManagerLocal esc = EscalationManagerEJBImpl.getOne();
-        _acknowledgeable = esc.isAlertAcknowledgeable(getId(), getDefinition());
+    GalertEscalatable(GalertLog galert, boolean ackable) {
+        _galert          = galert;
+        _acknowledgeable = ackable;
     }
 
     public AlertInterface getAlertInfo() {
@@ -66,5 +61,4 @@ public class GalertEscalable implements Escalatable {
     public boolean isAcknowledgeable() {
         return _acknowledgeable;
     }
-
 }

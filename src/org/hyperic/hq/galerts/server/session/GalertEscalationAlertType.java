@@ -52,7 +52,7 @@ public final class GalertEscalationAlertType
     }
     
     public Escalatable findEscalatable(Integer id) {
-        return new GalertEscalable(getGalertMan().findAlertLog(id)); 
+        return getGalertMan().findEscalatableAlert(id);
     }
 
     public PerformsEscalations findDefinition(Integer defId) {

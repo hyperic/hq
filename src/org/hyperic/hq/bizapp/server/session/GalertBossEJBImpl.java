@@ -57,7 +57,6 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
-import org.hyperic.hq.galerts.server.session.GalertEscalable;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
@@ -306,7 +305,7 @@ public class GalertBossEJBImpl
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                    PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException
+               PermissionException
     {
         AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
 
@@ -323,11 +322,11 @@ public class GalertBossEJBImpl
         }
         
         PageList alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, pc);
-
+        List escalatables = _galertMan.convertGalertsToEscalatables(alertLogs); 
+        
         JSONArray jarr = new JSONArray();
-        for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
-            // Look up escalatable
-            Escalatable alert = new GalertEscalable((GalertLog) i.next());
+        for (Iterator i = escalatables.iterator(); i.hasNext(); ) {
+            Escalatable alert = (Escalatable)i.next();
             
             // Format the alertTime
             SimpleDateFormat df =
