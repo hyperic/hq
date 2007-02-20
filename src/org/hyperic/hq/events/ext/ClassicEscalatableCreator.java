@@ -35,6 +35,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
@@ -54,11 +56,13 @@ import org.hyperic.hq.events.shared.AlertValue;
  * based on a {@link TriggerFiredEvent} if the escalation subsytem deems
  * it necessary.
  */
-class ClassicEscalatableCreator 
+public class ClassicEscalatableCreator 
     implements EscalatableCreator
 {
     private static final Log _log =
         LogFactory.getLog(ClassicEscalatableCreator.class);
+    private static final EscalationManagerLocal _eMan =
+        EscalationManagerEJBImpl.getOne();
 
     private AlertDefinition   _def;
     private TriggerFiredEvent _event;
@@ -150,6 +154,15 @@ class ClassicEscalatableCreator
             }
         }
         
-        return new ClassicEscalatable(alert, shortReason, longReason);
+        return createEscalatable(alert, shortReason, longReason);
+    }
+    
+    public static Escalatable createEscalatable(Alert alert, String shortReason,
+                                                String longReason) 
+    {
+        boolean ackable = _eMan.isAlertAcknowledgeable(alert.getId(),
+                                                       alert.getDefinition());
+
+        return new ClassicEscalatable(alert, shortReason, longReason, ackable);
     }
 }

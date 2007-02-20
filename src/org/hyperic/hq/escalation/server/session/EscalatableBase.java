@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.escalation.server.session;
 
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 
 /**
  * This is a utility class meant to provide some of the basic pieces needed
@@ -42,15 +40,14 @@ public abstract class EscalatableBase
     private boolean             _acknowledgeable;
     
     protected EscalatableBase(PerformsEscalations def, Integer id,
-                              String shortReason, String longReason) 
+                              String shortReason, String longReason,
+                              boolean ackable) 
     {
-        _def         = def;
-        _id          = id;
-        _shortReason = shortReason;
-        _longReason  = longReason;
-        
-        EscalationManagerLocal esc = EscalationManagerEJBImpl.getOne();
-        _acknowledgeable = esc.isAlertAcknowledgeable(getId(), getDefinition());
+        _def             = def;
+        _id              = id;
+        _shortReason     = shortReason;
+        _longReason      = longReason;
+        _acknowledgeable = ackable;
     }
     
     public PerformsEscalations getDefinition() {

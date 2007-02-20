@@ -32,8 +32,12 @@ public class ClassicEscalatable
     extends EscalatableBase
 {
     private Alert _alert;
-    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason);
+
+    public ClassicEscalatable(Alert a, String shortReason, String longReason,
+                              boolean ackable) 
+    {
+        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
+              ackable);
         
         _alert = a;
     }

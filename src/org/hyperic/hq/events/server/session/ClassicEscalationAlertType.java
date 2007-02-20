@@ -36,6 +36,7 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
+import org.hyperic.hq.events.ext.ClassicEscalatableCreator;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 
@@ -75,7 +76,9 @@ public final class ClassicEscalationAlertType
         
         shortReason = aMan.getShortReason(a);
         longReason  = aMan.getLongReason(a);
-        return new ClassicEscalatable(a, shortReason, longReason);
+        
+        return ClassicEscalatableCreator.createEscalatable(a, shortReason,
+                                                           longReason);
     }
 
     public PerformsEscalations findDefinition(Integer defId) {

@@ -47,7 +47,9 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.ext.ClassicEscalatableCreator;
 import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
@@ -384,9 +386,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
         for (Iterator i=alerts.iterator(); i.hasNext(); ) {
             Alert a = (Alert)i.next();
-            
-            res.add(new ClassicEscalatable(a, getShortReason(a),
-                                           getLongReason(a)));
+            Escalatable e = 
+                ClassicEscalatableCreator.createEscalatable(a, 
+                                                            getShortReason(a),
+                                                            getLongReason(a));
+            res.add(e);
         }
         return res;
     }
