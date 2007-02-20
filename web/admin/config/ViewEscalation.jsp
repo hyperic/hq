@@ -509,7 +509,7 @@ function showViewEscResponse(originalRequest) {
         sysDiv.setAttribute('id', 'sysloginput');
         $('sysloginput').style.display = 'none';
         //sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta" + " size=30 onblur=copyMeta(this);><br>" + "product: <input type=text name=product" + " size=30 onblur=copyProduct(this);><br>" + "version: <input type=text name=version" + " size=30 onblur=copyVersion(this);><br>";
+        sysDiv.innerHTML = "meta: <input type=text name=meta id=metainput" + " size=30 onblur=copyMeta(this);checkMeta(this);><br>" + "product: <input type=text name=product id=productinput" + " size=30 onblur=copyProduct(this);checkProduct(this);><br>" + "version: <input type=text name=version id=versioninput" + " size=30 onblur=copyVersion(this);checkVersion(this);><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -641,6 +641,7 @@ function showViewEscResponse(originalRequest) {
 
         var syslogDivIn = $('sysloginput');
         syslogDivIn.style.display='';
+        $('metainput').focus();
     }
 
     function hideSyslogInput(el) {
@@ -853,12 +854,48 @@ function showViewEscResponse(originalRequest) {
         $('addRowButton').style.display = "";
     }
 
+    function checkMeta(el) {
+
+      var metaText = el.value;
+        if(metaText == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
+        return false;
+        }
+    }
+
+    function checkProduct(el) {
+
+      var productText = el.value;
+        if(productText == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
+        return false;
+        }
+    }
+
+    function checkVersion(el) {
+
+      var versionText = el.value;
+        if(versionText == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
+        return false;
+        }
+    }
+
     function checkEmail() {
         var emailinputText = $('emailinput');
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
         var elemText = emailinputText.value;
 
-        if (elemText == '') {
+        if (elemText = '') {
         
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
