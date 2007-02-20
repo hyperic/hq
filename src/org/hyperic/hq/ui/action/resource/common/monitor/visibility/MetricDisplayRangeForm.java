@@ -36,11 +36,11 @@ import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.action.CalendarForm;
-
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.ui.action.CalendarForm;
 
 /**
  * Represents the controls on various pages that display metrics
@@ -97,7 +97,15 @@ public class MetricDisplayRangeForm extends CalendarForm {
     }
 
     public Integer getRid() {
-        return rid;
+        if (rid != null) {
+            return rid;
+        }
+        
+        if (eid.length == 1) {
+            return new AppdefEntityID(eid[0]).getId();
+        }
+        
+        return null;
     }
 
     public void setRid(Integer i) {
@@ -123,7 +131,15 @@ public class MetricDisplayRangeForm extends CalendarForm {
     }
 
     public Integer getType() {
-        return type;
+        if (type != null) {
+            return type;
+        }
+        
+        if (eid.length == 1) {
+            return new Integer(new AppdefEntityID(eid[0]).getType());
+        }
+        
+        return null;
     }
 
     public void setType(Integer i) {
