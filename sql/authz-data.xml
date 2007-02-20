@@ -451,7 +451,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="68" OPERATION_ID="%EAM_OPERATION.ID:412" ROLE_ID="%EAM_ROLE.ID:0"/>
     	  <data CID="69" OPERATION_ID="%EAM_OPERATION.ID:413" ROLE_ID="%EAM_ROLE.ID:0"/>
     	  <data CID="70" OPERATION_ID="%EAM_OPERATION.ID:414" ROLE_ID="%EAM_ROLE.ID:0"/>
-    	  <data CID="71" OPERATION_ID="%EAM_OPERATION.ID:415" ROLE_ID="%EAM_ROLE.ID:0"/>
     </table>
 
     <!-- RESOURCE CREATOR ROLE DEFINITION STUFF. The entries here
