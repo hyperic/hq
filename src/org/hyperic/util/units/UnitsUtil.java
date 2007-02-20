@@ -74,7 +74,7 @@ class UnitsUtil
         FACT_DAYS.multiply(new BigDecimal(365));
     
     static void checkValidUnits(int unit){
-        if(!(unit >= UNIT_NONE && unit <= UNIT_PERCENT))
+        if(unit < UNIT_NONE || unit >= UNIT_MAX)
             throw new IllegalArgumentException("Invalid units specified");
     }
 
@@ -85,7 +85,7 @@ class UnitsUtil
 
     static void checkValidScaleForUnits(int unit, int scale){
         if(!(scale == SCALE_NONE ||
-             ((unit == UNIT_BYTES || unit == UNIT_BITS) &&
+             ((unit == UNIT_BYTES || unit == UNIT_BITS || unit == UNIT_BYTES2BITS) &&
               scale >= SCALE_KILO && scale <= SCALE_PETA) ||
              ((unit == UNIT_DURATION || unit == UNIT_DATE) &&
               scale >= SCALE_YEAR && scale <= SCALE_NANO) ||

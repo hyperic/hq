@@ -34,6 +34,9 @@ public interface UnitsConstants {
     public static final int UNIT_DATE       = 5;
     public static final int UNIT_PERCENTAGE = 6;
     public static final int UNIT_PERCENT    = 7;
+    public static final int UNIT_APPROX_DUR = 8;
+    public static final int UNIT_BYTES2BITS = 9;
+    public static final int UNIT_MAX        = 10; //used for checkValidUnits()
     
     public static final int SCALE_NONE  = 0;
 

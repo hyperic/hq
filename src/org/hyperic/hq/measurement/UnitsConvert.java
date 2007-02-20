@@ -38,20 +38,12 @@ import org.hyperic.util.units.UnitsFormat;
 public class UnitsConvert {
     private static HashMap      unitsToUnit;
     private static HashMap      unitsToScale;
-    private static HashMap      simpleConverters;
-
+    
     static {
         initUnitsToUnit();
         initUnitsToScale();
-        initSimpleConverters();
     }
 
-    //simple example: convert bytes to bits
-    private static interface SimpleConverter {
-        public String getUnits();
-        public double format(double value);
-    }
-    
     private UnitsConvert(){}
 
     private static void initUnitsToUnit(){
@@ -81,7 +73,7 @@ public class UnitsConvert {
         unitsToUnit.put(MeasurementConstants.UNITS_BITS,
                         new Integer(UnitsConstants.UNIT_BITS));
         unitsToUnit.put(MeasurementConstants.UNITS_BYTES_TO_BITS,
-                        new Integer(UnitsConstants.UNIT_BITS));
+                        new Integer(UnitsConstants.UNIT_BYTES2BITS));
         unitsToUnit.put(MeasurementConstants.UNITS_KBITS,
                         new Integer(UnitsConstants.UNIT_BITS));
         unitsToUnit.put(MeasurementConstants.UNITS_MBITS,
@@ -169,24 +161,6 @@ public class UnitsConvert {
                          new Integer(UnitsConstants.SCALE_SEC));
     }
 
-    private static void initSimpleConverters() {
-        simpleConverters = new HashMap();
-
-        simpleConverters.put(MeasurementConstants.UNITS_BYTES_TO_BITS,
-                             new SimpleConverter() {
-            public String getUnits() {
-                return MeasurementConstants.UNITS_BITS;
-            }
-            public double format(double value) {
-                return value * 8;
-            }
-        });
-    }
-
-    private static SimpleConverter getSimpleConverter(String units) {
-        return (SimpleConverter)simpleConverters.get(units);
-    }
-    
     /**
      * Return the corresponding unit constant from
      * <code>UnitsConstants</code> for the given unit.
@@ -271,12 +245,6 @@ public class UnitsConvert {
     {
         int unit, scale;
 
-        SimpleConverter converter = getSimpleConverter(units);
-        if (converter != null) {
-            val = converter.format(val);
-            units = converter.getUnits();
-        }
-
         unit  = getUnitForUnit(units);
         scale = getScaleForUnit(units);
         return UnitsFormat.format(new UnitNumber(val, unit, scale),
@@ -307,14 +275,6 @@ public class UnitsConvert {
         FormattedNumber[] res;
         int unit, scale;
 
-        SimpleConverter converter = getSimpleConverter(units);
-        if (converter != null) {
-            units = converter.getUnits();
-            for (int i=0; i<vals.length; i++) {
-                vals[i] = converter.format(vals[i]);
-            }
-        }
-        
         unit  = getUnitForUnit(units);
         scale = getScaleForUnit(units);
         res   = UnitsFormat.formatSame(vals, unit, scale, locale);
@@ -327,14 +287,6 @@ public class UnitsConvert {
     {
         FormattedNumber[] res;
         int unit, scale;
-
-        SimpleConverter converter = getSimpleConverter(units);
-        if (converter != null) {
-            units = converter.getUnits();
-            for (int i=0; i<vals.length; i++) {
-                vals[i] = converter.format(vals[i]);
-            }
-        }
 
         unit  = getUnitForUnit(units);
         scale = getScaleForUnit(units);
