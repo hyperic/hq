@@ -126,6 +126,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public void setAlertFixed(Alert alert) {
         alert.setFixed(true);
+        
+        // If the alert definition is set to "recover", then we should enable
+        // it
+        AlertDefinition def = alert.getAlertDefinition();
+        if (def.isWillRecover() && !def.isEnabled()) {
+            def.setEnabled(true);
+        }
     }
     
     /**
