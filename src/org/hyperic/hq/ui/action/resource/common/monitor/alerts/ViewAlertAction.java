@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -53,6 +54,8 @@ import org.hyperic.hq.ui.beans.AlertConditionBean;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
@@ -128,15 +131,12 @@ public class ViewAlertAction extends TilesAction {
                 	ab.setActualValue(Constants.UNKNOWN);
                 }
                 else {
-                    int sessionId = RequestUtils.getSessionId(request)
-								.intValue();
-                    
                     // format threshold and value
                     Integer mid =
                         new Integer(condLogs[i].getCondition()
                                                .getMeasurementId());
                     DerivedMeasurementValue dmv =
-                        mb.getMeasurement(sessionId, mid);
+                        mb.getMeasurement(sessionID, mid);
                     FormatSpecifics precMax = new FormatSpecifics();
                     precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
 
@@ -162,6 +162,13 @@ public class ViewAlertAction extends TilesAction {
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
+
+        // Get the list of users
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        PageList availableUsers =
+            authzBoss.getAllSubjects(new Integer(sessionID), null,
+                                     PageControl.PAGE_ALL);
+        request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
 
         return null;
     }

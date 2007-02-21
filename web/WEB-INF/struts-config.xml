@@ -1985,15 +1985,6 @@
               <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
       
-      <action path="/alerts/ViewAlert"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ViewAlertAction">
-        <set-property property="title" value="2.2.3.1"/>
-              <exception key="exception.AlertNotFoundException"
-                         type="org.hyperic.hq.events.AlertNotFoundException"
-                         path="/common/GenericError.jsp"/>
-      </action>
-
       <action path="/alerts/ViewDefinition"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionAction">
