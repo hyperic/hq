@@ -58,7 +58,7 @@ var pageData = new Array();
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="cname" value="${ChildResourceType.name}"/>
-<fmt:message var="ChildTH" key="resource.autogroup.monitor.visibility.ChildTH"><fmt:param value="${ChildResourceType.name}"/></fmt:message>
+<fmt:message var="ChildTH" key="resource.autogroup.monitor.visibility.ChildTH"><fmt:param value="${cname}"/></fmt:message>
 
 <c:set var="ctype" value="${ChildResourceType.appdefTypeKey}"/>
 
