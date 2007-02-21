@@ -30,297 +30,18 @@
         <include name="pdk/lib/mx4j"/>
     </classpath>
 
-    <filter name="template"
-            value="${OBJECT_NAME}:${alias}"/>
-
-    <!-- Generic 3.x type is known to work with 3.0.20, 3.0.21, and 3.0.22. -->
-    <server name="Resin"
-            version="3.x"
-            description="Resin 3.x">
-
-        <property name="OBJECT_NAME"
-                  value="resin:type=Server"/>
-
-        <property name="PROC_MAIN_CLASS"
-                  value="com.caucho.server.resin.Resin"/>
-
-        <property name="PROC_HOME_PROPERTY"
-                  value="resin.home"/>
-
-        <!-- 3.0.19 is handled seperately -->
-        <property name="INSTALLPATH_NOMATCH"
-                  value="3.0.19"/>
-
-        <!-- Availability mappings -->
-        <property name="State.active" value="1.0"/>
-        <property name="State.stopped" value="0.0"/>
-        <property name="State.stopped-lazy" value="-0.01"/>
-
-        <plugin type="autoinventory"
-                class="org.hyperic.hq.product.jmx.MxServerDetector"/>
-
-        <plugin type="control"
-                class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
-
-        <plugin type="measurement"
-                class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
-
-        <config>
-            <option name="jmx.url"
-                    description="JMX URL to MBeanServer"
-                    default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
-
-            <option name="jmx.username"
-                    description="JMX username"
-                    optional="true"
-                    default="system"/>
-
-            <option name="jmx.password"
-                    description="JMX password"
-                    optional="true"
-                    default="manager"
-                    type="secret"/>
-        </config>
-
-        <properties>
-            <property name="RedeployMode" description="Redeploy Mode"/>
-            <property name="Id" description="Server Id"/>
-            <property name="SelectManagerEnabled" description="Select Manager Enabled"/>
-            <property name="StartupMode" description="Startup Mode"/>
-        </properties>
-
-        <actions include="stop,start,update,restart"/>
-
-        <metric name="Availability"
-                template="${OBJECT_NAME}:State"
-                indicator="true"/>
-
-        <metric name="Invocation Cache Hit Count"
-                alias="InvocationCacheHitCountTotal"
-                collectionType="trendsup"/>
-
-        <metric name="Invocation Cache Miss Count"
-                alias="InvocationCacheMissCountTotal"
-                collectionType="trendsup"/>
-
-        <metric name="Keepalive Count"
-                alias="KeepaliveCountTotal"
-                collectionType="trendsup"/>
-
-        <metric name="Request Count"
-                alias="RequestCountTotal"
-                collectionType="trendsup"
-                indicator="true"/>
-
-        <metric name="Request Read Bytes"
-                alias="RequestReadBytesTotal"
-                collectionType="trendsup"
-                units="b"
-                indicator="true"/>
-
-        <metric name="Request Time"
-                alias="RequestTimeTotal"
-                collectionType="trendsup"
-                units="ms"/>
-
-        <metric name="Request Write Bytes"
-                alias="RequestWriteBytesTotal"
-                collectionType="trendsup"
-                units="b"
-                indicator="true"/>
-
-        <metric name="Runtime Memory"
-                units="b"/>
-
-        <metric name="Runtime Memory Free"
-                units="b"/>
-
-        <metric name="Thread Active"
-                alias="ThreadActiveCount"
-                indicator="true"/>
-
-        <metric name="Thread Keepalive"
-                alias="ThreadKeepaliveCount"/>
-
-        <service name="Port">
-            <property name="OBJECT_NAME"
-                      value="resin:type=Port,name=*"/>
-            <config>
-                <option name="name"
-                        description="Port name"/>
-            </config>
-
-            <properties>
-                <property name="Address" description="Address"/>
-                <property name="ProtocolName" description="Protocol"/>
-                <property name="ConnectionMax" description="Max Connections"/>
-                <property name="KeepAliveMax" description="Max Keepalives"/>
-                <property name="Port" description="Port"/>
-                <property name="SSL" description="SSL Enabled"/>
-                <property name="SelectKeepaliveCount"
-                          description="Select Keepalive"/>
-            </properties>
-
-            <plugin type="autoinventory"/>
-
-            <!-- Availability mappings -->
-            <property name="State.active" value="1.0"/>
-            <property name="State.stopped" value="0.0"/>
-            <property name="State.stopped-lazy" value="-0.01"/>
-
-            <metric name="Availability"
-                    template="${OBJECT_NAME}:State"
-                    indicator="true"/>
-
-            <metric name="Client Disconnect Count"
-                    alias="ClientDisconnectCountTotal"
-                    collectionType="trendsup"/>
-
-            <metric name="Keepalive Count"
-                    alias="KeepaliveCountTotal"
-                    collectionType="trendsup"/>
-
-            <metric name="Read Bytes"
-                    alias="ReadBytesTotal"
-                    collectionType="trendsup"
-                    units="b"
-                    indicator="true"/>
-
-            <metric name="Write Bytes"
-                    alias="WriteBytesTotal"
-                    collectionType="trendsup"
-                    units="b"
-                    indicator="true"/>
-
-            <metric name="Request Count"
-                    alias="RequestCountTotal"
-                    collectionType="trendsup"
-                    indicator="true"/>
-
-            <metric name="Request Time"
-                    alias="RequestTimeTotal"
-                    collectionType="trendsup"
-                    units="ms"/>
-
-            <metric name="Thread Active Count"/>
-
-            <metric name="Thread Count"/>
-
-            <metric name="Thread Idle Count"/>
-
-            <metric name="Thread Keepalive Count"/>
-
-        </service>
-
-        <service name="Connection Pool">
-            <property name="OBJECT_NAME"
-                      value="resin:type=ConnectionPool,Host=*,WebApp=*,name=*"/>
-            <config>
-                <option name="Host"
-                        description="Connection Pool Host"/>
-                <option name="WebApp"
-                        description="Connection Pool WebApp"/>
-                <option name="name"
-                        description="Connection Pool name"/>
-            </config>
-
-            <properties>
-                <property name="MaxConnections" description="Max Connections"/>
-                <property name="MaxActiveTime" description="Max Active Time"/>
-                <property name="MaxCreateConnections" description="Max Create Connections"/>
-                <property name="MaxIdleTime" description="Max Idle Time"/>
-                <property name="MaxOverflowConnections" description="Max Overflow Connections"/>
-                <property name="MaxPoolTime" description="Max Pool Time"/>
-            </properties>
-
-            <plugin type="autoinventory"/>
-
-            <!-- No state attribute, use existance of MBean -->
-            <metric name="Availability"
-                    indicator="true"/>
-
-            <metric name="Connection Active Count"
-                    indicator="true"/>
-
-            <metric name="Connection Count"
-                    indicator="true"/>
-
-            <metric name="Connection Idle Count"
-                    indicator="true"/>
-
-        </service>
-
-        <service name="Webapp">
-            <property name="OBJECT_NAME"
-                      value="resin:type=WebApp,Host=*,name=*"/>
-
-            <!-- Availability mappings -->
-            <property name="State.active" value="1.0"/>
-            <property name="State.stopped" value="0.0"/>
-            <property name="State.stopped-lazy" value="-0.01"/>
-
-            <config>
-                <option name="Host"
-                        description="Host"/>
-                <option name="WebApp"
-                        description="WebApp"/>
-                <option name="name"
-                        description="name"/>
-            </config>
-
-            <properties>
-                <property name="RedeployMode" description="Redeploy Mode"/>
-                <property name="StartupMode" description="Startup Mode"/>
-            </properties>
-
-            <plugin type="autoinventory"/>
-
-            <metric name="Availability"
-                    template="${OBJECT_NAME}:State"
-                    indicator="true"/>
-
-            <metric name="Client Disconnect Count"
-                    alias="ClientDisconnectCountTotal"/>
-
-            <metric name="Request Count"
-                    alias="RequestCountTotal"
-                    collectionType="trendsup"
-                    indicator="true"/>
-
-            <metric name="Request Read Bytes"
-                    alias="RequestReadBytesTotal"
-                    collectionType="trendsup"
-                    units="b"
-                    indicator="true"/>
-
-            <metric name="Request Time"
-                    alias="RequestTimeTotal"
-                    collectionType="trendsup"
-                    units="ms"/>
-
-            <metric name="Request Write Bytes"
-                    alias="RequestWriteBytesTotal"
-                    collectionType="trendsup"
-                    units="b"
-                    indicator="true"/>
-
-            <plugin type="control"/>
-
-            <actions include="start,stop,update,restart"/>
-
-        </service>
-
-    </server>
-
     <filter name="THREAD_OBJ"
             value="resin:type=ThreadPool"/>
 
-    <metrics name="port">
-    </metrics>
+    <filter name="template"
+            value="${OBJECT_NAME}:${alias}"/>
+
+    <!-- This server type only works with Resin 3.0.12 through 3.0.19.  For
+    3.0.20 and greater, see the resin plugin in plugins/examples -->
 
     <server name="Resin"
-            version="3.0.19"
-            description="Resin 3.0.19">
+            version="3.x"
+            description="Resin 3.x">
 
         <property name="OBJECT_NAME"
                   value="resin:type=ResinServer"/>
@@ -330,9 +51,6 @@
 
         <property name="PROC_HOME_PROPERTY"
                   value="resin.home"/>
-
-        <property name="INSTALLPATH_MATCH"
-                  value="3.0.19"/>
 
         <!-- Availability mappings -->
         <property name="State.active" value="1.0"/>
@@ -507,48 +225,6 @@
 
         </service>
 
-        <service name="Webapp">
-            <property name="OBJECT_NAME"
-                      value="resin:type=WebApp,Server=*,Host=*,name=*"/>
-
-            <!-- Availability mappings -->
-            <property name="State.active" value="1.0"/>
-            <property name="State.stopped-lazy" value="-0.01"/>
-
-            <config>
-                <option name="Server"
-                        description="Server name"/>
-                <option name="Host"
-                        description="Host"/>
-                <option name="name"
-                        description="name"/>
-            </config>
-
-            <plugin type="autoinventory"/>
-
-            <metric name="Availability"
-                    template="${OBJECT_NAME}:State"
-                    indicator="true"/>
-
-            <metric name="Session Create Count"
-                    collectionType="trendsup"
-                    indicator="true"/>
-
-            <metric name="Session Active Count"
-                    indicator="true"/>
-
-            <metric name="Session Timeout Count"
-                    collectionType="trendsup"/>
-
-            <metric name="Session Invalidate Count"
-                    collectionType="trendsup"/>
-
-            <plugin type="control"/>
-
-            <actions include="start,stop,update,restart"/>
-
-        </service>
-
     </server>
 
     <help name="Resin 3.x">
@@ -604,7 +280,5 @@
     </p>
     ]]>
     </help>
-
-    <help name="Resin 3.0.19" include="Resin 3.x"/>
 
 </plugin>
