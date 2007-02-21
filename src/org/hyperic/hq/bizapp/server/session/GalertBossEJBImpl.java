@@ -303,7 +303,7 @@ public class GalertBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
-                                   PageControl pc)
+                                    long end, PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
@@ -321,7 +321,8 @@ public class GalertBossEJBImpl
             throw new SystemException(e);
         }
         
-        PageList alertLogs = _galertMan.findAlertLogsByTimeWindow(g, begin, pc);
+        PageList alertLogs =
+            _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
         List escalatables = _galertMan.convertGalertsToEscalatables(alertLogs); 
         
         JSONArray jarr = new JSONArray();

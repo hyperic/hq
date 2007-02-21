@@ -67,12 +67,14 @@ class GalertLogDAO
             .list();
     }
 
-    PageList findByTimeWindow(ResourceGroup g, long begin, PageControl pc) {
+    PageList findByTimeWindow(ResourceGroup g, long begin, long end,
+                              PageControl pc) {
         final String tsProp = "timestamp";
         Integer count = (Integer) createCriteria()
             .createAlias("alertDef", "d")
             .add(Restrictions.eq("d.group", g))
             .add(Restrictions.ge(tsProp, new Long(begin)))
+            .add(Restrictions.le(tsProp, new Long(end)))
             .setProjection(Projections.rowCount())
             .uniqueResult();
 
@@ -81,6 +83,7 @@ class GalertLogDAO
                 .createAlias("alertDef", "d")
                 .add(Restrictions.eq("d.group", g))
                 .add(Restrictions.ge(tsProp, new Long(begin)))
+                .add(Restrictions.le(tsProp, new Long(end)))
                 .addOrder(pc.isDescending() ? Order.desc(tsProp) :
                                               Order.asc(tsProp));
             
