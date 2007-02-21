@@ -34,7 +34,7 @@
   var help = "<hq:help/>";
 </script>
 
-<html>
+<html:html locale="true">
 <head>
 <title><fmt:message key="login.title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
@@ -157,4 +157,4 @@
 </script>
 </div>
 </body>
-</html>
+</html:html>

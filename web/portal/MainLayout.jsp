@@ -29,7 +29,7 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 
-<html:html>
+<html:html locale="true">
 <head>
   <meta http-equiv="EXPIRES" content="-1">
   <meta http-equiv="PRAGMA" content="NO-CACHE">
