@@ -1113,6 +1113,10 @@ border-left:1px solid #D5D8DE;
   color:#000000;
 }
 
+#rolesConfigWindow .BlockContent {
+  color:#000000;
+}
+
 #fixedSection {
   margin-bottom: 10px;
   border-top: 1px solid #D5D8DE;
