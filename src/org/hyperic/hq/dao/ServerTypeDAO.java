@@ -26,8 +26,10 @@
 package org.hyperic.hq.dao;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 
 /**
@@ -51,6 +53,13 @@ public class ServerTypeDAO extends HibernateDAO
 
     public void remove(ServerType entity)
     {
+        // Remove self from PlatformType
+        for (Iterator it = entity.getPlatformTypes().iterator(); it.hasNext(); )
+        {
+            PlatformType platType = (PlatformType) it.next();
+            platType.getServerTypes().remove(entity);
+        }
+
         super.remove(entity);
     }
 
