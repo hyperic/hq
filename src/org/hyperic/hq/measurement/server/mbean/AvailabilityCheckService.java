@@ -49,8 +49,6 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
@@ -253,7 +251,6 @@ public class AvailabilityCheckService
         
         // Check the servers and services.
         PlatformManagerLocal platMan = PlatformManagerEJBImpl.getOne();
-        AuthzSubjectManagerLocal authzMan = AuthzSubjectManagerEJBImpl.getOne();
         ArrayList metrics = new ArrayList();
 
         for (Iterator i = downPlatforms.iterator(); i.hasNext();) {
