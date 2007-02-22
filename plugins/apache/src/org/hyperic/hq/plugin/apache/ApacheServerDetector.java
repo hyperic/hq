@@ -89,6 +89,8 @@ public class ApacheServerDetector
     private String defaultIp;
     private PortRange httpRange;
     private PortRange httpsRange;
+    private boolean discoverModStatus;
+    private boolean discoverModSnmp;
 
     public ApacheServerDetector () { 
         super();
@@ -107,6 +109,16 @@ public class ApacheServerDetector
 
         this.httpsRange =
             new PortRange(this.props.getProperty("apache.https.ports"));
+
+        //true == force discovery of mod_snmp based types when snmpd.conf does not exist
+        this.discoverModSnmp =
+            "true".equals(this.props.getProperty("apache.discover.mod_snmp"));
+
+        //false == skip discovery of mod_status based types when snmpd.conf does not exist,
+        //neither type will be reported.
+        this.discoverModStatus =
+            !"false".equals(this.props.getProperty("apache.discover.mod_status")) &&
+            !this.discoverModSnmp;
     }
 
     private static String getServerRoot(String[] args) {
@@ -166,14 +178,20 @@ public class ApacheServerDetector
         return servers;
     }
 
-    protected void configureServer(ServerResource server)
+    protected boolean configureServer(ServerResource server)
         throws PluginException {
 
         ConfigResponse metricConfig, productConfig, controlConfig;
         String installpath = server.getInstallPath();
         File snmpConfig = getSnmpdConf(installpath);
+        boolean snmpConfigExists = snmpConfig.exists();
 
-        if (snmpConfig.exists()) {
+        if (snmpConfigExists || this.discoverModSnmp) {
+            if (!snmpConfigExists) {
+                log.debug(snmpConfig +
+                          " does not exist, cannot auto-configure " +
+                          server.getName());
+            }
             metricConfig = getSnmpConfig(snmpConfig);
             productConfig = getProductConfig(metricConfig);
             controlConfig = getControlConfig(installpath);
@@ -192,8 +210,10 @@ public class ApacheServerDetector
             }
 
             server.setDescription("mod_snmp monitor");
+
+            return true;
         }
-        else {
+        else if (this.discoverModStatus) {
             log.debug(snmpConfig +
                       " does not exist, discovering as type: " +
                       TYPE_HTTPD);
@@ -217,17 +237,24 @@ public class ApacheServerDetector
             server.setProductConfig(productConfig);
             //XXX need to auto-configure port and path
             //server.setMeasurementConfig();
+
+            return true;
+        }
+        else {
+            log.debug("Ignoring " + server.getName() +
+                      " at " + server.getInstallPath());
+            return false;
         }
     }
 
-    protected void configureServer(ServerResource server, ApacheBinaryInfo binary)
+    protected boolean configureServer(ServerResource server, ApacheBinaryInfo binary)
         throws PluginException {
-        
-        configureServer(server);
         
         ConfigResponse cprops = new ConfigResponse(binary.toProperties());
 
         server.setCustomProperties(cprops);
+
+        return configureServer(server);
     }
 
     public List getServerList(String installpath, String fullVersion,
@@ -245,10 +272,10 @@ public class ApacheServerDetector
         String name = getPlatformName() + " Apache " + fullVersion;
         sValue.setName(name);
 
-        configureServer(sValue, binary);
-
         List servers = new ArrayList();
-        servers.add(sValue);
+        if (configureServer(sValue, binary)) {
+            servers.add(sValue);
+        }
         return servers;
     }
 

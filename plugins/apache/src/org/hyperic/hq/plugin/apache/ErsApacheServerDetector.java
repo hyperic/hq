@@ -95,9 +95,9 @@ public class ErsApacheServerDetector
 
             server.setIdentifier(getAIID(serverRoot));
 
-            configureServer(server);
-            
-            servers.add(server);
+            if (configureServer(server)) {
+                servers.add(server);
+            }
         }
 
         return servers;
