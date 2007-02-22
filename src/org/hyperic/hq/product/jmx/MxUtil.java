@@ -26,6 +26,7 @@
 package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -61,9 +62,13 @@ import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.ptql.ProcessFinder;
 import org.hyperic.util.config.ConfigResponse;
 
 public class MxUtil {
+
+    private static final String PTQL_PREFIX = "ptql:";
 
     public static final String PROP_JMX_URL = "jmx.url";
     public static final String PROP_JMX_USERNAME = "jmx.username";
@@ -334,6 +339,45 @@ public class MxUtil {
         }
     }
 
+    //vmid == pid; use undocumented ConnectorAddressLink.importFrom(pid)
+    //to get the local JMXServiceURL
+    private static String getUrlFromPid(String ptql) throws IOException {
+        Sigar sigar = new Sigar();
+        String address;
+        long pid;
+
+        try {
+            pid =
+                new ProcessFinder(sigar).findSingleProcess(ptql);
+
+            Class caddrLinkClass =
+                Class.forName("sun.management.ConnectorAddressLink");
+
+            Method importFrom =
+                caddrLinkClass.getMethod("importFrom",
+                                         new Class[] { Integer.TYPE });
+
+            address =
+                (String)importFrom.invoke(caddrLinkClass,
+                                          new Object[] { new Integer((int)pid) });
+        } catch (Exception e) {
+            throw new IOException(ptql + " " + e.getMessage());
+        } finally {
+            sigar.close();
+        }
+
+        if (address == null) {
+            throw new IOException("Unable to determine " +
+                                  PROP_JMX_URL + " using vmid=" + pid +
+                                  ".  Server must be started with: " +
+                                  "-Dcom.sun.management.jmxremote");
+        }
+        log.debug(PTQL_PREFIX + ptql + " resolved to vmid=" + pid +
+                  ", " + PROP_JMX_URL + "=" + address);
+
+        return address;
+    }
+
     public static JMXConnector getMBeanConnector(Properties config)
         throws MalformedURLException,
                IOException {
@@ -349,6 +393,11 @@ public class MxUtil {
 
         if (jmxUrl == null) {
             throw new MalformedURLException(PROP_JMX_URL + "==null");
+        }
+
+        if (jmxUrl.startsWith(PTQL_PREFIX)) {
+            jmxUrl =
+                getUrlFromPid(jmxUrl.substring(PTQL_PREFIX.length()));
         }
 
         JMXServiceURL url = new JMXServiceURL(jmxUrl);
@@ -370,10 +419,10 @@ public class MxUtil {
         if (connector == null) {
             connector = getMBeanConnector(config);
             cache.put(jmxUrl, connector);
+            log.debug("Caching connector for: " + jmxUrl);
         }
         else {
             isCached = true;
-            log.debug("Using cached connector for: " + jmxUrl);
         }
 
         try {
