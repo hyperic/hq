@@ -4787,6 +4787,18 @@ has already been defined.
                           nullable="NOT NULL"/>
     </schemaSpec>
 
+    <schemaSpec version="3.15">
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (52, 'KERBEROS_REALM', '', '', '0')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (53, 'KERBEROS_KDC', '', '', '0')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (54, 'KERBEROS_DEBUG', '', '', '0')"/>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
