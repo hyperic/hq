@@ -285,7 +285,7 @@ BrowserDetect.init();
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
                   checkbox.setAttribute("class", "listMember");
-                  checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties, false);");
+                  checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties);");
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
                   td1.appendChild(checkbox);
@@ -525,7 +525,7 @@ BrowserDetect.init();
             th2.style.padding = "3px";
             th2.style.textAlign = "left";
             th2.style.borderBottom = "1px solid #D5D8DE";
-            th2.setAttribute("nowrap", true);
+            th2.setAttribute("noWrap", true);
             th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
             for (i = 0; i < metricValues.values.length; i++) {
