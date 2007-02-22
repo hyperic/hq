@@ -50,7 +50,7 @@
               PROPVALUE="@@@LDAPSEARCHFILTER@@@" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
 
-        <!-- Multicast address for HighAvail CAM -->
+        <!-- Multicast address for HighAvail -->
         <!-- TODO CHANGE ME... INTEGRATE INTO INSTALLER -->
         <data ID="19" PROPKEY="CAM_MULTICAST_ADDRESS"
               PROPVALUE="@@@MULTICAST_ADDR@@@" DEFAULT_PROPVALUE=""
@@ -156,6 +156,13 @@
         <data ID="51" PROPKEY="EVENT_LOG_PURGE" PROPVALUE="2678400000"
               DEFAULT_PROPVALUE="2678400000" FREAD_ONLY="FALSE"/>
 
+        <!-- Kerberos authencation options -->
+        <data ID="52" PROPKEY="KERBEROS_REALM" PROPVALUE="" DEFAULT_PROPVALUE=""
+              FREAD_ONLY="FALSE"/>
+        <data ID="53" PROPKEY="KERBEROS_KDC" PROPVALUE="" DEFAULT_PROPVALUE=""
+              FREAD_ONLY="FALSE"/>
+        <data ID="54" PROPKEY="KERBEROS_DEBUG" PROPVALUE="" DEFAULT_PROPVALUE=""
+              FREAD_ONLY="FALSE"/>
     </table>
 
 </Covalent.DBSetup>
