@@ -525,7 +525,7 @@ BrowserDetect.init();
             th2.style.padding = "3px";
             th2.style.textAlign = "left";
             th2.style.borderBottom = "1px solid #D5D8DE";
-            th2.setAttribute("noWrap", true);
+            th2.setAttribute("nowrap", true);
             th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
             for (i = 0; i < metricValues.values.length; i++) {
@@ -579,13 +579,14 @@ BrowserDetect.init();
         var faveText = eval('(' + originalRequest.responseText + ')');
         var fList = faveText.favorites;
         var table = document.getElementById('favoriteTable');
-        var tbody = document.createElement('tbody');
-
+        $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
+        
         if (table) {
             if (fList && fList.length > 0) {
+                var tbody = table.getElementsByTagName('tbody')[0];
 
-                for (var i = table.childNodes.length - 1; i > 2; i--) {
-                    table.removeChild(table.childNodes[i]);
+                for (var d = tbody.childNodes.length - 1; d > 1; d--) {
+                    tbody.removeChild(tbody.childNodes[d]);
                 }
 
                 for (i = 0; i < fList.length; i++) {
@@ -602,7 +603,7 @@ BrowserDetect.init();
                     var urlColon = ":"
                     var resUrl = $('viewResUrl').href;
 
-                    table.appendChild(tbody);
+
                     tbody.appendChild(tr);
 
                     if (i % 2 == 0) {
@@ -691,7 +692,7 @@ BrowserDetect.init();
             }
         }
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
-         $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
+
     }
 }
 
