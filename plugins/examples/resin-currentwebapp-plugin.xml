@@ -43,8 +43,8 @@
     -->
     <service name="CurrentWebApp"
              server="Resin"
-             version="3.0.19"
-             description="Resin 3.0.19 CurrentWebapp example">
+             version="3.0.x"
+             description="Resin 3.x CurrentWebapp example">
 
         <property name="OBJECT_NAME"
                   value="resin:type=CurrentWebApp"/>
