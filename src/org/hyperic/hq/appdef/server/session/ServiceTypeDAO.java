@@ -47,7 +47,10 @@ public class ServiceTypeDAO extends HibernateDAO
     }
 
     void remove(ServiceType entity) {
-        super.remove(entity);
+        // Remove self from ServerType
+        entity.getServerType().getServiceTypes().remove(entity);
+        
+        super.remove(entity);        
     }
 
     private ServiceType createServiceType(ServiceTypeValue stv) {
