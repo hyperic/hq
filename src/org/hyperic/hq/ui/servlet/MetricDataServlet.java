@@ -32,6 +32,7 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
 
@@ -75,7 +76,9 @@ public class MetricDataServlet extends HttpServlet {
         Long begin = (Long)prefs.get(MonitorUtils.BEGIN);
 
         PageList list;
+        DerivedMeasurementValue dm;
         try {
+            dm = _boss.getMeasurement(sessionId, mid);
             list = _boss.findMeasurementData(sessionId, mid,
                                              begin.longValue(),
                                              end.longValue(),
@@ -97,7 +100,8 @@ public class MetricDataServlet extends HttpServlet {
         try {
             response.setContentType("text/csv");
             response.addHeader("Content-disposition",
-                               "attachment; filename=data.csv");
+                               "attachment; filename=" +
+                               dm.getTemplate().getAlias() + ".csv");
             response.getOutputStream().write(buf.toString().getBytes());
         } catch (IOException e) {
             throw new ServletException("Error writing data to the client: ", e);
