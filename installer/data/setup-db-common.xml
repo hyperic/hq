@@ -63,7 +63,7 @@
     <substProps src="${conf-dir}/hq-server.conf"/>
   </target>
 
-  <target name="dbsetup" depends="hibernate-create">
+  <target name="dbsetup" depends="hibernate-setup">
     <antcall target="dbsetup-process-file">
       <param name="dbsetupfile" value="${data.dir}/data.xml"/>
       <param name="data"        value="true"/>

@@ -256,6 +256,5 @@
 
   <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
 
-  <target name="hibernate-create" depends="hibernate-schema-create" />
   <target name="hibernate-drop" depends="hibernate-schema-drop" />
   <target name="hibernate-validate" depends="hibernate-schema-validation" />
