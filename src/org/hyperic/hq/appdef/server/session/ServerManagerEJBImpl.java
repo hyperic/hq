@@ -62,8 +62,6 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -108,8 +106,38 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
 
-    private static final PermissionManager pm = 
-        PermissionManagerFactory.getInstance();
+    /**
+     * Validate a server value object which is to be created on this
+     * platform. This method will check IP conflicts and any other
+     * special constraint required to succesfully add a server instance
+     * to a platform
+     */
+    private void validateNewServer(Platform p, ServerValue sv)
+        throws ValidationException
+    {
+        // ensure the server value has a server type
+        String msg = null;
+        if(sv.getServerType() == null) {
+            msg = "Server has no ServiceType";
+        } else if(sv.idHasBeenSet()){
+            msg = "This server is not new, it has ID:" + sv.getId();
+        }
+        if(msg == null) {
+            Integer id = sv.getServerType().getId();
+            Collection stypes = p.getPlatformType().getServerTypes();
+            for (Iterator i = stypes.iterator(); i.hasNext();) {
+                ServerType sVal = (ServerType)i.next();
+                if(sVal.getId().equals(id))
+                    return;
+            }
+            msg = "Servers of type '" + sv.getServerType().getName() +
+                "' cannot be created on platforms of type '" +
+                p.getPlatformType().getName() +"'";
+        }
+        if (msg != null) {
+            throw new ValidationException(msg);
+        }
+    }
 
     /**
      * Create a Server on the given platform.
@@ -117,7 +145,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return ServerValue - the saved value object
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Integer createServer(AuthzSubjectValue subject,
                                 Integer platformId, Integer serverTypeId,
@@ -126,7 +153,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                PlatformNotFoundException, AppdefDuplicateNameException {
 
         try {
-            validateNewServer(sValue);
             trimStrings(sValue);
 
             Platform platform =
@@ -136,7 +162,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             sValue.setServerType(serverType.getServerTypeValue());
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
-            Server server = getServerDAO().createServer(platform, sValue);
+            
+            // validate the object
+            validateNewServer(platform, sValue);
+            
+            // create it
+            Server server = getServerDAO().create(sValue, platform);
 
             // Add server to parent collection
             Collection servers = platform.getServers();
@@ -172,11 +203,54 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Create a virtual server
+     * @throws FinderException 
+     * @throws CreateException 
+     * @throws PermissionException 
+     * @ejb:interface-method
+     */
+    public Server createVirtualServer(AuthzSubjectValue subject,
+                                      Platform platform, ServerType st)
+        throws PermissionException, CreateException, FinderException {
+        // First of all, make sure this is a virtual type
+        if (!st.isVirtual()) {
+            throw new IllegalArgumentException(
+                "createVirtualServer() called for non-virtual server type: " +
+                st.getName());
+        }
+        
+        // Create a new ServerValue to fill in
+        ServerValue sv = new ServerValue();
+        sv.setServerType(st.getServerTypeValue());
+        sv.setName(platform.getName() + " " + st.getName());
+        sv.setInstallPath("/");
+        sv.setServicesAutomanaged(false);
+        sv.setRuntimeAutodiscovery(true);
+        sv.setWasAutodiscovered(false);
+        sv.setOwner(subject.getName());
+        sv.setModifiedBy(subject.getName());
+        
+        Server server = getServerDAO().create(sv, platform);
+        
+        // Add server to parent collection
+        Collection servers = platform.getServers();
+        if (!servers.contains(server)) {
+            servers.add(server);
+        }
+
+        createAuthzServer(server.getName(),
+                          server.getId(),
+                          platform.getId(),
+                          st.isVirtual(), 
+                          subject);
+        return server;
+    }
+    
+    /**
      * Remove a server
      * @param subject The user issuing the delete operation.
      * @param id  The id of the Server.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeServer(AuthzSubjectValue subject, Integer id)
         throws ServerNotFoundException, RemoveException, PermissionException {
@@ -194,7 +268,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * A removeServer method that takes a ServerLocal.  Used by
      * PlatformManager.removePlatform when cascading removal to servers.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeServer(AuthzSubjectValue subject,
                              Server server)
@@ -258,7 +331,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find all server types
      * @return list of serverTypeValues
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getAllServerTypes(AuthzSubjectValue subject,
                                       PageControl pc)
@@ -275,7 +347,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server types
      * @return list of serverTypeValues
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getViewableServerTypes(AuthzSubjectValue subject,
                                       PageControl pc)
@@ -296,7 +367,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server non-virtual types for a platform
      * @return list of serverTypeValues
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
                                              Integer platId,
@@ -309,7 +379,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find viewable server types for a platform
      * @return list of serverTypeValues
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getServerTypesByPlatform(AuthzSubjectValue subject,
                                              Integer platId,
@@ -359,7 +428,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find a ServerValue by Id.
      * @ejb:interface-method
      * @deprecated Use findServerById instead.
-     * @ejb:transaction type="Required"
      */
     public ServerValue findServerValueById(AuthzSubjectValue subject,
                                            Integer id)
@@ -397,7 +465,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param subject - who
      * @param name - name of server
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue[] findServersByName(AuthzSubjectValue subject,
                                            String name)
@@ -430,7 +497,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param id - The ID of the server
      * @return ServerTypeValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerTypeValue findServerTypeById(Integer id)
         throws FinderException {
@@ -444,7 +510,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param name - the name of the server
      * @return ServerTypeValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerTypeValue findServerTypeByName(String name)
         throws FinderException {
@@ -459,7 +524,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /** 
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerLightValue getServerLightValue(Integer id)
         throws ServerNotFoundException {
@@ -475,7 +539,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by server type.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -518,7 +581,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /** 
      * Get server by id.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue getServerById(AuthzSubjectValue subject, 
                                      Integer id)
@@ -534,7 +596,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by name.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param name - name of server
      */
     public ServerValue[] getServersByName(AuthzSubjectValue subject, String name)
@@ -546,7 +607,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server by service.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue getServerByService(AuthzSubjectValue subject,
                                           Integer sID) 
@@ -570,7 +630,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server by service.  The virtual servers are not filtere out of
      * returned list.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getServersByServices(AuthzSubjectValue subject, 
                                          List sIDs) 
@@ -591,7 +650,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get all servers.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @return A List of ServerValue objects representing all of the
@@ -710,7 +768,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by platform.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param platId platform id.
@@ -737,7 +794,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by server type and platform.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -770,7 +826,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param platId platform id.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="Required"
      */
     public PageList getServersByPlatformServiceType( AuthzSubjectValue subject,
                                                      Integer platId,
@@ -802,7 +857,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
-     * @ejb:transaction type="Required"
      */
     public List getServersByType( AuthzSubjectValue subject, Integer typeId)
         throws PermissionException {
@@ -830,7 +884,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get non-virtual server IDs by server type and platform.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -850,7 +903,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by server type and platform.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -981,7 +1033,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by application.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1000,7 +1051,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by application and serverType.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1024,7 +1074,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get server IDs by application and serverType.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1050,24 +1099,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Private method to validate a new ServerValue object
-     * @throws ValidationException
-     */
-    private void validateNewServer(ServerValue sv) throws ValidationException {
-        String msg = null;
-        // first check if its new 
-        if(sv.idHasBeenSet()) {
-            msg = "This server is not new. It has id: " + sv.getId();
-        }
-        // else if(someotherthing)  ...
-
-        // Now check if there's a msg set and throw accordingly
-        if(msg != null) {
-            throw new ValidationException(msg);
-        }
-    }     
-
-    /**
      * Validate a new Server Type
      * @throws ValidationException
      */  
@@ -1080,7 +1111,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Update a server
      * @param existing 
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue updateServer(AuthzSubjectValue subject,
                                     ServerValue existing)
@@ -1299,7 +1329,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get the AUTHZ ResourceValue for a Server
      * @return ResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ResourceValue getServerResourceValue(Integer pk)
         throws FinderException, NamingException {

@@ -108,64 +108,6 @@ public class ServerDAO extends HibernateDAO
         return s;
     }
 
-    /**
-     * legacy EJB method for creating a server.
-     *
-     * Create a server for this Platform. The server is assumed
-     * to have an associated server type already set. This operation
-     * has to be performed as part of an existing transaction.
-     */
-    public Server createServer(Platform p, ServerValue sv)
-        throws ValidationException
-    {
-        // validate the object
-        validateNewServer(p, sv);
-        // set the parent platform to be this
-        // XXX cheap hack, the ejbPostCreate in ServerEJB only
-        // needs to be able to detect the foreign key of
-        // the parent platform. So, I'll skip the valueobject
-        // creation and create one with just an ID
-        PlatformLightValue pv = new PlatformLightValue();
-        pv.setId(p.getId());
-        sv.setPlatform(pv);
-        // get the server home
-        // create it
-        return create(sv, p);
-    }
-
-    /**
-     * Validate a server value object which is to be created on this
-     * platform. This method will check IP conflicts and any other
-     * special constraint required to succesfully add a server instance
-     * to a platform
-     */
-    private void validateNewServer(Platform p, ServerValue sv)
-        throws ValidationException
-    {
-        // ensure the server value has a server type
-        String msg = null;
-        if(sv.getServerType() == null) {
-            msg = "Server has no ServiceType";
-        } else if(sv.idHasBeenSet()){
-            msg = "This server is not new, it has ID:" + sv.getId();
-        }
-        if(msg == null) {
-            Integer id = sv.getServerType().getId();
-            Collection stypes = p.getPlatformType().getServerTypes();
-            for (Iterator i = stypes.iterator(); i.hasNext();) {
-                ServerType sVal = (ServerType)i.next();
-                if(sVal.getId().equals(id))
-                    return;
-            }
-            msg = "Servers of type '" + sv.getServerType().getName() +
-                "' cannot be created on platforms of type '" +
-                p.getPlatformType().getName() +"'";
-        }
-        if (msg != null) {
-            throw new ValidationException(msg);
-        }
-    }
-
     public Collection findAll_orderName(boolean asc)
     {
         String sql="from Server s join fetch s.serverType st " +

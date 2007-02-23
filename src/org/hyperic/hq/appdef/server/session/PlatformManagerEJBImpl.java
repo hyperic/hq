@@ -409,6 +409,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             createAuthzPlatform(pValue.getName(), platform.getId(),
                                 subject);
 
+            // Create the virtual server types
+            for (Iterator it = pType.getServerTypes().iterator(); it.hasNext();)
+            {
+                ServerType st = (ServerType) it.next();
+                if (st.isVirtual()) {
+                    getServerMgrLocal()
+                        .createVirtualServer(subject, platform, st);
+                }
+            }
+            
             // Send resource create event
             ResourceCreatedZevent zevent =
                 new ResourceCreatedZevent(subject, platform.getEntityId());
