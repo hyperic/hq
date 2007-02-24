@@ -138,7 +138,11 @@
 
     <c:if test="${not empty metric}">
       <c:url var="exportLink" value="/resource/MetricData">
+        <c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
         <c:param name="metricId" value="${metric.id}"/>
+        <c:if test="${not empty param.ctype}">
+          <c:param name="ctype" value="${param.ctype}"/>
+        </c:if>
       </c:url>
       <html:link href="${exportLink}"><fmt:message key="resource.common.monitor.visibility.ExportLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
