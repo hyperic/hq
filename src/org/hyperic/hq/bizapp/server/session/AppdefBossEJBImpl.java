@@ -2952,19 +2952,17 @@ public class AppdefBossEJBImpl
         for (Iterator itr = pl.iterator();itr.hasNext();){
             AppdefEntityID ent = (AppdefEntityID) itr.next();
             AppdefResourceValue resourceValue;
-            if (erFilter != null) {
-                resourceValue = erFilter.getCachedResource(ent);
-            } else {
-                try {
-                    resourceValue = this.findById(subject, ent);
-                } catch (AppdefEntityNotFoundException e) {
-                    // XXX - hack to ignore the error.  This must have occurred
-                    // when we created the resource, and rolled back the
-                    // AppdefEntity but not the Resource
-                    log.error("Invalid entity still in resource table: " + ent);
-                    continue;
-                }
+
+            try {
+                resourceValue = this.findById(subject, ent);
+            } catch (AppdefEntityNotFoundException e) {
+                // XXX - hack to ignore the error.  This must have occurred
+                // when we created the resource, and rolled back the
+                // AppdefEntity but not the Resource
+                log.error("Invalid entity still in resource table: " + ent);
+                continue;
             }
+
             finalList.add(resourceValue);
         }
 

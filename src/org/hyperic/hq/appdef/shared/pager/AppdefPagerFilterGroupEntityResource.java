@@ -79,7 +79,6 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     private AuthzSubjectValue subject;
     private boolean exclusive;
     private static final int UNDEFINED = -1;
-    private Map fetchedEntityCache;
     private int filterCount;
     private boolean groupSelected = false;
 
@@ -140,7 +139,6 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         this.entityType = et;
         this.resourceType = rt;
         this.exclusive = true;
-        fetchedEntityCache = new HashMap();
         filterCount = 0;
     }
 
@@ -152,7 +150,6 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         this.entityType = et;
         this.resourceType = rt;
         this.exclusive = (!negate);
-        fetchedEntityCache = new HashMap();
         filterCount = 0;
     }
 
@@ -171,10 +168,13 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 "AppdefEntityID");
         }
 
+        if (this.resourceType == -1 && this.resourceType == -1) {
+            return false; // Short circuit.
+        }
+
         try {
             entity = (AppdefEntityID) o;
             arv = fetchEntityById(entity);
-            fetchedEntityCache.put(entity, arv);
 
             boolean caught = isCompatible(arv);
             if (exclusive == caught) {
@@ -408,11 +408,6 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             return true;
         }
         return false;
-    }
-
-    // Return the resource value associated with the entity.
-    public AppdefResourceValue getCachedResource(AppdefEntityID id) {
-        return (AppdefResourceValue) fetchedEntityCache.get(id);
     }
 
     // DB fetch the resource value
