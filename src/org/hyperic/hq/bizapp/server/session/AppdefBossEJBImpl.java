@@ -2830,7 +2830,6 @@ public class AppdefBossEJBImpl
             
             for (Iterator i = ret.iterator(); i.hasNext(); ) {
                 AppdefResourceValue res = (AppdefResourceValue) i.next();
-                AppdefResourceValue parent;
 
                 if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                     ServerValue server = getServerManager()

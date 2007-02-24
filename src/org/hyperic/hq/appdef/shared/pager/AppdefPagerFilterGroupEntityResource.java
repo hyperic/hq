@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared.pager;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -50,7 +51,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 *   ADHOC_APP      GROUP        -1             Applications
 *   ADHOC_GRP      GROUP        -1             Mixed Groups of Groups
 *   ADHOC_GRP      GROUP        COMPAT_PS      Compatible groups
-*   ADHOC_GRP      GROUP        ADHOC_APP      Mixed Groups of Applications            
+*   ADHOC_GRP      GROUP        ADHOC_APP      Mixed Groups of Applications
 *   ADHOC_GRP      GROUP        ADHOC_PSS      Mixed Groups of PSS
 *   ADHOC_PSS      -1           -1             All Platforms,Servers & Services
 *   ADHOC_PSS      PLATFORM     -1             All Platforms
@@ -71,8 +72,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 *
 */
 public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
-
-
+    
     private int groupType;
     private int entityType;
     private int resourceType;
@@ -84,112 +84,136 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     private boolean groupSelected = false;
 
     // Create some shorter constant references...
-    private static final int PLATFORM = 
+    private static final int PLATFORM =
         AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-    private static final int SERVER   = 
+    private static final int SERVER =
         AppdefEntityConstants.APPDEF_TYPE_SERVER;
-    private static final int SERVICE  = 
+    private static final int SERVICE =
         AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-    private static final int APPLICATION = 
+    private static final int APPLICATION =
         AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-    private static final int GROUP = 
+    private static final int GROUP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP;
-    private static final int GROUP_ADHOC_APP = 
+    private static final int GROUP_ADHOC_APP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-    private static final int GROUP_ADHOC_GRP = 
+    private static final int GROUP_ADHOC_GRP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP;
-    private static final int GROUP_ADHOC_PSS = 
+    private static final int GROUP_ADHOC_PSS =
         AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
-    private static final int GROUP_COMPAT_PS = 
+    private static final int GROUP_COMPAT_PS =
         AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
-    private static final int GROUP_COMPAT_SVC = 
+    private static final int GROUP_COMPAT_SVC =
         AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
 
-    public int getGroupType () { return groupType; }
-    public int getEntityType () { return entityType; }
-    public int getResourceType () { return resourceType; }
-    public AuthzSubjectValue getSubject() { return subject; }
-    public int getFilterCount () { return filterCount; }
-    public  boolean isExclusive () { return exclusive; }
-    public  void setGroupSelected (boolean b) { this.groupSelected = b; }
+    public int getGroupType() {
+        return groupType;
+    }
 
-    public AppdefPagerFilterGroupEntityResource  ( AuthzSubjectValue subject,
-        int gt, int et, int rt) {
-        this.subject      = subject;
-        this.groupType    = gt;
-        this.entityType   = et;
+    public int getEntityType() {
+        return entityType;
+    }
+
+    public int getResourceType() {
+        return resourceType;
+    }
+
+    public AuthzSubjectValue getSubject() {
+        return subject;
+    }
+
+    public int getFilterCount() {
+        return filterCount;
+    }
+
+    public boolean isExclusive() {
+        return exclusive;
+    }
+
+    public void setGroupSelected(boolean b) {
+        this.groupSelected = b;
+    }
+
+    public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
+                                                int gt, int et, int rt) {
+        this.subject = subject;
+        this.groupType = gt;
+        this.entityType = et;
         this.resourceType = rt;
-        this.exclusive    = true;
+        this.exclusive = true;
         fetchedEntityCache = new HashMap();
-        filterCount       = 0;
+        filterCount = 0;
     }
 
-    public AppdefPagerFilterGroupEntityResource  ( AuthzSubjectValue subject,
-        int gt, int et, int rt, boolean negate ) {
-        this.subject      = subject;
-        this.groupType    = gt;
-        this.entityType   = et;
+    public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
+                                                int gt, int et, int rt,
+                                                boolean negate) {
+        this.subject = subject;
+        this.groupType = gt;
+        this.entityType = et;
         this.resourceType = rt;
-        this.exclusive    = (! negate);
+        this.exclusive = (!negate);
         fetchedEntityCache = new HashMap();
-        filterCount       = 0;
+        filterCount = 0;
     }
 
-   /** Evaluate an object against the filter.
-    * @param o - object instance of AppdefEntityID
-    * @return flag - true if caught (unless negated)  */
-    public boolean isCaught ( Object o ) {
-      AppdefResourceValue arv;
-      AppdefEntityID entity;
+    /**
+     * Evaluate an object against the filter.
+     *
+     * @param o - object instance of AppdefEntityID
+     * @return flag - true if caught (unless negated)
+     */
+    public boolean isCaught(Object o) {
+        AppdefResourceValue arv;
+        AppdefEntityID entity;
 
-      if (!(o instanceof AppdefEntityID)) {
-          throw new IllegalArgumentException("Expecting instance of "+
-                                             "AppdefEntityID");
-      }
+        if (!(o instanceof AppdefEntityID)) {
+            throw new IllegalArgumentException("Expecting instance of " +
+                "AppdefEntityID");
+        }
 
-      try {
-          entity = (AppdefEntityID) o;
-          arv = fetchEntityById(entity);
-          fetchedEntityCache.put(entity,arv);
+        try {
+            entity = (AppdefEntityID) o;
+            arv = fetchEntityById(entity);
+            fetchedEntityCache.put(entity, arv);
 
-          boolean caught = isCompatible(arv);
-          if (exclusive == caught) {
-              filterCount++;
-          }
-          return exclusive == caught;
-
-      } catch (Exception e) {
-          // In a paging context, we swallow all exceptions.
-          return exclusive == false;
-      }
-    }
-
-    private boolean isCompatible ( AppdefResourceValue vo ) {
-        switch (groupType) {
-        case (GROUP_ADHOC_APP):
-            return isGroupAdhocAppCompatible(vo);
-        case (GROUP_ADHOC_GRP):
-            return isGroupAdhocGrpCompatible(vo);
-        case (GROUP_ADHOC_PSS):
-            return isGroupAdhocPSSCompatible(vo);
-        case (GROUP_COMPAT_PS):
-            if (groupSelected) 
-                return isResourceCompatible(vo);
-            else
-                return isGroupResourceCompatible(vo);
-        case (GROUP_COMPAT_SVC):
-            if (groupSelected) 
-                return isResourceCompatible(vo);
-            else
-                return isGroupResourceCompatible(vo);
-        case (UNDEFINED):
-            if (resourceType == UNDEFINED) {
-                return isEntityCompatible(vo);
-            } else {
-                return isResourceCompatible(vo);
+            boolean caught = isCompatible(arv);
+            if (exclusive == caught) {
+                filterCount++;
             }
-        default: 
-            return false;      // unsupported group type?
+            return exclusive == caught;
+
+        } catch (Exception e) {
+            // In a paging context, we swallow all exceptions.
+            return exclusive == false;
+        }
+    }
+
+    private boolean isCompatible(AppdefResourceValue vo) {
+        switch (groupType) {
+            case(GROUP_ADHOC_APP):
+                return isGroupAdhocAppCompatible(vo);
+            case(GROUP_ADHOC_GRP):
+                return isGroupAdhocGrpCompatible(vo);
+            case(GROUP_ADHOC_PSS):
+                return isGroupAdhocPSSCompatible(vo);
+            case(GROUP_COMPAT_PS):
+                if (groupSelected)
+                    return isResourceCompatible(vo);
+                else
+                    return isGroupResourceCompatible(vo);
+            case(GROUP_COMPAT_SVC):
+                if (groupSelected)
+                    return isResourceCompatible(vo);
+                else
+                    return isGroupResourceCompatible(vo);
+            case(UNDEFINED):
+                if (resourceType == UNDEFINED) {
+                    return isEntityCompatible(vo);
+                } else {
+                    return isResourceCompatible(vo);
+                }
+            default:
+                return false;      // unsupported group type?
         }
     }
 
@@ -211,7 +235,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         }
         if (entityType == GROUP && resourceType == UNDEFINED &&
             vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue)vo;
+            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
             if (groupVo.getGroupType() == GROUP_ADHOC_APP) {
                 return true;
             }
@@ -241,8 +265,8 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 return true;
             }
             if (entityType == GROUP && resourceType == GROUP_COMPAT_PS &&
-                 (groupVo.getGroupType() == GROUP_COMPAT_PS ||
-                  groupVo.getGroupType() == GROUP_COMPAT_SVC)) {
+                (groupVo.getGroupType() == GROUP_COMPAT_PS ||
+                 groupVo.getGroupType() == GROUP_COMPAT_SVC)) {
                 return true;
             }
             if (entityType == GROUP && resourceType == GROUP_ADHOC_APP &&
@@ -273,29 +297,29 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // ADHOC_PSS      GROUP        -1             Grps Platform,server,Services
     private boolean isGroupAdhocPSSCompatible(AppdefResourceValue vo) {
         if (entityType == UNDEFINED && resourceType == UNDEFINED &&
-               (vo.getEntityId().getType() == PLATFORM ||
-                vo.getEntityId().getType() == SERVER ||
-                vo.getEntityId().getType() == SERVICE)) {
+            (vo.getEntityId().getType() == PLATFORM ||
+             vo.getEntityId().getType() == SERVER ||
+             vo.getEntityId().getType() == SERVICE)) {
             return true;
         }
         if (entityType == PLATFORM && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == PLATFORM) { 
+            vo.getEntityId().getType() == PLATFORM) {
             return true;
         }
-        if (entityType == PLATFORM && 
+        if (entityType == PLATFORM &&
             vo.getEntityId().getType() == PLATFORM &&
-            resourceType == 
-            vo.getAppdefResourceTypeValue().getId().intValue()) {
+            resourceType ==
+                vo.getAppdefResourceTypeValue().getId().intValue()) {
             return true;
-        } 
+        }
         if (entityType == SERVER && resourceType == UNDEFINED &&
             vo.getEntityId().getType() == SERVER) {
             return true;
         }
         if (entityType == SERVER &&
             vo.getEntityId().getType() == SERVER &&
-            resourceType == 
-            vo.getAppdefResourceTypeValue().getId().intValue()) {
+            resourceType ==
+                vo.getAppdefResourceTypeValue().getId().intValue()) {
             return true;
         }
         if (entityType == SERVICE && resourceType == UNDEFINED &&
@@ -304,14 +328,14 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         }
         if (entityType == SERVICE &&
             vo.getEntityId().getType() == SERVICE &&
-            resourceType == 
-            vo.getAppdefResourceTypeValue().getId().intValue()) {
+            resourceType ==
+                vo.getAppdefResourceTypeValue().getId().intValue()) {
             return true;
         }
         if (entityType == GROUP && resourceType == UNDEFINED &&
             vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue)vo;
-            if (groupVo.getGroupType() == GROUP_ADHOC_PSS ) {
+            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
+            if (groupVo.getGroupType() == GROUP_ADHOC_PSS) {
                 return true;
             }
         }
@@ -325,7 +349,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // ----------------------------------------------------------------------
     // UNDEF          <type>       <type>         ALl <type> of <type>
     private boolean isResourceCompatible(AppdefResourceValue vo) {
-		if (entityType == vo.getEntityId().getType() &&
+        if (entityType == vo.getEntityId().getType() &&
             resourceType == vo.getAppdefResourceTypeValue().getId().intValue()) {
             return true;
         }
@@ -343,7 +367,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // COMPAT_SVC     GROUP        -1             All compatible (svc) groups
     private boolean isGroupResourceCompatible(AppdefResourceValue vo) {
         if (vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue)vo;
+            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
             if (groupVo.isGroupCompat()) {
                 if (entityType == GROUP) {
                     if (resourceType != UNDEFINED)
@@ -353,10 +377,9 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 } else {
                     if (resourceType == UNDEFINED) {
                         return entityType == groupVo.getGroupEntType();
-                    }
-                    else {
+                    } else {
                         return (entityType == groupVo.getGroupEntType() &&
-                                resourceType == groupVo.getGroupEntResType());
+                            resourceType == groupVo.getGroupEntResType());
                     }
                 }
             }
@@ -375,7 +398,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     private boolean isEntityCompatible(AppdefResourceValue vo) {
         if (entityType == GROUP && resourceType == UNDEFINED &&
             vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue)vo;
+            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
             if (groupVo.isGroupAdhoc()) {
                 return true;
             }
@@ -388,14 +411,14 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     }
 
     // Return the resource value associated with the entity.
-    public AppdefResourceValue getCachedResource (AppdefEntityID id) { 
-        return (AppdefResourceValue)fetchedEntityCache.get(id);
+    public AppdefResourceValue getCachedResource(AppdefEntityID id) {
+        return (AppdefResourceValue) fetchedEntityCache.get(id);
     }
 
     // DB fetch the resource value
-    private AppdefResourceValue fetchEntityById (AppdefEntityID id) 
+    private AppdefResourceValue fetchEntityById(AppdefEntityID id)
         throws Exception {
-        AppdefEntityValue aev = new AppdefEntityValue (id,this.subject);
+        AppdefEntityValue aev = new AppdefEntityValue(id, this.subject);
         return aev.getLiteResourceValue();
     }
 }
