@@ -25,80 +25,39 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.ArrayList;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 
-public class MeasurementTemplate extends PersistedObject
-    implements java.io.Serializable {
-
-    // Fields
+public class MeasurementTemplate 
+    extends PersistedObject
+    implements Serializable 
+{
     private Integer _cid;
-    private String _name;
-    private String _alias;
-    private String _units;
-    private int _collectionType;
+    private String  _name;
+    private String  _alias;
+    private String  _units;
+    private int     _collectionType;
     private boolean _defaultOn = false;
-    private long _defaultInterval;
+    private long    _defaultInterval;
     private boolean _designate = false;
-    private String _template;
-    private String _plugin;
-    private byte[] _expressionData;
-    private long _ctime;
-    private long _mtime;
-    private MonitorableType _monitorableType;
-    private Category _category;
-    private Collection _measurementArgs = new ArrayList();
-    private Collection _rawMeasurementArgs = new ArrayList();
+    private String  _template;
+    private String  _plugin;
+    private byte[]  _expressionData;
+    private long    _ctime;
+    private long    _mtime;
 
-    // Constructors
+    private MonitorableType _monitorableType;
+    private Category        _category;
+    private Collection      _measurementArgs = new ArrayList();
+    private Collection      _rawMeasurementArgs = new ArrayList();
+
     public MeasurementTemplate() {
     }
-
-    public MeasurementTemplate(String name, String alias,
-                               int collectionType, boolean defaultOn,
-                               long defaultInterval, boolean designate,
-                               String template, long ctime, long mtime) {
-        _name = name;
-        _alias = alias;
-        _collectionType = collectionType;
-        _defaultOn = defaultOn;
-        _defaultInterval = defaultInterval;
-        _designate = designate;
-        _template = template;
-        _ctime = ctime;
-        _mtime = mtime;
-    }
-
-    public MeasurementTemplate(String name, String alias,
-                               String units, int collectionType, 
-                               boolean defaultOn, long defaultInterval, 
-                               boolean designate, String template,
-                               String plugin, byte[] expressionData, 
-                               long ctime, long mtime, 
-                               MonitorableType monitorableType, 
-                               Category category, 
-                               Collection measurementArgs) {
-        _name = name;
-        _alias = alias;
-        _units = units;
-        _collectionType = collectionType;
-        _defaultOn = defaultOn;
-        _defaultInterval = defaultInterval;
-        _designate = designate;
-        _template = template;
-        _plugin = plugin;
-        _expressionData = expressionData;
-        _ctime = ctime;
-        _mtime = mtime;
-        _monitorableType = monitorableType;
-        _category = category;
-        _measurementArgs = measurementArgs;
-    }
    
-    // Property accessors
     public Integer getCid() {
         return _cid;
     }
