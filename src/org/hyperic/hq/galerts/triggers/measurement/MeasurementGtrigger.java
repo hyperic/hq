@@ -122,14 +122,16 @@ public class MeasurementGtrigger
             }
         }
         
-        String leftHandStr;
+        String leftHandStr, numMatchStr;
         int leftHand;
         
         if (_isPercent) {
             leftHand    = numMatched * 100 / _groupSize;
+            numMatchStr = leftHand + "%"; 
             leftHandStr = (_numResources * 100 / _groupSize) + "%";
         } else {
             leftHand    = numMatched;
+            numMatchStr = leftHand + "";
             leftHandStr = "" + _numResources;  
         }
         
@@ -160,7 +162,7 @@ public class MeasurementGtrigger
               .append(" ")
               .append(leftHandStr)
               .append(" of the resources (")
-              .append(numMatched)
+              .append(numMatchStr)
               .append(") reported ")
               .append(_metricName)
               .append(" ")
