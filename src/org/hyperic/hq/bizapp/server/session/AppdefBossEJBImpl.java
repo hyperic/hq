@@ -950,7 +950,8 @@ public class AppdefBossEJBImpl
     {
         // get the user
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return this.findById(subject, entityId);
+        AppdefEntityValue aev = new AppdefEntityValue(entityId, subject);
+        return aev.getResourceValue();
     }
 
     /**
