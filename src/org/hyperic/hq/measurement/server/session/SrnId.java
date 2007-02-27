@@ -25,13 +25,12 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-public class SrnId implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
+public class SrnId implements Serializable {
     private int _appdefType;
     private int _instanceId;
 
-    // Constructors
     public SrnId() {
     }
     
@@ -40,7 +39,6 @@ public class SrnId implements java.io.Serializable {
         _instanceId = instanceId;
     }
    
-    // Property accessors
     public int getAppdefType() {
         return _appdefType;
     }
@@ -74,5 +72,9 @@ public class SrnId implements java.io.Serializable {
         result = 37 * result + getAppdefType();
         result = 37 * result + getInstanceId();
         return result;
+    }
+    
+    public String toString() {
+        return getAppdefType() + ":" + getInstanceId();
     }
 }
