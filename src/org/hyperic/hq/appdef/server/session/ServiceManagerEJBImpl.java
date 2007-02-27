@@ -73,6 +73,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.util.MapUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -942,13 +943,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         for (Iterator it = allServices.iterator(); it.hasNext(); ) {
             Service svc = (Service) it.next();
             Integer typeId = svc.getServiceType().getId();
-            List addTo = (List) retMap.get(typeId);
-                
-            if (addTo == null) {
-                addTo = new ArrayList();
-                retMap.put(typeId, addTo);
-            }
-                
+            List addTo = (List)MapUtil.getOrCreate(retMap, typeId,
+                                                   ArrayList.class);
+            
             addTo.add(svc);
         }
             
