@@ -284,7 +284,7 @@ BrowserDetect.init();
                   var checkbox = document.createElement('input');
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
-                  checkbox.setAttribute("class", "listMember");
+                  checkbox.setAttribute("class", "recentAlerts");
                   checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties);");
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
@@ -694,7 +694,142 @@ BrowserDetect.init();
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
 
     }
-}
+
+
+    function showEscalationResponse(originalRequest) {
+        var escText = eval('(' + originalRequest.responseText + ')');
+        var eList = escText.escalations;
+        var table = document.getElementById('escalationTable');
+        $('modifiedEscalationTime').innerHTML = 'Updated: ' + refreshTime();
+
+        if (table) {
+            if (eList && eList.length > 0) {
+                var tbody = table.getElementsByTagName('tbody')[0];
+
+                for (var e = tbody.childNodes.length - 1; e > 1; e--) {
+                    tbody.removeChild(tbody.childNodes[e]);
+                }
+
+                for (i = 0; i < eList.length; i++) {
+
+                    var tr = document.createElement('tr');
+                    var trTime = document.createElement('tr');
+                    var td1 = document.createElement('td');
+                    var td2 = document.createElement('td');
+                    var td3 = document.createElement('td');
+                    var td4 = document.createElement('td');
+                    var td5 = document.createElement('td');
+                    var infoDiv = document.createElement('div');
+                    var escAnchor = document.createElement("a");
+                    var urlColon = ":"
+                    var resUrl = $('viewEscUrl').href;
+                    var ul = document.createElement("ul");
+                    var liHead = document.createElement("li");
+                    var liAlertName = document.createElement("li");
+                    var liNotified = document.createElement("li");
+                    var notifyDiv = document.createElement('div');
+                    var AlertNameDiv = document.createElement('div');
+
+                    tbody.appendChild(tr);
+
+                    if (i % 2 == 0) {
+                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
+                    } else {
+                        tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
+                    }
+var liHead = document.createElement("li");
+                    tr.appendChild(td1);
+                    td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
+                    td1.setAttribute("id", (eList[i].resourceName));
+
+                    if (eList[i].resourceName && escAnchor && eList[i].resourceId && eList[i].resourceTypeId) {
+                        td1.appendChild(escAnchor);
+                        escAnchor.appendChild(document.createTextNode(eList[i].resourceName));
+                        escAnchor.setAttribute('href', (resUrl + eList[i].resourceTypeId + urlColon + eList[i].resourceId));
+                    } else {
+                        td1.innerHTML = "&nbsp;";
+                    }
+
+                    tr.appendChild(td2);
+                    td2.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
+                    td2.setAttribute("id", (eList[i].actionName));
+
+                    if (eList[i].actionName) {
+                        td2.appendChild(document.createTextNode(eList[i].actionName));
+                    } else {
+
+                        td2.innerHTML = "N/A";
+                    }
+
+                    tr.appendChild(td3);
+                    td3.setAttribute((document.all ? 'className' : 'class'), "elapsed");
+                    //td3.setAttribute("id", (eList[i].elapsed));
+
+                    if (eList[i].elapsed) {
+                        td3.appendChild(document.createTextNode(eList[i].elapsed));
+
+                    } else {
+                       
+                        td3.innerHTML = "N/A";
+                    }
+
+                    tr.appendChild(td4);
+                    td4.setAttribute((document.all ? 'className' : 'class'), "availability");
+                    //td4.setAttribute("id", (eList[i].nextAction));
+
+                    if (eList[i].nextAction) {
+                        td4.appendChild(document.createTextNode(eList[i].nextAction));
+                        
+                    } else {
+
+                        td4.innerHTML = "N/A";
+                    }
+
+                    tr.appendChild(td5);
+                    td5.setAttribute((document.all ? 'className' : 'class'), "acknowledged");
+
+                    if (eList[i].alerts) {
+                        td5.appendChild(document.createTextNode(eList[i].acknowledged));
+                    } else {
+                        td5.innerHTML = "No";
+                    }
+
+                    if (eList[i].escalationInfo) {
+                        $('escLog').appendChild(infoDiv);
+                        infoDiv.setAttribute("id", (eList[i].escalationName + '_menu'));
+                        infoDiv.setAttribute((document.all ? 'className' : 'class'), "menu");
+                        infoDiv.appendChild(ul);
+
+                        ul.appendChild(liHead);
+                        liHead.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
+                        liHead.appendChild(document.createTextNode('Escalation Action Log:'));
+                        liHead.setAttribute('width', '100%');
+
+                        ul.appendChild(liAlertName);
+                        liAlertName.appendChild(AlertNameDiv);
+                        AlertNameDiv.setAttribute((document.all ? 'className' : 'class'), "BoldText");
+                        AlertNameDiv.appendChild(document.createTextNode(eList[i].escalationAlertName));
+
+                        ul.appendChild(liNotified);
+                        liNotified.setAttribute((document.all ? 'className' : 'class'), "escLogNotified");
+                        liNotified.appendChild(NotifyDiv);
+                        NotifyDiv.setAttribute((document.all ? 'className' : 'class'), "BoldText");
+                        NotifyDiv.appendChild(document.createTextNode(eList[i].escalationNotified));
+
+                    }
+
+                  }
+                
+                } else {
+                $('noEscResources').style.display = '';
+                  }
+            }
+            //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
+
+        }
+
+
+    }
 
 function refreshTime() {
     var curDateTime = new Date()
