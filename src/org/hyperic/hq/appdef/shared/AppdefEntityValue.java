@@ -225,11 +225,11 @@ public class AppdefEntityValue {
 
             if (full) {
                 this.service = 
-                    getServiceManagerLocal().getServiceById(this.subject,
-                                                                 aId);
+                    getServiceManagerLocal().getServiceById(subject, aId);
             }
             else {
-                return getServiceManagerLocal().getServiceLightValue(aId);
+                return getServiceManagerLocal().getServiceLightValue(subject,
+                                                                     aId);
             }
         } 
         return this.service;

@@ -90,6 +90,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.jboss.ejb.plugins.cmp.jdbc2.FindByPrimaryKeyCommand;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -452,10 +453,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ServiceLightValue getServiceLightValue(Integer id)
+    public ServiceLightValue getServiceLightValue(AuthzSubjectValue subject,
+                                                  Integer id)
         throws ServiceNotFoundException, PermissionException {
 
-        Service s = getServiceDAO().findById(id);
+        Service s = findServiceById(id);
+        checkViewPermission(subject, s.getEntityId());
         return s.getServiceLightValue();
     }
 
@@ -466,11 +469,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public ServiceValue getServiceById(AuthzSubjectValue subject, Integer id)
         throws ServiceNotFoundException, PermissionException {
 
-        Service s = getServiceDAO().findById(id);
-        ServiceValue sValue = s.getServiceValue();
-
-        checkViewPermission(subject, sValue.getEntityId());
-        return sValue;
+        Service s = findServiceById(id);
+        checkViewPermission(subject, s.getEntityId());
+        return s.getServiceValue();
     }
 
     /**
