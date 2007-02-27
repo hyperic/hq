@@ -73,7 +73,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hq.dao.ServerTypeDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;

@@ -23,14 +23,13 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /**
  *
@@ -57,7 +56,7 @@ public class ServerTypeDAO extends HibernateDAO
         for (Iterator it = entity.getPlatformTypes().iterator(); it.hasNext(); )
         {
             PlatformType platType = (PlatformType) it.next();
-            platType.getServerTypes().remove(entity);
+            platType.getServerTypesBag().remove(entity);
         }
 
         super.remove(entity);
