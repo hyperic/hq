@@ -25,25 +25,26 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 
-public class RawMeasurement extends Measurement
-    implements java.io.Serializable {
-
-    // Fields    
+public class RawMeasurement 
+    extends Measurement
+    implements Serializable 
+{
     private String _dsn;
 
-    // Constructors
     public RawMeasurement() {
     }
 
     public RawMeasurement(Integer instanceId, MeasurementTemplate template,
-                          String dsn) {
+                          String dsn) 
+    {
         super(instanceId, template);
         _dsn = dsn;
     }
     
-    // Property accessors
     public String getDsn() {
         return _dsn;
     }
