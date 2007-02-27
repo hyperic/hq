@@ -10,19 +10,4 @@
          name="hyperic.jmx:type=Service,name=ProductConfig">
     <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
   </mbean>
-
-  <mbean code="org.jboss.util.threadpool.BasicThreadPool"
-         name="hyperic.jmx:service=HQWorkManagerThreadPool">
-    <!-- The name that appears in thread names -->
-    <attribute name="Name">HQWorkManager</attribute>
-    <!-- The maximum amount of work in the queue -->
-    <attribute name="MaximumQueueSize">256</attribute>
-    <!-- The minimum number of active threads to keep -->
-    <attribute name="MinimumPoolSize">2</attribute>
-    <!-- The maximum number of active threads -->
-    <attribute name="MaximumPoolSize">25</attribute>
-    <!-- How long to keep threads alive after their last work (default one minute) -->
-    <attribute name="KeepAliveTime">60000</attribute>
-  </mbean>
-
 </server>
