@@ -1122,3 +1122,8 @@ border-left:1px solid #D5D8DE;
   border-top: 1px solid #D5D8DE;
   border-bottom: 1px solid #D5D8DE;
 }
+
+.escLogNotified {
+  border-bottom:1px solid #333333;
+
+}
