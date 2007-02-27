@@ -76,6 +76,7 @@ public class ProductPluginDeployer
     extends SubDeployerSupport
     implements NotificationBroadcaster,
                NotificationListener,
+               ProductPluginDeployerMBean,
                Comparator
 {
     private static final String READY_MGR_NAME =
