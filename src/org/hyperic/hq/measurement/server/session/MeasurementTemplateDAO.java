@@ -32,8 +32,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -42,9 +40,6 @@ import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
 
 public class MeasurementTemplateDAO extends HibernateDAO {
-    private final static Log log =
-        LogFactory.getLog(MeasurementTemplateDAO.class);
-
     public MeasurementTemplateDAO(DAOFactory f) {
         super(MeasurementTemplate.class, f);
     }
@@ -86,14 +81,24 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         super.remove(mt);
     }
 
+    /**
+     * TODO:  This needs to be elsewhere -- namely in the DAO that deals
+     *        with measurements. -- JMT 2/26/07
+     */
     private void removeMeasurements(MeasurementTemplate mt) {
-        String sql = "delete Measurement where template.id=?";
-        int rows = getSession().createQuery(sql)
+        MetricDeleteCallback deleteCallback =  
+            MeasurementStartupListener.getDeleteMetricCallback();
+
+        String sql = "from Measurement where template.id=?";
+        List measurements = getSession().createQuery(sql)
             .setInteger(0, mt.getId().intValue())
-            .executeUpdate();
-        if (log.isDebugEnabled()) {
-            log.debug("removed " + rows + " measurements for template id "+
-                      mt.getId());
+            .list();
+
+        deleteCallback.beforeMetricsDeleted(measurements);
+        for (Iterator i=measurements.iterator(); i.hasNext(); ) {
+            Measurement m = (Measurement)i.next();
+            
+            super.remove(m);
         }
     }
 

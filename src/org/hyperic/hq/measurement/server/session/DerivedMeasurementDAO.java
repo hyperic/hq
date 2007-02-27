@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     void remove(DerivedMeasurement entity) {
+        MeasurementStartupListener
+            .getDeleteMetricCallback()
+            .beforeMetricsDeleted(Collections.singleton(entity));
+        
         super.remove(entity);
     }
 
@@ -114,7 +119,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     {
         Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
-            .append("DerivedMeasurement where ");
+            .append("from DerivedMeasurement where ");
         for (int i = 0; i < map.size(); i++) {
             if (i > 0) {
                 sql.append(" or ");
@@ -130,20 +135,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 .append("m.instanceId in (:list" + i + ")")
                 .append(") ");
         }
-        // delete baselines
-        StringBuffer bsql = new StringBuffer()
-            .append("delete Baseline where baselineId.derivedMeasurement.id in " +
-                    "(select id from ")
-            .append(sql)
-            .append(")");
-        Query q = getSession().createQuery(bsql.toString());
-        executeUpdate(map, q);
 
-        StringBuffer dsql = new StringBuffer()
-            .append("delete ")
-            .append(sql);
         // delete derived measurements
-        q = getSession().createQuery(dsql.toString());
+        Query q = getSession().createQuery(sql.toString());
         return executeUpdate(map, q);
     }
 
@@ -156,7 +150,16 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             q.setInteger("appdefType"+j, appdefType.intValue())
                 .setParameterList("list"+j, list);
         }
-        return q.executeUpdate();
+        
+        List v = q.list();
+        MeasurementStartupListener
+            .getDeleteMetricCallback()
+            .beforeMetricsDeleted(v);
+        
+        for (Iterator i=v.iterator(); i.hasNext(); ) {
+            super.remove(i.next());
+        }
+        return v.size();
     }
 
     List findByInstance(int type, int id, boolean enabled) {

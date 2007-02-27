@@ -25,17 +25,16 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
 
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hibernate.Query;
 
 public class RawMeasurementDAO extends HibernateDAO {
     public RawMeasurementDAO(DAOFactory f) {
@@ -52,6 +51,9 @@ public class RawMeasurementDAO extends HibernateDAO {
     }
     
     void remove(RawMeasurement entity) {
+        MeasurementStartupListener
+            .getDeleteMetricCallback() 
+            .beforeMetricsDeleted(Collections.singleton(entity));
         super.remove(entity);
     }
 
@@ -79,7 +81,7 @@ public class RawMeasurementDAO extends HibernateDAO {
     {
         Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
-            .append("delete RawMeasurement where ");
+            .append("from RawMeasurement where ");
         for (int i = 0; i < map.size(); i++) {
             if (i > 0) {
                 sql.append(" or ");
@@ -102,7 +104,15 @@ public class RawMeasurementDAO extends HibernateDAO {
             q.setInteger("appdefType"+j, appdefType.intValue())
                 .setParameterList("list"+j, list);
         }
-        return q.executeUpdate();
+        
+        List v = q.list();
+        MeasurementStartupListener
+            .getDeleteMetricCallback()
+            .beforeMetricsDeleted(v);
+        for (Iterator i=v.iterator(); i.hasNext(); ) {
+            super.remove(i.next());
+        }
+        return v.size();
     }
 
     RawMeasurement findByDsnForInstance(String dsn, Integer id) {

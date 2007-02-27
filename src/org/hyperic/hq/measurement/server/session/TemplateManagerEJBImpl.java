@@ -399,7 +399,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Remove a measurement template
      *
-     * @return a MeasurementTemplate value
      * @ejb:interface-method
      */
     public void removeTemplate(AuthzSubjectValue subject, Integer tid) {
@@ -552,16 +551,15 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * to be created.
      * @ejb:interface-method 
      */
-    public Map updateTemplates(String pluginName, 
-                               TypeInfo ownerEntity,
+    public Map updateTemplates(String pluginName, TypeInfo ownerEntity, 
                                Integer monitorableTypeId,
                                MeasurementInfo[] tmpls)
-        throws CreateException, RemoveException {
-
+        throws CreateException, RemoveException 
+    {
         MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
 
         // Organize the templates first
-        HashMap tmap = new HashMap();
+        Map tmap = new HashMap();
         for (int i = 0; i < tmpls.length; i++) {
             tmap.put(tmpls[i].getAlias(), tmpls[i]);
         }
@@ -569,12 +567,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         Collection mts = dao.findRawByMonitorableType(monitorableTypeId);
         
         for (Iterator i = mts.iterator(); i.hasNext();) {
-            MeasurementTemplate mt =
-                (MeasurementTemplate) i.next();
+            MeasurementTemplate mt = (MeasurementTemplate) i.next();
             
             // See if this is in the list
-            MeasurementInfo info =
-                (MeasurementInfo) tmap.remove(mt.getAlias());
+            MeasurementInfo info = (MeasurementInfo) tmap.remove(mt.getAlias());
 
             if (info == null) {
                 dao.remove(mt);
