@@ -101,18 +101,10 @@ public class AvailService
     public void ejbModuleStopped() {}
 
     public void ejbModuleStarted() {
-        // start the ProductPluginDeployer service
-        startPluginDeployer();
         startSchedulerService();
         startDataPurgeService();
     }
 
-    private void startPluginDeployer() {
-        startMBean("PluginDeployer",
-                   "hyperic.jmx:type=Service,name=ProductPluginDeployer", 
-                   "startDeployer");
-    }
-    
     private void startSchedulerService() {
         startMBean("SchedulerService",
                    "hyperic.jmx:type=Service,name=Scheduler", 

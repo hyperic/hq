@@ -74,12 +74,14 @@ import org.jboss.deployment.SubDeployerSupport;
 
 public class ProductPluginDeployer
     extends SubDeployerSupport
-    implements ProductPluginDeployerMBean,
-               NotificationBroadcaster,
+    implements NotificationBroadcaster,
+               NotificationListener,
                Comparator
 {
     private static final String READY_MGR_NAME =
         "hyperic.jmx:service=NotReadyManager";
+    private static final String SERVER_NAME =
+        "jboss.system:type=Server";
     private static final String URL_SCANNER_NAME =
         "hyperic.jmx:type=DeploymentScanner,flavor=URL";
     private static final String READY_ATTR = "Ready";
@@ -94,6 +96,7 @@ public class ProductPluginDeployer
     private List                 _plugins = new ArrayList();
     private boolean              _isStarted = false;
     private ObjectName           _readyMgrName;
+    private ObjectName           _serverName;
     private String               _pluginDir = PLUGIN_DIR;
     
     private NotificationBroadcasterSupport _broadcaster =
@@ -156,10 +159,53 @@ public class ProductPluginDeployer
 
         try {
             _readyMgrName = new ObjectName(READY_MGR_NAME);
+            _serverName   = new ObjectName(SERVER_NAME);
         } catch (MalformedObjectNameException e) {
             //notgonnahappen
             _log.error(e);
         }
+    }
+
+    /**
+     * This is called when the full server startup has occurred, and you 
+     * get the "Started in 30s:935ms" message.
+     * 
+     * We load all startup classes, then initialize the plugins.  Currently
+     * this is necesssary, since startup classes need to initialize the 
+     * application (creating callbacks, etc.), and plugins can't hit the
+     * app until that's been done.  Unfortunately, it also means that any
+     * startup listeners that depend on plugins loaded through the deployer
+     * won't work.  So far that doesn't seem to be a problem, but if it 
+     * ends up being one, we can split the plugin loading into more stages so
+     * that everyone has access to everyone.
+     */
+    public void handleNotification(Notification n, Object o) {
+        loadStartupClasses();
+
+        pluginNotify("deployer", DEPLOYER_READY);
+
+        Collections.sort(_plugins, this);
+
+        ProductManagerLocal pm = getProductManager();
+
+        for (Iterator i = _plugins.iterator(); i.hasNext();) {
+            String pluginName = (String)i.next();
+
+            try {
+                deployPlugin(pluginName, pm);
+            } catch(DeploymentException e) {
+                _log.error("Unable to deploy plugin [" + pluginName + "]", e);
+            }
+        }
+
+        _plugins.clear();
+
+        //generally means we are done deploying plugins at startup.
+        //but we are not "done" since a plugin can be dropped into
+        //hq-plugins at anytime.
+        pluginNotify("deployer", DEPLOYER_CLEARED);
+        
+        setReady(true);
     }
 
     protected void processNestedDeployments(DeploymentInfo di)
@@ -382,43 +428,6 @@ public class ProductPluginDeployer
         return isReady.booleanValue();
     }
 
-    /**
-     * Start the deployer process. This is a separate method from the mbean's
-     * start() lifecycle method because now the HighAvailService MBean is responsible
-     * for starting the deployer only after its completed its startup.
-     * If JBoss' deployment process wasnt so completely unreliable, this would not
-     * be necessary, but until the MBean depends stuff works correctly, this will
-     * have to do.
-     * @jmx:managed-operation
-     */
-    public void startDeployer() {
-        pluginNotify("deployer", DEPLOYER_READY);
-
-        Collections.sort(_plugins, this);
-
-        ProductManagerLocal pm = getProductManager();
-
-        for (Iterator i = _plugins.iterator(); i.hasNext();) {
-            String pluginName = (String)i.next();
-
-            try {
-                deployPlugin(pluginName, pm);
-            } catch(DeploymentException e) {
-                _log.error("Unable to deploy plugin [" + pluginName + "]", e);
-            }
-        }
-
-        _plugins.clear();
-
-        //generally means we are done deploying plugins at startup.
-        //but we are not "done" since a plugin can be dropped into
-        //hq-plugins at anytime.
-        pluginNotify("deployer", DEPLOYER_CLEARED);
-        loadStartupClasses();
-        
-        setReady(true);
-    }
-    
     private void loadStartupClasses() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = 
@@ -582,6 +591,8 @@ public class ProductPluginDeployer
             _log.error(e);
         }
 
+        getServer().addNotificationListener(_serverName, this, null, null);
+        
         //turn off ready filter asap at shutdown
         //this.stop() won't run until all files are undeploy()ed
         //which may take several minutes.
