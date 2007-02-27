@@ -166,6 +166,7 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             ServiceResource service = createServiceResource(SVC_NAME);
 
             config.setValue(PROP_IF, name);
+            config.setValue(PROP_IF_IX, columnName);
             service.setProductConfig(config);
             //required to auto-enable metric
             service.setMeasurementConfig();
