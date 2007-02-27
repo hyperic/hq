@@ -35,7 +35,7 @@
 </tiles:insert>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-bottom: 1px solid #D5D8DE; margin-bottom: 24px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine" style="margin-bottom: 24px;">
 <c:if test="${useroperations['administerCAM']}">
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>

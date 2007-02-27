@@ -47,7 +47,7 @@
   }
 </script>
 
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 10px; border-bottom: 1px solid #D5D8DE;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" class="TableBottomLine" style="margin-bottom: 10px;">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="common.header.EscalationName"/></td>
     <td class="BlockContent" colspan="2"><c:out value="${escalation.name}"/></td>
