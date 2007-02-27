@@ -334,11 +334,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public Service findServiceById(Integer id)
         throws ServiceNotFoundException
     {
-        try {
-            return getServiceDAO().findById(id);
-        } catch (ObjectNotFoundException e) {
+        Service service = getServiceById(id);
+        
+        if (service == null) {
             throw new ServiceNotFoundException(id);
         }
+        
+        return service;
     }
 
     /**

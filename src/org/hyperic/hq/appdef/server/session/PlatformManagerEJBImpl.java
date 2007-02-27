@@ -226,7 +226,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             pv = server.getPlatform().getPlatformLightValue();
             typeName = server.getServerType().getName();
         } else if (id.isPlatform()) {
-            Platform platform = getPlatformDAO().get(id.getId());                
+            Platform platform = getPlatformById(id.getId());                
 
             if (platform == null)
                 throw new PlatformNotFoundException(id);
@@ -276,13 +276,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public void removePlatform(AuthzSubjectValue subject, Integer id)
         throws RemoveException, PlatformNotFoundException, PermissionException 
     {
-        // find it
-        Platform platform = getPlatformDAO().get(id);
-
-        if (platform == null)
-            throw new PlatformNotFoundException(id);
-        
-        removePlatform(subject, platform);
+        removePlatform(subject, findPlatformById(id));
     }
     
     private void removePlatform(AuthzSubjectValue subject,
@@ -561,10 +555,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get platform light value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public PlatformLightValue getPlatformLightValue(Integer id)
-        throws PlatformNotFoundException 
+    public PlatformLightValue getPlatformLightValue(AuthzSubjectValue subject,
+                                                    Integer id)
+        throws PlatformNotFoundException, PermissionException 
     {
-        return findPlatformById(id).getPlatformLightValue();
+        Platform platform = findPlatformById(id);
+        checkViewPermission(subject, platform.getEntityId());
+        return platform.getPlatformLightValue();
     }
 
     /**
@@ -577,7 +574,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Platform findPlatformById(Integer id)
         throws PlatformNotFoundException
     {
-        Platform res = getPlatformDAO().get(id);
+        Platform res = getPlatformById(id);
         
         if (res == null)
             throw new PlatformNotFoundException(id);
@@ -604,7 +601,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                               Integer id)
         throws PlatformNotFoundException, PermissionException
     {
-        return findPlatformById(id).getPlatformValue();
+        Platform platform = findPlatformById(id);
+        checkViewPermission(subject, platform.getEntityId());
+        return platform.getPlatformValue();
     }
 
     /**

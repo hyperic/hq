@@ -443,11 +443,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public Server findServerById(Integer id)
         throws ServerNotFoundException
     {
-        try {
-            return getServerDAO().findById(id);
-        } catch (ObjectNotFoundException e) {
+        Server server = getServerById(id);
+        
+        if (server == null) {
             throw new ServerNotFoundException(id);
         }
+
+        return server;
     }
 
     /**
@@ -524,15 +526,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public ServerLightValue getServerLightValue(Integer id)
-        throws ServerNotFoundException {
-        try {
-            ServerDAO serverLocalHome = getServerDAO();
-            Server server = serverLocalHome.findById(id);
-            return server.getServerLightValue();
-        } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException(id, e);
-        }
+    public ServerLightValue getServerLightValue(AuthzSubjectValue subject,
+                                                Integer id)
+        throws ServerNotFoundException, PermissionException {
+        Server server = findServerById(id);
+        checkViewPermission(subject, server.getEntityId());
+        return server.getServerLightValue();
     }
 
     /**
@@ -585,11 +584,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                      Integer id)
         throws ServerNotFoundException, PermissionException {
 
-        Server s = getServerDAO().findById(id);
-        ServerValue sValue = s.getServerValue();
-        checkViewPermission(subject, sValue.getEntityId());
-
-        return sValue;
+        Server s = findServerById(id);
+        checkViewPermission(subject, s.getEntityId());
+        return s.getServerValue();
     }
 
     /**
