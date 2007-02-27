@@ -138,12 +138,13 @@ public class AppdefEntityValue {
 
             if (full) {
                 this.platform =
-                    getPlatformManagerLocal().getPlatformValueById(
-                        this.subject, aId);
+                    getPlatformManagerLocal().getPlatformValueById(subject,
+                                                                   aId);
             }
             else {
                 return
-                    getPlatformManagerLocal().getPlatformLightValue(aId);
+                    getPlatformManagerLocal().getPlatformLightValue(subject,
+                                                                    aId);
             }
         } 
         return this.platform;
@@ -188,11 +189,11 @@ public class AppdefEntityValue {
 
             if (full) {
                 this.server = 
-                    getServerManagerLocal().getServerById(this.subject,
-                                                               aId);
+                    getServerManagerLocal().getServerById(subject, aId);
             }
             else {
-                return getServerManagerLocal().getServerLightValue(aId);
+                return getServerManagerLocal().getServerLightValue(subject,
+                                                                   aId);
             }
         } 
         return this.server;
@@ -323,11 +324,11 @@ public class AppdefEntityValue {
         throws PermissionException, AppdefEntityNotFoundException {
         switch(this.id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return getPlatform(true).getName();
+            return getPlatform(false).getName();
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return getServer(true).getName();
+            return getServer(false).getName();
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService(true).getName();
+            return getService(false).getName();
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication().getName();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
@@ -341,11 +342,11 @@ public class AppdefEntityValue {
         throws PermissionException, AppdefEntityNotFoundException {
         switch(this.id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return getPlatform(true).getDescription();
+            return getPlatform(false).getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return getServer(true).getDescription();
+            return getServer(false).getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService(true).getDescription();
+            return getService(false).getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication().getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
