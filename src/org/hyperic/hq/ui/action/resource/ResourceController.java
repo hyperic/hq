@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -191,6 +192,8 @@ public abstract class ResourceController extends BaseDispatchAction {
             } catch (AppdefEntityNotFoundException aenf) {
                 RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
                 throw aenf;
+            } catch (PermissionException e) {
+                throw e;
             } catch (Exception e) {
                 throw AppdefEntityNotFoundException.build(entityId);
             }
