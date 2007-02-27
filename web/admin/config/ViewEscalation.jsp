@@ -448,7 +448,7 @@ function showViewEscResponse(originalRequest) {
         select1.onchange = function(){onchange_time(this);}
         select1.setAttribute('name', 'waittime');
         addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>);
+        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
         addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
         addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
         addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
