@@ -89,7 +89,8 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
                     if ( AppdefEntityConstants.APPDEF_TYPE_GROUP == eids[0].getType() ) {
                         try {
                             int sessionId = RequestUtils.getSessionId(request).intValue();
-                            AppdefGroupValue group = ab.findGroup(sessionId, eids[0]);
+                            AppdefGroupValue group =
+                                ab.findGroup(sessionId, eids[0].getId());
 
                             if ( group.isGroupAdhoc() ) {
                                 // mixed-group, not supported

@@ -87,7 +87,7 @@ public class NewFormPrepareAction extends BaseAction {
         // get the resource ids associated with this group,
         // create an options list, and associate it with the form
         AppdefBoss aBoss = ContextUtils.getAppdefBoss(ctx);
-        AppdefGroupValue group = aBoss.findGroup(sessionId, appdefId);
+        AppdefGroupValue group = aBoss.findGroup(sessionId, appdefId.getId());
         List groupMembers =
             BizappUtils.buildGroupResources(aBoss, sessionId, group,
                                             PageControl.PAGE_ALL);

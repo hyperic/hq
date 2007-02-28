@@ -123,9 +123,9 @@ public class GroupUtil {
         return GroupUtil.getGroup(subject,entity,null);
     }
 
-    public static AppdefGroupValue getGroup (AuthzSubjectValue subject,
-                                             AppdefEntityID entity,
-                                             PageControl pc )
+    private static AppdefGroupValue getGroup (AuthzSubjectValue subject,
+                                              AppdefEntityID entity,
+                                              PageControl pc )
         throws AppdefEntityNotFoundException, PermissionException {
 
         AppdefGroupValue agv;

@@ -322,26 +322,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id)
         throws AppdefGroupNotFoundException, PermissionException {
-        return findGroup(subject, id, PageControl.PAGE_ALL);
-    }
-
-    /**
-     * Lookup and return a group value object by its identifier.
-     * 
-     * @param subject subject value.
-     * @param id represetning group identifier
-     * @param pc control for group members.
-     * @return AppdefGroupValue object
-     * @throw AppdefGroupNotFoundException when group cannot be found.
-     * @throw PermissionException when group access is not authorized.
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id,
-                                      PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException {
         AppdefEntityID aeid =
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id);
-        return findGroup(subject, aeid, pc);
+        return findGroup(subject, aeid, PageControl.PAGE_ALL);
     }
 
     /**
@@ -450,7 +433,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         throws AppdefGroupNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
         PageList retVal = null;
-        AppdefGroupValue groupVo = findGroup(subject,gid,pc);
+        AppdefEntityID aeid =
+            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, gid);
+        AppdefGroupValue groupVo = findGroup(subject, aeid, pc);
         retVal = groupVo.getAppdefGroupEntries();
 
         // Replace each AppdefEntityID with an AppdefResourceValue

@@ -114,7 +114,7 @@ public class MetricDataServlet extends HttpServlet {
         } else if (id.isGroup()) {
             AppdefGroupValue gval;
             try {
-                gval = _aboss.findGroup(sessionId, id);
+                gval = _aboss.findGroup(sessionId, id.getId());
             } catch (Exception e) {
                 throw new ServletException("Error finding group=" + id, e);
             }

@@ -243,25 +243,53 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<c:url var="fgAction" value="/ResourceHub.do">
+  <c:if test="${not empty param.keywords}">
+    <c:param name="keywords" value="${param.keywords}"/>
+  </c:if>
+  <c:if test="${not empty param.ps}">
+    <c:param name="ps" value="${param.ps}"/>
+  </c:if>
+  <c:if test="${not empty param.so}">
+    <c:param name="so" value="${param.so}"/>
+  </c:if>
+  <c:if test="${not empty param.sc}">
+    <c:param name="sc" value="${param.sc}"/>
+  </c:if>
+  <c:if test="${not empty param.g}">
+    <c:param name="g" value="${param.g}"/>
+  </c:if>
+  <c:param name="ff" value="${ResourceHubForm.ff}"/>
+  <c:param name="ft" value="${ResourceHubForm.ft}"/>
+  <c:param name="view" value="${ResourceHubForm.view}"/>
+</c:url>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #ABB1C7;">
   <tr>
-    <td class="FilterLine" colspan="5"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td class="FilterLabelText" nowrap align="right">
+    <td class="FilterLabelText" nowrap align="right" width="1%">
     <c:choose>
     <c:when test="${empty allTypesKey}">
       <html:hidden property="ft" value=""/>&nbsp;
     </c:when>
     <c:otherwise>
       <fmt:message key="Filter.ViewLabel"/></td>
-    <td class="FilterLabelText" width="100%">
+    <td class="FilterLabelText">
       <html:select property="ft" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ft', '${ftAction}');">
         <html:option value="" key="${allTypesKey}"/>
         <html:optionsCollection property="types"/>
       </html:select>
 
-      <html:hidden property="fg"/>
+      <c:if test="${not empty AvailableResGrps}">
+    <td class="FilterLabelText" nowrap align="right">
+      <fmt:message key="resource.hub.filter.GroupLabel"/>
+    </td>
+    <td class="FilterLabelText" width="100%">
+        <html:select property="fg" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'fg', '${fgAction}');">
+          <html:option value="" key="resource.hub.filter.AllGroupOption"/>
+          <html:optionsCollection name="AvailableResGrps"/>
+        </html:select>
+    </td>
+      </c:if>
     </c:otherwise>
     </c:choose>
     </td>

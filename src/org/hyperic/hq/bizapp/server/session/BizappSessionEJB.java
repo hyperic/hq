@@ -320,10 +320,6 @@ public abstract class BizappSessionEJB {
         return platformmLocal;
     }
 
-    public AppdefGroupManagerLocal getGroupManager() {
-        return getAppdefGroupManager();
-    }
-
     public AppdefGroupManagerLocal getAppdefGroupManager() {
         if(agmLocal == null){
             try {

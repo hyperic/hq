@@ -47,6 +47,7 @@ import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -196,16 +197,17 @@ public class ResourceHubPortalAction extends BaseAction {
 
         int resourceType = DEFAULT_RESOURCE_TYPE;
         String ft = hubForm.getFt();
+        AppdefEntityTypeID aetid = null;
         if (ft != null && ft.length() > 0) {
             try {
                 // compat groups use the entity id format for ft
-                AppdefEntityID entityId = new AppdefEntityID(ft);
-                resourceType = entityId.getId().intValue();
+                aetid = new AppdefEntityTypeID(ft);
+                resourceType = aetid.getId().intValue();
                 // only compat groups specify ft as an entity id. in
                 // this case, the entity id's entity type overrides
                 // the one specified by ff (which is just
                 // APPDEF_TYPE_GROUP anyway).
-                entityType = entityId.getType();
+                entityType = aetid.getType();
             }
             catch (InvalidAppdefTypeException e) {
                 // what we got from the menu was not an entity id at
@@ -237,7 +239,6 @@ public class ResourceHubPortalAction extends BaseAction {
             groupType = g.intValue();
             user.setPreference(GRP_ATTRIB, new Integer(groupType));
             prefChanged = true;                         // Save new preference
-
         }
 
         MessageResources res = getResources(request);
@@ -289,6 +290,48 @@ public class ResourceHubPortalAction extends BaseAction {
                                                pc);
         }
         else {
+            boolean validFg = false;
+            
+            // See if user has selected a resource type
+            if (aetid != null) {
+                // Look up the resource type
+                AppdefResourceTypeValue typeVal =
+                    appdefBoss.findResourceTypeById(sessionId, aetid);
+                    
+                // Look up the groups of this type
+                List groups =
+                    appdefBoss.findAllGroupsMemberExclusive(sessionId,
+                                                            PageControl.PAGE_ALL,
+                                                            null, null, typeVal);
+                
+                if (groups.size() > 0) {
+                    ArrayList groupOptions = new ArrayList(groups.size());
+                    
+                    for (Iterator it = groups.iterator(); it.hasNext(); ) {
+                        AppdefGroupValue group = 
+                            (AppdefGroupValue) it.next();
+
+                        String appdefKey = group.getEntityId().getAppdefKey();
+                        groupOptions.add(new LabelValueBean(group.getName(),
+                                                            appdefKey));
+                        
+                        // Make sure that if we have a group to filter by that
+                        // it's valid
+                        if (hubForm.getFg() != null && !validFg) {
+                            validFg = hubForm.getFg().equals(appdefKey);
+                        }
+                    }
+                    
+                    // Set the group options in request
+                    request.setAttribute(Constants.AVAIL_RESGRPS_ATTR,
+                                         groupOptions);
+                }
+            }
+
+            if (!validFg) {
+                hubForm.setFg(null);
+            }
+            
             // Lastly, check for group to filter by
             if (hubForm.getFg() != null) {
                 AppdefEntityID geid = new AppdefEntityID(hubForm.getFg());

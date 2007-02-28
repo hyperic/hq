@@ -437,7 +437,7 @@ public class AppdefBossEJBImpl
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             return adev.getAssociatedServices(childResourceType.getId(), pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            AppdefGroupValue grp = findGroup(sessionID, parent);
+            AppdefGroupValue grp = findGroup(sessionID, parent.getId());
             if (grp.getGroupEntResType() !=
                 childResourceType.getId().intValue())
             {
@@ -1002,7 +1002,7 @@ public class AppdefBossEJBImpl
             break;
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             try {
-                retVal = getGroupManager().findGroup(subject, 
+                retVal = getAppdefGroupManager().findGroup(subject, 
                                                      entityId.getId());
             } catch (Exception e) {
                 throw new AppdefGroupNotFoundException(
@@ -2167,8 +2167,8 @@ public class AppdefBossEJBImpl
                                                                newOwner);
                 return findApplicationById(sessionId, id);
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                getGroupManager().changeGroupOwner(caller, id, newOwner);
-                return findGroup(sessionId, eid);
+                getAppdefGroupManager().changeGroupOwner(caller, id, newOwner);
+                return findGroup(sessionId, eid.getId());
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
             }
@@ -2200,7 +2200,7 @@ public class AppdefBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        return getGroupManager().createGroup(subject, name, description,
+        return getAppdefGroupManager().createGroup(subject, name, description,
                                              location);
     }
 
@@ -2228,7 +2228,7 @@ public class AppdefBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        return getGroupManager().createGroup(subject, adType, name,
+        return getAppdefGroupManager().createGroup(subject, adType, name,
                                              description, location);
     }
 
@@ -2255,7 +2255,7 @@ public class AppdefBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        return getGroupManager().createGroup(subject, adType, adResType,
+        return getAppdefGroupManager().createGroup(subject, adType, adResType,
                                              name, description, location);
     }
 
@@ -2297,34 +2297,7 @@ public class AppdefBossEJBImpl
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-            return getGroupManager().findGroupByName(subject, groupName, pc);
-        } catch (AppdefGroupNotFoundException e) {
-            log.debug("Caught 'group not found' exception.");
-            throw e;
-        }
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroup(int sessionId, AppdefEntityID id)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        return findGroup(sessionId,id,PageControl.PAGE_ALL);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroup(int sessionId, AppdefEntityID id,
-                                      PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            return getGroupManager().findGroup(subject,id,pc);
+            return getAppdefGroupManager().findGroupByName(subject, groupName, pc);
         } catch (AppdefGroupNotFoundException e) {
             log.debug("Caught 'group not found' exception.");
             throw e;
@@ -2340,29 +2313,7 @@ public class AppdefBossEJBImpl
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
-            return getGroupManager().findGroup(subject, id);
-        } catch (AppdefGroupNotFoundException e) {
-            log.error("Caught 'group not found' exception.");
-            throw e;
-        }
-    }
-
-    /**
-     * Lookup and return a group value object by its identifier.
-     * @param pc - page control for group members
-     * @throws AppdefGroupNotFoundException when group cannot be found.
-     * @throws InvalidAppdefTypeException if group is compat and the appdef
-     *        type id is incorrect.
-     * @ejb:interface-method
-     */
-    public AppdefGroupValue findGroup(int sessionId, Integer id,
-                                      PageControl pc)
-        throws AppdefGroupNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        try {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            return getGroupManager().findGroup(subject, id, pc);
+            return getAppdefGroupManager().findGroup(subject, id);
         } catch (AppdefGroupNotFoundException e) {
             log.error("Caught 'group not found' exception.");
             throw e;
@@ -2384,7 +2335,7 @@ public class AppdefBossEJBImpl
                SystemException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        AppdefGroupManagerLocal groupMan = getGroupManager();
+        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
         
         List toBePaged = new ArrayList(groupIds.length);
         for (int i=0; i < groupIds.length; i++) {
@@ -2497,7 +2448,7 @@ public class AppdefBossEJBImpl
             filterList.add(new AppdefGroupPagerFilterExclude(grpExcludeSet));
         }
         
-        return getGroupManager().findAllGroups(subject, entity, pc, 
+        return getAppdefGroupManager().findAllGroups(subject, entity, pc, 
                                                (AppdefPagerFilter[])
                                                filterList.toArray(new AppdefPagerFilter[0]));
     }
@@ -2555,17 +2506,13 @@ public class AppdefBossEJBImpl
         if (entity != null) {
             // Define exclusion filter to filter member set.
             filterList.add(new AppdefGroupPagerFilterMemExclude(entity));
-                           
+        }
+        
+        if (resType != null) {
             // Add a filter to weed out groups incompatible with this entity
-            int resTypeInt;
-            if (resType==null) {
-                resTypeInt = -1;
-            } else {
-                resTypeInt = resType.getId().intValue();
-            }
-            filterList.add(new AppdefGroupPagerFilterGrpEntRes(entity.getType(),
-                                                               resTypeInt,
-                                                               true ));
+            filterList.add(new AppdefGroupPagerFilterGrpEntRes(
+                    resType.getAppdefTypeId(), resType.getId().intValue(),
+                    true));
         }
         
         if (removeIds != null) {
@@ -2616,7 +2563,7 @@ public class AppdefBossEJBImpl
         PageList retVal;
 
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        retVal = getGroupManager().findAllGroups(subject, pc, grpFilters);
+        retVal = getAppdefGroupManager().findAllGroups(subject, pc, grpFilters);
         if (retVal == null)
             retVal = new PageList();  // return empty list if no groups.
         return retVal;
@@ -2636,7 +2583,7 @@ public class AppdefBossEJBImpl
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionID);
-            getGroupManager().saveGroup(subject, gv);
+            getAppdefGroupManager().saveGroup(subject, gv);
         } catch (GroupModificationException e) {
             log.debug("Caught group modification exception on save.");
             throw e;
@@ -2868,8 +2815,8 @@ public class AppdefBossEJBImpl
             }
         } else {
             try {
-                AppdefGroupValue gValue = findGroup(sessionId, groupEntity,
-                                                    PageControl.PAGE_ALL);
+                AppdefGroupValue gValue = findGroup(sessionId,
+                                                    groupEntity.getId());
                 groupType = gValue.getGroupType();
                 groupMemberFilter = 
                     new AppdefPagerFilterGroupMemExclude(gValue);
@@ -2991,7 +2938,7 @@ public class AppdefBossEJBImpl
         List filterList = new ArrayList();
 
         AppdefGroupValue gValue =
-            findGroup(sessionId, groupEntity, PageControl.PAGE_ALL);
+            findGroup(sessionId, groupEntity.getId());
         AppdefPagerFilterGroupMemExclude groupMemberFilter = 
             new AppdefPagerFilterGroupMemExclude(gValue, true);
         filterList.add( groupMemberFilter );
@@ -3223,7 +3170,7 @@ public class AppdefBossEJBImpl
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
-            getGroupManager().deleteGroup(subject,entity);
+            getAppdefGroupManager().deleteGroup(subject,entity);
         } catch (AppdefGroupNotFoundException e) {
             log.debug("Unable to locate group for removal");
             throw e;
@@ -3240,7 +3187,7 @@ public class AppdefBossEJBImpl
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
-            getGroupManager().deleteGroup(subject,groupId);
+            getAppdefGroupManager().deleteGroup(subject,groupId);
         } catch (AppdefGroupNotFoundException e) {
             log.debug("Unable to locate group for removal");
             throw e;
@@ -3265,7 +3212,7 @@ public class AppdefBossEJBImpl
                SystemException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        AppdefGroupManagerLocal groupMan = getGroupManager();
+        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
 
         for (int i=0;i<groupIds.length;i++) {
             AppdefGroupValue agv = groupMan.findGroup(subject,groupIds[i]);
@@ -3322,7 +3269,7 @@ public class AppdefBossEJBImpl
                 }
                 if(resType.equals(AuthzConstants.groupResType)) {
                     // change group owner
-                    getGroupManager()
+                    getAppdefGroupManager()
                         .changeGroupOwner(root, aRes.getInstanceId(), root);
                 }
             }
@@ -3347,7 +3294,7 @@ public class AppdefBossEJBImpl
                SystemException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        AppdefGroupManagerLocal groupMan = getGroupManager();
+        AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
 
         for (int i=0;i<groupIds.length;i++) {
             AppdefGroupValue agv = groupMan.findGroup(subject,groupIds[i]);
