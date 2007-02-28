@@ -131,11 +131,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param services - A collection of ServiceValue objects that will be
      * the initial set of services for the application.  This can be
      * null if you are creating an empty application.
-     * @return The saved value object which will contain a list of AppServiceValue
-     * objects inside it.
-     * @exception CreateException - if it fails to add the application
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public Integer createApplication(AuthzSubjectValue subject,
                                      ApplicationValue newApp,
@@ -144,7 +140,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                AppdefDuplicateNameException
     {
         if(log.isDebugEnabled()) {
-                log.debug("Begin createApplication: " + newApp);
+            log.debug("Begin createApplication: " + newApp);
         }
         
         // check if the object already exists
@@ -190,8 +186,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update the basic properties of an application. Will NOT update
      * service dependencies, etc.
-     * @param who
-     * @param newValue
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */

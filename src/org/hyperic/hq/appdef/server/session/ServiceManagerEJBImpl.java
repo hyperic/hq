@@ -1568,7 +1568,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a service cluster from a set of service Ids
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public Integer createCluster(AuthzSubjectValue subj,
                                  ServiceClusterValue cluster,
@@ -1582,9 +1581,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * @param serviceIdList - the list of service id's which comprise the updated cluster
+     * @param serviceIdList - the list of service id's which comprise the 
+     *                        updated cluster
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void updateCluster(AuthzSubjectValue subj,
                               ServiceClusterValue cluster,

@@ -257,7 +257,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a platform type
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public Integer createPlatformType(AuthzSubjectValue subject,
                                       PlatformTypeValue pType)
