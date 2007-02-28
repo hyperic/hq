@@ -340,7 +340,7 @@ function showViewEscResponse(originalRequest) {
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
         $('escPropertiesTable').style.display = '';
         $('editPropertiesTable').style.display = 'none';
-        document.addEscalation.reset();
+       
     }
 
     function saveAddEscalation () {
