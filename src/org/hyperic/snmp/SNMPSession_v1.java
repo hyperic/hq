@@ -145,12 +145,7 @@ class SNMPSession_v1 implements SNMPSession {
     private PDU walk(PDU request, List values) throws IOException {
         OID rootOID = request.get(0).getOid();
         PDU response = null;
-        int requests = 0;
-        boolean isDebug = log.isDebugEnabled();
-
-        if (isDebug) {
-            log.debug("Walking: " + rootOID);
-        }
+        int requests = 0, vars = 0;
         
         do {
             ResponseEvent responseEvent =
@@ -163,11 +158,14 @@ class SNMPSession_v1 implements SNMPSession {
             if (response == null) {
                 return null;
             }
-            if (isDebug) {
-                log.debug("request# " + requests + ", #vars " +
-                          response.size());
-            }
+            vars += response.size();
         } while (walk(response, request, rootOID, values));
+
+        if (log.isDebugEnabled()) {
+            log.debug(rootOID + " walk: " + requests + " requests, " +
+                      vars + " vars, avg=" +
+                      vars / requests);
+        }
 
         return response;
     }
