@@ -266,18 +266,21 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #ABB1C7;">
   <tr>
-    <td class="FilterLabelText" nowrap align="right" width="1%">
     <c:choose>
     <c:when test="${empty allTypesKey}">
+    <td class="FilterLabelText" nowrap align="right" width="100%">
       <html:hidden property="ft" value=""/>&nbsp;
+    </td>
     </c:when>
     <c:otherwise>
+    <td class="FilterLabelText" nowrap align="right" width="1%">
       <fmt:message key="Filter.ViewLabel"/></td>
     <td class="FilterLabelText">
       <html:select property="ft" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ft', '${ftAction}');">
         <html:option value="" key="${allTypesKey}"/>
         <html:optionsCollection property="types"/>
       </html:select>
+    </td>
 
       <c:if test="${not empty AvailableResGrps}">
     <td class="FilterLabelText" nowrap align="right">
@@ -292,7 +295,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </c:if>
     </c:otherwise>
     </c:choose>
-    </td>
 
 	<c:choose>
 	  <c:when test="${ResourceHubForm.view == CHART}">
