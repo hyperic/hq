@@ -79,7 +79,7 @@ function showViewEscResponse(originalRequest) {
         $('allowPauseTrue').checked = "true";
     }
     else {
-        $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
+         $('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
         $('allowPauseFalse').checked = "true";
     }
 
@@ -88,7 +88,7 @@ function showViewEscResponse(originalRequest) {
         $('notifyAllFalse').checked = "true";
     }
     else {
-        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+         $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
         $('notifyAllTrue').checked = "true";
     }
 
@@ -340,6 +340,7 @@ function showViewEscResponse(originalRequest) {
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
         $('escPropertiesTable').style.display = '';
         $('editPropertiesTable').style.display = 'none';
+        document.addEscalation.reset();
     }
 
     function saveAddEscalation () {
@@ -353,7 +354,7 @@ function showViewEscResponse(originalRequest) {
         var url = '<html:rewrite action="/escalation/saveAction"/>';
         
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
-        document.addEscalation.reset();
+        document.EscalationForm.reset();
     }
 
     function updateEscView( originalRequest ) {
@@ -564,7 +565,7 @@ function showViewEscResponse(originalRequest) {
         $('emailinputDiv').style.display = "none";
       }
       function onchange_handler(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
+
           $('userListDisplay').style.display= "";
         var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
@@ -639,7 +640,7 @@ function showViewEscResponse(originalRequest) {
     }
 
     function onchange_time(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
+
         var writeTime = $('time');
         writeTime.style.display = "";
         var index= el.options[el.selectedIndex].value;
@@ -762,13 +763,12 @@ function showViewEscResponse(originalRequest) {
 
                         if (usersInputList[i].checked) {
                             var checkedValues = usersInputList[i].value;
-                            //alert('before: ' + checkedValues)
+
                             <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                             if (checkedValues == <c:out value="${user.id}"/>) {
                             writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
                             }
                             </c:forEach>
-                            //writeListUsers.appendChild(document.createTextNode(checkedValues +' '));
 
                         }
                     }
@@ -806,14 +806,12 @@ function showViewEscResponse(originalRequest) {
 
                         if (rolesInputList[i].checked) {
                             var checkedValues = rolesInputList[i].value;
-                            //alert('before: ' + checkedValues)
-                            <c:forEach var="user" items="${AvailableRoles}" varStatus="status">
+                             <c:forEach var="user" items="${AvailableRoles}" varStatus="status">
                             if (checkedValues == <c:out value="${user.id}"/>) {
                             writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
                             }
                             </c:forEach>
-                            //writeListUsers.appendChild(document.createTextNode(checkedValues +' '));
-
+                           
                         }
                     }
                     new Effect.Fade(Windows.focusedWindow.getId());
@@ -1047,8 +1045,8 @@ function showViewEscResponse(originalRequest) {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" id="allowPauseTrue" value="true" /> <fmt:message
+            <td style="padding-top:2px;padding-bottom:2px;">
+                <input type="radio" name="allowPause" id="allowPauseTrue" value="true" onClick="this.value=true;" />  <fmt:message
               key="alert.config.escalation.allow.pause" /> <select
               id="maxWaitTime" name="maxWaitTime">
               <option value="300000">5 <fmt:message
