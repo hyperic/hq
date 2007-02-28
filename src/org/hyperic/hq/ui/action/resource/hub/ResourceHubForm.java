@@ -46,13 +46,14 @@ import org.apache.struts.util.ImageButtonBean;
 import org.apache.struts.util.LabelValueBean;
 
 /**
- * Removes a set of resources from the Resource Hub.
+ * Form for fetching and working with the set of resources for the Resource Hub.
  * 
  *
  */
 public class ResourceHubForm extends BaseValidatorForm {
     
-    public static final Log log = LogFactory.getLog(ResourceHubForm.class.getName());
+    public static final Log log =
+        LogFactory.getLog(ResourceHubForm.class.getName());
 
     //-------------------------------------static constant variables
     public static final String CHART_VIEW = "chart";
@@ -60,16 +61,17 @@ public class ResourceHubForm extends BaseValidatorForm {
 
     //-------------------------------------instance variables
 
-    private Integer ff;
-    private String ft;
-    private List functions;
-    private Integer g;
-    private String[] resources;
-    private List types;
-    private String keywords;
-    private String view;
+    private Integer _ff;
+    private String _ft;      // Resource type to filter by
+    private List _functions;
+    private Integer _g;      // Group type
+    private String[] _resources;
+    private List _types;
+    private String _keywords;
+    private String _view;
+    private String _fg;      // The group to filter by
 
-    private ImageButtonBean group = null;
+    private ImageButtonBean _group = null;
     
     //-------------------------------------constructors
 
@@ -81,91 +83,99 @@ public class ResourceHubForm extends BaseValidatorForm {
     //-------------------------------------public methods
 
     public Integer getFf() {
-        return ff;
+        return _ff;
     }
 
     public void setFf(Integer ff) {
-        this.ff = ff;
+        _ff = ff;
     }
 
     public String getFt() {
-        return ft;
+        return _ft;
     }
 
     public void setFt(String ft) {
-        this.ft = ft;
+        _ft = ft;
     }
 
     public List getFunctions() {
-        return functions;
+        return _functions;
     }
 
     public void setFunctions(List functions) {
-        this.functions = functions;
+        _functions = functions;
     }
 
     public void addFunction(LabelValueBean b) {
-        if (this.functions != null) {
-            this.functions.add(b);
+        if (_functions != null) {
+            _functions.add(b);
         }
     }
 
     public Integer getG() {
-        return g;
+        return _g;
     }
 
     public void setG(Integer g) {
-        this.g = g;
+        _g = g;
     }
 
     public String[] getResources() {
-        return resources;
+        return _resources;
     }
     
     public void setResources(String[] resources) {
-        this.resources = resources;
+        _resources = resources;
     }
     
     public List getTypes() {
-        return types;
+        return _types;
     }
 
     public void setTypes(List types) {
-        this.types = types;
+        _types = types;
     }
 
     public void addType(LabelValueBean b) {
-        if (this.types != null) {
-            this.types.add(b);
+        if (_types != null) {
+            _types.add(b);
         }
     }
 
     public void setKeywords(String keywords) {
-        this.keywords = keywords;
+        _keywords = keywords;
     }
 
     public String getKeywords() {
-        return keywords;
+        return _keywords;
     }
 
     public String getView() {
-        return view;
+        return _view;
     }
     
     public void setView(String view) {
-        this.view = view;
+        _view = view;
     }
 
     public ImageButtonBean getGroup() {
-        return this.group;
+        return _group;
     }
 
     public void setGroup(ImageButtonBean group) {
-        this.group = group;
+        _group = group;
     }
     
     public boolean isGroupClicked() {
         return getGroup().isSelected();
+    }
+
+    public String getFg() {
+        return _fg;
+    }
+
+    public void setFg(String fg) {
+        _fg = fg;
     }
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
@@ -174,35 +184,38 @@ public class ResourceHubForm extends BaseValidatorForm {
     }
 
     private void setDefaults() {
-        ff = null;
-        ft = null;
-        functions = new ArrayList();
-        g = new Integer(-1);
-        resources = new String[0];
-        types = new ArrayList();
-        view = null;
-        group = new ImageButtonBean();
+        _ff = null;
+        _ft = null;
+        _functions = new ArrayList();
+        _g = new Integer(-1);
+        _resources = new String[0];
+        _types = new ArrayList();
+        _view = null;
+        _group = new ImageButtonBean();
+        _fg = null;
     }
 
     public String toString() {
         StringBuffer s = new StringBuffer(super.toString());
 
         s.append(" ff=")
-         .append(ff)
+         .append(_ff)
          .append(" ft=")
-         .append(ft)
+         .append(_ft)
          .append(" functions=")
-         .append(functions)
+         .append(_functions)
          .append(" g=")
-         .append(g)
+         .append(_g)
          .append(" resources=")
-         .append(resources)
+         .append(_resources)
          .append(" types=")
-         .append(types)
+         .append(_types)
          .append(" view=")
-         .append(view)
+         .append(_view)
          .append(" group=")
-         .append(group);
+         .append(_group)
+         .append(" fg=")
+         .append(_fg);
 
         return s.toString();
     }

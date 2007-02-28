@@ -289,13 +289,23 @@ public class ResourceHubPortalAction extends BaseAction {
                                                pc);
         }
         else {
-            resources = appdefBoss.findCompatInventory(sessionId, 
-                                                       entityType, 
-                                                       resourceType,
-                                                       null,
-                                                       null,
-                                                       resourceName,
-                                                       pc);
+            // Lastly, check for group to filter by
+            if (hubForm.getFg() != null) {
+                AppdefEntityID geid = new AppdefEntityID(hubForm.getFg());
+                resources = appdefBoss.findCompatInventory(sessionId,
+                                                           geid,
+                                                           resourceName,
+                                                           pc);
+            }
+            else {
+                resources = appdefBoss.findCompatInventory(sessionId, 
+                                                           entityType, 
+                                                           resourceType,
+                                                           null,
+                                                           null,
+                                                           resourceName,
+                                                           pc);
+            }            
         }
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);

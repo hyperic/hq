@@ -49,6 +49,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -109,9 +112,6 @@ import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupEntityResource;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterGroupMemExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilterInternalService;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -122,6 +122,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
@@ -139,7 +140,6 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -2732,36 +2732,6 @@ public class AppdefBossEJBImpl
 
     /**
      * Produce list of compatible, viewable inventory items.
-     * The returned list of value objects will be filtered
-     * on AppdefGroupValue -- if the group contains the entity,
-     * then then the entity will not be included in the returned set.
-     *
-     * NOTE: This method returns an empty page list when no compatible
-     *       inventory is found.
-     *
-     * @param appdefTypeId    - the id correponding to the type of entity.
-     *                          example: platform, server, service
-     *                          NOTE: A valid entity type id is now MANDATORY!
-     * @param appdefResTypeId - the id corresponding to the type of resource
-     *                          example: linux, jboss, vhost
-     * @return page list of value objects that extend AppdefResourceValue
-     * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
-     */
-    public PageList findCompatInventory(int sessionId, int appdefTypeId,
-                                        int appdefResTypeId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
-        return findCompatInventory(sessionId, appdefTypeId,
-                                   appdefResTypeId,
-                                   APPDEF_GROUP_TYPE_UNDEFINED, null, null,
-                                   null, null, APPDEF_GROUP_TYPE_UNDEFINED,
-                                   pc);
-    }
-
-   /**
-     * Produce list of compatible, viewable inventory items.
      *
      * NOTE: This method returns an empty page list when no compatible
      *       inventory is found.
@@ -2854,11 +2824,11 @@ public class AppdefBossEJBImpl
                                          AppdefEntityID[] pendingEntities, 
                                          String resourceName, List filterList,
                                          int groupType, PageControl pc)
-        throws PermissionException, SessionTimeoutException, 
-               SessionNotFoundException 
+    throws PermissionException, SessionTimeoutException, 
+           SessionNotFoundException 
     {
         List toBePaged;
-        
+
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefPagerFilterGroupEntityResource erFilter;
         AppdefPagerFilterAssignSvc assignedSvcFilter;
@@ -2922,10 +2892,10 @@ public class AppdefBossEJBImpl
             // the HTML selectors that appear all over the product.
             if (groupEntContext) {
                 erFilter = new AppdefPagerFilterGroupEntityResource (
-                    subject, groupType, grpEntId, appdefResTypeId, true );
+                                                                     subject, groupType, grpEntId, appdefResTypeId, true );
             } else {
                 erFilter = new AppdefPagerFilterGroupEntityResource (
-                    subject, groupType, appdefTypeId, appdefResTypeId, true );
+                                                                     subject, groupType, appdefTypeId, appdefResTypeId, true );
                 if (groupEntity != null) {
                     erFilter.setGroupSelected(true);
                 }
@@ -2978,16 +2948,92 @@ public class AppdefBossEJBImpl
         int assignedSvcFilterSize = 0;
         if (assignedSvcFilter != null)
             assignedSvcFilterSize = assignedSvcFilter.getFilterCount();
-        
+
         int groupMemberFilterSize = 0;
         if (groupMemberFilter != null)
             groupMemberFilterSize = groupMemberFilter.getFilterCount();
 
         int adjustedSize = toBePaged.size() - erFilterSize - pendingSize -
-                           assignedSvcFilterSize - groupMemberFilterSize;
+        assignedSvcFilterSize - groupMemberFilterSize;
         watch.markTimeEnd("findCompatInventory");
         log.debug("findCompatInventory(): " + watch);
         return new PageList(finalList,adjustedSize);
+    }
+
+   /**
+     * Produce list of compatible, viewable inventory items.
+     * The returned list of value objects will be filtered
+     * on Group -- if the group contains the entity.
+     *
+     * NOTE: This method returns an empty page list when no compatible
+     *       inventory is found.
+     * @param grpEntId        - the appdef entity of a group value who's
+     *                          members are to be filtered for result set.
+     * @param resourceName    - resource name (or name substring) to search for.
+     * @return page list of value objects that extend AppdefResourceValue
+     * @throws AppdefGroupNotFoundException if the group is not found
+     * @ejb:interface-method
+     * @ejb:transaction type="NOTSUPPORTED"
+     */
+    public PageList findCompatInventory(int sessionId,
+                                        AppdefEntityID groupEntity,
+                                        String resourceName,
+                                        PageControl pc)
+        throws PermissionException, SessionTimeoutException, 
+               SessionNotFoundException, AppdefGroupNotFoundException 
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        
+        StopWatch watch = new StopWatch();
+        watch.markTimeBegin("findCompatInventory");
+
+        // init our (never-null) page and filter lists
+        List filterList = new ArrayList();
+
+        AppdefGroupValue gValue =
+            findGroup(sessionId, groupEntity, PageControl.PAGE_ALL);
+        AppdefPagerFilterGroupMemExclude groupMemberFilter = 
+            new AppdefPagerFilterGroupMemExclude(gValue, true);
+        filterList.add( groupMemberFilter );
+
+        // find ALL viewable resources by entity (type or name) and
+        // translate to appdef entities.
+        // We have to create a new page control because we are no
+        // longer limiting the size of the record set in authz.
+        watch.markTimeBegin("findViewableEntityIds");
+        List toBePaged = findViewableEntityIds(subject,
+                                               gValue.getGroupEntType(),
+                                               resourceName, pc);
+        watch.markTimeEnd("findViewableEntityIds");
+
+        // Page it, then convert to AppdefResourceValue
+        List finalList = new ArrayList();
+        watch.markTimeBegin("getPageList");
+        PageList pl = getPageList (toBePaged, pc, filterList);
+        watch.markTimeEnd("getPageList");
+
+        for (Iterator itr = pl.iterator();itr.hasNext();){
+            AppdefEntityID ent = (AppdefEntityID) itr.next();
+            
+            try {
+                finalList.add(findById(subject, ent));
+            } catch (AppdefEntityNotFoundException e) {
+                // XXX - hack to ignore the error.  This must have occurred
+                // when we created the resource, and rolled back the
+                // AppdefEntity but not the Resource
+                log.error("Invalid entity still in resource table: " + ent);
+                continue;
+            }            
+        }
+
+        int groupMemberFilterSize = 0;
+        if (groupMemberFilter != null)
+            groupMemberFilterSize = groupMemberFilter.getFilterCount();
+
+        int adjustedSize = toBePaged.size() - groupMemberFilterSize;
+        watch.markTimeEnd("findCompatInventory");
+        log.debug("findCompatInventory(): " + watch);
+        return new PageList(finalList, adjustedSize);
     }
 
    /**

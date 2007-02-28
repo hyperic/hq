@@ -260,6 +260,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
         <html:option value="" key="${allTypesKey}"/>
         <html:optionsCollection property="types"/>
       </html:select>
+
+      <html:hidden property="fg"/>
     </c:otherwise>
     </c:choose>
     </td>

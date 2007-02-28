@@ -755,9 +755,12 @@ public class ClientShellEntityFetcher {
     {
         AppdefBoss boss = this.bossManager.getAppdefBoss();
         return boss.findCompatInventory(this.auth.getAuthToken(), 
-                                  typeId.getType(), 
-                                  typeId.getId().intValue(), 
-                                  PageControl.PAGE_ALL);
+                                        typeId.getType(), 
+                                        typeId.getId().intValue(),
+                                        null,
+                                        null,
+                                        null,
+                                        PageControl.PAGE_ALL);
         
     }
     
