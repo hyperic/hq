@@ -284,7 +284,7 @@ BrowserDetect.init();
                   var checkbox = document.createElement('input');
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
-                  checkbox.setAttribute("class", "recentAlerts");
+                  checkbox.setAttribute("class", "listMember");
                   checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties);");
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
@@ -695,7 +695,7 @@ BrowserDetect.init();
 
     }
 
-
+    /*
     function showEscalationResponse(originalRequest) {
         var escText = eval('(' + originalRequest.responseText + ')');
         var eList = escText.escalations;
@@ -729,7 +729,9 @@ BrowserDetect.init();
                     var liNotified = document.createElement("li");
                     var notifyDiv = document.createElement('div');
                     var AlertNameDiv = document.createElement('div');
-
+                    var selectPause = document.createElement("select");
+                    var pauseDiv = document.createElement('div');
+                    
                     tbody.appendChild(tr);
 
                     if (i % 2 == 0) {
@@ -737,15 +739,13 @@ BrowserDetect.init();
                     } else {
                         tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
                     }
-var liHead = document.createElement("li");
+                    
                     tr.appendChild(td1);
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
-                    td1.setAttribute("id", (eList[i].resourceName));
+                    td1.setAttribute("id", (eList[i].actionName));
 
-                    if (eList[i].resourceName && escAnchor && eList[i].resourceId && eList[i].resourceTypeId) {
-                        td1.appendChild(escAnchor);
-                        escAnchor.appendChild(document.createTextNode(eList[i].resourceName));
-                        escAnchor.setAttribute('href', (resUrl + eList[i].resourceTypeId + urlColon + eList[i].resourceId));
+                    if (eList[i].actionName) {
+                        td1.appendChild(document.createTextNode(eList[i].actionName));
                     } else {
                         td1.innerHTML = "&nbsp;";
                     }
@@ -754,11 +754,12 @@ var liHead = document.createElement("li");
                     td2.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
                     td2.setAttribute("id", (eList[i].actionName));
 
-                    if (eList[i].actionName) {
-                        td2.appendChild(document.createTextNode(eList[i].actionName));
+                    if (eList[i].resourceName && escAnchor && eList[i].resourceId && eList[i].resourceTypeId) {
+                        td2.appendChild(escAnchor);
+                        escAnchor.appendChild(document.createTextNode(eList[i].resourceName));
+                        escAnchor.setAttribute('href', (resUrl + eList[i].resourceTypeId + urlColon + eList[i].resourceId));
                     } else {
-
-                        td2.innerHTML = "N/A";
+                        td2.innerHTML = "&nbsp;";
                     }
 
                     tr.appendChild(td3);
@@ -788,10 +789,39 @@ var liHead = document.createElement("li");
                     tr.appendChild(td5);
                     td5.setAttribute((document.all ? 'className' : 'class'), "acknowledged");
 
-                    if (eList[i].alerts) {
-                        td5.appendChild(document.createTextNode(eList[i].acknowledged));
+                    if (eList[i].acknowledged == "") {
+                        //td5.appendChild(document.createTextNode(eList[i].acknowledged));
+                        td5.appendChild(selectPause);
+                        selectPause.setAttribute('id', 'waittime_' + liID);
+                        <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
+                            addOption(selectPause, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
+                            <c:if test="${escalation.maxPauseTime >= 600000}">
+                            addOption(selectPause, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
+                            <c:if test="${escalation.maxPauseTime >= 1200000}">
+                            addOption(selectPause, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
+                            <c:if test="${escalation.maxPauseTime >= 1800000}">
+                             addOption(selectPause, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
+                            <c:if test="${escalation.maxPauseTime >= 3600000}">
+                            addOption(selectPause, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
+                            </c:if>
+                            </c:if>
+                            </c:if>
+                            </c:if>
+                        </c:if>
+
+
+
+                        selectPause.onchange = function(){onchange_time(this);}
+                        selectPause.setAttribute('name', 'waittime');
+                        addOption(selectPause, '0', '<fmt:message key="alert.config.escalation.end"/>');
+                        addOption(selectPause, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
+                        addOption(selectPause, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
+                        addOption(selectPause, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
+                        addOption(selectPause, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
+                        addOption(selectPause, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
+                        addOption(selectPause, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>'); 
                     } else {
-                        td5.innerHTML = "No";
+                        td5.appendChild(document.createTextNode(eList[i].acknowledged));
                     }
 
                     if (eList[i].escalationInfo) {
@@ -828,7 +858,28 @@ var liHead = document.createElement("li");
 
         }
 
+       */
+    }
 
+function addOption(sel, val, txt, selected) {
+        var o = document.createElement('option');
+        var t = document.createTextNode(txt);
+
+        o.setAttribute('value',val);
+
+        if (selected) {
+          o.setAttribute('selected', 'true');
+        }
+        sel.appendChild(o);
+        o.appendChild(document.createTextNode(txt));
+
+    }
+
+function onchange_time(el) {
+        //alert(el+", value="+ el.options[el.selectedIndex].value );
+
+        var index= el.options[el.selectedIndex].value;
+        alert('Then wait: ' + (index / 60000) + ' minutes');
     }
 
 function refreshTime() {
