@@ -117,12 +117,14 @@ public class SNMPValue {
           case SMIConstants.SYNTAX_COUNTER32:
           case SMIConstants.SYNTAX_COUNTER64:
           case SMIConstants.SYNTAX_TIMETICKS:
+          case SMIConstants.SYNTAX_GAUGE32:
             return TYPE_LONG;
           case SMIConstants.SYNTAX_OCTET_STRING:
             //XXX while we are able to convert long
             //does not mean we should. treat as a string
             //for now.
             //return TYPE_LONG_CONVERTABLE;
+            return TYPE_STRING;
           default:
             return TYPE_STRING;
         }
