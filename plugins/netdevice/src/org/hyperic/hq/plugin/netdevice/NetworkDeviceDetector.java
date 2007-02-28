@@ -272,14 +272,18 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
         if (log.isDebugEnabled()) {
             log.debug("Testing snmp config=" + config);
         }
+        if (config.getValue(SNMPClient.PROP_IP) == null) {
+            log.debug("snmp config incomplete, defering server creation");
+            return null;
+        }
         try {
             getSession(config).getSingleValue("sysName");
         } catch (Exception e) {
             //wait till we have valid snmp config at the platform level
-            log.debug("snmp config NOT ok, defering server creation");
+            log.debug("snmp config invalid, defering server creation");
             return null;
         }
-        log.debug("snmp config ok, creating server");
+        log.debug("snmp config valid, creating server");
         return super.getServerResources(config);
     }
     

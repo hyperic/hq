@@ -45,10 +45,13 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
     private static final String PROP_VERSION = "Version";
 
     private Properties props;
-    
+    private boolean autoDefaults;
+
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
         this.props = manager.getProperties();
+        this.autoDefaults =
+            "true".equals(this.props.getProperty("snmp.autoDefaults"));
     }
 
     private SNMPSession getSession(ConfigResponse config) {
@@ -91,12 +94,13 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
         String defaultVersion =
             getIpProp(SNMPClient.PROP_VERSION,
                       platformIp,
-                      SNMPClient.VALID_VERSIONS[0]); //v1
-        String fallbackVersion = SNMPClient.VALID_VERSIONS[1]; //v2c
+                      SNMPClient.VALID_VERSIONS[1]); //v2c
+        String fallbackVersion = SNMPClient.VALID_VERSIONS[0]; //v1
 
         PlatformResource platform =
             super.getPlatformResource(config);
 
+        Log log = getLog();
         ConfigResponse metricConfig;
         boolean hasConfig =
             config.getValue(SNMPClient.PROP_IP) != null;
@@ -104,8 +108,11 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
         if (hasConfig) {
             //we've already been here
             metricConfig = config;
+            if (log.isDebugEnabled()) {
+                log.debug("Using approved snmp config=" + metricConfig);
+            }
         }
-        else {
+        else if (this.autoDefaults) {
             //platform was just created, attempt to auto-configure
             metricConfig = new ConfigResponse();
             metricConfig.setValue(SNMPClient.PROP_IP, platformIp);
@@ -119,18 +126,24 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
                                             platformIp,
                                             SNMPClient.DEFAULT_PORT_STRING));
             metricConfig.setValue(NetworkDeviceDetector.PROP_IF_IX,
-                                  NetworkDeviceDetector.IF_DESCR);
+                                  getIpProp(NetworkDeviceDetector.PROP_IF_IX,
+                                            platformIp,
+                                            NetworkDeviceDetector.IF_DESCR));
+            if (log.isDebugEnabled()) {
+                log.debug("Using default snmp config=" + metricConfig);
+            }
+        }
+        else {
+            if (log.isDebugEnabled()) {
+                log.debug("Need user input for snmp config=" + config);
+            }
+            return platform;
         }
 
         ConfigResponse cprops = new ConfigResponse();
 
-        Log log = getLog();
         SNMPSession session;
 
-        if (log.isDebugEnabled()) {
-            log.debug("Using snmp config=" + metricConfig);
-        }
-        
         if ((session = getSession(metricConfig)) == null) {
             return platform;
         }
