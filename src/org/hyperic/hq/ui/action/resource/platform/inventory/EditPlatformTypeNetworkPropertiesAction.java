@@ -117,44 +117,11 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                 return returnFailure(request, mapping, forwardParams);
             }
 
-            int totalIps = platform.getIpValues().length;
-
-            // XXX The code below is commented since we should not be 
-            // editing the platform's machine type once the platform is created
-
-/*            platform.setPlatformType(platformType); */
-
-            
             editForm.updatePlatformValue(platform);
-            
-            if(totalIps > platform.getIpValues().length) {
-
-                //XXX The code below is an ugly hack. ack......
-                //but there is no other way to get the IPs stored in the db
-            
-                List dbIpValues =
-                    Arrays.asList(boss.findPlatformById(sessionId.intValue(),
-                                                        aeid.getId())
-                    .getIpValues());
-                List uiIpValues = Arrays.asList(platform.getIpValues());
-                List uiIpIds = new ArrayList();
-                for(Iterator rcs = uiIpValues.iterator();rcs.hasNext();) {
-                    IpValue uiIpValue  = (IpValue) rcs.next();
-                    uiIpIds.add(uiIpValue.getId());
-                }
-
-                for(Iterator rmdIps = dbIpValues.iterator();rmdIps.hasNext();) {
-                    IpValue rmdIp = (IpValue) rmdIps.next();
-                    if(!uiIpIds.contains(rmdIp.getId())) {
-                        platform.removeIpValue(rmdIp);
-                    }
-                }
-            }
 
             AgentValue agent =
-                BizappUtils.getAgentConnection(sessionId.intValue(),
-                                               boss, request,
-                                               editForm);
+                BizappUtils.getAgentConnection(sessionId.intValue(), boss,
+                                               request, editForm);
             if (agent != null) {
                 platform.setAgent(agent);
             }
@@ -163,21 +130,14 @@ public class EditPlatformTypeNetworkPropertiesAction extends BaseAction {
                       platform.getName() + "]" + " with attributes " +
                       platform + " and ips " +
                       Arrays.asList(platform.getIpValues())); 
-            PlatformValue newPlatform =
-                boss.updatePlatform(sessionId.intValue(), platform);
+            boss.updatePlatform(sessionId.intValue(), platform);
 
+            /* XXX - Not sure why it's the job of the UI to start an auto scan
             BizappUtils.startAutoScan(ctx,
                                       sessionId.intValue(),
                                       newPlatform.getEntityId());
+             */
             
-            /*            
-            // check to see if it's necessary for another, separate
-            // commit to remove old ips. this is a hack, but you can't
-            // do it both at once, bizapp explodes.
-            if (editForm.removeOldIps(platform)) {
-                newPlatform = boss.updatePlatform(sessionId.intValue(), platform);
-            }
-            */          
             RequestUtils
                 .setConfirmation(request,
                                  "resource.platform.inventory.confirm.EditTypeNetworkProperties",

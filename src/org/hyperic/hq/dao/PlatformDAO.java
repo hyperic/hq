@@ -147,6 +147,7 @@ public class PlatformDAO extends HibernateDAO {
             Ip ip = (Ip)i.next();
             if (ip.getId().equals(ipv.getId())) {
                 i.remove();
+                remove(ip);
                 return;
             }
         }

@@ -28,6 +28,8 @@ package org.hyperic.hq.ui.action.resource.platform;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -211,15 +213,16 @@ public class PlatformForm extends ResourceForm  {
         int numOldIps = oldIps.length;
         int numNewIps = getNumIps();
 
-        platform.removeAllIpValues();
-
         // add all new ips
-        int i;
-        for (i = 0; i < numNewIps; i++) {
+        HashMap oldIpsMap = new HashMap();
+        for (int i = 0; i < numOldIps; i++) {
+            oldIpsMap.put(oldIps[i].getId(), oldIps[i]);
+        }
+        
+        for (int i = 0; i < numNewIps; i++) {
             IpValue newIp = getIp(i);
-            if (i < numOldIps) {
-                // update the old ip and add it back
-                IpValue oldIp = oldIps[i];
+            if (newIp.getId() != null) {
+                IpValue oldIp = (IpValue) oldIpsMap.remove(newIp.getId());
                 oldIp.setAddress(newIp.getAddress());
                 oldIp.setMACAddress(newIp.getMACAddress());
                 oldIp.setNetmask(newIp.getNetmask());
@@ -236,8 +239,10 @@ public class PlatformForm extends ResourceForm  {
             }
         }
         
-        for (;i < numOldIps; i++) {
-            platform.removeIpValue(oldIps[i]);
+        // Remove the left-overs
+        for (Iterator it = oldIpsMap.values().iterator(); it.hasNext(); ) {
+            IpValue oldIp = (IpValue) it.next();
+            platform.removeIpValue(oldIp);
         }
     }
 
