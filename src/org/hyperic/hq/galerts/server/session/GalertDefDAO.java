@@ -59,6 +59,14 @@ class GalertDefDAO
         super.save(t);
     }
 
+    Collection findAbsolutelyAllGalertDefs() {
+        return super.findAll(); 
+    }
+    
+    /**
+     * Finds all the galert defs which have not been marked for deletion.
+     * Typically this is what people want to use.
+     */
     public Collection findAll() {
         return getSession().createQuery("from GalertDef d " + 
                                         "where d.deleted = false " +

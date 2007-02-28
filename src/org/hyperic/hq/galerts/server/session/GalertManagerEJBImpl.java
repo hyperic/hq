@@ -551,7 +551,9 @@ public class GalertManagerEJBImpl
              * Delete the GalertDefs that depend on the deleted group
              */
             public void preGroupDelete(ResourceGroup g) {
-                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);
+                DAOFactory f = DAOFactory.getDAOFactory();
+                GalertDefDAO defDao = new GalertDefDAO(f);
+                Collection defs = defDao.findAbsolutelyAllGalertDefs();
                 
                 for (Iterator i=defs.iterator(); i.hasNext(); ) {
                     GalertDef def = (GalertDef)i.next();
@@ -571,7 +573,7 @@ public class GalertManagerEJBImpl
              * reset every time this operation is performed.
              */
             public void groupMembersChanged(ResourceGroup g) {
-                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);
+                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);  
                 
                 for (Iterator i=defs.iterator(); i.hasNext(); ) {
                     GalertDef def = (GalertDef)i.next();
