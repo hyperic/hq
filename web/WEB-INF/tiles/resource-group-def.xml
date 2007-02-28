@@ -111,10 +111,6 @@
               controllerUrl="/resource/group/inventory/AddGroupResourcesFormPrepare.do"
               path="/resource/group/inventory/AddResources.jsp"/>
 
-  <definition name=".resource.group.inventory.AddRoles"
-              controllerUrl="/resource/group/inventory/AddGroupRolesFormPrepare.do"
-              path="/resource/group/inventory/AddRoles.jsp"/>
-
   <definition name=".resource.group.inventory.changeOwner"
               controllerUrl="/resource/common/inventory/ChangeResourceOwnerFormPrepare.do"
               path="/resource/group/inventory/ChangeOwner.jsp"/>
