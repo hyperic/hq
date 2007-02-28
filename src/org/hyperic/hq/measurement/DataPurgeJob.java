@@ -43,7 +43,6 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -133,19 +132,14 @@ public class DataPurgeJob implements Job {
         // VACUUM will occur every day at midnight.
 
         Properties conf;
+        
         try {
             conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (ConfigPropertyException e) {
-            // Not gonna happen
+        } catch(Exception e) {
             throw new SystemException(e);
         }
 
-        String dataMaintenance =
-            conf.getProperty(HQConstants.DataMaintenance);
+        String dataMaintenance = conf.getProperty(HQConstants.DataMaintenance);
         if (dataMaintenance == null) {
             // Should never happen
             _log.error("No data maintenance interval found");
@@ -153,6 +147,12 @@ public class DataPurgeJob implements Job {
         }
 
         long maintInterval = Long.parseLong(dataMaintenance);
+        if (maintInterval <= 0) {
+            _log.error("Maintenance interval was specified as [" + 
+                       dataMaintenance + "] -- which is invalid");
+            return;
+        }
+        
         // At midnight we always perform a VACUUM, otherwise we
         // check to see if it is time to perform normal database
         // maintenance. (On postgres we just rebuild indicies
