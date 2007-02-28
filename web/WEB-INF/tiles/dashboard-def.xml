@@ -149,6 +149,12 @@
               <put name="portletName" value=".dashContent.controlActions" />
   </definition> 
  
+  <definition name=".dashContent.escalationSummary"
+              path="/portlet/escalationSummary/View.jsp">              
+              <put name="adminUrl"    value="" />    
+              <put name="portletName" value=".dashContent.escalationSummary" />
+  </definition>  
+
   <definition name=".dash.portlets.multi">
             <putList name="multi.narrow">
               <add value=".dashContent.availSummary"/>
