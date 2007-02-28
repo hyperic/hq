@@ -491,7 +491,7 @@ function showViewEscResponse(originalRequest) {
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
         $('emailinputDiv').style.display = 'none';
-        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onblur=checkEmail();copyOthersEmail(this);></textarea>";
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onmouseout=checkEmail();copyOthersEmail(this);></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput');
@@ -881,12 +881,13 @@ function showViewEscResponse(originalRequest) {
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
         var elemText = emailinputText.value;
 
-        if (elemText = '') {
-        
+        if (elemText == '') {
+
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
         $('okCheck').innerHTML = "&nbsp;";
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
+        $('addEscButtons').style.display = "none";
         return false;
 
         } else if (elemText.match(illegalChars)) {
@@ -894,12 +895,13 @@ function showViewEscResponse(originalRequest) {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
         $('okCheck').innerHTML = "&nbsp;";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>';
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+        $('addEscButtons').style.display = "none";
         return false;
-
         } else {
             $('escMsg').innerHTML ='';
             $('example').style.display= 'none';
+            $('addEscButtons').style.display = "";
         }
 
     }
@@ -1226,7 +1228,7 @@ function showViewEscResponse(originalRequest) {
       <td id="addEscButtons" style="display:none">
         <table cellspacing="4" cellpadding="0" border="0">
         <tr>
-            <td>
+            <td id="saveButton">
             <tiles:insert page="/common/components/ActionButton.jsp">
             <tiles:put name="labelKey" value="common.label.Save"/>
               <tiles:put name="buttonHref" value="#"/>
