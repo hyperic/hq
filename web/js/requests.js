@@ -283,7 +283,7 @@ BrowserDetect.init();
                 else {
                   var checkbox = document.createElement('input');
                   checkbox.setAttribute("type", "checkbox");
-                  checkbox.setAttribute("name", "ealerts");
+                  checkbox.setAttribute("name", "alerts");
                   checkbox.setAttribute("class", "listMember");
                   checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties);");
                   checkbox.setAttribute("value",

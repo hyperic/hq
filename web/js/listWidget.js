@@ -375,7 +375,7 @@ function ToggleAll(e, widgetProperties, isRemove, subGroup) {
 
 	widgetInstanceName = widgetProperties["name"];
 	var prefix = widgetInstanceName;
-	
+
 	if (e.checked) {
 		CheckAll(e, widgetInstanceName, subGroup);
 		ToggleButtons(widgetInstanceName, prefix, isRemove, e.form);
@@ -437,7 +437,7 @@ function ToggleAllGroup(e, widgetProperties, subGroup) {
 		ToggleButtonsGroup(widgetInstanceName, prefix);
 	}
 }
-
+/*
 function CheckAll(e, widgetInstanceName, subGroup) {
 	var uList = e.form;
 	var len = uList.elements.length;
@@ -453,7 +453,29 @@ function CheckAll(e, widgetInstanceName, subGroup) {
 	
 	setWidgetProperty(widgetInstanceName, "numSelected", numCheckboxes);
 }
-	
+*/
+
+function CheckAll(e, widgetInstanceName, subGroup) {
+	var uList = e.form;
+    var len = uList.elements.length;
+	var numCheckboxes = getWidgetProperty(widgetInstanceName, "numSelected");
+
+	for (var i = 0; i < len; i++) {
+        var e = uList.elements[i];
+        var eClass = e.getAttribute("class");
+
+        eClass = eClass? eClass : e.getAttribute("className");
+       
+        if (eClass==subGroup && e.checked == false) {
+
+            Check(e);
+			numCheckboxes++;
+		}
+	}
+
+	setWidgetProperty(widgetInstanceName, "numSelected", numCheckboxes);
+}
+
 function ClearAll(e, widgetInstanceName, subGroup) {
 	var uList = e.form;
 	var len = uList.elements.length;
