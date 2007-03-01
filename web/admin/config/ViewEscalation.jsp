@@ -358,6 +358,7 @@ function showViewEscResponse(originalRequest) {
     }
 
     function updateEscView( originalRequest ) {
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
         $('example').style.display= '';
         $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
