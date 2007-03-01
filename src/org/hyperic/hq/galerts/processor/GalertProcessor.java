@@ -132,7 +132,7 @@ public class GalertProcessor {
      * @param defId Id of a {@link GalertDef} to load.
      */
     private void handleUpdate(MemGalertDef def) {
-        _log.info("Handling load/update of alert def: " + def.getName());
+        _log.debug("Handling load/update of alert def: " + def.getName());
         
         synchronized (CFG_LOCK) {
             MemGalertDef oldDef = (MemGalertDef)_alertDefs.get(def.getId());
@@ -145,8 +145,8 @@ public class GalertProcessor {
             // In with the new
             addListeners(def);
             _alertDefs.put(def.getId(), def);
-            _log.info("galert[id=" + def.getId() + ",name=" + def.getName() +
-                      "] loaded");
+            _log.debug("galert[id=" + def.getId() + ",name=" + def.getName() +
+                       "] loaded");
         }
     }
     
@@ -154,7 +154,7 @@ public class GalertProcessor {
      * Remove an alert definition from the processor. 
      */
     private void handleUnload(Integer defId) {
-        _log.info("Handling unload of alertdef[" + defId + "]");
+        _log.debug("Handling unload of alertdef[" + defId + "]");
         synchronized (CFG_LOCK) {
             MemGalertDef oldDef = (MemGalertDef)_alertDefs.get(defId);
             

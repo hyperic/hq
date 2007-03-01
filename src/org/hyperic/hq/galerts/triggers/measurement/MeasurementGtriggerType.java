@@ -53,7 +53,6 @@ public class MeasurementGtriggerType
         boolean isPercent;
         float metricValue;
         
-        _log.warn("Creating trigger: " + cfg);
         sizeCompareCode = Integer.parseInt(cfg.getValue(CFG_SIZE_COMPAR));
         sizeCompare     = SizeComparator.findByCode(sizeCompareCode);
         numResources    = Integer.parseInt(cfg.getValue(CFG_NUM_RESOURCE));
@@ -71,12 +70,10 @@ public class MeasurementGtriggerType
     }
 
     public ConfigSchema getSchema() {
-        _log.warn("getSchema");
         return new ConfigSchema();
     }
 
     public boolean validForGroup(ResourceGroup g) {
-        _log.warn("validForGroup: " + g);
         return true;
     }
 }
