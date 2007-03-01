@@ -58,6 +58,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.server.session.SRNCache;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
@@ -117,8 +118,6 @@ public class AvailabilityCheckService
     }
 
     /**
-     * Send the message.
-     *
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
@@ -127,7 +126,7 @@ public class AvailabilityCheckService
     
     protected void hitInSession(Date lDate) {
         if (!started) {
-            this.log.debug("HQ Services have not been started for " + logCtx);
+            this.log.debug("Unable to run.  Haven't been started yet");
             return;
         }
         
@@ -140,15 +139,10 @@ public class AvailabilityCheckService
         if (startTime == 0) {
             startTime = current;
             return;
-        }
-        else if (startTime + wait > current) {
-                return;
+        } else if (startTime + wait > current) {
+            return;
         }
 
-        if (log.isDebugEnabled())
-            log.debug("AvailabilityCheckService.hit() at " + lDate + "(" +
-                      current + ")");
-        
         SRNCache srnCache = SRNCache.getInstance();
         
         // Fetch all derived availablity measurements
@@ -163,6 +157,8 @@ public class AvailabilityCheckService
         HashMap availMap = new HashMap();
         ArrayList downPlatforms = new ArrayList();
         
+        // List of DataPoints to add at the end of all this mayhem
+        List addData = new ArrayList();
         // Let's be safe and reset the time to current
         current = System.currentTimeMillis();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
@@ -215,9 +211,9 @@ public class AvailabilityCheckService
                               " missing data at " + theMissing[i]);
 
                 // Insert the missing data point
-                mval = new MetricValue(
-                    MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                getDataMan().addData(dmVo.getId(), mval, false);
+                mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
+                                       theMissing[i]);
+                addData.add(new DataPoint(dmVo.getId(), mval));
             }
             
             // Check SRN to see if somehow the agent lost the schedule
@@ -324,11 +320,12 @@ public class AvailabilityCheckService
                         " missing data at " + theMissing[i]);
 
                 // Insert the missing data point
-                mval = new MetricValue(
-                    MeasurementConstants.AVAIL_DOWN, theMissing[i]);
-                getDataMan().addData(dmVo.getId(), mval, false);
+                mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
+                                       theMissing[i]);
+                addData.add(new DataPoint(dmVo.getId(), mval));
             }
         }
+        getDataMan().addData(addData, false);
     }
     
     /**
