@@ -308,7 +308,7 @@ public class ClientShellEntityFetcher {
         AppdefBoss boss = this.bossManager.getAppdefBoss();
         int token = this.auth.getAuthToken();
 
-        return boss.findAllGroups(token);
+        return boss.findAllGroups(token, PageControl.PAGE_ALL);
     }
 
     public List findAllAlertDefinitions()

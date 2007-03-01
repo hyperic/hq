@@ -47,11 +47,11 @@ import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -290,16 +290,17 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         else {
             // Look up groups
-            List groups = appdefBoss.findAllGroups(sessionId);
+            Collection groups = appdefBoss.findAllGroupPojos(sessionId);
             
             if (groups.size() > 0) {
                 ArrayList groupOptions = new ArrayList(groups.size());
                 
                 for (Iterator it = groups.iterator(); it.hasNext(); ) {
-                    AppdefGroupValue group = 
-                        (AppdefGroupValue) it.next();
+                    ResourceGroup group = (ResourceGroup) it.next();
 
-                    String appdefKey = group.getEntityId().getAppdefKey();
+                    String appdefKey = new AppdefEntityID(
+                            AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                            group.getId()).getAppdefKey();
                     groupOptions.add(new LabelValueBean(group.getName(),
                                                         appdefKey));
                 }

@@ -60,7 +60,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hibernate.ObjectNotFoundException;
 
 /**
  * Use this session bean to manipulate ResourceGroups,
@@ -478,10 +477,9 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
-    public PageList getAllResourceGroups(AuthzSubjectValue subject,
-                                         PageControl pc,
-                                         boolean excludeRoot)
-        throws PermissionException, FinderException, NamingException 
+    public Collection getAllResourceGroups(AuthzSubjectValue subject,
+                                           boolean excludeRoot)
+        throws PermissionException, FinderException 
     {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -504,7 +502,21 @@ public class ResourceGroupManagerEJBImpl
                 groups.add(rgloc);
             }
         }
+        
+        return groups;
+    }
 
+    /**
+     * Get all the resource groups excluding the root resource group and paged
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public PageList getAllResourceGroups(AuthzSubjectValue subject,
+                                         PageControl pc,
+                                         boolean excludeRoot)
+        throws PermissionException, FinderException, NamingException 
+    {
+        Collection groups = getAllResourceGroups(subject, excludeRoot);
         return _ownedGroupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
     }   
 

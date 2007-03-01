@@ -117,9 +117,11 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -2530,16 +2532,27 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Produce list of all groups where caller is authorized
-     * to modify.
-     * @return List containing AppdefGroupValue.
+     * Produce list of all group pojos where caller is authorized
+     * @return List containing AppdefGroup.
      * @ejb:interface-method
      * */
-    public PageList findAllGroups(int sessionId)
+    public Collection findAllGroupPojos(int sessionId)
         throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
+               SessionNotFoundException, FinderException 
     {
-        return findAllGroups(sessionId, new PageControl(), null);
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        ResourceGroupManagerLocal mgr = ResourceGroupManagerEJBImpl.getOne();
+        
+        Collection resGrps = mgr.getAllResourceGroups(subject, true);
+        
+        // We only want the appdef resource groups
+        for (Iterator it = resGrps.iterator(); it.hasNext(); ) {
+            ResourceGroup resGrp = (ResourceGroup) it.next();
+            if (resGrp.isSystem()) {
+                it.remove();
+            }
+        }
+        return resGrps;
     }
 
     /**
@@ -2555,8 +2568,8 @@ public class AppdefBossEJBImpl
         return findAllGroups(sessionId, pc, null);
     }
 
-    protected PageList findAllGroups(int sessionId, PageControl pc,
-                                     AppdefPagerFilter[] grpFilters)
+    private PageList findAllGroups(int sessionId, PageControl pc,
+                                   AppdefPagerFilter[] grpFilters)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException 
     {
