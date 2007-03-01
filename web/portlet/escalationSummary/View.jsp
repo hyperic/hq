@@ -46,7 +46,11 @@
 
 <script type="text/javascript">
 function requestEscalationSummary() {
-	var escUrl = "<html:rewrite page="/dashboard/ViewEscalationSummary.do"/>"
+        var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
+        url += '10001';
+        url += '.do';
+        //new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+    //var escUrl = "<html:rewrite page="/dashboard/ViewEscalationSummary.do"/>"
 	new Ajax.Request(escUrl, {method: 'get', onSuccess:showEscalationResponse, onFailure :reportError});
 }
 onloads.push(requestEscalationSummary);

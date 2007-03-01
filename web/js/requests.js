@@ -335,7 +335,7 @@ BrowserDetect.init();
                     imgNode.setAttribute("src", imagePath + "icon_ack.gif");
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
-                    imgNode.setAttribute("onClick", "return acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");
+                    imgNode.setAttribute("onClick", "alert(this.nodeName+" + aList[i].appdefKey + "'," + aList[i].alertId + ");acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");
                     ackAnchor.appendChild(imgNode);
 
                     imgNode = document.createElement('img');
