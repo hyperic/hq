@@ -27,17 +27,15 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
@@ -47,14 +45,10 @@ import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @ejb:bean name="ReportProcessor"
@@ -91,19 +85,24 @@ public class ReportProcessorEJBImpl
     }
     
     private void addData(List dataPoints, DerivedMeasurement dm, int dsnId, 
-                         MetricValue[] dpts, long current, Map oldDataPoints)  
+                         MetricValue[] dpts, long current)
     {
         long interval = dm.getInterval();
         boolean isPassThrough =
             dm.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
 
+        // Safeguard against an anomaly
+        if (interval <= 0) {
+            log.warn("Measurement had bogus interval[" + interval + "]: " + 
+                     dm);
+            interval = 60 * 1000;
+        }
+        
+        
         // Each datapoint corresponds to a set of measurement
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
             
-        // Detect if we need to backfill
-        long reservation = TimingVoodoo.roundDownTime(current, interval);
-        
         // For each Datapoint/MetricValue associated
         // with the DSN...
         for (int i = 0; i < dpts.length; i++) {
@@ -129,33 +128,11 @@ public class ReportProcessorEJBImpl
                 
                 // Add the raw measurement if it's not a pass-thru
                 addPoint(dataPoints, rmid, dpts);
-                
-                // See if we need to add to backfill queue
-                if (retrieval < reservation) {
-                    // It's old data.  Let's add it to the list of
-                    // data points that need to be back-filled.
-                    List timestampsForRmid = (List)oldDataPoints.get(rmid);
-                    if (null == timestampsForRmid) {
-                        timestampsForRmid = new ArrayList();
-                        oldDataPoints.put(rmid, timestampsForRmid);
-                    }
-                    timestampsForRmid.add(new Long(retrieval));
-                }
             }
         }
         
         if (isPassThrough) {
             addPoint(dataPoints, dm.getId(), passThroughs);
-        }
-
-        // Let's check to see if there is old data, if so, we
-        // can tell the scheduler to calculate missing values
-        if (oldDataPoints.size() > 0) {
-            try {
-                _measurementProc.recalculateMeasurements(oldDataPoints);
-            } catch (MeasurementScheduleException e) {
-                log.error("Cannot recalculate measurement(s).", e);
-            }
         }
     }
 
@@ -170,8 +147,6 @@ public class ReportProcessorEJBImpl
         // get current time so that we can use to check for old data
         long current = System.currentTimeMillis();
 
-        // Keep track of which measurement ids to recalculate
-        Map oldDataPoints = new HashMap();
         DSNList[] dsnLists = report.getClientIdList();
 
         List dataPoints = new ArrayList();
@@ -181,14 +156,19 @@ public class ReportProcessorEJBImpl
             DerivedMeasurement dm = _dmMan.getMeasurement(dmId);;
             
             // Can't do much if we can't look up the derived measurement
-            if (dm == null)
+            // If the measurement is enabled, we just throw away their data
+            // instead of trying to throw it into the backfill.  This is 
+            // because we don't know the interval to normalize those old
+            // points for.  This is still a problem for people who change their
+            // collection period, but the instances should be low.
+            if (dm == null || !dm.isEnabled())
                 continue;
             
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
                 int dsnId = valLists[j].getDsnId();
                 MetricValue[] vals = valLists[j].getValues();
-                addData(dataPoints, dm, dsnId, vals, current, oldDataPoints);
+                addData(dataPoints, dm, dsnId, vals, current);
             }
         }
         
