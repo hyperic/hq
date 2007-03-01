@@ -492,7 +492,7 @@ function showViewEscResponse(originalRequest) {
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
         $('emailinputDiv').style.display = 'none';
-        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onBlur=checkEmail();copyOthersEmail(this); onKeyPress=unhideEscButtons();></textarea>";
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this); onKeyPress=unhideEscButtons();></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput');
