@@ -93,7 +93,6 @@ public class ReportProcessorEJBImpl
     private void addData(List dataPoints, DerivedMeasurement dm, int dsnId, 
                          MetricValue[] dpts, long current, Map oldDataPoints)  
     {
-        long interval = dm.getInterval();
         boolean isPassThrough =
             dm.getFormula().equals(MeasurementConstants.TEMPL_IDENTITY);
 
@@ -101,46 +100,29 @@ public class ReportProcessorEJBImpl
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
             
-        // Detect if we need to backfill
-        long reservation = TimingVoodoo.roundDownTime(current, interval);
-        
         // For each Datapoint/MetricValue associated
         // with the DSN...
         for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
             if (isPassThrough) {
-                long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
-                
                 // Debugging missing data points
                 if (dm.getId().equals(_debugId)) {
                     log.info("metricDebug: ReportProcessor addData: " +
                              "metric ID " + _debugId +
                              " value=" + dpts[i].getValue() +
-                             " at " + adjust);
+                             " at " + retrieval);
                 }
                 
                 // Create new Measurement data point with the adjusted time
                 MetricValue modified = new MetricValue(dpts[i].getValue(), 
-                                                       adjust);
+                                                       retrieval);
                 passThroughs[i] = modified;
             } else {
                 Integer rmid = new Integer(dsnId);
                 
                 // Add the raw measurement if it's not a pass-thru
                 addPoint(dataPoints, rmid, dpts);
-                
-                // See if we need to add to backfill queue
-                if (retrieval < reservation) {
-                    // It's old data.  Let's add it to the list of
-                    // data points that need to be back-filled.
-                    List timestampsForRmid = (List)oldDataPoints.get(rmid);
-                    if (null == timestampsForRmid) {
-                        timestampsForRmid = new ArrayList();
-                        oldDataPoints.put(rmid, timestampsForRmid);
-                    }
-                    timestampsForRmid.add(new Long(retrieval));
-                }
             }
         }
         
