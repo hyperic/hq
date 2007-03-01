@@ -51,10 +51,12 @@ function requestEscalationSummary() {
         url += '.do';
         //new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
     //var escUrl = "<html:rewrite page="/dashboard/ViewEscalationSummary.do"/>"
-	new Ajax.Request(escUrl, {method: 'get', onSuccess:showEscalationResponse, onFailure :reportError});
+	new Ajax.Request(url, {method: 'get', onSuccess:showEscalationResponse, onFailure :reportError});
 }
 onloads.push(requestEscalationSummary);
 </script>
+    
+    
     <div id="logInfo">
   </div>
  <table width="100%" border="0" cellspacing="0" cellpadding="0" id="escalationTable" class="portletLRBorder">

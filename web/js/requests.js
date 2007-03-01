@@ -695,15 +695,15 @@ BrowserDetect.init();
 
     }
 
-    /*
+
     function showEscalationResponse(originalRequest) {
         var escText = eval('(' + originalRequest.responseText + ')');
-        var eList = escText.escalations;
+        var eList = escText.escalation.actions;
         var table = document.getElementById('escalationTable');
         $('modifiedEscalationTime').innerHTML = 'Updated: ' + refreshTime();
-
+        //$('test').innerHTML = originalRequest.responseText;
         if (table) {
-            if (eList && eList.length > 0) {
+            if (eList && eList.length <= 0) {
                 var tbody = table.getElementsByTagName('tbody')[0];
 
                 for (var e = tbody.childNodes.length - 1; e > 1; e--) {
@@ -742,10 +742,10 @@ BrowserDetect.init();
                     
                     tr.appendChild(td1);
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
-                    td1.setAttribute("id", (eList[i].actionName));
+                    td1.setAttribute("id", (eList[i].name));
 
-                    if (eList[i].actionName) {
-                        td1.appendChild(document.createTextNode(eList[i].actionName));
+                    if (eList[i].name) {
+                        td1.appendChild(document.createTextNode(eList[i].name));
                     } else {
                         td1.innerHTML = "&nbsp;";
                     }
@@ -763,7 +763,7 @@ BrowserDetect.init();
                     }
 
                     tr.appendChild(td3);
-                    td3.setAttribute((document.all ? 'className' : 'class'), "elapsed");
+                    td3.setAttribute((document.all ? 'className' : 'class'), "availability");
                     //td3.setAttribute("id", (eList[i].elapsed));
 
                     if (eList[i].elapsed) {
@@ -787,9 +787,9 @@ BrowserDetect.init();
                     }
 
                     tr.appendChild(td5);
-                    td5.setAttribute((document.all ? 'className' : 'class'), "acknowledged");
+                    td5.setAttribute((document.all ? 'className' : 'class'), "availability");
 
-                    if (eList[i].acknowledged == "") {
+                    if (eList[i].acknowledged == "" && eList[i].allowPause == "true") {
                         //td5.appendChild(document.createTextNode(eList[i].acknowledged));
                         td5.appendChild(selectPause);
                         selectPause.setAttribute('id', 'waittime_' + liID);
@@ -810,7 +810,7 @@ BrowserDetect.init();
                         </c:if>
 
 
-
+                        /*
                         selectPause.onchange = function(){onchange_time(this);}
                         selectPause.setAttribute('name', 'waittime');
                         addOption(selectPause, '0', '<fmt:message key="alert.config.escalation.end"/>');
@@ -820,6 +820,7 @@ BrowserDetect.init();
                         addOption(selectPause, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
                         addOption(selectPause, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
                         addOption(selectPause, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>'); 
+                    */
                     } else {
                         td5.appendChild(document.createTextNode(eList[i].acknowledged));
                     }
@@ -858,7 +859,7 @@ BrowserDetect.init();
 
         }
 
-       */
+    
     }
 
 function addOption(sel, val, txt, selected) {
