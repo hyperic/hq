@@ -92,7 +92,6 @@ public class ResourceHubPortalAction extends BaseAction {
     private static final String VIEW_ATTRIB = "Resource Hub View";
     private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
     private static final String GRP_ATTRIB  = "Resource Hub Group Type";
-    private static final String PAGE_ATTRIB = "Resource Hub Page Size";
     
     protected Log log =
         LogFactory.getLog(ResourceHubPortalAction.class.getName());
@@ -290,65 +289,38 @@ public class ResourceHubPortalAction extends BaseAction {
                                                pc);
         }
         else {
-            boolean validFg = false;
+            // Look up groups
+            List groups = appdefBoss.findAllGroups(sessionId);
             
-            // See if user has selected a resource type
-            if (aetid != null) {
-                // Look up the resource type
-                AppdefResourceTypeValue typeVal =
-                    appdefBoss.findResourceTypeById(sessionId, aetid);
-                    
-                // Look up the groups of this type
-                List groups =
-                    appdefBoss.findAllGroupsMemberExclusive(sessionId,
-                                                            PageControl.PAGE_ALL,
-                                                            null, null, typeVal);
+            if (groups.size() > 0) {
+                ArrayList groupOptions = new ArrayList(groups.size());
                 
-                if (groups.size() > 0) {
-                    ArrayList groupOptions = new ArrayList(groups.size());
-                    
-                    for (Iterator it = groups.iterator(); it.hasNext(); ) {
-                        AppdefGroupValue group = 
-                            (AppdefGroupValue) it.next();
+                for (Iterator it = groups.iterator(); it.hasNext(); ) {
+                    AppdefGroupValue group = 
+                        (AppdefGroupValue) it.next();
 
-                        String appdefKey = group.getEntityId().getAppdefKey();
-                        groupOptions.add(new LabelValueBean(group.getName(),
-                                                            appdefKey));
-                        
-                        // Make sure that if we have a group to filter by that
-                        // it's valid
-                        if (hubForm.getFg() != null && !validFg) {
-                            validFg = hubForm.getFg().equals(appdefKey);
-                        }
-                    }
-                    
-                    // Set the group options in request
-                    request.setAttribute(Constants.AVAIL_RESGRPS_ATTR,
-                                         groupOptions);
+                    String appdefKey = group.getEntityId().getAppdefKey();
+                    groupOptions.add(new LabelValueBean(group.getName(),
+                                                        appdefKey));
                 }
-            }
-
-            if (!validFg) {
-                hubForm.setFg(null);
+                
+                // Set the group options in request
+                request.setAttribute(Constants.AVAIL_RESGRPS_ATTR,
+                                     groupOptions);
             }
             
             // Lastly, check for group to filter by
-            if (hubForm.getFg() != null) {
-                AppdefEntityID geid = new AppdefEntityID(hubForm.getFg());
-                resources = appdefBoss.findCompatInventory(sessionId,
-                                                           geid,
-                                                           resourceName,
-                                                           pc);
+            AppdefEntityID geid = null;
+            if (hubForm.getFg() != null && hubForm.getFg().length() > 0) {
+                geid = new AppdefEntityID(hubForm.getFg());
             }
-            else {
-                resources = appdefBoss.findCompatInventory(sessionId, 
-                                                           entityType, 
-                                                           resourceType,
-                                                           null,
-                                                           null,
-                                                           resourceName,
-                                                           pc);
-            }            
+            
+            resources = appdefBoss.findCompatInventory(sessionId, 
+                                                       entityType, 
+                                                       resourceType,
+                                                       geid,
+                                                       resourceName,
+                                                       pc);
         }
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);

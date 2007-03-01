@@ -259,8 +259,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.g}">
     <c:param name="g" value="${param.g}"/>
   </c:if>
+  <c:if test="${not empty param.ft}">
+    <c:param name="ft" value="${param.ft}"/>
+  </c:if>
   <c:param name="ff" value="${ResourceHubForm.ff}"/>
-  <c:param name="ft" value="${ResourceHubForm.ft}"/>
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
@@ -492,7 +494,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </tiles:insert>
 
 <html:hidden property="ff"/>
-<html:hidden property="ft"/>
 <html:hidden property="g"/>
 <html:hidden property="pn"/>
 

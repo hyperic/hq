@@ -2673,8 +2673,8 @@ public class AppdefBossEJBImpl
         }
 
         return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId, 
-                                   groupEntTypeId, null, pendingEntities,
-                                   resourceName, null, groupType, pc);
+                                   groupEntTypeId, null, false,
+                                   pendingEntities, resourceName, null, groupType, pc);
     }
 
     /**
@@ -2702,8 +2702,8 @@ public class AppdefBossEJBImpl
     {
         return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
                                    APPDEF_GROUP_TYPE_UNDEFINED, groupEntity,
-                                   pendingEntities, null, null,
-                                   APPDEF_GROUP_TYPE_UNDEFINED, pc);
+                                   false, pendingEntities, null,
+                                   null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
     }
 
    /**
@@ -2737,9 +2737,9 @@ public class AppdefBossEJBImpl
         PageList ret = findCompatInventory(sessionId, appdefTypeId,
                                            appdefResTypeId,
                                            APPDEF_GROUP_TYPE_UNDEFINED,
-                                           groupEntity, pendingEntities,
-                                           resourceName, null,
-                                           APPDEF_GROUP_TYPE_UNDEFINED, pc);
+                                           groupEntity, false,
+                                           pendingEntities, resourceName,
+                                           null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
 
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
             appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) 
@@ -2768,9 +2768,11 @@ public class AppdefBossEJBImpl
                                          int appdefResTypeId, 
                                          int grpEntId, 
                                          AppdefEntityID groupEntity,
-                                         AppdefEntityID[] pendingEntities, 
-                                         String resourceName, List filterList,
-                                         int groupType, PageControl pc)
+                                         boolean members, 
+                                         AppdefEntityID[] pendingEntities,
+                                         String resourceName,
+                                         List filterList, int groupType,
+                                         PageControl pc)
     throws PermissionException, SessionTimeoutException, 
            SessionNotFoundException 
     {
@@ -2819,7 +2821,7 @@ public class AppdefBossEJBImpl
                                                     groupEntity.getId());
                 groupType = gValue.getGroupType();
                 groupMemberFilter = 
-                    new AppdefPagerFilterGroupMemExclude(gValue);
+                    new AppdefPagerFilterGroupMemExclude(gValue, members);
                 filterList.add( groupMemberFilter );
             } catch (AppdefGroupNotFoundException e) {
                 // non-fatal; log and continue
@@ -2922,65 +2924,41 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public PageList findCompatInventory(int sessionId,
+    public PageList findCompatInventory(int sessionId, int appdefTypeId,
+                                        int appdefResTypeId,
                                         AppdefEntityID groupEntity,
-                                        String resourceName,
-                                        PageControl pc)
-        throws PermissionException, SessionTimeoutException, 
-               SessionNotFoundException, AppdefGroupNotFoundException 
+                                        String resourceName, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
-        StopWatch watch = new StopWatch();
-        watch.markTimeBegin("findCompatInventory");
+        PageList ret = findCompatInventory(sessionId, appdefTypeId,
+                                           appdefResTypeId,
+                                           APPDEF_GROUP_TYPE_UNDEFINED,
+                                           groupEntity, true, null,
+                                           resourceName, null,
+                                           APPDEF_GROUP_TYPE_UNDEFINED, pc);
 
-        // init our (never-null) page and filter lists
-        List filterList = new ArrayList();
-
-        AppdefGroupValue gValue =
-            findGroup(sessionId, groupEntity.getId());
-        AppdefPagerFilterGroupMemExclude groupMemberFilter = 
-            new AppdefPagerFilterGroupMemExclude(gValue, true);
-        filterList.add( groupMemberFilter );
-
-        // find ALL viewable resources by entity (type or name) and
-        // translate to appdef entities.
-        // We have to create a new page control because we are no
-        // longer limiting the size of the record set in authz.
-        watch.markTimeBegin("findViewableEntityIds");
-        List toBePaged = findViewableEntityIds(subject,
-                                               gValue.getGroupEntType(),
-                                               resourceName, pc);
-        watch.markTimeEnd("findViewableEntityIds");
-
-        // Page it, then convert to AppdefResourceValue
-        List finalList = new ArrayList();
-        watch.markTimeBegin("getPageList");
-        PageList pl = getPageList (toBePaged, pc, filterList);
-        watch.markTimeEnd("getPageList");
-
-        for (Iterator itr = pl.iterator();itr.hasNext();){
-            AppdefEntityID ent = (AppdefEntityID) itr.next();
+        if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
+            appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) 
+        {
+            AuthzSubjectValue subject = manager.getSubject(sessionId);
             
-            try {
-                finalList.add(findById(subject, ent));
-            } catch (AppdefEntityNotFoundException e) {
-                // XXX - hack to ignore the error.  This must have occurred
-                // when we created the resource, and rolled back the
-                // AppdefEntity but not the Resource
-                log.error("Invalid entity still in resource table: " + ent);
-                continue;
-            }            
+            for (Iterator i = ret.iterator(); i.hasNext(); ) {
+                AppdefResourceValue res = (AppdefResourceValue) i.next();
+
+                if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+                    ServerValue server = getServerManager()
+                        .getServerById(subject, res.getId());
+                    res.setHostName(server.getPlatform().getName());
+
+                } else {
+                    ServiceValue service =
+                        getServiceManager().getServiceById(subject, res.getId());
+                    res.setHostName(service.getServer().getName());
+                }
+            }
         }
-
-        int groupMemberFilterSize = 0;
-        if (groupMemberFilter != null)
-            groupMemberFilterSize = groupMemberFilter.getFilterCount();
-
-        int adjustedSize = toBePaged.size() - groupMemberFilterSize;
-        watch.markTimeEnd("findCompatInventory");
-        log.debug("findCompatInventory(): " + watch);
-        return new PageList(finalList, adjustedSize);
+        return ret;
     }
 
    /**
@@ -3029,15 +3007,15 @@ public class AppdefBossEJBImpl
             return findCompatInventory(sessionId, appdefTypeId,
                                        appdefResTypeId,
                                        APPDEF_GROUP_TYPE_UNDEFINED, null,
-                                       pendingEntities, null,
-                                       filterList, APPDEF_GROUP_TYPE_UNDEFINED,
-                                       pc);
+                                       false, pendingEntities,
+                                       null, filterList,
+                                       APPDEF_GROUP_TYPE_UNDEFINED, pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return findCompatInventory(sessionId, appdefTypeId,
                                        appdefResTypeId,
                                        APPDEF_GROUP_TYPE_UNDEFINED, null,
-                                       pendingEntities, null,
-                                       null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
+                                       false, pendingEntities,
+                                       null, null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
         default:
             throw new IllegalArgumentException("Unsupported appdef type");
         }
