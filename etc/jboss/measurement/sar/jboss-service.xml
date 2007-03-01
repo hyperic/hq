@@ -32,7 +32,7 @@
   <mbean code="org.hyperic.hq.measurement.server.mbean.AvailabilityCheckService"
 	 name="hyperic.jmx:type=Service,name=AvailabilityCheck">
     <attribute name="Interval">120000</attribute>
-    <attribute name="Wait">30000</attribute>
+    <attribute name="Wait">300000</attribute>
   </mbean>
 
   <!-- Service is defined here, but started in HAService -->
