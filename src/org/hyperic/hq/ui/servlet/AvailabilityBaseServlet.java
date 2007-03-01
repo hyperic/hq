@@ -70,7 +70,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 FileUtil.copyStream(
                     getServletContext().getResourceAsStream(url), bs);
             } catch (IOException e) {
-                log.debug("could not load icon " + url, e);
+                log.debug("Could not load icon " + url, e);
             }
             iconData.put(url, new IconBytes(bs.toByteArray()));
         }
@@ -131,7 +131,7 @@ public abstract class AvailabilityBaseServlet extends HttpServlet {
                 sendWarningIcon(request, response);
             }
         } catch (Throwable t) {
-            log.debug("can't get availability measurement: ", t);
+            log.debug("Can't get availability measurement: ", t);
             sendErrorIcon(request, response);
             return;
         }
