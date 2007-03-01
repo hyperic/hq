@@ -316,7 +316,6 @@
 
     <mkdir dir="${ear.dir}/events-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/common-mbeans.sar/META-INF" />
-    <mkdir dir="${ear.dir}/ha-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/measurement-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/scheduler-mbeans.sar/META-INF" />
 
@@ -328,8 +327,6 @@
     </replace>
     <copy todir="${ear.dir}/common-mbeans.sar/META-INF" 
           file="etc/jboss/common/sar/jboss-service.xml" />
-    <copy todir="${ear.dir}/ha-mbeans.sar/META-INF"
-          file="etc/jboss/ha/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/measurement-mbeans.sar/META-INF" 
           file="etc/jboss/measurement/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/scheduler-mbeans.sar/META-INF" 
@@ -1567,8 +1564,6 @@
 
     <!-- The installer needs a copy of the unsubstituted version of
          certain subsystems jboss-service files -->
-    <copy file="etc/jboss/ha/sar/jboss-service.xml" 
-          toFile="${archive-dir}/installer-${version}/data/hq-engine/ha-service.xml"/>
     <copy file="etc/jboss/scheduler/sar/jboss-service.xml"
           toFile="${archive-dir}/installer-${version}/data/hq-engine/scheduler-service.xml"/>
 

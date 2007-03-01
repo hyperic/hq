@@ -26,7 +26,4 @@
   <module>
     <service>measurement-mbeans.sar</service>
   </module>
-  <module>
-    <service>ha-mbeans.sar</service>
-  </module>
 </jboss-app> 

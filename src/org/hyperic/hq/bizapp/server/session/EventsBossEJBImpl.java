@@ -95,14 +95,11 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
-import org.hyperic.hq.events.ext.RegisteredTriggerEvent;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
-import org.hyperic.hq.events.server.session.RegisteredTriggerNotifier;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -119,7 +116,6 @@ import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.util.ConfigPropertyException;
-import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -127,7 +123,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -497,11 +492,6 @@ public class EventsBossEJBImpl
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
         }
-        
-        // Broadcast the trigger creation
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.ADD,
-            (RegisteredTriggerValue[]) triggers.toArray(
-                new RegisteredTriggerValue[triggers.size()]));
 
         return parent;
     }
@@ -594,11 +584,6 @@ public class EventsBossEJBImpl
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
         }
-        
-        // Broadcast the trigger creation
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.ADD,
-            (RegisteredTriggerValue[]) triggers.toArray(
-                new RegisteredTriggerValue[triggers.size()]));
 
         return parent;
     }
@@ -680,11 +665,6 @@ public class EventsBossEJBImpl
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
         }
-        
-        // Broadcast the trigger creation
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.ADD,
-            (RegisteredTriggerValue[]) triggers.toArray(
-                new RegisteredTriggerValue[triggers.size()]));
     }
 
     /**
@@ -830,11 +810,6 @@ public class EventsBossEJBImpl
             // Now update the alert definition
             getADM().updateAlertDefinition(adval);
         }
-        
-        // Broadcast the trigger creation
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.ADD,
-            (RegisteredTriggerValue[]) triggers.toArray(
-                new RegisteredTriggerValue[triggers.size()]));
     }
 
     /**

@@ -110,9 +110,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         RegisteredTrigger t = getRegisteredTrigger(val.getId());
 
         t.setRegisteredTriggerValue(val);
-        
-        // Re-register the trigger with the dispatcher
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.UPDATE, val);
     }
 
     /**
@@ -125,9 +122,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         RegisteredTriggerValue val = t.getRegisteredTriggerValue();
 
         getTriggerDAO().remove(t);
-        
-        // Unregister the trigger with the dispatcher
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.DELETE, val);
     }
 
     /**
@@ -147,11 +141,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
             
             vals[i] = t.getRegisteredTriggerValue();
             getTriggerDAO().remove(t);
-        }       
-
-        // Unregister the trigger with the dispatcher
-        RegisteredTriggerNotifier.broadcast(RegisteredTriggerEvent.DELETE, 
-                                            vals);
+        }
     }
 
     public static RegisteredTriggerManagerLocal getOne() {

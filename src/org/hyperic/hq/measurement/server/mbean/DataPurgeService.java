@@ -27,10 +27,7 @@ package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.Date;
 
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.ha.shared.Mode;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 
@@ -61,43 +58,22 @@ public class DataPurgeService
     public DataPurgeService() {}
 
     /**
-     * DataPurge service is only active on master and standalone servers.
      * @jmx:managed-operation
      */
-    public boolean isActive () {
-        return Mode.getInstance().isActivated();
-    }
+    public void stop() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void stop()
-    {
-    }
-
-    /**
-     * @jmx:managed-operation
-     */
-    public void start() 
-        throws ApplicationException, SystemException
-    {
-    }
+    public void start() {}
 
     /**
      * @jmx:managed-operation
      */
     public void startPurgeService() {
 
-        // Make sure we are master or a standalone server
-        if (!isActive()) {
-            log.info("Not starting HQ Data Manager Service on Data Processing " +
-                     "Node");
-            return;
-        }
-        
         Class jobClass;
-        String jobName = 
-            ProductProperties.getProperty("hyperic.hq.dataPurge");
+        String jobName = ProductProperties.getProperty("hyperic.hq.dataPurge");
         try {
             jobClass = Class.forName(jobName);
         } catch (Exception e) {

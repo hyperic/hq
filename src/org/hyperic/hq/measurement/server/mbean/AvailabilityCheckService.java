@@ -53,7 +53,6 @@ import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
 import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
-import org.hyperic.hq.ha.shared.Mode;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
@@ -110,14 +109,6 @@ public class AvailabilityCheckService
     }
 
     /**
-     * AvailCheck service is only active on master and standalone servers.
-     * @jmx:managed-operation
-     */
-    public boolean isActive () {
-        return Mode.getInstance().isActivated();
-    }
-
-    /**
      * @jmx:managed-operation
      */
     public void hit(Date lDate) {
@@ -130,9 +121,6 @@ public class AvailabilityCheckService
             return;
         }
         
-        if (!isActive())
-            return;
-
         long current = lDate.getTime();
 
         // Don't start backfilling immediately

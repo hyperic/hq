@@ -8,7 +8,6 @@ conf=${ENGINE}/server/default/conf
 hq-ds.xml=${deploy}/
 jbossmq-service.xml=${deploy}/jms/jbossmq-service.xml
 server.xml=${deploy}/jbossweb-tomcat55.sar/
-ha-service.xml=${deploy}/hq.ear/ha-mbeans.sar/${META}
 jboss-service-events.xml=${deploy}/hq.ear/events-mbeans.sar/${META}
 scheduler-service.xml=${deploy}/hq.ear/scheduler-mbeans.sar/${META}
 jboss-service.xml=${conf}/

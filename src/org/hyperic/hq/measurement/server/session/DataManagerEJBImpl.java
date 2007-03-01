@@ -117,8 +117,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     // Purge intervals, loaded once on first invocation.
     private long purgeRaw, purge1h, purge6h;
 
-    private static final Analyzer analyzer = (Analyzer) ProductProperties
-        .getPropertyInstance("hyperic.hq.measurement.analyzer");
+    private Analyzer analyzer = null;
 
     private double getValue(ResultSet rs) throws SQLException {
         double val = rs.getDouble("value");
@@ -2025,7 +2024,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() throws CreateException {}
+    public void ejbCreate() throws CreateException {
+        analyzer = (Analyzer) ProductProperties
+            .getPropertyInstance("hyperic.hq.measurement.analyzer");
+
+    }
+
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}

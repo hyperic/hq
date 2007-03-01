@@ -32,10 +32,6 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
-import org.hyperic.hq.ha.shared.Mode;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * MBean class that is called by the Scheduler to send a HeartBeat
@@ -48,7 +44,6 @@ public class HeartBeatService
     implements HeartBeatServiceMBean 
 {
     private String topicName = EventConstants.EVENTS_TOPIC;
-    private final Log log = LogFactory.getLog(HeartBeatService.class);
 
     /**
      * Get the topic name to where the heartbeat messages will be
@@ -71,14 +66,6 @@ public class HeartBeatService
     }
 
     /**
-     * Heartbeat service is only active on master and standalone servers.
-     * @jmx:managed-operation
-     */
-    public boolean isActive () {
-        return Mode.getInstance().isActivated();
-    }
-
-    /**
      * Send the message.
      *
      * @jmx:managed-operation
@@ -88,7 +75,6 @@ public class HeartBeatService
     }
     
     protected void hitInSession(Date lDate) {
-        if (!isActive()) return;
         try {
             // Try to see if RegisteredTriggerManager is available
             RegisteredTriggerManagerUtil.getLocalHome();
@@ -97,7 +83,6 @@ public class HeartBeatService
             HeartBeatEvent event = new HeartBeatEvent(lDate);
             Messenger sender = new Messenger();
             sender.publishMessage(topicName, event);
-            // log.info("got hit, date: " + lDate);
         } catch (Exception e) {
             // Do not send out hearbeat if services are not up
         }
@@ -106,28 +91,20 @@ public class HeartBeatService
     /**
      * @jmx:managed-operation
      */
-    public void init() {
-        // do nothing
-    }
+    public void init() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void start() throws Exception {
-        // do nothing
-    }
+    public void start() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void stop() {
-        // do nothing
-    }
+    public void stop() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void destroy() {
-        // do nothing
-    }
+    public void destroy() {}
 }
