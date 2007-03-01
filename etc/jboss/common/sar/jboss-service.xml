@@ -2,12 +2,12 @@
 <!DOCTYPE server>
 
 <server>
-  <mbean code="org.hyperic.hq.common.server.mbean.MonitorService"
-         name="hyperic.jmx:type=Service,name=Monitor">
-  </mbean>
+    <mbean code="org.hyperic.hq.common.server.mbean.MonitorService"
+           name="hyperic.jmx:type=Service,name=Monitor">
+    </mbean>
 
-  <mbean code="org.hyperic.hq.common.server.mbean.ProductConfigService"
-         name="hyperic.jmx:type=Service,name=ProductConfig">
-    <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
-  </mbean>
+    <mbean code="org.hyperic.hq.common.server.mbean.ProductConfigService"
+           name="hyperic.jmx:type=Service,name=ProductConfig">
+        <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
+    </mbean>
 </server>
