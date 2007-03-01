@@ -947,6 +947,16 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
+<div class="ListHeaderInactive" style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px;">
+    <table cellspacing="0" cellpadding="3" border="0">
+    <tbody>
+       <tr>
+        <td><fmt:message key="inform.config.escalation.scheme.inProgressEscalation"/></td>
+       </tr>
+    </tbody>
+    </table>
+</div>
+
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
   name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input
   type="hidden" value="0" id="pid"> <input type="hidden" value="0"
