@@ -25,8 +25,10 @@
 package org.hyperic.hq.escalation.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -73,6 +75,13 @@ class EscalationStateDAO
     Collection findStatesFor(Escalation mesc) {
         return createCriteria()
             .add(Expression.eq("escalation", mesc))
+            .list();
+    }
+    
+    List getActiveEscalations(int maxEscalations) {
+        return createCriteria()
+            .addOrder(Order.asc("nextActionTime"))
+            .setMaxResults(maxEscalations)
             .list();
     }
 }

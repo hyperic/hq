@@ -274,7 +274,10 @@ public class EscalationManagerEJBImpl
         EscalationRuntime.getInstance().scheduleEscalation(curState);
     }
      
-    private Escalatable getEscalatable(EscalationState s) {
+    /**
+     * @ejb:interface-method  
+     */
+    public Escalatable getEscalatable(EscalationState s) {
         return s.getAlertType().findEscalatable(new Integer(s.getAlertId())); 
     }
     
@@ -601,6 +604,13 @@ public class EscalationManagerEJBImpl
         unscheduleEscalation(esc);
     }
 
+    /**
+     * @ejb:interface-method  
+     */
+    public List getActiveEscalations(int maxEscalations) {
+        return _stateDAO.getActiveEscalations(maxEscalations);
+    }
+    
     /**
      * @ejb:interface-method  
      */

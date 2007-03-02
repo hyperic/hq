@@ -2290,6 +2290,10 @@
               scope="request"
               type="org.hyperic.hq.ui.json.action.escalation.finder.ListAllEscalationName"/>
 
+      <action path="/escalation/ListActiveEscalations"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListActiveEscalations"/>
+
   </action-mappings>
 
 <!-- ===================================== Controller Configuration -->
