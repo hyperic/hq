@@ -70,6 +70,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -450,12 +451,12 @@ public class AIQueueManagerEJBImpl
         throws FinderException {
 
         // XXX Do authz check
-        AIIp aiip = getAIIpDAO().findByAddress(address);
-        if (aiip == null) {
-            throw new FinderException("Can't find ip: "+address);
+        List aiips = getAIIpDAO().findByAddress(address);
+        if (aiips.size() == 0) {
+            throw new FinderException("Can't find ip: " + address);
         }
 
-        AIIpValue aiipValue = aiip.getAIIpValue();
+        AIIpValue aiipValue = ((AIIp) aiips.get(0)).getAIIpValue();
         return aiipValue;
     }
 
@@ -656,6 +657,17 @@ public class AIQueueManagerEJBImpl
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
             Ip qip = (Ip) i.next();
             
+            String mac = qip.getMACAddress();
+            
+            if (!mac.equals(NetFlags.NULL_HWADDR)) {
+                List addrs = getAIIpDAO().findByMACAddress(qip.getMACAddress());
+                if (addrs.size() > 0) {
+                    AIPlatform aiplatform =
+                        ((AIIp) addrs.get(0)).getAIPlatform();
+                    return aiplatform.getAIPlatformValue();
+                }
+            }
+
             String address = qip.getAddress();
             // XXX This is a hack that we need to get rid of
             // at some point.  The idea is simple.  Every platform
@@ -664,13 +676,14 @@ public class AIQueueManagerEJBImpl
             // localhost doesn't give us any information.  Long
             // term, when we are trying to match all addresses,
             // this can go away.
-            if ((address.equals("127.0.0.1") || address.equals("0.0.0.0")) &&
-                    i.hasNext()) {
+            if ((address.equals(NetFlags.LOOPBACK_ADDRESS) ||
+                 address.equals(NetFlags.ANY_ADDR)) && i.hasNext()) {
                 continue;
             }
-            AIIp addr = getAIIpDAO().findByAddress(address);
-            if (addr != null) {
-                AIPlatform aiplatform = addr.getAIPlatform();
+
+            List addrs = getAIIpDAO().findByAddress(address);
+            if (addrs.size() > 0) {
+                AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
                 return aiplatform.getAIPlatformValue();
             }
         }
@@ -697,6 +710,7 @@ public class AIQueueManagerEJBImpl
         // match (and it isn't localhost), we assume that it is
         // the same platform.  In the future, we are probably going
         // to need to do better.
+        PlatformManagerLocal pmLocal = getPlatformMgrLocal();
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
             AIIp qip = (AIIp) i.next();
             
@@ -712,7 +726,6 @@ public class AIQueueManagerEJBImpl
                 continue;
             }
                 
-            PlatformManagerLocal pmLocal = getPlatformMgrLocal();
             PageList platforms = pmLocal.findPlatformsByIpAddr(subject, address,
                                                                null);
             if (!platforms.isEmpty()) {

@@ -1,5 +1,7 @@
 package org.hyperic.hq.dao;
 
+import java.util.List;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.autoinventory.AIIp;
@@ -63,12 +65,20 @@ public class AIIpDAO extends HibernateDAO
         return ip;
     }
 
-    public AIIp findByAddress(String addr)
+    public List findByAddress(String addr)
     {
         String sql="from AIIp where address=?";
-        return (AIIp)getSession().createQuery(sql)
+        return getSession().createQuery(sql)
             .setString(0, addr)
-            .uniqueResult();
+            .list();
     }
 
+
+    public List findByMACAddress(String addr)
+    {
+        String sql="from AIIp where mACAddress=?";
+        return getSession().createQuery(sql)
+            .setString(0, addr)
+            .list();
+    }
 }
