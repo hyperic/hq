@@ -4804,6 +4804,17 @@ has already been defined.
                      insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (54, 'KERBEROS_DEBUG', '', '', '0')"/>
     </schemaSpec>
 
+    <schemaSpec version="3.16">
+
+      <schema-directSQL>
+        <statement desc="Update ControlActionGroupJob for HQ">
+          UPDATE EAM_QRTZ_JOB_DETAILS SET
+          job_class_name='org.hyperic.hq.control.server.session.ControlActionGroupJob' WHERE
+          job_class_name='net.hyperic.hq.control.server.session.ControlActionGroupJob'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
