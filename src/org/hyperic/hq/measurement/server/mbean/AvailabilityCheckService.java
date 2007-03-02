@@ -35,9 +35,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
@@ -51,8 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
@@ -71,17 +66,11 @@ import org.hyperic.util.jdbc.DBUtil;
  * This job is responsible for filling in missing availabilty metric values.
  *
  * @jmx:mbean name="hyperic.jmx:type=Service,name=AvailabilityCheck"
- * 
  */
 public class AvailabilityCheckService
     extends SessionMBeanBase
-    implements AvailabilityCheckServiceMBean, MBeanRegistration,
-               EjbModuleLifecycleListener
+    implements AvailabilityCheckServiceMBean
 {
-    private MBeanServer server = null;
-    private EjbModuleLifecycle haListener = null;
-    private boolean started = false;
-        
     private static final String ENABLED_AVAIL_METRICS_SQL = 
         "SELECT m.id, m.mtime, m.coll_interval, mt.appdef_type, m.instance_id " +
         "FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
@@ -116,11 +105,7 @@ public class AvailabilityCheckService
     }
     
     protected void hitInSession(Date lDate) {
-        if (!started) {
-            this.log.debug("Unable to run.  Haven't been started yet");
-            return;
-        }
-        
+
         long current = lDate.getTime();
 
         // Don't start backfilling immediately
@@ -351,7 +336,6 @@ public class AvailabilityCheckService
             }
         } catch (Exception e) {
             log.error("Unable to get enabled availability measurements", e);
-            // gulp?
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -402,43 +386,18 @@ public class AvailabilityCheckService
     /**
      * @jmx:managed-operation
      */
-    public void start() throws Exception {
-        haListener =
-            new EjbModuleLifecycle(this.server, this,
-                                   HQConstants.EJB_MODULE_PATTERN);
-        haListener.start();
-    }
+    public void start() throws Exception {}
 
     /**
      * @jmx:managed-operation
      */
     public void stop() {
         log.info("Stopping " + this.getClass().getName());
-        haListener.stop();
     }
 
     /**
      * @jmx:managed-operation
      */
     public void destroy() {}
-
-    public ObjectName preRegister(MBeanServer server, ObjectName name)
-        throws Exception {
-        this.server = server;
-        return name;
-    }
-
-    public void postRegister(Boolean arg0) {}
-
-    public void preDeregister() throws Exception {}
-
-    public void postDeregister() {}
-
-    public void ejbModuleStarted() {
-        log.info("Starting " + this.getClass().getName());
-        this.started = true;
-    }
-
-    public void ejbModuleStopped() {}
 }
 

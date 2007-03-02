@@ -31,9 +31,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import javax.ejb.CreateException;
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -46,9 +43,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
@@ -77,16 +71,12 @@ import org.hyperic.hq.measurement.shared.SRNManagerLocal;
  */
 public class ScheduleVerificationService
     extends SessionMBeanBase
-    implements ScheduleVerificationServiceMBean, MBeanRegistration,
-               EjbModuleLifecycleListener 
+    implements ScheduleVerificationServiceMBean
 {
-    private Log log =
+    private Log _log =
         LogFactory.getLog(ScheduleVerificationService.class.getName());
 
-    private MBeanServer server = null;
-    private EjbModuleLifecycle camListener = null;
-    private boolean started = false;
-    private boolean firstTime = true;
+    private boolean _firstTime = true;
 
     private MeasurementProcessorLocal getMeasurementProcessor() {
         return MeasurementProcessorEJBImpl.getOne();
@@ -109,10 +99,10 @@ public class ScheduleVerificationService
         try {
             agentSync.reschedule(aid);
         } catch (MonitorAgentException e) {
-            log.error("Unable to communicate with agent for entity: " +
-                      aid.getID() + " to refresh metric schedule");
+            _log.error("Unable to communicate with agent for entity: " +
+                       aid.getID() + " to refresh metric schedule");
         } catch (Exception e) {
-            log.error("Failed to refresh schedule for entity: " + aid, e);
+            _log.error("Failed to refresh schedule for entity: " + aid, e);
         }
     }
     
@@ -125,8 +115,10 @@ public class ScheduleVerificationService
     
     protected void hitInSession(final Date lDate) {        
         // Skip first schedule verification, let the server warm up a bit
-        if (firstTime) {
-            firstTime = false;
+        // XXX: We should add a wait attribute for this, similar to the
+        //      AvailCheckService --RPM
+        if (_firstTime) {
+            _firstTime = false;
             return;
         }
 
@@ -139,14 +131,14 @@ public class ScheduleVerificationService
         } catch (CreateException e) {
             // this is a schedulable MBean -- we will try again later,
             // so just log a "not ready" message
-            log.info("Measurement Schedule Verification: " +
-                     "Agent or Data Manager not ready.");
+            _log.info("Measurement Schedule Verification: " +
+                      "Agent or Data Manager not ready.");
             return;
         } catch (NamingException e) {
             // this is a schedulable MBean -- we will try again later,
             // so just log a "not ready" message
-            log.info("Measurement Schedule Verification: " +
-                     "Agent or Data Manager not ready.");
+            _log.info("Measurement Schedule Verification: " +
+                      "Agent or Data Manager not ready.");
             return;
         }
 
@@ -181,32 +173,30 @@ public class ScheduleVerificationService
                 // Now reschedule all metrics for this entity
                 agentSync.reschedule(entId);
             } catch (AgentNotFoundException e) {
-                log.debug("Measurement Schedule Verification: " +
-                          "Agent not found for " + entId);
+                _log.debug("Measurement Schedule Verification: " +
+                           "Agent not found for " + entId);
                 // Resource not found, remove from SRN
                 srnManager.removeSrn(entId);
             } catch (PermissionException e) {
-                log.debug("Measurement Schedule Verification: " +
-                          "No permission to look up " + entId);
+                _log.debug("Measurement Schedule Verification: " +
+                           "No permission to look up " + entId);
             } catch (MonitorCreateException e) {
-                log.debug("Measurement Schedule Verification: " +
-                          "Could not create a monitor to connect to agent " +
+                _log.debug("Measurement Schedule Verification: " +
+                           "Could not create a monitor to connect to agent " +
                           agentVal);
                 downAgents.add(agentVal);
             } catch (MonitorAgentException e) {
-                log.debug("Measurement Schedule Verification: " +
-                          "Could not connect to agent " + agentVal);
+                _log.debug("Measurement Schedule Verification: " +
+                           "Could not connect to agent " + agentVal);
                 downAgents.add(agentVal);
             } catch (MeasurementScheduleException e) {
-                this.log.debug(
-                    "Scheduling error during rescheduling of " + entId);
+                _log.debug("Scheduling error during rescheduling of " + entId);
             } catch (MeasurementUnscheduleException e) {
-                this.log.debug(
-                    "Scheduling error during unscheduling of " + entId);
+                _log.debug("Scheduling error during unscheduling of " + entId);
             } catch (SubjectNotFoundException e) {
                 // No measurements to reschedule
             } catch (InvalidGraphException e) {
-                this.log.debug("Invalid graph for rescheduling of " + entId);
+                _log.debug("Invalid graph for rescheduling of " + entId);
             }
         }
     }
@@ -214,49 +204,24 @@ public class ScheduleVerificationService
     /**
      * @jmx:managed-operation
      */
-    public void init() {
-    }
+    public void init() {}
 
     /**
      * @jmx:managed-operation
      */
-    public void start() throws Exception {
-        camListener = new EjbModuleLifecycle(this.server, this,
-                                             HQConstants.EJB_MODULE_PATTERN);
-        camListener.start();
-
+    public void start() {
+        _log.info("Starting" + this.getClass().getName());
     }
 
     /**
      * @jmx:managed-operation
      */
     public void stop() {
-        log.info("Stopping ScheduleVerificationService");
-        camListener.stop();
+        _log.info("Stopping " + this.getClass().getName());
     }
 
     /**
      * @jmx:managed-operation
      */
     public void destroy() {}
-
-    public ObjectName preRegister(MBeanServer server, ObjectName name)
-        throws Exception {
-        this.server = server;
-        return name;
-    }
-
-    public void postRegister(Boolean arg0) {}
-
-    public void preDeregister() throws Exception {
-    }
-
-    public void postDeregister() {}
-
-    public void ejbModuleStarted() {
-        log.info("Starting ScheduleVerificationService");
-        this.started = true;
-    }
-
-    public void ejbModuleStopped() {}
 }
