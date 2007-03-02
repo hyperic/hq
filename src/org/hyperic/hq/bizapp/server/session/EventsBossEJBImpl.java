@@ -82,6 +82,7 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionConfigInterface;
@@ -1608,6 +1609,33 @@ public class EventsBossEJBImpl
         if (e != null) {
             getEscMan().removeAction(e, actId);
         }
+    }
+    
+    /**
+     * Retrieve a list of {@link EscalationState}s, representing the active
+     * escalations in the system.  
+     * 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public List getActiveEscalations(int sessionId, int maxEscalations) 
+        throws SessionException
+    {
+        manager.authenticate(sessionId);
+
+        return getEscMan().getActiveEscalations(maxEscalations);
+    }
+    
+    /**
+     * Gets the escalatable associated with the specified state
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Escalatable getEscalatable(int sessionId, EscalationState state) 
+        throws SessionException
+    {
+        manager.authenticate(sessionId);
+        return getEscMan().getEscalatable(state);
     }
     
     /**
