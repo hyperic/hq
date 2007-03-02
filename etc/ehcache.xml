@@ -79,10 +79,16 @@
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>  
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="CpropKey.findByKey"
          maxElementsInMemory="500"
          eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="RawMeasurement.findByTemplateForInstance"
+         maxElementsInMemory="5000"
+		 eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
@@ -115,7 +121,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  
+
   <!-- Metric data cache, used outside of hibernate -->
   <cache name="MetricDataCache"
          maxElementsInMemory="50000"
@@ -257,7 +263,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-            
+
   <!-- Group caches -->
   <cache name="org.hyperic.hq.authz.server.session.ResourceGroup"
          maxElementsInMemory="100"
@@ -380,6 +386,12 @@
   <!-- Classic alert caches -->
   <cache name="Alert.findByCreateTime"
          maxElementsInMemory="10"
+		 eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Alert.findByEntity"
+         maxElementsInMemory="100"
 		 eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -558,22 +570,6 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.escalation.server.session.Escalation.actionsList"
          maxElementsInMemory="20"
-		 eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-
-  <!-- Measurement stuffs -->
-  <cache name="RawMeasurement.findByTemplateForInstance"
-         maxElementsInMemory="5000"
-		 eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-
-  <!-- Alert caches -->
-  <cache name="Alert.findByEntity"
-         maxElementsInMemory="100"
 		 eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
