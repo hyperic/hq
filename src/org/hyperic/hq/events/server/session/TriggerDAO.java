@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -39,11 +41,25 @@ public class TriggerDAO extends HibernateDAO {
 
         //  Set the new ID just in case someone wants to use it
         createInfo.setId(res.getId());  
+
+        EventsStartupListener.getChangedTriggerCallback()
+            .afterTriggerCreated(res);
+        
         return res;
     }
 
     void remove(RegisteredTrigger trig) {
         super.remove(trig);
+    }
+
+    void removeTriggers(AlertDefinition def) {
+        EventsStartupListener.getChangedTriggerCallback()
+            .beforeTriggersDeleted(def.getTriggers());
+        
+        for (Iterator it = def.getTriggers().iterator(); it.hasNext(); ) {
+            remove(it.next());
+        }
+        def.clearTriggers();
     }
 
     public RegisteredTrigger findById(Integer id) {

@@ -292,6 +292,14 @@ public class AlertDefinition
         _actions = actions;
     }
 
+    void clearActions() {
+        for (Iterator it = _actions.iterator(); it.hasNext(); ) {
+            Action act = (Action) it.next();
+            act.setAlertDefinition(null);
+        }
+        _actions.clear();
+    }
+
     public Collection getConditions() {
         return Collections.unmodifiableCollection(_conditions);
     }
@@ -302,6 +310,15 @@ public class AlertDefinition
 
     void setConditionsBag(Collection conditions) {
         _conditions = conditions;
+    }
+
+    void clearConditions() {
+        for (Iterator it = _conditions.iterator(); it.hasNext(); ) {
+            AlertCondition cond = (AlertCondition) it.next();
+            cond.setAlertDefinition(null);
+            cond.setTrigger(null);
+        }
+        _conditions.clear();
     }
 
     public Collection getTriggers() {
@@ -315,7 +332,15 @@ public class AlertDefinition
     void setTriggersBag(Collection triggers) {
         _triggers = triggers;
     }
-    
+
+    void clearTriggers() {
+        for (Iterator it = _triggers.iterator(); it.hasNext(); ) {
+            RegisteredTrigger trigger = (RegisteredTrigger) it.next();
+            trigger.setAlertDefinition(null);
+        }
+        _triggers.clear();
+    }
+
     public boolean isResourceTypeDefinition() {
         return getParent() != null && 
                getParent().getId().equals(new Integer(0));

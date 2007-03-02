@@ -122,11 +122,7 @@ public class AlertDefinitionManagerEJBImpl
 
         // Get rid of their triggers first
         TriggerDAO tdao = getTriggerDAO();
-        for (Iterator it = alertdef.getTriggersBag().iterator(); it.hasNext(); )
-        {
-            tdao.remove((RegisteredTrigger) it.next());
-            it.remove();
-        }
+        tdao.removeTriggers(alertdef);
 
         AlertDAO dao = getAlertDAO();
         // See if there are any alerts
@@ -138,13 +134,13 @@ public class AlertDefinitionManagerEJBImpl
             // Make sure to disassociated from all triggers
             alertdef.setActOnTrigger(null);
             
-            for (Iterator it = alertdef.getConditionsBag().iterator();
+            for (Iterator it = alertdef.getConditions().iterator();
                  it.hasNext(); ) {
                 AlertCondition cond = (AlertCondition) it.next();
                 cond.setTrigger(null);
             }
             
-            for (Iterator it = alertdef.getActionsBag().iterator();
+            for (Iterator it = alertdef.getActions().iterator();
                  it.hasNext(); ) {
                 Action act = (Action) it.next();
                 act.setParent(null);
@@ -306,8 +302,9 @@ public class AlertDefinitionManagerEJBImpl
             // we'll create new conditions and update the alert
             // definition, but we won't remove the old conditions.
             AlertConditionValue[] conds = adval.getConditions();
+            AlertDefinitionDAO r = getAlertDefDAO();
 
-            getAlertDefDAO().clearConditions(aldef);
+            aldef.clearConditions();
             for (int i = 0; i < conds.length; i++) {
                 RegisteredTrigger trigger = null;
                 
@@ -328,8 +325,9 @@ public class AlertDefinitionManagerEJBImpl
             // we'll create new actions and update the alert
             // definition, but we won't remove the old conditions.
             ActionValue[] actions = adval.getActions();
+            AlertDefinitionDAO r = getAlertDefDAO();
 
-            getAlertDefDAO().clearActions(aldef);
+            aldef.clearActions();
             for (int i = 0; i <  actions.length; i++) {
                 Action parent = null;
                 

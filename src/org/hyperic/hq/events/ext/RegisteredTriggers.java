@@ -38,22 +38,21 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
+import org.hyperic.hq.events.server.session.RegisteredTrigger;
+import org.hyperic.hq.events.server.session.TriggerChangeCallback;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.collection.IntHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-/**
- *
- */
 public class RegisteredTriggers {
     private final static Log log =
         LogFactory.getLog(RegisteredTriggers.class.getName());
@@ -115,6 +114,10 @@ public class RegisteredTriggers {
                 this.unregisterTrigger((Integer) it.next());
             }
             
+            
+            HQApp app = HQApp.getInstance();
+            app.registerCallbackListener(TriggerChangeCallback.class,
+                                         new RegisteredTriggersUpdater());
             successful = true;
         } catch (javax.naming.NamingException e) {
             // Change to warning so that it won't show up in startup log
@@ -141,13 +144,6 @@ public class RegisteredTriggers {
         init(); // Initialize first
         
         Map triggers = new Hashtable();
-        
-        // See if this is a registration event
-        if (eventType.equals(RegisteredTriggerEvent.class)) {
-            RegistrationTrigger rtrig = new RegistrationTrigger();
-            triggers.put(rtrig.getId(), rtrig);
-            return triggers;
-        }
         
         // Look up by Event type
         if (!keyedByType.containsKey(eventType)) {
@@ -312,44 +308,28 @@ public class RegisteredTriggers {
         return this.keyedByTrigger;
     }
     
-    public class RegistrationTrigger extends AbstractTrigger {
-        /** Process an event from the dispatcher.
-         * @param event the Event to process
-         * @throws org.hyperic.hq.events.ext.ActionExecuteException if an action throws an exception
-         *
-         */
-        public void processEvent(AbstractEvent event)
-            throws EventTypeException, ActionExecuteException {
-            if (!(event instanceof RegisteredTriggerEvent)) {
-                throw new EventTypeException(
-                    "Event is not a RegisteredTriggerEvent");
-            }
-            
-            RegisteredTriggerEvent rte = (RegisteredTriggerEvent) event;
-            RegisteredTriggerValue tv = rte.getValue();
-            switch (rte.getAction()) {
-                // For updates, first unregister, and then register
-                case RegisteredTriggerEvent.UPDATE :
-                    unregisterTrigger(tv.getId());
-                case RegisteredTriggerEvent.ADD :
-                    try {
-                        registerTrigger(tv);
-                    } catch (ClassNotFoundException e) {
-                        log.error("Error registering trigger", e);
-                    } catch (InstantiationException e) {
-                        log.error("Error registering trigger", e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Error registering trigger", e);
-                    } catch (InvalidTriggerDataException e) {
-                        log.error("Error registering trigger", e);
-                    }
-                    break;
-                case RegisteredTriggerEvent.DELETE :
-                    unregisterTrigger(tv.getId());
-                    break;
-                default :
-                    break;
+    public class RegisteredTriggersUpdater implements TriggerChangeCallback {
+
+        public void beforeTriggersDeleted(Collection triggers) {
+            for (Iterator it = triggers.iterator(); it.hasNext(); ) {
+                RegisteredTrigger trigger = (RegisteredTrigger) it.next();
+                unregisterTrigger(trigger.getId());
             }
         }
+
+        public void afterTriggerCreated(RegisteredTrigger trigger) {
+            try {
+                registerTrigger(trigger.getRegisteredTriggerValue());
+            } catch (ClassNotFoundException e) {
+                log.error("Error registering trigger", e);
+            } catch (InstantiationException e) {
+                log.error("Error registering trigger", e);
+            } catch (IllegalAccessException e) {
+                log.error("Error registering trigger", e);
+            } catch (InvalidTriggerDataException e) {
+                log.error("Error registering trigger", e);
+            }
+        }
+
     }
 }

@@ -42,7 +42,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
@@ -407,8 +410,27 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public String getShortReason(Alert alert) {
+        AlertDefinition def = alert.getAlertDefinition();
+        AppdefEntityID aeid =
+            new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
+        AppdefEntityValue aev =
+            new AppdefEntityValue(aeid, AuthzSubjectManagerEJBImpl
+                                          .getOne().getOverlord());
+        
+        String name = "";
+        
+        try {
+            name = aev.getName();
+        } catch (AppdefEntityNotFoundException e) {
+            log.warn("Alert short reason requested for invalid resource " +
+                     aeid);
+        } catch (PermissionException e) {
+            // Should never happen
+            log.error("Overlord does not have permission for resource " + aeid);
+        }
+        
         // Get the short reason for the alert
-        return alert.getAlertDefinition().getName();
+        return def.getName() + " " + name;
     }
     
     /**

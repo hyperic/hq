@@ -41,25 +41,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
         super.remove(def);
     }
 
-    void clearConditions(AlertDefinition def) {
-        Collection conds = def.getConditionsBag();
-        for (Iterator it = conds.iterator(); it.hasNext(); ) {
-            AlertCondition cond = (AlertCondition) it.next();
-            cond.setAlertDefinition(null);
-            cond.setTrigger(null);
-        }
-        conds.clear();
-    }
-
-    void clearActions(AlertDefinition def) {
-        Collection acts = def.getActionsBag();
-        for (Iterator it = acts.iterator(); it.hasNext(); ) {
-            Action act = (Action) it.next();
-            act.setAlertDefinition(null);
-        }
-        acts.clear();
-    }
-
     public List findByAppdefEntity(int type, int id) {
         return findByAppdefEntity(type, id, "d.name");
     }

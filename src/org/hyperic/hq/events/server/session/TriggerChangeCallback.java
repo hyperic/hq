@@ -25,32 +25,20 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.StartupListener;
+import java.util.Collection;
 
-public class EventsStartupListener 
-    implements StartupListener
-{
-    private static final Object LOCK = new Object();
-    private static TriggerChangeCallback _changeCallback;
+public interface TriggerChangeCallback {
+    /**
+     * Called before triggers are deleted
+     * 
+     * @param triggers being deleted
+     */
+    void beforeTriggersDeleted(Collection triggers);
     
-    public void hqStarted() {
-        // Make sure the escalation enumeration is loaded and registered so 
-        // that the escalations run
-        ClassicEscalationAlertType.class.getClass();
-
-        HQApp app = HQApp.getInstance();
-
-        synchronized (LOCK) {
-            _changeCallback = (TriggerChangeCallback)
-                app.registerCallbackCaller(TriggerChangeCallback.class);
-        }
-
-    }
-
-    static TriggerChangeCallback getChangedTriggerCallback() {
-        synchronized (LOCK) {
-            return _changeCallback;
-        }
-    }
+    /**
+     * Called after trigger is created
+     * 
+     * @param trigger being created
+     */
+    void afterTriggerCreated(RegisteredTrigger trigger);
 }
