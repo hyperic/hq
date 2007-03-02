@@ -171,6 +171,15 @@ public class JMXFilterInitServlet extends HttpServlet {
                 base=base.substring(lastIdx );
             }
 
+            //handle another jboss tmp name that endsWith 5 random digits
+            int end = base.length();
+            while (Character.isDigit(base.charAt(end-1))) {
+                --end;
+            }
+            if ((base.length() - end) == 5) {
+                base = base.substring(0, end);
+            }
+
             //JBoss embedded Tomcat prepends /tmpXXXXX to the context name.  
             //The XXXXX is always a random number up to 5 digits long.  Since
             //it can change on restart, strip it out.
