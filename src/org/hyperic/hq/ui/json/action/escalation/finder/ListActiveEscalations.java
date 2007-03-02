@@ -56,7 +56,7 @@ public class ListActiveEscalations extends BaseAction {
                                                  10);  // XXX
 
         
-        JSONArray res = new JSONArray();
+        JSONArray resArr = new JSONArray();
         
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             EscalationState s = (EscalationState)i.next();
@@ -84,9 +84,12 @@ public class ListActiveEscalations extends BaseAction {
             sj.put("acked", s.isPaused());
             sj.put("ackedBy", s.getAcknowledgedBy().getFullName());
                    
-            res.put(sj);
+            resArr.put(sj);
         }
         
+        JSONObject res = new JSONObject();
+        
+        res.put("summary", resArr);
         ctx.setJSONResult(new JSONResult(res));
     }
 }
