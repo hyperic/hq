@@ -25,7 +25,7 @@
                  type="org.hyperic.hq.ui.action.admin.user.NewForm"/>
 
         <form-bean name="RegisterUserForm"
-                 type="org.hyperic.hq.ui.action.admin.user.NewForm"/>
+                 type="org.hyperic.hq.ui.action.admin.user.EditForm"/>
 
         <form-bean name="EditPasswordForm"
                  type="org.hyperic.hq.ui.action.admin.user.EditPasswordForm"/>

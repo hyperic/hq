@@ -70,7 +70,7 @@
 </table>
 </logic:messagesPresent>
 <!-- CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
  <tr class="BlockContent">  
   <td width="20%" class="BlockLabel">
    <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
@@ -189,8 +189,14 @@
 	</tr>	 
     </c:when>
   </c:choose>
-  <c:if test="${mode ne MODE_REGISTER}">
+
+  <c:choose>
    <tr valign="top">
+  <c:when test="${mode eq MODE_REGISTER}">
+    <td width="20%" class="BlockLabel">&nbsp;</td>
+    <td width="30%" class="BlockContent">&nbsp;</td>
+  </c:when>
+  <c:otherwise>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
     <td width="30%" class="BlockContent">
      <c:choose>
@@ -205,20 +211,18 @@
      <html:radio property="enableLogin" value="no" tabindex="7"/>
      <fmt:message key="admin.user.generalProperties.enableLogin.No"/>
     </td>
-    <!--
-    <td width="20%" class="BlockLabel">&nbsp;</td>
-    <td width="30%" class="BlockContent">&nbsp;</td>
-    -->
+  </c:otherwise>
+  </c:choose>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
     <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="smsAddress" tabindex="10"/></td>
    </tr>
-  </c:if>
-   <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
 </table>
 
 <c:if test="${mode eq MODE_EDIT}">         
  <html:hidden name="User" property="id" />
  <html:hidden property="u" value="${param.u}" />
+</c:if>
+
+<c:if test="${mode eq MODE_REGISTER}">         
+ <html:hidden property="id" value="${User.id}" />
 </c:if>

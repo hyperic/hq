@@ -33,7 +33,7 @@
 
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_REGISTER" var="MODE_REGISTER"/>
 
-<c:set var="User" value="${sessionScope.webUser.subject}"/>
+<c:set var="User" value="${webUser}"/>
 
 <html:form action="/admin/user/Register">
 
