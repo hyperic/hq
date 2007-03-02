@@ -121,7 +121,7 @@ public class AuthzSubjectManagerEJBImpl
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // check to see if the user attempting the modification
         // is the same as the one being modified
-        if(!(whoami.getId() == subject.getId())) {
+        if(!whoami.getId().equals(subjectPojo.getId())) {
             pm.check(whoami.getId(), getRootResourceType().getId(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
