@@ -401,29 +401,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         int sessionId = getAuthManager().getUnauthSessionId(name);
         return getCurrentSubject(sessionId);
     }
-
-    
-    /**
-     * Register the user by using the overlord to create him.
-     * @throws SubjectNotFoundException 
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public AuthzSubjectValue registerSubject(Integer sessionId,
-                                             AuthzSubjectValue user)
-        throws NamingException, CreateException, RemoveException,
-               PermissionException, SessionTimeoutException,
-               SessionNotFoundException, SubjectNotFoundException {
-        // check for timeout
-        AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());
-
-        // create the user as the overlord
-        AuthzSubjectValue overlord = getOverlord();
-        AuthzSubjectManagerLocal subject = getAuthzSubjectManager();
-        subject.createSubject(overlord, user);
-        return subject.findSubjectByAuth(user.getName(), user.getAuthDsn());
-    }
     
     /**
      * Return the <code>AuthzSubjectValue</code> object identified by

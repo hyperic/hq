@@ -74,7 +74,7 @@ public class RegisterAction extends BaseAction {
         Log log = LogFactory.getLog(RegisterAction.class.getName());
 
         Integer sessionId =  RequestUtils.getSessionId(request);
-        NewForm userForm = (NewForm)form;
+        EditForm userForm = (EditForm)form;
         HttpSession session = request.getSession(false);
 
         ActionForward forward = checkSubmit(request, mapping, form);
@@ -86,7 +86,9 @@ public class RegisterAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();            
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
-        AuthzSubjectValue user = new AuthzSubjectValue();
+        AuthzSubjectValue user = ContextUtils.getAuthzBoss(ctx)
+            .findSubject(RequestUtils.getSessionId(request), userForm.getId() );
+
         WebUser webUser = SessionUtils.getWebUser(session);
 
         user.setName        ( webUser.getUsername() );
@@ -106,7 +108,7 @@ public class RegisterAction extends BaseAction {
         // use the overlord to register the subject, and don't add
         // a principal
         log.trace("registering subject [" + user.getName() + "]");
-        authzBoss.registerSubject(sessionId, user);
+        authzBoss.saveSubject(sessionId, user);
 
         // nuke the temporary bizapp session and establish a new
         // one for this subject.. must be done before pulling the
@@ -115,15 +117,11 @@ public class RegisterAction extends BaseAction {
         sessionId = new Integer(authBoss.login(user.getName(), password));
 
         log.trace("finding subject [" + user.getName() + "]");
-        AuthzSubjectValue newUser =
-            authzBoss.findSubjectByName(sessionId, user.getName());
 
         // the new user has no prefs, but we still want to pick up
         // the defaults
-        ConfigResponse preferences = new ConfigResponse();
-        ConfigResponse defaultPreferences =
+        ConfigResponse preferences = 
             (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
-        preferences.merge(defaultPreferences, false);
 
         // look up the user's permissions
         log.trace("getting all operations");
@@ -135,13 +133,12 @@ public class RegisterAction extends BaseAction {
         }
 
         // we also need to create up a new web user
-        webUser = new WebUser(newUser, sessionId, password, preferences,
-                              false);
+        webUser = new WebUser(user, sessionId, password, preferences, false);
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
         HashMap parms = new HashMap(1);
-        parms.put(Constants.USER_PARAM, newUser.getId());
+        parms.put(Constants.USER_PARAM, user.getId());
 
         return returnSuccess(request, mapping, parms, false);
     }
