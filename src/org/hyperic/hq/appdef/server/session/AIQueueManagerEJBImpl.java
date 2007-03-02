@@ -659,7 +659,8 @@ public class AIQueueManagerEJBImpl
             
             String mac = qip.getMACAddress();
             
-            if (!mac.equals(NetFlags.NULL_HWADDR)) {
+            if (mac != null && mac.length() > 0 &&
+                !mac.equals(NetFlags.NULL_HWADDR)) {
                 List addrs = getAIIpDAO().findByMACAddress(qip.getMACAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform =
