@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.security.auth.login.AppConfigurationEntry;
@@ -39,8 +38,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycle;
-import org.hyperic.hq.common.shared.util.EjbModuleLifecycleListener;
+import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.ConfigPropertyException;
 
 import org.apache.commons.logging.Log;
@@ -53,8 +51,7 @@ import org.apache.commons.logging.LogFactory;
  * @jmx:mbean name="hyperic.jmx:type=Service,name=ProductConfig"
  */
 public class ProductConfigService 
-    implements ProductConfigServiceMBean, MBeanRegistration, 
-               EjbModuleLifecycleListener {
+    implements ProductConfigServiceMBean {
 
     private static final String AUTH_REALM =
         HQConstants.ApplicationName;
@@ -62,9 +59,7 @@ public class ProductConfigService
     private static final String AUTH_OBJECTNAME = 
         "jboss.security:service=XMLLoginConfig";
     
-    protected Log log = LogFactory.getLog(ProductConfigService.class.getName());
-    protected EjbModuleLifecycle listener = null;
-    protected MBeanServer server = null;
+    protected Log _log = LogFactory.getLog(ProductConfigService.class);
 
     public ProductConfigService() {}
 
@@ -73,29 +68,33 @@ public class ProductConfigService
      */
     public void stop()
     {
-        log.info("Stopping ProductConfigService");
-        listener.stop();
+        _log.info("Stopping ProductConfigService");
     }
 
     /**
      * @jmx:managed-operation
      */
-    public void start() 
-        throws ApplicationException, SystemException
-    {
-        log.info("Starting ProductConfigService");
-        listener = new EjbModuleLifecycle(server, this,
-                                          HQConstants.EJB_MODULE_PATTERN);   
-        listener.start();
+    public void start() {
+        _log.info("Starting " + this.getClass().getName());
+        _log.info("Initializing Hyperic Auth Providers");
+
+        try {
+            Properties conf = getConfig();
+            _log.info("Enabling Hyperic JAAS Providers");
+            registerJAASModules(conf);
+        } catch (Exception e) {
+            // Shouldn't happen
+            _log.fatal("Error initializing " + this.getClass().getName(), e);
+        }
     }
 
     /**
      * @jmx:managed-operation
      */
-    public void restart()
-    {
-        this.log.info("Restarting ProductConfigService");
-        ejbModuleStarted();
+    public void restart() {
+        _log.info("Restarting " + this.getClass().getName());
+        stop();
+        start();
     }
 
     /**
@@ -108,27 +107,10 @@ public class ProductConfigService
      */
     public void destroy() {}
 
-    /**
-     * @jmx:managed-attribute
-     */
-
-    // MBeanRegistration APIS 
-    public ObjectName preRegister(MBeanServer server, ObjectName name)
-            throws Exception 
-    {
-        this.server = server;
-        return name;
-    }
-
-    public void postRegister(Boolean registrationDone) {}
-
-    public void preDeregister() {}
-
-    public void postDeregister() {}
-
     private void registerJAASModules(Properties conf) 
         throws SystemException 
     {
+        MBeanServer server = MBeanUtil.getMBeanServer();
         ArrayList configEntries = new ArrayList();
         AppConfigurationEntry ace;
         Map configOptions;
@@ -140,37 +122,20 @@ public class ProductConfigService
                 AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
                 configOptions);
             // We always add the JDBC provider to the auth config
-            this.log.info("Enabling Hyperic JDBC JAAS Provider");
+            _log.info("Enabling Hyperic JDBC JAAS Provider");
             configEntries.add(ace);
 
             AppConfigurationEntry[] config = (AppConfigurationEntry[])
                 configEntries.toArray(new AppConfigurationEntry[0]);
 
             ObjectName objName = new ObjectName(AUTH_OBJECTNAME);
-            Object obj = 
-                server.invoke(objName, AUTH_METHOD,
-                              new Object[] { AUTH_REALM, config },
-                              new String[] { "java.lang.String", 
-                                            config.getClass().getName() });
+            server.invoke(objName, AUTH_METHOD,
+                          new Object[] { AUTH_REALM, config },
+                          new String[] { "java.lang.String",
+                                         config.getClass().getName() });
         } catch (Exception e) {
             throw new SystemException("Error Registering Hyperic JAAS " +
                                          "Modules", e);
-        }
-    }
-
-    public void ejbModuleStopped() {}
-
-    public void ejbModuleStarted()
-    {
-        log.info("Initializing Hyperic Auth Providers");
-
-        try {
-            Properties conf = getConfig();
-            this.log.info("Enabling Hyperic JAAS Providers");
-            registerJAASModules(conf);
-        } catch (Exception e) {
-            // Shouldn't happen
-            log.fatal("Error initializing the ProductConfigService:", e);
         }
     }
 

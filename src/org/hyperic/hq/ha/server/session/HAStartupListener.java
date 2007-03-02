@@ -42,6 +42,7 @@ public class HAStartupListener
         MBeanServer server = MBeanUtil.getMBeanServer();
         try {
             _log.info("Starting services");
+            startConfigService(server);
             startHAService(server);
         } catch (Exception e) {
             _log.error("Unable to start services", e);
@@ -56,5 +57,15 @@ public class HAStartupListener
         server.createMBean("org.hyperic.hq.ha.server.mbean.HAService", o);
 
         server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
+    }
+
+    private void startConfigService(MBeanServer server)
+        throws Exception
+    {
+        ObjectName o =
+            new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
+        server.createMBean("org.hyperic.hq.common.server.mbean.ProductConfigService", o);
+
+        server.invoke(o, "start", new Object[] {}, new String[] {});
     }
 }
