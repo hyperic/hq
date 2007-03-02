@@ -144,7 +144,7 @@ public class AuthManagerEJBImpl implements SessionBean {
                 if (!subject.getActive()) {
                     throw new LoginException("User account has been disabled.");
                 }
-            } catch (ObjectNotFoundException fe) {
+            } catch (SubjectNotFoundException fe) {
                 // User not found, check to make sure the standard JDBC JAAS
                 // provider is being used before creating the authz resources.
                 if (!config.getProperty(HQConstants.JAASProvider).

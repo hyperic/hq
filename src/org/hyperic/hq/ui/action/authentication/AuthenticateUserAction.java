@@ -82,9 +82,7 @@ public class AuthenticateUserAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
 
-        boolean usingJDBC = ContextUtils.usingJDBCAuthentication(ctx);
-
-        WebUser webUser = null;
+        WebUser webUser;
         HashMap userOpsMap = new HashMap();
         boolean needsRegistration = false;
         try {
@@ -99,39 +97,27 @@ public class AuthenticateUserAction extends TilesAction {
             }
 
             // look up the subject record
-            AuthzSubjectValue subject = null;
-            try {
-                subject = authzBoss
-                    .findSubjectByName(sessionId,
-                                       logonForm.getJ_username());
-            }
-            catch (FinderException fe) {
-                // Only throw and exception if the user is not found and
-                // we are using the JDBC login module.
-                if (usingJDBC) {
-                    throw fe;
-                }
+            AuthzSubjectValue subject =
+                authzBoss.findSubjectByName(sessionId,
+                                            logonForm.getJ_username());
+            if (subject == null) {
 
                 subject = new AuthzSubjectValue();
                 subject.setName(logonForm.getJ_username());
 
                 needsRegistration = true;
+            } else if (subject.getEmailAddress() == null ||
+                       subject.getEmailAddress().length() == 0) {
+                needsRegistration = true;
             }
 
             // figure out if the user has a principal
-            boolean hasPrincipal = false;
-            if (!usingJDBC) {
+            boolean
                 hasPrincipal = authBoss.isUser(sessionId.intValue(),
                                                logonForm.getJ_username());
-            }
-            else {
-                // with regular JDBC authentication, we are guaranteed
-                // to have a principal
-                hasPrincipal = true;
-            }
 
             ConfigResponse preferences = new ConfigResponse();
-            if (! needsRegistration) {
+            if (!needsRegistration) {
                 // look up the user's preferences
 
                 ConfigResponse defaultPreferences =
@@ -172,16 +158,10 @@ public class AuthenticateUserAction extends TilesAction {
         }
 
         // compute the post-login destination
-        ActionForward af = null;
+        ActionForward af;
         boolean setRedirect = true;
         if (needsRegistration) {
-            // we're authenticating against LDAP, and the user has
-            // never logged into HQ before, so he has no subject
-            // record. send him through the LDAP registration
-            // workflow.
-            if (log.isTraceEnabled()) {
-                log.trace("LDAP registration required");
-            }
+            log.debug("User registration required");
             af = new ActionForward(URL_REGISTER);
 
         } else {
@@ -201,14 +181,6 @@ public class AuthenticateUserAction extends TilesAction {
         // if any, forget the old session and start a new one,
         // setting the web user to show that we're logged in
 
-        // K, don't know really why we need to invalidate the existing session
-        // Seems a bit drastic.  Invalidating a session has a drawback for
-        // in-container testing with strutstest + cactus fails.  The failure
-        // is due to simple session management algorithm used by strustest.
-        // Taking this out so that we can do in-container testing w/o
-        // putting in a hack here to bypass invalidation on cactus test mode.
-        // Hope this does not break the app, crossing fingers here.
-//        session.invalidate();
         session = request.getSession(true);              
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
