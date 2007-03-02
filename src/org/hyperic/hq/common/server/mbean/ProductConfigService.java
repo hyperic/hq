@@ -33,9 +33,6 @@ import java.util.Properties;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.ldap.InitialLdapContext;
 import javax.security.auth.login.AppConfigurationEntry;
 
 import org.hyperic.hq.common.ApplicationException;
