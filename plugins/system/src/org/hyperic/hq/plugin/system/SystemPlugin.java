@@ -31,6 +31,7 @@ import org.hyperic.hq.product.ExecutableProcess;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogFileTailPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.ProcessControlPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -163,6 +164,9 @@ public class SystemPlugin extends ProductPlugin {
             }
             else if (info.getName().equals(SVC_NAME)) {
                 return new Win32ControlPlugin();
+            }
+            else if (info.getName().equals(PROCESS_NAME)) {
+                return new ProcessControlPlugin();
             }
         }
         else if (type.equals(ProductPlugin.TYPE_CONFIG_TRACK)) {
