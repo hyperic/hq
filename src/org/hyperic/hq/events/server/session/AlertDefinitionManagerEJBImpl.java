@@ -57,8 +57,6 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.util.pager.PageControl;
@@ -107,7 +105,8 @@ public class AlertDefinitionManagerEJBImpl
      * Remove alert definitions
      */
     private boolean deleteAlertDefinition(AuthzSubjectValue subj,
-                                       AlertDefinition alertdef, boolean force)
+                                          AlertDefinition alertdef,
+                                          boolean force)
         throws RemoveException, PermissionException 
     {
         canManageAlerts(subj, alertdef);
@@ -115,9 +114,18 @@ public class AlertDefinitionManagerEJBImpl
         boolean survivors = false;
         
         // If there are any children, delete them, too
-        for (Iterator i = alertdef.getChildren().iterator(); i.hasNext();) {
+        for (Iterator i = alertdef.getChildrenBag().iterator(); i.hasNext();) {
             AlertDefinition child = (AlertDefinition) i.next();
             survivors |= deleteAlertDefinition(subj, child, force);
+            i.remove();
+        }
+
+        // Get rid of their triggers first
+        TriggerDAO tdao = getTriggerDAO();
+        for (Iterator it = alertdef.getTriggersBag().iterator(); it.hasNext(); )
+        {
+            tdao.remove((RegisteredTrigger) it.next());
+            it.remove();
         }
 
         AlertDAO dao = getAlertDAO();
@@ -443,28 +451,8 @@ public class AlertDefinitionManagerEJBImpl
     public void deleteAlertDefinitions(AuthzSubjectValue subj, Integer[] ids)
         throws RemoveException, PermissionException
     {
-        RegisteredTriggerManagerLocal rtm;
-        
-        rtm = RegisteredTriggerManagerEJBImpl.getOne();
-        
-        // Get rid of their triggers first
-        for (int i = 0; i < ids.length; i++) {
-            AlertDefinition def = getAlertDefDAO().findById(ids[i]);            
-            canManageAlerts(subj, def);
-
-            def.setActOnTrigger(null);
-            rtm.deleteAlertDefinitionTriggers(ids[i]);
-
-            for (Iterator it = def.getChildren().iterator(); it.hasNext(); ) {
-                AlertDefinition child = (AlertDefinition)it.next();
-
-                rtm.deleteAlertDefinitionTriggers(child.getId());
-            }
-        }
-
         for (int i = 0; i < ids.length; i++) {
             AlertDefinition alertdef = getAlertDefDAO().findById(ids[i]);
-
             deleteAlertDefinition(subj, alertdef, false);
         }
     }
@@ -477,26 +465,12 @@ public class AlertDefinitionManagerEJBImpl
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException 
     {
-        RegisteredTriggerManagerLocal rtm;
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        
-        rtm = RegisteredTriggerManagerEJBImpl.getOne();
         
         List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
         
-        // Get rid of their triggers first
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition adef = (AlertDefinition) i.next();
-    
-            rtm.deleteAlertDefinitionTriggers(adef.getId());
-                
-            Collection ads = adef.getChildren();
-            for (Iterator cit = ads.iterator(); cit.hasNext();) {
-                AlertDefinition child = (AlertDefinition) cit.next();
-                        
-                rtm.deleteAlertDefinitionTriggers(child.getId());
-            }
-                
             deleteAlertDefinition(subj, adef, true);
         }
     }
@@ -622,7 +596,7 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:interface-method
      */
     public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
-        return getAlertDefDAO().findChildAlertDefs(id, parentId).size() > 0;
+        return getAlertDefDAO().findChildAlertDef(id, parentId) != null;
     }
 
     /** 
@@ -653,11 +627,9 @@ public class AlertDefinitionManagerEJBImpl
     public PageList findChildAlertDefinitions(Integer id) {
         AlertDefinition def = getAlertDefDAO().findById(id);
         List vals = new ArrayList();
-
-        List ads = getAlertDefDAO().findChildAlertDefinitions(def);
+        Collection ads = def.getChildren();
         for (Iterator i=ads.iterator(); i.hasNext(); ) {
             AlertDefinition child = (AlertDefinition)i.next();
-
             vals.add(child.getAlertDefinitionValue());
         }
 
@@ -668,21 +640,10 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:interface-method
      */
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
-                                              Integer pid)
-        throws FinderException 
-    {
-        Collection res = getAlertDefDAO().findChildAlertDefs(aeid, pid);
-
-        if (res.isEmpty())
-            return null;
-        return ((AlertDefinition)res.iterator().next()).getId();
-    }
-
-    /** Get list of children alert definitions for a parent alert definition
-     * @ejb:interface-method
-     */
-    public List findAlertDefinitionChildren(AlertDefinition def) {
-        return getAlertDefDAO().findChildAlertDefinitions(def);
+                                              Integer pid) {
+        AlertDefinition def = getAlertDefDAO().findChildAlertDef(aeid, pid);
+        
+        return def == null ? null : def.getId();
     }
 
     /** 
@@ -722,17 +683,18 @@ public class AlertDefinitionManagerEJBImpl
     {
         AlertDefinitionDAO aDao = getAlertDefDAO();
 
-        List adefs;
+        Collection adefs;
         if (parentId == EventConstants.TYPE_ALERT_DEF_ID) {
             adefs = aDao.findByAppdefEntityType(id);
+            
+            if (pc.getSortorder() == PageControl.SORT_DESC)
+                Collections.reverse((List) adefs);
         } else {
             canManageAlerts(subj, id);
-            adefs = aDao.findChildAlertDefs(id, parentId);
+            AlertDefinition def = getAlertDefDAO().findById(parentId);
+            adefs = def.getChildren();
         }
                 
-        if (pc.getSortorder() == PageControl.SORT_DESC)
-            Collections.reverse(adefs);
-
         return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
 
@@ -759,12 +721,13 @@ public class AlertDefinitionManagerEJBImpl
     {
         AlertDefinitionDAO aDao = getAlertDefDAO();
         TreeMap ret = new TreeMap();
-        List adefs;
+        Collection adefs;
             
         if (parentId != null &&
             EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) 
         {
-            adefs = aDao.findChildAlertDefs(id, parentId);
+            AlertDefinition def = getAlertDefDAO().findById(parentId);
+            adefs = def.getChildren();
         } else {
             canManageAlerts(subj, id);
             adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
@@ -773,7 +736,6 @@ public class AlertDefinitionManagerEJBImpl
         // Use name as key so that map is sorted
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition adLocal = (AlertDefinition) i.next();
-
             ret.put(adLocal.getName(), adLocal.getId());
         }
         return ret;

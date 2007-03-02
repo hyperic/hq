@@ -113,34 +113,16 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Delete a trigger.
-     *
-     * @ejb:interface-method
-     */
-    public void deleteTrigger(Integer trigId) {
-        RegisteredTrigger t = getRegisteredTrigger(trigId);
-        RegisteredTriggerValue val = t.getRegisteredTriggerValue();
-
-        getTriggerDAO().remove(t);
-    }
-
-    /**
      * Delete all triggers for an alert definition.
      *
      * @ejb:interface-method
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
         AlertDefinition def = getAlertDefDAO().findById(adId);
-        Collection triggers = new ArrayList(def.getTriggers());
-        RegisteredTriggerValue[] vals =
-            new RegisteredTriggerValue[triggers.size()];
 
-        int i = 0;
-        for (Iterator it = triggers.iterator(); it.hasNext(); i++) {
-            RegisteredTrigger t = (RegisteredTrigger) it.next();
-            
-            vals[i] = t.getRegisteredTriggerValue();
-            getTriggerDAO().remove(t);
+        for (Iterator it = def.getTriggersBag().iterator(); it.hasNext(); ) {
+            getTriggerDAO().remove((RegisteredTrigger) it.next());
+            it.remove();
         }
     }
 

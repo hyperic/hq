@@ -367,9 +367,6 @@ public class EventsBossEJBImpl
             } catch (MeasurementNotFoundException e) {
                 // Just set to 0, it'll never fire
                 clone.setMeasurementId(0);
-            } catch (FinderException e) {
-                // Just set to 0, it'll never fire
-                clone.setMeasurementId(0);
             }
     
             // Now add it to the alert definition
@@ -690,6 +687,7 @@ public class EventsBossEJBImpl
         }
 
         ArrayList alertdefs = new ArrayList();
+        
         // Associate with alert definition
         alertdefs.add(getADM().getById(subject, adid));
         
@@ -844,20 +842,6 @@ public class EventsBossEJBImpl
     /**
      * Delete a collection of alert definitions
      *
-     * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void removeAlertDefinitions(int sessionID, AppdefEntityID id)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               RemoveException, PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        getADM().deleteAlertDefinitions(subject, id);
-    }
-
-    /**
-     * Delete a collection of alert definitions
-     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
@@ -953,7 +937,7 @@ public class EventsBossEJBImpl
             AlertDefinition def = getADM().getByIdAndCheck(subject, adids[i]);
             count += getAM().deleteAlerts(subject, def);
             
-            List children = getADM().findAlertDefinitionChildren(def);
+            Collection children = def.getChildren();
             
             for (Iterator it = children.iterator(); it.hasNext(); ) {
                 AlertDefinition child = (AlertDefinition) it.next();

@@ -127,7 +127,6 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
-import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
@@ -136,6 +135,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -1616,7 +1616,6 @@ public class AppdefBossEJBImpl
                 svcMgrLoc.getServicesByPlatform(subject, platformId,
                                                 PageControl.PAGE_ALL));
 
-            EventsBossLocal eventsBoss    = getEventsBoss();
             MeasurementBossLocal measBoss = getMeasurementBoss();
             
             AppdefEntityID[] toDeleteResourceIds =
@@ -1636,7 +1635,8 @@ public class AppdefBossEJBImpl
                 }
 
                 // now remove the alerts
-                eventsBoss.removeAlertDefinitions(sessionId, thisId);
+                AlertDefinitionManagerEJBImpl.getOne()
+                    .deleteAlertDefinitions(subject, thisId);
                 toDeleteIdsList.add(thisId);
                 toDeleteResourceIds[i] = thisId;
             }
@@ -1984,14 +1984,14 @@ public class AppdefBossEJBImpl
                                               PageControl.PAGE_ALL));
 
 
-            EventsBossLocal eventsBoss    = getEventsBoss();
             MeasurementBossLocal measBoss = getMeasurementBoss();
                 
             for (Iterator i=unscheduleList.iterator();i.hasNext();) {
                 AppdefEntityID thisId =
                     ((AppdefResourceValue)i.next()).getEntityId();
                 // now remove the alerts
-                eventsBoss.removeAlertDefinitions(sessionId, thisId);
+                AlertDefinitionManagerEJBImpl.getOne()
+                    .deleteAlertDefinitions(subject, thisId);
 
                 // now remove the measurements
                 measBoss.removeMeasurements(sessionId, thisId);
@@ -2043,7 +2043,8 @@ public class AppdefBossEJBImpl
                 AppdefEntityID.newServiceID(serviceId.intValue());
 
             // first remove the alerts
-            getEventsBoss().removeAlertDefinitions(sessionId, id);
+            AlertDefinitionManagerEJBImpl.getOne()
+                .deleteAlertDefinitions(subject, id);
 
             // now remove any measurements associated with the service
             MeasurementBossLocal measBoss = getMeasurementBoss();

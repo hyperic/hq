@@ -33,7 +33,7 @@ public class TriggerDAO extends HibernateDAO {
         super(RegisteredTrigger.class, f);
     }
 
-    protected RegisteredTrigger create(RegisteredTriggerValue createInfo) {
+    RegisteredTrigger create(RegisteredTriggerValue createInfo) {
         RegisteredTrigger res = new RegisteredTrigger(createInfo);
         save(res);
 
@@ -42,11 +42,7 @@ public class TriggerDAO extends HibernateDAO {
         return res;
     }
 
-    protected void remove(RegisteredTrigger trig) {
-        if (trig.getAlertDefinition() != null) {
-            trig.getAlertDefinition().removeTrigger(trig);
-        }
-        trig.setAlertDefinition(null);
+    void remove(RegisteredTrigger trig) {
         super.remove(trig);
     }
 

@@ -82,30 +82,28 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     /**
-     * Find all alert defs for a given appdef entity.  All the alert defs
-     * must be a child of the passed def
+     * Find the alert def for a given appdef entity and is child of the parent
+     * alert def passed in
      * @param ent      Entity to find alert defs for
      * @param parentId ID of the parent
      */
-    public List findChildAlertDefs(AppdefEntityID ent, Integer parentId){
+    public AlertDefinition findChildAlertDef(AppdefEntityID ent,
+                                             Integer parentId){
         String sql = "FROM AlertDefinition a WHERE " + 
             "a.appdefType = :appdefType AND a.appdefId = :appdefId " +
             "AND a.deleted = false AND a.parent = :parent";
         
-        return getSession().createQuery(sql)
+        List defs = getSession().createQuery(sql)
             .setInteger("appdefType", ent.getType())
             .setInteger("appdefId", ent.getID())
             .setInteger("parent", parentId.intValue())
             .list();
-    }
+        
+        if (defs.size() == 0) {
+            return null;
+        }
 
-    public List findChildAlertDefinitions(AlertDefinition def) {
-        String sql = "from AlertDefinition d where d.parent = :parent " + 
-            "AND d.deleted = false";
-
-        return getSession().createQuery(sql)
-            .setParameter("parent", def)
-            .list();
+        return (AlertDefinition) defs.get(0);
     }
 
     public AlertDefinition findById(Integer id) {

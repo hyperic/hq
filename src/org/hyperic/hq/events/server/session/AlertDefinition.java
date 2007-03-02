@@ -74,10 +74,10 @@ public class AlertDefinition
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
     
-    protected AlertDefinition() {
+    AlertDefinition() {
     }
 
-    protected AlertCondition createCondition(AlertConditionValue condVal,
+    AlertCondition createCondition(AlertConditionValue condVal,
                                              RegisteredTrigger trigger)
     {
         AlertCondition res = new AlertCondition(this, condVal, trigger);
@@ -85,38 +85,38 @@ public class AlertDefinition
         return res;
     }
 
-    protected Action createAction(ActionValue actVal, Action parent) {
+    Action createAction(ActionValue actVal, Action parent) {
         Action res = new Action(this, actVal, parent);
         _actions.add(res);
         return res;
     }
     
-    protected Alert createAlert(AlertValue val) {
+    Alert createAlert(AlertValue val) {
         Alert res = new Alert(this, val);
         return res;
     }
     
-    protected void addTrigger(RegisteredTrigger t) {
+    void addTrigger(RegisteredTrigger t) {
         _triggers.add(t);
     }
     
-    protected void removeTrigger(RegisteredTrigger t) {
+    void removeTrigger(RegisteredTrigger t) {
         _triggers.remove(t);
     }
 
-    protected void addCondition(AlertCondition c) {
+    void addCondition(AlertCondition c) {
         _conditions.add(c);
     }
     
-    protected void removeCondition(AlertCondition c) {
+    void removeCondition(AlertCondition c) {
         _conditions.remove(c);
     }
 
-    protected void addAction(Action a) {
+    void addAction(Action a) {
         _actions.add(a);
     }
     
-    protected void removeAction(Action a) {
+    void removeAction(Action a) {
         _actions.remove(a);
     }
     
@@ -124,7 +124,7 @@ public class AlertDefinition
         return _name;
     }
 
-    protected void setName(String name) {
+    void setName(String name) {
         _name = name;
     }
 
@@ -132,7 +132,7 @@ public class AlertDefinition
         return _ctime;
     }
 
-    protected void setCtime(long ctime) {
+    void setCtime(long ctime) {
         _ctime = ctime;
     }
 
@@ -140,7 +140,7 @@ public class AlertDefinition
         return _mtime;
     }
 
-    protected void setMtime(long mtime) {
+    void setMtime(long mtime) {
         _mtime = mtime;
     }
 
@@ -148,7 +148,7 @@ public class AlertDefinition
         return _parent;
     }
 
-    protected void setParent(AlertDefinition parent) {
+    void setParent(AlertDefinition parent) {
         _parent = parent;
     }
 
@@ -156,11 +156,11 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(_children);
     }
     
-    protected Collection getChildrenBag() {
+    Collection getChildrenBag() {
         return _children;
     }
     
-    protected void setChildrenBag(Collection c) {
+    void setChildrenBag(Collection c) {
         _children = c;
     }
     
@@ -168,7 +168,7 @@ public class AlertDefinition
         return _description;
     }
 
-    protected void setDescription(String description) {
+    void setDescription(String description) {
         _description = description;
     }
 
@@ -176,7 +176,7 @@ public class AlertDefinition
         return _priority;
     }
 
-    protected void setPriority(int priority) {
+    void setPriority(int priority) {
         _priority = priority;
     }
 
@@ -184,7 +184,7 @@ public class AlertDefinition
         return _appdefId;
     }
 
-    protected void setAppdefId(int appdefId) {
+    void setAppdefId(int appdefId) {
         _appdefId = appdefId;
     }
 
@@ -192,7 +192,7 @@ public class AlertDefinition
         return _appdefType;
     }
 
-    protected void setAppdefType(int appdefType) {
+    void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
 
@@ -200,7 +200,7 @@ public class AlertDefinition
         return _enabled;
     }
 
-    protected void setEnabled(boolean enabled) {
+    void setEnabled(boolean enabled) {
         _enabled = enabled;
     }
 
@@ -208,7 +208,7 @@ public class AlertDefinition
         return _frequencyType;
     }
 
-    protected void setFrequencyType(int frequencyType) {
+    void setFrequencyType(int frequencyType) {
         _frequencyType = frequencyType;
     }
 
@@ -216,7 +216,7 @@ public class AlertDefinition
         return _count != null ? _count.longValue() : 0;
     }
 
-    protected void setCount(Long count) {
+    void setCount(Long count) {
         _count = count;
     }
 
@@ -224,7 +224,7 @@ public class AlertDefinition
         return _range != null ? _range.longValue() : 0;
     }
 
-    protected void setRange(Long range) {
+    void setRange(Long range) {
         _range = range;
     }
 
@@ -236,7 +236,7 @@ public class AlertDefinition
         return _willRecover;
     }
 
-    protected void setWillRecover(boolean willRecover) {
+    void setWillRecover(boolean willRecover) {
         _willRecover = willRecover;
     }
 
@@ -244,7 +244,7 @@ public class AlertDefinition
         return _notifyFiltered;
     }
 
-    protected void setNotifyFiltered(boolean notifyFiltered) {
+    void setNotifyFiltered(boolean notifyFiltered) {
         _notifyFiltered = notifyFiltered;
     }
 
@@ -252,7 +252,7 @@ public class AlertDefinition
         return _controlFiltered;
     }
 
-    protected void setControlFiltered(boolean controlFiltered) {
+    void setControlFiltered(boolean controlFiltered) {
         _controlFiltered = controlFiltered;
     }
 
@@ -260,7 +260,7 @@ public class AlertDefinition
         return _actOnTrigger;
     }
 
-    protected void setActOnTrigger(RegisteredTrigger actOnTrigger) {
+    void setActOnTrigger(RegisteredTrigger actOnTrigger) {
         _actOnTrigger = actOnTrigger;
     }
 
@@ -268,7 +268,7 @@ public class AlertDefinition
         return _escalation;
     }
     
-    protected void setEscalation(Escalation escalation) {
+    void setEscalation(Escalation escalation) {
         _escalation = escalation;
     }
 
@@ -276,7 +276,7 @@ public class AlertDefinition
         return _deleted;
     }
 
-    protected void setDeleted(boolean deleted) {
+    void setDeleted(boolean deleted) {
         _deleted = deleted;
     }
 
@@ -284,11 +284,11 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(_actions);
     }
     
-    protected Collection getActionsBag() {
+    Collection getActionsBag() {
         return _actions;
     }
 
-    protected void setActionsBag(Collection actions) {
+    void setActionsBag(Collection actions) {
         _actions = actions;
     }
 
@@ -296,11 +296,11 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(_conditions);
     }
     
-    protected Collection getConditionsBag() {
+    Collection getConditionsBag() {
         return _conditions;
     }
 
-    protected void setConditionsBag(Collection conditions) {
+    void setConditionsBag(Collection conditions) {
         _conditions = conditions;
     }
 
@@ -308,11 +308,11 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(_triggers);
     }
     
-    protected Collection getTriggersBag() {
+    Collection getTriggersBag() {
         return _triggers;
     }
 
-    protected void setTriggersBag(Collection triggers) {
+    void setTriggersBag(Collection triggers) {
         _triggers = triggers;
     }
     
@@ -381,7 +381,7 @@ public class AlertDefinition
         return _value;
     }
 
-    protected void setAlertDefinitionValueNoRels(AlertDefinitionValue val) {
+    void setAlertDefinitionValueNoRels(AlertDefinitionValue val) {
         AlertDefinitionDAO aDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
         TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
         
@@ -408,7 +408,7 @@ public class AlertDefinition
         }
     }
 
-    protected void setAlertDefinitionValue(AlertDefinitionValue val) {
+    void setAlertDefinitionValue(AlertDefinitionValue val) {
         AlertConditionDAO cDAO = DAOFactory.getDAOFactory().getAlertConditionDAO();
         ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
         TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
@@ -458,7 +458,7 @@ public class AlertDefinition
         }
     }
     
-    protected AlertDefinitionBasicValue getAlertDefinitionBasicValue() {
+    AlertDefinitionBasicValue getAlertDefinitionBasicValue() {
         if (_basicValue == null) {
             _basicValue = new AlertDefinitionBasicValue();
         }
