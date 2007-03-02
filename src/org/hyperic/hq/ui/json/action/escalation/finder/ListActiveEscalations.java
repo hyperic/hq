@@ -82,7 +82,8 @@ public class ListActiveEscalations extends BaseAction {
             sj.put("timeOutstanding", System.currentTimeMillis() - 
                                       alert.getAlertInfo().getTimestamp());
             sj.put("acked", s.isPaused());
-            sj.put("ackedBy", s.getAcknowledgedBy().getFullName());
+            if (s.isPaused())
+                sj.put("ackedBy", s.getAcknowledgedBy().getFullName());
                    
             resArr.put(sj);
         }
