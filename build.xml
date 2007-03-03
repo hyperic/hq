@@ -325,8 +325,6 @@
       <replacefilter token="@@@server.mail.host@@@" value="${server.mail.host}"/>
       <replacefilter token="@@@server.mail.sender@@@" value="${server.mail.sender}"/>
     </replace>
-    <copy todir="${ear.dir}/common-mbeans.sar/META-INF" 
-          file="etc/jboss/common/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/measurement-mbeans.sar/META-INF" 
           file="etc/jboss/measurement/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/scheduler-mbeans.sar/META-INF" 

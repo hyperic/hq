@@ -21,9 +21,6 @@
     <service>scheduler-mbeans.sar</service>
   </module>
   <module>
-    <service>common-mbeans.sar</service>
-  </module>
-  <module>
     <service>measurement-mbeans.sar</service>
   </module>
 </jboss-app> 

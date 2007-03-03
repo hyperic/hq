@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE server>
-
-<server>
-    <mbean code="org.hyperic.hq.common.server.mbean.MonitorService"
-           name="hyperic.jmx:type=Service,name=Monitor">
-    </mbean>
-</server>
