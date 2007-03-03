@@ -45,20 +45,32 @@
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewEscUrl" style="visibility:hidden;"></html:link>
 
 <script type="text/javascript">
+
 function requestEscalationSummary() {
-        var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
-        url += '10001';
-        url += '.do';
-        //new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
-    //var escUrl = "<html:rewrite page="/dashboard/ViewEscalationSummary.do"/>"
+    var url = '<html:rewrite page="/escalation/ListActiveEscalations.do"/>';
+
 	new Ajax.Request(url, {method: 'get', onSuccess:showEscalationResponse, onFailure :reportError});
 }
 onloads.push(requestEscalationSummary);
+
 </script>
-    
-    
-    <div id="logInfo">
-  </div>
+
+    <div style="display:none;">
+        <span id="noWaitText"><fmt:message key="alert.config.escalation.end"/></span>
+        <span id="fiveText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message></span>
+        <span id="tenText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message></span>
+        <span id="twentyText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message></span>
+        <span id="thirtyText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message></span>
+        <span id="fortyfiveText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message></span>
+        <span id="sixtyText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message></span>
+    </div>
+
+
+
+
+
+    <div id="logInfo"></div>
+
  <table width="100%" border="0" cellspacing="0" cellpadding="0" id="escalationTable" class="portletLRBorder">
  	<tbody>
         <tr class="tableRowHeader">
