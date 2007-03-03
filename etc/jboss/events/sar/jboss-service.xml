@@ -48,7 +48,7 @@
     <attribute name="SchedulableMBean">hyperic.jmx:type=Service,name=EventsHeartBeat</attribute>
     <attribute name="SchedulableMBeanMethod">hit( DATE )</attribute>
     <attribute name="InitialStartDate">NOW</attribute>
-    <attribute name="SchedulePeriod">10000</attribute>
+    <attribute name="SchedulePeriod">30000</attribute>
     <attribute name="InitialRepetitions">-1</attribute>
   </mbean>
 
