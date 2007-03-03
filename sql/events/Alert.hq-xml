@@ -38,7 +38,7 @@
       <one-to-many class="AlertActionLog" />
     </bag>
 
-    <bag name="conditionLogBag" table="EAM_ALERT_CONDITION_LOG">
+    <bag name="conditionLogBag" order-by="id" table="EAM_ALERT_CONDITION_LOG">
       <cache usage="read-write" />
       <key column="ALERT_ID" />
       <one-to-many class="AlertConditionLog" />
