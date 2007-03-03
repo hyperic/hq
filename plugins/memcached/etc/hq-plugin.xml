@@ -64,7 +64,7 @@
     </properties>
 
     <filter name="template"
-            value="memcached:${sockaddr.config}:${alias}"/>
+            value="mcd-stats:${sockaddr.config}:${alias}"/>
 
     <metric name="Availability"
             indicator="true"/>
