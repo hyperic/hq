@@ -328,23 +328,26 @@ BrowserDetect.init();
                 td6.setAttribute("align", "center");
                 if (aList[i].acknowledgeable) {
                     var ackAnchor = document.createElement("a");
-                    ackAnchor .setAttribute("href", ".");
-                    td6.appendChild(ackAnchor);
+                    //ackAnchor .setAttribute("href", ".");
+                     td6.appendChild(ackAnchor);
 
                     var imgNode = document.createElement('img');
+
                     imgNode.setAttribute("src", imagePath + "icon_ack.gif");
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
-                    imgNode.setAttribute("onClick", "alert(this.nodeName+" + aList[i].appdefKey + "'," + aList[i].alertId + ");acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ")");
-                    ackAnchor.appendChild(imgNode);
+                    imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
 
+                    ackAnchor.appendChild(imgNode);
+                    ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");imgHide(ack_" + aList[i].alertId + ");");
+
+                    ackInstruction.style.display = "";
+
+                } else {
+                    
                     imgNode = document.createElement('img');
                     imgNode.setAttribute("src", imagePath + "spacer.gif");
                     td6.appendChild(imgNode);
-
-                    ackInstruction.style.display = "";
-                } else {
-                    td6.innerHTML = "&nbsp;";
                 }
             }
         } else {
@@ -694,24 +697,40 @@ BrowserDetect.init();
         //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
 
     }
-
+ /*
 
     function showEscalationResponse(originalRequest) {
+       // alert('called')
         var escText = eval('(' + originalRequest.responseText + ')');
-        var eList = escText.escalation.actions;
+        var escSummary= escText.summary;
+       
+        var alertId = escSummary.alertId;
+        var entId = escSummary.entId;
+        var nextActionIdx = escSummary.nextActionIdx;
+        var entType = escSummary.entType;
+        var entName = escSummary.entName;
+        var maxPauseTime = escSummary.maxPauseTime;
+        var alertType = escSummary.alertType;
+
+        var eList = escSummary.escalation;
+        var allowPause = escSummary.escalation.allowPause;
+        var maxWaitTime = escSummary.escalation.maxWaitTime;
         var table = document.getElementById('escalationTable');
         $('modifiedEscalationTime').innerHTML = 'Updated: ' + refreshTime();
-        //$('test').innerHTML = originalRequest.responseText;
+
+
+
         if (table) {
-            if (eList && eList.length <= 0) {
+            if (escSummary) {
+                //alert('not empty')
                 var tbody = table.getElementsByTagName('tbody')[0];
 
                 for (var e = tbody.childNodes.length - 1; e > 1; e--) {
                     tbody.removeChild(tbody.childNodes[e]);
-                }
+                    }
 
                 for (i = 0; i < eList.length; i++) {
-
+                    alert(eList.length)
                     var tr = document.createElement('tr');
                     var trTime = document.createElement('tr');
                     var td1 = document.createElement('td');
@@ -731,7 +750,7 @@ BrowserDetect.init();
                     var AlertNameDiv = document.createElement('div');
                     var selectPause = document.createElement("select");
                     var pauseDiv = document.createElement('div');
-                    
+
                     tbody.appendChild(tr);
 
                     if (i % 2 == 0) {
@@ -739,7 +758,7 @@ BrowserDetect.init();
                     } else {
                         tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
                     }
-                    
+
                     tr.appendChild(td1);
                     td1.setAttribute((document.all ? 'className' : 'class'), "resourceName");
                     td1.setAttribute("id", (eList[i].name));
@@ -752,12 +771,13 @@ BrowserDetect.init();
 
                     tr.appendChild(td2);
                     td2.setAttribute((document.all ? 'className' : 'class'), "resourceTypeName");
-                    td2.setAttribute("id", (eList[i].actionName));
 
-                    if (eList[i].resourceName && escAnchor && eList[i].resourceId && eList[i].resourceTypeId) {
+
+                    if (entName) {
+                        td2.setAttribute("id", (entName));
                         td2.appendChild(escAnchor);
-                        escAnchor.appendChild(document.createTextNode(eList[i].resourceName));
-                        escAnchor.setAttribute('href', (resUrl + eList[i].resourceTypeId + urlColon + eList[i].resourceId));
+                        escAnchor.appendChild(document.createTextNode(entName));
+                        //escAnchor.setAttribute('href', (resUrl + eList[i].resourceTypeId + urlColon + eList[i].resourceId));
                     } else {
                         td2.innerHTML = "&nbsp;";
                     }
@@ -770,7 +790,7 @@ BrowserDetect.init();
                         td3.appendChild(document.createTextNode(eList[i].elapsed));
 
                     } else {
-                       
+
                         td3.innerHTML = "N/A";
                     }
 
@@ -780,7 +800,7 @@ BrowserDetect.init();
 
                     if (eList[i].nextAction) {
                         td4.appendChild(document.createTextNode(eList[i].nextAction));
-                        
+
                     } else {
 
                         td4.innerHTML = "N/A";
@@ -789,45 +809,50 @@ BrowserDetect.init();
                     tr.appendChild(td5);
                     td5.setAttribute((document.all ? 'className' : 'class'), "availability");
 
-                    if (eList[i].acknowledged == "" && eList[i].allowPause == "true") {
+                    if (summary.acked == "false") {
+                        var noWaitText = $('noWaitText').innerHTML;
+                        var fiveText = $('fiveText').innerHTML;
+                        var tenText = $('tenText').innerHTML;
+                        var twentyText = $('twentyText').innerHTML;
+                        var thirtyText = $('thirtyText').innerHTML;
+                        var fortyfiveText = $('fortyfiveText').innerHTML;
+                        var sixtyText = $('sixtyText').innerHTML;
                         //td5.appendChild(document.createTextNode(eList[i].acknowledged));
                         td5.appendChild(selectPause);
-                        selectPause.setAttribute('id', 'waittime_' + liID);
-                        <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
-                            addOption(selectPause, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
-                            <c:if test="${escalation.maxPauseTime >= 600000}">
-                            addOption(selectPause, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
-                            <c:if test="${escalation.maxPauseTime >= 1200000}">
-                            addOption(selectPause, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
-                            <c:if test="${escalation.maxPauseTime >= 1800000}">
-                             addOption(selectPause, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-                            <c:if test="${escalation.maxPauseTime >= 3600000}">
-                            addOption(selectPause, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
-                            </c:if>
-                            </c:if>
-                            </c:if>
-                            </c:if>
-                        </c:if>
+                        selectPause.setAttribute('id', (eList[i].name + '_waittime'));
 
-
-                        /*
-                        selectPause.onchange = function(){onchange_time(this);}
+                      /*
+                        //alert(noWaitText)
+                        //selectPause.onchange = function(){onchange_time(this);}
                         selectPause.setAttribute('name', 'waittime');
-                        addOption(selectPause, '0', '<fmt:message key="alert.config.escalation.end"/>');
-                        addOption(selectPause, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
-                        addOption(selectPause, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
-                        addOption(selectPause, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
-                        addOption(selectPause, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-                        addOption(selectPause, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
-                        addOption(selectPause, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>'); 
-                    */
+                        if (maxWaitTime > '0') {
+                        addOption(selectPause, '0', noWaitText);
+                            }
+                        if (maxWaitTime >= '300000') {
+                        addOption(selectPause, '300000', fiveText);
+                            }
+                        if (maxWaitTime >= '600000') {
+                        addOption(selectPause, '600000', tenText);
+                            }
+                        if (maxWaitTime >= '1200000') {
+                        addOption(selectPause, '1200000', twentyText);
+                            }
+                        if (maxWaitTime >= '1800000') {
+                        addOption(selectPause, '1800000', thirtyText);
+                            }
+                        if (maxWaitTime >= '2700000') {
+                        addOption(selectPause, '2700000', fortyfiveText);
+                            }
+                        if (maxWaitTime >= '3600000') {
+                        addOption(selectPause, '3600000', sixtyText);
+                        }
                     } else {
                         td5.appendChild(document.createTextNode(eList[i].acknowledged));
                     }
 
                     if (eList[i].escalationInfo) {
                         $('escLog').appendChild(infoDiv);
-                        infoDiv.setAttribute("id", (eList[i].escalationName + '_menu'));
+                        infoDiv.setAttribute("id", (eList[i].name + '_menu'));
                         infoDiv.setAttribute((document.all ? 'className' : 'class'), "menu");
                         infoDiv.appendChild(ul);
 
@@ -850,16 +875,17 @@ BrowserDetect.init();
                     }
 
                   }
-                
+
+                }
+
                 } else {
                 $('noEscResources').style.display = '';
-                  }
+                }
             }
             //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
 
         }
-
-    
+   */
     }
 
 function addOption(sel, val, txt, selected) {
@@ -916,3 +942,6 @@ function reportError(originalRequest) {
 }
 
 
+function imgHide(el) {
+    el.setAttribute("src", imagePath + "spacer.gif");
+}

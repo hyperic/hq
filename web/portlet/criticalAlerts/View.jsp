@@ -49,14 +49,17 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
 
 function acknowledgeAlert(img, eid, aid) {
-    new Effect.Shrink(img, {duration: 1.5});
-    var ackAlertUrl = "<html:rewrite page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid="/>" +
-        eid + "&a=" + aid;
+    //new Effect.Shrink(img, {duration: 1.5});
+    var ackAlertUrl = "<html:rewrite page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid="/>"
+    var pars = eid + "&a=" + aid;
+    var url = ackAlertUrl + pars;
+    new Ajax.Request(url);
 
-	new Ajax.Request(ackAlertUrl);
-    return false;
 }
 
+    function removeImg(el) {
+        alert(el.innerHTML);
+    }
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
