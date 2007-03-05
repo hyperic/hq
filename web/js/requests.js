@@ -285,7 +285,8 @@ BrowserDetect.init();
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
                   checkbox.setAttribute("class", "listMember");
-                  checkbox.setAttribute("onClick", "ToggleSelection(this, widgetProperties);");
+                  //checkbox.setAttribute("onclick", "ToggleSelection(this, widgetProperties, false);");
+                  checkbox.onclick = new Function("ToggleSelection(this, widgetProperties, false)");
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
                   td1.appendChild(checkbox);
@@ -705,7 +706,7 @@ BrowserDetect.init();
        // alert('called')
         var escText = eval('(' + originalRequest.responseText + ')');
         var escSummary= escText.summary;
-       
+
         var alertId = escSummary.alertId;
         var entId = escSummary.entId;
         var nextActionIdx = escSummary.nextActionIdx;
