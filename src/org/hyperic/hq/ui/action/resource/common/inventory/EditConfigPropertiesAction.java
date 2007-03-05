@@ -313,12 +313,6 @@ public class EditConfigPropertiesAction extends BaseAction {
             // call the uber setter in the AppdefBoss 
             boss.setAllConfigResponses(sessionInt, allConfigs, allConfigsRollback);
 
-            //run an auto-scan for platforms
-            if (aeid.isPlatform()) {
-                BizappUtils.startAutoScan(ctx,
-                                          sessionId.intValue(), aeid);
-            }
-
             RequestUtils.setConfirmation(request,
                      "resource."+ aeid.getTypeName() +
                      ".inventory.confirm.EditConfigProperties",

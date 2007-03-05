@@ -124,6 +124,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.autoinventory.AutoinventoryException;
+import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
@@ -142,6 +144,8 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -3590,9 +3594,10 @@ public class AppdefBossEJBImpl
     public void setAllConfigResponses(int sessionInt, 
                                       AllConfigResponses allConfigs,
                                       AllConfigResponses allConfigsRollback )
-        throws SessionNotFoundException, SessionTimeoutException,
-               EncodingException, FinderException, PermissionException,
-               ConfigFetchException, PluginException, ApplicationException
+        throws PermissionException, ConfigFetchException, EncodingException,
+               PluginException, ApplicationException, FinderException,
+               ScheduleWillNeverFireException, AgentConnectionException,
+               AutoinventoryException          
     {
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
@@ -3609,6 +3614,13 @@ public class AppdefBossEJBImpl
             
             // Wait until we have validated the config, send the configs
             AIConversionUtil.sendNewConfigEvent(subject, id, allConfigs);
+            
+            //run an auto-scan for platforms
+            if (id.isPlatform()) {
+                getAutoInventoryManager().startScan(subject, id, 
+                                                    new ScanConfigurationCore(),
+                                                    null, null, null);
+            }
         } catch (InvalidConfigException e) {
             //setValidationError for InventoryHelper.isResourceConfigured
             //so this error will be displayed in the UI
