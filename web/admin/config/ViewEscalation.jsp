@@ -346,8 +346,27 @@ function showViewEscResponse(originalRequest) {
     function saveAddEscalation () {
         // Convert whitespaces
         var emails = $('emailinput').value;
+        var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
         $('emailinput').value = emails.split(/[\s]/);
         $('emailinput').value = emails.split(/,/);
+
+        if (emails.value == '')  {
+
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
+
+        } else if (emails.match(illegalChars)) {
+
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = "&nbsp;";
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+        return false;
+
+        } else {
+            
         var id = $('id').value;
         var serialAddAction = Form.serialize('addEscalation');
         var pars =  "EscId=" + id + "&" + serialAddAction;
@@ -355,6 +374,7 @@ function showViewEscResponse(originalRequest) {
         
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
         document.EscalationForm.reset();
+        }
     }
 
     function updateEscView( originalRequest ) {
@@ -492,7 +512,7 @@ function showViewEscResponse(originalRequest) {
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
         $('emailinputDiv').style.display = 'none';
-        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this); onKeyPress=unhideEscButtons();></textarea>";
+        $('emailinputDiv').innerHTML = "email addresses<br> (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
 
         td4.appendChild(sysDiv);
         sysDiv.setAttribute('class', 'escInput');
@@ -888,8 +908,8 @@ function showViewEscResponse(originalRequest) {
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
         $('okCheck').innerHTML = "&nbsp;";
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
-        $('saveButton').style.display = "none";
-        return false;
+        //$('saveButton').style.display = "none";
+       
 
         } else if (elemText.match(illegalChars)) {
 
@@ -897,7 +917,7 @@ function showViewEscResponse(originalRequest) {
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
         $('okCheck').innerHTML = "&nbsp;";
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
-        $('saveButton').style.display = "none";
+        //$('saveButton').style.display = "none";
         return false;
         } else {
             $('escMsg').innerHTML ='';
@@ -907,9 +927,6 @@ function showViewEscResponse(originalRequest) {
 
     }
 
-   function unhideEscButtons() {
-      $('saveButton').style.display = "";
-    }
 
 </script>
 
