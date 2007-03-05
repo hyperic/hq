@@ -46,10 +46,12 @@
 		<td  width="20%" class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link></td>
 	</tr>
-	<tr>
+    <c:if test="${useroperations['administerCAM']}">
+    <tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link></td>
 	</tr>
+    </c:if>
 </table>
 <!--  /  -->
 
