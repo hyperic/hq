@@ -849,18 +849,18 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel" style="padding:3px;" width="100">
-          <fmt:message key="common.label.Name" />
+      <td class="BlockLabel" style="padding:3px;" width="20%">
+          <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="common.label.Name" />
       </td>
-      <td style="padding:3px;" align="left">
+      <td style="padding:3px;" align="left" width="80%">
           <input type="text" size="23" name="name" id="escName" />
       </td>
     </tr>
     <tr class="ListRow">
-      <td class="BlockLabel" valign="top" style="padding:3px;" width="100">
+      <td class="BlockLabel" valign="top" style="padding:3px;" width="20%">
           <fmt:message key="common.label.Description" />
       </td>
-      <td style="padding:3px;" align="left">
+      <td style="padding:3px;" align="left" width="80%">
           <textarea name="description" id="escDesc"></textarea>
       </td>
     </tr>

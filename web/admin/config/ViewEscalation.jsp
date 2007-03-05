@@ -992,7 +992,7 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr>
-      <td class="BlockLabel">
+      <td class="BlockLabel" width="20%">
         <fmt:message key="common.label.Name" />
       </td>
       <td width="80%" id="name" class="BlockLabel" style="text-align:left"></td>
@@ -1034,7 +1034,7 @@ function showViewEscResponse(originalRequest) {
       <td class="BlockContent">
         <table width="100%" cellpadding="4" cellspacing="0">
           <tr>
-            <td class="BlockLabel">
+            <td class="BlockLabel" width="20%">
               <fmt:message key="common.label.Name" />
             </td>
             <td width="80%">
