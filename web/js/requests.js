@@ -333,20 +333,22 @@ BrowserDetect.init();
 
                     var imgNode = document.createElement('img');
 
-                    imgNode.setAttribute("src", imagePath + "icon_ack.gif");
+                    imgNode.setAttribute("src", "images/icon_ack.gif");
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
                     imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
 
                     ackAnchor.appendChild(imgNode);
-                    ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");imgHide(ack_" + aList[i].alertId + ");");
+                    ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");");
+
+                    imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';");
 
                     ackInstruction.style.display = "";
 
                 } else {
                     
                     imgNode = document.createElement('img');
-                    imgNode.setAttribute("src", imagePath + "spacer.gif");
+                    imgNode.setAttribute("src", "images/spacer.gif");
                     td6.appendChild(imgNode);
                 }
             }
@@ -906,7 +908,7 @@ function onchange_time(el) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
 
         var index= el.options[el.selectedIndex].value;
-        alert('Then wait: ' + (index / 60000) + ' minutes');
+        //alert('Then wait: ' + (index / 60000) + ' minutes');
     }
 
 function refreshTime() {
@@ -939,9 +941,4 @@ function refreshDate() {
 
 function reportError(originalRequest) {
     alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
-}
-
-
-function imgHide(el) {
-    el.setAttribute("src", imagePath + "spacer.gif");
 }
