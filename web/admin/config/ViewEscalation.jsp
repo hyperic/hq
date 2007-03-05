@@ -85,11 +85,13 @@ function showViewEscResponse(originalRequest) {
 
     if (notifyAll) {
         $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.all" />';
-        $('notifyAllFalse').checked = "true";
+        $('notifyAllTrue').checked = "true";
+
     }
     else {
-         $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
-        $('notifyAllTrue').checked = "true";
+        $('changed').innerHTML = '<fmt:message key="alert.config.escalation.state.change.notify.previous" />';
+        $('notifyAllFalse').checked = "true";
+
     }
 
     var escViewUL = $('viewEscalationUL');
@@ -1113,15 +1115,16 @@ function showViewEscResponse(originalRequest) {
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
+
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notifyAll" id="notifyAllFalse" value="false" checked="true" /> <fmt:message
-              key="alert.config.escalation.state.change.notify.previous" /></td>
+              type="radio" name="notifyAll" id="notifyAllTrue" value="true" onClick="this.value=true;"/> <fmt:message
+              key="alert.config.escalation.state.change.notify.all" /></td>
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notifyAll" id="notifyAllTrue" value="true" /> <fmt:message
-              key="alert.config.escalation.state.change.notify.all" /></td>
+              type="radio" name="notifyAll" id="notifyAllFalse" value="false" checked="true"/> <fmt:message
+              key="alert.config.escalation.state.change.notify.previous" /></td>
           </tr>
         </tbody>
       </table>
