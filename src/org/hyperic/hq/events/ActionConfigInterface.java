@@ -37,7 +37,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
 
 /**
  */
-public interface ActionConfigInterface extends AlertConfigLoader {
+public interface ActionConfigInterface {
     /** 
      * Get the configuration schema for the action
      * 

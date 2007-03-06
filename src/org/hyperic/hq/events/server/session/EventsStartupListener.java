@@ -25,19 +25,27 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.StringTokenizer;
+
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.events.AlertConfigLoader;
 
 public class EventsStartupListener 
     implements StartupListener
 {
+    private static final Log _log = 
+        LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
     private static TriggerChangeCallback _changeCallback;
     
     public void hqStarted() {
-        AlertConfigLoader.class.getClass();
-        
         // Make sure the escalation enumeration is loaded and registered so 
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
@@ -49,8 +57,53 @@ public class EventsStartupListener
                 app.registerCallbackCaller(TriggerChangeCallback.class);
         }
 
+        loadConfigProps("triggers");
+        loadConfigProps("actions");
     }
+    
+    private void loadConfigProps(String prop) {
+        try {
+            MBeanServer mServer = (MBeanServer) MBeanServerFactory
+                    .findMBeanServer(null).iterator().next();
+            
+            ObjectName propName = new ObjectName(
+                    "jboss:type=Service,name=AlertDefinitionsProperties");
+            
+            Object obj = mServer.invoke(
+                            propName, "get", 
+                            new Object[] { prop, null },
+                            new String[] { String.class.getName(),
+                                           String.class.getName() });
 
+            if (obj == null) {
+                throw new PropertyNotFoundException(prop +
+                                                    " list not found");
+            }
+
+            _log.info(prop + " list: " + obj);
+            
+            StringTokenizer tok = new StringTokenizer((String) obj, ", ");
+            while (tok.hasMoreTokens()) {
+                String className = tok.nextToken();
+                    _log.debug("Initialize class: " + className);
+                
+                try {
+                    Class classObj = Class.forName(className);
+                    classObj.newInstance();
+                } catch (ClassNotFoundException e) {
+                    _log.error("Class: " + className + " not found");
+                } catch (InstantiationException e) {
+                    _log.error("Error instantiating class: " + className);
+                } catch (IllegalAccessException e) {
+                    _log.error("Error instantiating class: " + className);
+                }
+            }
+        } catch (Exception e) {
+            // Swallow all exceptions
+            _log.error("Encountered error initializing " + prop, e);
+        }
+    }
+    
     static TriggerChangeCallback getChangedTriggerCallback() {
         synchronized (LOCK) {
             return _changeCallback;

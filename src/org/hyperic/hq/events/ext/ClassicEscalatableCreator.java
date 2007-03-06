@@ -26,9 +26,12 @@
 package org.hyperic.hq.events.ext;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,6 +53,8 @@ import org.hyperic.hq.events.server.session.ClassicEscalatable;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.galerts.server.session.GalertAuxLogData;
+import org.hyperic.hq.galerts.server.session.GalertLogDataProvider;
 
 /**
  * This class has the knowledge to create an {@link Escalatable} object
@@ -156,7 +161,15 @@ public class ClassicEscalatableCreator
         
         return createEscalatable(alert, shortReason, longReason);
     }
-    
+
+    public Set getAuxDataTypes() {
+        return Collections.EMPTY_SET;
+    }
+
+    public List getAuxData(GalertLogDataProvider p) {
+        throw new IllegalArgumentException();
+    }
+
     public static Escalatable createEscalatable(Alert alert, String shortReason,
                                                 String longReason) 
     {

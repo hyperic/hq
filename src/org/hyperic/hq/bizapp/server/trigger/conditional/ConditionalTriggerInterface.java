@@ -29,7 +29,6 @@ import java.util.HashMap;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
-import org.hyperic.hq.events.AlertConfigLoader;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -41,7 +40,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Interface for triggers that derive its configuration values from
  * AlertCondition
  */
-public interface ConditionalTriggerInterface extends AlertConfigLoader {
+public interface ConditionalTriggerInterface {
     public static final String CFG_ID = ConditionalTriggerSchema.CFG_ID;
 
     public static final String CFG_COMPARATOR =
@@ -58,16 +57,10 @@ public interface ConditionalTriggerInterface extends AlertConfigLoader {
     
     public static HashMap MAP_COND_TRIGGER = new HashMap();
     
-    // Elbow AlertConfigLoader interface to start initializing
-    static ConfigClassesInitializer triggersInitializer =
-        AlertConfigLoader.triggersInitializer;
-
     /**
      * Translate alert condition to config response object
      * @param cond the alert condition
      * @return the equivalent config response object
-     * @throws InvalidOptionException
-     * @throws InvalidOptionValueException
      */
     public ConfigResponse getConfigResponse(AppdefEntityID id,
                                             AlertConditionValue cond)
@@ -77,7 +70,6 @@ public interface ConditionalTriggerInterface extends AlertConfigLoader {
      * Return the schema for the configuration of this trigger.  This does not
      * actually get called by anyone, it's here to enforce the authors of
      * triggers to implement getConfigSchema() for the CLI.
-     * @return the ConfigSchema
      */
     public ConfigSchema getConfigSchema();
 }
