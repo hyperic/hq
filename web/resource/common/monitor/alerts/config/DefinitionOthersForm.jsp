@@ -68,6 +68,5 @@
 </table>
 <tiles:insert definition=".form.buttons"/>
 <html:hidden property="ad"/>
-<html:hidden property="rid"/>
-<html:hidden property="type"/>
+<html:hidden property="eid"/>
 <html:hidden property="aetid"/>

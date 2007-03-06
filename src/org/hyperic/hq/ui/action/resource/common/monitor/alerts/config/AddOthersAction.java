@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -38,11 +37,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.StringUtil;
 
 /**
  * An action that adds other email addresses ( those that are not in
@@ -69,7 +65,7 @@ public class AddOthersAction extends AddNotificationsAction {
     protected Set getNotifications(AddNotificationsForm form, HttpSession session) {
         AddOthersForm addForm = (AddOthersForm)form;
         String emailAddresses = addForm.getEmailAddresses();
-        StringTokenizer token = new StringTokenizer(emailAddresses, ",");
+        StringTokenizer token = new StringTokenizer(emailAddresses, ",;");
         Set emails = new HashSet();
         while ( token.hasMoreTokens() ) {
             emails.add( token.nextToken().trim() );

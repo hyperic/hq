@@ -2090,8 +2090,15 @@
           <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
       </action>
 
-      <action path="/alerts/config/AddOthers*"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthers{1}Action"
+    <action path="/alerts/config/AddOthersFormPrepare"
+                name="AddAlertOthersForm"
+                scope="request"
+                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersFormPrepareAction">
+      <set-property property="title" value="2.2.3.2.1"/>
+    </action>
+
+      <action path="/alerts/config/AddOthers"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersAction"
               name="AddAlertOthersForm"
               scope="request"
               input="/alerts/Config.do?mode=addOthers">
