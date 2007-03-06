@@ -34,7 +34,7 @@
       <column name="NETMASK" length="64"/>
     </property>
 
-    <property name="MACAddress" type="string">
+    <property name="macAddress" type="string">
       <column name="MAC_ADDRESS" length="64" />
     </property>
 

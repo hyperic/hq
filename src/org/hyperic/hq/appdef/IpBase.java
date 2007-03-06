@@ -31,7 +31,7 @@ public abstract class IpBase extends AppdefBean
 {
     protected String _address;
     private String _netmask;
-    private String _MACAddress;
+    private String _macAddress;
     private IpValue _ipValue = new IpValue();
 
     public String getAddress() {
@@ -50,12 +50,12 @@ public abstract class IpBase extends AppdefBean
         _netmask = netmask;
     }
 
-    public String getMACAddress() {
-        return _MACAddress;
+    public String getMacAddress() {
+        return _macAddress;
     }
 
-    public void setMACAddress(String MACAddress) {
-        _MACAddress = MACAddress;
+    public void setMacAddress(String MACAddress) {
+        _macAddress = MACAddress;
     }
 
     /**
@@ -67,7 +67,7 @@ public abstract class IpBase extends AppdefBean
     public void setIpValue(IpValue valueHolder) {
         setAddress(valueHolder.getAddress());
         setNetmask(valueHolder.getNetmask());
-        setMACAddress(valueHolder.getMACAddress());
+        setMacAddress(valueHolder.getMACAddress());
     }
 
     /**
@@ -78,7 +78,7 @@ public abstract class IpBase extends AppdefBean
     {
         _ipValue.setAddress(getAddress());
         _ipValue.setNetmask(getNetmask());
-        _ipValue.setMACAddress(getMACAddress());
+        _ipValue.setMACAddress(getMacAddress());
         _ipValue.setId(getId());
         _ipValue.setMTime(getMTime());
         _ipValue.setCTime(getCTime());

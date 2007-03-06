@@ -38,7 +38,7 @@ public class Ip extends IpBase
     public Ip(String address, String netmask, String macAddress) {
         setAddress(address);
         setNetmask(netmask);
-        setMACAddress(macAddress);
+        setMacAddress(macAddress);
     }
 
     public Platform getPlatform() {

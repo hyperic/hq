@@ -101,7 +101,7 @@ public class AIIp extends IpBase
         aIIpValue.setDiff(getDiff());
         aIIpValue.setIgnored(getIgnored());
         aIIpValue.setAddress(getAddress());
-        aIIpValue.setMACAddress(getMACAddress());
+        aIIpValue.setMACAddress(getMacAddress());
         aIIpValue.setNetmask(getNetmask());
         aIIpValue.setId(getId());
         aIIpValue.setMTime(getMTime());
@@ -117,7 +117,7 @@ public class AIIp extends IpBase
         setDiff(valueHolder.getDiff());
         setIgnored(valueHolder.getIgnored());
         setAddress(valueHolder.getAddress());
-        setMACAddress(valueHolder.getMACAddress());
+        setMacAddress(valueHolder.getMACAddress());
         setNetmask(valueHolder.getNetmask());
     }
 

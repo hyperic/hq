@@ -103,7 +103,7 @@ public class Platform extends PlatformBase
             Ip ip = (Ip)i.next();
             if (ip.getAddress().equals(address) &&
                 ip.getNetmask().equals(netmask) &&
-                ip.getMACAddress().equals(macAddress)) {
+                ip.getMacAddress().equals(macAddress)) {
                 i.remove();
             }
         }

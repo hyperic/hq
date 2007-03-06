@@ -657,11 +657,11 @@ public class AIQueueManagerEJBImpl
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
             Ip qip = (Ip) i.next();
             
-            String mac = qip.getMACAddress();
+            String mac = qip.getMacAddress();
             
             if (mac != null && mac.length() > 0 &&
                 !mac.equals(NetFlags.NULL_HWADDR)) {
-                List addrs = getAIIpDAO().findByMACAddress(qip.getMACAddress());
+                List addrs = getAIIpDAO().findByMACAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform =
                         ((AIIp) addrs.get(0)).getAIPlatform();

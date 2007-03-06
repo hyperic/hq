@@ -284,7 +284,7 @@ public class AI2AppdefDiff {
                         scannedIp.setNetmask(appdefIp.getNetmask());
                     }
                     if (scannedIp.getMACAddress() == null) {
-                        scannedIp.setMACAddress(appdefIp.getMACAddress());
+                        scannedIp.setMACAddress(appdefIp.getMacAddress());
                     }
                 }
                 // Scanned IP does exist in appdef, do comparison 
@@ -298,7 +298,7 @@ public class AI2AppdefDiff {
                     addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_IPS_CHANGED);
 
                 }
-                if ( !objectsEqual(scannedIp.getMACAddress(), appdefIp.getMACAddress()) ) {
+                if ( !objectsEqual(scannedIp.getMACAddress(), appdefIp.getMacAddress()) ) {
                     // MAC has changed
                     scannedIp.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(scannedIp, AIQueueConstants.Q_IP_MAC_CHANGED);
@@ -319,7 +319,7 @@ public class AI2AppdefDiff {
             scannedIp = new AIIpValue();
             scannedIp.setAddress(appdefIp.getAddress());
             scannedIp.setNetmask(appdefIp.getNetmask());
-            scannedIp.setMACAddress(appdefIp.getMACAddress());
+            scannedIp.setMACAddress(appdefIp.getMacAddress());
             scannedIp.setQueueStatus(AIQueueConstants.Q_STATUS_REMOVED);
             revisedAIplatform.addAIIpValue(scannedIp);
 

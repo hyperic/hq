@@ -57,7 +57,7 @@ public class AIIpDAO extends HibernateDAO
         AIIp ip = new AIIp();
         ip.setAddress(ipv.getAddress());
         ip.setNetmask(ipv.getNetmask());
-        ip.setMACAddress(ipv.getMACAddress());
+        ip.setMacAddress(ipv.getMACAddress());
         ip.setQueueStatus(ipv.getQueueStatus());
         ip.setDiff(ipv.getDiff());
         ip.setIgnored(ipv.getIgnored());
@@ -76,7 +76,7 @@ public class AIIpDAO extends HibernateDAO
 
     public List findByMACAddress(String addr)
     {
-        String sql="from AIIp where mACAddress=?";
+        String sql="from AIIp where macAddress=?";
         return getSession().createQuery(sql)
             .setString(0, addr)
             .list();

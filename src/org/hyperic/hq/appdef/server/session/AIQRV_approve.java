@@ -256,14 +256,14 @@ public class AIQRV_approve implements AIQResourceVisitor {
             break;
         case AIQueueConstants.Q_STATUS_ADDED:
             platformMan.addIp(platform, aiip.getAddress(), aiip.getNetmask(),
-                              aiip.getMACAddress());
+                              aiip.getMacAddress());
             break;
         case AIQueueConstants.Q_STATUS_CHANGED:
             _log.error("IPs cannot have a status of changed");
             break;
         case AIQueueConstants.Q_STATUS_REMOVED:
             platformMan.removeIp(platform, aiip.getAddress(),
-                                 aiip.getNetmask(), aiip.getMACAddress());
+                                 aiip.getNetmask(), aiip.getMacAddress());
             break;
         default:
             _log.error("Unknown queue state: " + qstat);
