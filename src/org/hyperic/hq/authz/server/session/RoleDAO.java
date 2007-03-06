@@ -104,6 +104,8 @@ public class RoleDAO extends HibernateDAO {
     }
 
     void remove(Role entity) {
+        entity.clearResourceGroups();
+        entity.clearSubjects();
         super.remove(entity);
     }
 

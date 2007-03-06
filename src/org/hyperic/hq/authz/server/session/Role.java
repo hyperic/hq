@@ -88,6 +88,15 @@ public class Role extends AuthzNamedBean {
         return _resourceGroups;
     }
     
+    void clearResourceGroups() {
+        for (Iterator i=getResourceGroups().iterator(); i.hasNext(); ) {
+            ResourceGroup grp = (ResourceGroup)i.next();
+            
+            grp.removeRole(this);
+        }
+        getResourceGroups().clear();
+    }
+    
     protected void setResourceGroups(Collection val) {
         _resourceGroups = val;
     }
@@ -112,6 +121,15 @@ public class Role extends AuthzNamedBean {
         _subjects = val;
     }
 
+    void clearSubjects() {
+        for (Iterator i=getSubjects().iterator(); i.hasNext(); ) {
+            AuthzSubject s = (AuthzSubject)i.next();
+            
+            s.removeRole(this);
+        }
+        getSubjects().clear();
+    }
+    
     /**
      * @deprecated use (this) Role instead
      */
