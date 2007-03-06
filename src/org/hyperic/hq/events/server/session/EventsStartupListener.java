@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.events.AlertConfigLoader;
 
 public class EventsStartupListener 
     implements StartupListener
@@ -35,6 +36,8 @@ public class EventsStartupListener
     private static TriggerChangeCallback _changeCallback;
     
     public void hqStarted() {
+        AlertConfigLoader.class.getClass();
+        
         // Make sure the escalation enumeration is loaded and registered so 
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
