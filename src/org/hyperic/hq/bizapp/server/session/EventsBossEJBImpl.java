@@ -1232,11 +1232,6 @@ public class EventsBossEJBImpl
     {
         AuthzSubjectValue subject  = manager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
-        long base = (cur / timeRange) * timeRange;
-        boolean evenDivide = cur % timeRange == 0;
-        long lateTime = base + (evenDivide ? 0 : timeRange);
-        long earlyTime = base - timeRange - (evenDivide ? 0 : timeRange);
-        long newRange = lateTime - earlyTime;
         
         List appentResources;
         
@@ -1250,12 +1245,12 @@ public class EventsBossEJBImpl
         }
         
         List alerts = getAM().findAlerts(subject, count, priority, 
-                                         newRange, lateTime, appentResources);
+                                         timeRange, cur, appentResources);
         alerts = getAM().convertAlertsToEscalatables(alerts);
     
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-        List galerts = gMan.findAlerts(subject, count, priority, newRange,  
-                                       lateTime, appentResources); 
+        List galerts = gMan.findAlerts(subject, count, priority, timeRange,  
+                                       cur, appentResources); 
         alerts.addAll(gMan.convertGalertsToEscalatables(galerts)); 
 
         Collections.sort(alerts, new Comparator() {

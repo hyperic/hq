@@ -118,8 +118,6 @@ class GalertLogDAO
                 .setLong("end", end)
                 .setInteger("priority", priority)
                 .setMaxResults(count)
-                .setCacheable(true)
-                .setCacheRegion("GalertLog.findByCreateTimeAndPriority")
                 .list();
     }
 
