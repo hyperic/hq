@@ -320,13 +320,14 @@ public class MxUtil {
         } catch (RuntimeException e) {
             // Temporary fix until availability strings can be mapped
             // in hq-plugin.xml.  Resin wraps AttributeNotFoundException
-            // within a RuntimeException
-            Throwable cause = e.getCause();
-            if (cause != null &&
-                cause instanceof AttributeNotFoundException &&
-                (attribute.equals(Metric.ATTR_AVAIL) ||
-                 attribute.equals("State"))) {
-                return new Double(Metric.AVAIL_UP);
+            if (attribute.equals(Metric.ATTR_AVAIL)) {
+                Throwable cause = e.getCause();
+                while (cause != null) {
+                    if (cause instanceof AttributeNotFoundException) {
+                        return new Double(Metric.AVAIL_UP);
+                    }
+                    cause = cause.getCause();
+                }
             }
             throw e;
         }
