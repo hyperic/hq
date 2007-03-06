@@ -221,7 +221,7 @@ public class PlatformForm extends ResourceForm  {
         
         for (int i = 0; i < numNewIps; i++) {
             IpValue newIp = getIp(i);
-            if (newIp.getId() != null) {
+            if (newIp.getId() != null && newIp.getId().intValue() > 0) {
                 IpValue oldIp = (IpValue) oldIpsMap.remove(newIp.getId());
                 oldIp.setAddress(newIp.getAddress());
                 oldIp.setMACAddress(newIp.getMACAddress());
