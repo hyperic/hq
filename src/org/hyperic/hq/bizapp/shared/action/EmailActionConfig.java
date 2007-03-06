@@ -77,8 +77,8 @@ public class EmailActionConfig implements ActionConfigInterface {
         recip = new StringConfigOption(CFG_NAMES, 
                                   "Recipients (comma-delimited Emails or ID's)", 
                                   "");
-            
         recip.setMinLength(0);
+        recip.setOptional(true);
         res.addOption(recip);
 
         // If SMS
