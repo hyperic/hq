@@ -121,7 +121,7 @@ chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
   </c:otherwise>
 </c:choose>
 
-<input type="Hidden" id="privateChildResource">
+<input type="hidden" id="privateChildResource">
 <script type="text/javascript">
   testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "availableListMember");
 </script>
