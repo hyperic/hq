@@ -111,14 +111,11 @@
                         <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
                             <html:link page="/Admin.do"><span style="padding-right:10px;padding-left:10px;">Administration</span></html:link>
                         </td>
-                        <td style="border-right:2px solid #ffffff" class="mainNavText"><a href="." onclick="toggleMenu('recent');return false;"><span
+                        <td style="border-right:2px solid #ffffff" class="mainNavText">
+                        <a href="." onclick="toggleMenu('recent');return false;"><span
                                 id="recentImg" style="padding-right:10px;padding-left:10px;"><fmt:message key=".dashContent.recentResources"/></span></a>
                             <div style="clear: all;"></div>
-
-                            <div id="recent" style="position:absolute; z-index: 300; margin-top: 2px;display:none;">
                             <tiles:insert definition=".toolbar.recentResources"/>
-                            </div>
-
                         </td>
                         <td class="mainNavText" nowrap>
                             <html:link href=""
