@@ -346,52 +346,58 @@ function showViewEscResponse(originalRequest) {
     }
 
     function saveAddEscalation () {
+        var syslogDivIn = $('sysloginput');
+        if (syslogDivIn.style.display != 'none') {
+          if ($('metainput').value == '') {
+              $('metainput').focus();
+               return false;
+           }
+
+          if ($('productinput').value == '') {
+              $('productinput').focus();
+              return false;
+           }
+        
+          if ($('versioninput').value == '') {
+              $('versioninput').focus();
+              return false;
+           }
+        }
+
         // Convert whitespaces
-        var emails = $('emailinput').value;
-        var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-        $('emailinput').value = emails.split(/[\s]/);
-        $('emailinput').value = emails.split(/,/);
-
-
-        if ($('metainput').value == '') {
-            $('metainput').focus();
-             return false;
-         }
-
-        if ($('productinput').value == '') {
-            $('productinput').focus();
-            return false;
-         }
+        var emailInput = $('emailinput');
+        if (emailInput.style.display != 'none') {
         
-        if ($('versioninput').value == '') {
-            $('versioninput').focus();
-            return false;
-         }
+          var emails = emailInput.value;
+          var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
+          emailInput.value = emails.split(/[\s]/);
+          emailInput.value = emails.split(/,/);
         
-        if (emails.value == '')  {
+          if (emails.value == '')  {
 
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
 
-        } else if (emails.match(illegalChars)) {
+          } else if (emails.match(illegalChars)) {
 
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
-        return false;
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+            return false;
 
-        } else {
+          } else {
+              
+            var id = $('id').value;
+            var serialAddAction = Form.serialize('addEscalation');
+            var pars =  "EscId=" + id + "&" + serialAddAction;
+            var url = '<html:rewrite action="/escalation/saveAction"/>';
             
-        var id = $('id').value;
-        var serialAddAction = Form.serialize('addEscalation');
-        var pars =  "EscId=" + id + "&" + serialAddAction;
-        var url = '<html:rewrite action="/escalation/saveAction"/>';
-        
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
-        document.EscalationForm.reset();
+            new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
+            document.EscalationForm.reset();
+          }
         }
     }
 
@@ -993,24 +999,26 @@ function showViewEscResponse(originalRequest) {
 
 <div id="example" style="display:none;" class="ConfirmationBlock">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <tr>
-  <td style="padding-right:5px;" id="okCheck"><html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt=""/>
-  </td>
-  <td width="100%">
+  <tr>
+    <td style="padding-right:5px;" id="okCheck"><html:img
+      page="/images/tt_check.gif" height="9" width="9" border="0" alt="" /></td>
+    <td width="100%">
     <div id="escMsg"></div>
-  </td>
-    </tr>
+    </td>
+  </tr>
 </table>
 </div>
 
-<div class="ListHeaderInactive" style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px;">
-    <table cellspacing="0" cellpadding="3" border="0">
-    <tbody>
-       <tr>
-        <td><fmt:message key="inform.config.escalation.scheme.inProgressEscalation"/></td>
-       </tr>
-    </tbody>
-    </table>
+<div class="ListHeaderInactive"
+  style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px;">
+<table cellspacing="0" cellpadding="3" border="0">
+  <tbody>
+    <tr>
+      <td><fmt:message
+        key="inform.config.escalation.scheme.inProgressEscalation" /></td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
@@ -1033,88 +1041,88 @@ function showViewEscResponse(originalRequest) {
     <input type="hidden" id="gad" name="gad"
       value='<c:out value="${param.gad}"/>' />
   </c:when>
-</c:choose>
-  <input type="hidden" id="ffff" name="ggg" value='<c:out value="${escalation.id}"/>' />
-  <input type="hidden" id="escId" name="id"/>
+</c:choose> <input type="hidden" id="ffff" name="ggg"
+  value='<c:out value="${escalation.id}"/>' /> <input type="hidden" id="escId"
+  name="id" />
 
-<table width="100%" cellpadding="4" cellspacing="0" border="0" id="escPropertiesTable">
+<table width="100%" cellpadding="4" cellspacing="0" border="0"
+  id="escPropertiesTable">
   <tbody>
     <tr>
-      <td class="BlockTitle" colSpan="2">
-      <fmt:message key="alert.config.escalation.scheme" />
-      </td>
+      <td class="BlockTitle" colSpan="2"><fmt:message
+        key="alert.config.escalation.scheme" /></td>
     </tr>
     <tr>
-      <td class="BlockLabel" width="20%">
-        <fmt:message key="common.label.Name" />
-      </td>
+      <td class="BlockLabel" width="20%"><fmt:message
+        key="common.label.Name" /></td>
       <td width="80%" id="name" class="BlockLabel" style="text-align:left"></td>
     </tr>
     <tr>
-      <td class="BlockLabel" valign="top">
-          <fmt:message key="common.label.Description" />
-      </td>
+      <td class="BlockLabel" valign="top"><fmt:message
+        key="common.label.Description" /></td>
       <td id="description" class="BlockContent"></td>
     </tr>
     <tr>
-      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      <td class="BlockLabel" nowrap="true"><fmt:message
+        key="alert.config.escalation.acknowledged" /></td>
       <td id="acknowledged" class="BlockContent"></td>
     </tr>
     <tr>
-      <td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
+      <td class="BlockLabel" nowrap="true"><fmt:message
+        key="alert.config.escalation.state.change" /></td>
       <td id="changed" class="BlockContent"></td>
     </tr>
     <c:if test="${useroperations['modifyEscalation']}">
-    <tr class="ToolbarContent"><!-- EDIT TOOLBAR -->
-      <td colSpan="2">
-        <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.Edit"/>
-          <tiles:put name="buttonHref" value="."/>
-          <tiles:put name="buttonClick" value="editEscalation(); return false;"/>
-        </tiles:insert>
-      </td>
-    </tr>
+      <tr class="ToolbarContent">
+        <!-- EDIT TOOLBAR -->
+        <td colSpan="2"><tiles:insert
+          page="/common/components/ActionButton.jsp">
+          <tiles:put name="labelKey" value="common.label.Edit" />
+          <tiles:put name="buttonHref" value="." />
+          <tiles:put name="buttonClick" value="editEscalation(); return false;" />
+        </tiles:insert></td>
+      </tr>
     </c:if>
   </tbody>
 </table>
 
-<table width="100%" cellpadding="3" cellspacing="0" border="0" id="editPropertiesTable" style="display: none;">
+<table width="100%" cellpadding="3" cellspacing="0" border="0"
+  id="editPropertiesTable" style="display: none;">
   <tbody>
     <tr>
-      <td class="BlockTitle" colSpan="2"><fmt:message key="alert.config.escalation.scheme"/></td>
+      <td class="BlockTitle" colSpan="2"><fmt:message
+        key="alert.config.escalation.scheme" /></td>
     </tr>
     <tr>
       <td class="BlockContent">
-        <table width="100%" cellpadding="4" cellspacing="0">
-          <tr>
-            <td class="BlockLabel" width="20%">
-              <fmt:message key="common.label.Name" />
-            </td>
-            <td width="80%">
-              <input type="text" size="25" name="name" id="escName" />
-            </td>
-          </tr>
-          <tr>
-            <td class="BlockLabel" valign="top">
-              <fmt:message key="common.label.Description" />
-            </td>
-            <td>
-              <textarea cols="40" rows="4" name="description" id="escDesc"></textarea>
-            </td>
-          </tr>
-        </table>
+      <table width="100%" cellpadding="4" cellspacing="0">
+        <tr>
+          <td class="BlockLabel" width="20%"><fmt:message
+            key="common.label.Name" /></td>
+          <td width="80%"><input type="text" size="25" name="name"
+            id="escName" /></td>
+        </tr>
+        <tr>
+          <td class="BlockLabel" valign="top"><fmt:message
+            key="common.label.Description" /></td>
+          <td><textarea cols="40" rows="4" name="description" id="escDesc"></textarea>
+          </td>
+        </tr>
+      </table>
       </td>
     </tr>
     <tr>
-      <td class="BlockTitle"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      <td class="BlockTitle"><fmt:message
+        key="alert.config.escalation.acknowledged" /></td>
     </tr>
     <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:10px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
-            <td style="padding-top:2px;padding-bottom:2px;">
-                <input type="radio" name="allowPause" id="allowPauseTrue" value="true" onClick="this.value=true;" />  <fmt:message
+            <td style="padding-top:2px;padding-bottom:2px;"><input
+              type="radio" name="allowPause" id="allowPauseTrue" value="true"
+              onClick="this.value=true;" /> <fmt:message
               key="alert.config.escalation.allow.pause" /> <select
               id="maxWaitTime" name="maxWaitTime">
               <option value="300000">5 <fmt:message
@@ -1133,7 +1141,8 @@ function showViewEscResponse(originalRequest) {
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" id="allowPauseFalse" value="false" checked="true" /> <fmt:message
+              type="radio" name="allowPause" id="allowPauseFalse" value="false"
+              checked="true" /> <fmt:message
               key="alert.config.escalation.allow.continue" /></td>
           </tr>
         </tbody>
@@ -1152,34 +1161,39 @@ function showViewEscResponse(originalRequest) {
 
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notifyAll" id="notifyAllTrue" value="true" onClick="this.value=true;"/> <fmt:message
+              type="radio" name="notifyAll" id="notifyAllTrue" value="true"
+              onClick="this.value=true;" /> <fmt:message
               key="alert.config.escalation.state.change.notify.all" /></td>
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="notifyAll" id="notifyAllFalse" value="false" checked="true"/> <fmt:message
+              type="radio" name="notifyAll" id="notifyAllFalse" value="false"
+              checked="true" /> <fmt:message
               key="alert.config.escalation.state.change.notify.previous" /></td>
           </tr>
         </tbody>
       </table>
       </td>
     </tr>
-    <tr class="ToolbarContent"><!-- SET TOOLBAR -->
+    <tr class="ToolbarContent">
+      <!-- SET TOOLBAR -->
       <td>
-        <table cellspacing="4" cellpadding="0">
-        <tr><td>
-        <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.Save"/>
-          <tiles:put name="buttonHref" value="."/>
-          <tiles:put name="buttonClick" value="saveEscalation(); return false;"/>
-        </tiles:insert>
-        </td><td>
-        <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.Cancel"/>
-          <tiles:put name="buttonHref" value="."/>
-          <tiles:put name="buttonClick" value="cancelEditEscalation(); return false;"/>
-        </tiles:insert>
-        </td></tr></table>
+      <table cellspacing="4" cellpadding="0">
+        <tr>
+          <td><tiles:insert page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.Save" />
+            <tiles:put name="buttonHref" value="." />
+            <tiles:put name="buttonClick"
+              value="saveEscalation(); return false;" />
+          </tiles:insert></td>
+          <td><tiles:insert page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.Cancel" />
+            <tiles:put name="buttonHref" value="." />
+            <tiles:put name="buttonClick"
+              value="cancelEditEscalation(); return false;" />
+          </tiles:insert></td>
+        </tr>
+      </table>
       </td>
     </tr>
   </tbody>
@@ -1207,37 +1221,38 @@ function showViewEscResponse(originalRequest) {
     </c:forEach>
   </ul>
   </div>
-</c:if>
+</c:if></form>
 
-</form>
+<br />
 
-<br/>
-
-<form name="viewEscalation" id="viewEscalation" style="display:none;">
-    <input type="hidden" id="alertDefId" name="alertDefId"
-  value='<c:out value="${alertDef.id}"/>' />
-    <input type="hidden" value="" id="creationTime"> <input type="hidden"
-      value="" id="_version_"> <input type="hidden" value="" id="notifyAll">
-    <input type="hidden" value="" id="modifiedTime"> <input type="hidden"
-      value="" id="allowPause"> <input type="hidden" value="" id="escName">
-    <input type="hidden" value="" id="id">
+<form name="viewEscalation" id="viewEscalation" style="display:none;"><input
+  type="hidden" id="alertDefId" name="alertDefId"
+  value='<c:out value="${alertDef.id}"/>' /> <input type="hidden" value=""
+  id="creationTime"> <input type="hidden" value="" id="_version_">
+<input type="hidden" value="" id="notifyAll"> <input type="hidden"
+  value="" id="modifiedTime"> <input type="hidden" value=""
+  id="allowPause"> <input type="hidden" value="" id="escName"> <input
+  type="hidden" value="" id="id">
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-    <thead>
-         <tr>
-             <td class="BlockTitle" valign="top" nowrap colspan="2">
-                 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                     <tr>
-                         <td class="BlockTitle" valign="top" nowrap><span id="step2create" style="display:none;">Step 2 - Create </span><fmt:message key="common.label.EscalationSchemeActions"/></td>
-                         <td align="right" style="padding-right:3px;">
-                         <html:img page="/images/icon_info2-60A5EA.gif" onmouseover="menuLayers.show('actionsInfoPopup', event)" onmouseout="menuLayers.hide()" border="0"/>
-                        </td>
-                     </tr>
-                 </table>
-               </td>
-
+  <thead>
+    <tr>
+      <td class="BlockTitle" valign="top" nowrap colspan="2">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="BlockTitle" valign="top" nowrap><span id="step2create"
+            style="display:none;">Step 2 - Create </span><fmt:message
+            key="common.label.EscalationSchemeActions" /></td>
+          <td align="right" style="padding-right:3px;"><html:img
+            page="/images/icon_info2-60A5EA.gif"
+            onmouseover="menuLayers.show('actionsInfoPopup', event)"
+            onmouseout="menuLayers.hide()" border="0" /></td>
         </tr>
-     </thead>
+      </table>
+      </td>
+
+    </tr>
+  </thead>
   <tbody>
     <tr class="BlockContent">
       <td style="padding-left:15px;padding-bottom:0px;display:none;">
@@ -1253,72 +1268,66 @@ function showViewEscResponse(originalRequest) {
       </td>
     </tr>
     <tr class="BlockContent">
-        <td id="noActions" style="padding:5px;display:none;"><b><fmt:message key="inform.config.escalation.scheme.newAction.noactions"/></b>
-
-        </td>
+      <td id="noActions" style="padding:5px;display:none;"><b><fmt:message
+        key="inform.config.escalation.scheme.newAction.noactions" /></b></td>
     </tr>
     <tr>
       <td width="100%" id="viewSection" style="display:none;">
       <ul id="viewEscalationUL" style="margin-left:0px;"></ul>
       </td>
     </tr>
-   </tbody>
+  </tbody>
 </table>
 </form>
- <form name="addEscalation" id="addEscalation">
- <table width="100%" cellpadding="0" cellspacing="0" border="0">
+<form name="addEscalation" id="addEscalation">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tbody>
-      <tr>
+    <tr>
       <td width="100%" id="addSection">
       <ul id="addEscalationUL" style="margin-left:0px;">
       </ul>
       </td>
     </tr>
     <c:if test="${useroperations['modifyEscalation']}">
-    <tr class="ToolbarContent">
-      <td id="addRowButton">
+      <tr class="ToolbarContent">
+        <td id="addRowButton">
         <table cellspacing="4" cellpadding="0">
-        <tr>
-          <td>
-        <tiles:insert page="/common/components/ActionButton.jsp">
-          <tiles:put name="labelKey" value="common.label.AddAction"/>
-          <tiles:put name="buttonHref" value="#"/>
-          <tiles:put name="buttonClick" value="addRow(); return false;"/>
-        </tiles:insert>
+          <tr>
+            <td><tiles:insert page="/common/components/ActionButton.jsp">
+              <tiles:put name="labelKey" value="common.label.AddAction" />
+              <tiles:put name="buttonHref" value="#" />
+              <tiles:put name="buttonClick" value="addRow(); return false;" />
+            </tiles:insert></td>
+          </tr>
+        </table>
         </td>
-        </tr>
-       </table>
-       </td>
-    </tr>
+      </tr>
     </c:if>
     <tr class="ToolbarContent">
       <td id="addEscButtons" style="display:none">
-        <table cellspacing="4" cellpadding="0" border="0">
+      <table cellspacing="4" cellpadding="0" border="0">
         <tr>
-            <td id="saveButton">
-            <tiles:insert page="/common/components/ActionButton.jsp">
-            <tiles:put name="labelKey" value="common.label.Save"/>
-              <tiles:put name="buttonHref" value="#"/>
-            <tiles:put name="buttonClick" value="saveAddEscalation(); return false;"/>
-            </tiles:insert>
-            </td>
-            <td>
-            <tiles:insert page="/common/components/ActionButton.jsp">
-            <tiles:put name="labelKey" value="common.label.Cancel"/>
-            <tiles:put name="buttonHref" value="#"/>
-            <tiles:put name="buttonClick" value="cancelAddEscalation();"/>
-            </tiles:insert>
-            </td>
+          <td id="saveButton"><tiles:insert
+            page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.Save" />
+            <tiles:put name="buttonHref" value="#" />
+            <tiles:put name="buttonClick"
+              value="saveAddEscalation(); return false;" />
+          </tiles:insert></td>
+          <td><tiles:insert page="/common/components/ActionButton.jsp">
+            <tiles:put name="labelKey" value="common.label.Cancel" />
+            <tiles:put name="buttonHref" value="#" />
+            <tiles:put name="buttonClick" value="cancelAddEscalation();" />
+          </tiles:insert></td>
         </tr>
-        </table>
+      </table>
       </td>
     </tr>
-</tbody>
+  </tbody>
 </table>
 </form>
-<div id="actionsInfoPopup" class="menu" style="padding:3px;">
-<fmt:message key="inform.config.escalation.scheme.newAction.dragaction"/>
-</div>
+<div id="actionsInfoPopup" class="menu" style="padding:3px;"><fmt:message
+  key="inform.config.escalation.scheme.newAction.dragaction" /></div>
 
 <br>
 <br>
