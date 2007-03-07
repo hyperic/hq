@@ -27,27 +27,21 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Properties;
 
-import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.naming.NamingException;
 
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.ConfigPropertyException;
 
@@ -59,10 +53,11 @@ import org.hyperic.util.ConfigPropertyException;
  *      view-type="both"
  *      type="Stateless"
  */
-public class ConfigBossEJBImpl extends BizappSessionEJB
-    implements SessionBean {
+public class ConfigBossEJBImpl 
+    extends BizappSessionEJB
+    implements SessionBean 
+{
 
-    // An instance of the session manager
     private SessionManager sessionManager = SessionManager.getInstance();
 
     /**
@@ -71,32 +66,17 @@ public class ConfigBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public Properties getConfig() throws ConfigPropertyException {
-            try {
-                return ServerConfigManagerUtil.getLocalHome().create()
-                        .getConfig();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        return ServerConfigManagerEJBImpl.getOne().getConfig();
     }
 
     /**
      * Get the configuration properties for a specified prefix
-     * @param prefix
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException
     {
-        try {
-            return ServerConfigManagerUtil.getLocalHome().create()
-                    .getConfig(prefix);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        return ServerConfigManagerEJBImpl.getOne().getConfig(prefix);
     }
 
     /**
@@ -105,16 +85,9 @@ public class ConfigBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(Properties props) 
-        throws ApplicationException, SystemException,
-               ConfigPropertyException {
-            try {
-                ServerConfigManagerUtil.getLocalHome().create()
-                        .setConfig(props);
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        throws ApplicationException, ConfigPropertyException  
+    {
+        ServerConfigManagerEJBImpl.getOne().setConfig(props);
     }
 
     /**
@@ -123,16 +96,9 @@ public class ConfigBossEJBImpl extends BizappSessionEJB
      * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(String prefix, Properties props) 
-        throws ApplicationException, SystemException,
-               ConfigPropertyException {
-            try {
-                ServerConfigManagerUtil.getLocalHome().create()
-                        .setConfig(prefix, props);
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+        throws ApplicationException, ConfigPropertyException 
+    {
+        ServerConfigManagerEJBImpl.getOne().setConfig(prefix, props);
     }
 
     /**
@@ -146,20 +112,9 @@ public class ConfigBossEJBImpl extends BizappSessionEJB
 
             ObjectName objName =
                 new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-            server.invoke(objName, "restart",
-                          new Object[] {},
+            server.invoke(objName, "restart", new Object[] {},
                           new String[] {});
-        }
-        catch (MalformedObjectNameException e) {
-            throw new SystemException(e);
-        }
-        catch (InstanceNotFoundException e) {
-            throw new SystemException(e);
-        }
-        catch (MBeanException e) {
-            throw new SystemException(e);
-        }
-        catch (ReflectionException e) {
+        } catch (Exception e) {
             throw new SystemException(e);
         }
     }
@@ -167,7 +122,7 @@ public class ConfigBossEJBImpl extends BizappSessionEJB
     /**
      * Perform routine database maintenance.  Must have admin permissions.
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
-     * database is not PostgreSQL.
+     *         database is not PostgreSQL.
      * @ejb:interface-method
      */
     public long vacuum (int sessionId)
