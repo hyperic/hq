@@ -110,7 +110,7 @@ public class AlertDefinitionManagerEJBImpl
         throws RemoveException, PermissionException 
     {
         canManageAlerts(subj, alertdef);
-
+        
         boolean survivors = false;
         
         // If there are any children, delete them, too
@@ -451,6 +451,14 @@ public class AlertDefinitionManagerEJBImpl
     {
         for (int i = 0; i < ids.length; i++) {
             AlertDefinition alertdef = getAlertDefDAO().findById(ids[i]);
+            
+            // Don't delete child alert definitions
+            if (alertdef.getParent() != null &&
+                !EventConstants.TYPE_ALERT_DEF_ID
+                    .equals(alertdef.getParent().getId())) {
+                continue;
+            }
+            
             deleteAlertDefinition(subj, alertdef, false);
         }
     }
@@ -682,7 +690,7 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinitionDAO aDao = getAlertDefDAO();
 
         Collection adefs;
-        if (parentId == EventConstants.TYPE_ALERT_DEF_ID) {
+        if (parentId.equals(EventConstants.TYPE_ALERT_DEF_ID)) {
             adefs = aDao.findByAppdefEntityType(id);
             
             if (pc.getSortorder() == PageControl.SORT_DESC)
