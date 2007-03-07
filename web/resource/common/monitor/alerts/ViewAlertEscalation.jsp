@@ -101,6 +101,7 @@
   </c:if>&nbsp;
     </td>
     <td rowspan="2" width="60%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;">
+        <div style="text-align:left;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
@@ -115,6 +116,7 @@
   </c:choose>
   <tiles:put name="icon"><html:img page="/images/icon_ack.gif" alt="Click to Acknowledge" align="middle"/></tiles:put>
 </tiles:insert>
+            </div>
     </td>
   </tr>
 </table>
