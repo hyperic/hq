@@ -45,7 +45,7 @@
 </script>
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
-<td width="30%" valign="top">
+<td width="30%" valign="top" id="escalationsList">
 <tiles:insert definition=".portlet.error"/>
 <tiles:insert definition=".portlet.confirm"/>
 
