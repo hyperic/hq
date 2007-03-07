@@ -369,28 +369,28 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       <display:column width="5%" property="id" title="nbsp" nowrap="true">
         <display:quicknavdecorator resource="${resource}"/>
       </display:column>
-      <display:column width="25%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="/Resource.do?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
+      <display:column width="30%" property="name" title="${entityTypeTH}" isLocalizedTitle="false" href="/Resource.do?eid=${resource.entityId.appdefKey}" sort="true" sortAttr="5" defaultSort="true"/>
       <c:if test="${not empty resourceTypeTH}">
-      <display:column width="25%" property="id" title="${resourceTypeTH}" isLocalizedTitle="false">
+      <display:column width="30%" property="id" title="${resourceTypeTH}" isLocalizedTitle="false">
         <display:resourcedecorator resource="${resource}" type="true"/>
       </display:column>
       </c:if>
-      <display:column width="30%" property="description" title="common.header.Description"/>
+      <display:column width="24%" property="description" title="common.header.Description"/>
     <c:if test="${ResourceHubForm.ff == GROUP}">
       <display:column property="size" title="common.header.Members" sortAttr="1" align="center"/>
     </c:if>
-      <display:column width="15%" property="id" title="resource.common.monitor.visibility.AvailabilityTH" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle" sortAttr="1">
+      <display:column width="10%" property="id" title="resource.common.monitor.visibility.AvailabilityTH" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle" sortAttr="1">
         <display:availabilitydecorator resource="${resource}"/>
       </display:column>
     </display:table>
     </c:when>
     <c:otherwise>
-    <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table class="table" width="100%" border="1" cellspacing="0" cellpadding="0">
     <tr class="tableRowHeader">
 
     <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll"></th>
     <th width="5%" class="tableRowInactive">&nbsp;</th>
-    <th width="25%" class="tableRowSorted">
+    <th width="30%" class="tableRowSorted">
     <c:choose>
     <c:when test="${param.so == 'dec'}">
     <a href="<c:out value="${sAction}&so=asc"/>"><c:out value="${entityTypeTH}"/><html:img border="0" page="/images/tb_sortdown.gif"/></a>
