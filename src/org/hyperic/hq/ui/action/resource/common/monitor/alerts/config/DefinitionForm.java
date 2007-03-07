@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.GenericValidator;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
@@ -73,12 +72,12 @@ public class DefinitionForm extends ResourceForm  {
 
     // enable actions
     private int whenEnabled;
-    private String meetTimeTP;
+    private Integer meetTimeTP = new Integer(1);
     private int meetTimeUnitsTP;
-    private String howLongTP;
+    private Integer howLongTP = new Integer(1);
     private int howLongUnitsTP;
-    private String numTimesNT;
-    private String howLongNT;
+    private Integer numTimesNT = new Integer(1);
+    private Integer howLongNT = new Integer(1);
     private int howLongUnitsNT;
 
     private List metrics;
@@ -250,11 +249,11 @@ public class DefinitionForm extends ResourceForm  {
         this.whenEnabled = whenEnabled;
     }
     
-    public String getMeetTimeTP() {
+    public Integer getMeetTimeTP() {
         return meetTimeTP;
     }
     
-    public void setMeetTimeTP(String meetTimeTP) {
+    public void setMeetTimeTP(Integer meetTimeTP) {
         this.meetTimeTP = meetTimeTP;
     }
 
@@ -293,11 +292,11 @@ public class DefinitionForm extends ResourceForm  {
         this.meetTimeUnitsTP = meetTimeUnitsTP;
     }
 
-    public String getHowLongTP() {
+    public Integer getHowLongTP() {
         return howLongTP;
     }
     
-    public void setHowLongTP(String howLongTP) {
+    public void setHowLongTP(Integer howLongTP) {
         this.howLongTP = howLongTP;
     }
 
@@ -336,19 +335,19 @@ public class DefinitionForm extends ResourceForm  {
         this.howLongUnitsTP = howLongUnitsTP;
     }
 
-    public String getNumTimesNT() {
+    public Integer getNumTimesNT() {
         return numTimesNT;
     }
     
-    public void setNumTimesNT(String numTimesNT) {
+    public void setNumTimesNT(Integer numTimesNT) {
         this.numTimesNT = numTimesNT;
     }
     
-    public String getHowLongNT() {
+    public Integer getHowLongNT() {
         return howLongNT;
     }
     
-    public void setHowLongNT(String howLongNT) {
+    public void setHowLongNT(Integer howLongNT) {
         this.howLongNT = howLongNT;
     }
 
@@ -387,7 +386,7 @@ public class DefinitionForm extends ResourceForm  {
         this.howLongUnitsNT = howLongUnitsNT;
     }
 
-    public String getHowLong() {
+    public Integer getHowLong() {
         if (whenEnabled == EventConstants.FREQ_DURATION) {
             return howLongTP;
         } else { // (whenEnabled == EventConstants.FREQ_COUNTER)
@@ -519,16 +518,16 @@ public class DefinitionForm extends ResourceForm  {
         whenEnabled = adv.getFrequencyType();
         if (EventConstants.FREQ_DURATION == whenEnabled) {
             Long[] l = AlertDefUtil.getDurationAndUnits( new Long( adv.getRange() ) );
-            howLongTP = String.valueOf(l[0]);
+            howLongTP = new Integer(l[0].intValue());
             howLongUnitsTP = l[1].intValue();
             l = AlertDefUtil.getDurationAndUnits( new Long( adv.getCount() ) );
-            meetTimeTP = String.valueOf(l[0]);
+            meetTimeTP = new Integer(l[0].intValue());
             meetTimeUnitsTP = l[1].intValue();
         } else if (EventConstants.FREQ_COUNTER == whenEnabled) {
             Long[] l = AlertDefUtil.getDurationAndUnits( new Long( adv.getRange() ) );
-            howLongNT = String.valueOf(l[0]);
+            howLongNT = new Integer(l[0].intValue());
             howLongUnitsNT = l[1].intValue();
-            numTimesNT = String.valueOf( adv.getCount() );
+            numTimesNT = new Integer( (int) adv.getCount() );
         }
     }
 
@@ -573,10 +572,9 @@ public class DefinitionForm extends ResourceForm  {
         long count = 1;
         if (this.getWhenEnabled() == EventConstants.FREQ_DURATION) {
             count = AlertDefUtil.getSecondsConsideringUnits
-                ( Long.parseLong( this.getMeetTimeTP() ),
-                  getMeetTimeUnitsTP() );
+                ( getMeetTimeTP().longValue(), getMeetTimeUnitsTP() );
         } else if (this.getWhenEnabled() == EventConstants.FREQ_COUNTER) {
-            count = Integer.parseInt( this.getNumTimesNT() );
+            count = getNumTimesNT().intValue();
             if (count <= 0) {
                 count = 1; // must be at least 1
             }
@@ -584,10 +582,9 @@ public class DefinitionForm extends ResourceForm  {
         adv.setCount(count);
 
         // EventsBoss expects range in seconds
-        if (this.getHowLong().length() > 0) {
+        if (this.getHowLong() != null) {
             long numSeconds = AlertDefUtil.getSecondsConsideringUnits
-                ( Long.parseLong( this.getHowLong() ),
-                  getHowLongUnits() );
+                ( getHowLong().longValue(), getHowLongUnits() );
             adv.setRange(numSeconds);
         }
     }
@@ -619,12 +616,11 @@ public class DefinitionForm extends ResourceForm  {
             // make sure enablement stuff is a-ok
             if (getWhenEnabled() == EventConstants.FREQ_DURATION) {
                 log.debug("howLongTP=" + getHowLongTP());
-                if ( GenericValidator.isLong( getHowLongTP() ) &&
-                     GenericValidator.isLong( getMeetTimeTP() ) ) {
+                if ( getHowLongTP() != null && getMeetTimeTP() != null ) {
                     long count = AlertDefUtil.getSecondsConsideringUnits
-                        (Long.parseLong(getMeetTimeTP()), getMeetTimeUnitsTP());
+                        (getMeetTimeTP().longValue(), getMeetTimeUnitsTP());
                     long range = AlertDefUtil.getSecondsConsideringUnits
-                        (Long.parseLong(getHowLongTP()), getHowLongUnitsTP());
+                        (getHowLongTP().longValue(), getHowLongUnitsTP());
                     if (count > range) {
                         String fieldName = RequestUtils.message(
                             request, "alert.config.props.CB.TimePeriod");
