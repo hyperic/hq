@@ -89,7 +89,7 @@ function acknowledgeAlert(img, eid, aid) {
 			<td width="1%" class="ListHeaderCheckbox">
 				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
 			</td>
-			<td width="30%" class="ListHeaderInactiveSorted" align="left">
+			<td width="20%" class="ListHeaderInactiveSorted" align="left">
 				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
 			</td>
 			<td width="30%" class="ListHeaderInactive">
@@ -98,10 +98,10 @@ function acknowledgeAlert(img, eid, aid) {
 			<td width="30%" class="ListHeaderInactive">
 				<fmt:message key="dash.home.TableHeader.ResourceName"/>
 			</td>
-			<td width="5%" class="ListHeaderInactive" align="center">
+			<td width="10%" class="ListHeaderInactive" align="center">
 				<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
 			</td>
-			<td width="5%" class="ListHeaderInactive" align="center">
+			<td width="10%" class="ListHeaderInactive" align="center">
 				<fmt:message key="alerts.alert.AlertList.ListHeader.Acknowledge"/>
 			</td>
 		</tr>
