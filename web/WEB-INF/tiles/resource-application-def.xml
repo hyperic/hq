@@ -52,8 +52,7 @@
   <definition name=".tabs.resource.application.inventory"
       extends=".tabs.resource.application">                            
    <put name="selectedIndex"  value="1" />
-   <putList name="subTabList">
-   </putList>
+   <putList name="subTabList"/>
   </definition>
 
   <!-- monitor portals -->
@@ -67,44 +66,7 @@
               extends=".tabs.resource.application">
     <put name="selectedIndex"  value="0" />
     <put name="subSectionName" value="Monitor"/>
-    <putList name="subTabList">
-      <item value="Visibility" mode="currentHealth"
-            link="/resource/application/monitor/Visibility.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Configure" mode="configure"
-            link="/resource/application/monitor/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Alerts" mode="list"
-            link="/alerts/Alerts.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-      <item value="Configure" mode="list"
-            link="/alerts/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"/>
-    </putList>
-  </definition>
-
-  <definition name=".tabs.resource.application.monitor.visibility"
-              extends=".tabs.resource.application.monitor">
-    <put name="subSelectedIndex" value="0"/>
-  </definition>
-
-  <definition name=".tabs.resource.application.monitor.configVisibility"
-              extends=".tabs.resource.application.monitor">
-    <put name="subSelectedIndex" value="1"/>
-  </definition>
-
-  <definition name=".tabs.resource.application.monitor.alerts"
-              extends=".tabs.resource.application.monitor">
-    <put name="subSelectedIndex" value="2"/>
-  </definition>
-
-  <definition name=".tabs.resource.application.monitor.configAlerts"
-              extends=".tabs.resource.application.monitor">
-    <put name="subSelectedIndex" value="3"/>
+    <putList name="subTabList"/>
   </definition>
 
   <definition name=".resource.application.inventory.serviceList"
@@ -205,48 +167,11 @@
     </putList> 
   </definition>
 
-  <definition name=".tabs.resource.application.monitor"
-              extends=".tabs.resource.application">
-    <put name="selectedIndex"  value="0" />
-    <put name="subSectionName" value="Monitor"/>
-    <putList name="subTabList">
-      <item value="Visibility" mode="currentHealth"
-            link="/resource/application/monitor/Visibility.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"
-            visible="false"
-            />
-      <item value="Configure" mode="configure"
-            link="/resource/application/monitor/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"
-            visible="false"
-            />
-      <item value="Alerts" mode="list"
-            link="/alerts/Alerts.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"
-            visible="false"
-            />
-      <item value="Configure" mode="list"
-            link="/alerts/Config.do"
-            height="25" width="104"
-            classtype="org.hyperic.hq.ui.util.Tab"
-            visible="false"
-            />
-    </putList>
-  </definition>
-
   <!-- the subtabs at the top of the monitoring screens -->
 
   <definition name=".tabs.resource.application.monitor.visibility"
               extends=".tabs.resource.application.monitor">
     <put name="subSelectedIndex" value="0"/>
-  </definition>
-
-  <definition name=".tabs.resource.application.monitor.configVisibility"
-              extends=".tabs.resource.application.monitor">
-    <put name="subSelectedIndex" value="1"/>
   </definition>
 
   <definition name=".tabs.resource.application.monitor.alerts"
