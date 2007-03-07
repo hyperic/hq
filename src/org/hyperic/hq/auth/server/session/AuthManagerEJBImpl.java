@@ -41,7 +41,6 @@ import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -294,12 +293,15 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void deleteUser(AuthzSubjectValue subject, String username)
-        throws NamingException, FinderException, RemoveException
-    {
+    public void deleteUser(AuthzSubjectValue subject, String username) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         Principal local = lhome.findByUsername(username);
-        lhome.remove(local);
+
+        // Principal does not exist for users authenticated by other JAAS
+        // providers
+        if (local != null) {
+            lhome.remove(local);
+        }
     }
 
     /**

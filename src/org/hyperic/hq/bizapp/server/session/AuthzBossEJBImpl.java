@@ -264,7 +264,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
         try {
             AuthzSubjectManagerLocal mgr = getAuthzSubjectManager();
-            for (int i=0; i<ids.length; i++) {
+            for (int i = 0; i < ids.length; i++) {
                 AuthzSubjectValue aSubject = findSubject(sessionId, ids[i]); 
                 /* Note: This has not been finalized. At present, however,
                     the consensus is that a user should be able to be deleted
@@ -284,23 +284,10 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                 getAppdefBoss().resetResourceOwnership(
                     sessionId.intValue(), aSubject);
                 // reassign ownership of all things authz
-                this.resetResourceOwnership(sessionId.intValue(), aSubject);
+                resetResourceOwnership(sessionId.intValue(), aSubject);
                 
                 // delete in auth
-                try {
-                    getAuthManager().deleteUser(whoami, aSubject.getName());
-                } catch (FinderException e) {
-                    try {
-                        Properties config =
-                            getServerConfigManager().getConfig();
-                        if (config.getProperty(HQConstants.JAASProvider)
-                            .equals(HQConstants.JDBCJAASProvider))
-                            throw e;
-                    } catch (ConfigPropertyException ce) {
-                        // Just throw the FinderException then
-                        throw e;
-                    }
-                }
+                getAuthManager().deleteUser(whoami, aSubject.getName());
                 
                 // remove from authz
                 mgr.removeSubject(whoami, ids[i]);
