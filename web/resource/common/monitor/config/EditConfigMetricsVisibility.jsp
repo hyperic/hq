@@ -186,13 +186,6 @@
 </c:url>
 
 <!--  COLLECT METRICS TAB -->
-<c:set var="tmpTitle"> - <fmt:message key="resource.application.monitor.visibility.config.CurrentCollecting.SubTab"/></c:set>
-
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.monitor.visibility.config.CollectMetrics.Tab"/>
-  <tiles:put name="subTitle" beanName="tmpTitle"/>
-</tiles:insert>
-
 <c:set var="emptyMsg"><fmt:message key="resource.common.monitor.visibility.EmptyMetricsEtc"/></c:set>
 <hq:constant
         classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
