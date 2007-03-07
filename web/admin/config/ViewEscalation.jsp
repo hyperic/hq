@@ -609,14 +609,20 @@ function showViewEscResponse(originalRequest) {
         $('emailinput').value = "";
         $('emailinputDiv').style.display = "none";
       }
-      function onchange_handler(el) {
+
+        function onchange_handler(el) {
 
           $('userListDisplay').style.display= "";
         var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
 
 
+
+          if (index == "NoOp") {
+          writeAction.innerHTML = '<fmt:message key="inform.config.escalation.scheme.NoOP"/>';
+          } else {
           writeAction.innerHTML = 'Action: ' +index;
+          }
 
          if (index == "Email" || index == "SMS" || index == "NoOp") {
             hideSyslogInput(el);
