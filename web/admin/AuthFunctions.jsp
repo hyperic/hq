@@ -36,7 +36,7 @@
 </tiles:insert>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine" style="margin-bottom: 24px;">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
     <td width="30%" class="BlockContent"><html:link page="/admin/user/UserAdmin.do?mode=list"><fmt:message key="admin.home.ListUsers"/></html:link></td>
@@ -56,9 +56,6 @@
     </c:choose>
     </td>
     <td width="50%" class="BlockLabel">&nbsp;</td>
-  </tr>
-  <tr>
-    <td colspan="3" class="BlockBottomLine"><span style="height: 1px;"></span></td>
   </tr>
 </table>
 <!--  /  -->
