@@ -44,6 +44,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>"
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
+
+    for (var f = 0; f < document.FixAlertsForm.elements.length; f++) {
+            if (document.FixAlertsForm.elements[i].type == 'submit' && document.FixAlertsForm.elements[i].className == 'CompactButton') {
+                document.FixAlertsForm.elements[i].disabled = true;
+                document.FixAlertsForm.elements[i].className = 'CompactButtonInactive';
+            }
+     }
 }
 
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
@@ -54,8 +61,8 @@ function acknowledgeAlert(img, eid, aid) {
     var pars = eid + "&a=" + aid;
     var url = ackAlertUrl + pars;
     new Ajax.Request(url);
-
 }
+
 
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>

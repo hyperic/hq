@@ -379,8 +379,8 @@ function ToggleAll(e, widgetProperties, isRemove, subGroup) {
 	if (e.checked) {
 		CheckAll(e, widgetInstanceName, subGroup);
 		ToggleButtons(widgetInstanceName, prefix, isRemove, e.form);
-
-    } else {
+	}
+	else {
 		ClearAll(e, widgetInstanceName, subGroup);
 		ToggleButtons(widgetInstanceName, prefix, isRemove, e.form);
 	}

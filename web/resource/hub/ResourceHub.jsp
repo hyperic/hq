@@ -385,7 +385,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     </display:table>
     </c:when>
     <c:otherwise>
-    <table class="table" width="100%" border="1" cellspacing="0" cellpadding="0">
+    <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr class="tableRowHeader">
 
     <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll"></th>

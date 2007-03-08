@@ -90,7 +90,7 @@ public class ListActiveEscalations extends BaseAction {
         
         JSONObject res = new JSONObject();
         
-        res.put("summary", resArr);
+        res.put("escSummary", resArr);
         ctx.setJSONResult(new JSONResult(res));
     }
 }

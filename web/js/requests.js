@@ -230,6 +230,7 @@ BrowserDetect.init();
         var token = alertText.token;
         var alertTable;
         var alertFunc;
+        unCheck();
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -360,6 +361,8 @@ BrowserDetect.init();
 
         $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
         'Updated: ' + refreshTime();
+        
+
         //rTimer = setTimeout(alertFunc, 60000);
         // Refresh in 60 seconds
     }
@@ -754,4 +757,15 @@ function refreshDate() {
 
 function reportError(originalRequest) {
     alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
+}
+
+function unCheck() {
+
+        for(i=0; i<document.FixAlertsForm.elements.length; i++) {
+            if(document.FixAlertsForm.elements[i].type=="checkbox") {
+            document.FixAlertsForm.elements[i].checked=false;
+            }
+            $('listToggleAll').checked=false;
+       }
+
 }
