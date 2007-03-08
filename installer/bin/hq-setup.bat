@@ -49,7 +49,6 @@ if "%1"=="-oracle" SET INSTALL_MODE=oracle
 if "%1"=="-postgresql" SET INSTALL_MODE=postgresql
 if "%1"=="-mysql" SET INSTALL_MODE=mysql
 if "%1"=="-full" SET INSTALL_MODE=full
-if "%1"=="-highavail" SET INSTALL_MODE=highavail
 rem Didn't match an option, assume it if the file we use
 if not "%INSTALL_MODE%"=="quick" goto finishArgs
 if not "%1"=="" set SETUP_FILE=%1

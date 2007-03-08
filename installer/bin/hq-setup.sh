@@ -97,8 +97,6 @@ while [ ! "x${1}" = "x" ] ; do
     INSTALL_MODE=oracle
   elif [ "x${1}" = "x-postgresql" ] ; then
     INSTALL_MODE=postgresql
-  elif [ "x${1}" = "x-highavail" ] ; then
-    INSTALL_MODE=highavail
   else
     SETUP_FILE="${1}"
   fi
