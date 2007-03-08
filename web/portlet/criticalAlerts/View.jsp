@@ -57,9 +57,6 @@ function acknowledgeAlert(img, eid, aid) {
 
 }
 
-    function removeImg(el) {
-        alert(el.innerHTML);
-    }
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
@@ -87,7 +84,7 @@ function acknowledgeAlert(img, eid, aid) {
      <thead>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
-				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false)" name="listToggleAll">
+				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false);this.blur();" name="listToggleAll" id="listToggleAll">
 			</td>
 			<td width="30%" class="ListHeaderInactiveSorted" align="left">
 				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
