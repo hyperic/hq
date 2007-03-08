@@ -29,6 +29,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.dao.DAOFactory;
 
 import java.util.List;
 
@@ -68,12 +69,24 @@ public class SRNCache {
         return get(id);
     }
 
+    /**
+     * Get the SRN entry from the cache falling back to loading from the
+     * database if the SRN is not found.  Since the SRNCache is pre-populated
+     * the fallback to the database should only occur in clustered setups.
+     */
     public ScheduleRevNum get(SrnId id) {
         Element el = _cache.get(id);
         if (el != null) {
             return (ScheduleRevNum)el.getObjectValue();
         }
-        return null;
+        
+        ScheduleRevNumDAO dao =
+            DAOFactory.getDAOFactory().getScheduleRevNumDAO();
+        ScheduleRevNum srn = dao.findById(id);
+        if (srn != null) {
+            this.put(srn);
+        }
+        return srn;
     }
 
     public boolean remove(SrnId id) {

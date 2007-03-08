@@ -195,23 +195,13 @@ public class SRNManagerEJBImpl extends SessionEJB
         HashSet nonEntities = new HashSet();
 
         for (int i = 0; i < srns.length; i++) {
-            AppdefEntityID id = srns[i].getEntity();
-            ScheduleRevNum srn = cache.get(id);
+            ScheduleRevNum srn = cache.get(srns[i].getEntity());
 
             if (srn == null) {
-                // Attempt load from database, we pre-load the SRNCache, but
-                // in clustered environments we'll need to reload from the
-                // database.
-                SrnId srnId = new SrnId(id.getType(), id.getID());
-                srn = getScheduleRevNumDAO().findById(srnId);
-                if (srn == null) {
-                    _log.error("Agent's reporting for non-existing entity: "
-                               + srns[i].getEntity());
-                    nonEntities.add(srns[i].getEntity());
-                    continue;
-                } else {
-                    cache.put(srn);
-                }
+                _log.error("Agent's reporting for non-existing entity: "
+                           + srns[i].getEntity());
+                nonEntities.add(srns[i].getEntity());
+                continue;
             }
 
             synchronized (srn) {
