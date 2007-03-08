@@ -31,6 +31,9 @@
     <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
     <include name="repository/org.apache.geronimo.specs/jars/geronimo-j2ee_1.4_spec-*.jar"/>
     <include name="repository/geronimo/jars/geronimo-management-*.jar"/>
+    <include name="repository/geronimo/geronimo-management/1.1/geronimo-management-*.jar"/>
+    <include name="repository/geronimo/geronimo-management/1.1.1/geronimo-management-*.jar"/>
+    <include name="repository/org/apache/geronimo/specs/geronimo-j2ee_1.4_spec/1.1/geronimo-j2ee_1.4_spec-*.jar"/>
   </classpath>
 
   <filter name="template"
@@ -40,7 +43,7 @@
           version="1.0">
 
     <property name="domain"
-              value="geronimo.server"/>
+              value="geronimo"/>
 
     <property name="OBJECT_NAME"
               value="${domain}:j2eeType=J2EEServer,name=geronimo"/>
