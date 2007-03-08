@@ -72,7 +72,7 @@ public class SNMPClient {
     private static Log log = LogFactory.getLog(SNMPClient.class);
 
     //XXX cache should be configurable by subclasses
-    private static int CACHE_EXPIRE_DEFAULT = 60 * 1000; //60 seconds
+    private static int CACHE_EXPIRE_DEFAULT = 60 * 5 * 1000; //5 minutes
 
     private static MIBTree mibTree;
     private static IntHashMap sessionCache = null;
