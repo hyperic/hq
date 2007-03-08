@@ -483,7 +483,11 @@ function ClearAll(e, widgetInstanceName, subGroup) {
 	
 	for (var i = 0; i < len; i++) {
 		var e = uList.elements[i];
-		if (e.getAttribute(classStr)==subGroup && e.checked == true) {
+        var eClass = e.getAttribute("class");
+
+        eClass = eClass? eClass : e.getAttribute("className");
+
+         if (eClass==subGroup && e.checked == true) {
 			Clear(e);
       numCheckboxes--;
 		}
