@@ -167,13 +167,14 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             throw new IllegalArgumentException("Expecting instance of " +
                 "AppdefEntityID");
         }
-
-        if (this.resourceType == -1 && this.resourceType == -1) {
+        
+        entity = (AppdefEntityID) o;
+        
+        if (!entity.isGroup() && resourceType == -1 && resourceType == -1) {
             return false; // Short circuit.
         }
 
         try {
-            entity = (AppdefEntityID) o;
             arv = fetchEntityById(entity);
 
             boolean caught = isCompatible(arv);
