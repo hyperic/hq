@@ -89,7 +89,12 @@ public class RemoveAction extends BaseAction {
         String[] escalatables = nwForm.getEalerts();
 
         if ( log.isDebugEnabled() ) {
-            log.debug("removing: " + Arrays.asList(alertIds) );
+            if (alertIds != null) {
+                log.debug("acting on alerts: " + Arrays.asList(alertIds) );
+            }
+            if (escalatables != null) {
+                log.debug("acting on ealerts: " + Arrays.asList(escalatables) );
+            }
         }
 
         if ((alertIds == null || alertIds.length == 0) &&
