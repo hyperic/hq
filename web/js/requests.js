@@ -230,7 +230,6 @@ BrowserDetect.init();
         var token = alertText.token;
         var alertTable;
         var alertFunc;
-        unCheck();
 
         if (alertText.token != null) {
             alertTable = document.getElementById('recentAlertsTable' + token);
@@ -361,10 +360,11 @@ BrowserDetect.init();
 
         $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
         'Updated: ' + refreshTime();
-        
-
         //rTimer = setTimeout(alertFunc, 60000);
         // Refresh in 60 seconds
+        unCheck();
+
+        ToggleRecentAlertButton(FixAlertsForm);
     }
 
     function showAvailSummary(originalRequest) {

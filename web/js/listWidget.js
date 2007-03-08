@@ -120,6 +120,17 @@ function ToggleButtons(widgetInstanceName, prefix, isRemove, form) {
 	}
 }
 
+function ToggleRecentAlertButton(form) {
+    for (var i = 0; i < form.elements.length; i++) {
+            if (form.elements[i].type == 'submit' &&
+                form.elements[i].className == 'CompactButton') {
+                form.elements[i].disabled = true;
+                form.elements[i].className = 'CompactButtonInactive';
+            }
+        }
+	}
+
+
 function ToggleTwoButtons(widgetInstanceName, prefix, form, btnFunction) {
     if (btnFunction == "remove")
         var imgPrefix = "removeFrom";

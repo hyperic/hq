@@ -44,13 +44,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>"
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
-
-    for (var f = 0; f < document.FixAlertsForm.elements.length; f++) {
-            if (document.FixAlertsForm.elements[i].type == 'submit' && document.FixAlertsForm.elements[i].className == 'CompactButton') {
-                document.FixAlertsForm.elements[i].disabled = true;
-                document.FixAlertsForm.elements[i].className = 'CompactButtonInactive';
-            }
-     }
 }
 
 onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
@@ -62,8 +55,6 @@ function acknowledgeAlert(img, eid, aid) {
     var url = ackAlertUrl + pars;
     new Ajax.Request(url);
 }
-
-
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
@@ -91,7 +82,7 @@ function acknowledgeAlert(img, eid, aid) {
      <thead>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
-				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false);this.blur();" name="listToggleAll" id="listToggleAll">
+				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false);" name="listToggleAll" id="listToggleAll">
 			</td>
 			<td width="30%" class="ListHeaderInactiveSorted" align="left">
 				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
