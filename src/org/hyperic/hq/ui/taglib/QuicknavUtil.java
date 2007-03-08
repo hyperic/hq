@@ -77,7 +77,12 @@ public class QuicknavUtil {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                return ContextUtils.getUIUtils(ctx.getServletContext()) != null;
+                if (ContextUtils.getUIUtils(ctx.getServletContext()) != null) {
+                    AppdefGroupValue group = (AppdefGroupValue) rv;
+                    return AppdefEntityConstants
+                                .isGroupCompat(group.getGroupType());
+                }
+                return false;
             default:
                 return false;
         }
