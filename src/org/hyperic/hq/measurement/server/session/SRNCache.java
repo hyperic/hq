@@ -82,7 +82,7 @@ public class SRNCache {
         
         ScheduleRevNumDAO dao =
             DAOFactory.getDAOFactory().getScheduleRevNumDAO();
-        ScheduleRevNum srn = dao.findById(id);
+        ScheduleRevNum srn = dao.get(id);
         if (srn != null) {
             this.put(srn);
         }

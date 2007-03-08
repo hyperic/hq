@@ -40,6 +40,10 @@ public class ScheduleRevNumDAO extends HibernateDAO {
         return (ScheduleRevNum)super.findById(id);
     }
 
+    public ScheduleRevNum get(SrnId id) {
+        return (ScheduleRevNum)super.get(id);
+    }
+
     public void remove(SrnId id) {
         ScheduleRevNum srn = findById(id);
         if (srn != null) {
