@@ -108,6 +108,7 @@ public class HypericInterceptor
                        "mtime".equals(propertyNames[i]))
             {
                 modifiedIdx = i;
+                modified = true;
             }
         }
         if (createdIdx >= 0) {
