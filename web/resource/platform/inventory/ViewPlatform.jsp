@@ -36,7 +36,7 @@ var pageData = new Array();
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="selfAction" value="/resource/platform/Inventory.do?mode=view&eid=${entityId}"/>
-<c:if test="${not empty param.resourceType && param.resourceType != -1}">
+<c:if test="${not empty param.eid && not empty param.resourceType && param.resourceType != -1}">
   <c:set var="ctype" value="3:${param.resourceType}"/>
 </c:if>
 
