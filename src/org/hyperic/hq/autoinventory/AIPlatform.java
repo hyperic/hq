@@ -164,15 +164,6 @@ public class AIPlatform extends PlatformBase
         return this.ignored;
     }
 
-    /**
-     * @deprecated use isIgnored()
-     * @return
-     */
-    public boolean getIgnored()
-    {
-        return isIgnored();
-    }
-
     public void setIgnored(boolean ignored)
     {
         this.ignored = ignored;
@@ -321,7 +312,7 @@ public class AIPlatform extends PlatformBase
         aipValue.setControlConfig(getControlConfig());
         aipValue.setMeasurementConfig(getMeasurementConfig());
         aipValue.setDiff(getDiff());
-        aipValue.setIgnored(getIgnored());
+        aipValue.setIgnored(isIgnored());
         aipValue.setPlatformTypeName(
             (getPlatformTypeName() == null) ? "" : getPlatformTypeName());
         aipValue.setLastApproved(new Long(getLastApproved()));

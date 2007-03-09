@@ -98,15 +98,17 @@ public class Platform extends PlatformBase
         return ip;
     }
 
-    public void removeIp(String address, String netmask, String macAddress) {
+    public Ip removeIp(String address, String netmask, String macAddress) {
         for (Iterator i = _ips.iterator(); i.hasNext(); ) {
             Ip ip = (Ip)i.next();
             if (ip.getAddress().equals(address) &&
                 ip.getNetmask().equals(netmask) &&
                 ip.getMacAddress().equals(macAddress)) {
                 i.remove();
+                return ip;
             }
         }
+        return null;
     }
 
     public Collection getServers() {

@@ -221,7 +221,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <tiles:put name="aiResource" beanName="aiResource"/>
             <tiles:put name="resourceParam" beanName="resourceParam"/>
             <tiles:put name="aiResourceActionUrl" value="/resource/platform/autodiscovery/IgnoreIps.do"/>
-            <tiles:put name="resParam" value="aiip"/>
           </tiles:insert>
                 
       </table>

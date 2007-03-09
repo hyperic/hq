@@ -1370,7 +1370,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public void removeIp(Platform platform, String address, String netmask,
                          String macAddress) {
-        platform.removeIp(address, netmask, macAddress);
+        Ip ip = platform.removeIp(address, netmask, macAddress);
+        getPlatformDAO().remove(ip);
     }
 
     public static PlatformManagerLocal getOne() {

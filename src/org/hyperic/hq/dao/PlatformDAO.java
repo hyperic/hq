@@ -66,6 +66,10 @@ public class PlatformDAO extends HibernateDAO {
     public void remove(Platform entity) {
         super.remove(entity);
     }
+    
+    public void remove(Ip ip) {
+        super.remove(ip);
+    }
  
     /**
      * A method to update a platform based on a PlatformValue object

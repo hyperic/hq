@@ -57,7 +57,7 @@
 <tiles:importAttribute name="aiResource"/>
 <tiles:importAttribute name="aiResourceActionUrl"/>
 <tiles:importAttribute name="resourceParam"/>
-<tiles:importAttribute name="resParam"/>
+<tiles:importAttribute name="resParam" ignore="true"/>
 
 <c:set var="aiResourceUrl" 
         value="${aiResourceActionUrl}?${resourceParam}"/>
@@ -102,19 +102,33 @@
   <td width="80%" class="AutoDiscContent">
       <c:choose>
         <c:when test="${aiResource.queueStatus == CONST_REMOVED}">
+          <c:choose>
+            <c:when test="${empty resParam}">
+                <fmt:message key="resource.autodiscovery.action.uninstalled.DeleteFromInventory"/>
+            </c:when>
+            <c:otherwise>
             <html:select property="${resParam}:${aiResource.id}" value="${resIgnored}">
                 <html:option value="${CONST_UNIGNORE}"><fmt:message key="resource.autodiscovery.action.uninstalled.DeleteFromInventory"/></html:option>
                 <html:option value="${CONST_IGNORE}"><fmt:message key="resource.autodiscovery.action.uninstalled.KeepInInventrory"/></html:option>
             </html:select>
+            </c:otherwise>
+          </c:choose>
         </c:when>
         <c:when test="${aiResource.queueStatus == CONST_UNCHANGED}">
             <fmt:message key="resource.autodiscovery.action.unchanged.NoActions"/>
         </c:when>
         <c:otherwise>
+          <c:choose>
+            <c:when test="${empty resParam}">
+                <fmt:message key="resource.autodiscovery.typeAndNetworkProperties.filter.ImportValues"/>
+            </c:when>
+            <c:otherwise>
             <html:select property="${resParam}:${aiResource.id}" value="${resIgnored}">
                <html:option value="${CONST_UNIGNORE}"><fmt:message key="resource.autodiscovery.typeAndNetworkProperties.filter.ImportValues"/></html:option>
                <html:option value="${CONST_IGNORE}"><fmt:message key="resource.autodiscovery.action.new.DoNotImport"/></html:option>
             </html:select>
+            </c:otherwise>
+          </c:choose>
         </c:otherwise>
       </c:choose>
   </td>
