@@ -52,6 +52,11 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
         this.props = manager.getProperties();
         this.autoDefaults =
             "true".equals(this.props.getProperty("snmp.autoDefaults"));
+        if (!this.autoDefaults) {
+            //command-line -DsnmpCommunity=public
+            this.autoDefaults =
+                this.props.getProperty(SNMPClient.PROP_COMMUNITY) != null;
+        }
     }
 
     private SNMPSession getSession(ConfigResponse config) {
@@ -84,7 +89,8 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
     //snmpVersion.192.168.1.102=v1
     //snmpPort.192.168.1.102=1611
     private String getIpProp(String key, String ip, String defVal) {
-        return this.props.getProperty(key + "." + ip, defVal);
+        String propDefault = this.props.getProperty(key, defVal);
+        return this.props.getProperty(key + "." + ip, propDefault);
     }
     
     public PlatformResource getPlatformResource(ConfigResponse config)
