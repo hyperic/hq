@@ -50,6 +50,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -137,35 +138,27 @@ public class AuthManagerEJBImpl implements SessionBean {
             AuthzSubjectManagerLocal subjMgrLocal = 
                     AuthzSubjectManagerUtil.getLocalHome().create();
         
-            AuthzSubjectValue subject = null;
+            AuthzSubjectValue subject;
             try {
                 subject = subjMgrLocal.findSubjectByAuth(user, appName);
                 if (!subject.getActive()) {
                     throw new LoginException("User account has been disabled.");
                 }
             } catch (SubjectNotFoundException fe) {
-                // User not found, check to make sure the standard JDBC JAAS
-                // provider is being used before creating the authz resources.
-                if (!config.getProperty(HQConstants.JAASProvider).
-                    equals(HQConstants.JDBCJAASProvider)) {
-                    subject = new AuthzSubjectValue();
-                }
-                else {
-                    // User not found in the authz system.  Create it.
-                    try {
-                        AuthzSubjectValue overlord =
-                            subjMgrLocal.findOverlord();
-                        AuthzSubjectValue newUser 
-                            = createSubjectValue(user, appName);
+                // User not found in the authz system.  Create it.
+                try {
+                    AuthzSubjectValue overlord =
+                        subjMgrLocal.findOverlord();
+                    AuthzSubjectValue newUser
+                        = createSubjectValue(user, appName);
 
-                        subjMgrLocal.createSubject(overlord, newUser);
-                        subjMgrLocal.findSubjectByAuth(newUser.getName(), 
-                                                       newUser.getAuthDsn());                                                   
-                    } catch (CreateException e) {
-                        throw new
-                            ApplicationException("Unable to add user to " +
-                                                    "authorization system", e);
-                    }
+                    AuthzSubject sub = subjMgrLocal.createSubject(overlord,
+                                                                  newUser);
+                    subject = sub.getAuthzSubjectValue();
+                } catch (CreateException e) {
+                    throw new
+                        ApplicationException("Unable to add user to " +
+                                             "authorization system", e);
                 }
             }
 
