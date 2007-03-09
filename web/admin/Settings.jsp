@@ -4,6 +4,7 @@
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="struts-bean" prefix="bean" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -39,17 +40,27 @@
 <c:if test="${useroperations['administerCAM']}">
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link> - <fmt:message key="inform.config.admin.HQServerConfig"/></td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link><fmt:message key="inform.config.admin.HQServerConfig"/></td>
 	</tr>
 </c:if>
 	<tr>
 		<td  width="20%" class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link> - <fmt:message key="inform.config.admin.MonitoringDefaults"/></td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link>
+            <tiles:importAttribute name="defaultMsg" ignore="true"/>
+            <c:choose>
+                <c:when test="${not empty defaultMsg}">
+                    <fmt:message key="${defaultMsg}"/>
+                </c:when>
+                <c:otherwise>
+                    <fmt:message key="inform.config.admin.MonitoringDefaults"/>
+                </c:otherwise>
+            </c:choose>
+        </td>
 	</tr>
     <c:if test="${useroperations['administerCAM']}">
     <tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link> - <fmt:message key="inform.config.admin.EscalationScheme"/></td>
+		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link><fmt:message key="inform.config.admin.EscalationScheme"/></td>
 	</tr>
     </c:if>
 </table>
