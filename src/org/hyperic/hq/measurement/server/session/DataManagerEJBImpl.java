@@ -385,9 +385,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
     
-    private List getRemainingDataPointsAfterBatchFail(List data, 
-                                                      int[] counts) 
-    {
+    private List getRemainingDataPointsAfterBatchFail(List data, int[] counts) {  
         List res = new ArrayList();
         Iterator i=data.iterator();
         int idx;
@@ -402,7 +400,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     
         // It's also possible that counts[] is not as long as the list
         // of data points, so we have to return all the un-processed points
-        if (idx != counts.length)
+        if (data.size() != counts.length)
             res.addAll(data.subList(idx, data.size()));
         return res;
     }
