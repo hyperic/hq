@@ -306,7 +306,7 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 /* NAVIGATION MAP DIAGRAM */
 #diagramDiv {
 position: absolute;
-z-index: 100;
+z-index: 100;                                        3
 visibility: hidden;
 /* TURN THIS OFF B/C OF DROP-SHADOW
 filter: alpha(opacity=85);
@@ -1130,3 +1130,5 @@ border-left:1px solid #D5D8DE;
   border-bottom:1px solid #333333;
 
 }
+
+.italicInfo {font-size: 11px; font-style: italic; color:#333333;}
