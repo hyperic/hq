@@ -41,6 +41,7 @@
 var pageData = new Array();
 </script>
 
+<script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="compareMetrics"/>
 <script type="text/javascript">
@@ -103,14 +104,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
 key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 <fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>
+<div id="listDiv" style="padding-top: 24px; padding-bottom: 24px;">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.common.monitor.visibility.CompareMetricsTab"/>
 </tiles:insert>
-<tiles:insert definition=".resource.common.monitor.visibility.metricsDisplayControlForm">
-  <tiles:put name="form" beanName="CompareMetricsForm"/>
-  <tiles:put name="formName" value="CompareMetricsForm"/>
-</tiles:insert>
-<div id="listDiv">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <c:forEach var="category" items="${CompareMetricsForm.metrics}">
   <c:choose>
@@ -218,11 +215,17 @@ key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 </c:forEach>
 </table>
   
+<tiles:insert definition=".resource.common.monitor.visibility.metricsDisplayControlForm">
+  <tiles:put name="form" beanName="CompareMetricsForm"/>
+  <tiles:put name="formName" value="CompareMetricsForm"/>
+</tiles:insert>
+
 <tiles:insert definition=".resource.common.monitor.visibility.metricsToolbar">
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="useCurrentButton" value="true"/>
 </tiles:insert> 
 </div>
+
 <html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
 key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 <fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>

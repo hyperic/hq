@@ -56,6 +56,7 @@ function initializeWidgetProperties(widgetInstanceName) {
      widgetProperties["numFromSelected"] = 0; //for add/remove widgets
 	 widgetProperties["numToSelected"] = 0; //for add/remove widgets
 	 widgetProperties["numSelected"] = 0; //for list widgets
+	 widgetProperties["subGroup"] = "availableListMember"; //for list widgets
      pageData[widgetInstanceName] = widgetProperties;
 }
 

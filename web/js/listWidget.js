@@ -278,8 +278,8 @@ function ToggleAllSelectionFourButtons(e, widgetProperties, subGroup,
                      btnFunction);
 }
 
-function ToggleAllCompare(e, widgetProperties) {
-    subGroup="availableListMember";
+function ToggleAllCompare(e, widgetProperties, subGroup) {
+    subGroup = widgetProperties["subGroup"];
 
     if (isIE)
 		e = event.srcElement;

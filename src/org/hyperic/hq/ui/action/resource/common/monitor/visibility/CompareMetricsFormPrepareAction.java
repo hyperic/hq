@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -139,13 +140,30 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         form.setRn((Integer) pref.get(MonitorUtils.LASTN));
         form.setRu((Integer) pref.get(MonitorUtils.UNIT));
 
+        Long begin, end;
+        
         if (range != null) {
-            form.setRb(range.getBegin());
-            form.setRe(range.getEnd());
+            begin = range.getBegin();
+            end = range.getEnd();
         }
         else {
-            form.setRb((Long) pref.get(MonitorUtils.BEGIN));
-            form.setRe((Long) pref.get(MonitorUtils.END));
+            begin = (Long) pref.get(MonitorUtils.BEGIN);
+            end = (Long) pref.get(MonitorUtils.END);
+        }
+        
+        form.setRb(begin);
+        form.setRe(end);
+        
+        form.populateStartDate(new Date(begin.longValue()),
+                               request.getLocale());
+        form.populateEndDate(new Date(end.longValue()), request.getLocale());
+        
+        Boolean readOnly = (Boolean) pref.get(MonitorUtils.RO);
+        if (readOnly.booleanValue()) {
+            form.setA(MetricDisplayRangeForm.ACTION_DATE_RANGE);
+        }
+        else {
+            form.setA(MetricDisplayRangeForm.ACTION_LASTN);
         }
     }
 

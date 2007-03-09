@@ -36,6 +36,7 @@
 <script type="text/javascript">
 initializeWidgetProperties('<c:out value="${chbtWidget}"/>');
 chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
+chbtWidgetProps['subGroup'] = 'chbtListMember';
 </script>
 
 <tiles:importAttribute name="summaries" ignore="true"/>
@@ -85,7 +86,7 @@ chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
                    orderValue="so" order="${param.so}" sortValue="sc" sort="${param.sc}" pageValue="pn" 
                    page="${param.pn}" pageSizeValue="ps" pageSize="${param.ps}" >
      <display:column width="1%" property="resourceId" title="<input type=\"checkbox\" onclick=\"ToggleAllCompare(this, chbtWidgetProps)\" name=\"listToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
-       <display:checkboxdecorator name="r" onclick="ToggleSelectionCompare(this, chbtWidgetProps);" styleClass="availableListMember"/>
+       <display:checkboxdecorator name="r" onclick="ToggleSelectionCompare(this, chbtWidgetProps);" styleClass="chbtListMember"/>
      </display:column>
      <display:column width="50%" property="resourceName" title="${ChildTH}" isLocalizedTitle="false" sort="true" sortAttr="5" defaultSort="true" styleClass="ListCell"
                      href="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=currentHealth&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
@@ -123,5 +124,5 @@ chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
 
 <input type="hidden" id="privateChildResource">
 <script type="text/javascript">
-  testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "availableListMember");
+  testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "chbtListMember");
 </script>
