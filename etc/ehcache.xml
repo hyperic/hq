@@ -475,7 +475,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.RegisteredTrigger"
-         maxElementsInMemory="100"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
