@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,8 +32,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +63,6 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -306,12 +302,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DataPoint pt = (DataPoint)i.next();
                 Integer metricId = pt.getMetricId();
                 MetricValue val = pt.getMetricValue();
-                BigDecimal bigDec = pt.getBigDec();
                 
-                        
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, bigDec);            
+                stmt.setDouble(3, val.getValue());
                 stmt.addBatch();
             }
             
@@ -426,11 +420,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DataPoint pt = (DataPoint)i.next();
                 Integer metricId  = pt.getMetricId();
                 MetricValue val   = pt.getMetricValue();
-                BigDecimal bigDec = pt.getBigDec();
                 
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, bigDec);            
+                stmt.setDouble(3, val.getValue());
                 stmt.addBatch();
             }
             

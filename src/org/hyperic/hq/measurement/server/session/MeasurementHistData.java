@@ -25,33 +25,19 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 
-public class MeasurementHistData  implements java.io.Serializable {
-
-    // Fields    
+public class MeasurementHistData 
+    implements Serializable 
+{
     private MeasurementDataId _id;
-    private BigDecimal _value;
-    private BigDecimal _minValue;
-    private BigDecimal _maxValue;
+    private double            _value;
+    private double            _minValue;
+    private double            _maxValue;
 
-    // Constructors
-    public MeasurementHistData() {
-    }
-    
-    public MeasurementHistData(MeasurementDataId id) {
-        _id = id;
+    protected MeasurementHistData() {
     }
 
-    public MeasurementHistData(MeasurementDataId id, BigDecimal value, 
-                               BigDecimal minValue, BigDecimal maxValue) {
-        _id = id;
-        _value = value;
-        _minValue = minValue;
-        _maxValue = maxValue;
-    }
-   
-    // Property accessors
     public MeasurementDataId getId() {
         return _id;
     }
@@ -60,27 +46,27 @@ public class MeasurementHistData  implements java.io.Serializable {
         _id = id;
     }
 
-    public BigDecimal getValue() {
+    public double getValue() {
         return _value;
     }
     
-    protected void setValue(BigDecimal value) {
+    protected void setValue(double value) {
         _value = value;
     }
 
-    public BigDecimal getMinValue() {
+    public double getMinValue() {
         return _minValue;
     }
     
-    protected void setMinValue(BigDecimal minValue) {
+    protected void setMinValue(double minValue) {
         _minValue = minValue;
     }
 
-    public BigDecimal getMaxValue() {
+    public double getMaxValue() {
         return _maxValue;
     }
     
-    protected void setMaxValue(BigDecimal maxValue) {
+    protected void setMaxValue(double maxValue) {
         _maxValue = maxValue;
     }
 

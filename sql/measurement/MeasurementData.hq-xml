@@ -17,8 +17,8 @@
       </key-property>
     </composite-id>
 
-    <property name="value" type="big_decimal">
-      <column name="VALUE" precision="24" scale="5" />
+    <property name="value">
+      <column name="VALUE" />
     </property>
   </class>
 
