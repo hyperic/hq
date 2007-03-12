@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.bizapp.shared.UpdateBossLocal;
+import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.UpdateBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -82,10 +83,11 @@ public class UpdateBossEJBImpl
         t.start();
     }
     
-    private Properties getRequestInfo() {
+    private Properties getRequestInfo(UpdateStatus status) {
         Properties req = new Properties();
         String guid = ServerConfigManagerEJBImpl.getOne().getGUID();
         
+        req.setProperty("hq.updateStatusMode", "" + status.getMode().getCode());
         req.setProperty("hq.version", ProductProperties.getVersion());
         req.setProperty("hq.build", ProductProperties.getBuild());
         req.setProperty("hq.guid", guid);
@@ -123,10 +125,14 @@ public class UpdateBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void fetchReport() {
+        UpdateStatus status = _updateDAO.get();
         Properties req;
         byte[] reqBytes;
         
-        req = getRequestInfo();
+        if (status.getMode().equals(UpdateStatusMode.NONE))
+            return;
+        
+        req = getRequestInfo(status);
         
         try {
             ByteArrayOutputStream bOs = new ByteArrayOutputStream(); 
@@ -143,7 +149,8 @@ public class UpdateBossEJBImpl
             return;
         }
         
-        _log.debug("Sending report:\n" + req);
+        _log.debug("Generated report.  Size=" + reqBytes.length + 
+                   " report:\n" + req);
         
         PostMethod post = new PostMethod(CHECK_URL);
         HttpClient c = new HttpClient();
@@ -170,7 +177,7 @@ public class UpdateBossEJBImpl
     }
 
     private void processReport(int statusCode, String response) {  
-        UpdateStatus curStatus = _updateDAO.get();
+        UpdateStatus curStatus = getOrCreateStatus();
         
         if (response.length() >= 4000) { 
             _log.warn("Update report exceeded 4k");
@@ -178,19 +185,66 @@ public class UpdateBossEJBImpl
         }
 
         // TODO:  Check status code so we only save valid stuffs
-        if (curStatus == null) {
-            curStatus = new UpdateStatus(response, UpdateStatusMode.MAJOR);
-            _updateDAO.save(curStatus);
+        if (curStatus.getReport() != null && 
+            curStatus.getReport().equals(response))
+        {
             return;
         }
-        
-        if (curStatus.getReport().equals(response))
-            return;
         
         curStatus.setReport(response);
         curStatus.setIgnored(false);
     }
     
+    /**
+     * Returns null if there is no status report (or it's been ignored), else
+     * the string status report
+     * 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public String getUpdateReport() {
+        UpdateStatus status = getOrCreateStatus();
+        
+        if (status.isIgnored())
+            return null;
+        
+        if (status.getReport() == null || status.getReport().equals("")) {
+            return null;
+        }
+            
+        return status.getReport(); 
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void setUpdateMode(UpdateStatusMode mode) {
+        UpdateStatus status = getOrCreateStatus();
+        
+        status.setMode(mode);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void ignoreUpdate() {
+        UpdateStatus status = getOrCreateStatus();
+        
+        status.setIgnored(true);
+    }
+    
+    private UpdateStatus getOrCreateStatus() {
+        UpdateStatus res = _updateDAO.get();
+        
+        if (res == null) {
+            res = new UpdateStatus("", UpdateStatusMode.MAJOR);
+            _updateDAO.save(res);
+        }
+        return res;
+    }
+     
     private static class UpdateFetcher implements Runnable {
         public void run() {
             while(true) {
