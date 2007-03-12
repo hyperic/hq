@@ -4924,6 +4924,15 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.20">
+        <schema-addColumn table="EAM_ACTION" column="DELETED" 
+                          columnType="BOOLEAN"/>
+        <schema-update table="EAM_ACTION" column="DELETED"
+                           columnType="BOOLEAN" value="FALSE" />
+        <schema-alterColumn table="EAM_ACTION" column="DELETED" 
+                            nullable="NOT NULL"/>
+    </schemaSpec>
+    
 </dbupgrade>
 
 </target>

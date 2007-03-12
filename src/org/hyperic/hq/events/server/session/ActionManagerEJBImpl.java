@@ -181,12 +181,13 @@ public class ActionManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Delete a free-standing action
+     * Mark a free-standing action as deleted.  These actions will later be 
+     * deleted by a cleanup thread. 
      *
      * @ejb:interface-method
      */
-    public void deleteAction(Action a) {
-        _actDAO.remove(a);
+    public void markActionDeleted(Action a) {
+        a.setDeleted(true);
     }
     
     private void setParentAction(ActionValue val, Action action) {

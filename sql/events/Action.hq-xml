@@ -47,6 +47,11 @@
       <key column="ACTION_ID" />
       <one-to-many class="AlertActionLog" />
     </bag>
+
+    <property name="deleted">
+      <column name="DELETED" not-null="true"/>
+    </property>
+
   </class>
 
 </hibernate-mapping>

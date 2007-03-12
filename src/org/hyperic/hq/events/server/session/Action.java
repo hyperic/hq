@@ -28,7 +28,6 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +43,6 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.NoOpAction;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.util.ArrayUtil;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.json.JSON;
@@ -65,7 +63,8 @@ public class Action
     private AlertDefinition _alertDef;
     private Collection      _logEntries = new ArrayList();
     private Collection      _children = new ArrayList();
-
+    private boolean         _deleted = false;
+    
     private ActionValue     _valueObj;
 
     static Action newInstance(JSONObject json) 
@@ -203,6 +202,14 @@ public class Action
 
     protected void setLogEntriesBag(Collection logEntries) {
         _logEntries = logEntries;
+    }
+    
+    public boolean isDeleted() {
+        return _deleted;
+    }
+
+    protected void setDeleted(boolean deleted) {
+        _deleted = deleted;
     }
     
     public ActionValue getActionValue() {
