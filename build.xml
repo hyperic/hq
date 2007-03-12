@@ -380,6 +380,8 @@
         <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.2.4.jar" />
         <include name="json.jar" />
+        <include name="jug-asl-2.0.0.jar" />
+        <include name="commons-httpclient-3.0.1.jar" />
 
         <!-- replacement j2ee compile required for instantj 
              since our installer doesn't install tools.jar -->
