@@ -39,6 +39,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.bizapp.shared.ConfigBossLocal;
+import org.hyperic.hq.bizapp.shared.ConfigBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -57,7 +59,6 @@ public class ConfigBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean 
 {
-
     private SessionManager sessionManager = SessionManager.getInstance();
 
     /**
@@ -135,6 +136,14 @@ public class ConfigBossEJBImpl
             throw new PermissionException("Only admins can vacuum the DB");
         }
         return getServerConfigManager().vacuum();
+    }
+    
+    public static ConfigBossLocal getOne() {
+        try {
+            return ConfigBossUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void ejbCreate() { }
