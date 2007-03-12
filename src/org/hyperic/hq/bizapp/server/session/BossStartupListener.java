@@ -7,5 +7,6 @@ public class BossStartupListener
 {
     public void hqStarted() {
         EventsBossEJBImpl.getOne().startup();
+        UpdateBossEJBImpl.getOne().startup();
     }
 }
