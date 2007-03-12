@@ -181,8 +181,7 @@ public class EscalationManagerEJBImpl
 
         unscheduleEscalation(e);
         
-        // Remove the actual action
-        ActionManagerEJBImpl.getOne().deleteAction(action);
+        ActionManagerEJBImpl.getOne().markActionDeleted(action);
     }
 
     /**
