@@ -39,21 +39,27 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.ConfigProperty;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.dao.ConfigPropertyDAO;
+import org.hyperic.sigar.NetFlags;
+import org.hyperic.sigar.NetInterfaceConfig;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
+import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-import org.hyperic.hq.dao.ConfigPropertyDAO;
-import org.hyperic.dao.DAOFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.safehaus.uuid.EthernetAddress;
+import org.safehaus.uuid.UUIDGenerator;
 
 /**
  * This class is responsible for setting/getting the server 
@@ -66,6 +72,7 @@ import org.apache.commons.logging.LogFactory;
  * @ejb:util generate="physical"
  */
 public class ServerConfigManagerEJBImpl implements SessionBean {
+    private Log _log = LogFactory.getLog(ServerConfigManagerEJBImpl.class);
 
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
     private final String SQL_ANALYZE = "ANALYZE";
@@ -383,6 +390,78 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             return ccLH.findAll();
         } else {
             return ccLH.findByPrefix(prefix);
+        }
+    }
+
+    /**
+     * Gets the GUID for this HQ server instance.  The GUID is persistent for
+     * the duration of an HQ install and is created upon the first call of
+     * this method.  If for some reason it can't be determined, 'unknown'
+     * will be returned.
+     * 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public String getGUID() {
+        Properties p;
+        String res;
+        
+        try {
+            p = getConfig();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+        
+        res = p.getProperty("HQ-GUID");
+        if (res == null || res.trim().length() == 0) {
+            if ((res = createGUID()) == null)
+                return "unknown";  
+            p.setProperty("HQ-GUID", res);
+            try {
+                setConfig(p);
+            } catch(Exception e) {
+                throw new SystemException(e);
+            }
+        }
+        return res;
+    }
+    
+    private String createGUID() {
+        try {
+            EthernetAddress eAddr;
+            Sigar sigar = new Sigar();
+            SigarProxy proxy = SigarProxyCache.newInstance(sigar);
+            String[] ifaces = proxy.getNetInterfaceList();
+            String hwaddr = null;
+            
+            for (int i=0; i<ifaces.length; i++) {
+                NetInterfaceConfig cfg = 
+                    sigar.getNetInterfaceConfig(ifaces[i]);
+
+                if (NetFlags.LOOPBACK_ADDRESS.equals(cfg.getAddress()) ||
+                    (cfg.getFlags() & NetFlags.IFF_LOOPBACK) != 0 ||
+                    NetFlags.NULL_HWADDR.equals(cfg.getHwaddr())) 
+                {
+                    continue;
+                }
+                
+                hwaddr = cfg.getHwaddr();
+                break;
+            }
+            
+            if (hwaddr == null) {
+                _log.warn("Unable to get MAC hardware address -- none found");
+                return null;
+            }
+
+            _log.debug("Obtained HW MAC: " + hwaddr);
+            eAddr = new EthernetAddress(hwaddr);
+            return UUIDGenerator.getInstance()
+                                .generateTimeBasedUUID(eAddr)
+                                .toString();
+        } catch(Exception e) {
+            _log.warn("Error while creating GUID", e);
+            return null;
         }
     }
 
