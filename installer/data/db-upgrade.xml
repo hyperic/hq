@@ -4884,7 +4884,30 @@ has already been defined.
                      dupFail="false"
                      insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (55, 'HQ-GUID', '', '', '0')"/>
     </schemaSpec>
-    
+
+    <schemaSpec version="3.19">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+           CREATE TABLE eam_update_status (
+               id integer NOT NULL,
+               version_col bigint DEFAULT 0 NOT NULL,
+               report character varying(4000),
+               upmode integer NOT NULL,
+               ignored boolean NOT NULL
+           )
+        </statement>
+        <statement targetDB="oracle">
+           CREATE TABLE eam_mescalation_state (
+               id integer NOT NULL,
+               version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
+               report VARCHAR2(4000) NOT NULL,
+               upmode integer NOT NULL,
+               ignored NUMBER(1) NOT NULL
+           )
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

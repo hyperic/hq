@@ -25,11 +25,11 @@
     </property>
 
     <property name="updateModeEnum">
-      <column name="UPMODE" />
+      <column name="UPMODE" not-null="true"/>
     </property>
 
     <property name="ignored">
-      <column name="IGNORED" />
+      <column name="IGNORED" not-null="true"/>
     </property>
   </class>
 
