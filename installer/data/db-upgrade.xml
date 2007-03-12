@@ -4905,6 +4905,22 @@ has already been defined.
                ignored NUMBER(1) NOT NULL
            )
         </statement>
+        <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_update_status_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+        </statement>          
+        <statement targetDB="oracle">
+            CREATE SEQUENCE eam_update_status_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NOMAXVALUE
+                NOCYCLE
+                CACHE 10
+        </statement>
       </schema-directSQL>
     </schemaSpec>
 
