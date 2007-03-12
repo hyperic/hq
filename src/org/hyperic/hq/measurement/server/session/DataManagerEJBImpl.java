@@ -376,6 +376,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if (execInfo[idx] == Statement.EXECUTE_FAILED)
                 res.add(pt);
         }
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Need to deal with " + res.size() + " unhandled " + 
+                       "data points (out of " + execInfo.length + ")");
+        }
         return res;
     }
     
@@ -392,6 +397,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
     
+        if (_log.isDebugEnabled()) {
+            _log.debug("Need to deal with " + res.size() + " unhandled " + 
+                       "data points (out of " + counts.length + ").  " +
+                       "datasize=" + data.size());
+        }
+        
         // It's also possible that counts[] is not as long as the list
         // of data points, so we have to return all the un-processed points
         if (data.size() != counts.length)
