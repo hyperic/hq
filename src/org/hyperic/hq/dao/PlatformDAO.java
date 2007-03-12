@@ -337,4 +337,12 @@ public class PlatformDAO extends HibernateDAO {
         }
         return platforms;
     }
+    
+    public List getPlatformTypeCounts() {
+        String sql = "select t.name, count(*) from PlatformType t, " + 
+                     "Platform p where p.platformType = t " + 
+                     "group by t.name order by t.name";
+        
+        return getSession().createQuery(sql).list();
+    }
 }

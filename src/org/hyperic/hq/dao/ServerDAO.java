@@ -219,4 +219,13 @@ public class ServerDAO extends HibernateDAO
         }
         return servers;
     }
+    
+    public List getServerTypeCounts() {
+        String sql = "select t.name, count(*) from ServerType t, " + 
+                     "Server s where s.serverType = t " + 
+                     "group by t.name order by t.name";
+        
+        return getSession().createQuery(sql).list();
+    }
+    
 }

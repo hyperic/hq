@@ -1348,6 +1348,17 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             server.setName(server.getName().trim());
     }
  
+    /**
+     * Returns a list of 2 element arrays.  The first element is the name of
+     * the server type, the second element is the # of servers of that
+     * type in the inventory.
+     * 
+     * @ejb:interface-method
+     */
+    public List getServerTypeCounts() {
+        return getServerDAO().getServerTypeCounts(); 
+    }
+
     public static ServerManagerLocal getOne() {
         try {
             return ServerManagerUtil.getLocalHome().create();

@@ -1374,6 +1374,17 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         getPlatformDAO().remove(ip);
     }
 
+    /**
+     * Returns a list of 2 element arrays.  The first element is the name of
+     * the platform type, the second element is the # of platforms of that
+     * type in the inventory.
+     * 
+     * @ejb:interface-method
+     */
+    public List getPlatformTypeCounts() {
+        return getPlatformDAO().getPlatformTypeCounts(); 
+    }
+
     public static PlatformManagerLocal getOne() {
         try {
             return PlatformManagerUtil.getLocalHome().create();

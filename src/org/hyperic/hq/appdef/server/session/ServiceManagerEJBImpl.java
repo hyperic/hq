@@ -1698,6 +1698,17 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
+    /**
+     * Returns a list of 2 element arrays.  The first element is the name of
+     * the service type, the second element is the # of services of that
+     * type in the inventory.
+     * 
+     * @ejb:interface-method
+     */
+    public List getServiceTypeCounts() {
+        return getServiceDAO().getServiceTypeCounts(); 
+    }
+
     public static ServiceManagerLocal getOne() {
         try {
             return ServiceManagerUtil.getLocalHome().create();    

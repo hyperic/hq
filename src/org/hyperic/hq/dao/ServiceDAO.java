@@ -436,4 +436,12 @@ public class ServiceDAO extends HibernateDAO
         }
         return services;
     }
+    
+    public List getServiceTypeCounts() {
+        String sql = "select t.name, count(*) from ServiceType t, " + 
+                     "Service s where s.serviceType = t " + 
+                     "group by t.name order by t.name";
+        
+        return getSession().createQuery(sql).list();
+    }
 }
