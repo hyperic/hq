@@ -4897,7 +4897,7 @@ has already been defined.
            )
         </statement>
         <statement targetDB="oracle">
-           CREATE TABLE eam_mescalation_state (
+           CREATE TABLE eam_update_status  (
                id integer NOT NULL,
                version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
                report VARCHAR2(4000) NOT NULL,
