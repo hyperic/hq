@@ -4879,13 +4879,11 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
-    <!--
     <schemaSpec version="3.18">
       <schema-insert table="EAM_CONFIG_PROPS"
                      dupFail="false"
                      insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (55, 'HQ-GUID', '', '', '0')"/>
     </schemaSpec>
-    -->
     
 </dbupgrade>
 

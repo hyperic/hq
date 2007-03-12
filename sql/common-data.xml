@@ -163,6 +163,11 @@
               FREAD_ONLY="FALSE"/>
         <data ID="54" PROPKEY="KERBEROS_DEBUG" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
+              
+        <!-- Update notification service -->
+        <data ID="55" PROPKEY="HQ-GUID" PROPVALUE="" DEFAULT_PROPVALUE=""
+              FREAD_ONLY="FALSE"/>
+              
     </table>
 
 </Covalent.DBSetup>
