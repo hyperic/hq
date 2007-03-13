@@ -31,9 +31,22 @@
  --%>
 
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
   var help = "<hq:help/>";
+          
+ function getUpdateStatus(opt) {
+  if (opt=="Ok") {
+    var pars =  "update=true";
+    } else {
+    var pars =  "update=false";
+  }
+  var updateUrl = 'Dashboard.do?';
+  var url = updateUrl + pars;
+  //alert(url)
+  new Ajax.Request( url, {method: 'post'} );
+     }
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:2px solid #3399ff;border-bottom:2px solid #3399ff;" height="56">
 
@@ -69,6 +82,8 @@
     <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
         <tr>
             <td class="MastheadBgTop" colspan="5" nowrap style="border-bottom:1px solid #ffffff;" height="34">
+                <div style="position:absolute;top:10px;right:30px;" id="hb">
+		        <c:if test="${not empty HQUpdateReport}"><html:img page="/images/transmit.gif" border="0" width="16" height="16" onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/></div></c:if>
                  <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
 		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
 		        <div style="clear:both;"></div>
@@ -132,6 +147,17 @@
 </tr>
 
 </table>
+<c:if test="${not empty HQUpdateReport}">
+<div id="update" class="menu" style="border:1px solid black;padding:7px;font-weight:bold;background:white;color:#e15700;font-size:12px;">
+<c:out value="${HQUpdateReport}" escapeXml="false"/>
+    <form name="updateForm" action="">
+        <div style="float:right;padding-left:10px;"><input type="button" value="Cancel" onclick="getUpdateStatus(this.value);"></div>
+        <div style="float:left;padding-left:15px;padding-right:10px;"><input type="button" value="Ok" onclick="getUpdateStatus(this.value);"></div>
+        <div style="clear:both;"></div>
+    </form>
+</div>
+</c:if>
+
 <script language="JavaScript1.2">
       <!--
       var refreshCount = 0;
