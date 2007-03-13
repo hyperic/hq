@@ -140,12 +140,10 @@ public class ViewAction extends TilesAction {
         if (exc != null) {
             request.getSession().removeAttribute(Constants.IMPORT_ERROR_ATTR);
             log.error("Failed to approve AI report", exc);
-            if (exc instanceof AIQApprovalException) {
-                ActionMessage err =
-                    new ActionMessage("dash.autoDiscovery.import.Error",
-                                      exc.getMessage());
-                RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
-            }
+            ActionMessage err =
+                new ActionMessage("dash.autoDiscovery.import.Error",
+                                  exc.getMessage());
+            RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
         }
         return null;
     }
