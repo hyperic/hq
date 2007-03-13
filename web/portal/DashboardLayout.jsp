@@ -83,6 +83,7 @@
 </script>
 <script language="JavaScript" type="text/javascript">
     function refreshPortlets() {
+        
         var problemPortlet = $('problemResourcesTable');
         var favoritePortlet = $('favoriteTable');
         
@@ -91,29 +92,29 @@
 
         for(i=0;i<nodes.length;i++) {
             if(/metricTable/.test(nodes[i].id)) {
-            setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", 60000);    
+            setInterval("requestMetricsResponse<c:out value="${portlet.token}"/>()", 60000);
             }
         }
 
 
         for(i=0;i<nodes.length;i++) {
             if(/availTable/.test(nodes[i].id)) {
-            setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
+            setInterval("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
             }
          }
 
         for(i=0;i<getRecentForm.length;i++) {
             if(/RemoveAlerts/.test(getRecentForm[i].action)) {
-            setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+            setInterval("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
             }
         }
 
         if (problemPortlet){
-        setTimeout("requestProblemResponse()", 60000);
+        setInterval("requestProblemResponse()", 60000);
         }
 
         if (favoritePortlet) {
-        setTimeout("requestFavoriteResources()", 60000);
+        setInterval("requestFavoriteResources()", 60000);
         }
     }
 
