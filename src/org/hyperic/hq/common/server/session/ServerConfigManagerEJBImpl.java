@@ -49,11 +49,6 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
-import org.hyperic.sigar.NetFlags;
-import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarProxy;
-import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -414,7 +409,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         
         res = p.getProperty("HQ-GUID");
         if (res == null || res.trim().length() == 0) {
-            if ((res = createGUID()) == null)
+            if ((res = GUIDGenerator.createGUID()) == null)
                 return "unknown";  
             p.setProperty("HQ-GUID", res);
             try {
@@ -426,45 +421,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         return res;
     }
     
-    private String createGUID() {
-        try {
-            EthernetAddress eAddr;
-            Sigar sigar = new Sigar();
-            SigarProxy proxy = SigarProxyCache.newInstance(sigar);
-            String[] ifaces = proxy.getNetInterfaceList();
-            String hwaddr = null;
-            
-            for (int i=0; i<ifaces.length; i++) {
-                NetInterfaceConfig cfg = 
-                    sigar.getNetInterfaceConfig(ifaces[i]);
-
-                if (NetFlags.LOOPBACK_ADDRESS.equals(cfg.getAddress()) ||
-                    (cfg.getFlags() & NetFlags.IFF_LOOPBACK) != 0 ||
-                    NetFlags.NULL_HWADDR.equals(cfg.getHwaddr())) 
-                {
-                    continue;
-                }
-                
-                hwaddr = cfg.getHwaddr();
-                break;
-            }
-            
-            if (hwaddr == null) {
-                _log.warn("Unable to get MAC hardware address -- none found");
-                return null;
-            }
-
-            _log.debug("Obtained HW MAC: " + hwaddr);
-            eAddr = new EthernetAddress(hwaddr);
-            return UUIDGenerator.getInstance()
-                                .generateTimeBasedUUID(eAddr)
-                                .toString();
-        } catch(Exception e) {
-            _log.warn("Error while creating GUID", e);
-            return null;
-        }
-    }
-
     private static InitialContext ic = null;
     protected InitialContext getInitialContext() {
         if (ic == null) {
