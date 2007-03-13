@@ -125,7 +125,7 @@ public class UpdateBossEJBImpl
      * @ejb:transaction type="REQUIRED"
      */
     public void fetchReport() {
-        UpdateStatus status = _updateDAO.get();
+        UpdateStatus status = getOrCreateStatus();
         Properties req;
         byte[] reqBytes;
         
