@@ -80,8 +80,8 @@
     <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
         <tr>
             <td class="MastheadBgTop" colspan="5" nowrap style="border-bottom:1px solid #ffffff;" height="34">
-                <div style="position:absolute;top:10px;right:30px;" id="hb">
-		        <c:if test="${not empty HQUpdateReport}"><html:img page="/images/transmit.gif" border="0" width="16" height="16" onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/></div></c:if>
+                <c:if test="${not empty HQUpdateReport}"><div style="position:absolute;top:10px;right:30px;" id="hb">
+		        <html:img page="/images/transmit.gif" border="0" width="16" height="16" onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/></div></c:if>
                  <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
 		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
 		        <div style="clear:both;"></div>
