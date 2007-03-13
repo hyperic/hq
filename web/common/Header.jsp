@@ -37,12 +37,13 @@
   var help = "<hq:help/>";
           
  function getUpdateStatus(opt) {
-   if (opt=="Ignore") {
+   if (opt=="Ignore Announcement") {
      var pars =  "update=false";
      var updateUrl = 'Dashboard.do?';
      var url = updateUrl + pars;
      //window.location = url;
        new Ajax.Request( url, {method: 'post'} );
+       $('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
       }
      menuLayers.hide();
    }
@@ -87,7 +88,7 @@
                 <c:if test="${not empty HQUpdateReport}">
                  <div style="position:absolute;top:10px;right:30px;" id="hb">
 		        <html:img page="/images/transmit.gif" border="0" width="16" height="16" onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/></div>
-                 </c:if>
+                </c:if>
 
                  <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
 		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
@@ -156,7 +157,7 @@
 <div id="update" class="menu" style="border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
 <c:out value="${HQUpdateReport}" escapeXml="false"/>
     <form name="updateForm" action="">
-        <div style="text-align:center;padding-left:15px;padding-right:15px;"><input type="button" value="Ok" onclick="getUpdateStatus(this.value);"><span style="padding-left:15px;"><input type="button" value="Ignore" onclick="getUpdateStatus(this.value);"></span>
+        <div style="text-align:center;padding-left:15px;padding-right:15px;"><input type="button" value="Acknowledge" onclick="getUpdateStatus(this.value);"><span style="padding-left:15px;"><input type="button" value="Ignore Announcement" onclick="getUpdateStatus(this.value);"></span>
         </div>
 
     </form>
