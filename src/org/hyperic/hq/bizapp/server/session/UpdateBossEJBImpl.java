@@ -229,6 +229,14 @@ public class UpdateBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
+    public UpdateStatusMode getUpdateMode() {
+        return getOrCreateStatus().getMode();
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
     public void ignoreUpdate() {
         UpdateStatus status = getOrCreateStatus();
         
