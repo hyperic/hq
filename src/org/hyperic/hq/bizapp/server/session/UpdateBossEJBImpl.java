@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -70,8 +71,48 @@ public class UpdateBossEJBImpl
     private static final int CHECK_INTERVAL = 1000 * 60 * 60 * 24; 
     private static final String CHECK_URL = "http://support.hyperic.com/uns"; 
         
-    private final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
+    private static final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
     
+    private static Properties getTweakProperties() 
+        throws IOException
+    {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream is = 
+            loader.getResourceAsStream("META-INF/tweak.properties");
+        Properties res = new Properties();
+        
+        try {
+            res.load(is);
+        } finally {
+            try {is.close();} catch(IOException e) {}
+        }
+        return res;
+    }
+    
+    private static String getCheckURL() {
+        try {
+            Properties p = getTweakProperties();
+            String res = p.getProperty("hq.updateNotify.url");
+            if (res != null)
+                return res;
+        } catch(IOException e) {
+            _log.warn("Unable to get notification url", e);
+        }
+        return CHECK_URL;
+    }
+    
+    private static long getCheckInterval() {
+        try {
+            Properties p = getTweakProperties();
+            String res = p.getProperty("hq.updateNotify.interval");
+            if (res != null)
+                return Long.parseLong(res);
+        } catch(Exception e) {
+            _log.warn("Unable to get notification interval", e);
+        }
+        return CHECK_INTERVAL;
+    }
+
     /**
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -152,7 +193,8 @@ public class UpdateBossEJBImpl
         _log.debug("Generated report.  Size=" + reqBytes.length + 
                    " report:\n" + req);
         
-        PostMethod post = new PostMethod(CHECK_URL);
+        PostMethod post = new PostMethod(getCheckURL());
+        post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
         HttpClient c = new HttpClient();
         c.setTimeout(5 * 60 * 1000); 
         
@@ -178,21 +220,21 @@ public class UpdateBossEJBImpl
 
     private void processReport(int statusCode, String response) {  
         UpdateStatus curStatus = getOrCreateStatus();
+        String curReport;
         
         if (response.length() >= 4000) { 
             _log.warn("Update report exceeded 4k");
             return;
         }
+        
+        response = response.trim();
 
-        // TODO:  Check status code so we only save valid stuffs
-        if (curStatus.getReport() != null && 
-            curStatus.getReport().equals(response))
-        {
+        curReport = curStatus.getReport() == null ? "" : curStatus.getReport();
+        if (curReport.equals(response))
             return;
-        }
         
         curStatus.setReport(response);
-        curStatus.setIgnored(false);
+        curStatus.setIgnored(response.trim().length() == 0);
     }
     
     /**
@@ -256,10 +298,11 @@ public class UpdateBossEJBImpl
     private static class UpdateFetcher implements Runnable {
         public void run() {
             while(true) {
-                UpdateBossEJBImpl.getOne().fetchReport();
                 try {
-                    Thread.sleep(CHECK_INTERVAL);
-                } catch(InterruptedException e) {
+                    UpdateBossEJBImpl.getOne().fetchReport();
+                    Thread.sleep(getCheckInterval());
+                } catch(Exception e) {
+                    _log.warn("Error getting update notification", e);
                 }
             }
         }
