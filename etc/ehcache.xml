@@ -581,4 +581,11 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Update Cache -->
+  <cache name="org.hyperic.hq.bizapp.server.session.UpdateStatus"
+         maxElementsInMemory="1"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 </ehcache>
