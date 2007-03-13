@@ -85,16 +85,32 @@
     function refreshPortlets() {
         var problemPortlet = $('problemResourcesTable');
         var favoritePortlet = $('favoriteTable');
+        
+        var nodes = document.getElementsByTagName('table');
+        var getRecentForm = document.getElementsByTagName('form')
+
+        for(i=0;i<nodes.length;i++) {
+            if(/metricTable/.test(nodes[i].id)) {
+            setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", 60000);    
+            }
+        }
 
 
-        setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
-       
+        for(i=0;i<nodes.length;i++) {
+            if(/availTable/.test(nodes[i].id)) {
+            setTimeout("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
+            }
+         }
+
+        for(i=0;i<getRecentForm.length;i++) {
+            if(/RemoveAlerts/.test(getRecentForm[i].action)) {
+            setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+            }
+        }
 
         if (problemPortlet){
         setTimeout("requestProblemResponse()", 60000);
-            }
-
-        setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+        }
 
         if (favoritePortlet) {
         setTimeout("requestFavoriteResources()", 60000);
