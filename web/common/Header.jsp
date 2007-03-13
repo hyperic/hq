@@ -37,16 +37,14 @@
   var help = "<hq:help/>";
           
  function getUpdateStatus(opt) {
-  if (opt=="Ok") {
-    var pars =  "update=true";
-    } else {
-    var pars =  "update=false";
-  }
-  var updateUrl = 'Dashboard.do?';
-  var url = updateUrl + pars;
-  //alert(url)
-  new Ajax.Request( url, {method: 'post'} );
-     }
+   if (opt=="Ok") {
+     var pars =  "update=true";
+     var updateUrl = 'Dashboard.do?';
+     var url = updateUrl + pars;
+     window.location = url;
+   }
+   menuLayers.hide();
+ }
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:2px solid #3399ff;border-bottom:2px solid #3399ff;" height="56">
 
