@@ -1,7 +1,5 @@
 package org.hyperic.hq.measurement.server.session;
 
-import java.math.BigDecimal;
-
 import org.hyperic.hq.product.MetricValue;
 
 /**
@@ -23,5 +21,10 @@ public class DataPoint {
     
     public MetricValue getMetricValue() {
         return _val;
+    }
+    
+    public String toString() {
+        return "id=" + _metricId + " val=" + _val.getValue() + 
+            " time=" + _val.getTimestamp();
     }
 }

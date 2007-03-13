@@ -247,7 +247,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // XXX:  Get a better connection here - directly from Hibernate
             conn = DBUtil.getConnByContext(getInitialContext(), 
                                            DATASOURCE_NAME);
-            while (true) {
+            while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
                 left = insertData(conn, left);
@@ -265,12 +265,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
                 _log.debug("Update left " + left.size() + " points to process");
                 
-                if (numLeft == left.size()) {
+                if (numLeft == left.size() && numLeft != 0) {
+                    DataPoint remPt = (DataPoint)left.remove(0);
                     // There are some entries that we weren't able to do
                     // anything about ... that sucks.
                     _log.warn("Unable to do anything about " + numLeft + 
                               " data points.  Sorry.");
-                    break;
+                    _log.warn("Throwing away data point " + remPt);
                 }
             }
         } catch(Exception e) {
