@@ -48,6 +48,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     private String alertPurgeVal = "0";
     private String alertPurge    = "";
     private boolean reindex = false;
+    private int    updateMode = 0;
     protected String elPurgeVal = "0";
 
     public String toString() {
@@ -58,6 +59,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         buf.append(" helpUserId=").append(helpUserId);
         buf.append(" helpPassword=").append(helpPassword);
         buf.append(" deleteUnits=").append(deleteUnits);
+        buf.append(" updateMode=").append(updateMode);
 
         return buf.toString();
     }
@@ -80,6 +82,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         alertPurge = "";
         alertPurgeVal = null;
         elPurgeVal = "0";
+        updateMode = 0;
     }
 
     public void loadConfigProperties (Properties prop){
@@ -107,7 +110,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         alertPurge = findTimeUnit(alertPurgeLong.longValue());
         alertPurgeVal = calcTimeUnit(alertPurgeLong.longValue());
 
-        String elPurgeValStr = prop.getProperty(org.hyperic.hq.common.shared.HQConstants.EventLogPurge);
+        String elPurgeValStr = prop.getProperty(HQConstants.EventLogPurge);
         Long elPurgeLong = new Long(elPurgeValStr);
         elPurgeVal = calcTimeUnit(elPurgeLong.longValue());
     }
@@ -184,7 +187,7 @@ public class SystemConfigForm extends BaseValidatorForm {
             convertToMillisecond(Long.parseLong(elPurgeVal),
                                  Constants.DAYS_LABEL);
         
-        prop.setProperty(org.hyperic.hq.common.shared.HQConstants.EventLogPurge,
+        prop.setProperty(HQConstants.EventLogPurge,
                          String.valueOf(elPurgeLong));
 
         return prop;
@@ -296,5 +299,13 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     public void setElPurgeVal(String elPurgeVal) {
         this.elPurgeVal = elPurgeVal;
+    }
+
+    public int getUpdateMode() {
+        return updateMode;
+    }
+
+    public void setUpdateMode(int updateMode) {
+        this.updateMode = updateMode;
     }
 }

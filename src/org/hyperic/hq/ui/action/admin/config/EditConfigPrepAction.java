@@ -31,10 +31,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.ui.util.ContextUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -42,6 +38,11 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.ui.util.ContextUtils;
 
 public class EditConfigPrepAction extends TilesAction {
 
@@ -63,6 +64,11 @@ public class EditConfigPrepAction extends TilesAction {
         
         Properties props = boss.getConfig();
         cForm.loadConfigProperties(props);
+        
+        // Set the update mode
+        UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
+        UpdateStatusMode upMode = uboss.getUpdateMode();
+        cForm.setUpdateMode(upMode.getCode());
         
         // See if the property exists
         if (props.containsKey(HQConstants.SNMPVersion)) {

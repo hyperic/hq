@@ -36,7 +36,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -65,14 +67,22 @@ public class EditConfigAction extends BaseAction {
         ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
         
         if (cForm.isOkClicked()) {
-            if (log.isTraceEnabled()) log.trace("Getting config");
+            if (log.isTraceEnabled())
+                log.trace("Getting config");
             Properties props = cForm.saveConfigProperties(boss.getConfig());
 
-            if (log.isTraceEnabled()) log.trace("Setting config");
+            if (log.isTraceEnabled())
+                log.trace("Setting config");
             boss.setConfig(props);
 
-            if (log.isTraceEnabled()) log.trace("Restarting config service");
+            if (log.isTraceEnabled())
+                log.trace("Restarting config service");
             boss.restartConfig();
+
+            // Set the update mode
+            UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
+            uboss.setUpdateMode(
+                UpdateStatusMode.findByCode(cForm.getUpdateMode()));
         }
 
         RequestUtils.setConfirmation(request,

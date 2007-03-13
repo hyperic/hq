@@ -69,7 +69,7 @@
 <!--  /  -->
 
 <!--  EMAIL CONFIG CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   <tr>
     <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.BaseURL"/></td>
     <td width="40%" class="BlockContent"><html:text size="31" property="baseUrl" /></td>
@@ -79,6 +79,26 @@
     <td class="BlockLabel"><fmt:message key="admin.settings.SenderEmailAddressLabel"/></td>
     <td class="BlockContent"><html:text size="31" property="senderEmail" /></td>
     <td class="BlockContent" colspan="2"></td>
+  </tr>
+</table>
+<!--  /  -->
+
+<!--  UPDATE CONFIG TITLE -->
+<tiles:insert definition=".header.tab">  
+  <tiles:put name="tabKey" value="admin.settings.UpdateConfigTab"/>  
+</tiles:insert>
+<!--  /  -->
+
+<!--  UPDATE CONFIG CONTENTS -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.AnnouncementType"/></td>
+    <td width="40%" class="BlockContent">
+    <html:radio property="updateMode" value="0"/><fmt:message key="admin.settings.All"/>
+    <html:radio property="updateMode" value="1"/><fmt:message key="admin.settings.Major"/>
+    <html:radio property="updateMode" value="2"/><fmt:message key="common.label.None"/>
+    </td>
+    <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
