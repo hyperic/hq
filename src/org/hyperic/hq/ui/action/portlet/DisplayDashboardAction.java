@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.portlet;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -38,12 +39,16 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.InvalidOptionException;
 
 public class DisplayDashboardAction extends TilesAction {
@@ -56,6 +61,7 @@ public class DisplayDashboardAction extends TilesAction {
         throws Exception{
 
         HttpSession session = request.getSession();
+        ServletContext ctx = getServlet().getServletContext();
         
         Portal portal =
             (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
@@ -94,7 +100,6 @@ public class DisplayDashboardAction extends TilesAction {
                 rssToken = String.valueOf(session.hashCode());
  
                 // Now store the RSS auth token
-                ServletContext ctx = getServlet().getServletContext();
                 AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
                 user.setPreference(Constants.RSS_TOKEN, rssToken);
                 boss.setUserPrefs(user.getSessionId(), user.getId(),
@@ -104,6 +109,25 @@ public class DisplayDashboardAction extends TilesAction {
 
         }
         request.setAttribute(Constants.PORTAL_KEY, portal); 
+        
+        Map userOpsMap =
+            (Map) session.getAttribute(Constants.USER_OPERATIONS_ATTR);
+
+        if (userOpsMap.containsKey(AuthzConstants.rootOpCAMAdmin)) {
+            // Now check for updates
+            UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
+
+            try {
+                RequestUtils.getStringParameter(request, "update");
+                uboss.ignoreUpdate();
+            } catch (ParameterNotFoundException e) {
+                String update = uboss.getUpdateReport();
+                if (update != null) {
+                    request.setAttribute("HQUpdateReport", update);
+                }
+            }
+        }
+
         return null;
     }
 }

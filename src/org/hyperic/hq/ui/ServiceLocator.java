@@ -54,12 +54,14 @@ import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBossHome;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.EventsBossHome;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.GalertBossHome;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossHome;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBossHome;
 import org.hyperic.hq.ui.exception.ServiceLocatorException;
 import org.hyperic.hq.ui.util.UIUtils;
 /**
@@ -103,6 +105,9 @@ public class ServiceLocator {
 
     private static final String GALERT_NAME = GalertBossHome.JNDI_NAME;
     private static final Class GALERT_CLASS = GalertBossHome.class;
+
+    private static final String UPDATE_NAME = UpdateBossHome.JNDI_NAME;
+    private static final Class UPDATE_CLASS = UpdateBossHome.class;
 
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
@@ -161,8 +166,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AppdefBoss getAppdefBoss() throws ServiceLocatorException {
-        AppdefBossHome home =
-        (AppdefBossHome) lookup(APPDEF_NAME, APPDEF_CLASS);
+        AppdefBossHome home = (AppdefBossHome) lookup(APPDEF_NAME, APPDEF_CLASS);
         try {
             return (AppdefBoss) home.create();
         } catch (Exception e) {
@@ -178,8 +182,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AIBoss getAIBoss() throws ServiceLocatorException {
-        AIBossHome home =
-            (AIBossHome) lookup(AI_NAME, AI_CLASS);
+        AIBossHome home = (AIBossHome) lookup(AI_NAME, AI_CLASS);
         try {
             return (AIBoss) home.create();
         } catch (Exception e) {
@@ -195,8 +198,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AuthBoss getAuthBoss() throws ServiceLocatorException {
-        AuthBossHome home =
-        (AuthBossHome) lookup(AUTH_NAME, AUTH_CLASS);
+        AuthBossHome home = (AuthBossHome) lookup(AUTH_NAME, AUTH_CLASS);
         try {
             return (AuthBoss) home.create();
         } catch (Exception e) {
@@ -212,8 +214,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AuthzBoss getAuthzBoss() throws ServiceLocatorException {
-        AuthzBossHome home =
-        (AuthzBossHome) lookup(AUTHZ_NAME, AUTHZ_CLASS);
+        AuthzBossHome home = (AuthzBossHome) lookup(AUTHZ_NAME, AUTHZ_CLASS);
         try {
             return (AuthzBoss) home.create();
         } catch (Exception e) {
@@ -247,8 +248,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public EventsBoss getEventsBoss() throws ServiceLocatorException {
-        EventsBossHome home =
-        (EventsBossHome) lookup(EVENTS_NAME, EVENTS_CLASS);
+        EventsBossHome home = (EventsBossHome) lookup(EVENTS_NAME, EVENTS_CLASS);
         try {
             return (EventsBoss) home.create();
         } catch (Exception e) {
@@ -265,7 +265,7 @@ public class ServiceLocator {
      */
     public ProductBoss getProductBoss() throws ServiceLocatorException {
         ProductBossHome home =
-        (ProductBossHome) lookup(PRODUCT_NAME, PRODUCT_CLASS);
+            (ProductBossHome) lookup(PRODUCT_NAME, PRODUCT_CLASS);
         try {
             return (ProductBoss) home.create();
         } catch (Exception e) {
@@ -283,7 +283,7 @@ public class ServiceLocator {
     public MeasurementBoss getMeasurementBoss()
     throws ServiceLocatorException {
         MeasurementBossHome home =
-        (MeasurementBossHome) lookup(MEASURE_NAME, MEASURE_CLASS);
+            (MeasurementBossHome) lookup(MEASURE_NAME, MEASURE_CLASS);
         try {
             return (MeasurementBoss) home.create();
         } catch (Exception e) {
@@ -373,6 +373,16 @@ public class ServiceLocator {
                                                       
         try {
             return (GalertBoss) home.create();
+        } catch (Exception e) {
+            throw new ServiceLocatorException(e);
+        }
+    }
+
+    public UpdateBoss getUpdateBoss() throws ServiceLocatorException {
+        UpdateBossHome home = (UpdateBossHome)lookup(UPDATE_NAME, UPDATE_CLASS);
+                                                      
+        try {
+            return (UpdateBoss) home.create();
         } catch (Exception e) {
             throw new ServiceLocatorException(e);
         }

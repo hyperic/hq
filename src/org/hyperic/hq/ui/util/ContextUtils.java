@@ -44,11 +44,12 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.ServiceLocator;
@@ -66,7 +67,7 @@ public class ContextUtils {
      *
      * @param ctx the <code>ServletContext</code>
      */
-    public static ServiceLocator getServiceLocator(ServletContext ctx)
+    protected static ServiceLocator getServiceLocator(ServletContext ctx)
         throws ServiceLocatorException {
         ServiceLocator sl = (ServiceLocator)
             ctx.getAttribute(Constants.SERVICE_LOCATOR_CTX_ATTR);
@@ -111,7 +112,6 @@ public class ContextUtils {
      */
     public static AppdefBoss getAppdefBoss(ServletContext ctx)
         throws ServiceLocatorException {
-            
         return getServiceLocator(ctx).getAppdefBoss();
     }
 
@@ -122,7 +122,6 @@ public class ContextUtils {
      */
     public static AIBoss getAIBoss(ServletContext ctx)
         throws ServiceLocatorException {
-            
         return getServiceLocator(ctx).getAIBoss();
     }
 
@@ -142,8 +141,7 @@ public class ContextUtils {
      * @param ctx the <code>ServletContext</code>
      */
     public static AuthBoss getAuthBoss(ServletContext ctx)
-        throws ServiceLocatorException {
-            
+        throws ServiceLocatorException {            
         return getServiceLocator(ctx).getAuthBoss();
     }
 
@@ -154,7 +152,6 @@ public class ContextUtils {
      */
     public static AuthzBoss getAuthzBoss(ServletContext ctx)
         throws ServiceLocatorException {
-            
         return getServiceLocator(ctx).getAuthzBoss();
     }
 
@@ -175,7 +172,6 @@ public class ContextUtils {
      */
     public static MeasurementBoss getMeasurementBoss(ServletContext ctx)
         throws ServiceLocatorException {
-    
         return getServiceLocator(ctx).getMeasurementBoss();
     }
     
@@ -185,22 +181,68 @@ public class ContextUtils {
      * @param ctx the <code>ServletContext</code>
      */
     public static ProductBoss getProductBoss(ServletContext ctx)
-        throws ServiceLocatorException {
-            
+        throws ServiceLocatorException {            
         return getServiceLocator(ctx).getProductBoss();
     }
     
     /** Consult the cached <code>ServiceLocator</code> for an instance of
-     * <code>UIUtils</code>.
+     * <code>EventBoss</code>.
      *
      * @param ctx the <code>ServletContext</code>
      */
-    public static UIUtils getUIUtils(ServletContext ctx)
+    public static EventLogBoss getEventLogBoss(ServletContext ctx)
         throws ServiceLocatorException {
-            
-        return getServiceLocator(ctx).getUIUtils(ctx);
+        return getServiceLocator(ctx).getEventLogBoss();
+    }
+
+    /**
+     * Consult the cached <code>ServiceLocator</code> for an instance of
+     * <code>ControlBoss</code>.
+     * 
+     * @param ctx
+     *            the <code>ServletContext</code>
+     */
+    public static ControlBoss getControlBoss(ServletContext ctx)
+        throws ServiceLocatorException {
+        return getServiceLocator(ctx).getControlBoss();
     }
     
+    public static GalertBoss getGalertBoss(ServletContext ctx)
+        throws ServiceLocatorException {
+        return getServiceLocator(ctx).getGalertBoss();
+    }
+
+    public static UpdateBoss getUpdateBoss(ServletContext ctx)
+        throws ServiceLocatorException  {
+        return getServiceLocator(ctx).getUpdateBoss();
+    }
+
+    public static boolean usingJDBCAuthentication(ServletContext ctx)
+        throws Exception {
+        String provider =
+            (String) ctx.getAttribute(Constants.JAAS_PROVIDER_CTX_ATTR);
+    
+        if (provider == null) {
+            Properties conf = ContextUtils.getConfigBoss(ctx).getConfig();
+            provider = conf.getProperty(HQConstants.JAASProvider);
+            ctx.setAttribute(Constants.JAAS_PROVIDER_CTX_ATTR, provider);
+        }
+    
+        return provider != null &&
+            provider.equals(HQConstants.JDBCJAASProvider);
+    }
+
+    public static void saveProperties(ServletContext ctx,
+                                      String filename, 
+                                      Properties props)
+    throws Exception {
+        
+        filename = ctx.getRealPath(filename);
+        
+        FileOutputStream out = new FileOutputStream(filename);        
+        props.store((OutputStream) out, null);            
+    }
+
     /**
      * Load the specified properties file and return the properties.
      *
@@ -217,62 +259,18 @@ public class ContextUtils {
             props.load(is);
             is.close();
         }
-
+    
         return props;
     }
-    
-    public static void saveProperties(ServletContext ctx,
-                                      String filename, 
-                                      Properties props)
-    throws Exception {
-        
-        filename = ctx.getRealPath(filename);
-        
-        FileOutputStream out = new FileOutputStream(filename);        
-        props.store((OutputStream) out, null);            
-    }
-                                            
-    public static boolean usingJDBCAuthentication(ServletContext ctx)
-        throws Exception {
-        String provider =
-            (String) ctx.getAttribute(Constants.JAAS_PROVIDER_CTX_ATTR);
-
-        if (provider == null) {
-            Properties conf = ContextUtils.getConfigBoss(ctx).getConfig();
-            provider = conf.getProperty(HQConstants.JAASProvider);
-            ctx.setAttribute(Constants.JAAS_PROVIDER_CTX_ATTR, provider);
-        }
-
-        return provider != null &&
-            provider.equals(HQConstants.JDBCJAASProvider);
-    }
 
     /** Consult the cached <code>ServiceLocator</code> for an instance of
-     * <code>EventBoss</code>.
+     * <code>UIUtils</code>.
      *
      * @param ctx the <code>ServletContext</code>
      */
-    public static EventLogBoss getEventLogBoss(ServletContext ctx)
+    public static UIUtils getUIUtils(ServletContext ctx)
         throws ServiceLocatorException {
-            ServiceLocator sl = (ServiceLocator) getServiceLocator(ctx);
-            return sl.getEventLogBoss();
-        }
-
-    /** Consult the cached <code>ServiceLocator</code> for an instance of
-     * <code>ControlBoss</code>.
-     *
-     * @param ctx the <code>ServletContext</code>
-     */
-    public static ControlBoss getControlBoss(ServletContext ctx)
-        throws ServiceLocatorException {
-            ServiceLocator sl = getServiceLocator(ctx);
-            return sl.getControlBoss();
-        }
-    
-    public static GalertBoss getGalertBoss(ServletContext ctx)
-        throws ServiceLocatorException 
-    {
-        ServiceLocator sl = getServiceLocator(ctx);
-        return sl.getGalertBoss();
+            
+        return getServiceLocator(ctx).getUIUtils(ctx);
     }
 }
