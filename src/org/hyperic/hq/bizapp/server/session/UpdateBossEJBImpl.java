@@ -74,12 +74,15 @@ public class UpdateBossEJBImpl
     private static final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
     
     private static Properties getTweakProperties() 
-        throws IOException
+        throws Exception
     {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = 
             loader.getResourceAsStream("META-INF/tweak.properties");
         Properties res = new Properties();
+
+        if (is == null)
+            return res;
         
         try {
             res.load(is);
@@ -95,7 +98,7 @@ public class UpdateBossEJBImpl
             String res = p.getProperty("hq.updateNotify.url");
             if (res != null)
                 return res;
-        } catch(IOException e) {
+        } catch(Exception e) {
             _log.warn("Unable to get notification url", e);
         }
         return CHECK_URL;
@@ -227,6 +230,9 @@ public class UpdateBossEJBImpl
             return;
         }
         
+        if (curStatus.getMode().equals(UpdateStatusMode.NONE))
+            return;
+        
         response = response.trim();
 
         curReport = curStatus.getReport() == null ? "" : curStatus.getReport();
@@ -265,6 +271,11 @@ public class UpdateBossEJBImpl
         UpdateStatus status = getOrCreateStatus();
         
         status.setMode(mode);
+        
+        if (mode.equals(UpdateStatusMode.NONE)) {
+            status.setIgnored(true);
+            status.setReport("");
+        }
     }
 
     /**
