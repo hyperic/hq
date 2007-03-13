@@ -69,7 +69,8 @@ public class UpdateBossEJBImpl
     private static final UpdateStatusDAO _updateDAO = 
         new UpdateStatusDAO(DAOFactory.getDAOFactory());
     private static final int CHECK_INTERVAL = 1000 * 60 * 60 * 24; 
-    private static final String CHECK_URL = "http://support.hyperic.com/uns"; 
+    private static final String CHECK_URL = 
+        "http://updates.hyperic.com/hq-updates"; 
         
     private static final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
     
