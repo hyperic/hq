@@ -48,7 +48,6 @@ public class HAService
     public void startSingleton() {
         MBeanServer server = MBeanUtil.getMBeanServer();
         try {
-            startScheduler(server);
             startDataPurgeService(server);
             startHeartbeatService(server);
             startAvailCheckService(server);
@@ -62,13 +61,6 @@ public class HAService
      */
     public void stopSingleton(String gracefulShutdown) {
         // XXX: shut down services
-    }
-
-    private void startScheduler(MBeanServer server)
-        throws Exception
-    {
-        invoke(server, "hyperic.jmx:type=Service,name=Scheduler",
-               "startScheduler");
     }
 
     private void startDataPurgeService(MBeanServer server)

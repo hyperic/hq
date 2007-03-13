@@ -43,6 +43,7 @@ public class HAStartupListener
         try {
             _log.info("Starting services");
             startConfigService(server);
+            startScheduler(server);
             startHAService(server);
         } catch (Exception e) {
             _log.error("Unable to start services", e);
@@ -67,5 +68,12 @@ public class HAStartupListener
         server.createMBean("org.hyperic.hq.common.server.mbean.ProductConfigService", o);
 
         server.invoke(o, "start", new Object[] {}, new String[] {});
+    }
+
+    private void startScheduler(MBeanServer server)
+        throws Exception
+    {
+        ObjectName o = new ObjectName("hyperic.jmx:type=Service,name=Scheduler");
+        server.invoke(o, "startScheduler", new Object[] {}, new String[] {});
     }
 }
