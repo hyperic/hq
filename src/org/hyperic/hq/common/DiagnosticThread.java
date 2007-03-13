@@ -113,6 +113,8 @@ public class DiagnosticThread implements Runnable {
             } catch (InterruptedException e) {
                 _log.warn("Diagnostic thread interrupted, shutting down.");
                 break;
+            } catch (Exception e) {
+                _log.warn("Error encountered while collecting diagnostics", e);
             }
         }
     }
