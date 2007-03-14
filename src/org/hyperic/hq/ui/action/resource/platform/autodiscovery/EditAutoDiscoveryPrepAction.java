@@ -69,9 +69,6 @@ public class EditAutoDiscoveryPrepAction extends NewAutoDiscoveryPrepAction {
     {
         PlatformAutoDiscoveryForm aForm = (PlatformAutoDiscoveryForm) form;
 
-        AIScheduleValue sVal = (AIScheduleValue)request.getAttribute(Constants.AISCHEDULE_ATTR);
-        schedule.set(sVal);
-        aForm.setSid(sVal.getId());
         loadScanConfig(aForm, request);
 
         return super.workflow(context, mapping, form, request,response);
