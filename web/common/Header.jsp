@@ -56,7 +56,7 @@
 <td rowspan="2">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
-            <td class="logo">
+            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
                 <html:link page="/Dashboard.do">
                     <c:choose>
                         <c:when test="${applicationScope.largeLogo}">
@@ -74,7 +74,7 @@
             <td width="100%" class="logo">
                 <html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>
             </td>
-            <td class="logo">
+            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
                 <html:img page="/images/logo_Image_large2.jpg" width="225" height="54" alt="" border="0"/>
             </td>
         </tr>
