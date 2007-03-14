@@ -37,7 +37,7 @@
   var help = "<hq:help/>";
           
  function getUpdateStatus(opt) {
-   if (opt=="Ignore Announcement") {
+   if (opt=="<fmt:message key="header.Acknowledge"/>") {
      var pars =  "update=false";
      var updateUrl = 'Dashboard.do?';
      var url = updateUrl + pars;
@@ -157,7 +157,7 @@
 <div id="update" class="menu" style="border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
 <c:out value="${HQUpdateReport}" escapeXml="false"/>
     <form name="updateForm" action="">
-        <div style="text-align:center;padding-left:15px;padding-right:15px;"><input type="button" value="Acknowledge" onclick="getUpdateStatus(this.value);"><span style="padding-left:15px;"><input type="button" value="Ignore Announcement" onclick="getUpdateStatus(this.value);"></span>
+        <div style="text-align:center;padding-left:15px;padding-right:15px;"><input type="button" value="<fmt:message key="header.RemindLater"/>" onclick="getUpdateStatus(this.value);"><span style="padding-left:15px;"><input type="button" value="<fmt:message key="header.Acknowledge"/>" onclick="getUpdateStatus(this.value);"></span>
         </div>
 
     </form>
