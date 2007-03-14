@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanMethod;
 import org.hyperic.hq.autoinventory.ScanMethodConfig;
@@ -32,25 +34,11 @@ import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.util.config.ConfigResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionMapping;
-
 public class EditAutoDiscoveryAction extends NewAutoDiscoveryAction {
     
     private static final Log log
         = LogFactory.getLog(EditAutoDiscoveryAction.class.getName());
 
-    /**
-     * removes a AIScheduleValue object if already created.
-     */
-    protected void removeAISchedule(AIBoss aiboss, 
-                                    int sessionId, Integer sid)
-        throws Exception {
-        Integer[] ids = {sid};
-        aiboss.deleteAIJob(sessionId, ids);
-    }
-    
     /**
      * load the AIScheduleValue if needed
      */

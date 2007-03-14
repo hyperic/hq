@@ -25,8 +25,14 @@
 
 package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -37,12 +43,10 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanMethod;
-import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -52,13 +56,6 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 
 /**
  * Action class which saves an auto-discovery.  The autodiscovery
@@ -86,16 +83,10 @@ public class NewAutoDiscoveryAction extends BaseAction {
 
             Integer platformId = newForm.getRid();
             Integer platformType = newForm.getType();
-            Integer sid = newForm.getSid();
             
             HashMap forwardParams = new HashMap(3);
             forwardParams.put(Constants.RESOURCE_PARAM, platformId);
             forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, platformType );
-
-            // Bug #7109, save the ai schedule id for edit ai schedule. needed
-            // when the user clicks on the reset button.
-            if (sid != null && sid.intValue() > 0)            
-                forwardParams.put(Constants.SCHEDULE_PARAM, sid );
 
             ActionForward forward =
                 checkSubmit(request, mapping, form,
@@ -186,7 +177,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         AIBoss aiboss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
-        Integer scheduleId = newForm.getSid();
         
         // update the ScanConfiguration from the form obect
         List stValues =
@@ -221,37 +211,16 @@ public class NewAutoDiscoveryAction extends BaseAction {
         }        
         scanConfig.setServerSignatures(serverDetectorArray);
 
-        // probably need to add a new scan and remove the old one in
-        // one transaction.                                   
-        removeAISchedule(aiboss, sessionId, scheduleId);
-        
-        if (newForm.getIsNow()) {
-            aiboss.startScan(sessionId,
-                             pValue.getId().intValue(), 
-                             scanConfig.getCore(),
-                             null, null, /* No scanName or scanDesc for 
-                                            immediate, one-time scans */
-                             null);
-                             
-            waitForScanStart(sessionId, aiboss, pValue.getId().intValue());
-        } else {
-            ScheduleValue val = newForm.createSchedule();
-            aiboss.startScan(sessionId, 
-                             pValue.getId().intValue(), 
-                             scanConfig.getCore(),
-                             newForm.getName(),
-                             newForm.getDescription(),
-                             val);
-        }
+        aiboss.startScan(sessionId,
+                         pValue.getId().intValue(), 
+                         scanConfig.getCore(),
+                         null, null, /* No scanName or scanDesc for 
+                                        immediate, one-time scans */
+                         null);
+                         
+        waitForScanStart(sessionId, aiboss, pValue.getId().intValue());
     }
 
-    /**
-     * removes a AIScheduleValue object if new
-     */
-    protected void removeAISchedule(AIBoss aiboss, 
-                                    int sessionId, Integer sid) 
-        throws Exception {}
-    
     private void waitForScanStart(int sessionId, AIBoss boss, int platformId)
         throws Exception {
         Thread.sleep(2000);

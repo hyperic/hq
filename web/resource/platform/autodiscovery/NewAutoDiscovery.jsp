@@ -61,13 +61,6 @@
 </tiles:insert>
 &nbsp;<br>
 	
-<!-- SCHEDULE ACTION PROPERTIES -->
-<tiles:insert page="/resource/platform/autodiscovery/AutoDiscoveryPropertiesForm.jsp"/>
-&nbsp;<br>
-<c:if test="${not onlyAIplatform}">
-  <tiles:insert definition=".schedule"/>
-</c:if>
-
 <!-- FORM BUTTONS -->
 <tiles:insert definition=".form.buttons"/>
 

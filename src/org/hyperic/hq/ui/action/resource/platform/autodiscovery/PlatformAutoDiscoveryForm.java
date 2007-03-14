@@ -34,6 +34,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.ImageButtonBean;
+import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.common.SystemException;
@@ -45,13 +50,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.ImageButtonBean;
-import org.apache.struts.util.LabelValueBean;
 
 public class PlatformAutoDiscoveryForm extends ResourceForm {
 
@@ -73,10 +71,6 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
     
     private ImageButtonBean scheduleTypeChange;    
         
-    /**
-     * schedule id
-     */    
-    private Integer sid;
     private String scanMethod;
 
     //-------------------------------------constructors
@@ -199,9 +193,6 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
         this.serverTypesLB = serverTypesLB;
     }
 
-    public Integer getSid() { return sid; }
-    public void setSid(Integer integer) { sid = integer; }
-
     /**
      * This validate method tries to
      *   
@@ -238,16 +229,6 @@ public class PlatformAutoDiscoveryForm extends ResourceForm {
                 
                 List configs = BizappUtils.buildLoadConfigOptions(schema, newResponse ); 
                 this.configOptions = configs;
-            }
-
-            if (!getIsNow()) // check to see if name has been set
-            {
-                if (scanName == null || scanName.equalsIgnoreCase(""))
-                    errors.add("name", new ActionError("resource.common.inventory.error.NameIsRequired"));
-
-                // Make sure that the description is not too long, just cut it
-                if (scanDesc != null && scanDesc.length() > 200)
-                    scanDesc = scanDesc.substring(0, 199);
             }
         }
 
