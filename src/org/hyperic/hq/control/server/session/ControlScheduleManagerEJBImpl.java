@@ -48,9 +48,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -61,11 +63,11 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlHistoryValue;
+import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -133,6 +135,14 @@ public class ControlScheduleManagerEJBImpl
         } catch (Exception e) {
             throw new SystemException(e);
         }
+    }
+    
+    private AppdefManagerLocal appdefMan = null;
+    private AppdefManagerLocal getAppdefMan() {
+        if (appdefMan == null) {
+            appdefMan = AppdefManagerEJBImpl.getOne();
+        }
+        return appdefMan;
     }
 
     /**
@@ -989,6 +999,7 @@ public class ControlScheduleManagerEJBImpl
             throw new ApplicationException(e);
         }
     }
+    
     /**
      * Check view permission for an appdef entity
      *
@@ -997,43 +1008,8 @@ public class ControlScheduleManagerEJBImpl
      */
     private void checkViewPermission(AuthzSubjectValue caller,
                                      AppdefEntityID id)
-        throws PermissionException 
-    {
-        if (viewableResources == null) {
-            try {
-                ResourceManagerLocal rsrcMgr =
-                    ResourceManagerUtil.getLocalHome().create();
-                
-                viewableResources = rsrcMgr.findAllViewableInstances(caller);
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
-        }
-        
-        String key;
-        switch(id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            key = AuthzConstants.platformResType;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            key = AuthzConstants.serverResType;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            key = AuthzConstants.serviceResType;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            key = AuthzConstants.groupResType;
-            break;
-        default:
-            throw new PermissionException("Resource " + id +
-                                          " type is not supported");
-        }
-        
-        List ids = (List) viewableResources.get(key);
-        if (ids == null || !ids.contains(id.getId()))
-            throw new PermissionException("Resource " + id +" is not viewable"); 
+        throws PermissionException {
+        getAppdefMan().checkViewPermission(caller, id);
     }
     
     private class ControlHistoryLocalComparatorAsc implements Comparator {

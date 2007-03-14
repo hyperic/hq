@@ -42,6 +42,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -64,6 +66,16 @@ import org.hyperic.util.jdbc.DBUtil;
 
 public class AppdefManagerEJBImpl
     extends AppdefSessionEJB implements SessionBean {
+    
+    public static AppdefManagerLocal getOne() {
+        try {
+            return AppdefManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
+
     private static final String OPERABLE_SQL =
     /* ex. "SELECT DISTINCT(server_type_id) FROM eam_server " + */
     " s, EAM_CONFIG_RESPONSE c, EAM_RESOURCE r, EAM_OPERATION o, " +
