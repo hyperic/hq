@@ -304,7 +304,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create a service type supported by a specific server type
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public Integer createServiceType(AuthzSubjectValue subject,
         ServiceTypeValue stv, ServerTypeValue serverType) 
@@ -1300,7 +1299,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public ServiceValue updateService(AuthzSubjectValue subject,
                                       ServiceValue existing)
@@ -1379,7 +1377,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRESNEW"
      */
     public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException {
