@@ -38,7 +38,7 @@
           
  function getUpdateStatus(opt) {
    if (opt=="<fmt:message key="header.Acknowledge"/>") {
-     var pars =  "update=false";
+     var pars =  "update=true";
      var updateUrl = 'Dashboard.do?';
      var url = updateUrl + pars;
      //window.location = url;
