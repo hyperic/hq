@@ -392,7 +392,8 @@
             metricFunc = 'requestMetricsResponse()';
         }
 
-        if (metricValues.values) {
+        if (metricTable && metricValues.values) {
+
 
             var tbody = metricTable.getElementsByTagName('tbody')[0];
             var browser = BrowserDetect.browser;

@@ -93,9 +93,9 @@
         for(i=0;i<nodes.length;i++) {
             if(/metricTable/.test(nodes[i].id)) {
             setInterval("requestMetricsResponse<c:out value="${portlet.token}"/>()", 60000);
+            
             }
         }
-
 
         for(i=0;i<nodes.length;i++) {
             if(/availTable/.test(nodes[i].id)) {
