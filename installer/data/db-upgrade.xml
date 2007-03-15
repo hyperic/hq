@@ -4932,7 +4932,12 @@ has already been defined.
         <schema-alterColumn table="EAM_ACTION" column="DELETED" 
                             nullable="NOT NULL"/>
     </schemaSpec>
-    
+
+    <schemaSpec version="3.21">
+        <schema-alterColumn table="EAM_UPDATE_STATUS" column="REPORT" 
+                            nullable="NULL"/>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>
