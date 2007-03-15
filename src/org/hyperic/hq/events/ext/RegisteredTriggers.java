@@ -37,22 +37,21 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerChangeCallback;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import org.hyperic.util.collection.IntHashMap;
 
 public class RegisteredTriggers {
     private final static Log log =
@@ -61,16 +60,18 @@ public class RegisteredTriggers {
     public static final Integer KEY_ALL = new Integer(0);
     
     private static RegisteredTriggers singleton = new RegisteredTriggers();
-
+    
+    /** Holds value of property initialized. */
     private boolean initialized = false;
-
-    private Cache _keyedByType;
-    private Cache _keyedById;
-
+    
+    /** Holds value of property keyedByType. */
+    private Hashtable keyedByType = new Hashtable();
+    
+    /** Holds value of property keyedByTrigger. */
+    private Hashtable keyedByTrigger = new Hashtable();
+    
+    /** Creates a new instance of RegisteredTriggers */
     private RegisteredTriggers() {
-        _keyedByType = CacheManager.getInstance().getCache("TriggersByType");
-        _keyedById =
-            CacheManager.getInstance().getCache("TriggerById");
     }
     
     /** Initializes the cache.
@@ -88,7 +89,7 @@ public class RegisteredTriggers {
             RegisteredTriggerManagerLocal rtm =
             RegisteredTriggerManagerUtil.getLocalHome().create();
 
-            HashSet toRemove = new HashSet(_keyedById.getKeys());
+            HashSet toRemove = new HashSet(this.keyedByTrigger.keySet());
             
             Collection triggers = rtm.getAllTriggers();
             for (Iterator i = triggers.iterator(); i.hasNext();) {
@@ -145,26 +146,23 @@ public class RegisteredTriggers {
         Map triggers = new Hashtable();
         
         // Look up by Event type
-        if (!_keyedByType.isKeyInCache(eventType)) {
-            if (create) {
-                Element el = new Element(eventType, new HashMap());
-                _keyedByType.put(el);
-            } else {
-                return triggers;
-            }
-        }
-        
-        // Lookup by Instance
-        Element el = _keyedByType.get(eventType);
-        HashMap keyedByInstance = (HashMap)el.getObjectValue();
-        if (!keyedByInstance.containsKey(instance)) {
+        if (!keyedByType.containsKey(eventType)) {
             if (create)
-                keyedByInstance.put(instance, triggers);
+                keyedByType.put(eventType, new IntHashMap());
             else
                 return triggers;
         }
         
-        return (Map) keyedByInstance.get(instance);
+        // Lookup by Instance
+        IntHashMap keyedByInstance = (IntHashMap) keyedByType.get(eventType);
+        if (!keyedByInstance.containsKey(instance.intValue())) {
+            if (create)
+                keyedByInstance.put(instance.intValue(), triggers);
+            else
+                return triggers;
+        }
+        
+        return (Map) keyedByInstance.get(instance.intValue());
     }
     
     public static Collection getInterestedTriggers(AbstractEvent event) {
@@ -194,7 +192,7 @@ public class RegisteredTriggers {
     }
 
     public static boolean isTriggerInterested(AbstractEvent event) {
-        Map trigMap;
+        Map trigMap = null;
         
         // If the event happened more than a day ago, does anyone care?
         final long ONE_DAY = 86400000;
@@ -219,7 +217,7 @@ public class RegisteredTriggers {
     }
     
     public static boolean isTriggerRegistered(Integer tid) {
-        return singleton.getKeyedById().isKeyInCache(tid);
+        return singleton.getKeyedByTrigger().containsKey(tid);
     }
     
     private void registerTrigger(RegisteredTriggerValue tv)
@@ -256,12 +254,11 @@ public class RegisteredTriggers {
                 }
                 
                 // Reverse register the trigger
-                if (!_keyedById.isKeyInCache(tv.getId())) {
-                    Element el = new Element(tv.getId(), new ArrayList());
-                    _keyedById.put(el);
+                if (!keyedByTrigger.containsKey(tv.getId())) {
+                    keyedByTrigger.put(tv.getId(), new ArrayList());
                 }
-                Element el = _keyedById.get(tv.getId());
-                ArrayList triggerMaps = (ArrayList) el.getObjectValue();
+                ArrayList triggerMaps =
+                    (ArrayList) keyedByTrigger.get(tv.getId());
                 triggerMaps.add(triggers);
             }
         }
@@ -269,11 +266,7 @@ public class RegisteredTriggers {
     
     private void unregisterTrigger(Integer tvId) {
         // Use the keyedByTrigger table to look up which maps to delete from
-        Element el = _keyedById.get(tvId);
-        if (el == null) // Can't unregister
-            return;
-
-        ArrayList triggerMaps = (ArrayList)el.getObjectValue();
+        ArrayList triggerMaps = (ArrayList) keyedByTrigger.remove(tvId);
         if (triggerMaps == null) // Can't unregister
             return;
         
@@ -282,31 +275,39 @@ public class RegisteredTriggers {
             triggers.remove(tvId);
         }
     }
-
+    
+    /** Getter for property initialized.
+     * @return Value of property initialized.
+     *
+     */
     public boolean isInitialized() {
         return this.initialized;
     }
-
+    
+    /** Setter for property initialized.
+     * @param initialized New value of property initialized.
+     *
+     */
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
     }
-
+    
     /** Getter for property keyedByType.
      * @return Value of property keyedByType.
      *
      */
-    public Cache getKeyedByType() {
-        return _keyedByType;
+    public Hashtable getKeyedByType() {
+        return this.keyedByType;
     }
-
+    
     /** Getter for property keyedByTrigger.
      * @return Value of property keyedByTrigger.
      *
      */
-    public Cache getKeyedById() {
-        return _keyedById;
+    public Hashtable getKeyedByTrigger() {
+        return this.keyedByTrigger;
     }
-
+    
     public class RegisteredTriggersUpdater implements TriggerChangeCallback {
 
         public void beforeTriggersDeleted(Collection triggers) {
