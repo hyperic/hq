@@ -213,7 +213,7 @@ public class UpdateBossEJBImpl
             
             response = post.getResponseBodyAsString();
         } catch(Exception e) {
-            _log.warn("Unable to get updates", e);
+            _log.debug("Unable to get updates", e);
             return;
         } finally {
             post.releaseConnection();
@@ -228,6 +228,11 @@ public class UpdateBossEJBImpl
         
         if (response.length() >= 4000) { 
             _log.warn("Update report exceeded 4k");
+            return;
+        }
+        
+        if (statusCode != 200) {
+            _log.debug("Bad status code returned: " + statusCode);
             return;
         }
         
