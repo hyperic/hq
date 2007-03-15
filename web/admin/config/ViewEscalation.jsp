@@ -60,9 +60,9 @@ function showViewEscResponse(originalRequest) {
     var id = tmp.escalation.id;
     var maxWaitTime = (tmp.escalation.maxWaitTime / 60000) +
        " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
-     
+
     $('viewEscalation').style.display = "";
-  
+
     $('escId').value = id;
     $('id').value = id;
 
@@ -151,7 +151,7 @@ function showViewEscResponse(originalRequest) {
       var select2 = document.createElement("select");
       var select3 = document.createElement("select");
       var anchor = document.createElement("a");
-  
+
       var emailInfo = actionConfig.names;
 
       $('creationTime').value = creationTime;
@@ -160,14 +160,14 @@ function showViewEscResponse(originalRequest) {
       $('modifiedTime').value = modifiedTime;
       $('allowPause').value = allowPause;
       $('id').value = id;
-  
+
       escViewUL.appendChild(viewLi)
-  
+
       viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
       viewLi.setAttribute('id','row_'+ liID);
       $('row_'+ liID).style.margin = "0px";
       $('row_'+ liID).style.padding = "0px";
-      
+
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
       escTable.setAttribute('id','escTbl_'+ liID);
@@ -231,7 +231,7 @@ function showViewEscResponse(originalRequest) {
               var comma = ", ";
               for (var b = 0; b < emailAdds.length; b++) {
                 displayEmails += emailAdds[b];
-                  
+
                 if (b < emailAdds.length - 1) {
                   displayEmails += comma;
                 }
@@ -246,7 +246,7 @@ function showViewEscResponse(originalRequest) {
               //usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Others"/>:  " + displayEmails + "<br>";
 
          }
-           
+
       } else if (configListType == "2") {
           var uids = emailInfo.split(',');
           var userNames = "";
@@ -257,12 +257,12 @@ function showViewEscResponse(originalRequest) {
                   }
               </c:forEach>
           }
-          
+
           if (configSms == "true") {
           usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via SMS: " + userNames + "<br>";
               } else {
               usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/> via Email: " + userNames + "<br>";
-        
+
           }
       } else  if (configListType == "3") {
           var rids = emailInfo.split(',');
@@ -274,10 +274,10 @@ function showViewEscResponse(originalRequest) {
                   }
               </c:forEach>
           }
-          
+
           usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + roleNames + "<br>";
       }
-  
+
       escTr2.appendChild(td3);
       td3.setAttribute((document.all ? 'className' : 'class'), "td3");
       td3.setAttribute('width', '20%');
@@ -288,12 +288,12 @@ function showViewEscResponse(originalRequest) {
         td3.innerHTML = emailInfo + "<br>";
         break;
       }
-  
+
       td3.style.paddingTop = "5px";
-  
+
       escTr2.appendChild(td4);
       td5.setAttribute('width', '50%');
-  
+
       td4.appendChild(usersEditDiv);
       usersEditDiv.style.display = 'none';
       usersEditDiv.setAttribute('class', 'escInput'+ liID);
@@ -313,7 +313,7 @@ function showViewEscResponse(originalRequest) {
            constraint: 'vertical'});
 
     }
- 
+
     function editEscalation () {
         $('escPropertiesTable').style.display = 'none';
         $('editPropertiesTable').style.display = '';
@@ -342,10 +342,13 @@ function showViewEscResponse(originalRequest) {
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
         $('escPropertiesTable').style.display = '';
         $('editPropertiesTable').style.display = 'none';
-       
+
     }
 
+
+
     function saveAddEscalation () {
+
         var syslogDivIn = $('sysloginput');
         if (syslogDivIn.style.display != 'none') {
           if ($('metainput').value == '') {
@@ -357,47 +360,43 @@ function showViewEscResponse(originalRequest) {
               $('productinput').focus();
               return false;
            }
-        
+
           if ($('versioninput').value == '') {
               $('versioninput').focus();
               return false;
            }
         }
-
-        // Convert whitespaces
-        var emailInput = $('emailinput');
-        if (emailInput.style.display != 'none') {
         
-          var emails = emailInput.value;
+        var emailTextArea = $('emailinput');
+        if (emailTextArea.style.display != 'none') {
+
+          var emailAdds = emailTextArea.value;
           var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-          emailInput.value = emails.split(/[\s]/);
-          emailInput.value = emails.split(/,/);
-        
-          if (emails.value == '')  {
 
+           if ((typeof emailAdds) == "undefined" || emailAdds == ""){
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
 
-          } else if (emails.match(illegalChars)) {
-
+          } else if (emailAdds.match(illegalChars)){
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
-            return false;
 
-          } else {
-              
+           } else {
+            emailTextArea.value = emailAdds.split(/[\s]/);
+            emailTextArea.value = emailAdds.split(/,/);
+           
             var id = $('id').value;
             var serialAddAction = Form.serialize('addEscalation');
             var pars =  "EscId=" + id + "&" + serialAddAction;
             var url = '<html:rewrite action="/escalation/saveAction"/>';
-            
+
             new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
             document.EscalationForm.reset();
-          }
+           }
         }
     }
 
@@ -470,7 +469,7 @@ function showViewEscResponse(originalRequest) {
         td7.setAttribute('width', '10');
         td7.innerHTML = "&nbsp;"
         */
-        
+
         escTrHeader.appendChild(td6);
         td6.setAttribute('colSpan', '3');
         td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
@@ -531,7 +530,7 @@ function showViewEscResponse(originalRequest) {
 
         escTr2.appendChild(td4);
         td4.setAttribute('valign', 'top');
-        
+
         td4.appendChild(emailDiv);
         emailDiv.setAttribute('class', 'emailDiv');
         emailDiv.setAttribute('id', 'emailinputDiv');
@@ -723,7 +722,7 @@ function showViewEscResponse(originalRequest) {
         }
         sel.appendChild(o);
         o.appendChild(document.createTextNode(txt));
-      
+
     }
 
     function showResponse(originalRequest) {
@@ -752,7 +751,7 @@ function showViewEscResponse(originalRequest) {
 
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError} );
    }
-    
+
     function configure(id) {
       var sel = $('who' + id);
       var selval = sel.options[sel.selectedIndex].value;
@@ -792,7 +791,7 @@ function showViewEscResponse(originalRequest) {
       var getId = idStr.split('_');
       var usersDivIn = $('usersDiv' + getId[1]);
       var writeListUsers = $('userListDisplay');
-      
+
       Dialog.confirm('<div id="usersConfigWindow">' + usersDivIn.innerHTML +
                      '</div>',
                   {windowParameters: {className:'dialog', width:305, height:200,
@@ -842,7 +841,7 @@ function showViewEscResponse(originalRequest) {
                   okLabel: "OK", cancelLabel: "Cancel",
                   ok:function(win) {
                     var rolesInputList =
-                      rolesDivIn.getElementsByTagName('input');                      
+                      rolesDivIn.getElementsByTagName('input');
                     var updatedInputList =
                       $('rolesConfigWindow').getElementsByTagName('input');
 
@@ -862,7 +861,7 @@ function showViewEscResponse(originalRequest) {
                             writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
                             }
                             </c:forEach>
-                           
+
                         }
                     }
                     new Effect.Fade(Windows.focusedWindow.getId());
@@ -937,7 +936,7 @@ function showViewEscResponse(originalRequest) {
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
         $('versioninput').focus();
          return false;
-            
+
         } else {
             $('escMsg').innerHTML ='';
             $('example').style.display= 'none';
