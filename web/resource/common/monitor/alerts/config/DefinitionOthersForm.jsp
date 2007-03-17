@@ -4,6 +4,7 @@
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-logic" prefix="logic" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -68,5 +69,12 @@
 </table>
 <tiles:insert definition=".form.buttons"/>
 <html:hidden property="ad"/>
-<html:hidden property="eid"/>
+  <c:choose>
+    <c:when test="${not empty param.aetid}">
 <html:hidden property="aetid"/>
+    </c:when>
+    <c:otherwise>
+<html:hidden property="eid"/>
+    </c:otherwise>
+  </c:choose>
+
