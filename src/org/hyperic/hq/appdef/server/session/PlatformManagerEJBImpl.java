@@ -163,7 +163,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public PageList getAllPlatformTypes(AuthzSubjectValue subject,
                                         PageControl pc) 
     {
-        Collection platTypes = getPlatformTypeDAO().findAll();
+        Collection platTypes = getPlatformTypeDAO().findAllOrderByName();
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(platTypes, pc);
