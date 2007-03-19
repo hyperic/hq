@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.bizapp.client.shell;
 
-import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -38,17 +36,15 @@ public class ClientShell_alert_list
     extends ShellCommandBase 
 {
     private static final int[] PARAM_VALID_RESOURCE = {
-        ClientShell_resource.PARAM_GROUP,
         ClientShell_resource.PARAM_PLATFORM,
         ClientShell_resource.PARAM_SERVER,
         ClientShell_resource.PARAM_SERVICE,
+        ClientShell_resource.PARAM_GROUP,
     };
     
-    private ClientShell              shell;
     private ClientShellEntityFetcher entityFetcher;
 
     public ClientShell_alert_list(ClientShell shell){
-        this.shell         = shell;
         this.entityFetcher = 
             new ClientShellEntityFetcher(shell.getBossManager(),
                                       shell.getAuthenticator());
@@ -57,29 +53,27 @@ public class ClientShell_alert_list
     public void processCommand(String[] args)
         throws ShellCommandUsageException, ShellCommandExecException 
     {
-        PrintStream out = getOutStream();
         List data;
         
         if (args.length == 0) {
-            // Just return all alerts
-            data = findAllAlerts();
+            throw new ShellCommandUsageException(getSyntax());
         }
-        else if(ClientShell_resource.paramIsValid(PARAM_VALID_RESOURCE, args[0])){
+        else if(ClientShell_resource.paramIsValid(PARAM_VALID_RESOURCE,
+                                                  args[0])){
             String resourceType, resourceId;
             int appdefType;
 
             resourceType = args[0];
             resourceId   = args[1];
-            if(ClientShell_resource.convertParamToInt(resourceType) ==
-               ClientShell_resource.PARAM_GROUP)
-            {
+            if (ClientShell_resource.convertParamToInt(resourceType) ==
+                ClientShell_resource.PARAM_GROUP) {
                 throw new ShellCommandExecException("Not yet implemented");
             } 
 
             appdefType = ClientShell_resource.paramToEntityType(resourceType);
             data = findResourceAlerts(appdefType, resourceId);
         } else {
-            throw new ShellCommandUsageException(this.getUsageHelp(null));
+            throw new ShellCommandUsageException(getUsageHelp(null));
         }
         
         this.getOutStream().println(data.size() + " alerts found");
@@ -95,19 +89,10 @@ public class ClientShell_alert_list
                                  ValuePrinter.ATTRTYPE_LONGDATE,
                                  ValuePrinter.ATTRTYPE_STRING});
  
-        printer.setHeaders(new String[] { "ID", "Alert Time", 
-                                          "Actual Values"});
+        printer.setHeaders(new String[] { "ID", "Alert Time", "Actual Values"});
         printer.printList(data);
     }
 
-    private List findAllAlerts() throws ShellCommandExecException {
-        try {
-            return this.entityFetcher.findAllAlerts();
-        } catch(Exception exc){
-            throw new ShellCommandExecException("Error getting alerts", exc);
-        }
-    }
-    
     private List findResourceAlerts(int appdefType, String resourceId)
         throws ShellCommandExecException 
     {
@@ -122,8 +107,8 @@ public class ClientShell_alert_list
     }
     
     public String getSyntaxArgs(){
-        return "[" + ClientShell_resource.generateArgList(PARAM_VALID_RESOURCE) +
-            " <resource>]";
+        return ClientShell_resource.generateArgList(PARAM_VALID_RESOURCE) +
+            " <resource>";
     }
 
     public String getUsageShort(){
@@ -131,6 +116,6 @@ public class ClientShell_alert_list
     }
 
     public String getUsageHelp(String[] args) {
-        return "    " + this.getUsageShort() + ".";
+        return "    " + getUsageShort() + ".";
     }
 }
