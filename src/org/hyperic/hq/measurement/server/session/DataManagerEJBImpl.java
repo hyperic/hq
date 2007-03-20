@@ -86,6 +86,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
 
+    private static final BigDecimal MAX_DB_NUMBER = new BigDecimal("10000000000000000000000");
+
     private static final long MINUTE = 60 * 1000;
     
     // Table names
@@ -285,6 +287,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * Convert a decimal value to something suitable for being thrown into the database
+     * with a NUMERIC(24,5) definition
+     */
+    private BigDecimal getDecimalInRange(BigDecimal val) {
+        val = val.setScale(5, BigDecimal.ROUND_HALF_EVEN);
+        if (val.compareTo(MAX_DB_NUMBER) == 1) {
+            _log.warn("Value [" + val + "] is too big to put into the DB.  Truncating to [" + 
+                      MAX_DB_NUMBER+ "]");
+            return MAX_DB_NUMBER;
+        }
+        
+        return val;
+    }
+    
+    /**
      * This method is called to perform 'updates' for any inserts which failed
      * in addData. 
      */
@@ -314,7 +331,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, bigDec);
+                stmt.setBigDecimal(3, getDecimalInRange(bigDec));
                 stmt.addBatch();
             }
             
@@ -450,7 +467,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, bigDec);
+                stmt.setBigDecimal(3, getDecimalInRange(bigDec));
                 stmt.addBatch();
             }
             
