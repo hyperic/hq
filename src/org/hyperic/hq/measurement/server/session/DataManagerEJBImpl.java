@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -303,10 +304,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DataPoint pt = (DataPoint)i.next();
                 Integer metricId = pt.getMetricId();
                 MetricValue val = pt.getMetricValue();
+                BigDecimal bigDec;
                 
+                try {
+                    bigDec = BigDecimal.valueOf(val.getValue());
+                } catch(NumberFormatException e) {  // infinite, or NaN
+                    _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
+                    continue;
+                }
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setDouble(3, val.getValue());
+                stmt.setBigDecimal(3, bigDec);
                 stmt.addBatch();
             }
             
@@ -432,10 +440,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DataPoint pt = (DataPoint)i.next();
                 Integer metricId  = pt.getMetricId();
                 MetricValue val   = pt.getMetricValue();
+                BigDecimal bigDec;
                 
+                try {
+                    bigDec = BigDecimal.valueOf(val.getValue());
+                } catch(NumberFormatException e) {  // infinite, or NaN
+                    _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
+                    continue;
+                }
                 stmt.setInt(1, metricId.intValue());
                 stmt.setLong(2, val.getTimestamp());
-                stmt.setDouble(3, val.getValue());
+                stmt.setBigDecimal(3, bigDec);
                 stmt.addBatch();
             }
             

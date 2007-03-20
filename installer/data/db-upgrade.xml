@@ -4938,6 +4938,70 @@ has already been defined.
                             nullable="NULL"/>
     </schemaSpec>
 
+	<schemaSpec version="3.22">
+	  <schema-directSQL>
+	    <statement targetDB="postgresql">
+	      alter table eam_measurement_data alter column value type NUMERIC(24,5)
+	    </statement>
+	    <statement targetDB="postgresql">
+	      alter table eam_measurement_data_1h alter column value type  NUMERIC(24,5)
+	    </statement>
+	    <statement targetDB="postgresql">
+	      alter table eam_measurement_data_1h alter column minvalue type NUMERIC(24,5)
+	    </statement>
+	    <statement targetDB="postgresql">
+	      alter table eam_measurement_data_1h alter column maxvalue type NUMERIC(24,5)
+	    </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_6h alter column value type NUMERIC(24,5)
+        </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_6h alter column minvalue type NUMERIC(24,5)
+        </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_6h alter column maxvalue type NUMERIC(24,5)
+        </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_1d alter column value type NUMERIC(24,5)
+        </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_1d alter column minvalue type NUMERIC(24,5)
+        </statement>
+        <statement targetDB="postgresql">
+          alter table eam_measurement_data_1d alter column maxvalue type NUMERIC(24,5)
+        </statement>
+
+	  	<statement targetDB="oracle">
+          alter table eam_measurement_data modify (
+            value NUMERIC(24,5)
+          )
+        </statement>
+        <statement targetDB="oracle">
+          alter table eam_measurement_data_1h modify (
+            value NUMERIC(24,5),
+            minvalue NUMERIC(24,5),
+            maxvalue NUMERIC(24,5)
+          )
+        </statement>
+        <statement targetDB="oracle">
+          alter table eam_measurement_data_6h modify (
+            value NUMERIC(24,5),
+            minvalue NUMERIC(24,5),
+            maxvalue NUMERIC(24,5)
+          )
+        </statement>
+        <statement targetDB="oracle">
+          alter table eam_measurement_data_1d modify (
+            value NUMERIC(24,5),
+            minvalue NUMERIC(24,5),
+            maxvalue NUMERIC(24,5)
+          )
+        </statement>
+      
+      </schema-directSQL>
+    </schemaSpec>
+	
+
 </dbupgrade>
 
 </target>

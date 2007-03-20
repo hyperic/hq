@@ -26,14 +26,15 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class MeasurementHistData 
     implements Serializable 
 {
     private MeasurementDataId _id;
-    private double            _value;
-    private double            _minValue;
-    private double            _maxValue;
+    private BigDecimal            _value;
+    private BigDecimal            _minValue;
+    private BigDecimal            _maxValue;
 
     protected MeasurementHistData() {
     }
@@ -46,27 +47,27 @@ public class MeasurementHistData
         _id = id;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return _value;
     }
     
-    protected void setValue(double value) {
+    protected void setValue(BigDecimal value) {
         _value = value;
     }
 
-    public double getMinValue() {
+    public BigDecimal getMinValue() {
         return _minValue;
     }
     
-    protected void setMinValue(double minValue) {
+    protected void setMinValue(BigDecimal minValue) {
         _minValue = minValue;
     }
 
-    public double getMaxValue() {
+    public BigDecimal getMaxValue() {
         return _maxValue;
     }
     
-    protected void setMaxValue(double maxValue) {
+    protected void setMaxValue(BigDecimal maxValue) {
         _maxValue = maxValue;
     }
 
