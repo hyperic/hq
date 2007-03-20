@@ -17,16 +17,16 @@
       </key-property>
     </composite-id>
 
-    <property name="value">
-      <column name="VALUE"/>
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
     </property>
 
-    <property name="minValue">
-      <column name="MINVALUE"/>
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5"/>
     </property>
 
-    <property name="maxValue">
-      <column name="MAXVALUE"/>
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5"/>
     </property>
   </class>
 
@@ -41,16 +41,16 @@
       </key-property>
     </composite-id>
 
-    <property name="value">
-      <column name="VALUE"/>
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
     </property>
 
-    <property name="minValue">
-      <column name="MINVALUE"/>
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5"/>
     </property>
 
-    <property name="maxValue">
-      <column name="MAXVALUE"/>
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5"/>
     </property>
   </class>
 
@@ -65,16 +65,16 @@
       </key-property>
     </composite-id>
 
-    <property name="value">
-      <column name="VALUE"/>
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
     </property>
 
-    <property name="minValue">
-      <column name="MINVALUE"/>
+    <property name="minValue" type="big_decimal">
+      <column name="MINVALUE" precision="24" scale="5"/>
     </property>
 
-    <property name="maxValue">
-      <column name="MAXVALUE"/>
+    <property name="maxValue" type="big_decimal">
+      <column name="MAXVALUE" precision="24" scale="5"/>
     </property>
   </class>
 
