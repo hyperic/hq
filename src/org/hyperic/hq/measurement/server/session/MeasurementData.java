@@ -26,10 +26,11 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class MeasurementData implements Serializable {
     private MeasurementDataId _id;
-    private double            _value;
+    private BigDecimal        _value;
 
     public MeasurementData() {
     }
@@ -42,11 +43,11 @@ public class MeasurementData implements Serializable {
         _id = id;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return _value;
     }
     
-    protected void setValue(double value) {
+    protected void setValue(BigDecimal value) {
         _value = value;
     }
 
