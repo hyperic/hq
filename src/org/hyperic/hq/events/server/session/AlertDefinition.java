@@ -164,6 +164,14 @@ public class AlertDefinition
         _children = c;
     }
     
+    void removeChild(AlertDefinition child) {
+        _children.remove(child);
+    }
+    
+    void clearChildren() {
+        _children.clear();
+    }
+    
     public String getDescription() {
         return _description;
     }

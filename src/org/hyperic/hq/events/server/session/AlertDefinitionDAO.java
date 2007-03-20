@@ -24,8 +24,6 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;

@@ -114,11 +114,11 @@ public class AlertDefinitionManagerEJBImpl
         boolean survivors = false;
         
         // If there are any children, delete them, too
-        for (Iterator i = alertdef.getChildrenBag().iterator(); i.hasNext();) {
+        for (Iterator i = alertdef.getChildren().iterator(); i.hasNext();) {
             AlertDefinition child = (AlertDefinition) i.next();
             survivors |= deleteAlertDefinition(subj, child, force);
-            i.remove();
         }
+        alertdef.clearChildren();
 
         // Get rid of their triggers first
         TriggerDAO tdao = getTriggerDAO();
@@ -126,8 +126,7 @@ public class AlertDefinitionManagerEJBImpl
 
         AlertDAO dao = getAlertDAO();
         // See if there are any alerts
-        if (!force &&
-            (dao.countAlerts(alertdef).intValue() > 0 || survivors)) {
+        if (survivors || (!force && dao.countAlerts(alertdef).intValue() > 0)) {
             alertdef.setDeleted(true);
             alertdef.setEnabled(false);
             
@@ -477,6 +476,12 @@ public class AlertDefinitionManagerEJBImpl
         
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
             AlertDefinition adef = (AlertDefinition) i.next();
+            
+            // First check to see if need to remove from parent
+            if (adef.getParent() != null) {
+                adef.getParent().removeChild(adef);
+            }
+            
             deleteAlertDefinition(subj, adef, true);
         }
     }
