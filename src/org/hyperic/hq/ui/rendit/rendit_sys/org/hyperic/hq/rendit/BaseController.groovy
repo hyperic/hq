@@ -5,16 +5,21 @@ import java.io.OutputStreamWriter
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.ui.util.ContextUtils
+import org.hyperic.hq.ui.util.RequestUtils
+
 import groovy.text.SimpleTemplateEngine
 import java.io.File
 
 public abstract class BaseController 
 	extends Expando
 {
-    Log    log = LogFactory.getLog(this.getClass())
-    String action
-    File   pluginDir
-    def    invokeArgs
+    Log     log = LogFactory.getLog(this.getClass())
+    String  action
+    File    pluginDir
+    def     invokeArgs
+    private AuthzSubject user
     
     private void setAction(String action) { 
         this.action = action
@@ -29,6 +34,19 @@ public abstract class BaseController
     }
 
     /**
+     * Retreives the currently logged-in user
+     */
+    protected AuthzSubject getUser() {
+        if (this.user != null)
+            return this.user
+        
+		def sessId = RequestUtils.getSessionId(invokeArgs.request)
+		def ctx    = invokeArgs.request.session.servletContext
+
+		this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
+    }
+
+    /**
      * Render a .gsp.
      *
      * This method takes a map of arguments.  Valid arguments include:
@@ -38,6 +56,7 @@ public abstract class BaseController
      *           rendering
      */
     protected def render(args) {
+        args = (args == null) ? [:] : args
 		def gspArgs = args.remove("args")
 		def gspFile = args.remove("file")
 		def useAction
