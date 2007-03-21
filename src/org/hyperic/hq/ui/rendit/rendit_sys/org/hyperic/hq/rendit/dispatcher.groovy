@@ -37,15 +37,9 @@ public class Dispatcher {
     }
     
     def invoke() {
-		def controller
-		
-		try {
-			controller = Class.forName(controllerName, true, 
-			                           this.class.classLoader).newInstance() 
-		} catch(Exception e) {
-		    throw new IllegalArgumentException("Unknown controller " + 
-		                                       "[$controller]")
-		}
+		log.info "Controller name is $controllerName"
+		def controller = Class.forName(controllerName, true, 
+		                               this.class.classLoader).newInstance() 
 
 		controller.setAction(action)
         controller.setPluginDir(pluginDir)
