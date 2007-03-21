@@ -346,6 +346,7 @@ public final class JMXServlet extends HttpServlet {
                             Object o = mServer.getAttribute(oname, attName);
                             if(attName.indexOf( "=") >=0 ||
                                attName.indexOf( ":") >=0 ||
+                               attName.indexOf(".") >= 0 ||
                                attName.indexOf( " ") >=0 ) {
                                 continue;
                             }
