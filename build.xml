@@ -72,6 +72,9 @@
 
   <property name="installer.dir" value="${build.dir}/installer"/>
 
+  <property name="rendit_sys.dir" 
+	        value="${basedir}/src/org/hyperic/hq/ui/rendit/rendit_sys"/>
+	
   <path id="pdknative">
     <fileset dir="${sigar.lib}" includes="*.jar" />
     <fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
@@ -382,6 +385,7 @@
         <include name="json.jar" />
         <include name="jug-asl-2.0.0.jar" />
         <include name="commons-httpclient-3.0.1.jar" />
+        <include name="groovy-all-1.0.jar" />
 
         <!-- replacement j2ee compile required for instantj 
              since our installer doesn't install tools.jar -->
@@ -429,9 +433,20 @@
     <copy tofile="${ear.dir}/lib/jdomb8.jar"
           file="${thirdparty.lib}/jdom_b8.jar" />
 
+    <copy todir="${ear.dir}/rendit_sys">
+       <fileset dir="${rendit_sys.dir}"/>
+    </copy>
+
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
+  <target name="rendit-deploy" depends="init">
+  	<!-- Just a quick way to copy rendit_sys into JBoss -->
+    <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
+       <fileset dir="${rendit_sys.dir}"/>
+    </copy>
+  </target>
+  	
   <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
     <!-- generate EAR MANIFEST file -->
     <pathconvert targetos="unix" pathSep="," property="Class-Path">

@@ -44,6 +44,10 @@
 
   <filter-mapping>
     <filter-name>Authentication-Filter</filter-name>
+    <url-pattern>/rendit/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>Authentication-Filter</filter-name>
     <url-pattern>*.do</url-pattern>
   </filter-mapping>
   <filter-mapping>
@@ -53,6 +57,13 @@
   <listener>
     <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
   </listener>
+
+  <servlet>
+    <servlet-name>rendit</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.rendit.servlet.RenditServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
   <servlet>
     <servlet-name>metricdata</servlet-name>
     <servlet-class>org.hyperic.hq.ui.servlet.MetricDataServlet</servlet-class>
@@ -157,6 +168,10 @@
   </servlet-mapping>
   <!-- end cactus redirector mapping -->
 
+  <servlet-mapping>
+    <servlet-name>rendit</servlet-name>
+    <url-pattern>/rendit/*</url-pattern>
+  </servlet-mapping>
   <servlet-mapping>
     <servlet-name>metricdata</servlet-name>
     <url-pattern>/resource/MetricData</url-pattern>
