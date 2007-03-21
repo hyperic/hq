@@ -324,7 +324,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 BigDecimal bigDec;
                 
                 try {
-                    bigDec = BigDecimal.valueOf(val.getValue());
+                    bigDec = new BigDecimal(val.getValue());
                 } catch(NumberFormatException e) {  // infinite, or NaN
                     _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
                     continue;
@@ -460,7 +460,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 BigDecimal bigDec;
                 
                 try {
-                    bigDec = BigDecimal.valueOf(val.getValue());
+                    bigDec = new BigDecimal(val.getValue());
                 } catch(NumberFormatException e) {  // infinite, or NaN
                     _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
                     continue;
