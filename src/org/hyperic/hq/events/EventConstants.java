@@ -40,11 +40,11 @@ public class EventConstants {
     public static final int TYPE_LOG       = 7;
     
     private static final String[] TYPES = {
-        "Measurement Threshold",
-        "Measurement Baseline",
+        "Metric Threshold",
+        "Metric Baseline",
         "Control Action",
-        "Measurement Value Change",
-        "Alert Fired",
+        "Metric Value Change",
+        "",     // Don't want Recovery Alert condition to be visible
         "Custom Property Value Change",
         "Log Event",
     };

@@ -31,7 +31,7 @@ import java.util.List;
 
 public class EnumerationConfigOption extends ConfigOption
     implements Serializable {
-    private ArrayList  values   = new ArrayList(); /* Values the enum holds  */
+    private ArrayList _values = new ArrayList(); // Values the enum holds
 
     public EnumerationConfigOption(String optName, String optDesc, 
                                    String defValue)
@@ -47,16 +47,18 @@ public class EnumerationConfigOption extends ConfigOption
                                    String defValue, String[] enumValues)
     {
         super(optName, optDesc, defValue);
-        for(int i=0; i<enumValues.length; i++){
-            this.values.add(enumValues[i]);
+        for (int i = 0; i < enumValues.length; i++) {
+            if (enumValues[i] != null && enumValues[i].length() > 0) {
+                _values.add(enumValues[i]);
+            }
         }
     }
 
     public void checkOptionIsValid(String value) 
         throws InvalidOptionValueException {
 
-        if (!this.values.contains(value)) {
-            throw invalidOption("must be one of: " + this.values);
+        if (!_values.contains(value)) {
+            throw invalidOption("must be one of: " + _values);
         }
     } 
 
@@ -64,9 +66,9 @@ public class EnumerationConfigOption extends ConfigOption
         String defVal = super.getDefault();
         //if no default was specified, use the first in the list
         if ((defVal == null) &&
-            (this.values.size() != 0))
+            (_values.size() != 0))
         {
-            defVal = (String)this.values.get(0);
+            defVal = (String)_values.get(0);
         }
         return defVal;
     }
@@ -76,10 +78,10 @@ public class EnumerationConfigOption extends ConfigOption
      **********************/
 
     public void addValue(String option){
-        this.values.add(option);
+        _values.add(option);
     }
 
     public List getValues(){
-        return this.values;
+        return _values;
     }
 }

@@ -111,7 +111,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         throws ShellCommandExecException {
         
         try {
-            metrics = this.getEntityFetcher().getMetricsForID(id);
+            metrics = getEntityFetcher().getMetricsForID(id);
             if (metrics.size() == 0)
                 return "";
         } catch (Exception exc) {
@@ -223,7 +223,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
     
     public void processCommand(ParseResult parseRes)
         throws ShellCommandUsageException, ShellCommandExecException {
-        ClientShellEntityFetcher fetcher = this.getEntityFetcher();
+        ClientShellEntityFetcher fetcher = getEntityFetcher();
                 
         // build a list of resource objects
         List resources = new PageList();
@@ -234,11 +234,11 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
                     .getValue(ClientShellParseUtil.KEY_RESOURCE);
             resources.add(fetcher.findResourceByID(eid));
 
-            createResp = this.getClientShell().processConfigSchema(
-                    this.getDefCreateSchema());
+            createResp = getClientShell().processConfigSchema(
+                    getDefCreateSchema());
 
         } catch (EOFException exc) {
-            this.getOutStream().println("\nAlert definition creation aborted");
+            getOutStream().println("\nAlert definition creation aborted");
             return;
         } catch (Exception exc) {
             throw new ShellCommandExecException(exc.getMessage(), exc);
@@ -266,8 +266,8 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         boolean req = true;
         try {
             // Need to find out what type of alert the user wants
-            typeResp = this.getClientShell()
-                    .processConfigSchema(this.getCondTypeSchema());
+            typeResp = getClientShell()
+                    .processConfigSchema(getCondTypeSchema());
         
             int type = EventConstants.getType(typeResp.getValue(PROP_OPTION));
             
@@ -280,7 +280,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
             reqMap.put(condResp, Boolean.valueOf(req));
             
             // get the email and user ids for the alertdef from the user
-            ConfigSchema emailActionSchema = this.getEntityFetcher()
+            ConfigSchema emailActionSchema = getEntityFetcher()
                     .getActionConfigSchema(new EmailActionConfig()
                                                    .getImplementor());
             getClientShell().getOutStream()
@@ -294,7 +294,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
             // to supply a proper value
             while ( true ) {
                 try {
-                    if (this.getEntityFetcher().ensureNamesAreIds(actionResp)) {
+                    if (getEntityFetcher().ensureNamesAreIds(actionResp)) {
                         break;
                     }
                     actionResp = getClientShell()
@@ -323,7 +323,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
                 "An invalid option was entered.", e);
         } catch (Exception e) {
             throw new ShellCommandExecException(
-                "An exception has occured creating alert definition.", e);
+                "An exception has occured creating alert definition." + e.getMessage(), e);
         }
     }    
 
@@ -375,7 +375,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         
         try {
             // now save the alert definition in the backend
-            clone = this.getEntityFetcher().createAlertDefinition(clone);
+            clone = getEntityFetcher().createAlertDefinition(clone);
             getShell().sendToOutStream("Alert Definition '" +
                     def.getName() + "' (ID: " + clone.getId() + 
                     ") has been added to resource '" +
@@ -418,14 +418,14 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         case EventConstants.TYPE_BASELINE :
         case EventConstants.TYPE_CHANGE:
             // Print out metrics
-            this.getOutStream().println(getMetricAliases(id));
+            getOutStream().println(getMetricAliases(id));
             break;
         default:
             break;
         }
 
         ConfigResponse condResp =
-            this.getClientShell().processConfigSchema(condSchema);
+            getClientShell().processConfigSchema(condSchema);
         return condResp;
     }
 
@@ -457,7 +457,7 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
 
     public String getUsageHelp(String[] args) {
         return "    "
-            + this.getUsageShort()
+            + getUsageShort()
             + ".\n" 
             + "\n    The command will prompt for alert definition properties."
             + "\n    Adding measurement related conditions requires the alias of"
