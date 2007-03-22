@@ -25,15 +25,22 @@
 
 package org.hyperic.hq.appdef.shared.pager;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 
 /** Pager Processor filter that filters object instances of
 *   AppdefEntityID based on three contextual criteria: group type
@@ -175,9 +182,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         }
 
         try {
-            arv = fetchEntityById(entity);
-
-            boolean caught = isCompatible(arv);
+            boolean caught = isCompatible(entity);
             if (exclusive == caught) {
                 filterCount++;
             }
@@ -189,31 +194,43 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         }
     }
 
-    private boolean isCompatible(AppdefResourceValue vo) {
+    private boolean isCompatible(AppdefEntityID entity)
+        throws PermissionException, AppdefEntityNotFoundException {
+        AppdefResourceValue arv;
+        AppdefEntityValue aev = new AppdefEntityValue(entity, subject);
+
         switch (groupType) {
-            case(GROUP_ADHOC_APP):
-                return isGroupAdhocAppCompatible(vo);
-            case(GROUP_ADHOC_GRP):
-                return isGroupAdhocGrpCompatible(vo);
-            case(GROUP_ADHOC_PSS):
-                return isGroupAdhocPSSCompatible(vo);
-            case(GROUP_COMPAT_PS):
-                if (groupSelected)
-                    return isResourceCompatible(vo);
-                else
-                    return isGroupResourceCompatible(vo);
-            case(GROUP_COMPAT_SVC):
-                if (groupSelected)
-                    return isResourceCompatible(vo);
-                else
-                    return isGroupResourceCompatible(vo);
-            case(UNDEFINED):
-                if (resourceType == UNDEFINED) {
-                    return isEntityCompatible(vo);
-                } else {
-                    return isResourceCompatible(vo);
-                }
-            default:
+        case (GROUP_ADHOC_APP):
+            arv = aev.getLiteResourceValue();
+            return isGroupAdhocAppCompatible(arv);
+        case (GROUP_ADHOC_GRP):
+            arv = aev.getLiteResourceValue();
+            return isGroupAdhocGrpCompatible(arv);
+        case (GROUP_ADHOC_PSS):
+            arv = aev.getLiteResourceValue();
+            return isGroupAdhocPSSCompatible(arv);
+        case (GROUP_COMPAT_PS):
+            if (groupSelected)
+                return isResourceCompatible(entity);
+            else {
+                arv = aev.getLiteResourceValue();
+                return isGroupResourceCompatible(arv);
+            }
+        case (GROUP_COMPAT_SVC):
+            if (groupSelected)
+                return isResourceCompatible(entity);
+            else {
+                arv = aev.getLiteResourceValue();
+                return isGroupResourceCompatible(arv);
+            }
+        case (UNDEFINED):
+            if (resourceType == UNDEFINED) {
+                arv = aev.getLiteResourceValue();
+                return isEntityCompatible(arv);
+            } else {
+                return isResourceCompatible(entity);
+            }
+        default:
                 return false;      // unsupported group type?
         }
     }
@@ -349,12 +366,28 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // GROUP_TYPE     ENTITY_TYPE  RESOURCE_TYPE  INVENTORY RETURNED
     // ----------------------------------------------------------------------
     // UNDEF          <type>       <type>         ALl <type> of <type>
-    private boolean isResourceCompatible(AppdefResourceValue vo) {
-        if (entityType == vo.getEntityId().getType() &&
-            resourceType == vo.getAppdefResourceTypeValue().getId().intValue()) {
-            return true;
+    private boolean isResourceCompatible(AppdefEntityID id)
+        throws AppdefGroupNotFoundException, PermissionException {
+        switch(id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                Platform plat =
+                    PlatformManagerEJBImpl.getOne().getPlatformById(id.getId()); 
+                return resourceType == plat.getPlatformType().getId().intValue();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                Server svr =
+                    ServerManagerEJBImpl.getOne().getServerById(id.getId()); 
+                return resourceType == svr.getServerType().getId().intValue();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                Service svc =
+                    ServiceManagerEJBImpl.getOne().getServiceById(id.getId()); 
+                return resourceType == svc.getServiceType().getId().intValue();
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                AppdefGroupValue group =
+                    AppdefGroupManagerEJBImpl.getOne().findGroup(subject, id);
+                return resourceType == group.getGroupEntResType();
+            default:
+                return false;
         }
-        return false;
     }
 
     // Resource compatibility implies both appdef type and resource type
@@ -409,12 +442,5 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             return true;
         }
         return false;
-    }
-
-    // DB fetch the resource value
-    private AppdefResourceValue fetchEntityById(AppdefEntityID id)
-        throws Exception {
-        AppdefEntityValue aev = new AppdefEntityValue(id, this.subject);
-        return aev.getLiteResourceValue();
     }
 }
