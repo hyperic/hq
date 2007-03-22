@@ -34,6 +34,7 @@ import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ import java.util.NoSuchElementException;
  *
  */
 public abstract class AppdefResourceValue
-    implements java.io.Serializable, Comparable
+    implements Serializable, Comparable
 {
 
     // they all have id's

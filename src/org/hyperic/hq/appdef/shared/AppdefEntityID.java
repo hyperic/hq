@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -37,7 +38,7 @@ import org.hyperic.util.StringUtil;
  */
 
 public class AppdefEntityID 
-    implements java.io.Serializable
+    implements Serializable
 { 
     protected int entityType;   // APPDEF_TYPE_* from AppdefEntityConstants
     protected int entityID;     // ID from the database
