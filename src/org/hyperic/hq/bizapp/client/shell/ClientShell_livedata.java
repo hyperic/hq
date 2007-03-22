@@ -52,6 +52,6 @@ public class ClientShell_livedata extends MultiwordShellCommand {
     }
 
     public String getUsageShort(){
-        return "Control resources in HQ";
+        return "Get live data from resources";
     }
 }
