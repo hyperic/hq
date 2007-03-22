@@ -95,7 +95,7 @@ public class RenditServer {
         b.setVariable("invokeArgs", 
                       new InvocationBindings(path, plugin.getPluginDir(), 
                                              req, resp));
-        plugin.run("org/hyperic/hq/rendit/dispatcher.groovy", b);
+        plugin.run("org/hyperic/hq/ui/rendit/dispatcher.groovy", b);
     }
     
     public static final RenditServer getInstance() {

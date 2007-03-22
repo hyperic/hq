@@ -1,4 +1,4 @@
-package org.hyperic.hq.rendit
+package org.hyperic.hq.ui.rendit
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
