@@ -9,11 +9,14 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.ui.util.ContextUtils
 import org.hyperic.hq.ui.util.RequestUtils
 
+import org.hyperic.hq.ui.rendit.helpers.LiveDataHelper
+import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
+
 import groovy.text.SimpleTemplateEngine
 import java.io.File
 
-public abstract class BaseController 
-	extends Expando
+abstract class BaseController 
+    extends Expando
 {
     Log     log = LogFactory.getLog(this.getClass())
     String  action
@@ -32,7 +35,10 @@ public abstract class BaseController
     def setPluginDir(File pluginDir) {
         this.pluginDir = pluginDir
     }
-
+    
+    def getResourceHelper() { return new ResourceHelper(getUser()) }
+    def getLiveDataHelper() { return new LiveDataHelper(getUser()) }
+    
     /**
      * Retreives the currently logged-in user
      */
@@ -40,10 +46,10 @@ public abstract class BaseController
         if (this.user != null)
             return this.user
         
-		def sessId = RequestUtils.getSessionId(invokeArgs.request)
-		def ctx    = invokeArgs.request.session.servletContext
+        def sessId = RequestUtils.getSessionId(invokeArgs.request)
+        def ctx    = invokeArgs.request.session.servletContext
 
-		this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
+        this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
     }
 
     /**
@@ -54,25 +60,33 @@ public abstract class BaseController
      *           current action will be used
      *    args:  A map of key/value pairs to send to the .gsp to use when
      *           rendering
+     *
+     * Examples:
+     *    To render the file 'listView.gsp' to the browser         
+     *    > render file:'listView'
+     *
+     *    To render the current action to the browser and pass in parameters 
+     *    needed by the .gsp
+     *    > render args:[userName:'Jeff', favouriteDrink:'Vodka']
+     *                     
      */
-    protected def render(args) {
+    protected void render(args) {
         args = (args == null) ? [:] : args
-		def gspArgs = args.remove("args")
-		def gspFile = args.remove("file")
-		def useAction
-		
-		if (gspFile == null)
-		    useAction = action
-		else
-			useAction = gspFile
+        def gspArgs = args.remove("args")
+        def gspFile = args.remove("file")
+        def useAction
+                
+        if (gspFile == null)
+            useAction = action
+        else
+            useAction = gspFile
 
-		def targFile = new File(pluginDir, useAction + ".gsp")
-		targFile.withReader { reader ->
-			def eng       = new SimpleTemplateEngine(false)
-		    def template  = eng.createTemplate(reader)
-		    def outStream = invokeArgs.response.outputStream
-		    def outWriter = new OutputStreamWriter(outStream) 
-		    template.make(gspArgs).writeTo(outWriter)
-		}
-	}
+        new File(pluginDir, useAction + '.gsp').withReader { reader ->
+            def eng       = new SimpleTemplateEngine(false)
+            def template  = eng.createTemplate(reader)
+            def outStream = invokeArgs.response.outputStream
+            def outWriter = new OutputStreamWriter(outStream) 
+            template.make(gspArgs).writeTo(outWriter)
+        }
+    }
 }

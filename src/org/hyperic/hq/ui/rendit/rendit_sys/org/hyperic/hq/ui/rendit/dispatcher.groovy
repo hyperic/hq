@@ -8,7 +8,7 @@ import org.apache.commons.logging.LogFactory
  * RenditServer.  It has the responsibility of locating the controllers,
  * setting up the environment, and invoking the request.
  */
-public class Dispatcher {
+class Dispatcher {
     private Log log = LogFactory.getLog(Dispatcher.class);
 
     private File   pluginDir
@@ -37,7 +37,6 @@ public class Dispatcher {
     }
     
     def invoke() {
-		log.info "Controller name is $controllerName"
 		def controller = Class.forName(controllerName, true, 
 		                               this.class.classLoader).newInstance() 
 
@@ -50,7 +49,10 @@ public class Dispatcher {
         	throw new IllegalArgumentException("Unknown action [$action]")
         }
         	
+		def start = System.currentTimeMillis()
 		runner(invokeArgs.request.parameterMap)
+		log.info """Executed $controllerName:$action in   
+		             ${System.currentTimeMillis() - start} ms"""
     }
 }
 
