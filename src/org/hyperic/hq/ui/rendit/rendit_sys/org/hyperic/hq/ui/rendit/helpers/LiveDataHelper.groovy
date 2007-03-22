@@ -13,11 +13,11 @@ class LiveDataHelper
     private getDataMan() { LiveDataManagerEJBImpl.one }
     
     String[] getCommands(resource) {
-        dataMan.getCommands(resource.entityId)
+        dataMan.getCommands(userVal, resource.entityId)
     }
 
     JSONArray getData(resource, command) {
-        new JSONArray(dataMan.getData(resource.entityId, command)) 
+        new JSONArray(dataMan.getData(userVal, resource.entityId, command)) 
     }
 }
 
