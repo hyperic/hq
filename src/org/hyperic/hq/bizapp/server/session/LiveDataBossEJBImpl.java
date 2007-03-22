@@ -35,6 +35,7 @@ import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.PluginException;
 
 import javax.ejb.SessionBean;
 import javax.ejb.CreateException;
@@ -89,7 +90,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
      * @ejb:interface-method 
      */
     public String[] getLiveDataCommands(int sessionId, AppdefEntityID id)
-        throws PluginNotFoundException
+        throws PluginException
     {
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
 

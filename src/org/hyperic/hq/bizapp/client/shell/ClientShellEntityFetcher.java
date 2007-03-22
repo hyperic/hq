@@ -1174,7 +1174,7 @@ public class ClientShellEntityFetcher {
 
     public String[] getLiveDataCommands(AppdefEntityID id)
         throws RemoteException, NamingException,
-        ClientShellAuthenticationException, PluginNotFoundException
+        ClientShellAuthenticationException, PluginException
     {
         LiveDataBoss boss;
 

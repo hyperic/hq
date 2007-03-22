@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.livedata.agent.client.LiveDataClient;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
@@ -121,7 +122,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method 
      */
     public String[] getCommands(AppdefEntityID id)
-        throws PluginNotFoundException
+        throws PluginException
     {
         try {
             String plugin = getPlugin(id);
