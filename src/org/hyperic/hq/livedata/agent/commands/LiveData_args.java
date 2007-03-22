@@ -26,26 +26,57 @@
 package org.hyperic.hq.livedata.agent.commands;
 
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.encoding.Base64;
 
 public class LiveData_args extends AgentRemoteValue {
 
     private static final String PARAM_PLUGIN  = "plugin";
     private static final String PARAM_COMMAND = "command";
+    private static final String PARAM_CONFIG  = "config";
 
     public LiveData_args() {
         super();
     }
 
-    public LiveData_args(AgentRemoteValue val) {
+    public LiveData_args(AgentRemoteValue val)
+        throws AgentRemoteException
+    {
         String type = val.getValue(PARAM_PLUGIN);
         String command = val.getValue(PARAM_COMMAND);
+        String configStr = val.getValue(PARAM_CONFIG);
 
-        setConfig(type, command);
+        ConfigResponse config;
+        try {
+            config = ConfigResponse.decode(Base64.decode(configStr));
+        } catch (EncodingException e) {
+            throw new AgentRemoteException("Unable to decode plugin " +
+                                           "configuration: " +
+                                           e.getMessage());
+        }
+
+        setConfig(type, command, config);
     }
 
-    public void setConfig(String type, String command) {
+    public void setConfig(String type, String command, ConfigResponse config)
+        throws AgentRemoteException
+    {
+        String configStr;
+
+        try {
+            configStr = Base64.encode(config.encode());
+
+        } catch (EncodingException e) {
+            throw new AgentRemoteException("Unable to encode plugin " +
+                                           "configuration: " +
+                                           e.getMessage());
+        }
+
         super.setValue(PARAM_PLUGIN, type);
         super.setValue(PARAM_COMMAND, command);
+        super.setValue(PARAM_CONFIG, configStr);
     }
 
     public String getPlugin() {
@@ -54,5 +85,22 @@ public class LiveData_args extends AgentRemoteValue {
 
     public String getCommand() {
         return getValue(PARAM_COMMAND);
+    }
+    
+    public ConfigResponse getConfig()
+        throws AgentRemoteException
+    {
+        String configStr = getValue(PARAM_CONFIG);
+        ConfigResponse config;
+
+        try {
+            config = ConfigResponse.decode(Base64.decode(configStr));
+        } catch (EncodingException e) {
+            throw new AgentRemoteException("Unable to decode plugin " +
+                                           "configuration: " +
+                                           e.getMessage());
+        }
+
+        return config;
     }
 }

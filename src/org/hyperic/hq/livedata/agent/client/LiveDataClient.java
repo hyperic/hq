@@ -33,8 +33,7 @@ import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-
-import java.util.Properties;
+import org.hyperic.util.config.ConfigResponse;
 
 public class LiveDataClient {
 
@@ -46,13 +45,13 @@ public class LiveDataClient {
         _api = new LiveDataCommandsAPI();
     }
 
-    public String getData(String type, String command, Properties props)
+    public String getData(String type, String command, ConfigResponse config)
         throws AgentConnectionException, AgentRemoteException,
                LiveDataException
     {
         LiveData_args args = new LiveData_args();
 
-        args.setConfig(type, command);
+        args.setConfig(type, command, config);
 
         AgentRemoteValue res =
             _agentConnection.sendCommand(LiveDataCommandsAPI.command_getData,

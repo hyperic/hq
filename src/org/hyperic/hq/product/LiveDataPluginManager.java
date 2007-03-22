@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import org.hyperic.hq.livedata.shared.LiveDataTranslator;
+import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONArray;
 
 import java.util.Properties;
@@ -57,11 +58,12 @@ public class LiveDataPluginManager extends PluginManager {
         return p;
     }
 
-    public JSONArray getData(String plugin, String command)
+    public JSONArray getData(String plugin, String command,
+                             ConfigResponse config)
         throws PluginException
     {
         LiveDataPlugin p = getLiveDataPlugin(plugin);
-        Object o = p.getData(command);
+        Object o = p.getData(command, config);
 
         try {
             return LiveDataTranslator.encode(o);

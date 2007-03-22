@@ -1163,7 +1163,8 @@ public class ClientShellEntityFetcher {
         throws NamingException, ClientShellAuthenticationException,
         PermissionException, AgentConnectionException, RemoteException,
         AgentRemoteException, AgentNotFoundException, LiveDataException,
-        AppdefEntityNotFoundException
+        AppdefEntityNotFoundException, SessionTimeoutException,
+        SessionNotFoundException
     {
         LiveDataBoss boss;
 
@@ -1174,7 +1175,8 @@ public class ClientShellEntityFetcher {
 
     public String[] getLiveDataCommands(AppdefEntityID id)
         throws RemoteException, NamingException,
-        ClientShellAuthenticationException, PluginException
+        ClientShellAuthenticationException, PluginException,
+        SessionTimeoutException, SessionNotFoundException
     {
         LiveDataBoss boss;
 

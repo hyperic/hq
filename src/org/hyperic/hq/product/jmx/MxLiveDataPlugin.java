@@ -27,10 +27,11 @@ package org.hyperic.hq.product.jmx;
 
 import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 
 public class MxLiveDataPlugin extends LiveDataPlugin {
 
-    public Object getData(String command)
+    public Object getData(String command, ConfigResponse config)
         throws PluginException
     {
         return new Object();

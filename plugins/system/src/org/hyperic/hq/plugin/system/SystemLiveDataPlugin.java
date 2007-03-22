@@ -30,6 +30,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.livedata.shared.LiveDataTranslator;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONArray;
 
 public class SystemLiveDataPlugin extends LiveDataPlugin {
@@ -46,7 +47,9 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_FILESYSTEM
     };
 
-    public Object getData(String command) throws PluginException {
+    public Object getData(String command, ConfigResponse config)
+        throws PluginException
+    {
         Sigar sigar = new Sigar();
 
         try {
@@ -72,10 +75,10 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
 
     public static void main(String[] args) throws Exception {
         SystemLiveDataPlugin p = new SystemLiveDataPlugin();
-
+        ConfigResponse emtpy = new ConfigResponse();
         for (int i = 0; i < _COMMANDS.length; i++) {
             System.out.println("Running command " + _COMMANDS[i]);
-            Object o = p.getData(_COMMANDS[i]);
+            Object o = p.getData(_COMMANDS[i], emtpy);
             JSONArray js = LiveDataTranslator.encode(o);
             System.out.println(js.toString(2));
         }

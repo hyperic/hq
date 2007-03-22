@@ -91,7 +91,8 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         _log.info("Asked to invoke cmdGetData for " + args.getPlugin());
 
         try {
-            JSONArray o = _manager.getData(args.getPlugin(), args.getCommand());
+            JSONArray o = _manager.getData(args.getPlugin(), args.getCommand(),
+                                           args.getConfig());
             LiveData_result res = new LiveData_result();
             res.setResult(o.toString());
             return res;

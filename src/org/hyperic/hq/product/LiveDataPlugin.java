@@ -25,9 +25,12 @@
 
 package org.hyperic.hq.product;
 
+import org.hyperic.util.config.ConfigResponse;
+
 public abstract class LiveDataPlugin extends GenericPlugin {
 
-    public abstract Object getData(String command) throws PluginException;
+    public abstract Object getData(String command, ConfigResponse config)
+        throws PluginException;
 
     public abstract String[] getCommands();
 }

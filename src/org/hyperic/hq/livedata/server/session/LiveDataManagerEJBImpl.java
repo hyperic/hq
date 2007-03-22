@@ -40,16 +40,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.util.config.ConfigResponse;
 
 import javax.ejb.SessionContext;
 import javax.ejb.SessionBean;
-import java.util.Properties;
 
 /**
  * @ejb:bean name="LiveDataManager"
@@ -90,7 +91,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
 
-    private String getPlugin(AppdefEntityID id)
+    private String getPluginName(AppdefEntityID id)
         throws AppdefEntityNotFoundException
     {
         ConfigManagerLocal cManager = ConfigManagerEJBImpl.getOne();
@@ -99,21 +100,41 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     }
 
     /**
+     * Live data subsystem uses measurement configs.
+     */
+    private ConfigResponse getMeasurementConfig(AuthzSubjectValue subject,
+                                                AppdefEntityID id)
+        throws LiveDataException
+    {
+        ConfigManagerLocal cManager = ConfigManagerEJBImpl.getOne();
+
+        try {
+            return cManager.getMergedConfigResponse(subject,
+                                                    ProductPlugin.TYPE_MEASUREMENT,
+                                                    id, true);
+        } catch (Exception e) {
+            throw new LiveDataException(e);
+        }
+    }
+
+    /**
      * Get live data for a given resource.
      *
      * @ejb:interface-method
      */
-    public String getData(AppdefEntityID id, String command)
+    public String getData(AuthzSubjectValue subject,
+                          AppdefEntityID id, String command)
         throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException,
         AppdefEntityNotFoundException, LiveDataException
     {
         LiveDataClient client =
             new LiveDataClient(AgentConnectionUtil.getClient(id));
-        Properties props = new Properties();
+        String plugin = getPluginName(id);
 
-        String plugin = getPlugin(id);
-        return client.getData(plugin, command, props);
+        ConfigResponse config = getMeasurementConfig(subject, id);
+
+        return client.getData(plugin, command, config);
     }
 
     /**
@@ -121,11 +142,11 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method 
      */
-    public String[] getCommands(AppdefEntityID id)
+    public String[] getCommands(AuthzSubjectValue subject, AppdefEntityID id)
         throws PluginException
     {
         try {
-            String plugin = getPlugin(id);
+            String plugin = getPluginName(id);
             return _manager.getCommands(plugin);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
