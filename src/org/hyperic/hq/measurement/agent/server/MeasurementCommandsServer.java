@@ -61,8 +61,6 @@ import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
-import org.hyperic.hq.measurement.agent.commands.SigarCmd_args;
-import org.hyperic.hq.measurement.agent.commands.SigarCmd_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
@@ -439,39 +437,6 @@ public class MeasurementCommandsServer
         return new TrackPluginRemove_result();
     }
 
-    //XXX: Needs to be hooked up with sigar.
-    private SigarCmd_result sigarCmd(SigarCmd_args args) 
-        throws AgentRemoteException
-    {
-
-        ArrayList table = new ArrayList();
-        String cmd = args.getCmd();
-
-        this.log.info("Invoking sigar cmd=" + cmd);
-        
-        // Headers
-        ArrayList headers = new ArrayList();
-        headers.add("Col1");
-        headers.add("Col2");
-        headers.add("Col3");
-
-        table.add(headers);
-
-        // Add row data
-        for (int i = 0; i < 10; i++) {
-            ArrayList row = new ArrayList();
-            row.add("row" + i);
-            row.add("row" + i);
-            row.add("row" + i);
-            table.add(row);
-        }
-
-        SigarCmd_result res = new SigarCmd_result();
-        res.setList(table);
-        
-        return res;
-    }
-
     public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
                                             InputStream in, OutputStream out)
         throws AgentRemoteException 
@@ -509,11 +474,6 @@ public class MeasurementCommandsServer
             TrackPluginRemove_args ta = new TrackPluginRemove_args(args);
 
             return this.trackPluginRemove(ta);
-        } else if(cmd.equals(this.verAPI.command_sigarCmd)) {
-            SigarCmd_args sa =
-                new SigarCmd_args(args);
-
-            return this.sigarCmd(sa);
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }

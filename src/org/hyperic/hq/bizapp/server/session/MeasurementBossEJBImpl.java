@@ -3954,20 +3954,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     }
 
-    /**
-     * Invoke a sigar cmd on a remote agent
-     *
-     * @ejb:interface-method
-     */
-    public List sigarCmd(int sessionId, AppdefEntityID id, String cmd)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, AgentNotFoundException,
-               AgentRemoteException, AgentConnectionException
-    {
-        MeasurementCommandsClient client = getClient(id);
-        return client.sigarCmd(cmd);
-    }
-
     /** @ejb:create-method */
     public void ejbCreate() throws CreateException {}
     public void ejbActivate() throws EJBException, RemoteException {}

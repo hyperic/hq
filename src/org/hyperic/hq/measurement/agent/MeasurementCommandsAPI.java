@@ -64,11 +64,6 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
     public static final String command_trackRemove =
         trackPrefix + "trackRemove";
 
-    // Sigar commands
-    public static final String command_sigarCmd =
-        "sigar:sigarCmd";
-    
-
     public static final String[] commandSet = {
         command_scheduleMeasurements,
         command_unscheduleMeasurements,
@@ -76,8 +71,7 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
         command_setProperties,
         command_deleteProperties,
         command_trackAdd,
-        command_trackRemove,
-        command_sigarCmd
+        command_trackRemove
     };
 
     public MeasurementCommandsAPI(){

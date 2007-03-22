@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.agent.client;
 
-import java.util.List;
-
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
@@ -36,12 +34,8 @@ import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
-import org.hyperic.hq.measurement.agent.commands.SigarCmd_args;
-import org.hyperic.hq.measurement.agent.commands.SigarCmd_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
@@ -192,24 +186,5 @@ public class MeasurementCommandsClient {
         AgentRemoteValue val = this.agentConn.sendCommand(
                                    this.verAPI.command_trackRemove,
                                    this.verAPI.getVersion(), args);
-    }
-
-    public List sigarCmd(String cmd)
-        throws AgentRemoteException,
-               AgentConnectionException
-    {
-        SigarCmd_args args;
-        SigarCmd_result res;
-        AgentRemoteValue rval;
-        
-        args = new SigarCmd_args();
-        args.setCmd(cmd);
-
-        rval = this.agentConn.sendCommand(this.verAPI.command_sigarCmd,
-                                          this.verAPI.getVersion(), args);
-
-        res = new SigarCmd_result(rval);
-
-        return res.getList();
     }
 }
