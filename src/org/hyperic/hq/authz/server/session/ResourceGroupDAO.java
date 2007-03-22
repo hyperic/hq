@@ -150,9 +150,7 @@ public class ResourceGroupDAO extends HibernateDAO
     {
         return getSession()
             .createQuery("from ResourceGroup g " +
-                         "join fetch g.roles r " +
-                         "where r.id = ? and g.id not in " +
-                         "(select id from r.resourceGroups) and " +
+                         "where ? not in (select id from g.roles) and " +
                          "g.system = false order by g.sortName " +
                          (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
