@@ -68,6 +68,7 @@ public abstract class ProductPlugin extends GenericPlugin {
         TYPE_RESPONSE_TIME,
         TYPE_LOG_TRACK,
         TYPE_CONFIG_TRACK,
+        TYPE_LIVE_DATA
     };
 
     public static final String[] CONFIGURABLE_TYPES = {
