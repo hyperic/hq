@@ -97,7 +97,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
      * @ejb:interface-method 
      */
     public String[] getLiveDataCommands(int sessionId, AppdefEntityID id)
-        throws PluginException,
+        throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubjectValue subject = _manager.getSubject(sessionId);

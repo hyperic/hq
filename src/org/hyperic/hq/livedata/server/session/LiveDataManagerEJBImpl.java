@@ -38,6 +38,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -91,14 +93,6 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
 
-    private String getPluginName(AppdefEntityID id)
-        throws AppdefEntityNotFoundException
-    {
-        ConfigManagerLocal cManager = ConfigManagerEJBImpl.getOne();
-        // XXX: Seems this method should not be in the config manager.
-        return cManager.getPluginName(id);
-    }
-
     /**
      * Live data subsystem uses measurement configs.
      */
@@ -130,11 +124,13 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     {
         LiveDataClient client =
             new LiveDataClient(AgentConnectionUtil.getClient(id));
-        String plugin = getPluginName(id);
 
         ConfigResponse config = getMeasurementConfig(subject, id);
 
-        return client.getData(plugin, command, config);
+        AppdefEntityValue val = new AppdefEntityValue(id, subject);
+        AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+
+        return client.getData(tVal.getName(), command, config);
     }
 
     /**
@@ -143,11 +139,13 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method 
      */
     public String[] getCommands(AuthzSubjectValue subject, AppdefEntityID id)
-        throws PluginException
+        throws PluginException, PermissionException
     {
         try {
-            String plugin = getPluginName(id);
-            return _manager.getCommands(plugin);
+            AppdefEntityValue val = new AppdefEntityValue(id, subject);
+            AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+
+            return _manager.getCommands(tVal.getName());
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }

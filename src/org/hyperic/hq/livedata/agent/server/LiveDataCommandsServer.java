@@ -88,10 +88,11 @@ public class LiveDataCommandsServer implements AgentServerHandler {
     public LiveData_result cmdGetData(LiveData_args args)
         throws AgentRemoteException
     {
-        _log.info("Asked to invoke cmdGetData for " + args.getPlugin());
+        _log.info("Asked to invoke cmdGetData for " + args.getType());
 
         try {
-            JSONArray o = _manager.getData(args.getPlugin(), args.getCommand(),
+            JSONArray o = _manager.getData(args.getType(),
+                                           args.getCommand(),
                                            args.getConfig());
             LiveData_result res = new LiveData_result();
             res.setResult(o.toString());

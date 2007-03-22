@@ -41,28 +41,16 @@ public class LiveDataPluginManager extends PluginManager {
         return ProductPlugin.TYPE_LIVE_DATA;
     }
 
-    private LiveDataPlugin getLiveDataPlugin(String plugin)
-        throws PluginException
+    private LiveDataPlugin getLiveDataPlugin(String type)
+        throws PluginNotFoundException
     {
-        ProductPluginManager mgr = (ProductPluginManager)getParent();
-        ProductPlugin pp = mgr.getProductPlugin(plugin);
-
-        //XXX: fix me, this only works for platforms.
-        LiveDataPlugin p =
-            (LiveDataPlugin)pp.getPlugin(ProductPlugin.TYPE_LIVE_DATA,
-                                         pp.getTypeInfo());
-        if (p == null) {
-            throw new PluginException("Live data plugin for " +
-                                      pp.getTypeInfo() + " not found.");
-        }
-        return p;
+        return (LiveDataPlugin)getPlugin(type);
     }
 
-    public JSONArray getData(String plugin, String command,
-                             ConfigResponse config)
+    public JSONArray getData(String type, String command, ConfigResponse config)
         throws PluginException
     {
-        LiveDataPlugin p = getLiveDataPlugin(plugin);
+        LiveDataPlugin p = getLiveDataPlugin(type);
         Object o = p.getData(command, config);
 
         try {
@@ -72,10 +60,10 @@ public class LiveDataPluginManager extends PluginManager {
         }
     }
 
-    public String[] getCommands(String plugin)
+    public String[] getCommands(String type)
         throws PluginException
     {
-        LiveDataPlugin p = getLiveDataPlugin(plugin);
+        LiveDataPlugin p = getLiveDataPlugin(type);
         return p.getCommands();
     }
 }

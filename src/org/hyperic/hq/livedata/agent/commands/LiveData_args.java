@@ -33,7 +33,7 @@ import org.hyperic.util.encoding.Base64;
 
 public class LiveData_args extends AgentRemoteValue {
 
-    private static final String PARAM_PLUGIN  = "plugin";
+    private static final String PARAM_TYPE    = "type";
     private static final String PARAM_COMMAND = "command";
     private static final String PARAM_CONFIG  = "config";
 
@@ -44,7 +44,7 @@ public class LiveData_args extends AgentRemoteValue {
     public LiveData_args(AgentRemoteValue val)
         throws AgentRemoteException
     {
-        String type = val.getValue(PARAM_PLUGIN);
+        String type = val.getValue(PARAM_TYPE);
         String command = val.getValue(PARAM_COMMAND);
         String configStr = val.getValue(PARAM_CONFIG);
 
@@ -74,13 +74,13 @@ public class LiveData_args extends AgentRemoteValue {
                                            e.getMessage());
         }
 
-        super.setValue(PARAM_PLUGIN, type);
+        super.setValue(PARAM_TYPE, type);
         super.setValue(PARAM_COMMAND, command);
         super.setValue(PARAM_CONFIG, configStr);
     }
 
-    public String getPlugin() {
-        return getValue(PARAM_PLUGIN);
+    public String getType() {
+        return getValue(PARAM_TYPE);
     }
 
     public String getCommand() {
