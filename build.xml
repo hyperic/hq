@@ -742,6 +742,8 @@
       <include name="org/hyperic/hq/common/shared/ProductProperties.class"/>
       <!-- workaround for StackOverflow w/ WLS 9.x -->
       <include name="weblogic/net/file/Handler.class"/>
+      <!-- Livedata shared classes -->
+      <include name="org/hyperic/hq/livedata/shared/**"/>
     </jar>
 
     <!-- Pack version info -->
@@ -799,6 +801,8 @@
         <include name="dnsjava-2.0.3.jar"/>
         <!-- for JMX based plugins -->
         <include name="mx4j/*.jar"/>
+        <!-- for live data translation -->
+        <include name="json.jar"/>
       </fileset>
     </copy>
 
@@ -1017,6 +1021,14 @@
       <exclude name="org/hyperic/hq/control/**/*_test.java"/>
       <manifest>
         <attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer" />
+      </manifest>
+    </jar>
+
+    <jar basedir="${build.dir}/classes"
+         jarfile="${agent.dir}/lib/LiveDataServer.jar">
+      <include name="org/hyperic/hq/livedata/**"/>
+      <manifest>
+        <attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
       </manifest>
     </jar>
 

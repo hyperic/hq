@@ -39,6 +39,7 @@ import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -91,6 +92,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.bizapp.shared.LiveDataBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
@@ -115,6 +117,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
+import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -1099,7 +1102,7 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getMeasurementBoss();
         boss.invokeDataCompact(auth.getAuthToken());
     }
-    
+
     public boolean ensureNamesAreIds(ConfigResponse response)
         throws SessionNotFoundException, SessionTimeoutException,
                ClientShellAuthenticationException, RemoteException, 
@@ -1155,6 +1158,29 @@ public class ClientShellEntityFetcher {
         
         return (0 == numInvalid);
     }
-    
+
+    public String getLiveData(AppdefEntityID id, String command)
+        throws NamingException, ClientShellAuthenticationException,
+        PermissionException, AgentConnectionException, RemoteException,
+        AgentRemoteException, AgentNotFoundException, LiveDataException,
+        AppdefEntityNotFoundException
+    {
+        LiveDataBoss boss;
+
+        boss = this.bossManager.getLiveDataBoss();
+
+        return boss.getLiveData(auth.getAuthToken(), id, command);
+    }
+
+    public String[] getLiveDataCommands(AppdefEntityID id)
+        throws RemoteException, NamingException,
+        ClientShellAuthenticationException, PluginNotFoundException
+    {
+        LiveDataBoss boss;
+
+        boss = this.bossManager.getLiveDataBoss();
+
+        return boss.getLiveDataCommands(auth.getAuthToken(), id);
+    }
 }
 

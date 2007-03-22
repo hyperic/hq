@@ -102,6 +102,7 @@ public class ProductPluginManager extends PluginManager {
     private RtPluginManager rpm;
     private LogTrackPluginManager ltpm;
     private ConfigTrackPluginManager ctpm;
+    private LiveDataPluginManager ldpm;
 
     public ProductPluginManager() {
         this(System.getProperties());
@@ -348,7 +349,8 @@ public class ProductPluginManager extends PluginManager {
         this.rpm = new RtPluginManager(props);
         this.ltpm = new LogTrackPluginManager(props);
         this.ctpm = new ConfigTrackPluginManager(props);
-
+        this.ldpm = new LiveDataPluginManager(props);
+        
         PluginManager[] mgrs = {
             this.mpm,
             this.cpm,
@@ -356,6 +358,7 @@ public class ProductPluginManager extends PluginManager {
             this.rpm,
             this.ltpm,
             this.ctpm,
+            this.ldpm,
             this //note to self
         };
 
@@ -416,6 +419,10 @@ public class ProductPluginManager extends PluginManager {
 
     public ConfigTrackPluginManager getConfigTrackPluginManager() {
         return this.ctpm;
+    }
+
+    public LiveDataPluginManager getLiveDataPluginManager() {
+        return this.ldpm;
     }
 
     public MeasurementPlugin getMeasurementPlugin(String name) {

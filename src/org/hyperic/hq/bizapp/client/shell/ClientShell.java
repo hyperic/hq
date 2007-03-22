@@ -139,6 +139,7 @@ public class ClientShell
         registerCommandHandler("trigger",      new ClientShell_trigger(this));
         registerCommandHandler("vacuum",       new ClientShell_vacuum(this));
         registerCommandHandler("version",      new ClientShell_version(this));
+        registerCommandHandler("livedata",     new ClientShell_livedata(this));
 
         this.setHandlerHidden(".",            true);
         this.setHandlerHidden("exit",         true);

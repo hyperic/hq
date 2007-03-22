@@ -198,6 +198,9 @@ public class SystemPlugin extends ProductPlugin {
                 return new LogFileTailPlugin();
             }
         }
+        else if (type.equals(ProductPlugin.TYPE_LIVE_DATA)) {
+            return new SystemLiveDataPlugin();
+        }
 
         return null;
     }

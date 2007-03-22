@@ -41,6 +41,7 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String TYPE_RESPONSE_TIME = "responsetime";
     public static final String TYPE_LOG_TRACK     = "log_track";
     public static final String TYPE_CONFIG_TRACK  = "config_track";
+    public static final String TYPE_LIVE_DATA     = "livedata";
 
     //server import attribute propagated by ConfigManager
     public static final String PROP_INSTALLPATH   = "installpath";

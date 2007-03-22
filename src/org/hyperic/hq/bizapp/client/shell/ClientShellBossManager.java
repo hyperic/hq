@@ -42,6 +42,8 @@ import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
+import org.hyperic.hq.bizapp.shared.LiveDataBoss;
+import org.hyperic.hq.bizapp.shared.LiveDataBossUtil;
 
 import java.util.Hashtable;
 import javax.naming.NamingException;
@@ -55,6 +57,7 @@ public class ClientShellBossManager {
     private ConfigBoss      configBoss;
     private EventsBoss      eventsBoss;
     private AIBoss          aiBoss;
+    private LiveDataBoss    liveDataBoss;
 
     protected ClientShellAuthenticator auth;
     
@@ -75,6 +78,7 @@ public class ClientShellBossManager {
         this.measurementBoss = null;
         this.eventsBoss      = null;
         this.aiBoss          = null;
+        this.liveDataBoss    = null;
     }
 
     public AppdefBoss getAppdefBoss()
@@ -217,4 +221,21 @@ public class ClientShellBossManager {
         return this.aiBoss;
     }
 
+    public LiveDataBoss getLiveDataBoss()
+        throws NamingException, ClientShellAuthenticationException
+    {
+        if (this.liveDataBoss == null) {
+            try {
+                Hashtable env = this.auth.getNamingEnv();
+
+                this.liveDataBoss = LiveDataBossUtil.getHome(env).create();
+            } catch (ClientShellAuthenticationException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new NamingException("Could not get LiveDataBoss: " + e);
+            }
+        }
+
+        return this.liveDataBoss;
+    }
 }
