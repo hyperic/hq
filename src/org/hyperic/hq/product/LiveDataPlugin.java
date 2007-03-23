@@ -26,6 +26,7 @@
 package org.hyperic.hq.product;
 
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 public abstract class LiveDataPlugin extends GenericPlugin {
 
@@ -33,4 +34,8 @@ public abstract class LiveDataPlugin extends GenericPlugin {
         throws PluginException;
 
     public abstract String[] getCommands();
+
+    public ConfigSchema getConfigSchema() {
+        return new ConfigSchema();
+    }
 }

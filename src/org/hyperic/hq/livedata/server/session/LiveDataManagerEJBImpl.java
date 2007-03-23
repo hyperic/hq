@@ -50,6 +50,7 @@ import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 import javax.ejb.SessionContext;
 import javax.ejb.SessionBean;
@@ -117,7 +118,8 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public String getData(AuthzSubjectValue subject,
-                          AppdefEntityID id, String command)
+                          AppdefEntityID id, String command,
+                          ConfigResponse config)
         throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException,
         AppdefEntityNotFoundException, LiveDataException
@@ -125,8 +127,10 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         LiveDataClient client =
             new LiveDataClient(AgentConnectionUtil.getClient(id));
 
-        ConfigResponse config = getMeasurementConfig(subject, id);
+        ConfigResponse measurementConfig = getMeasurementConfig(subject, id);
 
+        config.merge(measurementConfig, false);
+        
         AppdefEntityValue val = new AppdefEntityValue(id, subject);
         AppdefResourceTypeValue tVal = val.getResourceTypeValue();
 
@@ -146,6 +150,25 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             AppdefResourceTypeValue tVal = val.getResourceTypeValue();
 
             return _manager.getCommands(tVal.getName());
+        } catch (AppdefEntityNotFoundException e) {
+            throw new PluginNotFoundException("No plugin found for " + id, e);
+        }
+    }
+
+    /**
+     * Get the ConfigSchema for a given resource.
+     * 
+     * @ejb:interface-method
+     */
+    public ConfigSchema getConfigSchema(AuthzSubjectValue subject,
+                                        AppdefEntityID id)
+        throws PluginException, PermissionException
+    {
+        try {
+            AppdefEntityValue val = new AppdefEntityValue(id, subject);
+            AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+
+            return _manager.getConfigSchema(tVal.getName());
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }

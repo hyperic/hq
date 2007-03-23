@@ -27,6 +27,7 @@ package org.hyperic.hq.product;
 
 import org.hyperic.hq.livedata.shared.LiveDataTranslator;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.json.JSONArray;
 
 import java.util.Properties;
@@ -65,5 +66,12 @@ public class LiveDataPluginManager extends PluginManager {
     {
         LiveDataPlugin p = getLiveDataPlugin(type);
         return p.getCommands();
+    }
+
+    public ConfigSchema getConfigSchema(String type)
+        throws PluginException
+    {
+        LiveDataPlugin p = getLiveDataPlugin(type);
+        return p.getConfigSchema();
     }
 }

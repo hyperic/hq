@@ -39,6 +39,8 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 
 import javax.ejb.SessionBean;
 import javax.ejb.CreateException;
@@ -80,7 +82,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public String getLiveData(int sessionId, AppdefEntityID id,
-                              String command)
+                              String command, ConfigResponse config)
         throws PermissionException, AgentConnectionException,
         AgentRemoteException, AgentNotFoundException,
         AppdefEntityNotFoundException, LiveDataException,
@@ -88,7 +90,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
     {
         AuthzSubjectValue subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
-        return manager.getData(subject, id, command);
+        return manager.getData(subject, id, command, config);
     }
 
     /**
@@ -103,5 +105,19 @@ public class LiveDataBossEJBImpl implements SessionBean {
         AuthzSubjectValue subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getCommands(subject, id);
+    }
+
+    /**
+     * Get the ConfigSchema for this resource
+     *
+     * @ejb:interface-method 
+     */
+    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id)
+        throws PluginException, PermissionException,
+               SessionTimeoutException, SessionNotFoundException    
+    {
+        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        return manager.getConfigSchema(subject, id);
     }
 }

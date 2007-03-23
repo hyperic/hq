@@ -1159,7 +1159,8 @@ public class ClientShellEntityFetcher {
         return (0 == numInvalid);
     }
 
-    public String getLiveData(AppdefEntityID id, String command)
+    public String getLiveData(AppdefEntityID id, String command,
+                              ConfigResponse config)
         throws NamingException, ClientShellAuthenticationException,
         PermissionException, AgentConnectionException, RemoteException,
         AgentRemoteException, AgentNotFoundException, LiveDataException,
@@ -1170,7 +1171,7 @@ public class ClientShellEntityFetcher {
 
         boss = this.bossManager.getLiveDataBoss();
 
-        return boss.getLiveData(auth.getAuthToken(), id, command);
+        return boss.getLiveData(auth.getAuthToken(), id, command, config);
     }
 
     public String[] getLiveDataCommands(AppdefEntityID id)
@@ -1184,6 +1185,19 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getLiveDataBoss();
 
         return boss.getLiveDataCommands(auth.getAuthToken(), id);
+    }
+
+    public ConfigSchema getLiveDataConfigSchema(AppdefEntityID id)
+        throws RemoteException, NamingException,
+        ClientShellAuthenticationException, PluginException,
+        PermissionException,
+        SessionTimeoutException, SessionNotFoundException
+    {
+        LiveDataBoss boss;
+
+        boss = this.bossManager.getLiveDataBoss();
+
+        return boss.getConfigSchema(auth.getAuthToken(), id);
     }
 }
 

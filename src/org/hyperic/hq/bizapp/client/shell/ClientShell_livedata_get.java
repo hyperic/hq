@@ -28,6 +28,8 @@ package org.hyperic.hq.bizapp.client.shell;
 import org.hyperic.util.shell.ShellCommandUsageException;
 import org.hyperic.util.shell.ShellCommandExecException;
 import org.hyperic.util.shell.ShellCommandBase;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.json.JSONArray;
 
@@ -57,7 +59,13 @@ public class ClientShell_livedata_get extends ShellCommandBase {
             int type = ClientShell_resource.paramToEntityType(args[0]);
             AppdefEntityID id =  _entityFetcher.getID(type, args[1]);
 
-            String s = _entityFetcher.getLiveData(id, args[2]);
+            ConfigSchema schema = _entityFetcher.getLiveDataConfigSchema(id);
+
+            ConfigResponse response =
+                ((ClientShell)this.getShell()).processConfigSchema(schema);
+
+            String s = _entityFetcher.getLiveData(id, args[2], response);
+
             JSONArray json = new JSONArray(s);
             this.getShell().getOutStream().println("Printing output from " +
                                                    args[2] + " command:");
