@@ -130,6 +130,10 @@ public abstract class ServerDetector
                                 List servers)
         throws PluginException {
 
+        if (servers.size() == 0) {
+            return null;
+        }
+
         HashMap platforms = new HashMap();
         
         RuntimeResourceReport rrr = new RuntimeResourceReport(serverId);
@@ -185,6 +189,7 @@ public abstract class ServerDetector
         List servers = discoverServers(config);
 
         if (servers != null) {
+            getLog().debug("discovered " + servers.size() + " servers");
             return discoverServerResources(serverId, platform, config, servers);
         }
         
