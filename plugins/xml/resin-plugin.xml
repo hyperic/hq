@@ -83,6 +83,9 @@
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
+    <plugin type="livedata"
+            class="org.hyperic.hq.product.jmx.MxLiveDataPlugin"/>
+
     <config>
       <option name="jmx.url"
               description="JMX URL to MBeanServer"
