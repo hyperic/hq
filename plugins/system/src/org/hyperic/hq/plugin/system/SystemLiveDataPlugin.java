@@ -27,11 +27,10 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.livedata.shared.LiveDataTranslator;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
-import org.json.JSONArray;
+import com.thoughtworks.xstream.XStream;
 
 public class SystemLiveDataPlugin extends LiveDataPlugin {
 
@@ -79,8 +78,9 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         for (int i = 0; i < _COMMANDS.length; i++) {
             System.out.println("Running command " + _COMMANDS[i]);
             Object o = p.getData(_COMMANDS[i], emtpy);
-            JSONArray js = LiveDataTranslator.encode(o);
-            System.out.println(js.toString(2));
+
+            XStream xstream = new XStream();
+            System.out.println(xstream.toXML(o));
         }
     }
 }

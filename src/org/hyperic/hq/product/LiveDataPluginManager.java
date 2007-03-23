@@ -25,12 +25,12 @@
 
 package org.hyperic.hq.product;
 
-import org.hyperic.hq.livedata.shared.LiveDataTranslator;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-import org.json.JSONArray;
 
 import java.util.Properties;
+
+import com.thoughtworks.xstream.XStream;
 
 public class LiveDataPluginManager extends PluginManager {
 
@@ -48,17 +48,15 @@ public class LiveDataPluginManager extends PluginManager {
         return (LiveDataPlugin)getPlugin(type);
     }
 
-    public JSONArray getData(String type, String command, ConfigResponse config)
+    public String getData(String type, String command, ConfigResponse config)
         throws PluginException
     {
         LiveDataPlugin p = getLiveDataPlugin(type);
         Object o = p.getData(command, config);
 
-        try {
-            return LiveDataTranslator.encode(o);
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
+        XStream xtream = new XStream();
+
+        return xtream.toXML(o);
     }
 
     public String[] getCommands(String type)

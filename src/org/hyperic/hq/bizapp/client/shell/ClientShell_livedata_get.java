@@ -66,10 +66,9 @@ public class ClientShell_livedata_get extends ShellCommandBase {
 
             String s = _entityFetcher.getLiveData(id, args[2], response);
 
-            JSONArray json = new JSONArray(s);
             this.getShell().getOutStream().println("Printing output from " +
                                                    args[2] + " command:");
-            this.getShell().getOutStream().println(json.toString(2));
+            this.getShell().getOutStream().println(s);
 
         } catch (Exception e) {
             throw new ShellCommandExecException(e);

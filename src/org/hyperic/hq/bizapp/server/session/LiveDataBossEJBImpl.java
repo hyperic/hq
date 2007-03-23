@@ -73,11 +73,8 @@ public class LiveDataBossEJBImpl implements SessionBean {
     /**
      * Get live data for a given resource
      *
-     * The data returned is the string representation of a JSONArray.  This
-     * is mainly because JSONArray is not Serializable. To reconstruct the
-     * JSONArray object use:
-     *
-     * new JSONArray(string);
+     * The data returned from getLiveData is an XML representation of the
+     * object that was returned by the LiveDataPlugin.
      *
      * @ejb:interface-method
      */

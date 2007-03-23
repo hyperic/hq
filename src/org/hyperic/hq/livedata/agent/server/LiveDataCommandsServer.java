@@ -38,7 +38,6 @@ import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -91,11 +90,11 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         _log.info("Asked to invoke cmdGetData for " + args.getType());
 
         try {
-            JSONArray o = _manager.getData(args.getType(),
-                                           args.getCommand(),
-                                           args.getConfig());
+            String s = _manager.getData(args.getType(),
+                                        args.getCommand(),
+                                        args.getConfig());
             LiveData_result res = new LiveData_result();
-            res.setResult(o.toString());
+            res.setResult(s);
             return res;
         } catch (Exception e) {
             throw new AgentRemoteException("Unable to invoke command", e);
