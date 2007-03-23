@@ -162,7 +162,7 @@ public class WebsphereUtil {
                 } catch (Exception e) {
                     //e.g. unauthorized
                     throw new MetricUnreachableException(metric.getObjectName() +
-                                                         ": " + e.getMessage());
+                                                         ": " + e.getMessage(), e);
                 }
             }
         } catch (ConnectorException e) {

@@ -423,7 +423,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         isOSGi =
-            new File(installDir, "/runtimes").isDirectory();
+            new File(installDir, "/plugins").isDirectory();
 
         //required for 6.1
         File sslConfigFile =
@@ -504,6 +504,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + "/lib/classloader.jar",
             installDir + "/lib/security.jar",
             installDir + "/lib/wasproduct.jar",
+            installDir + "/lib/pmij2ee.jar",
             installDir + "/java/jre/lib/ibmcertpathprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjceprovider.jar",
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
