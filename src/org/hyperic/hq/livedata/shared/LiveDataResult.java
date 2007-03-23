@@ -1,10 +1,11 @@
 package org.hyperic.hq.livedata.shared;
 
+import com.thoughtworks.xstream.XStream;
+
 import java.io.Serializable;
 
 /**
  * Result object from live data commands.
- *
  */
 public class LiveDataResult implements Serializable {
 
@@ -19,5 +20,13 @@ public class LiveDataResult implements Serializable {
      */
     public String getXMLResult() {
         return _xml;
+    }
+
+    /**
+     * Get the Object result for this request.
+     */
+    public Object getObjectResult() {
+        XStream xstream = new XStream();
+        return xstream.fromXML(_xml);
     }
 }
