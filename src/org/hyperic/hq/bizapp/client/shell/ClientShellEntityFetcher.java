@@ -118,6 +118,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -1159,8 +1160,8 @@ public class ClientShellEntityFetcher {
         return (0 == numInvalid);
     }
 
-    public String getLiveData(AppdefEntityID id, String command,
-                              ConfigResponse config)
+    public LiveDataResult getLiveData(AppdefEntityID id, String command,
+                                      ConfigResponse config)
         throws NamingException, ClientShellAuthenticationException,
         PermissionException, AgentConnectionException, RemoteException,
         AgentRemoteException, AgentNotFoundException, LiveDataException,

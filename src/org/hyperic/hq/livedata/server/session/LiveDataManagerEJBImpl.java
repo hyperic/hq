@@ -49,6 +49,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -117,9 +118,9 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public String getData(AuthzSubjectValue subject,
-                          AppdefEntityID id, String command,
-                          ConfigResponse config)
+    public LiveDataResult getData(AuthzSubjectValue subject,
+                                  AppdefEntityID id, String command,
+                                  ConfigResponse config)
         throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException,
         AppdefEntityNotFoundException, LiveDataException

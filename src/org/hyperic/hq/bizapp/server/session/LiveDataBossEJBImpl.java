@@ -34,6 +34,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -73,13 +74,10 @@ public class LiveDataBossEJBImpl implements SessionBean {
     /**
      * Get live data for a given resource
      *
-     * The data returned from getLiveData is an XML representation of the
-     * object that was returned by the LiveDataPlugin.
-     *
      * @ejb:interface-method
      */
-    public String getLiveData(int sessionId, AppdefEntityID id,
-                              String command, ConfigResponse config)
+    public LiveDataResult getLiveData(int sessionId, AppdefEntityID id,
+                                      String command, ConfigResponse config)
         throws PermissionException, AgentConnectionException,
         AgentRemoteException, AgentNotFoundException,
         AppdefEntityNotFoundException, LiveDataException,

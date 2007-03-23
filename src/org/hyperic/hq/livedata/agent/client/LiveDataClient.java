@@ -29,6 +29,7 @@ import org.hyperic.hq.livedata.agent.LiveDataCommandsAPI;
 import org.hyperic.hq.livedata.agent.commands.LiveData_args;
 import org.hyperic.hq.livedata.agent.commands.LiveData_result;
 import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -45,7 +46,8 @@ public class LiveDataClient {
         _api = new LiveDataCommandsAPI();
     }
 
-    public String getData(String type, String command, ConfigResponse config)
+    public LiveDataResult getData(String type, String command,
+                                  ConfigResponse config)
         throws AgentConnectionException, AgentRemoteException,
                LiveDataException
     {
@@ -58,6 +60,8 @@ public class LiveDataClient {
                                          _api.getVersion(), args);
         LiveData_result val = new LiveData_result(res);
 
-        return val.getResult();
+        String xml = val.getResult();
+
+        return new LiveDataResult(xml);
     }
 }
