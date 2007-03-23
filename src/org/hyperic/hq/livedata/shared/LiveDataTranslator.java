@@ -37,6 +37,11 @@ public class LiveDataTranslator {
 
     public static JSONArray encode(Object o) throws Exception {
 
+        if (o instanceof JSONArray) {
+            // If the plugin already has encoded to JSON, ignore.
+            return (JSONArray)o;
+        }
+
         JSONArray jarr = new JSONArray();
 
         if (o.getClass().isArray()) {
