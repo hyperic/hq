@@ -347,6 +347,11 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      */
     public void removeRole(AuthzSubjectValue whoami, Integer rolePk)
         throws RemoveException, PermissionException {
+        // Don't delete the super user role
+        if (rolePk.equals(AuthzConstants.rootRoleId)) {
+            throw new RemoveException("Superuser role cannot be removed");
+        }
+
         Role roleLocal = getRoleDAO().findById(rolePk);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
