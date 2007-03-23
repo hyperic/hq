@@ -27,26 +27,15 @@ package org.hyperic.hq.product.jmx;
 
 import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeType;
 import java.util.Properties;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
 
 public class MxLiveDataPlugin extends LiveDataPlugin {
 
@@ -93,40 +82,6 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
 
     public String[] getCommands() {
         return _COMMANDS;
-    }
-
-    public Object getOldData(String command, ConfigResponse config)
-        throws PluginException
-    {
-        Properties props = config.toProperties();
-        _log.info("Using properties: " + props);
-
-        try {
-            ObjectName oName = new ObjectName("java.lang:type=Threading");
-            MBeanServerConnection mBeanServer = MxUtil.getMBeanServer(props);
-
-            CompositeData data = (CompositeData)
-                mBeanServer.invoke(oName, "getThreadInfo",
-                                   new Long[] { new Long(1) },
-                                   new String[] { Long.TYPE.getName() } );
-
-            CompositeType type = data.getCompositeType();
-            Set keys = type.keySet();
-
-            JSONArray arr = new JSONArray();
-            JSONObject json = new JSONObject();
-            for (Iterator i = keys.iterator(); i.hasNext(); ) {
-                String key = (String)i.next();
-                Object o = data.get(key);
-                json.put(key, o);
-            }
-            arr.put(json);
-
-            return arr;
-
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
     }
 
     public ConfigSchema getConfigSchema() {
