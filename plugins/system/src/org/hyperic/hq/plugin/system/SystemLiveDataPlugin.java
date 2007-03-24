@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
@@ -38,12 +39,14 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_CPU        = "cpu";
     private static final String CMD_CPUPERC    = "cpuperc";
     private static final String CMD_FILESYSTEM = "filesystem";
+    private static final String CMD_TOP        = "top";
 
     private static final String _COMMANDS[] = {
         CMD_CPUINFO,
         CMD_CPU,
         CMD_CPUPERC,
-        CMD_FILESYSTEM
+        CMD_FILESYSTEM,
+        CMD_TOP
     };
 
     public Object getData(String command, ConfigResponse config)
@@ -60,6 +63,10 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 return sigar.getCpuPercList();
             } else if (command.equals(CMD_FILESYSTEM)) {
                 return sigar.getFileSystemList();
+            } else if (command.equals(CMD_TOP)) {
+                String filter =
+                    config.getValue(SigarMeasurementPlugin.PTQL_CONFIG);
+                return TopData.gather(sigar, filter);
             } else {
                 throw new PluginException("Unknown command '" + command + "'");
             }
