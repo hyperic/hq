@@ -16,6 +16,10 @@ class ResourceHelper
             str: {name -> platMan.findPlatformTypeByName(name)},
             int: {id -> platMan.findPlatformTypeValueById(id)}],
     ]
+    
+    private final ALL_FINDERS = [
+        platforms: {platMan.getAllPlatforms(userVal, PageControl.PAGE_ALL)},                               
+    ]
 
     ResourceHelper(user) {
         super(user)
@@ -24,20 +28,10 @@ class ResourceHelper
     private getPlatMan() { PlatformManagerEJBImpl.one }  
 
     /**
-     * Get all the platforms.  The results are constrained by the authoraiztaion
-     * of the current user
-     */
-    Collection getAllPlatforms() {
-        platMan.getAllPlatforms(userVal, PageControl.PAGE_ALL)
-    }
-    
-    /**
      * Generic method to find resources.  The results are constrained by the
-     * authorization of the current user
+     * authorization of the current user.  The result objects are subclasses  
+     * of AppdefResourceValue
      * 
-     * args:  The arguments are a map of options.  Currently the only 
-     *        options are to find a platform or platformType by name or id.
-     *
      * Examples:
      * 
      *     To find a platform by name:
@@ -45,27 +39,47 @@ class ResourceHelper
      *
      *     To find a platform by id:
      *       > find platform:44123
+     *
+     *     To find all the platforms:
+     *       > find all:'platforms'
      */
-    AppdefResourceValue find(args) {
+    def find(args) {
+         if (args.containsKey('all')) {
+            return findAll(args)
+        }
+        findSingle(args)
+    }
+    
+    private def findAll(args) {
+        def type = args['all']
+        if (!ALL_FINDERS.containsKey(type)) {
+            throw new IllegalArgumentException("Unknown resource type [$type]" + 
+                                               ".  Must be one of " +
+                                               ALL_FINDERS.keySet());
+        }
+        ALL_FINDERS[type]()
+    }
+     
+    private def findSingle(args) {
         def resourceType
         for (i in args) {
             if (NAME_FINDERS.containsKey(i.key)) {
                 if (resourceType != null) {
-                    throw new IllegalArgumentException("""Cannot specify more 
-                                than one resource type [$resourceType] and 
-                                [$i.key]""")
+                    throw new IllegalArgumentException("Cannot specify more " + 
+                                "than one resource type [$resourceType] and " + 
+                                "[$i.key]")
                 }
                 resourceType = i.key
              }
         }
 
         if (resourceType == null)
-            throw new IllegalArgumentException(""""No resource type specified. 
-                                               Must be one of  
-                                               $NAME_FINDERS.keySet()""")
+            throw new IllegalArgumentException("No resource type specified. "+ 
+                                               "Must be one of " +  
+                                               NAME_FINDERS.keySet())
 
         def resourceVal = args[resourceType]
         def argType = (resourceVal instanceof String) ? 'str' : 'int'
-        NAME_FINDERS[resourceType][argType].call(resourceVal)
+        NAME_FINDERS[resourceType][argType](resourceVal)
     }
 }
