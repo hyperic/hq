@@ -232,7 +232,11 @@ public class ProcessData {
             return NA;
         }
         long t = total / 1000;
-        return t/60 + ":" + t%60;
+        String sec = String.valueOf(t%60);
+        if (sec.length() == 1) {
+            sec = "0" + sec;
+        }
+        return t/60 + ":" + sec;
     }
 
     public String getFormattedCpuPerc() {
