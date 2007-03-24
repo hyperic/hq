@@ -73,7 +73,7 @@
   <property name="installer.dir" value="${build.dir}/installer"/>
 
   <property name="rendit_sys.dir" 
-	        value="${basedir}/src/org/hyperic/hq/ui/rendit/rendit_sys"/>
+	        value="${basedir}/ui_plugins/rendit_sys"/>
 	
   <path id="pdknative">
     <fileset dir="${sigar.lib}" includes="*.jar" />
