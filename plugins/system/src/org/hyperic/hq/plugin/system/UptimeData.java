@@ -25,9 +25,13 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarNotImplementedException;
+import org.hyperic.sigar.util.PrintfFormat;
 
 public class UptimeData {
 
@@ -63,5 +67,70 @@ public class UptimeData {
 
     public double[] getLoadavg() {
         return _loadavg;
+    }
+
+    public String getFormattedTime() {
+        return getFormattedTime(_time);
+    }
+
+    public static String getFormattedTime(long time) {
+        return new SimpleDateFormat("h:mm a").format(new Date(time));
+    }
+
+    public String getFormattedUptime() {
+        return getFormattedUptime(_uptime);
+    }
+
+    public static String getFormattedUptime(double uptime) {
+        String retval = "";
+
+        int days = (int)uptime / (60*60*24);
+        int minutes, hours;
+
+        if (days != 0) {
+            retval += days + " " + ((days > 1) ? "days" : "day") + ", ";
+        }
+
+        minutes = (int)uptime / 60;
+        hours = minutes / 60;
+        hours %= 24;
+        minutes %= 60;
+
+        if (hours != 0) {
+            retval += hours + ":" + minutes;
+        }
+        else {
+            retval += minutes + " min";
+        }
+
+        return retval;
+    }
+
+    public String getFormattedLoadavg() {
+        return getFormattedLoadavg(_loadavg);
+    }
+
+    public static String getFormattedLoadavg(double[] loadavg) {
+        if (loadavg == null) {
+            return "(load average unknown)"; //windows
+        }
+
+        final String format =
+            "%.2f, %.2f, %.2f";
+
+        Object[] avg = new Double[] {
+            new Double(loadavg[0]),
+            new Double(loadavg[1]),
+            new Double(loadavg[2]),
+        };
+
+        return new PrintfFormat(format).sprintf(avg);
+    }
+
+    public String toString() {
+        return
+            getFormattedTime() + 
+            "  up " + getFormattedUptime() +
+            ", " + getFormattedLoadavg();
     }
 }
