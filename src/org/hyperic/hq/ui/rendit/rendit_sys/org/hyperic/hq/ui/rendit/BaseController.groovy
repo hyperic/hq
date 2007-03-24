@@ -1,5 +1,7 @@
 package org.hyperic.hq.ui.rendit
 
+import org.apache.commons.lang.StringEscapeUtils
+
 import java.io.OutputStreamWriter
 
 import org.apache.commons.logging.Log
@@ -15,22 +17,23 @@ import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
 import groovy.text.SimpleTemplateEngine
 import java.io.File
 
-abstract class BaseController 
-    extends Expando
-{
+abstract class BaseController { 
     Log     log = LogFactory.getLog(this.getClass())
     String  action
     File    pluginDir
-    def     invokeArgs
+
+    private invokeArgs
     private AuthzSubject user
     
     private void setAction(String action) { 
         this.action = action
     }
-    
-    def setInvokeArgs(def args) {
+    	
+    protected setInvokeArgs(args) {
         this.invokeArgs = args
     }
+    
+    def getInvokeArgs() { invokeArgs }
     
     def setPluginDir(File pluginDir) {
         this.pluginDir = pluginDir
@@ -52,6 +55,31 @@ abstract class BaseController
         this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
     }
 
+    public String h(str) {
+        StringEscapeUtils.escapeHtml(str)    
+    }
+
+    public RENDER_BUILTINS = [
+        link_to : { text, Object[] args ->
+        	def url = ""
+            def opts = (args.length > 0) ? args[0] : [:]
+        	def htmlOpts = (args.length > 1) ? args[1] : [:]
+            
+            if (opts.containsKey('action')) 
+                url += h(opts['action'])
+            
+            url += '?'                
+            for (o in htmlOpts) {
+                url += URLEncoder.encode("" + o.key, "UTF-8") + "=" + 
+                       URLEncoder.encode("" + o.value, "UTF-8") + "&"
+            }
+
+            return "<a href=\"$url\">$text</a>"
+        },
+        
+        h : { str -> h(str) } 
+    ]
+    
     /**
      * Render a .gsp.
      *
@@ -85,7 +113,9 @@ abstract class BaseController
             def eng       = new SimpleTemplateEngine(false)
             def template  = eng.createTemplate(reader)
             def outStream = invokeArgs.response.outputStream
-            def outWriter = new OutputStreamWriter(outStream) 
+            def outWriter = new OutputStreamWriter(outStream)
+            
+            gspArgs.putAll(RENDER_BUILTINS)
             template.make(gspArgs).writeTo(outWriter)
         }
     }
