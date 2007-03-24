@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.ui.util.ContextUtils
 import org.hyperic.hq.ui.util.RequestUtils
@@ -110,8 +109,8 @@ abstract class BaseController {
      */
     protected void render(args) {
         args = (args == null) ? [:] : args
-        def gspArgs = args.remove("args")
-        def gspFile = args.remove("file")
+        def gspArgs = args.get("args", [:])
+        def gspFile = args.file
         def useAction
                 
         if (gspFile == null)
