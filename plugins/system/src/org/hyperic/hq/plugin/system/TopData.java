@@ -25,6 +25,7 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,5 +110,35 @@ public class TopData {
 
     public List getProcesses() {
         return _processes;
+    }
+
+    public void print(PrintStream out) {
+        out.println(getUptime());
+        out.println(getCurrentProcessSummary());
+        out.println(getCpu());
+        out.println(getMem());
+        out.println(getSwap());
+        out.println();
+        out.println(ProcessData.PS_HEADER);
+        List processes = getProcesses();
+        for (int i=0; i<processes.size(); i++) {
+            ProcessData process = (ProcessData)processes.get(i);
+            out.println(process.toString("\t"));
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        String filter;
+        if (args.length == 1) {
+            filter = args[0];
+        }
+        else {
+            filter = null;
+        }
+
+        Sigar sigar = new Sigar();
+        TopData top = TopData.gather(sigar, filter);
+        top.print(System.out);
+        sigar.close();
     }
 }
