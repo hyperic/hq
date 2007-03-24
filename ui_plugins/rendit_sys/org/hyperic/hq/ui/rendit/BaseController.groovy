@@ -7,12 +7,14 @@ import java.io.OutputStreamWriter
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.ui.util.ContextUtils
 import org.hyperic.hq.ui.util.RequestUtils
 
 import org.hyperic.hq.ui.rendit.helpers.LiveDataHelper
 import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
+import org.hyperic.hq.ui.rendit.helpers.HQHelper
 
 import groovy.text.SimpleTemplateEngine
 import java.io.File
@@ -41,6 +43,7 @@ abstract class BaseController {
     
     def getResourceHelper() { return new ResourceHelper(getUser()) }
     def getLiveDataHelper() { return new LiveDataHelper(getUser()) }
+    def getHQHelper() { return new HQHelper(getUser()) }
     
     /**
      * Retreives the currently logged-in user
@@ -58,15 +61,20 @@ abstract class BaseController {
     public String h(str) {
         StringEscapeUtils.escapeHtml(str)    
     }
-
+        
+    // TODO:  These need to be moved to a separate class
     public RENDER_BUILTINS = [
         link_to : { text, Object[] args ->
         	def url = ""
             def opts = (args.length > 0) ? args[0] : [:]
         	def htmlOpts = (args.length > 1) ? args[1] : [:]
             
-            if (opts.containsKey('action')) 
+            if (opts.containsKey('action')) { 
                 url += h(opts['action'])
+            } else if (opts.containsKey('resource')) {
+                def entId = opts['resource'].entityId.appdefKey
+                url = getHQHelper().serverURL + "Resource.do?eid=$entId"
+            }
             
             url += '?'                
             for (o in htmlOpts) {
@@ -74,6 +82,8 @@ abstract class BaseController {
                        URLEncoder.encode("" + o.value, "UTF-8") + "&"
             }
 
+            if (url[-1] == '?' || url[-1] == '&') 
+                url = url[0..-2]
             return "<a href=\"$url\">$text</a>"
         },
         

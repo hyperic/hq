@@ -1,6 +1,6 @@
 <html>
 <body>
-  <h1>LiveData commands for <%= resource.name %> 
+  <h1>LiveData commands for <%= link_to resource.name, [resource:resource]  %> 
       (<%= resource.appdefResourceTypeValue.name %>)</h1>
   
   <p>
