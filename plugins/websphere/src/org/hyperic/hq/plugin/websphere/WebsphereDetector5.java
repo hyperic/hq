@@ -48,8 +48,13 @@ public class WebsphereDetector5
     private static final String PTQL_QUERY =
         "State.Name.eq=java,Args.*.eq=com.ibm.ws.runtime.WsServer";
 
+    private static final String SOAP_PORT_EXPR =
+        "//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@port";
+
     private WebsphereRuntimeDiscoverer5 discoverer = null;
     private String node = null;
+    private String port = null;
+    private String installpath;
 
     protected List discoverServers(ConfigResponse config)
         throws PluginException {
@@ -89,9 +94,56 @@ public class WebsphereDetector5
                                         "localhost");
     }
 
+    private File findServerIndex() {
+        //any serverindex.xml will do.
+        File[] cells =
+            new File(this.installpath + "/config/cells").listFiles();
+
+        if (cells == null) {
+            return null;
+        }
+
+        for (int i=0; i<cells.length; i++) {
+            File[] nodes =
+                new File(cells[i], "nodes").listFiles();
+
+            if (nodes == null) {
+                continue;
+            }
+
+            for (int j=0; j<nodes.length; j++) {
+                File index = new File(nodes[j], "serverindex.xml");
+                if (index.exists() && index.canRead()) {
+                    return index;
+                }
+            }
+        }
+
+        return null;
+    }
+
     protected String getAdminPort() {
-        return getManager().getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
-                                        "8880");
+        if (this.port != null) {
+            return this.port;
+        }
+        final String prop =
+            WebsphereProductPlugin.PROP_ADMIN_PORT;
+
+        File index = findServerIndex();
+
+        if (index != null) {
+            this.port =
+                getXPathValue(index, SOAP_PORT_EXPR);
+            getLog().debug("Configuring " + prop + "=" + this.port +
+                           " from: " + index);
+        }
+
+        if (this.port == null) {
+            this.port =
+                getManager().getProperty(prop, "8880");
+        }
+
+        return this.port;
     }
 
     protected String getNodeName() {
@@ -112,6 +164,8 @@ public class WebsphereDetector5
     }
 
     protected void initDetector(File root) {
+        this.installpath = root.getAbsolutePath();
+
         //sadly, the setupCmdLine script is the
         //best way to determine the node name
         final String NODE_PROP = "WAS_NODE=";
