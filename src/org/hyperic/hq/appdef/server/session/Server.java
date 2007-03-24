@@ -47,7 +47,7 @@ public class Server extends ServerBase
     private boolean _autodiscoveryZombie;
     private ServerType _serverType;
     private ConfigResponseDB _configResponse;
-    private Collection _services;
+    private Collection _services = new ArrayList();
 
     public Server() {
         super();
