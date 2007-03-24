@@ -3,6 +3,7 @@ package org.hyperic.hq.ui.rendit.helpers
 import org.hyperic.util.pager.PageControl
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
 
 class ResourceHelper 
@@ -15,10 +16,14 @@ class ResourceHelper
         platformType: [
             str: {name -> platMan.findPlatformTypeByName(name)},
             int: {id -> platMan.findPlatformTypeValueById(id)}],
+        group: [ 
+            str: {name -> groupMap.findGroupByName(userVal, name)},
+            int: {id -> groupMan.findGroup(userVal, id)}],
     ]
     
     private final ALL_FINDERS = [
-        platforms: {platMan.getAllPlatforms(userVal, PageControl.PAGE_ALL)},                               
+        platforms: {platMan.getAllPlatforms(userVal, PageControl.PAGE_ALL)},
+        groups: {groupMan.findAllGroups(userVal, PageControl.PAGE_ALL)},                               
     ]
 
     ResourceHelper(user) {
@@ -26,6 +31,7 @@ class ResourceHelper
     }
 
     private getPlatMan() { PlatformManagerEJBImpl.one }  
+    private getGroupMan() { AppdefGroupManagerEJBImpl.one }  
 
     /**
      * Generic method to find resources.  The results are constrained by the
