@@ -1,5 +1,7 @@
 package org.hyperic.hq.ui.rendit.helpers
 
+import org.hyperic.util.pager.PageControl
+
 import org.hyperic.hq.appdef.shared.AppdefResourceValue
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
 
@@ -22,7 +24,16 @@ class ResourceHelper
     private getPlatMan() { PlatformManagerEJBImpl.one }  
 
     /**
-     * Generic method to find resources.  
+     * Get all the platforms.  The results are constrained by the authoraiztaion
+     * of the current user
+     */
+    Collection getAllPlatforms() {
+        platMan.getAllPlatforms(userVal, PageControl.PAGE_ALL)
+    }
+    
+    /**
+     * Generic method to find resources.  The results are constrained by the
+     * authorization of the current user
      * 
      * args:  The arguments are a map of options.  Currently the only 
      *        options are to find a platform or platformType by name or id.
