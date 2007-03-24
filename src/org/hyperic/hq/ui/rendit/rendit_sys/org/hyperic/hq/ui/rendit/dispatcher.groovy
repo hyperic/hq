@@ -51,8 +51,8 @@ class Dispatcher {
         	
 		def start = System.currentTimeMillis()
 		runner(invokeArgs.request.parameterMap)
-		log.info """Executed $controllerName:$action in   
-		             ${System.currentTimeMillis() - start} ms"""
+		log.info "Executed $controllerName:$action in " +   
+		         "${System.currentTimeMillis() - start} ms"
     }
 }
 
