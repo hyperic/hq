@@ -4,7 +4,7 @@ import org.hyperic.util.config.ConfigResponse
 
 public class LiveController extends BaseController {
     def index = {
-        render(args:[platforms:resourceHelper.allPlatforms])
+        render(args:[platforms:resourceHelper.find(all:'platforms')])
     }
 	
     def showResource = { params ->
