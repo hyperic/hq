@@ -25,6 +25,7 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -176,6 +177,16 @@ public class ProcessData {
         return _name;
     }
 
+    public String getBaseName() {
+        int ix = _name.lastIndexOf(File.separator);
+        if (ix == -1) {
+            return _name;
+        }
+        else {
+            return _name.substring(ix+1);
+        }
+    }
+
     public String getFormattedStartTime() {
         return getFormattedStartTime(_startTime);
     }
@@ -240,7 +251,7 @@ public class ProcessData {
             _state + delim +
             getFormattedCpuTotal() + delim +
             getFormattedCpuPerc() + delim +
-            _name;
+            getBaseName();
     }
 
     public String toString() {
