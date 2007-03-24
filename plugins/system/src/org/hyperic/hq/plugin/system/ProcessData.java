@@ -25,6 +25,10 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcCredName;
 import org.hyperic.sigar.ProcMem;
@@ -35,6 +39,30 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
 public class ProcessData {
+    public static final String NA = "-";
+
+    public static final String LABEL_PID   = "PID";
+    public static final String LABEL_USER  = "USER";
+    public static final String LABEL_STIME = "STIME";
+    public static final String LABEL_SIZE  = "SIZE";
+    public static final String LABEL_RSS   = "RSS";
+    public static final String LABEL_SHARE = "SHARE";
+    public static final String LABEL_STATE = "STATE";
+    public static final String LABEL_TIME  = "TIME";
+    public static final String LABEL_CPU   = "%CPU";
+    public static final String LABEL_NAME  = "COMMAND";
+
+    public static final String PS_HEADER =
+        LABEL_PID   + "\t" +
+        LABEL_USER  + "\t" +
+        LABEL_STIME + "\t" +
+        LABEL_SIZE  + "\t" +
+        LABEL_RSS   + "\t" +
+        LABEL_SHARE + "\t" +
+        LABEL_STATE + "\t" +
+        LABEL_TIME  + "\t" +
+        LABEL_CPU   + "\t" +
+        LABEL_NAME;
 
     private long _pid;
     private String _owner;
@@ -146,5 +174,76 @@ public class ProcessData {
 
     public String getName() {
         return _name;
+    }
+
+    public String getFormattedStartTime() {
+        return getFormattedStartTime(_startTime);
+    }
+
+    public static String getFormattedStartTime(long time) {
+        if (time == 0) {
+            return "00:00";
+        }
+        else if (time == Sigar.FIELD_NOTIMPL) {
+            return NA;
+        }
+
+        long timeNow = System.currentTimeMillis();
+        String fmt = "MMMd";
+
+        if ((timeNow - time) < ((60*60*24) * 1000)) {
+            fmt = "HH:mm";
+        }
+
+        return new SimpleDateFormat(fmt).format(new Date(time));
+    }
+
+    public String getFormattedSize() {
+        return Sigar.formatSize(_size);
+    }
+
+    public String getFormattedShare() {
+        return Sigar.formatSize(_share);
+    }
+
+    public String getFormattedResident() {
+        return Sigar.formatSize(_resident);
+    }
+
+    public String getFormattedCpuTotal() {
+        return getFormattedCpuTotal(_cpuTotal);
+    }
+
+    public static String getFormattedCpuTotal(long total) {
+        if (total == Sigar.FIELD_NOTIMPL) {
+            return NA;
+        }
+        long t = total / 1000;
+        return t/60 + ":" + t%60;
+    }
+
+    public String getFormattedCpuPerc() {
+        if (_cpuPerc == Sigar.FIELD_NOTIMPL) {
+            return NA;
+        }
+        return CpuPerc.format(_cpuPerc);
+    }
+
+    public String toString(String delim) {
+        return
+            _pid + delim +
+            _owner + delim +
+            getFormattedStartTime() + delim +
+            getFormattedSize() + delim +
+            getFormattedResident() + delim +
+            getFormattedShare() + delim +
+            _state + delim +
+            getFormattedCpuTotal() + delim +
+            getFormattedCpuPerc() + delim +
+            _name;
+    }
+
+    public String toString() {
+        return toString(",");
     }
 }
