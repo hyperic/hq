@@ -1,6 +1,9 @@
 package org.hyperic.hq.ui.rendit.helpers
 
+import org.hyperic.hq.appdef.shared.AppdefResourceValue
+import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
+import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.json.JSONArray
 
 class LiveDataHelper 
@@ -12,12 +15,15 @@ class LiveDataHelper
 
     private getDataMan() { LiveDataManagerEJBImpl.one }
     
-    String[] getCommands(resource) {
+    String[] getCommands(AppdefResourceValue resource) {
         dataMan.getCommands(userVal, resource.entityId)
     }
 
-    JSONArray getData(resource, command) {
-        new JSONArray(dataMan.getData(userVal, resource.entityId, command)) 
+    LiveDataResult getData(AppdefResourceValue resource, String command, 
+                           config) 
+    { 
+        dataMan.getData(userVal, resource.entityId, command, 
+                        config as ConfigResponse)
     }
 }
 
