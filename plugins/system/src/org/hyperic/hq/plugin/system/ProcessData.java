@@ -25,7 +25,6 @@
 //XXX move this class to sigar
 package org.hyperic.hq.plugin.system;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -178,7 +177,10 @@ public class ProcessData {
     }
 
     public String getBaseName() {
-        int ix = _name.lastIndexOf(File.separator);
+        int ix = _name.lastIndexOf("/");
+        if (ix == -1) {
+            ix = _name.lastIndexOf("\\");
+        }
         if (ix == -1) {
             return _name;
         }
