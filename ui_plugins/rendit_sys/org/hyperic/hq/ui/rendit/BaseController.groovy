@@ -81,7 +81,7 @@ abstract class BaseController {
                        URLEncoder.encode("" + o.value, "UTF-8") + "&"
             }
 
-            if (url[-1] == '?' || url[-1] == '&') 
+            if (url.length() > 0 && (url[-1] == '?' || url[-1] == '&')) 
                 url = url[0..-2]
             return "<a href=\"$url\">$text</a>"
         },

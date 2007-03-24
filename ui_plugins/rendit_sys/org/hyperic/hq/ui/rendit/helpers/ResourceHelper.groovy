@@ -17,7 +17,7 @@ class ResourceHelper
             str: {name -> platMan.findPlatformTypeByName(name)},
             int: {id -> platMan.findPlatformTypeValueById(id)}],
         group: [ 
-            str: {name -> groupMap.findGroupByName(userVal, name)},
+            str: {name -> groupMan.findGroupByName(userVal, name)},
             int: {id -> groupMan.findGroup(userVal, id)}],
     ]
     
@@ -86,6 +86,12 @@ class ResourceHelper
 
         def resourceVal = args[resourceType]
         def argType = (resourceVal instanceof String) ? 'str' : 'int'
+        
+        try { // If it's a string with an integer inside, try that
+            resourceVal = Integer.parseInt(resourceVal)
+            argType = 'int'
+        } catch(NumberFormatException e) {
+        }
         NAME_FINDERS[resourceType][argType](resourceVal)
     }
 }
