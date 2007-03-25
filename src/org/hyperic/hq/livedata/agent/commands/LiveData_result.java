@@ -105,7 +105,7 @@ public class LiveData_result extends AgentRemoteValue {
         return new String(compressedData, 0, total);
     }
 
-    public static String decompress(String s)
+    private String decompress(String s)
         throws IOException, DataFormatException
     {
         Inflater decompressor = new Inflater();
