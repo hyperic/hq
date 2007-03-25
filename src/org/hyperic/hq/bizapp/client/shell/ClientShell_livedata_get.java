@@ -31,14 +31,17 @@ import org.hyperic.util.shell.ShellCommandBase;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 
 import java.io.PrintStream;
+import java.util.List;
 
 public class ClientShell_livedata_get extends ShellCommandBase {
 
     private static final int[] PARAM_VALID_RESOURCE = {
+        ClientShell_resource.PARAM_GROUP,
         ClientShell_resource.PARAM_PLATFORM,
         ClientShell_resource.PARAM_SERVER,
         ClientShell_resource.PARAM_SERVICE,
@@ -62,23 +65,58 @@ public class ClientShell_livedata_get extends ShellCommandBase {
             int type = ClientShell_resource.paramToEntityType(args[0]);
             AppdefEntityID id =  _entityFetcher.getID(type, args[1]);
 
-            ConfigSchema schema = _entityFetcher.getLiveDataConfigSchema(id);
-
-            ConfigResponse response =
-                ((ClientShell)this.getShell()).processConfigSchema(schema);
-
-            LiveDataCommand cmd = new LiveDataCommand(id, args[2], response);
-            LiveDataResult res = _entityFetcher.getLiveData(cmd);
-
-            PrintStream ps = this.getShell().getOutStream();
-            ps.println("Printing XML output from " + args[2] + " command:");
-            if (res.hasError()) {
-                ps.println("Error: " + res.getErrorMessage());
+            if (id.isGroup()) {
+                processGroupCommand(id, args[2]);
             } else {
-                ps.println(res.getXMLResult());
+                processCommand(id, args[2]);
             }
         } catch (Exception e) {
             throw new ShellCommandExecException(e);
+        }
+    }
+
+    private void processCommand(AppdefEntityID id, String command)
+        throws Exception
+    {
+        ConfigSchema schema = _entityFetcher.getLiveDataConfigSchema(id);
+        ConfigResponse response =
+            ((ClientShell) this.getShell()).processConfigSchema(schema);
+
+        LiveDataCommand cmd = new LiveDataCommand(id, command, response);
+        LiveDataResult res = _entityFetcher.getLiveData(cmd);
+
+        PrintStream ps = this.getShell().getOutStream();
+        ps.println("Printing XML output from " + command + " command:");
+        if (res.hasError()) {
+            ps.println("Error: " + res.getErrorMessage());
+        } else {
+            ps.println(res.getXMLResult());
+        }
+    }
+
+    private void processGroupCommand(AppdefEntityID id, String command)
+        throws Exception
+    {
+        AppdefGroupValue val =
+            _entityFetcher.getGroupValue(id.getId().toString());
+        List entities = val.getAppdefGroupEntries();
+
+        LiveDataCommand[] cmds = new LiveDataCommand[entities.size()];
+        for (int i = 0; i < entities.size(); i++) {
+            AppdefEntityID aid = (AppdefEntityID)entities.get(i);
+            cmds[i] = new LiveDataCommand(aid, command, new ConfigResponse());
+        }
+
+        LiveDataResult[] res = _entityFetcher.getLiveData(cmds);
+        PrintStream ps = this.getShell().getOutStream();
+        ps.println("Printing XML output from command " + command);
+        for (int i = 0; i < entities.size(); i++) {
+            ps.println("Result value " + i);
+            if (res[i].hasError()) {
+                ps.println("Error: " + res[i].getErrorMessage());
+            } else {
+                ps.println(res[i].getXMLResult());
+            }
         }
     }
 
