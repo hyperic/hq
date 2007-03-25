@@ -1,5 +1,7 @@
 package org.hyperic.hq.ui.rendit.helpers
 
+import org.hyperic.hq.product.PluginNotFoundException
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefResourceValue
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
@@ -19,12 +21,29 @@ class LiveDataHelper
         dataMan.getCommands(userVal, resource.entityId)
     }
 
+    String[] getCommands(AppdefEntityID id) {
+        dataMan.getCommands(userVal, id)
+    }
+
     LiveDataResult getData(AppdefResourceValue resource, String command, 
                            config) 
     {
         LiveDataCommand cmd = new LiveDataCommand(resource.entityId, command,
                                                   config as ConfigResponse)
         dataMan.getData(userVal, cmd)
+    }
+    
+    /** 
+     * Check if a resource supports a command.  
+     * XXX:  Would be cool if we could just attach this functionality directly
+     *       to the entity ID or the resource via categories or metaclasses!
+     */
+    boolean resourceSupports(AppdefEntityID id, String command) {
+        try {
+            return (dataMan.getCommands(userVal, id) as List).contains(command)
+        } catch(PluginNotFoundException e) {
+            return false
+        }
     }
 }
 
