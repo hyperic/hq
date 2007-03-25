@@ -63,14 +63,17 @@ public class TopData {
     private void ps(Sigar sigar, String filter) throws SigarException {
         _processes = new ArrayList();
         long[] pids;
+        int max;
         if (filter == null) {
             pids = sigar.getProcList();
+            max = 20; //XXX make configurable
         }
         else {
             pids = ProcessFinder.find(sigar, filter);
+            max = pids.length;
         }
 
-        for (int i=0; i<pids.length; i++) {
+        for (int i=0; i<max; i++) {
             long pid = pids[i];
             try {
                 _processes.add(ProcessData.gather(sigar, pid));
