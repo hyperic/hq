@@ -28,40 +28,37 @@ package org.hyperic.hq.livedata.agent.client;
 import org.hyperic.hq.livedata.agent.LiveDataCommandsAPI;
 import org.hyperic.hq.livedata.agent.commands.LiveData_args;
 import org.hyperic.hq.livedata.agent.commands.LiveData_result;
-import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.agent.client.AgentConnection;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.util.config.ConfigResponse;
 
 public class LiveDataClient {
 
     private LiveDataCommandsAPI _api;
-    private AgentConnection _agentConnection;
+    private AgentConnection _conn;
 
     public LiveDataClient(AgentConnection agentConnection) {
-        _agentConnection = agentConnection;
+        _conn = agentConnection;
         _api = new LiveDataCommandsAPI();
     }
 
     public LiveDataResult getData(String type, String command,
                                   ConfigResponse config)
-        throws AgentConnectionException, AgentRemoteException,
-               LiveDataException
     {
-        LiveData_args args = new LiveData_args();
+        try {
+            LiveData_args args = new LiveData_args();
 
-        args.setConfig(type, command, config);
+            args.setConfig(type, command, config);
 
-        AgentRemoteValue res =
-            _agentConnection.sendCommand(LiveDataCommandsAPI.command_getData,
-                                         _api.getVersion(), args);
-        LiveData_result val = new LiveData_result(res);
-
-        String xml = val.getResult();
-
-        return new LiveDataResult(xml);
+            AgentRemoteValue res =
+                _conn.sendCommand(LiveDataCommandsAPI.command_getData,
+                                  _api.getVersion(), args);
+            LiveData_result val = new LiveData_result(res);
+            String xml = val.getResult();
+            return new LiveDataResult(xml);
+        } catch (Exception e) {
+            return new LiveDataResult(e, e.getMessage());
+        }
     }
 }

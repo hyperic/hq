@@ -32,6 +32,9 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
+
+import java.io.PrintStream;
 
 public class ClientShell_livedata_get extends ShellCommandBase {
 
@@ -64,13 +67,16 @@ public class ClientShell_livedata_get extends ShellCommandBase {
             ConfigResponse response =
                 ((ClientShell)this.getShell()).processConfigSchema(schema);
 
-            LiveDataResult res = _entityFetcher.getLiveData(id, args[2],
-                                                            response);
+            LiveDataCommand cmd = new LiveDataCommand(id, args[2], response);
+            LiveDataResult res = _entityFetcher.getLiveData(cmd);
 
-            this.getShell().getOutStream().println("Printing XML output from " +
-                                                   args[2] + " command:");
-            this.getShell().getOutStream().println(res.getXMLResult());
-
+            PrintStream ps = this.getShell().getOutStream();
+            ps.println("Printing XML output from " + args[2] + " command:");
+            if (res.hasError()) {
+                ps.println("Error: " + res.getErrorMessage());
+            } else {
+                ps.println(res.getXMLResult());
+            }
         } catch (Exception e) {
             throw new ShellCommandExecException(e);
         }

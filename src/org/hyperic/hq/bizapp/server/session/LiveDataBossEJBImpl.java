@@ -35,6 +35,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -76,16 +77,30 @@ public class LiveDataBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public LiveDataResult getLiveData(int sessionId, AppdefEntityID id,
-                                      String command, ConfigResponse config)
-        throws PermissionException, AgentConnectionException,
-        AgentRemoteException, AgentNotFoundException,
-        AppdefEntityNotFoundException, LiveDataException,
-        SessionTimeoutException, SessionNotFoundException
+    public LiveDataResult getLiveData(int sessionId, LiveDataCommand command)
+        throws PermissionException, AgentNotFoundException,
+               AppdefEntityNotFoundException, LiveDataException,
+               SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubjectValue subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
-        return manager.getData(subject, id, command, config);
+        return manager.getData(subject, command);
+    }
+
+    /**
+     * Get live data for the given commands
+     *
+     * @ejb:interface-method 
+     */
+    public LiveDataResult[] getLiveData(int sessionId,
+                                        LiveDataCommand[] commands)
+        throws PermissionException, AgentNotFoundException,
+               AppdefEntityNotFoundException, LiveDataException,
+               SessionTimeoutException, SessionNotFoundException
+    {
+        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        return manager.getData(subject, commands);
     }
 
     /**

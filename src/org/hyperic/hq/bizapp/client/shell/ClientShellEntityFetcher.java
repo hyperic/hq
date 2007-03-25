@@ -119,6 +119,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -1160,19 +1161,30 @@ public class ClientShellEntityFetcher {
         return (0 == numInvalid);
     }
 
-    public LiveDataResult getLiveData(AppdefEntityID id, String command,
-                                      ConfigResponse config)
+    public LiveDataResult getLiveData(LiveDataCommand command)
         throws NamingException, ClientShellAuthenticationException,
-        PermissionException, AgentConnectionException, RemoteException,
-        AgentRemoteException, AgentNotFoundException, LiveDataException,
-        AppdefEntityNotFoundException, SessionTimeoutException,
-        SessionNotFoundException
+               PermissionException, RemoteException, AgentNotFoundException,
+               LiveDataException, AppdefEntityNotFoundException,
+               SessionTimeoutException, SessionNotFoundException
     {
         LiveDataBoss boss;
 
         boss = this.bossManager.getLiveDataBoss();
 
-        return boss.getLiveData(auth.getAuthToken(), id, command, config);
+        return boss.getLiveData(auth.getAuthToken(), command);
+    }
+
+    public LiveDataResult[] getLiveData(LiveDataCommand[] commands) 
+        throws NamingException, ClientShellAuthenticationException,
+               PermissionException, RemoteException, AgentNotFoundException,
+               LiveDataException, AppdefEntityNotFoundException,
+               SessionTimeoutException, SessionNotFoundException
+    {
+        LiveDataBoss boss;
+
+        boss = this.bossManager.getLiveDataBoss();
+
+        return boss.getLiveData(auth.getAuthToken(), commands);
     }
 
     public String[] getLiveDataCommands(AppdefEntityID id)

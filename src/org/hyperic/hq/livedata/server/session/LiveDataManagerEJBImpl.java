@@ -43,18 +43,22 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
+import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
 import javax.ejb.SessionContext;
 import javax.ejb.SessionBean;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Iterator;
 
 /**
  * @ejb:bean name="LiveDataManager"
@@ -98,44 +102,100 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     /**
      * Live data subsystem uses measurement configs.
      */
-    private ConfigResponse getMeasurementConfig(AuthzSubjectValue subject,
-                                                AppdefEntityID id)
+    private ConfigResponse getConfig(AuthzSubjectValue subject,
+                                     LiveDataCommand command)
         throws LiveDataException
     {
         ConfigManagerLocal cManager = ConfigManagerEJBImpl.getOne();
 
         try {
-            return cManager.getMergedConfigResponse(subject,
-                                                    ProductPlugin.TYPE_MEASUREMENT,
-                                                    id, true);
+            AppdefEntityID id = command.getAppdefEntityID();
+            ConfigResponse config = command.getConfig();
+            ConfigResponse mConfig = cManager.
+                getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT,
+                                        id, true);
+            config.merge(mConfig, false);
+            return config;
         } catch (Exception e) {
             throw new LiveDataException(e);
         }
     }
 
     /**
-     * Get live data for a given resource.
+     * Get the appdef type for a given entity id.
+     */
+    private String getType(AuthzSubjectValue subject, LiveDataCommand cmd)
+        throws AppdefEntityNotFoundException, PermissionException
+    {
+        AppdefEntityID id = cmd.getAppdefEntityID();
+        AppdefEntityValue val = new AppdefEntityValue(id, subject);
+        AppdefResourceTypeValue typeVal = val.getResourceTypeValue();
+        return typeVal.getName();
+    }
+
+    /**
+     * Run the given live data command.
      *
      * @ejb:interface-method
      */
     public LiveDataResult getData(AuthzSubjectValue subject,
-                                  AppdefEntityID id, String command,
-                                  ConfigResponse config)
+                                  LiveDataCommand cmd)
         throws PermissionException, AgentNotFoundException,
-        AgentConnectionException, AgentRemoteException,
-        AppdefEntityNotFoundException, LiveDataException
+               AppdefEntityNotFoundException, LiveDataException
     {
-        LiveDataClient client =
-            new LiveDataClient(AgentConnectionUtil.getClient(id));
+        AppdefEntityID id = cmd.getAppdefEntityID();
+        AgentConnection conn = AgentConnectionUtil.getClient(id);
+        LiveDataClient client = new LiveDataClient(conn);
 
-        ConfigResponse measurementConfig = getMeasurementConfig(subject, id);
+        ConfigResponse config = getConfig(subject, cmd);
+        String type = getType(subject, cmd);
 
-        config.merge(measurementConfig, false);
-        
-        AppdefEntityValue val = new AppdefEntityValue(id, subject);
-        AppdefResourceTypeValue tVal = val.getResourceTypeValue();
+        return client.getData(type, cmd.getCommand(), config);
+    }
 
-        return client.getData(tVal.getName(), command, config);
+    /**
+     * Run a list of live data commands in batch.
+     *
+     * @ejb:interface-method 
+     */
+    public LiveDataResult[] getData(AuthzSubjectValue subject,
+                                    LiveDataCommand[] commands)
+        throws PermissionException, AppdefEntityNotFoundException,
+               AgentNotFoundException, LiveDataException
+    {
+        HashMap buckets = new HashMap();
+
+        for (int i = 0; i < commands.length; i++) {
+            LiveDataCommand cmd = commands[i];
+            AppdefEntityID id = cmd.getAppdefEntityID();
+            AgentConnection conn = AgentConnectionUtil.getClient(id);
+
+            ConfigResponse config = getConfig(subject, cmd);
+            String type = getType(subject, cmd);
+
+            LiveDataExecutorCommand exec =
+                new LiveDataExecutorCommand(type, cmd.getCommand(), config);
+
+            List queue = (List)buckets.get(conn);
+            if (queue == null) {
+                queue = new ArrayList();
+                queue.add(exec);
+                buckets.put(conn, queue);
+            } else {
+                queue.add(exec);
+            }
+        }
+
+        LiveDataExecutor executor = new LiveDataExecutor();
+        for (Iterator i = buckets.keySet().iterator(); i.hasNext(); ) {
+            AgentConnection conn = (AgentConnection)i.next();
+            List cmds = (List)buckets.get(conn);
+            executor.getData(new LiveDataClient(conn), cmds);
+        }
+
+        executor.shutdown();
+
+        return executor.getResult();
     }
 
     /**
