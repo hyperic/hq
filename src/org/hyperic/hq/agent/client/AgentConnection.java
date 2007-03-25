@@ -68,6 +68,14 @@ public class AgentConnection {
         _agentAPI     = new AgentAPI();
     }
 
+    public String getAgentAddress() {
+        return _agentAddress;
+    }
+
+    public int getAgentPort() {
+        return _agentPort;
+    }
+
     protected Socket getSocket()
         throws AgentConnectionException
     {
@@ -212,5 +220,15 @@ public class AgentConnection {
             } catch(IOException ignoreexc){
             }
         }
+    }
+
+    public boolean equals(Object o) {
+        return o instanceof AgentConnection &&
+            ((AgentConnection)o).getAgentAddress().equals(getAgentAddress()) &&
+            ((AgentConnection)o).getAgentPort() == getAgentPort();
+    }
+
+    public int hashCode() {
+        return getAgentAddress().hashCode() + getAgentPort();
     }
 }
