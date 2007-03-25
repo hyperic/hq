@@ -33,7 +33,6 @@ import org.hyperic.sigar.ProcCpu;
 import org.hyperic.sigar.ProcCredName;
 import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcState;
-import org.hyperic.sigar.ProcTime;
 import org.hyperic.sigar.ProcUtil;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -75,54 +74,52 @@ public class ProcessData {
     private double _cpuPerc;
     private String _name;
 
+    private ProcState _procState;
+    private ProcCredName _procCredName;
+    private ProcCpu _procCpu;
+    private ProcMem _procMem;
+
     public ProcessData() {}
 
     public void populate(Sigar sigar, long pid)
         throws SigarException {
 
-        ProcState state = sigar.getProcState(pid);
-        ProcTime time = null;
+        _procState = sigar.getProcState(pid);
         final String unknown = "???";
 
         _pid = pid;
 
         try {
-            ProcCredName cred = sigar.getProcCredName(pid);
-            _owner = cred.getUser();
+            _procCredName = sigar.getProcCredName(pid);
+            _owner = _procCredName.getUser();
         } catch (SigarException e) {
             _owner = unknown;
         }
 
         try {
-            time = sigar.getProcTime(pid);
-            _startTime = time.getStartTime();
+            _procCpu = sigar.getProcCpu(pid);
+            _startTime = _procCpu.getStartTime();
         } catch (SigarException e) {
            _startTime = Sigar.FIELD_NOTIMPL;
         }
 
         try {
-            ProcMem mem = sigar.getProcMem(pid);
-            _size = mem.getSize();
-            _resident = mem.getResident();
-            _share = mem.getShare();
+            _procMem = sigar.getProcMem(pid);
+            _size = _procMem.getSize();
+            _resident = _procMem.getResident();
+            _share = _procMem.getShare();
         } catch (SigarException e) {
             _size = _resident = _share = Sigar.FIELD_NOTIMPL;
         }
 
-        _state = state.getState();
+        _state = _procState.getState();
 
-        if (time != null) {
-            _cpuTotal = time.getTotal();
+        if (_procCpu != null) {
+            _cpuTotal = _procCpu.getTotal();
+            _cpuPerc = _procCpu.getPercent();
         }
         else {
-            _cpuTotal = Sigar.FIELD_NOTIMPL;
-        }
-
-        try {
-            ProcCpu cpu = sigar.getProcCpu(pid);
-            _cpuPerc = cpu.getPercent();
-        } catch (SigarException e) {
-            _cpuPerc = Sigar.FIELD_NOTIMPL;
+            _cpuPerc = _cpuTotal = Sigar.FIELD_NOTIMPL;
         }
 
         _name = ProcUtil.getDescription(sigar, pid);
@@ -134,6 +131,22 @@ public class ProcessData {
         ProcessData data = new ProcessData();
         data.populate(sigar, pid);
         return data;
+    }
+
+    public ProcState getProcState() {
+        return _procState;
+    }
+
+    public ProcCredName getProcCredName() {
+        return _procCredName;
+    }
+
+    public ProcCpu getProcCpu() {
+        return _procCpu;
+    }
+
+    public ProcMem getProcMem() {
+        return _procMem;
     }
 
     public long getPid() {
