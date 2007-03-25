@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
@@ -155,10 +156,9 @@ public class ControlManagerEJBImpl implements SessionBean {
                 cMan.getMergedConfigResponse(subject, 
                                              ProductPlugin.TYPE_CONTROL,
                                              id, true);
-
-            ControlCommandsClient client = ControlUtil.getClient(id);
+            ControlCommandsClient client =
+                new ControlCommandsClient(AgentConnectionUtil.getClient(id));
             client.controlPluginAdd(pluginName, pluginType, mergedResponse);
-
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (CreateException e) {
