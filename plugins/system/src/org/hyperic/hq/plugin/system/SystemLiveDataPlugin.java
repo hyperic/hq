@@ -40,13 +40,15 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_CPUPERC    = "cpuperc";
     private static final String CMD_FILESYSTEM = "filesystem";
     private static final String CMD_TOP        = "top";
+    private static final String CMD_NETSTAT    = "netstat";
 
     private static final String _COMMANDS[] = {
         CMD_CPUINFO,
         CMD_CPU,
         CMD_CPUPERC,
         CMD_FILESYSTEM,
-        CMD_TOP
+        CMD_TOP,
+        CMD_NETSTAT
     };
 
     public Object getData(String command, ConfigResponse config)
@@ -67,6 +69,14 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 String filter =
                     config.getValue(SigarMeasurementPlugin.PTQL_CONFIG);
                 return TopData.gather(sigar, filter);
+            } else if (command.equals(CMD_NETSTAT)) {
+                NetstatData data = new NetstatData();
+                String flags = config.getValue("netstat.flags");
+                if (flags != null) {
+                    data.setFlags(flags);
+                }
+                data.populate(sigar);
+                return data;
             } else {
                 throw new PluginException("Unknown command '" + command + "'");
             }
