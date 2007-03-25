@@ -97,7 +97,8 @@ public class LiveDataCommandsServer implements AgentServerHandler {
             res.setResult(s);
             return res;
         } catch (Exception e) {
-            throw new AgentRemoteException("Unable to invoke command", e);
+            throw new AgentRemoteException("Unable to invoke command: " +
+                                           e.getMessage(), e);
         }
     }
 }
