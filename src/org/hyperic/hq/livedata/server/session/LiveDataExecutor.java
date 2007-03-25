@@ -41,13 +41,14 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
 
     private static Log _log = LogFactory.getLog(LiveDataExecutor.class);
 
-    private static final int THREAD_MIN = 5;
     private static final int THREAD_MAX = 30;
 
     private List _results;
 
     public LiveDataExecutor() {
-        super(THREAD_MIN, THREAD_MAX, 1, TimeUnit.MINUTES,
+        // Fixed sized threadpool.  The ThreadPoolExecutor will only spawn
+        // the threads a necessary.
+        super(THREAD_MAX, THREAD_MAX, 1, TimeUnit.SECONDS,
               new LinkedBlockingQueue());
         _results = new ArrayList();
     }
