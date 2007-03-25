@@ -158,7 +158,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
 
-        return client.getData(type, cmd.getCommand(), config);
+        return client.getData(id, type, cmd.getCommand(), config);
     }
 
     /**
@@ -182,7 +182,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             String type = getType(subject, cmd);
 
             LiveDataExecutorCommand exec =
-                new LiveDataExecutorCommand(type, cmd.getCommand(), config);
+                new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
 
             List queue = (List)buckets.get(conn);
             if (queue == null) {

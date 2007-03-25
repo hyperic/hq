@@ -26,17 +26,24 @@
 package org.hyperic.hq.livedata.server.session;
 
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 class LiveDataExecutorCommand {
+    private AppdefEntityID _id;
     private String _type;
     private String _command;
     private ConfigResponse _config;
 
-    public LiveDataExecutorCommand(String type, String command,
-                           ConfigResponse config) {
+    public LiveDataExecutorCommand(AppdefEntityID id, String type, String command,
+                                   ConfigResponse config) {
+        _id = id;
         _type = type;
         _command = command;
         _config = config;
+    }
+
+    public AppdefEntityID getAppdefEntityID() {
+        return _id;
     }
 
     public String getType() {

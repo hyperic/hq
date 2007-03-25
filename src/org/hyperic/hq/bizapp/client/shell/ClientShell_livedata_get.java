@@ -101,17 +101,21 @@ public class ClientShell_livedata_get extends ShellCommandBase {
             _entityFetcher.getGroupValue(id.getId().toString());
         List entities = val.getAppdefGroupEntries();
 
+        PrintStream ps = this.getShell().getOutStream();
+        ps.print("Entities:");
         LiveDataCommand[] cmds = new LiveDataCommand[entities.size()];
         for (int i = 0; i < entities.size(); i++) {
             AppdefEntityID aid = (AppdefEntityID)entities.get(i);
             cmds[i] = new LiveDataCommand(aid, command, new ConfigResponse());
+            ps.print(" " + aid);
         }
+        ps.println();
 
         LiveDataResult[] res = _entityFetcher.getLiveData(cmds);
-        PrintStream ps = this.getShell().getOutStream();
         ps.println("Printing XML output from command " + command);
         for (int i = 0; i < entities.size(); i++) {
-            ps.println("Result value " + i);
+            ps.println("Result value " + i + " for resource " +
+                       res[i].getAppdefEntityID());
             if (res[i].hasError()) {
                 ps.println("Error: " + res[i].getErrorMessage());
             } else {

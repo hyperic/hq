@@ -31,6 +31,7 @@ import org.hyperic.hq.livedata.agent.commands.LiveData_result;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.config.ConfigResponse;
 
 public class LiveDataClient {
@@ -43,7 +44,8 @@ public class LiveDataClient {
         _api = new LiveDataCommandsAPI();
     }
 
-    public LiveDataResult getData(String type, String command,
+    public LiveDataResult getData(AppdefEntityID id, String type,
+                                  String command,
                                   ConfigResponse config)
     {
         try {
@@ -56,9 +58,9 @@ public class LiveDataClient {
                                   _api.getVersion(), args);
             LiveData_result val = new LiveData_result(res);
             String xml = val.getResult();
-            return new LiveDataResult(xml);
+            return new LiveDataResult(id, xml);
         } catch (Exception e) {
-            return new LiveDataResult(e, e.getMessage());
+            return new LiveDataResult(id, e, e.getMessage());
         }
     }
 }

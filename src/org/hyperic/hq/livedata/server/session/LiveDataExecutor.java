@@ -41,13 +41,13 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
 
     private static Log _log = LogFactory.getLog(LiveDataExecutor.class);
 
-    private static final int THREAD_MIN = 1;
+    private static final int THREAD_MIN = 5;
     private static final int THREAD_MAX = 30;
 
     private List _results;
 
     public LiveDataExecutor() {
-        super(THREAD_MIN, THREAD_MAX, 1, TimeUnit.HOURS,
+        super(THREAD_MIN, THREAD_MAX, 1, TimeUnit.MINUTES,
               new LinkedBlockingQueue());
         _results = new ArrayList();
     }
@@ -83,7 +83,8 @@ public class LiveDataExecutor extends ThreadPoolExecutor {
                 LiveDataExecutorCommand cmd = (LiveDataExecutorCommand)i.next();
                 _log.debug("Running cmd '" + cmd + "' in thread " +
                            Thread.currentThread().getName());
-                LiveDataResult res = _client.getData(cmd.getType(),
+                LiveDataResult res = _client.getData(cmd.getAppdefEntityID(),
+                                                     cmd.getType(),
                                                      cmd.getCommand(),
                                                      cmd.getConfig());
                 _results.add(res);
