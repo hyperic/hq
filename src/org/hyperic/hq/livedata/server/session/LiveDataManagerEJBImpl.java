@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -111,11 +112,18 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         try {
             AppdefEntityID id = command.getAppdefEntityID();
             ConfigResponse config = command.getConfig();
-            ConfigResponse mConfig = cManager.
-                getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT,
-                                        id, true);
-            config.merge(mConfig, false);
-            return config;
+
+            try {
+                ConfigResponse mConfig = cManager.
+                    getMergedConfigResponse(subject,
+                                            ProductPlugin.TYPE_MEASUREMENT,
+                                            id, true);
+                config.merge(mConfig, false);
+                return config;
+            } catch (ConfigFetchException e) {
+                // No measurement config?  No problem
+                return config;
+            }
         } catch (Exception e) {
             throw new LiveDataException(e);
         }
