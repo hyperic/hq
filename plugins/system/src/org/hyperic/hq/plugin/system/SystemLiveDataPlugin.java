@@ -44,6 +44,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_TOP        = "top";
     private static final String CMD_PROCESS    = "process";
     private static final String CMD_NETSTAT    = "netstat";
+    private static final String CMD_IFCONFIG   = "ifconfig";
     private static final String CMD_WHO        = "who";
 
     private static final String _COMMANDS[] = {
@@ -54,6 +55,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_TOP,
         CMD_PROCESS,
         CMD_NETSTAT,
+        CMD_IFCONFIG,
         CMD_WHO
     };
 
@@ -92,6 +94,8 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 }
                 data.populate(sigar);
                 return data;
+            } else if (command.equals(CMD_IFCONFIG)) {
+                return IfconfigData.gather(sigar);
             } else if (command.equals(CMD_WHO)) {
                 return sigar.getWhoList();
             } else {
