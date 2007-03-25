@@ -83,8 +83,11 @@ abstract class BaseController {
 
             if (url.length() > 0 && (url[-1] == '?' || url[-1] == '&')) 
                 url = url[0..-2]
-            return "<a href=\"$url\">$text</a>"
+            "<a href=\"$url\">$text</a>"
         },
+        
+        avail_icon : { color -> "<img src=\"/images/icon_available_$color" + 
+                                ".gif\"/>" },
         
         h : { str -> h(str) } 
     ]
