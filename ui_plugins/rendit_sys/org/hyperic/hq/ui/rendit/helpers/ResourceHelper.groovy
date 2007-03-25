@@ -88,7 +88,7 @@ class ResourceHelper
         def argType = (resourceVal instanceof String) ? 'str' : 'int'
         
         try { // If it's a string with an integer inside, try that
-            resourceVal = Integer.parseInt(resourceVal)
+            resourceVal = Integer.valueOf(resourceVal)
             argType = 'int'
         } catch(NumberFormatException e) {
         }
