@@ -448,6 +448,9 @@
     <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
        <fileset dir="${rendit_sys.dir}"/>
     </copy>
+    <copy todir="${jboss.home}">
+       <fileset dir="${basedir}/ui_plugins"/>
+    </copy>
   </target>
   	
   <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
