@@ -41,6 +41,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_FILESYSTEM = "filesystem";
     private static final String CMD_TOP        = "top";
     private static final String CMD_NETSTAT    = "netstat";
+    private static final String CMD_WHO        = "who";
 
     private static final String _COMMANDS[] = {
         CMD_CPUINFO,
@@ -48,7 +49,8 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_CPUPERC,
         CMD_FILESYSTEM,
         CMD_TOP,
-        CMD_NETSTAT
+        CMD_NETSTAT,
+        CMD_WHO
     };
 
     public Object getData(String command, ConfigResponse config)
@@ -77,6 +79,8 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 }
                 data.populate(sigar);
                 return data;
+            } else if (command.equals(CMD_WHO)) {
+                return sigar.getWhoList();
             } else {
                 throw new PluginException("Unknown command '" + command + "'");
             }
