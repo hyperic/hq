@@ -54,9 +54,8 @@ public class LiveDataPluginManager extends PluginManager {
         LiveDataPlugin p = getLiveDataPlugin(type);
         Object o = p.getData(command, config);
 
-        XStream xtream = new XStream();
-
-        return xtream.toXML(o);
+        XStream xstream = new XStream();
+        return xstream.toXML(o);
     }
 
     public String[] getCommands(String type)
