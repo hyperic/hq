@@ -57,33 +57,51 @@ abstract class BaseController {
         this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
     }
 
+    // TODO:  This all needs to be moved to a separate class
     public String h(str) {
         StringEscapeUtils.escapeHtml(str)    
     }
-        
-    // TODO:  These need to be moved to a separate class
-    public RENDER_BUILTINS = [
-        link_to : { text, Object[] args ->
-        	def url = ""
-            def opts = (args.length > 0) ? args[0] : [:]
-        	def htmlOpts = (args.length > 1) ? args[1] : [:]
+    
+    public String url_for(opts, htmlOpts) {
+    	def url = ""
             
-            if (opts.containsKey('action')) { 
-                url += h(opts['action'])
-            } else if (opts.containsKey('resource')) {
-                def entId = opts['resource'].entityId.appdefKey
-                url = getHQHelper().serverURL + "Resource.do?eid=$entId"
-            }
+        if (opts.containsKey('action')) { 
+            url += h(opts['action'])
+        } else if (opts.containsKey('resource')) {
+            def entId = opts['resource'].entityId.appdefKey
+            url = getHQHelper().serverURL + "Resource.do?eid=$entId"
+        }
             
-            url += '?'                
-            for (o in htmlOpts) {
-                url += URLEncoder.encode("" + o.key, "UTF-8") + "=" + 
-                       URLEncoder.encode("" + o.value, "UTF-8") + "&"
-            }
+        url += '?'                
+        for (o in htmlOpts) {
+            url += URLEncoder.encode("" + o.key, "UTF-8") + "=" + 
+                   URLEncoder.encode("" + o.value, "UTF-8") + "&"
+        }
 
-            if (url.length() > 0 && (url[-1] == '?' || url[-1] == '&')) 
-                url = url[0..-2]
-            "<a href=\"$url\">$text</a>"
+        if (url.length() > 1 && (url[-1] == '?' || url[-1] == '&')) 
+            url = url[0..-2]
+        url
+    }
+    
+    public RENDER_BUILTINS = [
+        url_for : { args -> 
+            def opts     = (args.length > 0) ? args[0] : [:]
+            def htmlOpts = (args.length > 1) ? args[1] : [:]
+            url_for(opts, htmlOpts) 
+        },
+        
+        button : { args ->
+            def text = h(args.remove('text'))
+            def url  = url_for(args.get('to', [:]), 
+                               args.get('htmlOpts', [:]))
+            
+            "<button onclick=\"window.open('$url')\">$text</button>"
+        },
+        
+        link_to : { text, Object[] args ->
+            def opts     = (args.length > 0) ? args[0] : [:]
+            def htmlOpts = (args.length > 1) ? args[1] : [:]
+            "<a href=\"" + url_for(opts, htmlOpts) + "\">$text</a>"
         },
         
         avail_icon : { color -> "<img src=\"/images/icon_available_$color" + 
@@ -112,10 +130,19 @@ abstract class BaseController {
      */
     protected void render(args) {
         args = (args == null) ? [:] : args
-        def gspArgs = args.get("args", [:])
-        def gspFile = args.file
+        def inlineArgs = args.get('inline') 
+        def gspArgs    = args.get("args", [:])
+        def gspFile    = args.file
+        def outStream = invokeArgs.response.outputStream
+        def outWriter = new OutputStreamWriter(outStream)
         def useAction
-                
+
+        if (inlineArgs != null) {
+            outWriter.write(inlineArgs, 0, inlineArgs.length())
+            outWriter.flush()
+            return
+        }
+
         if (gspFile == null)
             useAction = action
         else
@@ -124,8 +151,6 @@ abstract class BaseController {
         new File(pluginDir, useAction + '.gsp').withReader { reader ->
             def eng       = new SimpleTemplateEngine(false)
             def template  = eng.createTemplate(reader)
-            def outStream = invokeArgs.response.outputStream
-            def outWriter = new OutputStreamWriter(outStream)
             
             gspArgs.putAll(RENDER_BUILTINS)
             template.make(gspArgs).writeTo(outWriter)
