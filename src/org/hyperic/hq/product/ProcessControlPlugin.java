@@ -124,6 +124,28 @@ public class ProcessControlPlugin extends ControlPlugin {
         return false;
     }
 
+    public static int getSignal(String signal)
+        throws PluginException {
+
+        if (Character.isDigit(signal.charAt(0))) {
+            try {
+                return Integer.parseInt(signal);
+            } catch (NumberFormatException e) {
+                throw new PluginException(signal + ": " + e);
+            }
+        }
+        else {
+            Integer num = (Integer)SIGNALS.get(signal);
+            if (num == null) {
+                num = (Integer)SIGNALS.get("SIG" + signal);
+            }
+            if (num == null) {
+                throw new PluginException("Invalid signal: " + signal);
+            }
+            return num.intValue();
+        }
+    }
+
     public void doAction(String action, String[] args)
         throws PluginException {
 
@@ -150,25 +172,7 @@ public class ProcessControlPlugin extends ControlPlugin {
             throw new PluginException("Too many arguments");
         }
 
-        int signum;
-        if (Character.isDigit(signal.charAt(0))) {
-            try {
-                signum = Integer.parseInt(signal);
-            } catch (NumberFormatException e) {
-                throw new PluginException(signal + ": " + e);
-            }
-        }
-        else {
-            Integer num = (Integer)SIGNALS.get(signal);
-            if (num == null) {
-                num = (Integer)SIGNALS.get("SIG" + signal);
-            }
-            if (num == null) {
-                throw new PluginException("Invalid signal: " + signal);
-            }
-            signum = num.intValue();
-        }
-
+        int signum = getSignal(signal);
         Sigar sigar = new Sigar();
         long[] pids;
         List killed = new ArrayList();
