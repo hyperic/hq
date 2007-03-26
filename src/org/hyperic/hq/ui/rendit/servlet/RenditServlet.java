@@ -93,6 +93,8 @@ public class RenditServlet
             File sysDir = new File(sysPath);
             RenditServer.getInstance().setSysDir(sysDir);
 
+            _log.info("Watching for HQU plugins in [" + 
+                      homeDir.getAbsolutePath() + "]");
             _watcher = new DirWatcher(homeDir, new DirWatcherCallback() {
                 public void fileAdded(File f) {
                     if (PluginWrapper.isValidPlugin(f)) {
