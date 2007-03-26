@@ -24,6 +24,10 @@ class LiveDataHelper
     String[] getCommands(AppdefEntityID id) {
         dataMan.getCommands(userVal, id)
     }
+    
+    LiveDataResult[] getData(LiveDataCommand[] commands) {
+        dataMan.getData(userVal, commands)
+    }
 
     LiveDataResult getData(AppdefResourceValue resource, String command, 
                            config) 
