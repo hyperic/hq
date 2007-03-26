@@ -96,14 +96,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                     config.getValue(SigarMeasurementPlugin.PTQL_CONFIG);
                 return TopData.gather(sigar, filter);
             } else if (command.equals(CMD_PROCESS)) {
-                String pid =
-                    config.getValue(PROP_PID);
-                if (pid == null) {
-                    //throw new PluginException("Missing " + PROP_PID);
-                    //XXX default to our own pid for testing.
-                    return ProcessDetailData.gather(sigar, sigar.getPid());
-                }
-                return ProcessDetailData.gather(sigar, pid);
+                return ProcessDetailData.gather(sigar, getPid(config));
             } else if (command.equals(CMD_KILL)) {
                 String signame = config.getValue(PROP_SIGNAL);
                 if (signame == null) {

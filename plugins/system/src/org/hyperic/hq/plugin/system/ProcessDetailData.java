@@ -87,19 +87,6 @@ public class ProcessDetailData extends ProcessData {
         return data;
     }
 
-    public static ProcessData gather(Sigar sigar, String pid)
-        throws SigarException {
-    
-        long id;
-        try {
-            id = Long.parseLong(pid);
-        } catch (NumberFormatException e) {
-            throw new SigarException("Invalid pid: " + pid);
-        }
-
-        return gather(sigar, id);
-    }
-
     public String[] getProcArgs() {
         return _procArgs;
     }
