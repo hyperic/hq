@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProcessControlPlugin;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -36,6 +37,7 @@ import com.thoughtworks.xstream.XStream;
 public class SystemLiveDataPlugin extends LiveDataPlugin {
 
     public static final String PROP_PID        = "process.pid";
+    public static final String PROP_SIGNAL     = "process.signal";
 
     private static final String CMD_CPUINFO    = "cpuinfo";
     private static final String CMD_CPU        = "cpu";
@@ -43,6 +45,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_FILESYSTEM = "filesystem";
     private static final String CMD_TOP        = "top";
     private static final String CMD_PROCESS    = "process";
+    private static final String CMD_KILL       = "kill";
     private static final String CMD_NETSTAT    = "netstat";
     private static final String CMD_IFCONFIG   = "ifconfig";
     private static final String CMD_WHO        = "who";
@@ -54,10 +57,25 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_FILESYSTEM,
         CMD_TOP,
         CMD_PROCESS,
+        CMD_KILL,
         CMD_NETSTAT,
         CMD_IFCONFIG,
         CMD_WHO
     };
+
+    private long getPid(ConfigResponse config)
+        throws PluginException {
+
+        String pid = config.getValue(PROP_PID);
+        if (pid == null) {
+            throw new PluginException("Missing " + PROP_PID);
+        }        
+        try {
+            return Long.parseLong(pid);
+        } catch (NumberFormatException e) {
+            throw new PluginException("Invalid pid: " + pid);
+        }
+    }
 
     public Object getData(String command, ConfigResponse config)
         throws PluginException
@@ -86,6 +104,17 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                     return ProcessDetailData.gather(sigar, sigar.getPid());
                 }
                 return ProcessDetailData.gather(sigar, pid);
+            } else if (command.equals(CMD_KILL)) {
+                String signame = config.getValue(PROP_SIGNAL);
+                if (signame == null) {
+                    signame = ProcessControlPlugin.SIGKILL;
+                }
+
+                long pid = getPid(config);
+                int signal = ProcessControlPlugin.getSignal(signame);
+
+                sigar.kill(pid, signal);
+                return null;
             } else if (command.equals(CMD_NETSTAT)) {
                 NetstatData data = new NetstatData();
                 String flags = config.getValue("netstat.flags");
