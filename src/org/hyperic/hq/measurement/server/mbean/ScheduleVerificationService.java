@@ -210,7 +210,7 @@ public class ScheduleVerificationService
      * @jmx:managed-operation
      */
     public void start() {
-        _log.info("Starting" + this.getClass().getName());
+        _log.info("Starting " + this.getClass().getName());
     }
 
     /**
