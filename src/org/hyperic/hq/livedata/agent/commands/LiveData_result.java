@@ -28,6 +28,7 @@ package org.hyperic.hq.livedata.agent.commands;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.util.encoding.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -86,44 +87,40 @@ public class LiveData_result extends AgentRemoteValue {
         throws IOException
     {
         Deflater compressor = new Deflater();
-        compressor.setInput(s.getBytes());
+        compressor.setInput(s.getBytes("UTF-8"));
         compressor.finish();
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        int total = 0;
         byte[] buf = new byte[1024];
         while (!compressor.finished()) {
             int count = compressor.deflate(buf);
-            total += count;
             bos.write(buf, 0, count);
         }
 
         bos.close();
 
         byte[] compressedData = bos.toByteArray();
-        return new String(compressedData, 0, total);
+        return Base64.encode(compressedData);
     }
 
     private String decompress(String s)
         throws IOException, DataFormatException
     {
         Inflater decompressor = new Inflater();
-        decompressor.setInput(s.getBytes());
+        decompressor.setInput(Base64.decode(s));
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        int total = 0;
         byte[] buf = new byte[1024];
         while (!decompressor.finished()) {
             int count = decompressor.inflate(buf);
-            total += count;
             bos.write(buf, 0, count);
         }
 
         bos.close();
 
         byte[] decompressedData = bos.toByteArray();
-        return new String(decompressedData, 0, total);
+        return new String(decompressedData, 0, decompressedData.length, "UTF-8");
     }
 }
