@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory
 /**
  * The Dispatcher is the direct invocation target called from the HQ
  * RenditServer.  It has the responsibility of locating the controllers,
- * setting up the environment, and invoking the request.
+ * setting up the environment, and invoking the request.  
  */
 class Dispatcher {
     private Log log = LogFactory.getLog(Dispatcher.class);
@@ -22,9 +22,13 @@ class Dispatcher {
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
     
-    def Dispatcher(def invokeArgs) {
-        def path = invokeArgs.requestPath
+    def Dispatcher(invokeArgs) {
+        def req      = invokeArgs.request
+        def servPath = req.servletPath
+        def reqUri   = req.requestURI
 
+        List path = reqUri[(servPath.length() + 1)..-1].split('/')
+        
         if (path.size() < 3) {
             throw new IllegalArgumentException("Path must have at least 3 " + 
                                                "components");
@@ -33,7 +37,7 @@ class Dispatcher {
         pluginDir       = invokeArgs.pluginDir
         controllerName  = capitalize(path[1]) + "Controller"
         action          = path[2]
-        this.invokeArgs = invokeArgs                              
+        this.invokeArgs = invokeArgs
     }
     
     def invoke() {

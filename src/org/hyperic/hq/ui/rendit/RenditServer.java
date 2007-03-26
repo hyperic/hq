@@ -75,11 +75,10 @@ public class RenditServer {
         }
     }
 
-    public void handleRequest(List path, HttpServletRequest req, 
+    public void handleRequest(String pluginName, HttpServletRequest req, 
                               HttpServletResponse resp) 
         throws Exception
     {
-        String pluginName     = (String)path.get(0);
         PluginWrapper plugin;
         
         synchronized (CFG_LOCK) {
@@ -93,7 +92,7 @@ public class RenditServer {
         
         Binding b = new Binding();
         b.setVariable("invokeArgs", 
-                      new InvocationBindings(path, plugin.getPluginDir(), 
+                      new InvocationBindings(plugin.getPluginDir(), 
                                              req, resp));
         plugin.run("org/hyperic/hq/ui/rendit/dispatcher.groovy", b);
     }

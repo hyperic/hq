@@ -47,14 +47,16 @@ public class RenditServlet
         reqUri = reqUri.substring(servPath.length());
         List path = StringUtil.explode(reqUri, "/");
         
-        if (path.size() != 3) {
+        if (path.size() < 1) {
             throw new ServletException("Illegal request path");
         }
         
-        _log.info("Request: " + req.getRequestURI() + "?" +
-                  req.getQueryString());
+        String plugin = (String)path.get(0);
+        _log.info("Request for [" + plugin + "]: " + req.getRequestURI() + 
+                  "?" + req.getQueryString());
+                  
         try {
-            RenditServer.getInstance().handleRequest(path, req, response);
+            RenditServer.getInstance().handleRequest(plugin, req, response);
         } catch(Exception e) {
             throw new ServletException(e);
         }
