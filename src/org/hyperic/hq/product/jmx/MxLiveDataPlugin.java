@@ -35,7 +35,11 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
 import java.util.Properties;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.HashMap;
 
 public class MxLiveDataPlugin extends LiveDataPlugin {
 
@@ -81,11 +85,37 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
                 throw new PluginException("Unkown command " + command);
             }
 
+            // if CompositeData, return Map for simplicity.
+            if (res instanceof CompositeData) {
+                return convertCompositeData((CompositeData)res);
+            }
+
+            // Same goes for CompositeData[]
+            if (res instanceof CompositeData[]) {
+                CompositeData[] o = (CompositeData[])res;
+                Map[] ret = new Map[o.length];
+                for (int i = 0; i < o.length; i++) {
+                    ret[i] = convertCompositeData(o[i]);
+                }
+                return ret;
+            }
+            
             return res;
 
         } catch (Exception e) {
             throw new PluginException(e);
         }
+    }
+
+    private Map convertCompositeData(CompositeData data) {
+        Map retval = new HashMap();
+        for (Iterator i = data.getCompositeType().keySet().iterator();
+             i.hasNext(); ) {
+            String key = (String)i.next();
+            Object val = data.get(key);
+            retval.put(key, val);
+        }
+        return retval;
     }
 
     public String[] getCommands() {
