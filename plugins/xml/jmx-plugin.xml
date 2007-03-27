@@ -88,6 +88,9 @@
     <plugin type="control"
             class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
 
+    <plugin type="livedata"
+            class="org.hyperic.hq.product.jmx.MxLiveDataPlugin"/>
+
     <actions include="gc"/>
 
     <property name="OBJECT_NAME.gc" value="${memory}"/>
