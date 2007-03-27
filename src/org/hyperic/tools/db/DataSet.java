@@ -26,10 +26,9 @@
 package org.hyperic.tools.db;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-import org.hyperic.util.jdbc.JDBC;
 
 import org.apache.oro.text.perl.Perl5Util;
 
@@ -37,7 +36,6 @@ abstract class DataSet
 {
     private DBSetup m_parent;
     private String  m_strTableName;
-    private boolean m_bVerbose;
     private static Perl5Util regexp = new Perl5Util();
     
     protected DataSet(String tableName, DBSetup dbsetup)
@@ -85,7 +83,6 @@ abstract class DataSet
 
     protected String getCreateCommand() throws SQLException
     {
-        int index;
         int iCols = this.getNumberColumns();
         
         StringBuffer strCmd = new StringBuffer("INSERT INTO ");
@@ -119,7 +116,6 @@ abstract class DataSet
 
     protected String getUpdateCommand() throws SQLException
     {
-        int index;
         int iCols = this.getNumberColumns();
         
         StringBuffer strCmd = new StringBuffer("UPDATE ");
@@ -236,16 +232,22 @@ abstract class DataSet
             }
         
             if (strValue != null) {
-				// We need to replace the value 'TRUE' with '1' if this is
-                // Oracle. It's a hack to have this code in this class until I
-                // do some restructuring of the code
-                if (m_parent.getDbType() == OracleTable.CLASS_TYPE) {
-                    if (strValue.compareTo("TRUE") == 0)
-                        strValue = "1";
-                    else if (strValue.compareTo("FALSE") == 0)
-                        strValue = "0";
+                // We need to replace the value 'TRUE' with '1' and 'FALSE' with
+                // '0' if this is Oracle or MySQL. It's a hack to have this code
+                // in this class until I do some restructuring of the code
+                if (strValue.compareTo("TRUE") == 0 &&
+                    (m_parent.getDbType() == OracleTable.CLASS_TYPE ||
+                     m_parent.getDbType() == MySQLTable.CLASS_TYPE)) {
+                    stmt.setInt(i + 1, 1);
+                    continue;
                 }
-
+                else if (strValue.compareTo("FALSE") == 0 &&
+                    (m_parent.getDbType() == OracleTable.CLASS_TYPE ||
+                     m_parent.getDbType() == MySQLTable.CLASS_TYPE)) {
+                    stmt.setInt(i + 1, 0);
+                    continue;
+                }
+                
                 stmt.setString(i + 1, strValue);
             }
             else {
