@@ -1,5 +1,11 @@
 package org.hyperic.hq.ui.rendit
 
+import org.hyperic.hq.ui.rendit.util.UserUtil
+import org.hyperic.hq.ui.rendit.metaclass.AppdefLiveDataCategory
+import org.hyperic.hq.ui.rendit.metaclass.CategoryInfo
+import org.hyperic.hq.appdef.shared.AppdefEntityID
+
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -9,6 +15,9 @@ import org.apache.commons.logging.LogFactory
  * setting up the environment, and invoking the request.  
  */
 class Dispatcher {
+    private static final CATEGORIES = [
+        AppdefLiveDataCategory                                       
+    ]
     private Log log = LogFactory.getLog(Dispatcher.class);
 
     private String controllerName
@@ -60,23 +69,32 @@ class Dispatcher {
         def loader    = this.class.classLoader
         loader.addURL(appDir.toURL())
         def controller = Class.forName(controllerName, true, 
-		                               loader).newInstance() 
+                                       loader).newInstance() 
 
         action = path[2]
-		controller.setAction(action)
-		controller.setControllerName(path[1])
+        controller.setAction(action)
+        controller.setControllerName(path[1])
         controller.setPluginDir(invokeArgs.pluginDir)
-		controller.setInvokeArgs(invokeArgs)
+        controller.setInvokeArgs(invokeArgs)
         
         def runner = controller."$action"
         if (runner == null)
-        	throw new IllegalArgumentException("Unknown action [$action]")
+            throw new IllegalArgumentException("Unknown action [$action]")
         	
-		def start = System.currentTimeMillis()
-		runner(invokeArgs.request.parameterMap)
-		log.info "Executed $controllerName:$action in " +   
-		         "${System.currentTimeMillis() - start} ms"
-		return true
+        def start = System.currentTimeMillis()
+
+        try {
+            CategoryInfo.setUser(UserUtil.getUser(invokeArgs))
+            use (*CATEGORIES) {
+                runner(invokeArgs.request.parameterMap)
+            }
+        } finally {
+            CategoryInfo.setUser(null)
+        }
+		
+        log.info "Executed $controllerName:$action in " +   
+                 "${System.currentTimeMillis() - start} ms"
+        return true
     }
 }
 

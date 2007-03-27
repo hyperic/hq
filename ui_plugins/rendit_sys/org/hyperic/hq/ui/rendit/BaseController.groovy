@@ -1,5 +1,7 @@
 package org.hyperic.hq.ui.rendit
 
+import org.hyperic.hq.ui.rendit.util.UserUtil
+
 import org.apache.commons.lang.StringEscapeUtils
 
 import java.io.OutputStreamWriter
@@ -8,8 +10,6 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.ui.util.ContextUtils
-import org.hyperic.hq.ui.util.RequestUtils
 
 import org.hyperic.hq.ui.rendit.helpers.LiveDataHelper
 import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
@@ -58,10 +58,7 @@ abstract class BaseController {
         if (this.user != null)
             return this.user
         
-        def sessId = RequestUtils.getSessionId(invokeArgs.request)
-        def ctx    = invokeArgs.request.session.servletContext
-
-        this.user = ContextUtils.getAuthzBoss(ctx).getCurrentSubject(sessId)
+        this.user = UserUtil.getUser(invokeArgs)
     }
 
     // TODO:  This all needs to be moved to a separate class
