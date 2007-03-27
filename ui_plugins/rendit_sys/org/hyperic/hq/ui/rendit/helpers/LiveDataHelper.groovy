@@ -29,12 +29,9 @@ class LiveDataHelper
         dataMan.getData(userVal, commands)
     }
 
-    LiveDataResult getData(AppdefResourceValue resource, String command, 
-                           config) 
+    LiveDataResult getData(LiveDataCommand command)
     {
-        def cmd = [resource.entityId, command, 
-                   config as ConfigResponse] as LiveDataCommand
-        dataMan.getData(userVal, cmd)
+        dataMan.getData(userVal, command)
     }
     
     /** 

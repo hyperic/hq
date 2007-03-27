@@ -1,5 +1,6 @@
 import org.hyperic.hq.ui.rendit.BaseController
 
+import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.util.config.ConfigResponse
 
 public class LiveController extends BaseController {
@@ -16,7 +17,9 @@ public class LiveController extends BaseController {
 		
         if (command != null) {
             command = command[0]
-            result = liveDataHelper.getData(plat, command, [:]).XMLResult
+            def cmd = [plat.entityId, command,
+                       [:] as ConfigResponse] as LiveDataCommand
+            result = liveDataHelper.getData(cmd).XMLResult
         }
 
         render(args:[resource:plat, cmds:cmds, result:result, command:command]) 
