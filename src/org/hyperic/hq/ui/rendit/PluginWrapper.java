@@ -26,7 +26,6 @@ public class PluginWrapper {
         try {
             u = new URL[] {
                 sysDir.toURL(),
-                _pluginDir.toURL(),
             };
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
