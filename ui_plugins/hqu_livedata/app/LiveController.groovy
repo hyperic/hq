@@ -9,7 +9,7 @@ public class LiveController extends BaseController {
     }
 	
     def showResource = { params ->
-        def platId  = Integer.parseInt(params['id'][0])
+        def platId  = params['id'][0]
         def plat    = resourceHelper.find(platform:platId)
         def cmds    = liveDataHelper.getCommands(plat)
         def command = params['command']
