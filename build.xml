@@ -1368,7 +1368,7 @@
       <fileset dir="${thirdparty.lib}">
         <include name="oracle_jdbc/ojdbc14.jar"/>
         <include name="postgresql/postgresql-8.1-*.jdbc3.jar"/>
-        <include name="mysql_jdbc/mysql-connector-java-3.0.12-*.jar"/>
+        <include name="mysql_jdbc/mysql*.jar"/>
         <include name="jakarta-oro*.jar" />
         <include name="ant-contrib.jar" />
         <include name="commons-logging.jar"/>
