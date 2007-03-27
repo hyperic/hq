@@ -65,10 +65,10 @@ public class LiveDataPluginManager extends PluginManager {
         return p.getCommands();
     }
 
-    public ConfigSchema getConfigSchema(String type)
+    public ConfigSchema getConfigSchema(String type, String command)
         throws PluginException
     {
         LiveDataPlugin p = getLiveDataPlugin(type);
-        return p.getConfigSchema();
+        return p.getConfigSchema(command);
     }
 }

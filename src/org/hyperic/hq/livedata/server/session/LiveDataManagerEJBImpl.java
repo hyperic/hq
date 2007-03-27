@@ -230,14 +230,14 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public ConfigSchema getConfigSchema(AuthzSubjectValue subject,
-                                        AppdefEntityID id)
+                                        AppdefEntityID id, String command)
         throws PluginException, PermissionException
     {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceTypeValue tVal = val.getResourceTypeValue();
 
-            return _manager.getConfigSchema(tVal.getName());
+            return _manager.getConfigSchema(tVal.getName(), command);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }

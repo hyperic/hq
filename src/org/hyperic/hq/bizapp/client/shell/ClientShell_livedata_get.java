@@ -78,7 +78,8 @@ public class ClientShell_livedata_get extends ShellCommandBase {
     private void processCommand(AppdefEntityID id, String command)
         throws Exception
     {
-        ConfigSchema schema = _entityFetcher.getLiveDataConfigSchema(id);
+        ConfigSchema schema = _entityFetcher.getLiveDataConfigSchema(id,
+                                                                     command);
         ConfigResponse response =
             ((ClientShell) this.getShell()).processConfigSchema(schema);
 

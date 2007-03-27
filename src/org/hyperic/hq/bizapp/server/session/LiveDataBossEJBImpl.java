@@ -122,12 +122,13 @@ public class LiveDataBossEJBImpl implements SessionBean {
      *
      * @ejb:interface-method 
      */
-    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id)
+    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id,
+                                        String command)
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException    
     {
         AuthzSubjectValue subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
-        return manager.getConfigSchema(subject, id);
+        return manager.getConfigSchema(subject, id, command);
     }
 }

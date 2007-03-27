@@ -42,7 +42,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
     private static Log _log = LogFactory.getLog(MxLiveDataPlugin.class);
 
     private static final String PROP_OBJNAME = "ObjectName";
-    private static final String PROP_METHOD  = "method";
+    private static final String PROP_METHOD  = "Method";
 
     private static final String CMD_GET    = "get";
     private static final String CMD_INVOKE = "invoke";
@@ -84,7 +84,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
         return _COMMANDS;
     }
 
-    public ConfigSchema getConfigSchema() {
+    public ConfigSchema getConfigSchema(String command) {
         ConfigSchema schema = new ConfigSchema();
 
         StringConfigOption object =

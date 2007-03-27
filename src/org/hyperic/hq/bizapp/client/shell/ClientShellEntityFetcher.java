@@ -1200,7 +1200,8 @@ public class ClientShellEntityFetcher {
         return boss.getLiveDataCommands(auth.getAuthToken(), id);
     }
 
-    public ConfigSchema getLiveDataConfigSchema(AppdefEntityID id)
+    public ConfigSchema getLiveDataConfigSchema(AppdefEntityID id,
+                                                String command)
         throws RemoteException, NamingException,
         ClientShellAuthenticationException, PluginException,
         PermissionException,
@@ -1210,7 +1211,7 @@ public class ClientShellEntityFetcher {
 
         boss = this.bossManager.getLiveDataBoss();
 
-        return boss.getConfigSchema(auth.getAuthToken(), id);
+        return boss.getConfigSchema(auth.getAuthToken(), id, command);
     }
 }
 
