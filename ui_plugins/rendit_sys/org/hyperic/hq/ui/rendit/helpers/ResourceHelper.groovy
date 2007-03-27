@@ -96,6 +96,14 @@ class ResourceHelper
                                                NAME_FINDERS.keySet())
 
         def resourceVal = args[resourceType]
+        if (resourceVal instanceof String[]) {
+            if (resourceVal.length != 1) {
+                throw new IllegalArgumentException("findSingle does not " + 
+                                                   "accept > 1 id")
+            }
+            resourceVal = resourceVal[0]
+        }
+                        
         def argType = (resourceVal instanceof String) ? 'str' : 'int'
 
         if (argType == 'str') {
