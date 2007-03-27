@@ -35,7 +35,9 @@ public abstract class LiveDataPlugin extends GenericPlugin {
 
     public abstract String[] getCommands();
 
-    public ConfigSchema getConfigSchema(String command) {
+    public ConfigSchema getConfigSchema(String command)
+        throws PluginException
+    {
         return new ConfigSchema();
     }
 }

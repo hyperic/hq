@@ -41,8 +41,9 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
 
     private static Log _log = LogFactory.getLog(MxLiveDataPlugin.class);
 
-    private static final String PROP_OBJNAME = "ObjectName";
-    private static final String PROP_METHOD  = "Method";
+    private static final String PROP_OBJNAME   = "ObjectName";
+    private static final String PROP_METHOD    = "Method";
+    private static final String PROP_ATTRIBUTE = "Attribute";
 
     private static final String CMD_GET    = "get";
     private static final String CMD_INVOKE = "invoke";
@@ -61,14 +62,21 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
         try {
             MBeanServerConnection mBeanServer = MxUtil.getMBeanServer(props);
             ObjectName oName = new ObjectName(props.getProperty(PROP_OBJNAME));
-            String method = props.getProperty(PROP_METHOD);
-
+            
             Object res;
             if (command.equals(CMD_INVOKE)) {
+                String method = props.getProperty(PROP_METHOD);
+                if (method == null) {
+                    throw new PluginException("No method givin.");
+                }
                 res = mBeanServer.invoke(oName, method, new Object[0],
                                          new String[0]);
             } else if (command.equals(CMD_GET)) {
-                res = mBeanServer.getAttribute(oName, method);
+                String attribute = props.getProperty(PROP_ATTRIBUTE);
+                if (attribute == null) {
+                    throw new PluginException("No attribute given");
+                }
+                res = mBeanServer.getAttribute(oName, attribute);
             } else {
                 throw new PluginException("Unkown command " + command);
             }
@@ -84,16 +92,26 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
         return _COMMANDS;
     }
 
-    public ConfigSchema getConfigSchema(String command) {
+    public ConfigSchema getConfigSchema(String command)
+        throws PluginException
+    {
         ConfigSchema schema = new ConfigSchema();
 
-        StringConfigOption object =
+        StringConfigOption objectName =
             new StringConfigOption(PROP_OBJNAME, "Object name");
-        StringConfigOption method =
-            new StringConfigOption(PROP_METHOD, "Method to invoke");
+        schema.addOption(objectName);
 
-        schema.addOption(object);
-        schema.addOption(method);
+        if (command.equals(CMD_GET)) {
+            StringConfigOption attr =
+                new StringConfigOption(PROP_ATTRIBUTE, "Attribute to get");
+            schema.addOption(attr);
+        } else if (command.equals(CMD_INVOKE)) {
+            StringConfigOption method =
+                new StringConfigOption(PROP_METHOD, "Method to invoke");
+            schema.addOption(method);
+        } else {
+            throw new PluginException("Unknown command " + command);
+        }
 
         return schema;
     }
