@@ -11,10 +11,10 @@ import org.apache.commons.logging.LogFactory
 class Dispatcher {
     private Log log = LogFactory.getLog(Dispatcher.class);
 
-    private File   pluginDir
     private String controllerName
     private String action
-	private def    invokeArgs
+    private List   path
+    private def    invokeArgs
 	
     private String capitalize(String s) {
         if (s.length() == 0) 
@@ -27,36 +27,56 @@ class Dispatcher {
         def servPath = req.servletPath
         def reqUri   = req.requestURI
 
-        List path = reqUri[(servPath.length() + 1)..-1].split('/')
-        
-        if (path.size() < 3) {
-            throw new IllegalArgumentException("Path must have at least 3 " + 
-                                               "components");
-        }
-        
-        pluginDir       = invokeArgs.pluginDir
-        controllerName  = capitalize(path[1]) + "Controller"
-        action          = path[2]
+        path = reqUri[(servPath.length() + 1)..-1].split('/')
         this.invokeArgs = invokeArgs
     }
     
     def invoke() {
-		def controller = Class.forName(controllerName, true, 
-		                               this.class.classLoader).newInstance() 
+        if (invokeController())
+            return
+    }
+    
+    /**
+     * Attempt to invoke a controller.  If the path looks like:
+     *   plugin/controller/action
+     * then attempt to locate the controller and associated action.
+     *
+     * Returns false if the controller wasn't found or the path was 
+     * incorrect (i.e. not likely a controller request, maybe a .css or .html
+     * request)                  
+     */
+    def invokeController() {
+        if (path.size() < 3)
+            return false
+        
+        controllerName = capitalize(path[1]) + "Controller"
 
+        def pluginDir = invokeArgs.pluginDir
+        def appDir    = new File(pluginDir, "app")
+        def contFile  = new File(appDir, controllerName + ".groovy")
+        if (!contFile.isFile())
+            return false
+        
+        def loader    = this.class.classLoader
+        loader.addURL(appDir.toURL())
+        def controller = Class.forName(controllerName, true, 
+		                               loader).newInstance() 
+
+        action = path[2]
 		controller.setAction(action)
-        controller.setPluginDir(pluginDir)
-		controller.setInvokeArgs(invokeArgs) 
+		controller.setControllerName(path[1])
+        controller.setPluginDir(invokeArgs.pluginDir)
+		controller.setInvokeArgs(invokeArgs)
         
         def runner = controller."$action"
-        if (runner == null) {
+        if (runner == null)
         	throw new IllegalArgumentException("Unknown action [$action]")
-        }
         	
 		def start = System.currentTimeMillis()
 		runner(invokeArgs.request.parameterMap)
 		log.info "Executed $controllerName:$action in " +   
 		         "${System.currentTimeMillis() - start} ms"
+		return true
     }
 }
 

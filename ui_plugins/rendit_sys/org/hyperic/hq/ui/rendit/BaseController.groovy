@@ -22,9 +22,15 @@ abstract class BaseController {
     Log     log = LogFactory.getLog(this.getClass())
     String  action
     File    pluginDir
-
+    
     private invokeArgs
+    private String controllerName
     private AuthzSubject user
+    private File viewDir
+    
+    private void setControllerName(String name) {
+        this.controllerName = name
+    }
     
     private void setAction(String action) { 
         this.action = action
@@ -36,8 +42,9 @@ abstract class BaseController {
     
     def getInvokeArgs() { invokeArgs }
     
-    def setPluginDir(File pluginDir) {
+    void setPluginDir(File pluginDir) {
         this.pluginDir = pluginDir
+        viewDir = new File(pluginDir, "views")
     }
     
     def getResourceHelper() { return new ResourceHelper(getUser()) }
@@ -148,7 +155,8 @@ abstract class BaseController {
         else
             useAction = gspFile
 
-        new File(pluginDir, useAction + '.gsp').withReader { reader ->
+        def subViewDir = new File(viewDir, controllerName) 
+        new File(subViewDir, useAction + '.gsp').withReader { reader ->
             def eng       = new SimpleTemplateEngine(false)
             def template  = eng.createTemplate(reader)
             
