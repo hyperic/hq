@@ -19,7 +19,7 @@
     </version>
 
     <property name="key">
-      <column name="KEY" not-null="true"/>
+      <column name="PROPKEY" not-null="true"/>
     </property>
     
     <property name="value">

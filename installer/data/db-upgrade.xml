@@ -5001,6 +5001,14 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 	
+    <schemaSpec version="3.33">
+      <schema-directSQL>
+        <statement>
+            ALTER TABLE EAM_CRISPO_OPT RENAME COLUMN KEY TO PROPKEY
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 
 </dbupgrade>
 
