@@ -11,20 +11,18 @@ public class TopController extends BaseController {
     }
     
     def killProcess = { params ->
-        def plat = resourceHelper.find(platform:params['id'][0])
+        def plat = resourceHelper.find(platform:params['id'])
         def pid  = params['pid'][0]
-        def res  = liveDataHelper.getData(plat, 'kill',
-                                        ["process.pid" : pid,
-                                         "process.signal" : "QUIT"] 
-                                         as ConfigResponse)
+        def res  = plat.getLiveData('kill', ['process.pid' : pid,
+                                             'process.signal' : 'QUIT'])
         render()                                         
     }
     
     def showProcess = { params ->
-        def plat = resourceHelper.find(platform:params['id'][0])
+        def plat = resourceHelper.find(platform:params['id'])
         def pid  = params['pid'][0]
-        def res = liveDataHelper.getData(plat, 'process',
-                                        ["process.pid" : pid] as ConfigResponse)
+        def res  = plat.getLiveData('process', ["process.pid" : pid])
+                                    
         if (res.hasError()) {
             render(file:'showProcessError', 
                    args:[errorMsg:res.errorMessage])
@@ -36,7 +34,7 @@ public class TopController extends BaseController {
     }
     
     def showCrack = { params ->
-        def group    = resourceHelper.find(group:params['id'][0]) 
+        def group    = resourceHelper.find(group:params['id']) 
         def entIds   = group.appdefGroupEntries
         def cpuData  = []
         def topTable = []
