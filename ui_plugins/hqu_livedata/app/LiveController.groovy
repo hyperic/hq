@@ -9,17 +9,14 @@ public class LiveController extends BaseController {
     }
 	
     def showResource = { params ->
-        def platId  = params['id'][0]
-        def plat    = resourceHelper.find(platform:platId)
-        def cmds    = liveDataHelper.getCommands(plat)
+        def plat    = resourceHelper.find(platform:params['id'])
+        def cmds    = plat.liveDataCommands 
         def command = params['command']
         def result
 		
         if (command != null) {
             command = command[0]
-            def cmd = [plat.entityId, command,
-                       [:] as ConfigResponse] as LiveDataCommand
-            result = liveDataHelper.getData(cmd).XMLResult
+            result = plat.getLiveData(command).XMLResult 
         }
 
         render(args:[resource:plat, cmds:cmds, result:result, command:command]) 
