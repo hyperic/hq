@@ -449,7 +449,9 @@
        <fileset dir="${rendit_sys.dir}"/>
     </copy>
     <copy todir="${jboss.home}">
-       <fileset dir="${basedir}/ui_plugins"/>
+       <fileset dir="${basedir}/ui_plugins">
+         <include name="hqu_*/**"/>
+       </fileset>
     </copy>
   </target>
   	
