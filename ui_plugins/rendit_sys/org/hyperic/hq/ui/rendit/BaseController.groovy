@@ -22,9 +22,9 @@ abstract class BaseController {
     Log     log = LogFactory.getLog(this.getClass())
     String  action
     File    pluginDir
+    String  controllerName
     
     private invokeArgs
-    private String controllerName
     private AuthzSubject user
     private File viewDir
     
@@ -32,10 +32,6 @@ abstract class BaseController {
         this.controllerName = name
     }
     
-    private void setAction(String action) { 
-        this.action = action
-    }
-    	
     protected setInvokeArgs(args) {
         this.invokeArgs = args
     }
