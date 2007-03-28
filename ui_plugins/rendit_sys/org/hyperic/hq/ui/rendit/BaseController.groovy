@@ -67,7 +67,7 @@ abstract class BaseController {
     }
     
     public String url_for(opts, htmlOpts) {
-    	def url = ""
+        def url = ""
             
     	if (opts.containsKey('controller')) {
     	    url += "../" + h(opts['controller'])
@@ -79,7 +79,10 @@ abstract class BaseController {
             url += h(opts['action'])
         } else if (opts.containsKey('resource')) {
             def entId = opts['resource'].entityId.appdefKey
-            url = getHQHelper().serverURL + "Resource.do?eid=$entId"
+            def curUrl = new URL(invokeArgs.request.requestURL + "")
+            def newURL = new URL(curUrl.protocol, curUrl.host, curUrl.port,
+                                 "/Resource.do?eid=$entId") 
+            url = newURL.toString()
         }
             
         url += '?'                
