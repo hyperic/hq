@@ -69,6 +69,12 @@ abstract class BaseController {
     public String url_for(opts, htmlOpts) {
     	def url = ""
             
+    	if (opts.containsKey('controller')) {
+    	    url += "../" + h(opts['controller'])
+    	    if (opts.containsKey('action'))
+    			url += "/"        
+    	}
+    	
         if (opts.containsKey('action')) { 
             url += h(opts['action'])
         } else if (opts.containsKey('resource')) {
