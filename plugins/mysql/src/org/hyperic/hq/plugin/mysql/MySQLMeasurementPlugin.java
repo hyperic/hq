@@ -53,7 +53,7 @@ public class MySQLMeasurementPlugin
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 
     // Measurement Queries
-    private static final String STATUSQUERY = "SHOW STATUS LIKE ";
+    private static final String STATUSQUERY = "SHOW /*!50002 GLOBAL */ STATUS LIKE ";
     private static final String TABLEQUERY  = "SHOW TABLE STATUS LIKE %table%";
     private static final String INDEXQUERY  = "SHOW INDEX FROM %table%";
     private static final String DBQUERY     = "SHOW TABLE STATUS";
