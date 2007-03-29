@@ -2,10 +2,7 @@ package org.hyperic.hq.ui.rendit.metaclass
 
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
-import org.hyperic.hq.appdef.server.session.AppdefResource
-import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.shared.AppdefResourceValue
-import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 
@@ -18,7 +15,7 @@ class AppdefAppdefCategory {
      * Get a resource from an appdef entity ID.
      */
     static AppdefResourceValue getResource(AppdefEntityID entId) {
-		(new ResourceHelper(categoryInfo.user)).find(resource:entId)
+		(new ResourceHelper(CategoryInfo.user)).find(resource:entId)
     }
     
     /**
