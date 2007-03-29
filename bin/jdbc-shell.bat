@@ -20,7 +20,7 @@ set ORACLE_LIB=%JDBC_LIB%\oracle_jdbc
 set JDBC_CLASSPATH=%JDBC_LIB%\henplus.jar
 set JDBC_CLASSPATH=%JDBC_CLASSPATH%;%JDBC_LIB%\libreadline-java.jar
 set JDBC_CLASSPATH=%JDBC_CLASSPATH%;%JDBC_LIB%\postgresql\postgresql-7.4.3.jar
-set JDBC_CLASSPATH=%JDBC_CLASSPATH%;%JDBC_LIB%\mysql_jdbc\mysql-connector-java-3.0.12-production-bin.jar
+set JDBC_CLASSPATH=%JDBC_CLASSPATH%;%JDBC_LIB%\mysql_jdbc\mysql-connector-java-5.0.5-bin.jar
 
 for %%f in (%ORACLE_LIB%\*.jar) do set JDBC_CLASSPATH=!JDBC_CLASSPATH!;%ORACLE_LIB%\%%~nf.jar
 
