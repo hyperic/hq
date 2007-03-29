@@ -1,6 +1,7 @@
 package org.hyperic.hq.ui.rendit
 
 import org.hyperic.hq.ui.rendit.util.UserUtil
+import org.hyperic.hq.ui.rendit.metaclass.AppdefAppdefCategory
 import org.hyperic.hq.ui.rendit.metaclass.AppdefLiveDataCategory
 import org.hyperic.hq.ui.rendit.metaclass.CategoryInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -16,7 +17,8 @@ import org.apache.commons.logging.LogFactory
  */
 class Dispatcher {
     private static final CATEGORIES = [
-        AppdefLiveDataCategory                                       
+        AppdefAppdefCategory,                               
+        AppdefLiveDataCategory,                                       
     ]
     private Log log = LogFactory.getLog(Dispatcher.class);
 
