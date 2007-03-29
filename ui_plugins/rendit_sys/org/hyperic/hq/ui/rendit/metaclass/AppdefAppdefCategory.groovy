@@ -9,8 +9,6 @@ import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 
-import groovy.lang.DelegatingMetaClass
-
 /**
  * This category enhances the general appdef types by giving them additional
  * methods
