@@ -1,11 +1,8 @@
 package org.hyperic.hq.ui.rendit.metaclass
 
-import org.hyperic.hq.appdef.shared.PlatformValue
 import org.hyperic.hq.appdef.shared.AppdefResourceValue
 import org.hyperic.hq.ui.rendit.helpers.MetricHelper
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-
-import groovy.lang.DelegatingMetaClass
 
 /**
  * This category adds measurement methods to appdef types
@@ -17,5 +14,9 @@ class AppdefMetricCategory {
      */
     static Map getEnabledMetrics(AppdefEntityID id) {
         (new MetricHelper(CategoryInfo.user)).getEnabledMetrics(id)
+    }
+
+    static Map getEnabledMetrics(AppdefResourceValue resource) {
+		getEnabledMetrics(resource.entityId)
     }
 }

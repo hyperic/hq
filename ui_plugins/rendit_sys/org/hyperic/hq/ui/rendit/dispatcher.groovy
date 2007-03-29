@@ -5,6 +5,7 @@ import org.hyperic.hq.ui.rendit.metaclass.AppdefAppdefCategory
 import org.hyperic.hq.ui.rendit.metaclass.AppdefLiveDataCategory
 import org.hyperic.hq.ui.rendit.metaclass.AppdefMetricCategory
 import org.hyperic.hq.ui.rendit.metaclass.CategoryInfo
+import org.hyperic.hq.ui.rendit.metaclass.MetricMetricCategory
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 
 import org.codehaus.groovy.runtime.InvokerHelper
@@ -21,6 +22,7 @@ class Dispatcher {
         AppdefAppdefCategory,                               
         AppdefLiveDataCategory,
         AppdefMetricCategory,
+        MetricMetricCategory,
     ]
     private Log log = LogFactory.getLog(Dispatcher.class);
 
