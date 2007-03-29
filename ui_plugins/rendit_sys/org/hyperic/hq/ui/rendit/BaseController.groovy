@@ -13,6 +13,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 
 import org.hyperic.hq.ui.rendit.helpers.LiveDataHelper
 import org.hyperic.hq.ui.rendit.helpers.ResourceHelper
+import org.hyperic.hq.ui.rendit.helpers.MetricHelper
 import org.hyperic.hq.ui.rendit.helpers.HQHelper
 
 import groovy.text.SimpleTemplateEngine
@@ -45,6 +46,7 @@ abstract class BaseController {
     
     def getResourceHelper() { return new ResourceHelper(getUser()) }
     def getLiveDataHelper() { return new LiveDataHelper(getUser()) }
+    def getMetricHelper() { return new MetricHelper(getUser()) }
     def getHQHelper() { return new HQHelper(getUser()) }
     
     /**
