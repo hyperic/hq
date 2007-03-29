@@ -30,16 +30,16 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
+import org.hyperic.util.StringUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import java.util.Properties;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.List;
 
 public class MxLiveDataPlugin extends LiveDataPlugin {
 
@@ -48,6 +48,7 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
     private static final String PROP_OBJNAME   = "ObjectName";
     private static final String PROP_METHOD    = "Method";
     private static final String PROP_ATTRIBUTE = "Attribute";
+    private static final String PROP_ARGS      = "Arguments";
 
     private static final String CMD_GET    = "get";
     private static final String CMD_INVOKE = "invoke";
@@ -61,28 +62,33 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
         throws PluginException
     {
         Properties props = config.toProperties();
-        _log.info("Using properties: " + props);
+        _log.debug("Using properties: " + props);
 
         try {
-            MBeanServerConnection mBeanServer = MxUtil.getMBeanServer(props);
-            ObjectName oName = new ObjectName(props.getProperty(PROP_OBJNAME));
+            String oName = props.getProperty(PROP_OBJNAME);
             
             Object res;
             if (command.equals(CMD_INVOKE)) {
                 String method = props.getProperty(PROP_METHOD);
                 if (method == null) {
-                    throw new PluginException("No method givin.");
+                    throw new PluginException("No method given.");
                 }
-                res = mBeanServer.invoke(oName, method, new Object[0],
-                                         new String[0]);
+
+                String argsStr = props.getProperty(PROP_ARGS, "");
+                List args = StringUtil.explode(argsStr, ",");
+                _log.debug("Using arguments:" + args);
+
+                res = MxUtil.invoke(props, oName, method,
+                                    args.toArray(new String[0]), new String[0]);
             } else if (command.equals(CMD_GET)) {
                 String attribute = props.getProperty(PROP_ATTRIBUTE);
                 if (attribute == null) {
                     throw new PluginException("No attribute given");
                 }
-                res = mBeanServer.getAttribute(oName, attribute);
+
+                res = MxUtil.getValue(props, oName, attribute);
             } else {
-                throw new PluginException("Unkown command " + command);
+                throw new PluginException("Unknown command " + command);
             }
 
             // if CompositeData, return Map for simplicity.
@@ -139,6 +145,12 @@ public class MxLiveDataPlugin extends LiveDataPlugin {
             StringConfigOption method =
                 new StringConfigOption(PROP_METHOD, "Method to invoke");
             schema.addOption(method);
+
+            StringConfigOption args =
+                new StringConfigOption(PROP_ARGS, "Comma separated arguments", 
+                                       "");
+            args.setOptional(true);
+            schema.addOption(args);
         } else {
             throw new PluginException("Unknown command " + command);
         }
