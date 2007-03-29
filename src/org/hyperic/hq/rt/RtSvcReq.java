@@ -28,6 +28,8 @@ package org.hyperic.hq.rt;
 import java.util.Set;
 
 public class RtSvcReq {
+    // Fixed URL length
+    public final static int MAX_URL_LENGTH = 766;
 
     // Fields
     private Integer _id;
@@ -70,11 +72,7 @@ public class RtSvcReq {
     }
 
     public void setUrl(String url) {
-        // Truncate to 766 characters
-        if (url.length() > 766) {
-            url = url.substring(0, 765);
-        }
-        _url = url;
+        _url = truncateUrl(url);
     }
 
     public Set getRtRequestStat() {
@@ -83,5 +81,13 @@ public class RtSvcReq {
 
     public void setRtRequestStat(Set s) {
         _rtRequestStat = s;
+    }
+    
+    public static String truncateUrl(String url) {
+        // Truncate to MAX_URL_LENGTH characters
+        if (url.length() > MAX_URL_LENGTH) {
+            url = url.substring(0, MAX_URL_LENGTH - 1);
+        }
+        return url;
     }
 }
