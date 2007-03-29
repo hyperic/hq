@@ -232,19 +232,12 @@ abstract class DataSet
             }
         
             if (strValue != null) {
-                // We need to replace the value 'TRUE' with '1' and 'FALSE' with
-                // '0' if this is Oracle or MySQL. It's a hack to have this code
-                // in this class until I do some restructuring of the code
-                if (strValue.compareTo("TRUE") == 0 &&
-                    (m_parent.getDbType() == OracleTable.CLASS_TYPE ||
-                     m_parent.getDbType() == MySQLTable.CLASS_TYPE)) {
-                    stmt.setInt(i + 1, 1);
+                if (strValue.equals("TRUE")) {
+                    stmt.setBoolean(i + 1, true);
                     continue;
                 }
-                else if (strValue.compareTo("FALSE") == 0 &&
-                    (m_parent.getDbType() == OracleTable.CLASS_TYPE ||
-                     m_parent.getDbType() == MySQLTable.CLASS_TYPE)) {
-                    stmt.setInt(i + 1, 0);
+                else if (strValue.equals("FALSE")) {
+                    stmt.setBoolean(i + 1, false);
                     continue;
                 }
                 
