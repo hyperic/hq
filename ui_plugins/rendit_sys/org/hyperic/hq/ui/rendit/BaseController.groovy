@@ -64,6 +64,11 @@ abstract class BaseController {
         StringEscapeUtils.escapeHtml(str)    
     }
     
+    public String createURL(path) {
+        def curUrl = new URL(invokeArgs.request.requestURL + "")
+        (new URL(curUrl.protocol, curUrl.host, curUrl.port, path)).toString()
+    }
+    
     public String url_for(opts, htmlOpts) {
         def url = ""
             
@@ -75,12 +80,19 @@ abstract class BaseController {
     	
         if (opts.containsKey('action')) { 
             url += h(opts['action'])
-        } else if (opts.containsKey('resource')) {
+        } 
+
+        if (opts.containsKey('metricChart')) {
+            def entId      = opts['metricChart'].entId
+            def templateId = opts['metricChart'].templateId
+            url = createURL("/resource/common/monitor/Visibility.do?" + 
+                            "eid=$entId&m=$templateId" + 
+                            "&mode=chartSingleMetricSingleResource") 
+        }
+        
+        if (opts.containsKey('resource')) {
             def entId = opts['resource'].entityId.appdefKey
-            def curUrl = new URL(invokeArgs.request.requestURL + "")
-            def newURL = new URL(curUrl.protocol, curUrl.host, curUrl.port,
-                                 "/Resource.do?eid=$entId") 
-            url = newURL.toString()
+            url = createURL("/Resource.do?eid=$entId")
         }
             
         url += '?'                
