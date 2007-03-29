@@ -20,7 +20,7 @@
     </version>
 
     <property name="prefResponse" type="binary">
-      <column name="PREF_RESPONSE" />
+      <column name="PREF_RESPONSE" length="65535"/>
     </property>
   </class>
 
