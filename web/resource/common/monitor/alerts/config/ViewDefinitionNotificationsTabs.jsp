@@ -35,6 +35,7 @@
 <tiles:importAttribute name="viewOthersUrl"/>
 <tiles:importAttribute name="viewRolesUrl" ignore="true"/>
 <tiles:importAttribute name="viewEscalationUrl"/>
+<tiles:importAttribute name="viewSnmpUrl"/>
 
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${mode == 'viewDefinition'}">
@@ -65,8 +66,12 @@
     <c:when test="${tab.value == 'Roles'}">
       <c:set var="tabUrl" value="${viewRolesUrl}"/>
     </c:when>
+    <c:when test="${tab.value == 'SNMP'}">
+      <c:set var="tabUrl" value="${viewSnmpUrl}"/>
+    </c:when>
   </c:choose>
 
+    <c:if test="${snmpEnabled || tab.value != 'SNMP'}">
         <c:choose>
           <c:when test="${mode == tab.link}">
             <td valign="top" width="15"><html:img page="/images/miniTabs_left_on.gif" width="11" height="19" alt="" border="0"/></td>
@@ -82,6 +87,7 @@
             <td valign="top" width="17"><html:img page="/images/miniTabs_right_off.gif" width="11" height="19" alt="" border="0"/></td>
           </c:otherwise>
         </c:choose>
+  </c:if>
 </c:forEach>
         </tr>
       </table>
