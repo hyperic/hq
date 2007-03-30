@@ -646,7 +646,7 @@ public class DBUtil {
 
         case DATABASE_MYSQL5:
             msg = changeNullAndTrim(e.getMessage());
-            return (msg.startsWith("Base table or view not found"));
+            return (msg.endsWith("doesn't exist"));
         default:
             return false;
         }
