@@ -5009,6 +5009,105 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <!-- Add the missing RT tables for .org.  Deliberately skipping Oracle, since
+         users who use Oracle (likely Enterprise customers) will already have these
+         tables -->
+    <schemaSpec version="3.24">
+      <schema-directSQL>
+        <statement desc="Add eam_error_code table" fail="false" targetDB="postgresql">
+          CREATE TABLE eam_error_code (
+            id integer NOT NULL,
+            version_col bigint DEFAULT 0 NOT NULL,
+            code integer NOT NULL,
+            description character varying(64) NOT NULL
+          );
+        </statement>
+        <statement desc="Add eam_error_code constraint" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_error_code ADD CONSTRAINT eam_error_code_pkey PRIMARY KEY (id);
+        </statement>
+        <statement desc="Add eam_error_code index" fail="false" targetDB="postgresql">
+          CREATE INDEX error_code ON eam_error_code USING btree (code);
+        </statement>
+        <statement desc="Add eam_service_request table" fail="false" targetDB="postgresql">
+          CREATE TABLE eam_service_request (
+              id integer NOT NULL,
+              version_col bigint DEFAULT 0 NOT NULL,
+              serviceid integer NOT NULL,
+              url character varying(767) NOT NULL
+          );
+        </statement>
+        <statement desc="Add eam_service_request primary key" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_service_request
+              ADD CONSTRAINT eam_service_request_pkey PRIMARY KEY (id);
+        </statement>
+        <statement desc="Add eam_service_request unique constraint" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_service_request
+              ADD CONSTRAINT eam_service_request_serviceid_key UNIQUE (serviceid, url);
+        </statement>
+        <statement desc="Add eam_service_request index" fail="false" targetDB="postgresql">
+          CREATE INDEX service_request_svcid ON eam_service_request USING btree (serviceid);
+        </statement>
+        <statement desc="Add eam_service_request index" fail="false" targetDB="postgresql">
+          CREATE INDEX service_request_url ON eam_service_request USING btree (url);
+        </statement>
+        <statement desc="Add eam_request_stat table" fail="false" targetDB="postgresql">
+          CREATE TABLE eam_request_stat (
+              id integer NOT NULL,
+              version_col bigint DEFAULT 0 NOT NULL,
+              ipaddr character varying(20) NOT NULL,
+              min double precision NOT NULL,
+              max double precision NOT NULL,
+              total double precision NOT NULL,
+              count integer NOT NULL,
+              begintime bigint NOT NULL,
+              endtime bigint NOT NULL,
+              svctype integer NOT NULL,
+              svcreq_id integer
+          );
+        </statement>
+        <statement desc="Add eam_request_stat primary key" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_request_stat
+              ADD CONSTRAINT eam_request_stat_pkey PRIMARY KEY (id);
+        </statement>
+        <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
+          CREATE INDEX reqstat_idx_begintime ON eam_request_stat USING btree (begintime);
+        </statement>
+        <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
+          CREATE INDEX reqstat_idx_endtime ON eam_request_stat USING btree (endtime);
+        </statement>
+        <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
+          CREATE INDEX service_id ON eam_request_stat USING btree (svcreq_id);
+        </statement>
+        <statement desc="Add eam_request_stat foreign key" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_request_stat
+            ADD CONSTRAINT fke8ebbc72154d0f55 FOREIGN KEY (svcreq_id) REFERENCES eam_service_request(id) ON DELETE CASCADE;
+        </statement>
+        <statement desc="Add eam_stat_errors table" fail="false" targetDB="postgresql">
+          CREATE TABLE eam_stat_errors (
+            id integer NOT NULL,
+            version_col bigint DEFAULT 0 NOT NULL,
+            count integer NOT NULL,
+            error_id integer,
+            reqstat_id integer
+          );
+        </statement>
+        <statement desc="Add eam_stat_errors primary key" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_stat_errors
+            ADD CONSTRAINT eam_stat_errors_pkey PRIMARY KEY (id);
+        </statement>
+        <statement desc="Add eam_stat_errors index" fail="false" targetDB="postgresql">
+          CREATE INDEX stat_errors_reqstat ON eam_stat_errors USING btree (reqstat_id);
+        </statement>
+        <statement desc="Add eam_stat_errors foreign key constraint" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_stat_errors
+            ADD CONSTRAINT fk6f2383a8237d366c FOREIGN KEY (error_id) REFERENCES eam_error_code(id) ON DELETE CASCADE;
+        </statement>
+        <statement desc="Add eam_stat_errors foreign key constraint" fail="false" targetDB="postgresql">
+          ALTER TABLE ONLY eam_stat_errors
+            ADD CONSTRAINT fk6f2383a82de89070 FOREIGN KEY (reqstat_id) REFERENCES eam_request_stat(id) ON DELETE CASCADE;
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 
 </dbupgrade>
 
