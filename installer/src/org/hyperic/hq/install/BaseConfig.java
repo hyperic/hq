@@ -46,6 +46,7 @@ public abstract class BaseConfig implements InstallerConfigSchemaProvider {
     public static final String INSTALLMODE_QUICK      = "quick";
     public static final String INSTALLMODE_ORACLE     = "oracle";
     public static final String INSTALLMODE_POSTGRESQL = "postgresql";
+    public static final String INSTALLMODE_MYSQL      = "mysql";
     public static final String INSTALLMODE_FULL       = "full";
 
     private String baseName;

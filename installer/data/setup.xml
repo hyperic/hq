@@ -541,6 +541,7 @@ ${errMsg}
         <include name="libreadline-java.jar"/>
         <include name="ojdbc14.jar"/>
         <include name="postgresql-7.4.3.jar"/>
+        <include name="mysql-connector-java-5.0.5-bin.jar"/>
         <include name="optional.jar"/>
         <include name="sigar.jar"/>
         <include name="xercesImpl.jar"/>

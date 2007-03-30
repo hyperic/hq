@@ -63,10 +63,14 @@ public class ServerConfig extends BaseConfig {
     public static final String DBC_ORA9    = "Oracle 9i/10g";
     public static final String DBC_PGSQL   = "PostgreSQL";
     public static final String DBC_BUILTIN = "HQ Built-in Database";
+    public static final String DBC_MYSQL   = "MySQL 5.x";
+    
     // database names we need to use internally
     public static final String DB_ORA8  = "Oracle8";
     public static final String DB_ORA9  = "Oracle9i";
     public static final String DB_PGSQL = "PostgreSQL";
+    public static final String DB_MYSQL = "MySQL";
+    
     // Required for postgresql
     public static final String PGSQL_PROTOCOL = "?protocolVersion=2";
 
@@ -159,7 +163,6 @@ public class ServerConfig extends BaseConfig {
         throws EarlyExitException {
 
         ConfigSchema schema = super.getInstallSchema(previous, iterationCount);
-        String dbCreateChoice;
         String portChoice;
         String fqdn;
         String domain;
@@ -168,15 +171,11 @@ public class ServerConfig extends BaseConfig {
         String dbChoice;
         StringConfigOption usernameOption;
         StringConfigOption passwordOption;
-        String advancedDBSetupChoice;
-        int tablespaceIndex;
         String serverInstallDir;
 
-        String installMode = getProjectProperty("install.mode");
-        boolean isOracleQuickMode = installMode.equals(INSTALLMODE_ORACLE);
-        boolean isPGSQLQuickMode = installMode.equals(INSTALLMODE_POSTGRESQL);
-        boolean isQuickMode = isPGSQLQuickMode || isOracleQuickMode ||
-                              installMode.equals(INSTALLMODE_QUICK);
+        InstallMode installMode =
+            new InstallMode(getProjectProperty("install.mode"));
+
         // Do we have an builtin-postgresql packaged with us?
         boolean haveBuiltinDB = getReleaseHasBuiltinDB();
 
@@ -221,7 +220,7 @@ public class ServerConfig extends BaseConfig {
                                              + serverInstallDir);
             }
             
-            if (isQuickMode) {
+            if (installMode.isQuick()) {
                 schema.addOption
                     (new HiddenConfigOption("server.webapp.port", "7080"));
                 
@@ -266,7 +265,7 @@ public class ServerConfig extends BaseConfig {
             // creating the database, since we don't yet run dbsetup
             // for upgrades
             String computedBaseUrl = computeHTTPBaseUrl(fqdn, portChoice);
-            if (isQuickMode) {
+            if (installMode.isQuick()) {
                 schema.addOption
                     (new HiddenConfigOption("server.webapp.baseurl",
                                             computedBaseUrl));
@@ -287,7 +286,7 @@ public class ServerConfig extends BaseConfig {
                                                         fqdn));
             }
 
-            if (isQuickMode) {
+            if (installMode.isQuick()) {
                 schema.addOption(new HiddenConfigOption("server.mail.sender",
                                                         "hqadmin@" + domain));
             } else {
@@ -298,47 +297,53 @@ public class ServerConfig extends BaseConfig {
             break;
 
         case 5:
-            if (isOracleQuickMode) {
+            if (installMode.isOracle()) {
                 String defaultDB = DBC_ORA9;
                 String[] dbs = new String[] { DBC_ORA8, DBC_ORA9 };
-                schema.addOption
-                    (new EnumerationConfigOption("server.database.choice",
-                                                 Q_DATABASE,
-                                                 defaultDB,
-                                                 dbs));
-            } else if (isPGSQLQuickMode) {
-                schema.addOption
-                    (new HiddenConfigOption("server.database.choice",
-                                            DBC_PGSQL));
-
-            } else if (isQuickMode && haveBuiltinDB) {
-                schema.addOption
-                    (new HiddenConfigOption("server.database.choice",
-                                            DBC_BUILTIN));
-
+                schema.addOption(
+                    new EnumerationConfigOption("server.database.choice",
+                                                Q_DATABASE,
+                                                defaultDB,
+                                                dbs));
+            } else if (installMode.isPostgres()) {
+                schema.addOption(
+                    new HiddenConfigOption("server.database.choice",
+                                           DBC_PGSQL));
+            } else if (installMode.isMySQL()) {
+                schema.addOption(
+                    new HiddenConfigOption("server.database.choice",
+                                           DBC_MYSQL));
+            } else if (installMode.isQuick() && haveBuiltinDB) {
+                schema.addOption(
+                    new HiddenConfigOption("server.database.choice",
+                                           DBC_BUILTIN));
             } else {
-                String defaultDB
-                    = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA9;
+                String defaultDB = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA9;
                 String[] dbs = haveBuiltinDB
                     ? new String[] { DBC_BUILTIN, DBC_ORA8, DBC_ORA9, 
-                                     DBC_PGSQL }
-                    : new String[] { DBC_ORA8, DBC_ORA9, DBC_PGSQL };
-                schema.addOption
-                    (new EnumerationConfigOption("server.database.choice",
-                                                 Q_DATABASE,
-                                                 defaultDB,
-                                                 dbs));
+                                     DBC_PGSQL, DBC_MYSQL }
+                    : new String[] { DBC_ORA8, DBC_ORA9, DBC_PGSQL, DBC_MYSQL };
+                schema.addOption(
+                    new EnumerationConfigOption("server.database.choice",
+                                                Q_DATABASE,
+                                                defaultDB,
+                                                dbs));
             }
             break;
 
         case 6:
             // determine server.database from server.database.choice...
             dbChoiceStr = previous.getValue("server.database.choice");
-            if (dbChoiceStr.equals(DBC_ORA8)) dbChoice = DB_ORA8;
-            else if (dbChoiceStr.equals(DBC_ORA9)) dbChoice = DB_ORA9;
-            else if (dbChoiceStr.startsWith(DBC_PGSQL)) dbChoice = DB_PGSQL;
+            if (dbChoiceStr.equals(DBC_ORA8))
+                dbChoice = DB_ORA8;
+            else if (dbChoiceStr.equals(DBC_ORA9))
+                dbChoice = DB_ORA9;
+            else if (dbChoiceStr.startsWith(DBC_PGSQL))
+                dbChoice = DB_PGSQL;
+            else if (dbChoiceStr.startsWith(DBC_MYSQL))
+                dbChoice = DB_MYSQL;
             else if (dbChoiceStr.equals(DBC_BUILTIN)) {
-                dbChoice = DB_PGSQL; 
+                dbChoice = DB_PGSQL;
                 schema.addOption(new HiddenConfigOption("using.builtin.db",
                                                         "true"));
             }
@@ -353,12 +358,6 @@ public class ServerConfig extends BaseConfig {
                         StringUtil.replace(Q_JDBC_URL, "%%DBNAME%%",
                                            dbChoiceStr),
                         "jdbc:oracle:thin:@localhost:1521:HYPERIC_" + PRODUCT));
-                schema.addOption(new StringConfigOption("server.database-user",
-                        Q_JDBC_USER));
-                passwordOption = new StringConfigOption(
-                        "server.database-password", Q_JDBC_PASSWORD);
-                passwordOption.setSecret(true);
-                schema.addOption(passwordOption);
                 schema.addOption(new HiddenConfigOption(
                         "server.database-driver",
                         "oracle.jdbc.driver.OracleDriver"));
@@ -373,19 +372,23 @@ public class ServerConfig extends BaseConfig {
                                            dbChoiceStr),
                         "jdbc:postgresql://localhost:5432/" + PRODUCT
                                 + PGSQL_PROTOCOL));
-                schema.addOption(new StringConfigOption("server.database-user",
-                                                        Q_JDBC_USER));
-                passwordOption = new StringConfigOption(
-                        "server.database-password", Q_JDBC_PASSWORD);
-                passwordOption.setSecret(true);
-                schema.addOption(passwordOption);
                 schema.addOption(new HiddenConfigOption(
                         "server.database-driver", "org.postgresql.Driver"));
                 schema.addOption(new HiddenConfigOption(
                         "server.quartzDelegate",
                         "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
+            } else if ( dbChoice.equals(DB_MYSQL) ) {
+                schema.addOption(new StringConfigOption("server.database-url",
+                        StringUtil.replace(Q_JDBC_URL, "%%DBNAME%%",
+                                           dbChoiceStr),
+                        "jdbc:mysql://localhost:3306/" + PRODUCT));
+                schema.addOption(new HiddenConfigOption(
+                        "server.database-driver", "com.mysql.jdbc.Driver"));
+                schema.addOption(new HiddenConfigOption(
+                        "server.quartzDelegate",
+                        "org.quartz.impl.jdbcjobstore.StdJDBCDelegate"));
             } else {
-                if (!isQuickMode) {
+                if (!installMode.isQuick()) {
                     // In "full" mode, we even let them pick the pgsql port
                     schema.addOption
                         (new PortConfigOption("server.postgresql.port",
@@ -398,10 +401,6 @@ public class ServerConfig extends BaseConfig {
                 }
                     
                 schema.addOption(new HiddenConfigOption
-                                 ("server.database-user", "hqadmin"));
-                schema.addOption(new HiddenConfigOption
-                                 ("server.database-password", "hqadmin"));
-                schema.addOption(new HiddenConfigOption
                                  ("server.database-driver",
                                   "org.postgresql.Driver"));
                 schema.addOption
@@ -409,20 +408,32 @@ public class ServerConfig extends BaseConfig {
                      ("server.quartzDelegate",
                       "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"));
             }
+            
+            if (dbChoiceStr.equals(DBC_BUILTIN)) {
+                schema.addOption(new HiddenConfigOption
+                                 ("server.database-user", "hqadmin"));
+                schema.addOption(new HiddenConfigOption
+                                 ("server.database-password", "hqadmin"));
+            }
+            else {
+                schema.addOption(new StringConfigOption("server.database-user",
+                                                        Q_JDBC_USER));
+                passwordOption = new StringConfigOption(
+                        "server.database-password", Q_JDBC_PASSWORD);
+                passwordOption.setSecret(true);
+                schema.addOption(passwordOption);
+            }
 
             senderChoice = previous.getValue("server.mail.sender");
             // dont ask about admin username if this is an HA node
             // this should have already been set up
-            if (isQuickMode) {
-                schema.addOption(new HiddenConfigOption
-                                 ("server.admin.username",
-                                  "hqadmin"));
-                schema.addOption(new HiddenConfigOption
-                                 ("server.admin.password",
-                                  "hqadmin"));
-                schema.addOption
-                    (new HiddenConfigOption("server.admin.email",
-                                            senderChoice));
+            if (installMode.isQuick()) {
+                schema.addOption(new HiddenConfigOption(
+                        "server.admin.username", "hqadmin"));
+                schema.addOption(new HiddenConfigOption(
+                        "server.admin.password", "hqadmin"));
+                schema.addOption(new HiddenConfigOption("server.admin.email",
+                        senderChoice));
             } else {
                 usernameOption = new AdminUsernameConfigOption
                     ("server.admin.username", Q_ADMIN_USER, "hqadmin");
@@ -689,7 +700,7 @@ public class ServerConfig extends BaseConfig {
         String url      = config.getValue("server.database-url");
 
         try {
-            return DBUtil.checkTableExists(url, user, password, 
+            return DBUtil.checkTableExists(url, user, password,
                                            "EAM_CONFIG_PROPS");
         } catch (DriverLoadException e) {
             throw new EarlyExitException("Error connecting to database "
@@ -712,5 +723,36 @@ public class ServerConfig extends BaseConfig {
                                 + File.separator
                                 + "hqdb");
         return (hqdbDir.exists() && hqdbDir.isDirectory() && hqdbDir.canRead());
+    }
+    
+    private class InstallMode {
+        boolean _oracleQuickMode   = false;
+        boolean _postgresQuickMode = false;
+        boolean _mysqlQuickMode    = false;
+        boolean _quickMode         = false;
+        
+        InstallMode(String mode) {
+            _oracleQuickMode   = mode.equals(INSTALLMODE_ORACLE);
+            _postgresQuickMode = mode.equals(INSTALLMODE_POSTGRESQL);
+            _mysqlQuickMode    = mode.equals(INSTALLMODE_MYSQL);
+            _quickMode         = mode.equals(INSTALLMODE_QUICK);
+        }
+        
+        boolean isOracle() {
+            return _oracleQuickMode;
+        }
+        
+        boolean isPostgres() {
+            return _postgresQuickMode;
+        }
+        
+        boolean isMySQL() {
+            return _mysqlQuickMode;
+        }
+        
+        boolean isQuick() {
+            return _postgresQuickMode || _oracleQuickMode || _mysqlQuickMode ||
+                   _quickMode;
+        }
     }
 }

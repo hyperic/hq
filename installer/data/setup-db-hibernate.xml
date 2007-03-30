@@ -49,10 +49,12 @@
         <property name="hyperic.dialect" value="PostgreSQL" />
         <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
       </case>
-      <case value="mySQL">
-        <property name="hyperic.dialect" value="MySQL" />
+      <case value="MySQL">
+        <property name="hyperic.dialect" value="MySQL5InnoDB" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
       </case>
       <default>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.${hyperic.dialect}Dialect" />
         <fail>
         Unrecognized datasource mapping name: ${server.database}
         </fail>
@@ -129,7 +131,6 @@
       </sequential>
     </for>
 
-    <property name="hibernate.dialect" value="org.hibernate.dialect.${hyperic.dialect}Dialect" />
     <property file="${hibernate-properties}" />
     <echoproperties destfile="${hibernate-properties-gen}.xml" format="xml">
       <propertyset>
