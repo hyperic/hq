@@ -40,7 +40,6 @@ import org.hyperic.util.jdbc.DBUtil;
 public class SST_DirectSQL extends SchemaSpecTask {
 
     private VerifySchema verifySchema;
-    private Statement statement;
     private List statements;
 
     public SST_DirectSQL () {
@@ -95,14 +94,28 @@ public class SST_DirectSQL extends SchemaSpecTask {
         private Connection conn = null;
         private String desc = null;
         private String targetDB = null;
+        private boolean fail = true;
 
         public Statement () {}
 
         public void init (Connection conn) {
             this.conn = conn;
         }
-        public void setDesc (String s) { desc=s; }
-        public String getDesc () { return desc; }
+        public void setDesc(String s) {
+            desc = s;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
+
+        public boolean isFail() {
+            return fail;
+        }
+
+        public void setFail(boolean fail) {
+            this.fail = fail;
+        }
 
         public void setTargetDB (String t) { targetDB = t; }
 
@@ -153,8 +166,9 @@ public class SST_DirectSQL extends SchemaSpecTask {
                 try {
                     ps.execute();
                 } catch (SQLException e) {
-                    if (sqlStmt.trim().toLowerCase().startsWith("drop")) {
-                        log(">>>>> Drop failed: " + e);
+                    if (!isFail() ||
+                        sqlStmt.trim().toLowerCase().startsWith("drop")) {
+                        log(">>>>> SQL failed: " + e);
                         conn.rollback();
                         conn.commit();
                     } else {
