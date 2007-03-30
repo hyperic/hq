@@ -1,5 +1,6 @@
 package org.hyperic.hq.ui.rendit
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.ui.rendit.util.UserUtil
 
 import org.apache.commons.lang.StringEscapeUtils
@@ -82,12 +83,23 @@ abstract class BaseController {
             url += h(opts['action'])
         } 
 
-        if (opts.containsKey('metricChart')) {
-            def entId      = opts['metricChart'].entId
-            def templateId = opts['metricChart'].templateId
+        // Single resource, multi metric chart
+        if (opts.containsKey('resourceCharts')) {
+            def dMetrics = opts['resourceCharts']
+            if (dMetrics.size() == 0)
+                throw new IllegalArgumentException("No charts specified")
+            def first       = dMetrics[0]                                
+            def templateIds = ""
+            for (m in dMetrics) {
+                templateIds += "&m=${m.template.id}"
+            }
+            
+            def multiUrl   = 
             url = createURL("/resource/common/monitor/Visibility.do?" + 
-                            "eid=$entId&m=$templateId" + 
-                            "&mode=chartSingleMetricSingleResource") 
+                			"mode=chartMultiMetricSingleResource" +
+                			"&rid=${first.instanceId}" +
+                			"&type=${first.appdefType}" +
+                			templateIds)
         }
         
         if (opts.containsKey('resource')) {
