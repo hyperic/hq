@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.product.jmx;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,6 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
-import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -55,9 +53,6 @@ public class MxServerDetector
     static final String PROP_SERVICE_NAME = "name";
     private static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
     private static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
-    private static final String VERSION_FILE = "VERSION_FILE";
-    private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
-    private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
     private static final String PROP_PROCESS_QUERY = "process.query";
     protected static final String PROC_JAVA = "State.Name.sw=java";
     protected static final String SUN_JMX_PORT = 
@@ -183,44 +178,13 @@ public class MxServerDetector
 
         List servers = new ArrayList();
         List procs = getServerProcessList();
-        String versionFile = getTypeProperty(VERSION_FILE);
-        String installPathMatch = getTypeProperty(INSTALLPATH_MATCH);
-        String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
+
         for (int i=0; i<procs.size(); i++) {
             MxProcess process = (MxProcess)procs.get(i);
             String dir = process.getInstallPath();
 
-            //optional use a file to determine correct type version
-            if (versionFile != null) {
-                File file = new File(dir, versionFile);
-                if (!file.exists()) {
-                    String[] expanded = PluginLoader.expand(file);
-                    if ((expanded == null) || (expanded.length == 0)) {
-                        getLog().debug(file + " does not exist, skipping");
-                        continue;
-                    }
-                    else {
-                        getLog().debug(VERSION_FILE + "=" + versionFile +
-                                       " -> " + expanded[0]);
-                    }
-                }
-            }
-
-            // Optional use of INSTALLPATH_MATCH & INSTALLPATH_NOMATCH
-            if (installPathMatch != null) {
-                if (!(dir.indexOf(installPathMatch) != -1)) {
-                    getLog().debug(dir + " not a match for " +
-                                   installPathMatch + ", skipping");
-                    continue;
-                }
-            }
-
-            if (installPathNoMatch != null) {
-                if (dir.indexOf(installPathNoMatch) != -1) {
-                    getLog().debug(dir + " is a match for " +
-                                   installPathNoMatch + ", skipping");
-                    continue;
-                }
+            if (!isInstallTypeVersion(dir)) {
+                continue;
             }
 
             // Create the server resource
