@@ -163,14 +163,18 @@ public class DaemonDetector
         //since they will all have the same default configuration
         List servers = new ArrayList();
         List found = getFileResources(platformConfig);
-        if (found.size() != 0) {
-            servers.add(found.get(0));
-        }
-        else {
+        ServerResource server = null;
+
+        if (found.size() == 0) {
             found = getProcessResources(platformConfig);
-            if (found.size() != 0) {
-                servers.add(found.get(0));
-            }   
+        }
+
+        if (found.size() != 0) {
+            server = (ServerResource)found.get(0);
+
+            if (isInstallTypeVersion(server.getInstallPath())) {
+                servers.add(server);
+            }
         }
 
         return servers;
