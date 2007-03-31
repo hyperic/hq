@@ -33,6 +33,9 @@
           value="${OBJECT_NAME}:${alias}"/>
 
   <server name="Mule" version="1.3">
+    <property name="VERSION_FILE"
+              value="lib/mule/mule-core-1.3*.jar"/>
+
     <property name="OBJECT_NAME"
               value="%domain%:type=org.mule.ManagementContext,name=MuleServerInfo"/>
 
@@ -255,4 +258,8 @@
     </service>
   </server>
 
+  <server name="Mule" version="1.4" include="1.3">
+    <property name="VERSION_FILE"
+              value="lib/mule/mule-core-1.4*.jar"/>
+  </server>
 </plugin>
