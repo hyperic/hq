@@ -49,6 +49,7 @@ import org.hyperic.hq.appdef.shared.AIServiceValue;
 
 import org.hyperic.hq.autoinventory.ServerSignature;
 
+import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -74,6 +75,9 @@ public abstract class ServerDetector
 
     private static final String SERVER_SIGS =
         "etc/hq-server-sigs.properties";
+    private static final String VERSION_FILE = "VERSION_FILE";
+    private static final String INSTALLPATH_MATCH = "INSTALLPATH_MATCH";
+    private static final String INSTALLPATH_NOMATCH = "INSTALLPATH_NOMATCH";
 
     private static final String[] NO_ARGS = new String[0];
     private static final long[] NO_PIDS = new long[0];
@@ -405,6 +409,53 @@ public abstract class ServerDetector
                 try { is.close(); } catch (IOException e) { }
             }
         }
+    }
+
+    /**
+     * Test if server type version filters apply:
+     * VERSION_FILE - Return true if given file exists within installpath
+     * INSTALLPATH_MATCH - Return true if installpath matches given substring
+     * INSTALLPATH_NOMATCH - Return false if installpath matches given substring
+     * @param installpath The server instance installpath
+     * @return false installpath does not match type version criteria, true otherwise
+     */
+    protected boolean isInstallTypeVersion(String installpath) {
+        String versionFile = getTypeProperty(VERSION_FILE);
+        String installPathMatch = getTypeProperty(INSTALLPATH_MATCH);
+        String installPathNoMatch = getTypeProperty(INSTALLPATH_NOMATCH);
+
+        if (versionFile != null) {
+            File file = new File(installpath, versionFile);
+            if (!file.exists()) {
+                String[] expanded = PluginLoader.expand(file);
+                if ((expanded == null) || (expanded.length == 0)) {
+                    getLog().debug(file + " does not exist, skipping");
+                    return false;
+                }
+                else {
+                    getLog().debug(VERSION_FILE + "=" + versionFile +
+                                   " matches -> " + expanded[0]);
+                }
+            }
+        }
+
+        if (installPathMatch != null) {
+            if (!(installpath.indexOf(installPathMatch) != -1)) {
+                getLog().debug(installpath + " not a match for " +
+                               installPathMatch + ", skipping");
+                return false;
+            }
+        }
+
+        if (installPathNoMatch != null) {
+            if (installpath.indexOf(installPathNoMatch) != -1) {
+                getLog().debug(installpath + " is a match for " +
+                               installPathNoMatch + ", skipping");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
