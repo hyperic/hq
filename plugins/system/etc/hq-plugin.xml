@@ -1010,7 +1010,8 @@
   </pre>
   </p>
   <p>
-  For more examples see the .sigar_shellrc file included in the HQ distribution.
+  For more examples see the pdk/lib/.sigar_shellrc file included in the HQ agent distribution and the
+  Sigar <a href="http://support.hyperic.com/confluence/display/SIGAR/PTQL">PTQL Documentation</a>.
   </p>
   ]]>
   </help>
