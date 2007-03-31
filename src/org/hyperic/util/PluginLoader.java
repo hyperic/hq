@@ -189,7 +189,7 @@ public class PluginLoader extends URLClassLoader {
         addURL(new File(url));
     }
 
-    private class ClassPathFilter implements FilenameFilter {
+    private static class ClassPathFilter implements FilenameFilter {
         private String start;
         private String end;
 
@@ -202,28 +202,36 @@ public class PluginLoader extends URLClassLoader {
             return name.startsWith(this.start) && name.endsWith(this.end);
         }
     }
-    
+
+    public static String[] expand(File file) {
+        String name = file.getName();
+        int ix = name.indexOf("*"); //good enough for version matching
+        if (ix == -1) {
+            return null;
+        }
+        file = file.getParentFile();
+        if (!file.isDirectory()) {
+            return null;
+        }
+
+        //support: "repository/geronimo/jars/geronimo-management-*.jar"
+        String start = name.substring(0, ix);
+        String end = name.substring(ix+1);
+
+        return file.list(new ClassPathFilter(start, end));
+    }
+
     public void addURL(File file)
         throws PluginLoaderException {
 
         String[] jars = null;
 
         if (!file.exists()) {
-            String name = file.getName();
-            int ix = name.indexOf("*");
-            if (ix == -1) {
+            jars = expand(file);
+            if (jars == null) {
                 return;
             }
             file = file.getParentFile();
-            if (!file.isDirectory()) {
-                return;
-            }
-
-            //support: "repository/geronimo/jars/geronimo-management-*.jar"
-            String start = name.substring(0, ix);
-            String end = name.substring(ix+1);
-
-            jars = file.list(new ClassPathFilter(start, end));
         }
 
         if (file.isDirectory()) {
