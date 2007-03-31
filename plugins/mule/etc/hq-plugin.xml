@@ -50,6 +50,12 @@
       <option name="domain"
               description="JMX Domain"
               default="Mule.Mule_Dot_Net_Stock_Quote_Sample_using_REST"/>
+      <option name="mule.home"
+              description="Mule Home"
+              default=""/>
+      <option name="mule.config"
+              description="Mule Instance Config"
+              default=""/>
     </config>
 
     <plugin type="autoinventory"

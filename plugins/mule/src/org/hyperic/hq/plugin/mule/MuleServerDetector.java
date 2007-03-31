@@ -53,10 +53,11 @@ public class MuleServerDetector extends MxServerDetector {
         "wrapper.working.dir=";
 
     private static final String PROP_DOMAIN = "domain";
+    private static final String PROP_CONFIG = "mule.config";
 
     private static final String DOMAIN_PREFIX = "Mule";
 
-    private Map _ids = new HashMap();
+    private Map _instances = new HashMap();
 
     //attempt to find the xml config file for this server
     //1.3 has a wrapper parent process with the working.dir
@@ -65,6 +66,9 @@ public class MuleServerDetector extends MxServerDetector {
         String[] args = process.getArgs();
         String wrapperPid = null;
         String config = null;
+        final String propHome = getProcHomeProperty();
+        final String defPropHome = "-D" + propHome + "=";
+        String home = null;
 
         for (int i=0; i<args.length; i++) {
             String arg = args[i];
@@ -73,6 +77,9 @@ public class MuleServerDetector extends MxServerDetector {
             }
             else if (arg.equals("-config")) {
                 config = args[i+1];
+            }
+            else if (arg.startsWith(defPropHome)) {
+                home = arg.substring(defPropHome.length());
             }
         }
 
@@ -104,7 +111,14 @@ public class MuleServerDetector extends MxServerDetector {
                 process.setURL(url);
                 getLog().debug(configFile + " jmx.url=" + url);
                 String id = getXPathValue(doc, ID_EXPR);
-                _ids.put(url, id);
+                HashMap instance = new HashMap();
+                instance.put(PROP_DOMAIN, DOMAIN_PREFIX + "." + id);
+                instance.put(PROP_CONFIG,
+                             getCanonicalPath(configFile.getPath()));
+                if (home != null) {
+                    instance.put(propHome, home);
+                }
+                _instances.put(url, instance);
             } catch (IOException e) {
                 getLog().error("Error parsing: " + configFile, e);
             }
@@ -145,14 +159,10 @@ public class MuleServerDetector extends MxServerDetector {
                                     ConfigResponse config) {
 
         String url = config.getValue(MxUtil.PROP_JMX_URL);
-        String id = (String)_ids.get(url);
-        if (id == null) {
-            //Using the default jmx service url
-            id = (String)_ids.get(null);
-        }
-        if (id != null) {
-            config.setValue(PROP_DOMAIN,
-                            DOMAIN_PREFIX + "." + id);
+        Map instance = (Map)_instances.get(url);
+
+        if (instance != null) {
+            config.merge(new ConfigResponse(instance), true);
         }
 
         super.setProductConfig(server, config);
