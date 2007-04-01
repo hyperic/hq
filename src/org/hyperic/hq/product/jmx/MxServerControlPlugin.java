@@ -86,6 +86,31 @@ public class MxServerControlPlugin extends ServerControlPlugin {
         }
     }
 
+    protected String getObjectName() {
+        return this.objectName;
+    }
+
+    protected int invokeMethod(String objectName,
+                               String operation,
+                               String[] args) {
+
+        MxControlPlugin.invokeMethod(this, objectName,
+                                     operation, args);
+        return getResult();
+    }
+
+    protected int invokeMethod(String objectName, String operation) {
+        return invokeMethod(objectName, operation, new String[0]);
+    }
+
+    protected int invokeMethod(String operation) {
+        return invokeMethod(getObjectName(), operation);
+    }
+
+    protected int invokeMethod(String operation, String[] args) {
+        return invokeMethod(getObjectName(), operation, args);
+    }
+
     public void doAction(String action, String[] args)
         throws PluginException {
 
@@ -97,8 +122,7 @@ public class MxServerControlPlugin extends ServerControlPlugin {
             restart();
         }
         else {
-            MxControlPlugin.invokeMethod(this, this.objectName,
-                                         action, args);
+            invokeMethod(getObjectName(), action, args);
         }
     }
 
