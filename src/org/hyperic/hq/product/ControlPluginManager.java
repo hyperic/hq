@@ -37,6 +37,9 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ControlPluginManager extends PluginManager {
+    //allow command-line disablement for testing w/o adding actions to plugin.xml
+    private static final boolean _validateAction =
+        !"false".equals(System.getProperty("control.action.validate"));
 
     private HashMap pluginQueue  = new HashMap();
 
@@ -128,7 +131,7 @@ public class ControlPluginManager extends PluginManager {
                PluginException
     {
         List methods = getActions(name);
-        if (!methods.contains(action)) {
+        if (_validateAction && !methods.contains(action)) {
             throw new PluginException("Action '" + action + "' not supported");
         }
 

@@ -90,8 +90,17 @@ public class MxControlPlugin
             getTypeProperty(MxQuery.PROP_OBJECT_NAME + "." + action);
 
         if (objectName == null) {
-            //default to OBJECT_NAME property
-            objectName = this.objectName;
+            //allow ObjectName embedded in action name for cmd-line testing:
+            //-m control -a hyperic:Name=MxServerTest::invokeFoo
+            int ix = action.indexOf("::");
+            if (ix != -1) {
+                objectName = action.substring(0, ix);
+                action = action.substring(ix+2);
+            }
+            else {
+                //default to OBJECT_NAME property
+                objectName = this.objectName;
+            }
         }
         else {
             objectName = Metric.translate(objectName, getConfig());
@@ -107,15 +116,25 @@ public class MxControlPlugin
         log.debug("invoking " + action + " " + Arrays.asList(args));
 
         try {
+            String result = null;
             Object obj =
                 MxUtil.invoke(plugin.getConfig().toProperties(),
                               objectName,
                               action, args, new String[0]);
+            if (obj != null) {
+                if (obj.getClass().isArray()) {
+                    result =
+                        Arrays.asList((Object[])obj).toString();
+                }
+                else {
+                    result = obj.toString();
+                }
+            }
             log.debug(objectName + "." + action +
                       "() returned: " + obj);
             plugin.setResult(RESULT_SUCCESS);
-            if (obj != null) {
-                plugin.setMessage(obj.toString());
+            if (result != null) {
+                plugin.setMessage(result);
             }
         } catch (PluginException e) {
             log.error(e.getMessage(), e);

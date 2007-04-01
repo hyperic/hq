@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -158,6 +159,106 @@ public class MBeanUtil {
             }
         });
 
+        addConverter(Long[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                Long[] args = new Long[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Long.valueOf(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(Integer[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                Integer[] args = new Integer[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Integer.valueOf(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(Double[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                Double[] args = new Double[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Double.valueOf(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(Short[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                Short[] args = new Short[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Short.valueOf(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(Boolean[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                Boolean[] args = new Boolean[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Boolean.valueOf(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(long[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                long[] args = new long[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Long.parseLong(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(int[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                int[] args = new int[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Integer.parseInt(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(double[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                double[] args = new double[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Double.parseDouble(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(short[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                short[] args = new short[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = Short.parseShort(params[i]);
+                }
+                return args;
+            }
+        });
+
+        addConverter(boolean[].class, new ListConverter() {
+            public Object convert(String[] params) {
+                boolean[] args = new boolean[params.length];
+                for (int i=0; i<params.length; i++) {
+                    args[i] = params[i].equals("true") ? true : false;
+                }
+                return args;
+            }
+        });
+
         Class[][] aliases = {
             { String.class, Object.class },
             { Short.TYPE, Short.class },
@@ -205,9 +306,27 @@ public class MBeanUtil {
     private static PluginException invalidParams(String method,
                                                  HashMap sigs,
                                                  Object[]args) {
+        StringBuffer num = new StringBuffer();
+        StringBuffer sig = new StringBuffer();
+
+        for (Iterator it=sigs.keySet().iterator(); it.hasNext();) {
+            Object o = it.next();
+            StringBuffer sb;
+            if (o instanceof Integer) {
+                sb = num;
+            }
+            else {
+                sb = sig;
+            }
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(o);
+        }
+
         String msg =
-            "operation '" + method + "' takes " + sigs.keySet() +
-            " arguments, [" + args.length + "] given";
+            "operation '" + method + "' takes (" + num + ")" +
+            " arguments, " + args.length + " given. Signature=[" + sig + "]";
         return new PluginException(msg);
     }
 
@@ -264,7 +383,20 @@ public class MBeanUtil {
 
         return null;
     }
-    
+
+    private static String toString(MBeanParameterInfo[] pinfo) {
+        StringBuffer sb = new StringBuffer();
+        for (int i=0; i<pinfo.length; i++) {
+            if (sb.length() != 0) {
+                sb.append(", ");
+            }
+            sb.append(pinfo[i].getType());
+        }
+        sb.insert(0, '(');
+        sb.append(')');
+        return sb.toString();
+    }
+
     public static OperationParams getOperationParams(MBeanInfo info,
                                                      String method,
                                                      Object args[])
@@ -274,15 +406,43 @@ public class MBeanUtil {
         MBeanOperationInfo[] ops = info.getOperations();
         MBeanParameterInfo[] pinfo = null;
         HashMap sigs = new HashMap();
+        String methodSignature = null;
+
+        if (args.length != 0) {
+            String arg = (String)args[0];
+            if (arg.startsWith("@(") && arg.endsWith(")")) {
+                methodSignature = arg.substring(1);
+                String[] dst = new String[args.length-1];
+                System.arraycopy(args, 1, dst, 0, dst.length);
+                args = dst;
+            }
+        }
 
         if (isDebug) {
-            log.debug("Converting params for: " +
-                      method + Arrays.asList(args));
+            String msg =
+                "Converting params for: " +
+                method + Arrays.asList(args);
+            if (methodSignature != null) {
+                msg += ", using provided signature: " +
+                       methodSignature;
+            }
+            log.debug(msg);
         }
 
         for (int i=0; i<ops.length; i++) {
             if (ops[i].getName().equals(method)) {
                 pinfo = ops[i].getSignature();
+                StringBuffer sig = new StringBuffer();
+                sig.append("(");
+                for (int j=0; j<pinfo.length; j++) {
+                    sig.append(pinfo[j].getType());
+                    if (j+1 != pinfo.length){
+                        sig.append(';');
+                    }
+                }
+                sig.append(')');
+                log.debug("Found operation: " + method + sig);
+                sigs.put(sig.toString(), pinfo);
                 sigs.put(new Integer(pinfo.length), pinfo);
                 //XXX might have more than 1 method w/ same
                 //number of args but different signature
@@ -301,19 +461,39 @@ public class MBeanUtil {
             throw new PluginException(msg);
         }
         else if (sigs.size() > 1) {
-            //try exact match, else last one wins.
-            Object o = sigs.get(new Integer(args.length));
-            if (o != null) {
-                pinfo = (MBeanParameterInfo[])o;
+            if (methodSignature == null) {
+                //try exact match, else last one wins.
+                Object o = sigs.get(new Integer(args.length));
+                if (o != null) { 
+                    pinfo = (MBeanParameterInfo[])o;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Using default sig: " + toString(pinfo));
+                    }
+                }
+            }
+            else {
+                pinfo =
+                    (MBeanParameterInfo[])sigs.get(methodSignature);
+                if (pinfo == null) {
+                    String msg =
+                        "No matching Operation signature found for: " +
+                        method + methodSignature;
+                    throw new PluginException(msg);
+                }
+                else if (log.isDebugEnabled()) {
+                    log.debug("Using matched sig: " + toString(pinfo));
+                }
             }
         }
 
         int len = pinfo.length;
         int nargs = args.length;
+        int consumed;
         String[] signature = new String[len];
         List arguments = new ArrayList();
 
-        for (int i=0; i<len; i++) {
+        for (int i=0,j=0; i<len; i++, j+=consumed) {
+            consumed = 1;
             String sig = pinfo[i].getType();
             signature[i] = sig;
 
@@ -323,44 +503,52 @@ public class MBeanUtil {
                 throw new PluginException(msg);
             }
             
-            if (i >= args.length) {
+            if (j >= args.length) {
                 throw invalidParams(method, sigs, args);
             }
 
             if (isListType(sig)) {
                 String[] listArgs;
-                if (i != 0) {
-                    int diff = args.length - i;
-                    listArgs = new String[diff];
-                    System.arraycopy(args, i, listArgs, 0, diff);
-                }
-                else {
+                if (len == 1) {
                     listArgs = (String[])args;
                 }
-                nargs -= listArgs.length;
-                arguments.add(convert(sig, listArgs));
+                else {
+                    int remain = (len-1) - j;
+                    consumed = args.length - j - remain;
 
-                if (i != (len-1)) {
+                    listArgs = new String[consumed];
+                    System.arraycopy(args, j, listArgs, 0, consumed);
+                }
+
+                nargs -= listArgs.length;
+                try {
+                    arguments.add(convert(sig, listArgs));
+                } catch (Exception e) {
                     String msg =
-                        sig + " must be the last argument";
-                    throw new PluginException(msg);
+                        "Exception converting " + Arrays.asList(listArgs) +
+                        "' to type '" + sig + "'";
+                        throw new PluginException(msg + ": " + e);
                 }
             }
             else {
                 nargs--;
                 try {
-                    arguments.add(convert(sig, (String)args[i]));
+                    arguments.add(convert(sig, (String)args[j]));
                 } catch (Exception e) {
                     String msg =
-                        "Exception converting param[" + i + "] '" +
-                        args[i] + "' to type '" + sig + "'";
+                        "Exception converting param[" + j + "] '" +
+                        args[j] + "' to type '" + sig + "'";
                         throw new PluginException(msg + ": " + e);
                 }
             }
 
             if (isDebug) {
+                Object arg = arguments.get(i);
+                if (arg.getClass().isArray()) {
+                    arg = Arrays.asList((Object[])arg).toString();
+                }
                 log.debug(method + "() arg " + i + "=" +
-                          arguments.get(i) + ", type=" + sig);
+                          arg + ", type=" + sig);
             }
         }
 
