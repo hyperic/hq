@@ -51,9 +51,9 @@ public class MxServerDetector
     implements AutoServerDetector
 {
     static final String PROP_SERVICE_NAME = "name";
-    private static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
-    private static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
-    private static final String PROP_PROCESS_QUERY = "process.query";
+    public static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
+    public static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
+    public static final String PROP_PROCESS_QUERY = "process.query";
     protected static final String PROC_JAVA = "State.Name.sw=java";
     protected static final String SUN_JMX_PORT = 
         "-Dcom.sun.management.jmxremote.port=";
