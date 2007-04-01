@@ -52,8 +52,8 @@ public class MuleServerDetector extends MxServerDetector {
     private static final String PROP_WRAPPER_CWD =
         "wrapper.working.dir=";
 
-    private static final String PROP_DOMAIN = "domain";
-    private static final String PROP_CONFIG = "mule.config";
+    static final String PROP_DOMAIN = "domain";
+    static final String PROP_CONFIG = "mule.config";
 
     private static final String DOMAIN_PREFIX = "Mule";
 
