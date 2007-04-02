@@ -39,13 +39,13 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 
 /**
  * A simple trigger which fires if a log event occurs.
@@ -68,7 +68,7 @@ public class LogEventTrigger
      * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedEventTypes()
      */
     public Class[] getInterestedEventTypes(){
-        return new Class[] { ResourceLogEvent.class };
+        return new Class[] { ResourceLogEvent.class, ConfigChangedEvent.class };
     }
 
     /**
@@ -121,7 +121,7 @@ public class LogEventTrigger
             sType       = triggerData.getValue(CFG_TYPE);
             sID         = triggerData.getValue(CFG_ID);
             sLevel      = triggerData.getValue(CFG_NAME);
-            this.match  = triggerData.getValue(CFG_OPTION);
+            match       = triggerData.getValue(CFG_OPTION);
         } catch (EncodingException e) {
             throw new InvalidTriggerDataException(e);
         }
@@ -136,8 +136,8 @@ public class LogEventTrigger
             level = Integer.parseInt(sLevel);
         
         try {
-            this.id = new AppdefEntityID(Integer.parseInt(sType),
-                                         Integer.parseInt(sID));
+            id = new AppdefEntityID(Integer.parseInt(sType),
+                                    Integer.parseInt(sID));
         } catch(NumberFormatException exc){
             throw new InvalidTriggerDataException(
                 "Instance type: " + sType + " or id: " + sID +
@@ -150,16 +150,27 @@ public class LogEventTrigger
      */
     public void processEvent(AbstractEvent e)
         throws EventTypeException, ActionExecuteException {
-        ResourceLogEvent event;
+        
+        // Config changed events have no levels
+        if (e instanceof ConfigChangedEvent && level == -1) {
+            TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), e);
+            tfe.setMessage("Firing log event trigger: Config changed - " +
+                           ((ConfigChangedEvent) e).getMessage());
+            try {
+                super.fireActions(tfe);
+            } catch (AlertCreateException exc) {
+                throw new ActionExecuteException(exc);
+            }
+        }
         
         if(!(e instanceof ResourceLogEvent)){
             throw new EventTypeException("Invalid event type passed, " +
                                          "expected ResourceLogEvent");
         }
 
-        // If we didn't fulfill the condition, then don't fire
-        event = (ResourceLogEvent) e;
+        ResourceLogEvent event = (ResourceLogEvent) e;
         
+        // If we didn't fulfill the condition, then don't fire
         if (!event.getResource().equals(id))
             return;
         
@@ -184,7 +195,7 @@ public class LogEventTrigger
         }
         else {
             // Let dispatchers know that trigger evaluated to false
-            this.notFired();
+            notFired();
         }
     }
 
