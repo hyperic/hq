@@ -37,8 +37,13 @@
       <c:when test="${listSize == 0}">
       <fmt:message key="alert.current.detail.notifications.none"/>
       </c:when>
-      <c:otherwise>
+      <c:when test="${not empty notifyList}">
       <hq:listJoin list="${notifyList}" property="${listObjectProperty}" delimiter=", "/>
+      </c:when>
+      <c:otherwise>
+        <fmt:message key="common.value.parenthesis">
+          <fmt:param><fmt:message key="common.value.notavail"/></fmt:param>
+        </fmt:message>
       </c:otherwise>
       </c:choose>
     </td>
