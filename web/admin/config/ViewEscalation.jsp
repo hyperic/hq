@@ -38,6 +38,8 @@
 <script type="text/javascript">
  onloads.push(requestViewEscalation);
 
+var selUserEsc;
+
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
         var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
@@ -348,7 +350,10 @@ function showViewEscResponse(originalRequest) {
 
 
     function saveAddEscalation () {
+        if (!checkEmail()) { return false; }
 
+        var emailTextArea = $('emailinput');
+        var emailAdds = emailTextArea.value;
         var syslogDivIn = $('sysloginput');
         if (syslogDivIn.style.display != 'none') {
           if ($('metainput').value == '') {
@@ -367,25 +372,6 @@ function showViewEscResponse(originalRequest) {
            }
         }
         
-        var emailTextArea = $('emailinput');
-        if (emailTextArea.style.display != 'none') {
-
-          var emailAdds = emailTextArea.value;
-          var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-
-           if ((typeof emailAdds) == "undefined" || emailAdds == ""){
-            $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
-
-          } else if (emailAdds.match(illegalChars)){
-            $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
-
-           } else {
             emailTextArea.value = emailAdds.split(/[\s]/);
             emailTextArea.value = emailAdds.split(/,/);
            
@@ -396,8 +382,8 @@ function showViewEscResponse(originalRequest) {
 
             new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
             document.EscalationForm.reset();
-           }
-        }
+        
+
     }
 
     function updateEscView( originalRequest ) {
@@ -463,13 +449,7 @@ function showViewEscResponse(originalRequest) {
         escTableBody.appendChild(escTrHeader);
         escTableBody.appendChild(escTr2);
         escTableBody.appendChild(escTr1);
-        /*
-        escTrHeader.appendChild(td7);
-        td7.setAttribute('rowSpan', '3');
-        td7.setAttribute('width', '10');
-        td7.innerHTML = "&nbsp;"
-        */
-
+        
         escTrHeader.appendChild(td6);
         td6.setAttribute('colSpan', '3');
         td6.setAttribute((document.all ? 'className' : 'class'), "BlockTitle");
@@ -660,6 +640,7 @@ function showViewEscResponse(originalRequest) {
             $('emailinput').focus();
            //configureOthers(nodeId);
         }
+          selUserEsc = index;
       }
 
     function showWhoSelect(el) {
@@ -945,34 +926,36 @@ function showViewEscResponse(originalRequest) {
     }
 
     function checkEmail() {
-        var emailinputText = $('emailinput');
+
+        var emailTextArea = $('emailinput');
+        var userListCheck = $('userListDisplay');
+        var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-        var elemText = emailinputText.value;
+       
+        if (selUserEsc == 'Others' && emailAdds == '') {
 
-        if (elemText == '') {
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
+            //$('saveButton').style.display = "none";
+            return false;
+            } else if (emailAdds.match(illegalChars)) {
 
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
-        //$('saveButton').style.display = "none";
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
+            //$('saveButton').style.display = "none";
+            return false;
+            } else {
+                $('escMsg').innerHTML ='';
+                $('example').style.display= 'none';
+                $('addEscButtons').style.display = "";
+            return true;
+            }
 
-
-        } else if (elemText.match(illegalChars)) {
-
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
-        //$('saveButton').style.display = "none";
-        return false;
-        } else {
-            $('escMsg').innerHTML ='';
-            $('example').style.display= 'none';
-            $('addEscButtons').style.display = "";
-        }
-
-    }
+   }
 
 
 </script>
