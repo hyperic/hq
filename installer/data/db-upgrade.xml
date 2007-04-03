@@ -4972,36 +4972,125 @@ has already been defined.
         </statement>
 
 	  	<statement targetDB="oracle">
-          alter table eam_measurement_data modify (
-            value NUMERIC(24,5)
+          alter table EAM_MEASUREMENT_DATA rename column VALUE to VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA add (VALUE NUMBER(24,5))
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA set VALUE=VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table eam_measurement_data drop column VALUE_TMP
+        </statement>
+
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H rename column VALUE to VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H rename column MINVALUE to MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H rename column MAXVALUE to MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H add (
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5)
           )
         </statement>
         <statement targetDB="oracle">
-          alter table eam_measurement_data_1h modify (
-            value NUMERIC(24,5),
-            minvalue NUMERIC(24,5),
-            maxvalue NUMERIC(24,5)
+          update EAM_MEASUREMENT_DATA_1H set VALUE=VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_1H set MINVALUE=MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_1H set MAXVALUE=MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H DROP COLUMN VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H DROP COLUMN MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H DROP COLUMN MAXVALUE_TMP
+        </statement>
+          
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H rename column VALUE to VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H rename column MINVALUE to MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H rename column MAXVALUE to MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H add (
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5)
           )
         </statement>
         <statement targetDB="oracle">
-          alter table eam_measurement_data_6h modify (
-            value NUMERIC(24,5),
-            minvalue NUMERIC(24,5),
-            maxvalue NUMERIC(24,5)
+          update EAM_MEASUREMENT_DATA_6H set VALUE=VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_6H set MINVALUE=MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_6H set MAXVALUE=MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H DROP COLUMN VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H DROP COLUMN MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H DROP COLUMN MAXVALUE_TMP
+        </statement>          
+
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D rename column VALUE to VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D rename column MINVALUE to MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D rename column MAXVALUE to MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D add (
+            VALUE NUMBER(24,5),
+            MINVALUE NUMBER(24,5),
+            MAXVALUE NUMBER(24,5)
           )
         </statement>
         <statement targetDB="oracle">
-          alter table eam_measurement_data_1d modify (
-            value NUMERIC(24,5),
-            minvalue NUMERIC(24,5),
-            maxvalue NUMERIC(24,5)
-          )
+          update EAM_MEASUREMENT_DATA_1D set VALUE=VALUE_TMP
         </statement>
-      
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_1D set MINVALUE=MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          update EAM_MEASUREMENT_DATA_1D set MAXVALUE=MAXVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D DROP COLUMN VALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D DROP COLUMN MINVALUE_TMP
+        </statement>
+        <statement targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D DROP COLUMN MAXVALUE_TMP
+        </statement>          
+                      
       </schema-directSQL>
     </schemaSpec>
-	
-
 </dbupgrade>
 
 </target>
