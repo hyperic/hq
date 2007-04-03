@@ -161,8 +161,8 @@ public class ConfigChangedTrigger
             event.getMessage().indexOf(match) > -1) {
             try {
                 TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
-                tfe.setMessage("Firing config changed trigger: " +
-                               event.getMessage());
+                tfe.setMessage("Config file (" + event.getSource() +
+                               ") changed: " + event.getMessage());
                 super.fireActions(tfe);
             } catch (AlertCreateException exc) {
                 throw new ActionExecuteException(exc);
