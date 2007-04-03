@@ -35,7 +35,7 @@
 <tiles:importAttribute name="viewOthersUrl"/>
 <tiles:importAttribute name="viewRolesUrl" ignore="true"/>
 <tiles:importAttribute name="viewEscalationUrl"/>
-<tiles:importAttribute name="viewSnmpUrl"/>
+<tiles:importAttribute name="viewSnmpUrl" ignore="true"/>
 
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${mode == 'viewDefinition'}">
