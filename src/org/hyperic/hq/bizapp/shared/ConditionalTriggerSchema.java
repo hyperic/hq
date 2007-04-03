@@ -173,6 +173,23 @@ public class ConditionalTriggerSchema {
 
             res.addOption(mID);
             break;
+        case EventConstants.TYPE_CFG_CHG:
+            StringConfigOption filename;
+
+            type = new IntegerConfigOption(CFG_TYPE, "Resource Type", null);
+            type.setMinValue(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+            type.setMaxValue(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+
+            id = new IntegerConfigOption(CFG_ID, "Resource ID", null);
+            id.setMinValue(0);
+
+            filename = new StringConfigOption(CFG_OPTION, "File name",
+                    null);
+
+            res.addOption(type);
+            res.addOption(id);
+            res.addOption(filename);
+            break;
         default:
             break;
         }

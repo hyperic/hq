@@ -156,6 +156,9 @@ public class AlertDefUtil {
                                                  AlertConditionValue[] acvList,
                                                  boolean template)
     {
+        String msgKey;
+        ArrayList args;
+        
         // conditions
         ArrayList alertDefConditions = new ArrayList(acvList.length);
         for (int i = 0; i < acvList.length; ++i) {
@@ -224,12 +227,23 @@ public class AlertDefUtil {
                 break;
 
             case EventConstants.TYPE_LOG:
-                String msgKey = "alert.config.props.CB.LogCondition";
-                ArrayList args = new ArrayList(2);
+                msgKey = "alert.config.props.CB.LogCondition";
+                args = new ArrayList(2);
                 args.add(ResourceLogEvent.getLevelString(
                          Integer.parseInt(acv.getName())));
                 if (acv.getOption() != null && acv.getOption().length() > 0) {
                     msgKey += ".StringMatch";
+                    args.add(acv.getOption());
+                }
+                
+                textValue = new StringBuffer(
+                        RequestUtils.message(request, msgKey, args.toArray()));
+                break;
+            case EventConstants.TYPE_CFG_CHG:
+                msgKey = "alert.config.props.CB.ConfigCondition";
+                args = new ArrayList(1);
+                if (acv.getOption() != null && acv.getOption().length() > 0) {
+                    msgKey += ".FileMatch";
                     args.add(acv.getOption());
                 }
                 

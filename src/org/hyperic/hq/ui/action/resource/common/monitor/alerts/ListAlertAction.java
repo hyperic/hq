@@ -256,6 +256,9 @@ public class ListAlertAction extends TilesAction {
                     Integer.parseInt(cond.getName())));
             bean.setValue(value);
             break;
+        case EventConstants.TYPE_CFG_CHG:
+            bean.setValue(value);
+            break;
         default:
             bean.setName(Constants.UNKNOWN);
             bean.setComparator(Constants.UNKNOWN);

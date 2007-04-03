@@ -82,6 +82,7 @@ public final class ConditionBean {
     private String customProperty;
     private int    logLevel;
     private String logMatch;
+    private String fileMatch;
 
 
     //-------------------------------------constructors
@@ -234,6 +235,16 @@ public final class ConditionBean {
         this.logMatch = logMatch;
     }
 
+    public String getFileMatch() {
+        return fileMatch;
+    }
+
+
+    public void setFileMatch(String fileMatch) {
+        this.fileMatch = fileMatch;
+    }
+
+
     public double getThresholdValue() {
         if ( trigger.equals("onMetric") ) {
             if ( thresholdType.equals(TYPE_ABS) ) {
@@ -307,7 +318,7 @@ public final class ConditionBean {
                 errs.add("condition[" + idx + "].customProperty", err);
                 valid = false;
             }
-        } else if (trigger.equals("onLog")) {
+        } else if (trigger.equals("onLog") || trigger.equals("onCfgChg")) {
             // Nothing is required            
         } else { // on control action
             if (0 == getControlAction().length()) {
@@ -375,6 +386,10 @@ public final class ConditionBean {
                 logLevel = Integer.parseInt(acv.getName());
                 logMatch = acv.getOption();
                 break;
+            case EventConstants.TYPE_CFG_CHG:
+                trigger = "onCfgChg";
+                fileMatch = acv.getOption();
+                break;
             case EventConstants.TYPE_CONTROL:
             default:
                 trigger = "onEvent";
@@ -403,10 +418,10 @@ public final class ConditionBean {
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, RemoteException,
                TemplateNotFoundException {
-        acv.setId( this.getId() );
-        if ( this.getTrigger().equals("onMetric") ) {
-            acv.setMeasurementId( this.getMetricId().intValue() );
-            if ( this.getThresholdType().equals(TYPE_ABS) ) {
+        acv.setId( getId() );
+        if ( getTrigger().equals("onMetric") ) {
+            acv.setMeasurementId( getMetricId().intValue() );
+            if ( getThresholdType().equals(TYPE_ABS) ) {
                 acv.setType(EventConstants.TYPE_THRESHOLD);
 
                 MeasurementTemplateValue mtv;
@@ -427,32 +442,35 @@ public final class ConditionBean {
                                      getAbsoluteValue(), mtv));
                 } catch (ParseException e) {
                     // Just set the value
-                    acv.setThreshold(this.getThresholdValue());
+                    acv.setThreshold(getThresholdValue());
                 }
-                acv.setComparator( this.getComparator() );
-            } else if (this.getThresholdType().equals(TYPE_PERC)) {
+                acv.setComparator( getComparator() );
+            } else if (getThresholdType().equals(TYPE_PERC)) {
                 acv.setType(EventConstants.TYPE_BASELINE);
-                acv.setOption( this.getBaselineOption() );
+                acv.setOption( getBaselineOption() );
                 acv.setThreshold( NumberUtil.stringAsNumber(percentage).doubleValue() );
-                acv.setComparator( this.getComparator() );
+                acv.setComparator( getComparator() );
             } else {
                 acv.setType(EventConstants.TYPE_CHANGE);
             }
-            acv.setName( this.getMetricName() );
-        } else if ( this.getTrigger().equals("onCustProp") ) {
+            acv.setName( getMetricName() );
+        } else if ( getTrigger().equals("onCustProp") ) {
             acv.setType(EventConstants.TYPE_CUST_PROP);
-            acv.setName( this.getCustomProperty() );
-        } else if ( this.getTrigger().equals("onLog") ) {
+            acv.setName( getCustomProperty() );
+        } else if ( getTrigger().equals("onLog") ) {
             acv.setType(EventConstants.TYPE_LOG);
-            acv.setName( String.valueOf(this.getLogLevel()) );
-            acv.setOption( this.getLogMatch() );
+            acv.setName( String.valueOf(getLogLevel()) );
+            acv.setOption( getLogMatch() );
+        } else if ( getTrigger().equals("onCfgChg") ) {
+            acv.setType(EventConstants.TYPE_CFG_CHG);
+            acv.setOption( getFileMatch() );
         }
         else {
             acv.setType(EventConstants.TYPE_CONTROL);
-            acv.setName( this.getControlAction() );
-            acv.setOption( this.getControlActionStatus() );
+            acv.setName( getControlAction() );
+            acv.setOption( getControlActionStatus() );
         }
-        acv.setRequired( this.isRequired() );
+        acv.setRequired( isRequired() );
     }
 
     private void setDefaults() {
@@ -468,6 +486,7 @@ public final class ConditionBean {
         customProperty = null;
         logLevel = -1;
         logMatch = null;
+        fileMatch = null;
     }
 }
 

@@ -547,17 +547,27 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 break;
             case EventConstants.TYPE_LOG:
                 text.append("Event/Log Level(")
-                        .append(
-                                ResourceLogEvent.getLevelString(Integer
+                        .append(ResourceLogEvent.getLevelString(Integer
                                         .parseInt(cond.getName())))
                         .append(")");
                 if (cond.getOptionStatus() != null
                         && cond.getOptionStatus().length() > 0) {
                     text.append(" and matching substring ").append('"')
-                            .append(cond.getOptionStatus()).append('"');
+                        .append(cond.getOptionStatus()).append('"');
                 }
 
                 text.append("\n").append(indent).append("Log: ")
+                        .append(logs[i].getValue());
+                break;
+            case EventConstants.TYPE_CFG_CHG:
+                text.append("Config changed");
+                if (cond.getOptionStatus() != null
+                        && cond.getOptionStatus().length() > 0) {
+                    text.append(": ")
+                        .append(cond.getOptionStatus());
+                }
+
+                text.append("\n").append(indent).append("Details: ")
                         .append(logs[i].getValue());
                 break;
             default:

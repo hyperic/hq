@@ -149,6 +149,7 @@ public class ViewAlertAction extends TilesAction {
 
             case EventConstants.TYPE_CUST_PROP:
             case EventConstants.TYPE_LOG:
+            case EventConstants.TYPE_CFG_CHG:
                 ab.setActualValue(condLogs[i].getValue());
                 break;
 

@@ -38,6 +38,7 @@ public class EventConstants {
     public static final int TYPE_ALERT     = 5;
     public static final int TYPE_CUST_PROP = 6;
     public static final int TYPE_LOG       = 7;
+    public static final int TYPE_CFG_CHG   = 8;
     
     private static final String[] TYPES = {
         "Metric Threshold",
@@ -47,6 +48,7 @@ public class EventConstants {
         "",     // Don't want Recovery Alert condition to be visible
         "Custom Property Value Change",
         "Log Event",
+        "Config Changed",
     };
 
     public static String[] getTypes() {

@@ -184,8 +184,16 @@
       <html:option value="6" key="resource.common.monitor.label.events.Info"/>
       <html:option value="7" key="resource.common.monitor.label.events.Debug"/>
     </html:select>
-    <bean:message bundle="ee" key="alert.config.props.CB.Content.Match"/>
+    <fmt:message key="alert.config.props.CB.Content.Match"/>
     <html:text property="condition[0].logMatch" size="10" maxlength="25"/>
+  </td>
+</tr>
+<tr>
+  <td class="BlockLabel">&nbsp;</td>
+  <td class="BlockContent" nowrap>
+    <html:radio property="condition[0].trigger" value="onCfgChg"/>
+    <fmt:message key="alert.config.props.CB.Content.FileMatch"/>
+    <html:text property="condition[0].fileMatch" size="10" maxlength="25"/>
   </td>
 </tr>
 </c:if>

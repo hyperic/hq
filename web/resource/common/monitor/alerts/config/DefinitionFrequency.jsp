@@ -77,14 +77,15 @@
 
     <tr>
       <td class="BlockLabel">&nbsp;</td>
-      <td class="<c:out value='${ntClass}'/>"><html:radio
-        property="whenEnabled" onchange="javascript:checkEnable();"
-        value="${enableNumTimesInPeriod}"/><fmt:message
-        key="alert.config.props.CB.Content.NT1"/>
+      <td class="<c:out value='${ntClass}'/>">
+      <span class="InactiveText">
+      <html:radio property="whenEnabled" onchange="javascript:checkEnable();"
+        value="${enableNumTimesInPeriod}"/>
+        <fmt:message key="alert.config.props.CB.Content.NT1"/>
         &nbsp;<html:text property="numTimesNT" size="2"
         maxlength="3" onchange="javascript:checkEnableNT();"/>
-        &nbsp;<fmt:message
-        key="alert.config.props.CB.Content.NT2"/>
+        &nbsp;
+        <fmt:message key="alert.config.props.CB.Content.NT2"/>
         &nbsp;<html:text property="howLongNT" size="2"
         maxlength="3" onchange="javascript:checkEnableNT();"/>&nbsp;
         <tiles:insert definition=".events.config.conditions.enablement.timeunits">
@@ -97,5 +98,6 @@
         <html:errors property="howLongNT"/>
         </span>
         </c:if>
+      </span>
       </td>
     </tr>

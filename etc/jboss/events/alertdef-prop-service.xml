@@ -34,7 +34,8 @@
         org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger, \
         org.hyperic.hq.bizapp.server.trigger.conditional.AlertTrigger, \
         org.hyperic.hq.bizapp.server.trigger.conditional.CustomPropertyTrigger, \
-        org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger
+        org.hyperic.hq.bizapp.server.trigger.conditional.LogEventTrigger \
+        org.hyperic.hq.bizapp.server.trigger.conditional.ConfigChangedTrigger
 
       actions =
     </attribute>

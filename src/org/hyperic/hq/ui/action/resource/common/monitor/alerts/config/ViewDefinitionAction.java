@@ -105,6 +105,7 @@ public class ViewDefinitionAction extends TilesAction {
             case EventConstants.TYPE_ALERT:
             case EventConstants.TYPE_CUST_PROP:
             case EventConstants.TYPE_LOG:
+            case EventConstants.TYPE_CFG_CHG:
                 break;
             default:
                 canEditConditions = false;
