@@ -160,9 +160,6 @@ public class ClassicEscalatableCreator
     public static Escalatable createEscalatable(Alert alert, String shortReason,
                                                 String longReason) 
     {
-        boolean ackable = _eMan.isAlertAcknowledgeable(alert.getId(),
-                                                       alert.getDefinition());
-
-        return new ClassicEscalatable(alert, shortReason, longReason, ackable);
+        return new ClassicEscalatable(alert, shortReason, longReason); 
     }
 }

@@ -26,8 +26,6 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 
 class GalertEscalatableCreator 
@@ -35,8 +33,6 @@ class GalertEscalatableCreator
 {
     private static final GalertManagerLocal _gMan = 
         GalertManagerEJBImpl.getOne();
-    private static final EscalationManagerLocal _eMan =
-        EscalationManagerEJBImpl.getOne();
     
     private GalertDef          _def;
     private ExecutionReason    _reason;
@@ -47,15 +43,6 @@ class GalertEscalatableCreator
     }
     
     public Escalatable createEscalatable() {
-        GalertLog log = _gMan.createAlertLog(_def, _reason);
-
-        return createEscalatable(log);
-    }
-    
-    public static Escalatable createEscalatable(GalertLog log) {
-        boolean ackable = _eMan.isAlertAcknowledgeable(log.getId(), 
-                                                       log.getDefinition());
-        
-        return new GalertEscalatable(log, ackable);
+        return _gMan.createAlertLog(_def, _reason);
     }
 }

@@ -33,11 +33,9 @@ public class ClassicEscalatable
 {
     private Alert _alert;
 
-    public ClassicEscalatable(Alert a, String shortReason, String longReason,
-                              boolean ackable) 
-    {
+    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
         super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              ackable);
+              a.isAckable());
         
         _alert = a;
     }
