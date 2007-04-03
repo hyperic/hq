@@ -35,41 +35,41 @@ import org.hyperic.hq.plugin.netservices.SocketWrapper;
 public class PerlbalStats extends NetServicesCollector
 {
     private static final String END = ".";
-				private static final String REQUEST_KEY = "requests";
-				private static final Pattern REQUEST_PATTERN = Pattern.compile("^reqs:");
-				private SocketWrapper mySocket = null;
+    private static final String REQUEST_KEY = "requests";
+    private static final Pattern REQUEST_PATTERN = Pattern.compile("^reqs:");
+    private SocketWrapper mySocket = null;
 
     public void collect()
-				{
+    {
       try
-						{
+      {
         startTime();
         mySocket = getSocketWrapper();
-								setRequests();
+        setRequests();
       }
-						catch (IOException e)
-						{
+      catch (IOException e)
+      {
         setAvailability(false);
         if (getMessage() == null)
           setErrorMessage(e.getMessage());
       }
-						finally
-						{
+      finally
+      {
         if (mySocket != null) {
-								  mySocket.close();
-								  mySocket = null;
-						  }
+          mySocket.close();
+          mySocket = null;
+        }
       }
     }
 
     private void setRequests()
     {
-						try
+      try
       {
-								String line;
-								mySocket.writeLine("proc");
+        String line;
+        mySocket.writeLine("proc");
         while ((line = mySocket.readLine()) != null)
-  						{
+        {
           if (line.startsWith(END))
             break;
           if (!REQUEST_PATTERN.matcher(line).find())
@@ -82,25 +82,11 @@ public class PerlbalStats extends NetServicesCollector
         //XXX process stats
         endTime();
       }
-						catch (IOException e)
-						{
+      catch (IOException e)
+      {
         setAvailability(false);
         if (getMessage() == null)
           setErrorMessage(e.getMessage());
       }
-	   }
+    }
 }
-/*
-												|nodes|
-												127.0.0.1:60002 lastresponse 1175553970
-												127.0.0.1:60002 requests 481
-												127.0.0.1:60002 connects 1
-												127.0.0.1:60002 lastconnect 1175553789
-												127.0.0.1:60002 attempts 1
-												127.0.0.1:60002 responsecodes 200 481
-												127.0.0.1:60002 lastattempt 1175553789
-												|proc|
-												time: 1175553802
-												pid: 2004
-												reqs: 38 (+38)
-*/
