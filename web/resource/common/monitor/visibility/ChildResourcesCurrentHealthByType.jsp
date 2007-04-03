@@ -98,7 +98,7 @@ chbtWidgetProps['subGroup'] = 'chbtListMember';
       <display:availabilitydecorator resourceId="${summary.resourceId}" resourceTypeId="${summary.resourceTypeId}"/>
      </display:column>
      <display:column width="8%" property="throughput" title="resource.common.monitor.visibility.USAGETH" styleClass="ListCellCheckboxLeftLine">
-     <display:metricdecorator unit="${summary.throughputUnits}" defaultKey="resource.common.monitor.visibility.performance.NotAvail"/>
+     <display:metricdecorator unit="${summary.throughputUnits}" defaultKey="common.value.notavail"/>
      </display:column>
     </display:table>
 

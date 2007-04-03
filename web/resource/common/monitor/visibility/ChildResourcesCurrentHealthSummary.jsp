@@ -162,7 +162,7 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
     <img src="<c:out value="${stoplightUrl}" escapeXml="false" />" <c:out value="${availStoplightDimensions}" escapeXml="false" /> border="0" height="12">
     </td>
     <td class="ListCellCheckboxLeftLine">
-      <hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="resource.common.monitor.visibility.performance.NotAvail" />
+      <hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="common.value.notavail" />
     </td>
   </tr>
     </c:forEach>

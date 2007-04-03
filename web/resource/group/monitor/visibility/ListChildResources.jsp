@@ -98,7 +98,7 @@
               <c:out value="${summary.resourceTypeName}"/>
           </li>
           <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
-            <hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="resource.common.monitor.visibility.performance.NotAvail" />
+            <hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="common.value.notavail" />
           </li>
           <hr>
           <li>

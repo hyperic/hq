@@ -60,7 +60,7 @@
       <html:link page="/resource/platform/monitor/Visibility.do?mode=${param['mode']}&eid=${summary.parentResourceTypeId}:${summary.parentResourceId}"><c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/></html:link>
     </c:if>
       <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
-        <hq:metric metric="${summary.throughput}" unit="none"  defaultKey="resource.common.monitor.visibility.performance.NotAvail" />
+        <hq:metric metric="${summary.throughput}" unit="none"  defaultKey="common.value.notavail" />
       </li>
     </ul>
   </div>

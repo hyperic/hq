@@ -213,10 +213,10 @@
 <display:column width="15%" value="${summary.resource.name}" 
   title="${resourceTypeTitle}" isLocalizedTitle="false" styleClass="ListCell"/>
 <display:column width="6%" property="minExpectedValue" title="resource.common.monitor.visibility.metricmetadata.expectedrange.low" styleClass="ListCell">
-  <display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="resource.common.monitor.visibility.performance.NotAvail"/>
+  <display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="common.value.notavail"/>
 </display:column>
 <display:column width="6%" property="maxExpectedValue" title="resource.common.monitor.visibility.metricmetadata.expectedrange.high" styleClass="ListCell">
-  <display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="resource.common.monitor.visibility.performance.NotAvail"/>
+  <display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="common.value.notavail"/>
 </display:column>
 <display:column width="6%" property="interval" title="resource.common.monitor.visibility.metricmetadata.collection.interval" styleClass="ListCell">
   <display:datedecorator isElapsedTime="true" isGroup="true"/>
@@ -228,7 +228,7 @@
 <display:column width="15%" property="mtime" title="resource.common.monitor.visibility.metricmetadata.collection.lastModified" styleClass="ListCell">
 <display:datedecorator /></display:column>
 <display:column width="8%" property="lastValue" title="resource.common.monitor.visibility.metricmetadata.last" styleClass="ListCell">
-<display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="resource.common.monitor.visibility.performance.NotAvail"/></display:column>
+<display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="common.value.notavail"/></display:column>
 <display:column width="15%" property="lastValueTimestamp" title="resource.common.monitor.visibility.metricmetadata.last.collectiontime" styleClass="ListCell">
 <display:datedecorator /></display:column>
 </display:table>
