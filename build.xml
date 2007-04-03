@@ -904,6 +904,8 @@
 
     <hqplugin name="memcached"/>
 
+    <hqplugin name="perlbal"/>
+
     <hqplugin name="mule"/>
 
     <hqplugin name="vmware"/>
