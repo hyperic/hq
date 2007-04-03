@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -323,7 +324,7 @@ public class GalertBossEJBImpl
         
         PageList alertLogs =
             _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
-        List escalatables = _galertMan.convertGalertsToEscalatables(alertLogs); 
+        List escalatables = new ArrayList(alertLogs);
         
         JSONArray jarr = new JSONArray();
         for (Iterator i = escalatables.iterator(); i.hasNext(); ) {

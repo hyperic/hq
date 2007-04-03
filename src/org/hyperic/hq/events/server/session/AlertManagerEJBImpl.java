@@ -345,7 +345,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return valuePager.seek(alerts, pc);
     }
 
-
     /**
      * Search alerts given a set of criteria
      *
@@ -387,11 +386,25 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             
         return result;
     }
-
+    
     /**
+     * Find escalatables for a resource in a given time range.
+     *
+     * @see findAlerts(AuthzSubjectValue, int, int, long, long, List)
+     *
      * @ejb:interface-method
      */
-    public List convertAlertsToEscalatables(Collection alerts) {
+    public List findEscalatables(AuthzSubjectValue subj, int count, 
+                                 int priority, long timeRange, long endTime, 
+                                 List includes)
+        throws PermissionException
+    {
+        List alerts = findAlerts(subj, count, priority, timeRange, endTime,
+                                 includes);
+        return convertAlertsToEscalatables(alerts);
+    }
+
+    private List convertAlertsToEscalatables(Collection alerts) {
         List res = new ArrayList(alerts.size());
 
         for (Iterator i=alerts.iterator(); i.hasNext(); ) {

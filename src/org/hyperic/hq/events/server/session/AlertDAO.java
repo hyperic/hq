@@ -68,6 +68,13 @@ public class AlertDAO extends HibernateDAO {
     public List findByEntity(AppdefEntityID id) {
         return findByEntity(id, "a.ctime DESC");
     }
+    
+    List findEscalatables() {
+        String sql = "from Alert a"; 
+    
+        return getSession().createQuery(sql)
+            .list();
+    }
 
     public List findByCreateTime(long begin, long end, int count) {
         return createCriteria()

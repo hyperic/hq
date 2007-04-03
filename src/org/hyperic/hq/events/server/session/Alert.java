@@ -49,7 +49,8 @@ public class Alert
     private AlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
     private Collection      _conditionLog = new ArrayList();
-
+    private Long            _stateId;
+    private Long            _ackedBy;
     private AlertValue      _alertVal;
 
     protected Alert() {
@@ -157,6 +158,26 @@ public class Alert
     
     private void removeConditionLog(AlertConditionLog acl) {
         _conditionLog.remove(acl);
+    }
+    
+    protected void setAckedBy(Long ackedBy) {
+        _ackedBy = ackedBy;
+    }
+    
+    protected Long getAckedBy() { 
+        return _ackedBy;
+    }
+    
+    protected void setStateId(Long stateId) {
+        _stateId = stateId;
+    }
+    
+    protected Long getStateId() {
+        return _stateId;
+    }
+    
+    public boolean isAckable() {
+        return getStateId() != null && getAckedBy() == null;
     }
     
     public AlertValue getAlertValue() {

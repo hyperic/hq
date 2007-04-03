@@ -1244,14 +1244,13 @@ public class EventsBossEJBImpl
             appentResources = Arrays.asList(ids);
         }
         
-        List alerts = getAM().findAlerts(subject, count, priority, 
-                                         timeRange, cur, appentResources);
-        alerts = getAM().convertAlertsToEscalatables(alerts);
+        List alerts = getAM().findEscalatables(subject, count, priority, 
+                                               timeRange, cur, appentResources);
     
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
         List galerts = gMan.findAlerts(subject, count, priority, timeRange,  
                                        cur, appentResources); 
-        alerts.addAll(gMan.convertGalertsToEscalatables(galerts)); 
+        alerts.addAll(galerts);
 
         Collections.sort(alerts, new Comparator() {
             public int compare(Object o1, Object o2) {

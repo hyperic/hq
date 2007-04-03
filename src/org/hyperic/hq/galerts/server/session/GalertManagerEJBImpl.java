@@ -246,7 +246,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public Escalatable findEscalatableAlert(Integer id) {
-        return GalertEscalatableCreator.createEscalatable(_logDAO.findById(id));
+        return _logDAO.findById(id);
     }
 
     /**
@@ -517,22 +517,6 @@ public class GalertManagerEJBImpl
         GalertDef def = findById(id);
 
         _escMan.startEscalation(def, new GalertEscalatableCreator(def, reason));
-    }
-
-    /**
-     * Convert GalertLogs to Escalatable
-     * @ejb:interface-method
-     */
-    public List convertGalertsToEscalatables(Collection galerts) {
-        List res = new ArrayList(galerts.size());
-
-        for (Iterator i = galerts.iterator(); i.hasNext();) {
-            GalertLog a = (GalertLog) i.next();
-
-            res.add(GalertEscalatableCreator.createEscalatable(a));
-        }
-
-        return res;
     }
 
     /**
