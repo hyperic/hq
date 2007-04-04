@@ -420,6 +420,9 @@ public class SessionUtils {
         
         String returnPath = getReturnPath(session);
         if (returnPath == null) {
+            if (mapping.getInput() == null)
+                return;
+            
             returnPath = mapping.getInput();
         }
         

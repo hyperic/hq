@@ -49,11 +49,13 @@ import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringifiedException;
 
 import org.apache.struts.action.ActionForm;
@@ -180,6 +182,16 @@ public class PlatformAutoDiscoveryAction extends ResourceController {
                           ".resource.platform.autodiscovery.ViewResults");
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
+        
+        // Set the workflow
+        if (mapping instanceof BaseActionMapping) {
+            BaseActionMapping smap = (BaseActionMapping) mapping;
+            String workflow = smap.getWorkflow();
+            if (workflow != null) {
+                SessionUtils.pushWorkflow(request.getSession(), mapping,
+                                          workflow);
+            }
+        }
 
         return null;
     }

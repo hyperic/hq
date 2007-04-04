@@ -733,7 +733,8 @@
       <action path="/resource/platform/AutoDiscoveryPortal"
               parameter="mode"
               type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.PlatformAutoDiscoveryAction"
-          input="/resource/platform/AutoDiscovery.do?mode=view">
+          input="/resource/platform/AutoDiscovery.do?mode=new">
+        <set-property property="workflow" value="autodiscovery/ViewResults"/>
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
       </action>
 

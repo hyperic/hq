@@ -27,26 +27,28 @@ package org.hyperic.hq.ui.action.resource.platform.autodiscovery;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 public class ImportAIResourcesAction extends BaseAction {
 
@@ -59,10 +61,18 @@ public class ImportAIResourcesAction extends BaseAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
+        AutoDiscoveryResultsForm aiForm = (AutoDiscoveryResultsForm) form;
+        
+        // Set the parameters if available
+        Map params = new HashMap();
+        if (aiForm.getRid() != null && aiForm.getRid().intValue() > 0) {
+            params.put(Constants.ENTITY_ID_PARAM, aiForm.getEid());
+        }
+        
         try {
-            AutoDiscoveryResultsForm aiForm = (AutoDiscoveryResultsForm) form;
             ActionForward forward = checkSubmit(request, mapping, form,
                                                 YES_RETURN_PATH);
+            
             if (forward != null) { 
                 return forward;
             }         
@@ -73,10 +83,10 @@ public class ImportAIResourcesAction extends BaseAction {
                 RequestUtils.setError(request, 
                                       "dash.autoDiscovery.import.Error",
                                       e.getMessage());
-                return returnFailure(request, mapping);
+                return returnFailure(request, mapping, params);
             }
 
-            return returnSuccess(request, mapping);
+            return returnSuccess(request, mapping, params);
             
         }
         catch (AIQApprovalException ae) {
@@ -90,12 +100,12 @@ public class ImportAIResourcesAction extends BaseAction {
                 // don't care about any other error
                 throw ae;
             }
-            return returnFailure(request, mapping);
+            return returnFailure(request, mapping, params);
         }
         catch (PlatformNotFoundException ae) {
             RequestUtils.setError(request,
                                   "resource.platform.inventory.autoinventory.error.NoPlatformFound");
-            return returnFailure(request, mapping);
+            return returnFailure(request, mapping, params);
         }
     }
 
