@@ -38,7 +38,9 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
@@ -107,6 +109,17 @@ public class NewAutoDiscoveryAction extends BaseAction {
             RequestUtils.setConfirmation(request,
                 "resource.platform.inventory.autoinventory.status.NewScan");
 
+            // See if there is an existing report
+            AIBoss aiboss = ContextUtils.getAIBoss(ctx);
+            try {
+                AIPlatformValue aip =
+                    aiboss.findAIPlatformByPlatformID(sessionId,
+                                                        platformId.intValue());
+                request.setAttribute(Constants.AIPLATFORM_ATTR, aip);
+            } catch (PlatformNotFoundException e) {
+                // Don't worry about it then
+            }
+            
             return returnNew(request, mapping, forwardParams);
         } catch (AgentConnectionException e) {
             RequestUtils

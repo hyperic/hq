@@ -1,5 +1,4 @@
 <%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic-el" prefix="logic" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
@@ -34,6 +33,13 @@
 </tiles:insert>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <c:if test="${not empty AIPlatform}">
+	<tr valign="top">
+      <td class="BlockLeftAlignLabel">
+      <html:link page="/resource/platform/AutoDiscovery.do?mode=results" paramId="aiPid" paramName="AIPlatform" paramProperty="id"><fmt:message key="resource.autodiscovery.currentStatus.ViewResults"/></html:link>
+      </td>
+    </tr>
+    </c:if>
 	<tr valign="top">
 		<td class="BlockLeftAlignLabel"><fmt:message key="${platformSpecificScanMsg}"/></td>
     </tr>
