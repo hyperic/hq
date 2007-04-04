@@ -784,6 +784,8 @@
         <include name="dnsjava-2.0.3.jar"/>
         <!-- for JMX based plugins -->
         <include name="mx4j/*.jar"/>
+        <!-- for XPathAPI -->
+        <include name="xalan.jar"/>
       </fileset>
     </copy>
 
