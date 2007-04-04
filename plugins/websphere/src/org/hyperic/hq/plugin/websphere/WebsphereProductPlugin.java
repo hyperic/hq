@@ -430,7 +430,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             new File(soapConfigFile.getParent(),
                      "ssl.client.props");
         if (sslConfigFile.exists()) {
-            log.debug("Using ssl properties: " + soapConfig);
+            log.debug("Using ssl properties: " + sslConfigFile);
             System.setProperty("com.ibm.SSL.ConfigURL",
                                "file:" + sslConfigFile);
         }
