@@ -25,45 +25,27 @@
 
 package org.hyperic.hq.ui.action.portlet.search;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.Portal;
-
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.util.LabelValueBean;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
+
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
-import org.hyperic.util.timer.StopWatch;
 
 /**
  * An <code>TilesAction</code> that sets up for searching the Resource Hub portal.
  */
 public class ViewAction extends TilesAction {
 
-    // ---------------------------------------------------- Public Methods
+    private Log _log = LogFactory.getLog(ViewAction.class);
 
     /**
      * Set up the Resource Hub portal.
@@ -73,10 +55,6 @@ public class ViewAction extends TilesAction {
                                 HttpServletRequest request,
                                 HttpServletResponse response)
     throws Exception {
-        StopWatch timer = new StopWatch();
-        Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
-
-        Log log = LogFactory.getLog(ViewAction.class.getName());
         ResourceHubForm hubForm = (ResourceHubForm) form;
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
@@ -87,14 +65,13 @@ public class ViewAction extends TilesAction {
                 if(!entityTypes[i][0].equals("5") ){
                     hubForm.addFunction(new LabelValueBean(entityTypes[i][1],
                                                            entityTypes[i][0]));
-                    log.debug( entityTypes[i][1]+ " = " + entityTypes[i][0]);
+                    _log.debug( entityTypes[i][1]+ " = " + entityTypes[i][0]);
                 }
             }
             hubForm.addFunction( new LabelValueBean("mixedGroups", "5" ) );
             hubForm.addFunction( new LabelValueBean("compatibleGroups", "5" ) );
             
         }
-        timingLog.trace("SearchHubPrepare - timing ["+timer.toString()+"]");
         return null;
     }
 }
