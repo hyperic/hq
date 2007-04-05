@@ -68,6 +68,7 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * An <code>Action</code> that sets up the Resource Hub portal.
@@ -278,6 +279,8 @@ public class ResourceHubPortalAction extends BaseAction {
                 throw new ServletException("Invalid group type: " + groupType);
             }
 
+            StopWatch watch = new StopWatch();
+
             resources =
                 appdefBoss.findCompatInventory(sessionId,
                                                groupSubtype,
@@ -287,6 +290,10 @@ public class ResourceHubPortalAction extends BaseAction {
                                                resourceName,
                                                null,
                                                pc);
+            if (log.isDebugEnabled()) {
+                log.debug("findCompatInventory() elapsed: " +
+                          watch.getElapsed());
+            }
         }
         else {
             // Look up groups

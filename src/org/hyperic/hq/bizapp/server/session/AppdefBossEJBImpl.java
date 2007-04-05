@@ -2858,11 +2858,19 @@ public class AppdefBossEJBImpl
             // resource type to filter the inventory set. This facilitates
             // the HTML selectors that appear all over the product.
             if (groupEntContext) {
-                erFilter = new AppdefPagerFilterGroupEntityResource (
-                                                                     subject, groupType, grpEntId, appdefResTypeId, true );
+                erFilter =
+                    new AppdefPagerFilterGroupEntityResource (subject,
+                                                              groupType,
+                                                              grpEntId,
+                                                              appdefResTypeId,
+                                                              true );
             } else {
-                erFilter = new AppdefPagerFilterGroupEntityResource (
-                                                                     subject, groupType, appdefTypeId, appdefResTypeId, true );
+                erFilter =
+                    new AppdefPagerFilterGroupEntityResource (subject,
+                                                              groupType,
+                                                              appdefTypeId,
+                                                              appdefResTypeId,
+                                                              true );
                 if (groupEntity != null) {
                     erFilter.setGroupSelected(true);
                 }
@@ -2889,10 +2897,12 @@ public class AppdefBossEJBImpl
 
         for (Iterator itr = pl.iterator();itr.hasNext();){
             AppdefEntityID ent = (AppdefEntityID) itr.next();
+            
+            AppdefEntityValue aev = new AppdefEntityValue(ent, subject);
             AppdefResourceValue resourceValue;
-
+            
             try {
-                resourceValue = this.findById(subject, ent);
+                resourceValue = aev.getLiteResourceValue();
             } catch (AppdefEntityNotFoundException e) {
                 // XXX - hack to ignore the error.  This must have occurred
                 // when we created the resource, and rolled back the
