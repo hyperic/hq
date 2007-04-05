@@ -162,11 +162,10 @@ public class ResourceGroupDAO extends HibernateDAO
                                                boolean asc)
     {
 
-        String sql="select distinct rg from ResourceGroup rg " +
+        String sql="select distinct rg from ResourceGroup rg" +
                    " join fetch rg.resourceSet r " +
-                   "where r.instanceId=? and " +
-                   " r.resourceType.id=? " +
-                   "order by rg.sortName " +
+                   "where rg.resource is not null and r.instanceId = ? and " +
+                   " r.resourceType.id = ? order by rg.sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, instanceId.intValue())
