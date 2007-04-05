@@ -32,8 +32,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.util.LabelValueBean;
 
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -44,8 +42,6 @@ import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
  * An <code>TilesAction</code> that sets up for searching the Resource Hub portal.
  */
 public class ViewAction extends TilesAction {
-
-    private Log _log = LogFactory.getLog(ViewAction.class);
 
     /**
      * Set up the Resource Hub portal.
@@ -65,12 +61,10 @@ public class ViewAction extends TilesAction {
                 if(!entityTypes[i][0].equals("5") ){
                     hubForm.addFunction(new LabelValueBean(entityTypes[i][1],
                                                            entityTypes[i][0]));
-                    _log.debug( entityTypes[i][1]+ " = " + entityTypes[i][0]);
                 }
             }
             hubForm.addFunction( new LabelValueBean("mixedGroups", "5" ) );
             hubForm.addFunction( new LabelValueBean("compatibleGroups", "5" ) );
-            
         }
         return null;
     }
