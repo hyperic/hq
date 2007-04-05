@@ -153,16 +153,19 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         // Update the derived template
         for (Iterator i = mt.getRawMeasurementArgs().iterator(); i.hasNext();) {
             MeasurementArg raw = (MeasurementArg)i.next();
-            MeasurementTemplate derived = raw.getTemplate();
-            if (MeasurementConstants.TEMPL_IDENTITY
-                .equals(derived.getTemplate())) {
-                derived.setAlias(info.getAlias());
-                derived.setDesignate(info.isIndicator());
-                derived.setUnits(info.getUnits());
-                derived.setCollectionType(info.getCollectionType());
-                derived.setDefaultOn(info.isDefaultOn());
-                derived.setDefaultInterval(info.getInterval());
-                derived.setCategory(cat);
+            MeasurementTemplate t = raw.getTemplate();
+            if (MeasurementConstants.TEMPL_IDENTITY.equals(t.getTemplate())) {
+                t.setAlias(info.getAlias());
+                t.setDesignate(info.isIndicator());
+                t.setUnits(info.getUnits());
+                t.setCollectionType(info.getCollectionType());
+                t.setCategory(cat);
+
+                // Don't reset defaultOn or interval if it's been changed
+                if (t.getMtime() == t.getCtime()) {
+                    t.setDefaultOn(info.isDefaultOn());
+                    t.setDefaultInterval(info.getInterval());
+                }
                 save(mt);
                 return;
             }
