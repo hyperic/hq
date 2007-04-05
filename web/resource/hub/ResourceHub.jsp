@@ -377,7 +377,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </c:if>
       <display:column width="24%" property="description" title="common.header.Description"/>
     <c:if test="${ResourceHubForm.ff == GROUP}">
-      <display:column property="size" title="common.header.Members" sortAttr="1" align="center"/>
+      <display:column property="totalSize" title="common.header.Members" sortAttr="1" align="center"/>
     </c:if>
       <display:column width="10%" property="id" title="resource.common.monitor.visibility.AvailabilityTH" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle" sortAttr="1">
         <display:availabilitydecorator resource="${resource}"/>

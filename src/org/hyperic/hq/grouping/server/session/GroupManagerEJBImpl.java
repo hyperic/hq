@@ -176,7 +176,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public GroupValue findGroup (AuthzSubjectValue subject, GroupValue retVal,
-                                 PageControl pc)
+                                 boolean full)
         throws PermissionException, GroupNotFoundException 
     {
         try {
@@ -200,24 +200,28 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             retVal.setDescription(group.getDescription());
             retVal.setLocation(group.getLocation());
             retVal.setGroupType(group.getGroupType().intValue());
-            retVal.setSubject(subject);
             retVal.setGroupEntType(group.getGroupEntType().intValue());
             retVal.setGroupEntResType(group.getGroupEntResType().intValue());
-            retVal.setClusterId(group.getClusterId().intValue());
-            retVal.setMTime(new Long(group.getMtime()));
-            retVal.setCTime(new Long(group.getCtime()));
-            retVal.setModifiedBy(group.getModifiedBy());
-            retVal.setOwner(fetchGroupOwner(group.getId()));
-
-            // Add the group members
-            for (Iterator i = group.getResources().iterator(); i.hasNext();) {
-                Resource resVo = (Resource) i.next();
-                GroupEntry ge =
-                    new GroupEntry(resVo.getInstanceId(),
-                                   resVo.getResourceType().getName());
-                retVal.addEntry(ge);
-            }
             retVal.setTotalSize( group.getResources().size() );
+
+            if (full) {
+                retVal.setSubject(subject);
+                retVal.setClusterId(group.getClusterId().intValue());
+                retVal.setMTime(new Long(group.getMtime()));
+                retVal.setCTime(new Long(group.getCtime()));
+                retVal.setModifiedBy(group.getModifiedBy());
+                retVal.setOwner(fetchGroupOwner(group.getId()));
+                
+                // Add the group members
+                for (Iterator i = group.getResources().iterator(); i.hasNext();)
+                {
+                    Resource resVo = (Resource) i.next();
+                    GroupEntry ge =
+                        new GroupEntry(resVo.getInstanceId(),
+                                       resVo.getResourceType().getName());
+                    retVal.addEntry(ge);
+                }
+            }
         } catch (FinderException fe) {
             log.debug("GroupManager caught underlying finder exc "+
                       "attempting to findResourceGroupById(): "+
@@ -523,22 +527,16 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
 
     // To avoid groups with duplicate names, we're now performing a
     // a case-insensitive name based find before creation.
-    private boolean groupNameExists(AuthzSubjectValue subject, 
-                                    GroupValue gVo) 
-    {
-        boolean retVal;
-
+    private boolean groupNameExists(AuthzSubjectValue subject, GroupValue gVo) {
         try {
-            findGroup (subject,gVo,PageControl.PAGE_ALL);
-            retVal = true;
+            findGroup(subject, gVo, false);
         } catch (GroupNotFoundException e) {
-            retVal = false;
+            return false;
         } catch (PermissionException pe) {
             // this happens when a group with same name exists and user
             // is unauthorized to view it.
-            retVal = true;
         }
-        return retVal;
+        return true;
     }
 
     public static GroupManagerLocal getOne() {

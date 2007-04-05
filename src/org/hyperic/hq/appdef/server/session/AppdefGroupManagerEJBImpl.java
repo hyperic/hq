@@ -290,7 +290,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                             String groupName)
         throws AppdefGroupNotFoundException, PermissionException 
     {
-        return findGroup(subject, null, groupName, PageControl.PAGE_ALL);
+        return findGroup(subject, null, groupName, true);
     }
 
     /**
@@ -307,7 +307,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                             String groupName, PageControl pc)
         throws AppdefGroupNotFoundException, PermissionException 
     {
-        return findGroup(subject, null, groupName, pc);
+        return findGroup(subject, null, groupName, true);
     }
 
     /**
@@ -324,7 +324,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         throws AppdefGroupNotFoundException, PermissionException {
         AppdefEntityID aeid =
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id);
-        return findGroup(subject, aeid, PageControl.PAGE_ALL);
+        return findGroup(subject, aeid);
     }
 
     /**
@@ -339,27 +339,23 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     public AppdefGroupValue findGroup(AuthzSubjectValue subject,
                                       AppdefEntityID id)
         throws AppdefGroupNotFoundException, PermissionException {
-        return findGroup(subject, id, PageControl.PAGE_ALL);
+        return findGroup(subject, id, true);
     }
 
     /**
-     * Lookup and return a group value object.
+     * Lookup and return a group value object that may or may not be fully 
+     * populated.
      * @param subject subject value.
      * @param id entity id
-     * @param pc - page control
      * @return AppdefGroupValue object
+     * @ejb:interface-method
      * @throws AppdefGroupNotFoundException when group cannot be located in db.
      * @throws PermissionException if the caller is not authorized.
-     * @ejb:interface-method
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject,
-                                      AppdefEntityID id, PageControl pc)
+                                      AppdefEntityID id, boolean full)
         throws AppdefGroupNotFoundException, PermissionException {
-        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
-            throw new InvalidAppdefTypeException(
-                "findGroup() requires a entity id of type group.");
-
-        return findGroup(subject, id, null, pc);
+        return findGroup(subject, id, null, full);
     }
 
     /*
@@ -367,7 +363,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      */
     private AppdefGroupValue findGroup(AuthzSubjectValue subject,
                                        AppdefEntityID id,
-                                       String groupName, PageControl pc)
+                                       String groupName, boolean full)
         throws AppdefGroupNotFoundException, PermissionException
     {
         AppdefGroupValue retVal;
@@ -389,7 +385,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                                        "id specified.");
             }
 
-            retVal = (AppdefGroupValue) manager.findGroup(subject, retVal, pc);
+            retVal = (AppdefGroupValue) manager.findGroup(subject, retVal, full);
 
             // Check permission, making sure to generate an appdef id if only
             // a group name was passed in.
@@ -435,7 +431,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         PageList retVal = null;
         AppdefEntityID aeid =
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, gid);
-        AppdefGroupValue groupVo = findGroup(subject, aeid, pc);
+        AppdefGroupValue groupVo = findGroup(subject, aeid, null, true);
         retVal = groupVo.getAppdefGroupEntries();
 
         // Replace each AppdefEntityID with an AppdefResourceValue

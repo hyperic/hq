@@ -58,25 +58,25 @@ public class AppdefEntityValue {
     private ServiceValue            service     = null;
     private AppdefGroupValue        group       = null;
 
-    private AppdefEntityID          id;
-    private AuthzSubjectValue       subject;
+    private AppdefEntityID          _id;
+    private AuthzSubjectValue       _subject;
 
     public AppdefEntityValue(AppdefEntityID id, AuthzSubjectValue subject) {
-        this.id      = id;
-        this.subject = subject;
+        _id      = id;
+        _subject = subject;
     }
     
     public AppdefEntityID getID() {
-        return this.id;
+        return _id;
     }
 
-    private AppdefGroupManagerLocal getGroupManagerLocal() {
+    private AppdefGroupManagerLocal getGroupManager() {
         try {
-            if(this.groupManagerLocal == null){
-                this.groupManagerLocal = 
+            if(groupManagerLocal == null){
+                groupManagerLocal = 
                     AppdefGroupManagerUtil.getLocalHome().create();
             }
-            return this.groupManagerLocal;
+            return groupManagerLocal;
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -84,13 +84,13 @@ public class AppdefEntityValue {
         }
     }
 
-    private PlatformManagerLocal getPlatformManagerLocal() {
+    private PlatformManagerLocal getPlatformManager() {
         try {
-            if(this.platformManagerLocal == null){
-                this.platformManagerLocal = 
+            if(platformManagerLocal == null){
+                platformManagerLocal = 
                     PlatformManagerUtil.getLocalHome().create();
             }
-            return this.platformManagerLocal;
+            return platformManagerLocal;
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -98,13 +98,13 @@ public class AppdefEntityValue {
         }
     }
 
-    private ApplicationManagerLocal getApplicationManagerLocal() {
+    private ApplicationManagerLocal getApplicationManager() {
         try {
-            if(this.applicationManagerLocal == null){
-                this.applicationManagerLocal = 
+            if(applicationManagerLocal == null){
+                applicationManagerLocal = 
                     ApplicationManagerUtil.getLocalHome().create();
             }
-            return this.applicationManagerLocal;
+            return applicationManagerLocal;
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -112,13 +112,13 @@ public class AppdefEntityValue {
         }
     }
 
-    private ConfigManagerLocal getConfigManagerLocal() {
+    private ConfigManagerLocal getConfigManager() {
         try {
-            if(this.configManagerLocal == null){
-                this.configManagerLocal = 
+            if(configManagerLocal == null){
+                configManagerLocal = 
                     ConfigManagerUtil.getLocalHome().create();
             }
-            return this.configManagerLocal;
+            return configManagerLocal;
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -133,40 +133,40 @@ public class AppdefEntityValue {
 
     private AppdefResourceValue getPlatform(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(this.platform == null){
-            Integer aId = this.id.getId();
+        if(platform == null){
+            Integer aId = _id.getId();
 
             if (full) {
-                this.platform =
-                    getPlatformManagerLocal().getPlatformValueById(subject,
+                platform =
+                    getPlatformManager().getPlatformValueById(_subject,
                                                                    aId);
             }
             else {
                 return
-                    getPlatformManagerLocal().getPlatformLightValue(subject,
+                    getPlatformManager().getPlatformLightValue(_subject,
                                                                     aId);
             }
         } 
-        return this.platform;
+        return platform;
     }
     
     private ApplicationValue getApplication()
         throws AppdefEntityNotFoundException, ApplicationNotFoundException,
                PermissionException {
-        if(this.application == null){
-            Integer aId = this.id.getId();
+        if(application == null){
+            Integer aId = _id.getId();
 
-            this.application = 
-                getApplicationManagerLocal().getApplicationById(
-                    this.subject, aId);
+            application = 
+                getApplicationManager().getApplicationById(
+                    _subject, aId);
         } 
-        return this.application;
+        return application;
     }
     
-    private ServerManagerLocal getServerManagerLocal() {
-        if(this.serverManagerLocal == null){
+    private ServerManagerLocal getServerManager() {
+        if(serverManagerLocal == null){
             try {
-                this.serverManagerLocal = 
+                serverManagerLocal = 
                     ServerManagerUtil.getLocalHome().create();
             } catch (CreateException e) {
                 throw new SystemException(e);
@@ -174,7 +174,7 @@ public class AppdefEntityValue {
                 throw new SystemException(e);
             }
         }
-        return this.serverManagerLocal;
+        return serverManagerLocal;
     }
 
     private ServerTypeValue getServerType()
@@ -184,28 +184,28 @@ public class AppdefEntityValue {
 
     private AppdefResourceValue getServer(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(this.server == null){
-            Integer aId = this.id.getId();
+        if(server == null){
+            Integer aId = _id.getId();
 
             if (full) {
-                this.server = 
-                    getServerManagerLocal().getServerById(subject, aId);
+                server = 
+                    getServerManager().getServerById(_subject, aId);
             }
             else {
-                return getServerManagerLocal().getServerLightValue(subject,
+                return getServerManager().getServerLightValue(_subject,
                                                                    aId);
             }
         } 
-        return this.server;
+        return server;
     }
 
-    private ServiceManagerLocal getServiceManagerLocal() {
+    private ServiceManagerLocal getServiceManager() {
         try {
-            if(this.serviceManagerLocal == null){
-                this.serviceManagerLocal = 
+            if(serviceManagerLocal == null){
+                serviceManagerLocal = 
                     ServiceManagerUtil.getLocalHome().create();
             }
-            return this.serviceManagerLocal;
+            return serviceManagerLocal;
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
@@ -220,43 +220,37 @@ public class AppdefEntityValue {
 
     private AppdefResourceValue getService(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(this.service == null){
-            Integer aId = this.id.getId();
+        if(service == null){
+            Integer aId = _id.getId();
 
             if (full) {
-                this.service = 
-                    getServiceManagerLocal().getServiceById(subject, aId);
+                service = 
+                    getServiceManager().getServiceById(_subject, aId);
             }
             else {
-                return getServiceManagerLocal().getServiceLightValue(subject,
+                return getServiceManager().getServiceLightValue(_subject,
                                                                      aId);
             }
         } 
-        return this.service;
+        return service;
     }
 
     private AppdefResourceTypeValue getGroupType()
         throws PermissionException, AppdefGroupNotFoundException {
-        return getGroup().getAppdefResourceTypeValue();
+        return getGroup(true).getAppdefResourceTypeValue();
     }
 
-    private AppdefGroupValue getGroup()
+    private AppdefGroupValue getGroup(boolean full)
         throws PermissionException, AppdefGroupNotFoundException {
         if (group == null)
-            this.group = getGroupManagerLocal().findGroup(subject,this.id);
-        return this.group;
+            group = getGroupManager().findGroup(_subject, _id, full);
+        return group;
     }
     
-    private AppdefGroupValue getGroup(PageControl pc)
-        throws PermissionException, AppdefGroupNotFoundException {
-        this.group = getGroupManagerLocal().findGroup(subject, this.id, pc);
-        return this.group;
-    }
-
     private PageList getGroupAppdefEntityValues(int groupAppdefType,
                                                 PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException {
-        AppdefGroupValue group = getGroup(pc);
+        AppdefGroupValue group = getGroup(true);
         AppdefResourceTypeValue resType = group.getAppdefResourceTypeValue();
 
         List eids = group.getAppdefGroupEntries();
@@ -266,26 +260,26 @@ public class AppdefEntityValue {
         switch (groupAppdefType) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             if (resType instanceof ServerTypeValue)
-                return getPlatformManagerLocal()
-                    .getPlatformsByServers(subject, eids);
+                return getPlatformManager()
+                    .getPlatformsByServers(_subject, eids);
             
             if (!(resType instanceof PlatformTypeValue))
-                throw new IllegalArgumentException(this.id +
+                throw new IllegalArgumentException(_id +
                     " group is not a valid platform compatible group");
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             if (resType instanceof ServiceTypeValue) {
-                return getServerManagerLocal()
-                    .getServersByServices(subject, eids);
+                return getServerManager()
+                    .getServersByServices(_subject, eids);
             } 
 
             if (!(resType instanceof ServerTypeValue))
-                throw new IllegalArgumentException(this.id +
+                throw new IllegalArgumentException(_id +
                     " group is not a valid server compatible group");
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             if (!(resType instanceof ServiceTypeValue))
-                throw new IllegalArgumentException(this.id +
+                throw new IllegalArgumentException(_id +
                     " group is not a valid service compatible group");
             break;
         default:
@@ -297,7 +291,7 @@ public class AppdefEntityValue {
         PageList res = new PageList();
         for (Iterator it = eids.iterator(); it.hasNext(); ) {
             AppdefEntityID eid = (AppdefEntityID) it.next();
-            AppdefEntityValue val = new AppdefEntityValue(eid, this.subject);
+            AppdefEntityValue val = new AppdefEntityValue(eid, _subject);
             res.add(val.getResourceValue());
         }
 
@@ -307,14 +301,14 @@ public class AppdefEntityValue {
 
     public String getMonitorableType()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(this.id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return getTypeName();
         default:
-            throw new IllegalArgumentException(this.id.getTypeName() + 
+            throw new IllegalArgumentException(_id.getTypeName() + 
                                                " does not support " +
                                                "measurement");
         }
@@ -322,7 +316,7 @@ public class AppdefEntityValue {
 
     public String getName()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(this.id.getType()) {
+        switch(_id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return getPlatform(false).getName();
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -332,7 +326,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication().getName();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup().getName();
+            return getGroup(true).getName();
         default:
             throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -340,7 +334,7 @@ public class AppdefEntityValue {
 
     public String getDescription()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(this.id.getType()) {
+        switch(_id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return getPlatform(false).getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -350,7 +344,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication().getDescription();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup().getDescription();
+            return getGroup(true).getDescription();
         default:
             throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -359,7 +353,7 @@ public class AppdefEntityValue {
     public String getTypeName()
         throws AppdefEntityNotFoundException, PermissionException
     {
-        switch(this.id.getType()) {
+        switch(_id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return getPlatformType().getName();
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -379,10 +373,10 @@ public class AppdefEntityValue {
     public String getPluginName()
         throws AppdefEntityNotFoundException
     {
-        if (this.id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        if (_id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
             throw new IllegalArgumentException ("Groups do not have plugins");
         
-        return getConfigManagerLocal().getPluginName(this.id);
+        return getConfigManager().getPluginName(_id);
     }
 
     /**
@@ -391,7 +385,7 @@ public class AppdefEntityValue {
      */
     public AppdefResourceValue getLiteResourceValue()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(this.id.getType()) {
+        switch(_id.getType()) {
           case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return getPlatform(false);
           case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -401,7 +395,7 @@ public class AppdefEntityValue {
           case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication();
           case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup();
+            return getGroup(false);
         default:
           throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -413,7 +407,7 @@ public class AppdefEntityValue {
      */
     public AppdefResourceValue getResourceValue()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(this.id.getType()) {
+        switch(_id.getType()) {
           case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             return getPlatform(true);
           case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -423,7 +417,7 @@ public class AppdefEntityValue {
           case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication();
           case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup();
+            return getGroup(true);
         default:
           throw new IllegalStateException("Unknown appdef entity type");
         }
@@ -444,20 +438,20 @@ public class AppdefEntityValue {
         PageList res;
         Integer iId;
 
-        iId = id.getId();
+        iId = _id.getId();
 
-        pManager = getPlatformManagerLocal();
-        if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION){
-            return pManager.getPlatformsByApplication(subject, iId, pc);
+        pManager = getPlatformManager();
+        if(_id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION){
+            return pManager.getPlatformsByApplication(_subject, iId, pc);
         }
 
         res = new PageList();
-        switch(id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            res.add(pManager.getPlatformByService(subject, iId));
+            res.add(pManager.getPlatformByService(_subject, iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            res.add(pManager.getPlatformByServer(subject, iId));
+            res.add(pManager.getPlatformByServer(_subject, iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             res.add(getPlatform(true));
@@ -467,7 +461,7 @@ public class AppdefEntityValue {
                 AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pc);
         default:
             throw new IllegalArgumentException(
-                id.getTypeName() + 
+                _id.getTypeName() + 
                 " type does not have valid platform association");
         }
         res.setTotalSize(1);
@@ -496,27 +490,27 @@ public class AppdefEntityValue {
         PageList res;
         Integer iId;
 
-        iId      = id.getId();
-        sManager = getServerManagerLocal();
+        iId      = _id.getId();
+        sManager = getServerManager();
 
-        switch(id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return sManager.getServersByApplication(subject, iId, pc);
+            return sManager.getServersByApplication(_subject, iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return sManager.getServersByPlatform(subject, iId, true, pc);
+            return sManager.getServersByPlatform(_subject, iId, true, pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return getGroupAppdefEntityValues(
                  AppdefEntityConstants.APPDEF_TYPE_SERVER, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             res = new PageList();
-            res.add(sManager.getServerByService(subject, iId));
+            res.add(sManager.getServerByService(_subject, iId));
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             res = new PageList();
             res.add(getServer(true));
             break;
         default :
-            throw new IllegalArgumentException(id.getTypeName() + 
+            throw new IllegalArgumentException(_id.getTypeName() + 
                                                " type does not have " +
                                                "valid server association");
         }
@@ -534,24 +528,24 @@ public class AppdefEntityValue {
         PageList res;
         Integer iId;
 
-        iId      = id.getId();
-        sManager = getServerManagerLocal();
+        iId      = _id.getId();
+        sManager = getServerManager();
 
-        switch(id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             res =
-                sManager.getServersByApplication(subject, iId, typeId, pc);
+                sManager.getServersByApplication(_subject, iId, typeId, pc);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             // default to exclude virtual servers
-            res = sManager.getServersByPlatform(subject, iId, typeId, true, pc);
+            res = sManager.getServersByPlatform(_subject, iId, typeId, true, pc);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             res = getAssociatedServers(pc);
             break;
         default:
-            throw new IllegalArgumentException(id.getTypeName() + 
+            throw new IllegalArgumentException(_id.getTypeName() + 
                                                " type does not have " +
                                                "valid server association");
         }
@@ -569,25 +563,25 @@ public class AppdefEntityValue {
         Integer[] ids;
         Integer iId;
     
-        iId      = id.getId();
-        sManager = getServerManagerLocal();
+        iId      = _id.getId();
+        sManager = getServerManager();
     
-        switch(id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            ids = sManager.getServerIdsByApplication(subject, iId, typeId);
+            ids = sManager.getServerIdsByApplication(_subject, iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            ids = sManager.getServerIdsByPlatform(subject, iId, typeId);
+            ids = sManager.getServerIdsByPlatform(_subject, iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            ServerValue server = sManager.getServerByService(subject, iId);
+            ServerValue server = sManager.getServerByService(_subject, iId);
             ids = new Integer[] { server.getId() };
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             ids = new Integer[] { iId };
             break;
         default:
-            throw new IllegalArgumentException(id.getTypeName() + 
+            throw new IllegalArgumentException(_id.getTypeName() + 
                                                " type does not have " +
                                                "valid server association");
         }
@@ -612,12 +606,12 @@ public class AppdefEntityValue {
         PageList res;
         Integer iId;
         
-        sManager = getServiceManagerLocal();
-        iId      = id.getId();
+        sManager = getServiceManager();
+        iId      = _id.getId();
 
-        switch(id.getType()){
+        switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-            return sManager.getServiceInventoryByApplication(subject, iId,
+            return sManager.getServiceInventoryByApplication(_subject, iId,
                                                              pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             validateGroupType(
@@ -625,16 +619,16 @@ public class AppdefEntityValue {
             return getGroupAppdefEntityValues(
                 AppdefEntityConstants.APPDEF_TYPE_SERVICE, pc);
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return sManager.getPlatformServices(subject, iId, pc);
+            return sManager.getPlatformServices(_subject, iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-            return sManager.getServicesByServer(subject, iId, pc);
+            return sManager.getServicesByServer(_subject, iId, pc);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            res = sManager.getServicesByService(subject, iId, pc);
+            res = sManager.getServicesByService(_subject, iId, pc);
             res.add(getService(true));     // Also add self
             res.setTotalSize(res.size());
             return res;
         default :
-            throw new IllegalArgumentException(id.getTypeName() + 
+            throw new IllegalArgumentException(_id.getTypeName() + 
                 " type does not have valid service associations");
         }
     }
@@ -651,31 +645,31 @@ public class AppdefEntityValue {
         PageList res;
         Integer iId;
 
-        sManager = getServiceManagerLocal();
-        iId = id.getId();
+        sManager = getServiceManager();
+        iId = _id.getId();
 
-        switch (id.getType()) {
+        switch (_id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                res = sManager.getServiceInventoryByApplication(subject,
+                res = sManager.getServiceInventoryByApplication(_subject,
                                                                 iId, typeId,pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                res = sManager.getServicesByService(subject, iId,
+                res = sManager.getServicesByService(_subject, iId,
                                                     typeId, pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                res = sManager.getServicesByServer(subject, iId, typeId,
+                res = sManager.getServicesByServer(_subject, iId, typeId,
                                                    pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
-                res = sManager.getPlatformServices(subject, iId, typeId,
+                res = sManager.getPlatformServices(_subject, iId, typeId,
                                                    pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP :
                 res = new PageList();
                 break;
             default :
-                throw new IllegalArgumentException(id.getTypeName() +
+                throw new IllegalArgumentException(_id.getTypeName() +
                     " type does not have valid service associations");
         }
         return res;
@@ -721,12 +715,12 @@ public class AppdefEntityValue {
         Integer[] sids;
         PageControl pc = PageControl.PAGE_ALL;
             
-        sManager = getServiceManagerLocal();
-        iId = id.getId();
+        sManager = getServiceManager();
+        iId = _id.getId();
 
-        switch (id.getType()) {
+        switch (_id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            vals = sManager.getServiceInventoryByApplication(subject, iId,
+            vals = sManager.getServiceInventoryByApplication(_subject, iId,
                                                              typeId, pc);
             res = new ArrayList(vals.size());
             for (Iterator it = vals.iterator(); it.hasNext();) {
@@ -736,13 +730,13 @@ public class AppdefEntityValue {
 
             return res;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            sids = sManager.getServiceIdsByServer(subject, iId, typeId);
+            sids = sManager.getServiceIdsByServer(_subject, iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            sids = sManager.getServiceIdsByService(subject, iId, typeId);
+            sids = sManager.getServiceIdsByService(_subject, iId, typeId);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            vals = sManager.getPlatformServices(subject, iId, typeId, pc);
+            vals = sManager.getPlatformServices(_subject, iId, typeId, pc);
             res = new ArrayList(vals.size());
                 for (Iterator it = vals.iterator(); it.hasNext(); ) {
                     AppdefResourceValue aval = (AppdefResourceValue) it.next();
@@ -751,7 +745,7 @@ public class AppdefEntityValue {
                 return res;
                 
             default :
-                throw new IllegalArgumentException(id.getTypeName() +
+                throw new IllegalArgumentException(_id.getTypeName() +
                     " type does not have valid service associations");
         }
 
@@ -767,7 +761,7 @@ public class AppdefEntityValue {
     public AppdefEntityID[] getFlattenedServiceIds()
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        return getFlattenedServiceIds(subject);
+        return getFlattenedServiceIds(_subject);
     }
 
     /** Get all of the service IDs associated with this resource
@@ -777,14 +771,14 @@ public class AppdefEntityValue {
     public AppdefEntityID[] getFlattenedServiceIds(AuthzSubjectValue subject)
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        ServiceManagerLocal sManager = getServiceManagerLocal();
+        ServiceManagerLocal sManager = getServiceManager();
         PageControl pc = PageControl.PAGE_ALL;
         
         AppdefEntityID[] servEntIds;
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION){
+        if (_id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION){
             Integer[] servicePKs =
                 sManager.getFlattenedServiceIdsByApplication(
-                    subject, id.getId());
+                    subject, _id.getId());
             
             servEntIds = new AppdefEntityID[servicePKs.length];
             for (int i = 0; i < servicePKs.length; i++) {

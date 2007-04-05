@@ -132,7 +132,7 @@ public class GroupUtil {
         try {
             AppdefGroupManagerLocal groupMgr =
                 AppdefGroupManagerUtil.getLocalHome().create();
-            agv = groupMgr.findGroup(subject, entity, pc);
+            agv = groupMgr.findGroup(subject, entity);
         } catch (CreateException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
