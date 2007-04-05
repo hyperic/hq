@@ -95,10 +95,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="0" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
     </table>
 
-    <table name="EAM_RESOURCE_GROUP">
-        <data CID="0" RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
-    </table>
-
     <!-- dump all reources into authz resource group -->
     <table name="EAM_RES_GRP_RES_MAP">
         <data CID="0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
@@ -344,10 +340,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
             FSYSTEM="TRUE"/>
     </table>
 
-    <table name="EAM_RESOURCE_GROUP">
-        <data CID="1" RESOURCE_ID="%EAM_RESOURCE.ID:7"/>
-    </table>
-   
     <!-- add an entry in the user prefs for the root user -->
     <table name="EAM_USER_CONFIG_RESP">
         <data id="%EAM_SUBJECT.ID:1"/>

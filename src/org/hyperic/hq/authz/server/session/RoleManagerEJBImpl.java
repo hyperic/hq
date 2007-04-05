@@ -1533,10 +1533,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         ResourceGroup resGrp = getResourceGroupDAO().findById(groupId);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 resGrp.getResource().getResourceType(),
-                 resGrp.getId(),
-                 AuthzConstants.groupOpViewResourceGroup);
+        pm.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
+                 AuthzConstants.perm_viewResourceGroup);
 
         Collection roles = resGrp.getRoles();
         

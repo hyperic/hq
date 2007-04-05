@@ -26,19 +26,30 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.util.pager.PagerProcessor;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
 
 public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
- 
+    private ResourceDAO dao = null;
+    
     public PagerProcessor_ownedResourceGroup () {}
 
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
             if ( o instanceof ResourceGroup) {
-                ResourceGroup group = (ResourceGroup)o;
+                if (dao == null) {
+                    dao = new ResourceDAO(DAOFactory.getDAOFactory());
+                }
+                
+                ResourceGroup group = (ResourceGroup) o;
+                Resource resource =
+                    dao.findByInstanceId(AuthzConstants.authzGroup,
+                                         group.getId());
+
                 return new OwnedResourceGroupValue(group.getResourceGroupValue(), 
-						   group.getResource().getOwner().getAuthzSubjectValue());
+						   resource.getOwner().getAuthzSubjectValue());
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to OwnedResourceGroupValue: " + e);
