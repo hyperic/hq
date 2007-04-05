@@ -444,6 +444,16 @@
 
   </metrics>
 
+  <filter name="template"
+           value="jk-status:${jk.config}:${alias}"/>
+
+  <metrics name="jk-status">
+    <metric name="Availability"
+            indicator="true"/>
+  </metrics>
+
+  <config name="jk" include="url,basicauth"/>
+
   <help name="restart-server">
   <![CDATA[
     <p><h4>Restart the Server</h4></p>
@@ -711,6 +721,20 @@ ExtendedStatus On
 </pre>
     ]]>
     </help>
+
+    <service name="mod_jk">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="JkStatusCollector"/>
+
+      <property name="path" value="/jk-status"/>
+
+      <config include="jk"/>
+
+      <metrics include="jk-status"/>
+    </service>
   </server>
 
   <server name="Apache"
@@ -805,6 +829,20 @@ ExtendedStatus On
               class="ApacheErrorLogPlugin"/>
 
       <metrics include="apache-vhost"/>
+    </service>
+
+    <service name="mod_jk">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="JkStatusCollector"/>
+
+      <property name="path" value="/jk-status"/>
+
+      <config include="jk"/>
+
+      <metrics include="jk-status"/>
     </service>
   </server>
 
