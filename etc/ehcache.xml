@@ -15,13 +15,13 @@
 
   <!-- Measurement caches -->
   <cache name="org.hyperic.hq.measurement.server.session.Measurement"
-         maxElementsInMemory="20000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.MeasurementTemplate"
-         maxElementsInMemory="20000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -45,7 +45,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Baseline"
-         maxElementsInMemory="20000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -81,7 +81,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="CpropKey.findByKey"
-         maxElementsInMemory="500"
+         maxElementsInMemory="2000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -95,22 +95,22 @@
 
   <!-- Appdef config responses -->
   <cache name="org.hyperic.hq.appdef.ConfigResponseDB"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="10000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ConfigReponseDB.findByPlatformId"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="10000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ConfigReponseDB.findByServerId"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="10000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ConfigReponseDB.findByServiceId"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="10000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
@@ -124,21 +124,21 @@
 
   <!-- Metric data cache, used outside of hibernate -->
   <cache name="MetricDataCache"
-         maxElementsInMemory="50000"
+         maxElementsInMemory="100000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- The SRN cache, used outside of hibernate -->
   <cache name="SRNCache"
-         maxElementsInMemory="50000"
+         maxElementsInMemory="100000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Agent Caches -->
   <cache name="org.hyperic.hq.appdef.Agent"
-         maxElementsInMemory="100"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -150,7 +150,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Agent.findByAgentToken"
-         maxElementsInMemory="100"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -164,7 +164,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform"
-         maxElementsInMemory="100"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -176,13 +176,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.Ip"
-         maxElementsInMemory="500"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform.ips"
-         maxElementsInMemory="100"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -196,7 +196,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Server"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="2000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -208,7 +208,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
-         maxElementsInMemory="100"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -228,7 +228,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Service"
-         maxElementsInMemory="5000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -240,7 +240,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Server.services"
-         maxElementsInMemory="500"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -292,13 +292,13 @@
 
   <!-- Permission related caches -->
   <cache name="org.hyperic.hq.authz.server.session.Resource"
-         maxElementsInMemory="5000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Resource.findByInstanceId"
-         maxElementsInMemory="5000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
