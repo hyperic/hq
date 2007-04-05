@@ -1310,16 +1310,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         MetricDataCache cache = MetricDataCache.getInstance();
         ArrayList nodata = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
+            if (ids[i] == null) {
+                continue;
+            }
+
             MetricValue mval = cache.get(ids[i], timestamp);
-            if (mval != null)
+            if (mval != null) {
                 data.put(ids[i], mval);
-            else
+            } else {
                 nodata.add(ids[i]);
+            }
         }
+
         if (nodata.size() == 0) {
             return data;
-        }
-        else {
+        } else {
             ids = (Integer[]) nodata.toArray(new Integer[0]);
         }
         

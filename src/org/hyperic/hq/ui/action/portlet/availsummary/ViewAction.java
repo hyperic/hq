@@ -32,6 +32,8 @@ import javax.servlet.ServletContext;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -44,8 +46,10 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.util.pager.PageList;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.product.MetricValue;
 import org.json.JSONObject;
 
 import java.util.Iterator;
@@ -56,11 +60,17 @@ import java.util.TreeSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 /**
  * This action class is used by the Availability Summary portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends BaseAction {
+
+    private static Log _log = LogFactory.getLog(ViewAction.class);
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -69,13 +79,12 @@ public class ViewAction extends BaseAction {
         throws Exception
     {
         ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
-
-        WebUser user = (WebUser) request.getSession().getAttribute(
-            Constants.WEBUSER_SES_ATTR);
-
+        WebUser user = (WebUser)
+            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         String token;
+        long ts = System.currentTimeMillis();
+
         try {
             token = RequestUtils.getStringParameter(request, "token");
         } catch (ParameterNotFoundException e) {
@@ -92,31 +101,52 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        DashboardUtils.verifyResources(resKey, ctx, user);
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
 
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
         int count = Integer.parseInt(user.getPreference(numKey, "10"));
-
         int sessionId = user.getSessionId().intValue();
-        PageList resources = appdefBoss.findByIds(sessionId, arrayIds);
 
+        CacheEntry[] ents = new CacheEntry[arrayIds.length];
+        Integer[] mids = new Integer[arrayIds.length];
         Map res = new HashMap();
-        for (Iterator i = resources.iterator(); i.hasNext(); ) {
-            AppdefResourceValue rValue = (AppdefResourceValue)i.next();
-            AppdefResourceTypeValue type = rValue.getAppdefResourceTypeValue();
-            String name = type.getName();
-            AvailSummary summary = (AvailSummary)res.get(name);
-            if (summary == null) {
-                summary = new AvailSummary(type);
-                res.put(name, summary);
+        long interval = 0;
+        ArrayList toRemove = new ArrayList();
+        for (int i = 0; i < arrayIds.length; i++) {
+            AppdefEntityID id = arrayIds[i];
+            try {
+                ents[i] = loadData(sessionId, id);
+            } catch (AppdefEntityNotFoundException e) {
+                toRemove.add(id.getAppdefKey());
             }
-                
-            double avail = mBoss.getAvailability(sessionId,
-                                                 rValue.getEntityId());
-            summary.setAvailability(avail);
+
+            if (ents[i] != null) {
+                mids[i] = ents[i].getMetricId();
+                if (ents[i].getInterval() > interval) {
+                    interval = ents[i].getInterval();
+                }
+            } else {
+                mids[i] = null;
+            }
+        }
+
+        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, mids,
+                                                      interval);
+
+        for (int i = 0; i < ents.length; i++) {
+            CacheEntry ent = ents[i];
+            // Only add if we have data
+            if (vals[i] != null) {
+                String name = ent.getType().getName();
+                AvailSummary summary = (AvailSummary)res.get(name);
+                if (summary == null) {
+                    summary = new AvailSummary(ent.getType());
+                    res.put(name, summary);
+                }
+                summary.setAvailability(vals[i].getValue());
+            }
         }
 
         JSONObject availSummary = new JSONObject();
@@ -147,6 +177,15 @@ public class ViewAction extends BaseAction {
         availSummary.put("title", user.getPreference(titleKey, ""));
         
         response.getWriter().write(availSummary.toString());
+
+        _log.debug("Availability summary loaded in " +
+                   (System.currentTimeMillis() - ts) + " ms");
+
+        if (toRemove.size() > 0) {
+            _log.debug("Removing " + toRemove.size() + " missing resources.");
+            DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
+                                           resKey, user);
+        }
 
         return null;
     }
@@ -211,6 +250,88 @@ public class ViewAction extends BaseAction {
             } else {
                 return 1;
             }
+        }
+    }
+
+    private CacheEntry loadData(int sessionId, AppdefEntityID id)
+        throws AppdefEntityNotFoundException
+    {
+        Cache cache = CacheManager.getInstance().getCache("AvailabilitySummary");
+        CacheKey key = new CacheKey(sessionId, id);
+        Element e = cache.get(key);
+
+        if (e != null) {
+            return (CacheEntry)e.getObjectValue();
+        }
+
+        // Otherwise, load from the backend
+        ServletContext ctx = getServlet().getServletContext();
+        AppdefBoss      aBoss = ContextUtils.getAppdefBoss(ctx);
+        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+
+        try {
+            AppdefResourceValue val = aBoss.findById(sessionId, id);
+            DerivedMeasurement m = mBoss.findAvailabilityMetric(sessionId, id);
+            if (m == null) {
+                return null;
+            }
+
+            CacheEntry res = new CacheEntry(val.getAppdefResourceTypeValue(),
+                                            m.getId(), m.getInterval());
+            cache.put(new Element(key, res));
+            return res;
+        } catch (AppdefEntityNotFoundException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            _log.debug("Caught exception loading data: " + ex, ex);
+            return null;
+        }
+    }
+
+    // Classes for caching dashboard data
+
+    public class CacheKey {
+        private AppdefEntityID _id;
+        private int _sessionId;
+
+        public CacheKey(int sessionId, AppdefEntityID id) {
+            _sessionId = sessionId;
+            _id = id;
+        }
+
+        public boolean equals(Object o) {
+            return (o instanceof CacheKey) &&
+                ((CacheKey)o)._id.equals(_id) &&
+                ((CacheKey)o)._sessionId == _sessionId;
+        }
+
+        public int hashCode() {
+            return _id.hashCode() + _sessionId;
+        }
+    }
+
+    public class CacheEntry {
+        private AppdefResourceTypeValue _type;
+        private Integer _metricId;
+        private long _interval;
+
+        public CacheEntry(AppdefResourceTypeValue tval, Integer metricId,
+                          long interval) {
+            _type = tval;
+            _metricId = metricId;
+            _interval = interval;
+        }
+
+        public AppdefResourceTypeValue getType() {
+            return _type;
+        }
+
+        public Integer getMetricId() {
+            return _metricId;
+        }
+
+        public long getInterval() {
+            return _interval;
         }
     }
 }
