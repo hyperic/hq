@@ -78,23 +78,14 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
     private double  threshold;
     private Integer metricId;
 
-    /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedEventTypes()
-     */
     public Class[] getInterestedEventTypes(){
         return new Class[] { MeasurementEvent.class };
     }
 
-    /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedInstanceIDs()
-     */
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { metricId };
     }
 
-    /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getConfigSchema()
-     */
     public ConfigSchema getConfigSchema(){
         return ConditionalTriggerSchema
             .getConfigSchema(EventConstants.TYPE_THRESHOLD);
@@ -109,9 +100,6 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         return resp;
     }
     
-    /**
-     * @see org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface#getConfigResponse()
-     */
     public ConfigResponse getConfigResponse(AppdefEntityID id,
                                             AlertConditionValue cond)
         throws InvalidOptionException, InvalidOptionValueException {
@@ -129,9 +117,6 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         return resp;
     }
     
-    /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#init()
-     */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException
     {
@@ -185,10 +170,6 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
 
     /**
      * extracts the operator
-     *
-     * @param soperator
-     * @return int
-     * @throws org.hyperic.hq.bizapp.server.trigger.InvalidTriggerDataException
      */
     protected int getOperator(String soperator)
         throws InvalidTriggerDataException
@@ -209,9 +190,6 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
     }
 
 
-    /**
-     * @see org.hyperic.hq.events.AbstractEvent#processEvent()
-     */
     public void processEvent(AbstractEvent e)
         throws EventTypeException, ActionExecuteException {
         MeasurementEvent event;
@@ -272,52 +250,27 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         }
     }
 
-    /**
-     * Returns the threshold.
-     * @return double
-     */
     public double getThreshold() {
         return threshold;
     }
 
-    /**
-     * Sets the threshold.
-     * @param threshold The threshold to set
-     */
     public void setThreshold(double val) {
         threshold = val;
     }
 
-    /**
-     * Returns the operator.
-     * @return int
-     */
     public int getOperator() {
         return operator;
     }
 
-    /**
-     * Sets the operator.
-     * @param operator The operator to set
-     */
     public void setOperator(int val) {
         operator = val;
     }
 
-    /**
-     * Returns the metricId.
-     * @return Integer
-     */
     public Integer getMeasurementID() {
         return metricId;
     }
 
-    /**
-     * Sets the metricId.
-     * @param metricId The metricId to set
-     */
     public void setMeasurementID(Integer val) {
         metricId = val;
     }
-
 }
