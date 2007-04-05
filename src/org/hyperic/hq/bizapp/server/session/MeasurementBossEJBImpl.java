@@ -1085,43 +1085,57 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     .getLiveMeasurementValues(subject, mids)[0];
     }
 
-     /** Get the last metric value
-      * @param tids The template IDs to get
-      * @ejb:interface-method
-      */
-      public MetricValue[] getLastMetricValue(int sessionId,
-                                              AppdefEntityID aeid,
-                                              Integer[] tids)
-         throws SessionTimeoutException, SessionNotFoundException,
-                PermissionException {
-         AuthzSubjectValue subject = manager.getSubject(sessionId);
-         
-         Integer mids[] = new Integer[tids.length];
-         long interval = 0;
-         for (int i = 0; i < tids.length; i++) {
-             try {
+    /**
+     * Get the last metric values for the given template IDs.
+     *
+     * @param tids The template IDs to get
+     * @ejb:interface-method
+     */
+    public MetricValue[] getLastMetricValue(int sessionId,
+                                            AppdefEntityID aeid,
+                                            Integer[] tids)
+        throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+
+        Integer mids[] = new Integer[tids.length];
+        long interval = 0;
+        for (int i = 0; i < tids.length; i++) {
+            try {
                 DerivedMeasurementValue dmv =
-                     getDerivedMeasurementManager()
+                    getDerivedMeasurementManager()
                         .findMeasurement(subject, tids[i], aeid.getId());
                 mids[i] = dmv.getId();
                 interval = Math.max(interval, dmv.getInterval());
             } catch (MeasurementNotFoundException e) {
                 mids[i] = new Integer(0);
-            }             
-         }
-         
-         MetricValue[] ret = new MetricValue[tids.length];
-         Map data = getDataMan().getLastDataPoints(mids,
-                                                   System.currentTimeMillis() -
-                                                       (3 * interval));
-             
-         for (int i = 0; i < mids.length; i++) {
-             if (data.containsKey(mids[i]))
-                 ret[i] = (MetricValue) data.get(mids[i]);
-         }
-         
-         return ret;
-     }
+            }
+        }
+
+        return getLastMetricValue(sessionId,  mids, interval);
+    }
+
+    /**
+     * Get the last metric data for the array of measurement ids.
+     *
+     * @param mids  The array of measurement ids to get metrics for
+     * @param interval The allowable time in ms to go back looking for data.
+     * @ejb:interface-method
+     */
+    public MetricValue[] getLastMetricValue(int sessionId, Integer mids[],
+                                            long interval)
+    {
+        MetricValue[] ret = new MetricValue[mids.length];
+        Map data = getDataMan().getLastDataPoints(mids,
+                                                  System.currentTimeMillis() -
+                                                      (3 * interval));
+        for (int i = 0; i < mids.length; i++) {
+            if (data.containsKey(mids[i]))
+                ret[i] = (MetricValue) data.get(mids[i]);
+        }
+
+        return ret;
+    }
 
     /*
      * Private function to find the group measurements
@@ -3966,6 +3980,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     {
         MeasurementCommandsClient client = getClient(id);
         return client.sigarCmd(cmd);
+    }
+
+    /**
+     * Get the availability metric for a given resource
+     * @ejb:interface-method
+     */
+    public DerivedMeasurement findAvailabilityMetric(int sessionId,
+                                                     AppdefEntityID id)
+        throws SessionTimeoutException, SessionNotFoundException
+    {
+        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        return findAvailabilityMetric(subject, id);
     }
 
     /** @ejb:create-method */

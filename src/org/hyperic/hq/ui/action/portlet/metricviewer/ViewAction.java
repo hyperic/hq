@@ -38,8 +38,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
@@ -47,6 +49,8 @@ import org.hyperic.util.units.FormattedNumber;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionForm;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,11 +62,17 @@ import java.util.TreeSet;
 import java.util.Comparator;
 import java.util.ArrayList;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 /**
  * This action class is used by the Metric Viewer portlet.  It's main
  * use is to generate the JSON objects required for display into the UI.
  */
 public class ViewAction extends BaseAction {
+
+    private static Log _log = LogFactory.getLog(ViewAction.class);
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -76,7 +86,7 @@ public class ViewAction extends BaseAction {
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
         int sessionId = user.getSessionId().intValue();
-
+        long ts = System.currentTimeMillis();
         String token;
         try {
             token = RequestUtils.getStringParameter(request, "token");
@@ -137,19 +147,37 @@ public class ViewAction extends BaseAction {
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
         AppdefResourceTypeValue typeVal =
             appdefBoss.findResourceTypeById(sessionId, typeId);
+        CacheData[] data = new CacheData[arrayIds.length];
+        Integer[] mids = new Integer[arrayIds.length];
+        long interval = 0;
+        ArrayList toRemove = new ArrayList();
+        for (int i = 0; i < arrayIds.length; i++) {
+            AppdefEntityID id = arrayIds[i];
+            try {
+                data[i] = loadData(sessionId, id, template);
+            } catch (AppdefEntityNotFoundException e) {
+                toRemove.add(id.getAppdefKey());
+            }
+            if (data[i] != null) {
+                mids[i] = data[i].getMetricId();
 
-        PageList resources = appdefBoss.findByIds(sessionId, arrayIds);
+                if (data[i].getInterval() > interval) {
+                    interval = data[i].getInterval();
+                }
+            } else {
+                mids[i] = null;
+            }
+        }
+
+        MetricValue[] vals = mBoss.getLastMetricValue(sessionId, mids,
+                                                      interval);
         TreeSet sortedSet =
             new TreeSet(new MetricSummaryComparator(isDescending));
-        for (Iterator i = resources.iterator(); i.hasNext(); ) {
-            AppdefResourceValue rValue = (AppdefResourceValue)i.next();
-            MetricValue[] val = mBoss.getLastMetricValue(sessionId,
-                                                         rValue.getEntityId(),
-                                                         tids);
-            // handle DataNotAvailable
-            if (val[0] != null) {
-                MetricSummary summary = new MetricSummary(rValue, template,
-                                                          val[0]);
+        for (int i = 0; i < data.length; i++) {
+            // Only show resources with data
+            if (vals[i] != null) {
+                MetricSummary summary = new MetricSummary(data[i].getResource(),
+                                                          template, vals[i]);
                 sortedSet.add(summary);
             }
         }
@@ -172,6 +200,15 @@ public class ViewAction extends BaseAction {
         res.put("metricValues", metricValues);
 
         response.getWriter().write(res.toString());
+
+        _log.debug("Metric viewer loaded in " +
+                   (System.currentTimeMillis() - ts) + " ms.");
+
+        if (toRemove.size() > 0) {
+            _log.debug("Removing " + toRemove.size() + " missing resources.");
+            DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
+                                           resKey, user);
+        }
 
         return null;
     }
@@ -240,6 +277,93 @@ public class ViewAction extends BaseAction {
                     return 1;
                 }
             }
+        }
+    }
+
+    private CacheData loadData(int sessionId, AppdefEntityID id,
+                               MeasurementTemplateValue template)
+        throws AppdefEntityNotFoundException
+    {
+        Cache cache = CacheManager.getInstance().getCache("MetricViewer");
+        CacheKey key = new CacheKey(sessionId, id, template);
+        Element e = cache.get(key);
+
+        if (e != null) {
+            return (CacheData)e.getObjectValue();
+        }
+
+        // Otherwise, load from the backend
+        ServletContext ctx = getServlet().getServletContext();
+        AppdefBoss      aBoss = ContextUtils.getAppdefBoss(ctx);
+        MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+
+        try {
+            AppdefResourceValue val = aBoss.findById(sessionId, id);
+            DerivedMeasurementValue dm =
+                mBoss.getMeasurement(sessionId, id, template.getAlias());
+            if (dm == null) {
+                return null; // No metric scheduled.
+            }
+
+            CacheData data = new CacheData(val, dm.getId(), dm.getInterval());
+            cache.put(new Element(key, data));
+            return data;
+        } catch (AppdefEntityNotFoundException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            _log.debug("Caught exception loading data: " + ex, ex);
+            return null;
+        }
+    }
+    
+    // Classes for caching dashboard data
+
+    public class CacheKey {
+        private int _sessionId;
+        private AppdefEntityID _id;
+        private MeasurementTemplateValue _template;
+
+        public CacheKey(int sessionId, AppdefEntityID id,
+                        MeasurementTemplateValue template) {
+            _sessionId = sessionId;
+            _id = id;
+            _template = template;
+        }
+
+        public boolean equals(Object o) {
+            return (o instanceof CacheKey) &&
+                ((CacheKey)o)._id.equals(_id) &&
+                ((CacheKey)o)._template.equals(_template) &&
+                ((CacheKey)o)._sessionId == _sessionId;
+        }
+
+        public int hashCode() {
+            return _id.hashCode() + _template.hashCode() + _sessionId;
+        }
+    }
+
+    public class CacheData {
+        private AppdefResourceValue _resource;
+        private Integer _metricId;
+        private long _interval;
+
+        public CacheData(AppdefResourceValue resource,
+                         Integer metricId, long interval) {
+            _resource = resource;
+            _metricId = metricId;
+            _interval = interval;
+        }
+
+        public AppdefResourceValue getResource() {
+            return _resource;
+        }
+
+        public Integer getMetricId() {
+            return _metricId;
+        }
+
+        public long getInterval() {
+            return _interval;
         }
     }
 }

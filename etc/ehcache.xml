@@ -576,4 +576,20 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- Dashboard caches -->
+  <cache name="AvailabilitySummary"
+         maxElementsInMemory="2000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <cache name="MetricViewer"
+         maxElementsInMemory="2000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
 </ehcache>
