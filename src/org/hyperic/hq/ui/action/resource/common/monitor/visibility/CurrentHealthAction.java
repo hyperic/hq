@@ -91,25 +91,22 @@ public class CurrentHealthAction extends TilesAction {
                                   Constants.ERR_RESOURCE_NOT_FOUND);
             return null;
         }
-
+        
+        AppdefEntityID aeid = resource.getEntityId();
         ServletContext ctx = getServlet().getServletContext();
 
         // Check configuration
-        InventoryHelper helper =
-            InventoryHelper.getHelper(resource.getEntityId());
+        InventoryHelper helper = InventoryHelper.getHelper(aeid);
         helper.isResourceConfigured(request, ctx, true);
         
         // Set the views
-        setupViews(request, (IndicatorViewsForm) form,
-                   resource.getEntityId().getAppdefKey());
+        setupViews(request, (IndicatorViewsForm) form, aeid.getAppdefKey());
 
         // Get the resource availability
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        MeasurementBoss boss =
-            ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
         WebUser user = SessionUtils.getWebUser(request.getSession());
 
-        AppdefEntityID aeid = resource.getEntityId();
         try {
             MeasurementTemplateValue mtv =
                 boss.getAvailabilityMetricTemplate(sessionId, aeid);
@@ -126,8 +123,7 @@ public class CurrentHealthAction extends TilesAction {
             // Seems like sometimes Postgres does not average cleanly for
             // groups, and the value ends up being like 0.9999999999.  We don't
             // want the insignificant amount to mess up our display.
-            if (resource.getEntityId().getType() ==
-                AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            if (aeid.isGroup()) {
                 for (Iterator it = data.iterator(); it.hasNext(); ) {
                     MetricValue val = (MetricValue) it.next();
                     if (val.toString().equals("1"))
