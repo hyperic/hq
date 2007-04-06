@@ -27,10 +27,18 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -41,14 +49,9 @@ import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
- * Create a new alert definition.
+ * Update the syslog action for an alert definition.
  *
  */
 public class EditDefinitionSyslogActionAction extends BaseAction {
@@ -67,14 +70,21 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
 
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
-        Integer rid = saForm.getRid();
-        Integer type = saForm.getType();
+        
+        Map params = new HashMap(2);
+        
+        if (saForm.getAetid() != null) {
+            params.put(Constants.APPDEF_RES_TYPE_ID,
+                       new AppdefEntityTypeID(saForm.getAetid()));
+        }
+        else {
+            params.put(Constants.ENTITY_ID_PARAM,
+                       new AppdefEntityID(saForm.getEid()));
+        }
+        params.put("ad", saForm.getAd());
+        
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
-        Map params = new HashMap();
-        params.put(Constants.RESOURCE_PARAM, rid);
-        params.put(Constants.RESOURCE_TYPE_ID_PARAM, type);
-        params.put( "ad", saForm.getAd() );
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -82,7 +92,8 @@ public class EditDefinitionSyslogActionAction extends BaseAction {
             return forward;
         }
 
-        AlertDefinitionValue adv = eb.getAlertDefinition( sessionID, saForm.getAd() );
+        AlertDefinitionValue adv =
+            eb.getAlertDefinition( sessionID, saForm.getAd() );
         ActionValue actionValue = AlertDefUtil.getSyslogActionValue(adv);
         if ( saForm.getShouldBeRemoved() ) {
             if (null != actionValue) {

@@ -1,5 +1,6 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
+<%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%--
@@ -32,7 +33,14 @@
 <tiles:insert definition=".events.config.view.syslogaction"/>
 
 <tiles:insert definition=".toolbar.edit">
-  <tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&type=${Resource.entityId.type}&rid=${Resource.id}&ad=${alertDef.id}"/></tiles:put>
+  <c:choose>
+    <c:when test="${not empty param.aetid}">
+      <tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&aetid=${param.aetid}&ad=${alertDef.id}"/></tiles:put>
+    </c:when>
+    <c:otherwise>
+      <tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&eid=${Resource.entityId}&ad=${alertDef.id}"/></tiles:put>
+    </c:otherwise>
+  </c:choose>
 </tiles:insert>
 <br>
 </c:if>

@@ -33,8 +33,8 @@
 
 <html:form action="/alerts/EditSyslogAction">
 
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
+<html:hidden property="aetid"/>
+<html:hidden property="eid"/>
 <html:hidden property="ad"/>
 <html:hidden property="id"/>
 
