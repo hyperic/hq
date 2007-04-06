@@ -279,7 +279,11 @@ public class Action
         try {
             return getInitializedAction().execute(alert, info);
         } catch (Exception e) {
-            throw new ActionExecuteException("Unable to execute action", e); 
+            if (_log.isDebugEnabled()) {
+                _log.debug("Unable to execute action", e);
+            }
+            throw new ActionExecuteException("Unable to execute action: " +
+                                             e.getMessage()); 
         }
     }
 
