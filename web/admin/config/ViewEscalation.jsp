@@ -354,6 +354,7 @@ function showViewEscResponse(originalRequest) {
 
         var emailTextArea = $('emailinput');
         var emailAdds = emailTextArea.value;
+
         var syslogDivIn = $('sysloginput');
         if (syslogDivIn.style.display != 'none') {
           if ($('metainput').value == '') {
@@ -931,8 +932,8 @@ function showViewEscResponse(originalRequest) {
         var userListCheck = $('userListDisplay');
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-       
-        if (selUserEsc == 'Others' && emailAdds == '') {
+        
+        if (selUserEsc == 'Others' || selUserEsc == '' && emailAdds == '') {
 
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
