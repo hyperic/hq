@@ -141,42 +141,38 @@ public class MeasurementGtrigger
                    " " + _comparator + " " + _metricVal);
         _log.debug("Number of resources matching condition: " + numMatched);
         
-        if (_sizeCompare.isTrue(leftHand, _numResources)) {
-            StringBuffer sr, lr;
-            FireReason reason;
-            
-            sr = new StringBuffer();
-            lr = new StringBuffer();
-            
-            sr.append(_sizeCompare)
-              .append(" ")
-              .append(leftHandStr)
-              .append(" of the resources reported ")
-              .append(_metricName)
-              .append(" ")
-              .append(_comparator)
-              .append(" ")
-              .append(_metricVal);
-            
-            lr.append(_sizeCompare)
-              .append(" ")
-              .append(leftHandStr)
-              .append(" of the resources (")
-              .append(numMatchStr)
-              .append(") reported ")
-              .append(_metricName)
-              .append(" ")
-              .append(_comparator)
-              .append(" ")
-              .append(_metricVal);
-          
-            reason = new FireReason(sr.toString(), lr.toString());
-            _log.debug("Trigger firing");
-            setFired(reason);
-        } else {
-            _log.debug("Trigger not firing");
+        if (!_sizeCompare.isTrue(leftHand, _numResources)) {
             setNotFired();
+            return;
         }
+        
+        StringBuffer sr = new StringBuffer();
+        StringBuffer lr = new StringBuffer();
+            
+        sr.append(_sizeCompare)
+            .append(" ")
+            .append(leftHandStr)
+            .append(" of the resources reported ")
+            .append(_metricName)
+            .append(" ")
+            .append(_comparator)
+            .append(" ")
+            .append(_metricVal);
+            
+        lr.append(_sizeCompare)
+            .append(" ")
+            .append(leftHandStr)
+            .append(" of the resources (")
+            .append(numMatchStr)
+            .append(") reported ")
+            .append(_metricName)
+            .append(" ")
+            .append(_comparator)
+            .append(" ")
+            .append(_metricVal);
+        
+        FireReason reason = new FireReason(sr.toString(), lr.toString());
+        setFired(reason);
     }
     
     public void setGroup(ResourceGroup rg) {
