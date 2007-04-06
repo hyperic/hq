@@ -137,10 +137,12 @@ public class ResourceForm extends ScheduleForm {
         return null;
     }
 
-    public void setAetid(String aetidStr) {
-        AppdefEntityTypeID aetid = new AppdefEntityTypeID(aetidStr);
-        type = new Integer(aetid.getType());
-        resourceType = aetid.getId();
+    public void setAetid(String str) {
+        if (str.length() > 0) {
+            AppdefEntityTypeID aetid = new AppdefEntityTypeID(str);
+            type = new Integer(aetid.getType());
+            resourceType = aetid.getId();
+        }
     }
     
     /**
@@ -183,9 +185,11 @@ public class ResourceForm extends ScheduleForm {
     }
     
     public void setEid(String eidStr) {
-        AppdefEntityID eid = new AppdefEntityID(eidStr);
-        rid = eid.getId();
-        type = new Integer(eid.getType());
+        if (eidStr.length() > 0) {
+            AppdefEntityID eid = new AppdefEntityID(eidStr);
+            rid = eid.getId();
+            type = new Integer(eid.getType());
+        }
     }
     
     /**
