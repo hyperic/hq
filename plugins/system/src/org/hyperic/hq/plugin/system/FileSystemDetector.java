@@ -40,9 +40,22 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.security.MD5;
 
 import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
 
 public class FileSystemDetector
     extends SystemServerDetector {
+
+    private static final String PROP_DISCOVER_NFS =
+        "system.nfs.discover";
+    private boolean _discoverNfs;
+
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+
+        _discoverNfs = //XXX should this be off by default?
+            !"false".equals(manager.getProperty(PROP_DISCOVER_NFS));
+    }
 
     protected String getServerType() {
         return SystemPlugin.FILE_SERVER_NAME;
@@ -79,6 +92,14 @@ public class FileSystemDetector
                 "File System " + fs.getDevName() + 
                 mntInfo +
                 " (" + genericType + "/" + type + ")";
+
+            if ((fs.getType() == FileSystem.TYPE_NETWORK) &&
+                !_discoverNfs)
+            {
+                getLog().debug(PROP_DISCOVER_NFS +
+                               "=false, skipping " + info);
+                continue;
+            }
 
             AIServiceValue svc = 
                 createSystemService(SystemPlugin.FILE_MOUNT_SERVICE,
