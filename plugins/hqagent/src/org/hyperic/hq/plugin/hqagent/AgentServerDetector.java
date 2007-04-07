@@ -35,6 +35,7 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
 
 public class AgentServerDetector
@@ -77,6 +78,10 @@ public class AgentServerDetector
         cprop.setValue("version", ProductProperties.getVersion());
         cprop.setValue("JavaVersion", System.getProperty("java.vm.version"));
         cprop.setValue("JavaVendor", System.getProperty("java.vm.vendor"));
+        cprop.setValue("UserHome", System.getProperty("user.home"));
+        cprop.setValue("SigarVersion", Sigar.VERSION_STRING);
+        cprop.setValue("SigarNativeVersion", Sigar.NATIVE_VERSION_STRING);
+
         res.setCustomProperties(cprop);
 
         res.setProductConfig();
