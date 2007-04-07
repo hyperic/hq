@@ -50,9 +50,10 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
@@ -63,7 +64,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -73,6 +73,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.VirtualManagerLocal;
 import org.hyperic.hq.appdef.shared.VirtualManagerUtil;
@@ -110,8 +111,8 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
-import org.hyperic.hq.measurement.server.session.ResourcesWithoutDataHelper;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.ResourcesWithoutDataHelper;
 import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
@@ -131,7 +132,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 
 /** BizApp interface to the Measurement subsystem
@@ -2472,6 +2472,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * @return a List of ResourceTypeDisplaySummary's
+     * @deprecated use POJO API instead
      */    
     private List 
         getSummarizedResourceCurrentHealth(AuthzSubjectValue subject, 
@@ -2479,12 +2480,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException 
     {
-
+    
         List summaries = new ArrayList();
-
+    
         // Create Map of auto-group'd/singleton resources and a List of clusters
         // since their current health summarizations are not flattened        
-
+    
         // auto-group'd entities are kept track of in here where keys are the
         // type id's and the values are lists of resources
         HashMap resTypeMap = new HashMap(); 
@@ -2513,7 +2514,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                         PageControl.PAGE_ALL);
                     AppdefEntityID[] ids = (AppdefEntityID[])
                         memberIds.toArray(new AppdefEntityID[0]);
-                    setResourceTypeDisplaySummary(subject, cds, agval, ids);
+                    setResourceTypeDisplaySummary(subject, cds,
+                                                  agval.getAppdefResourceTypeValue(),
+                                                  ids);
                     summaries.add(cds);
                 } catch (GroupNotCompatibleException e) {
                     log.error("Group not compatible: " + aid);
@@ -2556,11 +2559,83 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 summary.setNumResources(new Integer(ids.length));
             } else {
                 // singleton
-                summary = new SingletonDisplaySummary();
-                ((SingletonDisplaySummary)summary).setEntityId(aid);
-                ((SingletonDisplaySummary)summary).setEntityName(resource.getName());
+                summary = new SingletonDisplaySummary(aid, resource.getName());
             }
-            setResourceTypeDisplaySummary(subject, summary, resource, ids);
+            setResourceTypeDisplaySummary(subject, summary,
+                                          resource.getAppdefResourceTypeValue(),
+                                          ids);
+            summaries.add(summary);
+        }
+    
+        Collections.sort(summaries);
+        return summaries;
+    }
+
+    /**
+     * @return a List of ResourceTypeDisplaySummary's
+     */    
+    private List getSummarizedResourceCurrentHealth(AuthzSubjectValue subject, 
+                                                    Collection resources)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException {
+        List summaries = new ArrayList();
+
+        // auto-group'd entities are kept track of in here where keys are the
+        // type id's and the values are lists of resources
+        HashMap resTypeMap = new HashMap(); 
+        
+        // keys are type id's and the values are AppdefResources
+        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            AppdefResource resource = (AppdefResource) it.next();
+            AppdefResourceType type = resource.getAppdefResourceType();
+            Integer typeId = type.getId();
+            List siblings = (List) resTypeMap.get(typeId);
+            if (siblings == null) {
+                siblings = new ArrayList();
+                resTypeMap.put(typeId, siblings);               
+            }
+
+            // Add resource to list
+            siblings.add(resource);
+        }
+        
+        // first deal with the autogroubz and singletons (singletons
+        // are just the degenerative case of an autogroup, why it's
+        // its own type is... silly)
+        for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Collection siblings = (Collection) entry.getValue();
+            // Make sure we have valid IDs
+            if (siblings == null || siblings.size() == 0)
+                continue;                    
+                
+            ResourceTypeDisplaySummary summary = null;
+
+            AppdefResourceType type = null;
+            AppdefEntityID[] ids = new AppdefEntityID[siblings.size()];
+            int i = 0;
+            for (Iterator sibIt = siblings.iterator(); sibIt.hasNext(); i++) {
+                AppdefResource res = (AppdefResource) sibIt.next();
+                ids[i] = res.getEntityId();
+                
+                if (type == null) {
+                    type = res.getAppdefResourceType();
+                    
+                    if (it.hasNext()) {
+                        // autogroup
+                        summary = new AutogroupDisplaySummary();
+                        summary.setNumResources(new Integer(siblings.size()));
+                    }
+                    else {
+                        // singleton
+                        summary = new SingletonDisplaySummary(ids[i],
+                                                              res.getName());
+                    }
+                }
+            }
+            setResourceTypeDisplaySummary(subject, summary,
+                                          type.getAppdefResourceTypeValue(),
+                                          ids);
             summaries.add(summary);
         }
 
@@ -2571,14 +2646,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private void 
         setResourceTypeDisplaySummary(AuthzSubjectValue subject,
                                       ResourceTypeDisplaySummary summary, 
-                                      AppdefResourceValue resource,
+                                      AppdefResourceTypeValue resType,
                                       AppdefEntityID[] ids) 
     {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
         long begin = end - MeasurementConstants.HEALTH_WINDOW_MILLIS;
 
-        summary.setResourceType(resource.getAppdefResourceTypeValue());
+        summary.setResourceType(resType);
         
         StopWatch watch = new StopWatch(end);
         
@@ -2717,19 +2792,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return List a list of ResourceTypeDisplaySummary beans
      * @ejb:interface-method
      */
-    public List findSummarizedServiceCurrentHealth(int sessionId,
-                                                   AppdefEntityID entId,
-                                                   boolean internal)
+    public List findSummarizedPlatformServiceCurrentHealth(int sessionId,
+                                                           AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
-        // Get the associated services        
-        AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
-        List services= rv.getAssociatedServices(internal);
-        return getSummarizedResourceCurrentHealth(subject, 
-            (AppdefResourceValue[]) services.toArray(
-                new AppdefResourceValue[services.size()]));
+        ServiceManagerLocal svcMgr = ServiceManagerEJBImpl.getOne();
+        Collection services = svcMgr.getPlatformServices(subject,
+                                                         entId.getId());
+        return getSummarizedResourceCurrentHealth(subject, services);
     }
     
     /**
@@ -2740,13 +2811,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
         // Get the associated services        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED,
-                                         PageControl.SORT_ASC, 
-                                         SortAttribute.NAME);
-        List services= rv.getAssociatedServices(pc);
+        List services= rv.getAssociatedServices(PageControl.PAGE_ALL);
         return getSummarizedResourceCurrentHealth(subject, 
             (AppdefResourceValue[]) services.toArray(
                 new AppdefResourceValue[services.size()]));

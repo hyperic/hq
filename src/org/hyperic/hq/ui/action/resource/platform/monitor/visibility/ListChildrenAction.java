@@ -122,8 +122,8 @@ public class ListChildrenAction extends TilesAction {
         if (isInternal) {
             // cheat and treat platform services as internal so as to not 
             // disturb the whackadocious action class hierarchy
-            return boss.findSummarizedServiceCurrentHealth(sessionId, entityId,
-                                                           false);
+            return boss.findSummarizedPlatformServiceCurrentHealth(sessionId,
+                                                                   entityId);
         }
 
         log.trace("getting deployed server healths for resource [" +

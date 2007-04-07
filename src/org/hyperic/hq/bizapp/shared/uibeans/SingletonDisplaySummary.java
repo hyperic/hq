@@ -44,6 +44,12 @@ public class SingletonDisplaySummary
         setNumResources(new Integer(1));
     }
 
+    public SingletonDisplaySummary(AppdefEntityID eid, String name) {
+        this();
+        entityId = eid;
+        entityName = name;
+    }
+
     public int getSummaryType() {
         return UIConstants.SUMMARY_TYPE_SINGLETON;
     }

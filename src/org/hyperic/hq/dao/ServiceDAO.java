@@ -259,30 +259,8 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * legacy EJB finder
-     * @deprecated use finaPlatformServices_orderName(boolean)
-     * @return
-     */
-    public Collection findPlatformServices_orderName(Integer platId, boolean b)
-    {
-        return findPlatformServices_orderName(platId, b, true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaPlatformServices_orderName(boolean)
-     * @return
-     */
-    public Collection findPlatformServices_orderName_desc(Integer platId,
-                                                          boolean b)
-    {
-        return findPlatformServices_orderName(platId, b, false);
-    }
-
     public Collection findPlatformServices_orderName(Integer platId,
-                                                      boolean b,
-                                                      boolean asc)
+                                                     boolean asc)
     {
         String sql="select sv from Service sv " +
                    " join fetch sv.server s " +
@@ -294,7 +272,7 @@ public class ServiceDAO extends HibernateDAO
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, platId.intValue())
-            .setBoolean(1, b)
+            .setBoolean(1, true)
             .setCacheRegion("Service.findPlatformServices")
             .setCacheable(true)
             .list();

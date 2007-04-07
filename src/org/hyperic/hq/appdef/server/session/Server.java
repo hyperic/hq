@@ -338,4 +338,8 @@ public class Server extends ServerBase
 
         return result;
     }
+
+    public AppdefResourceType getAppdefResourceType() {
+       return _serverType;
+    }
 }

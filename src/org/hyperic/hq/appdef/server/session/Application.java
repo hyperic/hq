@@ -207,4 +207,8 @@ public class Application extends AppdefResource
     {
         return (obj instanceof Application) && super.equals(obj);
     }
+
+    public AppdefResourceType getAppdefResourceType() {
+        return _applicationType;
+    }
 }

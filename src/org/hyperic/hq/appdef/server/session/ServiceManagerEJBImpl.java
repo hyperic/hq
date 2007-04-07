@@ -894,7 +894,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get platform services (children of virtual servers)
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getPlatformServices(AuthzSubjectValue subject,
                                         Integer platId, 
@@ -909,7 +908,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Get platform services (children of virtual servers)
      * of a specified type
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PageList getPlatformServices(AuthzSubjectValue subject,
                                         Integer platId, 
@@ -919,8 +917,17 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                ServiceNotFoundException {
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
         Collection allServices = getServiceDAO()
-            .findPlatformServices_orderName(platId,true,pc.isAscending());
+            .findPlatformServices_orderName(platId, pc.isAscending());
         return this.filterAndPage(allServices, subject, typeId, pc);
+    }
+    
+    /**
+     * Get platform service POJOs (children of virtual servers)
+     * @ejb:interface-method
+     */
+    public Collection getPlatformServices(AuthzSubjectValue subject,
+                                          Integer platId) {
+        return getServiceDAO().findPlatformServices_orderName(platId, true);
     }
     
     /**
@@ -938,7 +945,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
             
         Collection allServices = getServiceDAO()
-            .findPlatformServices_orderName(platId,true,pc.isAscending());
+            .findPlatformServices_orderName(platId, pc.isAscending());
         HashMap retMap = new HashMap();
             
         // Map all services by type ID

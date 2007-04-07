@@ -327,4 +327,8 @@ public class Service extends AppdefResource
 
         return result;
     }
+
+    public AppdefResourceType getAppdefResourceType() {
+        return _serviceType;
+    }
 }

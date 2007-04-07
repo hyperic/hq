@@ -296,4 +296,8 @@ public class Platform extends PlatformBase
     public boolean equals(Object obj) {
         return (obj instanceof Platform) && super.equals(obj);
     }
+
+    public AppdefResourceType getAppdefResourceType() {
+        return _platformType;
+    }
 }
