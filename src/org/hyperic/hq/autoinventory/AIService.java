@@ -26,14 +26,12 @@
 package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
 public class AIService extends AppdefResource
 {
     private String serviceTypeName;
@@ -235,5 +233,9 @@ public class AIService extends AppdefResource
         result = 37*result + (server != null ? server.hashCode() : 0);
 
         return result;
+    }
+
+    public AppdefResourceType getAppdefResourceType() {
+        return null;
     }
 }

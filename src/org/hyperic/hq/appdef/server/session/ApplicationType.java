@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
@@ -94,5 +95,9 @@ public class ApplicationType extends AppdefResourceType
 
     public int getAppdefType() {
         return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+    }
+
+    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+        return getApplicationTypeValue();
     }
 }

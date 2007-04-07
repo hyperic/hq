@@ -25,14 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.io.Serializable;
-
 import org.hyperic.hq.appdef.AppdefBean;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 
-/**
- *
- */
 public abstract class AppdefResourceType extends AppdefBean
 {
     protected String name;
@@ -89,4 +84,9 @@ public abstract class AppdefResourceType extends AppdefBean
         this.description = description;
     }
 
+    /**
+     * @deprecated use this object instead
+     * @return the type value object
+     */
+    public abstract AppdefResourceTypeValue getAppdefResourceTypeValue();
 }

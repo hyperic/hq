@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
@@ -105,23 +106,6 @@ public class ServerType extends AppdefResourceType
         return AppdefEntityConstants.APPDEF_TYPE_SERVER;
     }
 
-    /**
-     * legacy EJB DTO (value object) pattern
-     * @deprecated use (this) ServerType object instead
-     */
-    public ServerTypeValue getServerTypeValueObject() {
-        ServerTypeValue vo = new ServerTypeValue();
-        vo.setName(getName());
-        vo.setSortName(getSortName());
-        vo.setDescription(getDescription());
-        vo.setPlugin(getPlugin());
-        vo.setId(getId());
-        vo.setMTime(getMTime());
-        vo.setCTime(getCTime());
-        vo.setVirtual(isVirtual());
-        return vo;
-    }
-
     private ServerTypeValue _serverTypeValue = new ServerTypeValue();
     /**
      * legacy EJB DTO (value object) pattern
@@ -149,5 +133,9 @@ public class ServerType extends AppdefResourceType
 
     public boolean equals(Object obj) {
         return (obj instanceof ServerType) && super.equals(obj);
+    }
+
+    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+        return getServerTypeValue();
     }
 }

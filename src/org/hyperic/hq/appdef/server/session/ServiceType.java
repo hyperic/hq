@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
@@ -148,5 +149,9 @@ public class ServiceType extends AppdefResourceType
 
     public boolean equals(Object obj) {
         return (obj instanceof ServiceType) && super.equals(obj);
+    }
+
+    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+        return getServiceTypeValue();
     }
 }

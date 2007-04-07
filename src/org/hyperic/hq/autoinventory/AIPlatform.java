@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.autoinventory;
 
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 
@@ -345,5 +346,9 @@ public class AIPlatform extends PlatformBase
     public boolean equals(Object obj)
     {
         return (obj instanceof AIPlatform) && super.equals(obj);
+    }
+
+    public AppdefResourceType getAppdefResourceType() {
+        return null;
     }
 }

@@ -36,6 +36,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -231,5 +232,9 @@ public class PlatformType extends AppdefResourceType {
 
     public boolean equals(Object obj) {
         return (obj instanceof PlatformType) && super.equals(obj);
+    }
+
+    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+        return getPlatformTypeValue();
     }
 }
