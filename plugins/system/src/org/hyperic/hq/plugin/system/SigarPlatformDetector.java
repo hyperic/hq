@@ -51,14 +51,14 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class SigarPlatformDetector extends PlatformDetector {
 
-    private static final String PROP_NETWORK_CONNECTED =
-        "platform.networkConnected";
     private static final String PROP_PLATFORM_IP_IGNORE =
         ProductPlugin.PROP_PLATFORM_IP + ".ignore";
+    private static final String PROP_PLATFORM_IP_DISCOVER =
+        ProductPlugin.PROP_PLATFORM_IP + ".discover";
 
     private String fqdn;
     private String ip;
-    private boolean networkConnected;
+    private boolean ipDiscover;
     private PluginManager manager;
     private Map ipIgnore = new HashMap();
 
@@ -70,9 +70,16 @@ public class SigarPlatformDetector extends PlatformDetector {
             props.getProperty(ProductPlugin.PROP_PLATFORM_FQDN);
         this.ip =
             props.getProperty(ProductPlugin.PROP_PLATFORM_IP);
-        //just for testing so we dont actually have to unplug network cable
-        this.networkConnected =
-            !"false".equals(props.getProperty(PROP_NETWORK_CONNECTED));
+        this.ipDiscover =
+            !"false".equals(props.getProperty(PROP_PLATFORM_IP_DISCOVER));
+
+        final String prop = "platform.networkConnected";
+        String networkConnected = props.getProperty(prop);
+        if ("false".equals(networkConnected)) {
+            this.ipDiscover = false;
+            getLog().warn(prop + " is deprecated, use " +
+                          PROP_PLATFORM_IP_DISCOVER + "=false instead");
+        }
 
         //allow filter via agent.properties in case there is an address
         //collision in the inventory
@@ -211,9 +218,9 @@ public class SigarPlatformDetector extends PlatformDetector {
                     }
                 }
 
-                if (!this.networkConnected) {
+                if (!this.ipDiscover) {
                     if ((flags & NetFlags.IFF_LOOPBACK) <= 0) {
-                        getLog().info(PROP_NETWORK_CONNECTED +
+                        getLog().info(PROP_PLATFORM_IP_DISCOVER +
                                       "=false, skipping interface=" + name +
                                       ", ip=" + address);
                         continue;
