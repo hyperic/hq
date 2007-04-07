@@ -237,7 +237,8 @@
                     ackAnchor.appendChild(imgNode);
                     ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");");
 
-                    imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';");
+                    //imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';this.border='0';");
+                    imgNode.onclick = new Function("imgHide", "this.parentNode.parentNode.innerHTML='&nbsp;';");
 
                     ackInstruction.style.display = "";
 
