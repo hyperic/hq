@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.LogTrackPlugin;
@@ -140,6 +141,11 @@ public class NetServicesDetector
             return description;
         }
     }
+
+    //XXX lame.
+    private boolean isIPv4(String address) {
+        return new StringTokenizer(address, ".", true).countTokens() == 7;
+    }
     
     protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
@@ -181,7 +187,13 @@ public class NetServicesDetector
                 continue;
             }
             String address = conn.getLocalAddress();
-            if (address.equals("0.0.0.0")) {
+            if (address.equals(NetFlags.ANY_ADDR_V6) ||
+                !isIPv4(address))
+            {
+                continue;
+            }
+
+            if (NetFlags.isAnyAddress(address)) {
                 address = "*";
             }
             ports.put(String.valueOf(conn.getLocalPort()), address);
