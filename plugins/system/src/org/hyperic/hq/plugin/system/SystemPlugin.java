@@ -259,6 +259,7 @@ public class SystemPlugin extends ProductPlugin {
         { "vendorVersion", "Vendor Version" },
         { "ram", "RAM" },
         { "cpuSpeed", "CPU Speed" },
+        { "ip", "IP Address" },
         { "primaryDNS", "Primary DNS" },
         { "secondaryDNS", "Secondary DNS" },
         { "defaultGateway", "Default Gateway" },

@@ -151,6 +151,7 @@ public class SigarPlatformDetector extends PlatformDetector {
         Sigar sigar = new Sigar();
         HashMap ips = new HashMap();
         String fqdn = this.fqdn;
+        String ip = null;
 
         ips.putAll(this.ipIgnore);
 
@@ -207,6 +208,8 @@ public class SigarPlatformDetector extends PlatformDetector {
                     if (!address.equals(NetFlags.LOOPBACK_ADDRESS)) {
                         continue;
                     }
+                } else if (ip == null) {
+                    ip = address;
                 }
 
                 if (isWin32()) {
@@ -278,6 +281,9 @@ public class SigarPlatformDetector extends PlatformDetector {
 
                 platform.setCpuCount(new Integer(1)); //1 at least
             }
+
+            setValue(cprops, "ip", ip);
+
             try {
                 NetInfo info = sigar.getNetInfo();
                 setValue(cprops, "primaryDNS", info.getPrimaryDns());
