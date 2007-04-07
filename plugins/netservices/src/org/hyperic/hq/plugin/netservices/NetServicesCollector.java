@@ -38,18 +38,18 @@ import javax.net.ssl.X509TrustManager;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.sigar.NetConnection;
-import org.hyperic.sigar.NetFlags;
+import org.hyperic.sigar.NetStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.SigarProxy;
-import org.hyperic.sigar.SigarProxyCache;
 import org.hyperic.util.security.BogusTrustManager;
 
 public abstract class NetServicesCollector extends Collector {
 
+    private static final String PROP_NETSTAT = "netservices.netstat";
+
     private int port = -1;
     private int defaultPort, defaultSSLPort;
-    private boolean isSSL;
+    private boolean isSSL, enableNetstat;
     private String sslProtcol;
 
     private InetSocketAddress sockaddr;
@@ -58,16 +58,9 @@ public abstract class NetServicesCollector extends Collector {
 
     private boolean hasCredentials;
 
-    private static final int TCP_FLAGS =
-        NetFlags.CONN_SERVER | NetFlags.CONN_CLIENT |
-        NetFlags.CONN_TCP;
-
     //XXX should just have a NetStat thread that is always
     //collecting, for these services and the platform to share.
-    private static Sigar sigarInstance = null;
-    private static SigarProxy sigar = null;
-    private static final int SIGAR_EXPIRE =
-        5* 60 * 1000; //5 minutes
+    private static Sigar sigar = null;
 
     protected int getDefaultTimeout() {
         return 10; //10 seconds
@@ -78,57 +71,29 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     protected void netstat() {
-        NetConnection[] connections;
+        if (!this.enableNetstat) {
+            return;
+        }
+
+        byte[] address =
+            getSocketAddress().getAddress().getAddress();
+        int port = getSocketAddress().getPort();
+        NetStat netstat;
         synchronized (sigar) {
             try {
-                connections =
-                    sigar.getNetConnectionList(TCP_FLAGS);
+                netstat =
+                    sigar.getNetStat(address, port);
             } catch (SigarException e) {
                 return;
             }
         }
 
-        String address = getHostAddress();
-        int port = getPort();
-        int incoming = 0, outgoing = 0;
-        int allIncoming = 0, allOutgoing = 0;
-        int[] states = new int[NetFlags.TCP_UNKNOWN];
-        for (int i=0; i<states.length; i++) {
-            states[i] = 0;
-        }
-        
-        for (int i=0; i<connections.length; i++) {
-            NetConnection conn = connections[i];
-            int state = conn.getState();
+        setValue("InboundConnections", netstat.getTcpInboundTotal());
+        setValue("OutboundConnections", netstat.getTcpOutboundTotal());
+        setValue("AllInboundConnections", netstat.getAllInboundTotal());
+        setValue("AllOutboundConnections", netstat.getAllOutboundTotal());
 
-            if (state == NetFlags.TCP_LISTEN) {
-                continue;
-            }
-
-            if (conn.getLocalPort() == port) {
-                allIncoming++;
-                if (conn.getLocalAddress().equals(address)) {
-                    incoming++;
-                }
-            }
-            else if (conn.getRemotePort() == port) {
-                allOutgoing++;
-                if (conn.getRemoteAddress().equals(address)) {
-                    outgoing++;
-                }
-            }
-            else {
-                continue;
-            }
-
-            states[state]++;
-        }
-
-        setValue("InboundConnections", incoming);
-        setValue("OutboundConnections", outgoing);
-        setValue("AllInboundConnections", allIncoming);
-        setValue("AllOutboundConnections", allOutgoing);
-        
+        int[] states = netstat.getTcpStates();
         for (int i=0; i<states.length; i++) {
             setValue("State" + NetConnection.getStateString(i),
                      states[i]);
@@ -136,11 +101,12 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     protected void init() throws PluginException {
-        if (sigar == null) {
-            sigarInstance = new Sigar();
-            sigar =
-                SigarProxyCache.newInstance(sigarInstance,
-                                            SIGAR_EXPIRE);
+        this.enableNetstat = 
+            !"false".equals(getPlugin().getManagerProperty(PROP_NETSTAT));
+        if (this.enableNetstat) {
+            if (sigar == null) {
+                sigar = new Sigar();
+            }
         }
         
         this.user = getProperty(PROP_USERNAME);
