@@ -63,6 +63,18 @@ public class AgentProductPlugin
                                      "Java Vendor");
         schema.addOption(opt);
 
+        opt = new StringConfigOption("UserHome",
+                                     "User Home");
+        schema.addOption(opt);
+
+        opt = new StringConfigOption("SigarVersion",
+                                     "Sigar Version");
+        schema.addOption(opt);
+
+        opt = new StringConfigOption("SigarNativeVersion",
+                                     "Sigar Native Version");
+        schema.addOption(opt);
+
         return schema;
     }
 
