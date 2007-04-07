@@ -25,12 +25,16 @@
 
 package org.hyperic.hq.plugin.system;
 
+import java.io.File;
+
 import org.hyperic.hq.product.ConfigFileTrackPlugin;
 import org.hyperic.hq.product.ExecutableMeasurementPlugin;
 import org.hyperic.hq.product.ExecutableProcess;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogFileTailPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProcessControlPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -41,6 +45,10 @@ import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.Win32EventLogTrackPlugin;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
 
+import org.hyperic.sigar.FileWatcherThread;
+import org.hyperic.sigar.ProcFileMirror;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
@@ -119,6 +127,48 @@ public class SystemPlugin extends ProductPlugin {
 
     public SystemPlugin() {
         setName(NAME);
+    }
+
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+
+        final String prop = "sigar.mirror.procnet";
+        final String enable = manager.getProperty(prop);
+        getLog().debug(prop + "=" + enable);
+        if (!"true".equals(enable)) {
+            return;
+        }
+
+        //intended for use on systems with very large connection tables
+        //where processing /proc/net/tcp may block or otherwise take much longer
+        //than reading a plain 'ol text file
+        //should only happen agent-side
+        String dir = manager.getProperty("agent.tmpDir", "tmp");
+        ProcFileMirror mirror = null;
+        final String[] procnet = {
+            "/proc/net/tcp",
+            "/proc/net/tcp6"
+        };
+        for (int i=0; i<procnet.length; i++) {
+            File file = new File(procnet[i]);
+            if (!file.exists()) {
+                continue;
+            }
+            if (mirror == null) {
+                mirror = new ProcFileMirror(new Sigar(), dir);
+            }
+
+            try {
+                mirror.add(file);
+                getLog().debug("mirroring " + procnet[i]);
+            } catch (SigarException e) {
+                getLog().warn(e.getMessage());
+            }
+        }
+        if (mirror != null) {
+            FileWatcherThread.getInstance().add(mirror);
+            FileWatcherThread.getInstance().doStart();
+        }
     }
 
     public GenericPlugin getPlugin(String type, TypeInfo info) {

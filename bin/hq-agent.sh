@@ -4,6 +4,8 @@ AGENTPROPFILE_PROP=agent.propFile
 AGENT_PROPS=agent.properties
 AGENT_LIB=./lib
 PDK_LIB=./pdk/lib
+# for /proc/net/tcp mirror
+SIGAR_PROC_NET=./tmp
 
 # ------------- 
 # Shouldn't need to change anything below this

@@ -594,7 +594,8 @@ public abstract class ServerDetector
         }
 
         if ((address == null) ||
-            NetFlags.isLoopback(address))
+            NetFlags.isLoopback(address) ||
+            NetFlags.isAnyAddress(address))
         {
             address = "localhost";
         }

@@ -224,6 +224,10 @@ public abstract class GenericPlugin {
         return getCustomPropertiesSchema(getTypeInfo());
     }
 
+    public String getManagerProperty(String key) {
+        return this.manager.getProperty(key);
+    }
+
     /**
      * Get a value defined by a &lt;property&gt; tag in the plugin's hq-plugin.xml 
      */
