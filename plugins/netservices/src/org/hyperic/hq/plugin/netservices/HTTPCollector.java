@@ -192,12 +192,26 @@ public class HTTPCollector extends SocketChecker {
             return;
         }
 
-        String body = method.getResponseBodyAsString();
-        parseResults(body);        
+        try {
+            String body = method.getResponseBodyAsString();
+            parseResults(body);
+        } catch (Exception e) { 
+            //throws IOException in commons-httpclient/3.0, nada in 2.0
+            setErrorMessage("Exception parsing response: " +
+                            e.getMessage());
+        }
     }
 
     private boolean matchResponse(HttpMethod method) {
-        String body = method.getResponseBodyAsString();
+        String body;
+        try {
+            body = method.getResponseBodyAsString();
+        } catch (Exception e) {
+            setErrorMessage("Exception getting response body: " +
+                            e.getMessage());
+            return false;
+        }
+
         if (body == null) {
             body = "";
         }
@@ -220,7 +234,8 @@ public class HTTPCollector extends SocketChecker {
             setWarningMessage("Response (length=" + body.length() +
                               ") does not match " + this.pattern);
         } catch (Exception e) {
-            e.printStackTrace();
+            setErrorMessage("Exception matching response: " +
+                            e.getMessage(), e);
         }
         return false;
     }
