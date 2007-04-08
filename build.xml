@@ -373,7 +373,6 @@
         <include name="commons-modeler.jar" />
         <include name="commons-collections.jar" />
         <include name="commons-dbcp.jar" />
-        <include name="commons-httpclient-2.0.jar" />
         <include name="commons-pool.jar" />
         <include name="commons-services.jar" />
         <include name="log4j-1.2.14.jar" />
@@ -795,7 +794,7 @@
         <include name="ant.jar" />  <!-- AI scans + util.TokenReplacer -->
         <include name="bcel-5.1.jar" />  <!-- sigar PTQL -->
         <include name="junit.jar" />  <!-- test to help with support issues -->
-        <include name="commons-httpclient-2.0.jar" /> <!-- Lather -->
+        <include name="commons-httpclient-3.0.1.jar" /> <!-- Lather -->
         <!-- WebSphere: must be in the main classloader for reasons unknown -->
         <include name="activation.jar" />
         <!-- for hq-plugin.xml parser -->
@@ -1501,7 +1500,7 @@
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/mockrunner-ejb.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/jakarta-oro-*.jar" />
     <delete file="${ear.dir}/hq.war/WEB-INF/lib/strutstest.jar" />
-    <delete file="${ear.dir}/hq.war/WEB-INF/lib/commons-httpclient-2.0.jar" />    
+    <delete file="${ear.dir}/hq.war/WEB-INF/lib/commons-httpclient-3.0.1.jar" />    
     <delete file="${ear.dir}/hq.war/WEB-INF/classes/cactus.properties"/>
     <delete file="${ear.dir}/hq.war/WEB-INF/classes/log_client.properties"/>
   </target>
