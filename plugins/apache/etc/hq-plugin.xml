@@ -40,7 +40,7 @@
   <!-- first part of snmpIndexValue (1.3.6.1.2.1.6.)
        is the tcp protocol id, see ietf-mibs/WWW-MIB.txt -->
   <filter name="vhost.config"
-	  value="snmpIndexName=wwwServiceName->wwwServiceProtocol,snmpIndexValue=%server.name%->1.3.6.1.2.1.6.%port%"/>
+          value="snmpIndexName=wwwServiceName->wwwServiceProtocol,snmpIndexValue=%server.name%->1.3.6.1.2.1.6.%port%"/>
 
   <!-- we need to lookup the index first, then combine that value
        with the give oid value.  for example:
@@ -445,14 +445,40 @@
   </metrics>
 
   <filter name="template"
-           value="jk-status:${jk.config}:${alias}"/>
+          value="jk-status:${url.config}:${alias}"/>
 
   <metrics name="jk-status">
     <metric name="Availability"
             indicator="true"/>
-  </metrics>
 
-  <config name="jk" include="url,basicauth"/>
+    <metric name="Reads"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Errors"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Retries"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="ClientErrors"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Maps"
+            category="THROUGHPUT"
+            units="none"/>
+
+  </metrics>
 
   <help name="restart-server">
   <![CDATA[
@@ -729,9 +755,11 @@ ExtendedStatus On
       <plugin type="collector"
               class="JkStatusCollector"/>
 
-      <property name="path" value="/jk-status"/>
-
-      <config include="jk"/>
+      <config include="url">
+        <option name="path"
+                description="jk-status path"
+                default="/jk-status"/>
+      </config>
 
       <metrics include="jk-status"/>
     </service>
@@ -838,9 +866,13 @@ ExtendedStatus On
       <plugin type="collector"
               class="JkStatusCollector"/>
 
-      <property name="path" value="/jk-status"/>
+<!--      <property name="path" value="/jk-status"/> -->
 
-      <config include="jk"/>
+      <config include="url">
+        <option name="path"
+                description="jk-status path"
+                default="/jk-status"/>
+      </config>
 
       <metrics include="jk-status"/>
     </service>
