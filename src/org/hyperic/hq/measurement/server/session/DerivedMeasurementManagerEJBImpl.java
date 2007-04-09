@@ -1346,10 +1346,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             log.warn("Error turning on default metrics, configuration (" +
                       config + ") " + "couldn't be validated", e);
             cfgMan.setValidationError(subject, id, e.getMessage());
+            return;
         } catch (Exception e) {
             log.warn("Error turning on default metrics, " +
                       "error in validation", e);
             cfgMan.setValidationError(subject, id, e.getMessage());
+            return;
         }
 
         // Enable the metrics
