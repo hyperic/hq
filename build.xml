@@ -795,6 +795,7 @@
         <include name="bcel-5.1.jar" />  <!-- sigar PTQL -->
         <include name="junit.jar" />  <!-- test to help with support issues -->
         <include name="commons-httpclient-3.0.1.jar" /> <!-- Lather -->
+        <include name="commons-codec-1.3.jar" /> <!-- HTTPClient dep -->
         <!-- WebSphere: must be in the main classloader for reasons unknown -->
         <include name="activation.jar" />
         <!-- for hq-plugin.xml parser -->
