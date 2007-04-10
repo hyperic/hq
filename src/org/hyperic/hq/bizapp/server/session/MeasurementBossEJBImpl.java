@@ -2623,7 +2623,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (type == null) {
                     type = res.getAppdefResourceType();
                     
-                    if (it.hasNext()) {
+                    if (sibIt.hasNext()) {
                         // autogroup
                         summary = new AutogroupDisplaySummary();
                         summary.setNumResources(new Integer(siblings.size()));
