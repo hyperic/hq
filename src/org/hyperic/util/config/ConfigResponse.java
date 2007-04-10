@@ -337,4 +337,16 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
     public int size(){
         return this.attributes.size();
     }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof ConfigResponse)) {
+            return false;
+        }
+
+        return ((ConfigResponse)o).toProperties().equals(this.toProperties());
+    }
+
+    public int hashCode() {
+        return this.toProperties().hashCode();
+    }
 }
