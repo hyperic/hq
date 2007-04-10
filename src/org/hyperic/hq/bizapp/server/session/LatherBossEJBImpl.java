@@ -32,12 +32,6 @@ import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.security.SecurityUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Lather Boss.
  * 
@@ -51,10 +45,6 @@ public class LatherBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
-    private final Log log = 
-        LogFactory.getLog(LatherBossEJBImpl.class.getName());
-
-    private SessionContext  sessionCtx;
     private LatherDispatcher dispatcher;
 
     /**
@@ -96,7 +86,5 @@ public class LatherBossEJBImpl
 
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {
-        this.sessionCtx = ctx;
-    }
+    public void setSessionContext(SessionContext ctx) {}
 }
