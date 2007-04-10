@@ -58,4 +58,24 @@ public class LiveDataCommand implements Serializable {
     public String toString() {
         return _id + ":" + _command;
     }
+
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof LiveDataCommand)) {
+            return false;
+        }
+
+        LiveDataCommand cmd = (LiveDataCommand)o;
+        return
+            cmd.getAppdefEntityID().equals(_id) &&
+            cmd.getCommand().equals(_command) &&
+            cmd.getConfig().equals(_config);
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + _id.hashCode();
+        result = 37*result + _command.hashCode();
+        result = 37*result + _config.hashCode();
+        return result;
+    }
 }
