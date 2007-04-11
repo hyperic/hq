@@ -649,7 +649,7 @@ function refreshDate() {
 }
 
 function reportError(originalRequest) {
-    alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
+    //alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
 }
 
 function unCheck() {
