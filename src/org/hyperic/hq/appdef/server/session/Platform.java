@@ -111,6 +111,19 @@ public class Platform extends PlatformBase
         return null;
     }
 
+    
+    public Ip updateIp(String address, String netmask, String macAddress) {
+        for (Iterator i = _ips.iterator(); i.hasNext(); ) {
+            Ip ip = (Ip)i.next();
+            if (ip.getAddress().equals(address)) {
+                ip.setNetmask(netmask);
+                ip.setMacAddress(macAddress);
+                return ip;
+            }
+        }
+        return null;
+    }
+    
     public Collection getServers() {
         return _servers;
     }

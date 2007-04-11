@@ -1365,6 +1365,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Update an IP on a platform
+     * @ejb:interface-method
+     */
+    public Ip updateIp(Platform platform, String address, String netmask,
+                       String macAddress) {
+        return platform.updateIp(address, netmask, macAddress);
+    }
+
+    /**
      * Remove an IP on a platform
      * @ejb:interface-method
      */
