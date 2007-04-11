@@ -53,6 +53,7 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.StringUtil;
 
 import javax.ejb.SessionContext;
 import javax.ejb.SessionBean;
@@ -60,6 +61,10 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 /**
  * @ejb:bean name="LiveDataManager"
@@ -73,16 +78,21 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     private static Log _log = LogFactory.getLog(LiveDataManagerEJBImpl.class);
 
     private LiveDataPluginManager _manager;
+    private Cache _cache;
+
+    private static final String CACHENAME = "LiveData";
+    private static final long NO_CACHE = -1;
 
     /** @ejb:create-method */
     public void ejbCreate() {
 
-        // Get reference to the plugin manager
+        // Initialize local objects
         try {
             _manager = (LiveDataPluginManager) ProductManagerEJBImpl.
                 getOne().getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
+            _cache = CacheManager.getInstance().getCache(CACHENAME);
         } catch (Exception e) {
-            _log.error("Unable to get plugin manager", e);
+            _log.error("Unable to initialize LiveData manager", e);
         }
     }
 
@@ -118,8 +128,8 @@ public class LiveDataManagerEJBImpl implements SessionBean {
                     getMergedConfigResponse(subject,
                                             ProductPlugin.TYPE_MEASUREMENT,
                                             id, true);
-                config.merge(mConfig, false);
-                return config;
+                mConfig.merge(config, false);
+                return mConfig;
             } catch (ConfigFetchException e) {
                 // No measurement config?  No problem
                 return config;
@@ -141,6 +151,44 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         return typeVal.getName();
     }
 
+    private void putElement(LiveDataCommand cmd, LiveDataResult res) {
+        putElement(new LiveDataCommand[] { cmd },
+                   new LiveDataResult[] { res });
+    }
+
+    private void putElement(LiveDataCommand[] cmds, LiveDataResult[] res) {
+        LiveDataCacheKey key = new LiveDataCacheKey(cmds);
+        LiveDataCacheObject obj = new LiveDataCacheObject(res);
+        Element e = new Element(key, obj);
+        _cache.put(e);
+    }
+
+    private LiveDataResult getElement(LiveDataCommand cmd, long timeout) {
+        LiveDataResult[] res = getElement(new LiveDataCommand[] { cmd },
+                                          timeout);
+        return res == null ? null : res[0];
+    }
+
+    private LiveDataResult[] getElement(LiveDataCommand[] cmds, long timeout) {
+        LiveDataCacheKey key = new LiveDataCacheKey(cmds);
+        Element e = _cache.get(key);
+        if (e == null) {
+            return null;
+        }
+
+        LiveDataCacheObject obj = (LiveDataCacheObject)e.getObjectValue();
+
+        if (System.currentTimeMillis() > obj.getCtime() + timeout) {
+            // Object is expired
+            _cache.remove(key);
+            return null;
+        }
+
+        _log.info("Returning cached result " +
+                  StringUtil.arrayToString(obj.getResult()));
+        return obj.getResult();
+    }
+
     /**
      * Run the given live data command.
      *
@@ -148,9 +196,34 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      */
     public LiveDataResult getData(AuthzSubjectValue subject,
                                   LiveDataCommand cmd)
+        throws AppdefEntityNotFoundException, PermissionException,
+               AgentNotFoundException, LiveDataException
+    {
+        return getData(subject, cmd, NO_CACHE);
+    }
+
+    /**
+     * Run the given live data command.  If cached data is found that is not
+     * older than the cachedTimeout the cached data will be returned.
+     *
+     * @param cacheTimeout
+     * @ejb:interface-method
+     */
+    public LiveDataResult getData(AuthzSubjectValue subject,
+                                  LiveDataCommand cmd, long cacheTimeout)
         throws PermissionException, AgentNotFoundException,
                AppdefEntityNotFoundException, LiveDataException
     {
+        // Attempt load from cache
+        LiveDataResult res;
+
+        if (cacheTimeout != NO_CACHE) {
+            res = getElement(cmd, cacheTimeout);
+            if (res != null) {
+                return res;
+            }
+        }
+
         AppdefEntityID id = cmd.getAppdefEntityID();
         AgentConnection conn = AgentConnectionUtil.getClient(id);
         LiveDataClient client = new LiveDataClient(conn);
@@ -158,21 +231,51 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
 
-        return client.getData(id, type, cmd.getCommand(), config);
+        res = client.getData(id, type, cmd.getCommand(), config);
+
+        if (cacheTimeout != NO_CACHE) {
+            putElement(cmd, res);
+        }
+
+        return res;
     }
 
     /**
      * Run a list of live data commands in batch.
      *
-     * @ejb:interface-method 
+     * @ejb:interface-method
      */
     public LiveDataResult[] getData(AuthzSubjectValue subject,
                                     LiveDataCommand[] commands)
+        throws AppdefEntityNotFoundException, PermissionException, 
+               AgentNotFoundException, LiveDataException
+    {
+       return getData(subject, commands, NO_CACHE);
+    }
+
+    /**
+     * Run a list of live data commands in batch.  If cached data is found
+     * that is not older than the cacheTimeout the cached data will be returned.
+     *
+     * @param cacheTimeout The cache timeout given in milliseconds.
+     * @ejb:interface-method
+     */
+    public LiveDataResult[] getData(AuthzSubjectValue subject,
+                                    LiveDataCommand[] commands,
+                                    long cacheTimeout)
         throws PermissionException, AppdefEntityNotFoundException,
                AgentNotFoundException, LiveDataException
     {
-        HashMap buckets = new HashMap();
+        // Attempt load from cache
+        LiveDataResult[] res;
+        if (cacheTimeout != NO_CACHE) {
+            res = getElement(commands, cacheTimeout);
+            if (res != null) {
+                return res;
+            }
+        }
 
+        HashMap buckets = new HashMap();
         for (int i = 0; i < commands.length; i++) {
             LiveDataCommand cmd = commands[i];
             AppdefEntityID id = cmd.getAppdefEntityID();
@@ -203,7 +306,13 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
         executor.shutdown();
 
-        return executor.getResult();
+        res = executor.getResult();
+
+        if (cacheTimeout != NO_CACHE) {
+            putElement(commands, res);
+        }
+
+        return res;
     }
 
     /**
