@@ -137,15 +137,22 @@ public class ViewAction extends BaseAction {
 
         for (int i = 0; i < ents.length; i++) {
             CacheEntry ent = ents[i];
-            // Only add if we have data
-            if (vals[i] != null) {
+            MetricValue val = vals[i];
+            if (val == null) {
+                // If we don't have measurement data for this resource, assume
+                // that it is down.
+                val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
+            }
+
+            // If no avail measurement is scheduled, skip this resource
+            if (ent != null) {
                 String name = ent.getType().getName();
-                AvailSummary summary = (AvailSummary)res.get(name);
+                AvailSummary summary = (AvailSummary) res.get(name);
                 if (summary == null) {
                     summary = new AvailSummary(ent.getType());
                     res.put(name, summary);
                 }
-                summary.setAvailability(vals[i].getValue());
+                summary.setAvailability(val.getValue());
             }
         }
 
