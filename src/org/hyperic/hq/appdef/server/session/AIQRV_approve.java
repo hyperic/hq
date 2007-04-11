@@ -259,7 +259,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
                               aiip.getMacAddress());
             break;
         case AIQueueConstants.Q_STATUS_CHANGED:
-            _log.error("IPs cannot have a status of changed");
+            platformMan.updateIp(platform, aiip.getAddress(), aiip.getNetmask(),
+                              aiip.getMacAddress());
             break;
         case AIQueueConstants.Q_STATUS_REMOVED:
             platformMan.removeIp(platform, aiip.getAddress(),
