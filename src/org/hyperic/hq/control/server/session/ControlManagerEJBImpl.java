@@ -41,12 +41,15 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
@@ -57,10 +60,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
-import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
-import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -322,27 +321,26 @@ public class ControlManagerEJBImpl implements SessionBean {
                                                 "group.");
         }
 
+        List members;
+
         try {
-            List members;
+            members = GroupUtil.getCompatGroupMembers(subject, id, null);
+        } catch (GroupNotCompatibleException ex) {
+            // only compatible groups are controllable
+            return false;
+        }
 
+        if (members.isEmpty())
+            return false;
+
+       for (Iterator i = members.iterator(); i.hasNext();) {
+            AppdefEntityID member = (AppdefEntityID) i.next();
             try {
-                members  = GroupUtil.getCompatGroupMembers(
-                    subject, id, null, PageControl.PAGE_ALL);
-            } catch (GroupNotCompatibleException ex) {
-                // only compatible groups are controllable
-                return false;
-            }
-
-            if (members.isEmpty())
-                return false;
-
-           for (Iterator i = members.iterator(); i.hasNext();) {
-                AppdefEntityID member = (AppdefEntityID) i.next();
                 checkControlEnabled(subject,member);
+                return true;
+            } catch (PluginException e) {
+                //continue
             }
-            return true;
-        } catch (PluginException e) {
-            //continue
         }
         return false;
     }
@@ -583,20 +581,8 @@ public class ControlManagerEJBImpl implements SessionBean {
             // then the entire group is unauthz.
             if (entities[x].getType() == 
                 AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-                AppdefGroupValue agv = GroupUtil.getGroup(caller,entities[x]);
-                if (agv.isGroupCompat()) {
-                    List members = agv.getAppdefGroupEntries();
-                    AppdefEntityID[] memArr = (AppdefEntityID[]) 
-                        members.toArray(new AppdefEntityID[0]);
-                    // recursion is allowed in non-interface ejb methods only...
-                    List authzMem = 
-                        doBatchCheckControlPermissions(caller,memArr);
-                    // only add the group if all members are control authz
-                    // ( > occurs when groups possibly contain other groups...)
-                    if (authzMem.size() != 0 && 
-                        members.size() >= authzMem.size()) {
-                        retVal.add(entities[x]);
-                    }
+                if (isGroupControlEnabled(caller, entities[x])) {
+                    retVal.add(entities[x]);
                 }
                 continue;
             } 
