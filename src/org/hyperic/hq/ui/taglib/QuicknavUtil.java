@@ -198,7 +198,7 @@ public class QuicknavUtil {
     
             // Skip if group has no members
             if (rv instanceof AppdefGroupValue) {
-                skip = ((AppdefGroupValue) rv).getSize() == 0;
+                skip = ((AppdefGroupValue) rv).getTotalSize() == 0;
             }
             
             if (!skip) {
