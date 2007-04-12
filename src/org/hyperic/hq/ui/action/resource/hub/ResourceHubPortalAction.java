@@ -333,7 +333,6 @@ public class ResourceHubPortalAction extends BaseAction {
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
-        // check control permissions
         ArrayList ids = new ArrayList();
         if (resources != null) {
             for (Iterator it = resources.iterator(); it.hasNext();) {
@@ -341,6 +340,8 @@ public class ResourceHubPortalAction extends BaseAction {
                 ids.add(rv.getEntityId());
             }
         }
+        
+        StopWatch watch = new StopWatch();
 
         if (ids.size() > 0) {
             AppdefEntityID[] idArr =
@@ -371,6 +372,10 @@ public class ResourceHubPortalAction extends BaseAction {
                                  controllableResources);
         }
         
+        if (log.isDebugEnabled()) {
+            log.debug("batchCheckControlPermissions " + watch.reset());
+        }
+
         // retrieve inventory summary
         AppdefInventorySummary summary =
             appdefBoss.getInventorySummary(sessionId);
@@ -413,6 +418,10 @@ public class ResourceHubPortalAction extends BaseAction {
             List types =
                 appdefBoss.findAllResourceTypes(sessionId, entityType, pc);
             addTypeOptions(hubForm, types);
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Look up types " + watch.getElapsed());
         }
 
         // Save the preferences if necessary
