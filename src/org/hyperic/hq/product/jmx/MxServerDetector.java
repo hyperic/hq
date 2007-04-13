@@ -55,8 +55,10 @@ public class MxServerDetector
     public static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
     public static final String PROP_PROCESS_QUERY = "process.query";
     protected static final String PROC_JAVA = "State.Name.sw=java";
+    protected static final String SUN_JMX_REMOTE =
+        "-Dcom.sun.management.jmxremote";
     protected static final String SUN_JMX_PORT = 
-        "-Dcom.sun.management.jmxremote.port=";
+        SUN_JMX_REMOTE + ".port=";
 
     protected static String getMxURL(String port) {
         return
@@ -72,12 +74,25 @@ public class MxServerDetector
     }
 
     protected boolean configureMxURL(ConfigResponse config, String arg) {
+        final String prop = SUN_JMX_REMOTE + "=";
+        if (arg.startsWith(prop)) {
+            String url = arg.substring(prop.length());
+            if (url.startsWith(MxUtil.PTQL_PREFIX)) {
+                //local access enabled via:
+                //-Dcom.sun.management.jmxremote=ptql:State.Name.eq=java,...
+                config.setValue(MxUtil.PROP_JMX_URL, url);
+                return true;
+            }
+        }
+
         String port = parseMxPort(arg);
         if (port == null) {
             return false;
         }
 
         String url = getMxURL(port);
+        //remote access enabled via:
+        //-Dcom.sun.management.jmxremote.port=xxxx
         config.setValue(MxUtil.PROP_JMX_URL, url);
 
         return true;
