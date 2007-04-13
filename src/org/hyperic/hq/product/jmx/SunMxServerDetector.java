@@ -73,7 +73,13 @@ public class SunMxServerDetector extends MxServerDetector {
                     if ((name == null) ||
                         (name = name.trim()).length() == 0)
                     {
-                        name = "@ " + parseMxPort(arg);                        
+                        String port = parseMxPort(arg);                        
+                        if (port == null) {
+                            name = " (local)";
+                        }
+                        else {
+                            name = "@ " + port;
+                        }
                     }
                     else {
                         //jmx-plugin.xml may map the classname to product name
@@ -84,11 +90,13 @@ public class SunMxServerDetector extends MxServerDetector {
                         }
                     }
 
+                    String identifier = args[j];
                     String installpath = getProcExe(pid);
                     ServerResource server =
                         createServerResource(installpath);
                     server.setName(server.getName() + " " + name);
-                    server.setIdentifier(args[j]);
+                    server.setIdentifier(identifier);
+                    getLog().debug(server.getName() + " identifier=" + identifier);
                     setProductConfig(server, config);
                     server.setMeasurementConfig();
 

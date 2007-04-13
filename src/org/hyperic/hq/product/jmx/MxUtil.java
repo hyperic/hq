@@ -68,7 +68,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class MxUtil {
 
-    private static final String PTQL_PREFIX = "ptql:";
+    static final String PTQL_PREFIX = "ptql:";
 
     public static final String PROP_JMX_URL = "jmx.url";
     public static final String PROP_JMX_USERNAME = "jmx.username";
