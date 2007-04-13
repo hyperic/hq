@@ -74,7 +74,8 @@ public class Metric {
     private String propString = null;
     private MetricProperties props = null;
     private String id = null; //for tie-in to logging
-    
+    private String category = null;
+
     private Metric() {
     }
 
@@ -305,7 +306,20 @@ public class Metric {
             this.id = type + ":" + id;
         }
     }
-    
+
+    public String getCategory() {
+        return this.category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public boolean isAvail() {
+        return MeasurementConstants.CAT_AVAILABILITY.equals(getCategory()) ||
+               getAttributeName().equals(ATTR_AVAIL);
+    }
+
     /**
      * @param template The metric string to be parsed.
      * @return A Metric that can be used by the plugins.
