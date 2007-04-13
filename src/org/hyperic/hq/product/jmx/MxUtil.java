@@ -300,6 +300,9 @@ public class MxUtil {
             throw invalidObjectName(metric.getObjectName(), e);
         } catch (IOException e) {
             removeMBeanConnector(config);
+            if (metric.isAvail()) {
+                return new Double(Metric.AVAIL_DOWN);
+            }
             throw unreachable(metric.getProperties(), e);
         } catch (MBeanException e) {
             throw error(metric.toString(), e);
@@ -307,7 +310,7 @@ public class MxUtil {
             //XXX not all MBeans have a reasonable attribute to
             //determine availability, so just assume if we get this far
             //the MBean exists and is alive.
-            if (attribute.equals(Metric.ATTR_AVAIL)) {
+            if (metric.isAvail()) {
                 return new Double(Metric.AVAIL_UP);
             }
             throw attributeNotFound(metric.getObjectName(),
@@ -320,7 +323,7 @@ public class MxUtil {
         } catch (RuntimeException e) {
             // Temporary fix until availability strings can be mapped
             // in hq-plugin.xml.  Resin wraps AttributeNotFoundException
-            if (attribute.equals(Metric.ATTR_AVAIL)) {
+            if (metric.isAvail()) {
                 Throwable cause = e.getCause();
                 while (cause != null) {
                     if (cause instanceof AttributeNotFoundException) {
