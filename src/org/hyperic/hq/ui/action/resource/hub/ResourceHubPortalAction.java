@@ -138,7 +138,6 @@ public class ResourceHubPortalAction extends BaseAction {
         }
         */
         
-        
         String view = hubForm.getView();
         if (!ResourceHubForm.LIST_VIEW.equals(view) &&
             !ResourceHubForm.CHART_VIEW.equals(view)) { // Invalid view
@@ -252,6 +251,8 @@ public class ResourceHubPortalAction extends BaseAction {
         }
 
         PageList resources = null;
+        StopWatch watch = new StopWatch();
+        watch.markTimeBegin("findCompatInventory");
         if (isGroupSelected) {
             // as far as the backend is concerned, the resource type
             // is the actual group type we want. our groupType just
@@ -279,8 +280,6 @@ public class ResourceHubPortalAction extends BaseAction {
                 throw new ServletException("Invalid group type: " + groupType);
             }
 
-            StopWatch watch = new StopWatch();
-
             resources =
                 appdefBoss.findCompatInventory(sessionId,
                                                groupSubtype,
@@ -290,10 +289,6 @@ public class ResourceHubPortalAction extends BaseAction {
                                                resourceName,
                                                null,
                                                pc);
-            if (log.isDebugEnabled()) {
-                log.debug("findCompatInventory() elapsed: " +
-                          watch.getElapsed());
-            }
         }
         else {
             // Look up groups
@@ -331,6 +326,8 @@ public class ResourceHubPortalAction extends BaseAction {
                                                        pc);
         }
 
+        watch.markTimeEnd("findCompatInventory");
+
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);
 
         // check control permissions
@@ -341,7 +338,8 @@ public class ResourceHubPortalAction extends BaseAction {
                 ids.add(rv.getEntityId());
             }
         }
-
+        
+        watch.markTimeBegin("batchCheckControlPermissions");
         if (ids.size() > 0) {
             AppdefEntityID[] idArr =
                 (AppdefEntityID[]) ids.toArray(new AppdefEntityID[0]);
@@ -363,19 +361,23 @@ public class ResourceHubPortalAction extends BaseAction {
                     request.setAttribute("Indicators", templates);
             }
 
+            /*
             // Set additional flags
             ControlBoss controlBoss = ContextUtils.getControlBoss(ctx);
             List controllableResources =
                 controlBoss.batchCheckControlPermissions(sessionId, idArr);
             request.setAttribute(Constants.ALL_RESOURCES_CONTROLLABLE,
                                  controllableResources);
+                                 */
         }
         
+        watch.markTimeEnd("batchCheckControlPermissions");
         // retrieve inventory summary
         AppdefInventorySummary summary =
             appdefBoss.getInventorySummary(sessionId);
         request.setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
 
+        watch.markTimeBegin("findAllResourceTypes");
         // generate list of selectable resource types for the chosen
         // entity type.
         pc = PageControl.PAGE_ALL;
@@ -415,6 +417,11 @@ public class ResourceHubPortalAction extends BaseAction {
             addTypeOptions(hubForm, types);
         }
 
+        watch.markTimeEnd("findAllResourceTypes");
+        if (log.isDebugEnabled()) {
+            log.debug("ResourceHubPortalAction: " + watch);
+        }
+
         // Save the preferences if necessary
         if (prefChanged) {
             AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
@@ -425,9 +432,8 @@ public class ResourceHubPortalAction extends BaseAction {
         // clean out the return path 
         SessionUtils.resetReturnPath(request.getSession());
         
-        Portal portal =
-            Portal.createPortal("resource.hub.ResourceHubTitle",
-                                ".resource.hub");
+        Portal portal = Portal.createPortal("resource.hub.ResourceHubTitle",
+                                            ".resource.hub");
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
         request.setAttribute(Constants.INVENTORY_HIERARCHY_ATTR, navHierarchy);

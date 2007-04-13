@@ -192,7 +192,8 @@ public class QuicknavUtil {
                                                QuicknavUtil.ICON_SRC_A,
                                                context);
         }
-    
+
+        /*
         if (QuicknavUtil.isControllable(rv, context)) {
             boolean skip = false;
     
@@ -212,6 +213,7 @@ public class QuicknavUtil {
                 }
             }
         }
+        */
     
         return buf.toString();
     }

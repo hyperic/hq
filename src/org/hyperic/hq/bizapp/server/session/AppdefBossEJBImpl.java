@@ -2959,34 +2959,10 @@ public class AppdefBossEJBImpl
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
-        PageList ret = findCompatInventory(sessionId, appdefTypeId,
-                                           appdefResTypeId,
-                                           APPDEF_GROUP_TYPE_UNDEFINED,
-                                           groupEntity, true, null,
-                                           resourceName, null,
-                                           APPDEF_GROUP_TYPE_UNDEFINED, pc);
-
-        if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
-            appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) 
-        {
-            AuthzSubjectValue subject = manager.getSubject(sessionId);
-            
-            for (Iterator i = ret.iterator(); i.hasNext(); ) {
-                AppdefResourceValue res = (AppdefResourceValue) i.next();
-
-                if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                    ServerValue server = getServerManager()
-                        .getServerById(subject, res.getId());
-                    res.setHostName(server.getPlatform().getName());
-
-                } else {
-                    ServiceValue service =
-                        getServiceManager().getServiceById(subject, res.getId());
-                    res.setHostName(service.getServer().getName());
-                }
-            }
-        }
-        return ret;
+        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
+                                   APPDEF_GROUP_TYPE_UNDEFINED, groupEntity,
+                                   true, null, resourceName, null,
+                                   APPDEF_GROUP_TYPE_UNDEFINED, pc);
     }
 
    /**
