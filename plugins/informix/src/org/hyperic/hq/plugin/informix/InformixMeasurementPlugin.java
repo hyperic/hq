@@ -51,11 +51,6 @@ public class InformixMeasurementPlugin extends JDBCMeasurementPlugin
 
     private Map myQueries = new HashMap();
 
-    public InformixMeasurementPlugin()
-    {
-        setName(InformixProductPlugin.NAME);
-    }
-
     protected void getDriver() throws ClassNotFoundException
     {
         Class.forName(JDBC_DRIVER);
