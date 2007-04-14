@@ -2941,6 +2941,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException {
         PageList summaries = new PageList();
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
+            StopWatch watch = new StopWatch();
             AppdefResourceValue resource = (AppdefResourceValue) it.next();
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
         
@@ -2974,8 +2975,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     summary.setMonitorable(Boolean.TRUE);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    AppdefGroupValue agv =
-                        GroupUtil.getGroup(subject, resource.getEntityId());
+                    AppdefGroupValue agv = (AppdefGroupValue) resource;
                     if (!agv.isGroupCompat()) {
                         // geez, why are we here at all?  well, a user _could_
                         // add a group to their dashboard's resourceHealth
@@ -3010,6 +3010,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }            
             setResourceDisplaySummary(summary, resource, parent);
             summaries.add(summary);
+            log.debug("getResourcesCurrentHealth: " + watch);
         }        
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
@@ -3205,18 +3206,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        PageList resources;
 
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         StopWatch timer = new StopWatch();
 
-        AppdefBossLocal boss;
-        try {
-            boss = AppdefBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
+        PageList resources = new PageList();
+        for (int i = 0; i < entIds.length; i++) {
+            AppdefEntityValue entVal =
+                new AppdefEntityValue(entIds[i], subject);
+            resources.add(entVal.getLiteResourceValue());
         }
-        resources = boss.findByIds(sessionId,entIds);
         timingLog.trace("findResourceCurrentHealth(2) - timing [" +
                         timer.toString()+"]");
 

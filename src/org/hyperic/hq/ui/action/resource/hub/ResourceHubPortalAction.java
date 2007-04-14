@@ -54,7 +54,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
@@ -340,9 +339,6 @@ public class ResourceHubPortalAction extends BaseAction {
         
         watch.markTimeBegin("batchCheckControlPermissions");
         if (ids.size() > 0) {
-            AppdefEntityID[] idArr =
-                (AppdefEntityID[]) ids.toArray(new AppdefEntityID[0]);
-
             if (prefView.equals(ResourceHubForm.LIST_VIEW) &&
                 !isGroupSelected && resourceType != DEFAULT_RESOURCE_TYPE) {
                 // Get the indicator templates
@@ -353,8 +349,17 @@ public class ResourceHubPortalAction extends BaseAction {
                 cats.add(MeasurementConstants.CAT_THROUGHPUT);
                 cats.add(MeasurementConstants.CAT_PERFORMANCE);
 
-                Collection templates =
-                    mboss.getDesignatedTemplates(sessionId, idArr, cats);
+                Collection templates = null;
+                
+                for (Iterator it = ids.iterator(); it.hasNext(); ) {
+                    templates =
+                        mboss.getDesignatedTemplates(sessionId,
+                                                     (AppdefEntityID) it.next(),
+                                                     cats);
+                    
+                    if (templates.size() > 0)
+                        break;
+                }
                 
                 if (templates.size() > 0)
                     request.setAttribute("Indicators", templates);
