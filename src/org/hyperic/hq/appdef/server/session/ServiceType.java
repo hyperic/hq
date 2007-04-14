@@ -115,21 +115,24 @@ public class ServiceType extends AppdefResourceType
         return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
     }
 
-    private ServiceTypeValue _serviceTypeValue = new ServiceTypeValue();
+    private ServiceTypeValue _serviceTypeValue = null;
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) ServiceType object instead
      * @return
      */
     public ServiceTypeValue getServiceTypeValue() {
-        _serviceTypeValue.setName(getName());
-        _serviceTypeValue.setSortName(getSortName());
-        _serviceTypeValue.setDescription(getDescription());
-        _serviceTypeValue.setPlugin(getPlugin());
-        _serviceTypeValue.setIsInternal(getIsInternal());
-        _serviceTypeValue.setId(getId());
-        _serviceTypeValue.setMTime(getMTime());
-        _serviceTypeValue.setCTime(getCTime());
+        if (_serviceTypeValue == null) {
+            _serviceTypeValue = new ServiceTypeValue();
+            _serviceTypeValue.setName(getName());
+            _serviceTypeValue.setSortName(getSortName());
+            _serviceTypeValue.setDescription(getDescription());
+            _serviceTypeValue.setPlugin(getPlugin());
+            _serviceTypeValue.setIsInternal(getIsInternal());
+            _serviceTypeValue.setId(getId());
+            _serviceTypeValue.setMTime(getMTime());
+            _serviceTypeValue.setCTime(getCTime());
+        }
         return _serviceTypeValue;
     }
 

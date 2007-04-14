@@ -25,16 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collection;
+
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.dao.DAOFactory;
-import org.hibernate.ObjectNotFoundException;
-
-import java.util.Collection;
 
 public class Service extends AppdefResource
 {
@@ -209,12 +208,8 @@ public class Service extends AppdefResource
             // temporarily rely on EJB until
             // it is hibernized
             try {
-                ServiceTypeDAO shome =
-                    DAOFactory.getDAOFactory().getServiceTypeDAO();
-                ServiceType st =
-                    shome.findById(getServiceType().getId());
                 _serviceLightValue.setServiceType(
-                    st.getServiceTypeValue());
+                    getServiceType().getServiceTypeValue());
             } catch (ObjectNotFoundException e) {
             }
         }
