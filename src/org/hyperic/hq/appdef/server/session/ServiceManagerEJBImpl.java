@@ -457,7 +457,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws ServiceNotFoundException, PermissionException {
 
         Service s = findServiceById(id);
-        checkViewPermission(subject, s.getEntityId());
+        //checkViewPermission(subject, s.getEntityId());
         return s.getServiceLightValue();
     }
 
