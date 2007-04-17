@@ -162,7 +162,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return v.size();
     }
 
-    List findByInstance(int type, int id, boolean enabled) {
+    public List findByInstance(int type, int id, boolean enabled) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
