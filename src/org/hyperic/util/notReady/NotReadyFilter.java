@@ -78,12 +78,15 @@ public class NotReadyFilter
     {
         HttpServletResponse hResp;
         HttpServletRequest hReq;
-
+        boolean ready;
+        
         synchronized(_readyLock) {
-            if (_isReady){
-                filterChain.doFilter(servletRequest, servletResponse);
-                return;
-            }
+            ready = _isReady;
+        }
+        
+        if (ready) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
         }
 
         hResp = (HttpServletResponse)servletResponse;
