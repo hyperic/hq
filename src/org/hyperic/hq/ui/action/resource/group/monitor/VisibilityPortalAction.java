@@ -49,6 +49,7 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisib
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * A <code>BaseDispatchAction</code> that sets up compatible group monitor
@@ -136,11 +137,18 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             // setResource already set a request error
             return;
         }
+        
+        StopWatch watch = new StopWatch();
+        watch.markTimeBegin("findGroupCurrentHealth");
         List healths = boss.findGroupCurrentHealth(sessionId, entityId);
+        watch.markTimeEnd("findGroupCurrentHealth");
 
-        if (log.isTraceEnabled())
-            log.trace("got " + healths.size()
+        if (log.isDebugEnabled()) {
+            log.debug("got " + healths.size()
                       + " ResourceTypeDisplays getting group member's health");
+            log.debug("findResourceHealths: " + watch);
+        }
+        
         request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
                              healths);
         request.setAttribute(Constants.CTX_SUMMARIES, healths);
