@@ -138,17 +138,6 @@ public class AutoGroupMetricsFormPrepareAction
         begin = (Long) range.get(MonitorUtils.BEGIN);
         end = (Long) range.get(MonitorUtils.END);
 
-        PageControl pc = RequestUtils.getPageControl(request);
-
-        Integer sessionId = RequestUtils.getSessionId(request);
-        List healths = AutoGroupHelper.getAutoGroupResourceHealths(ctx,
-                                                                   sessionId,
-                                                                   entityIds,
-                                                                   childTypeID);
-        
-        request.setAttribute(Constants.AUTOGROUP_HEALTH_SUMMARIES_ATTR,
-                             healths);
-
         // prepare form
         // XXX: needs to go away when the rest of monitoring supports eids
         if (null != typeHolder) {
