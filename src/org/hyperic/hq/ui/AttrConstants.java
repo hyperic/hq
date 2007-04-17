@@ -643,14 +643,6 @@ public interface AttrConstants {
     
     /**
      * The request scope attribute under which actions store a
-     * <code>List</code> of <code>ResourceDisplaySummary</code>
-     * objects representing the currently viewed autogroup's members
-     */
-    public static final String AUTOGROUP_HEALTH_SUMMARIES_ATTR =
-    "AutoGroupHealthSummaries";
-    
-    /**
-     * The request scope attribute under which actions store a
      * <code>Map</code> of <code>MetricDisplaySummary</code>
      * objects keyed by metric category.
      */
