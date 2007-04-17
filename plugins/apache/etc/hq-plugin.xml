@@ -730,6 +730,9 @@
     <plugin type="collector"
             class="ApacheStatusCollector"/>
 
+    <plugin type="autoinventory"
+            class="ApacheServerDetector"/>
+
     <metrics include="apache-status"/>
 
     <help>

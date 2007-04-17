@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +53,8 @@ public class JkStatusCollector extends HTTPCollector
                                 RECOVER_TIME_KEY = "RecoverTime",
                                 MEMBER_COUNT_KEY = "MemberCount",
                                 MAPCOUNT_KEY = "Maps";
+    static final String JK_NAME = "mod_jk";
+    static final String WORKER_NAME = JK_NAME + " Worker";
 
     protected void init() throws PluginException
     {
