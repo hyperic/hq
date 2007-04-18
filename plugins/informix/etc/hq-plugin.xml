@@ -34,9 +34,8 @@
   <filter name="domain" value="informix"/>
 
   <!-- appended to each template by MeasurementInfoXML -->
-  <property name="template-config">
-   jdbcUrl=jdbc:informix-sqli://%hostname%:%port%/sysmaster:informixserver=%servername%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%
-  </property>
+  <property name="template-config"
+            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
   <filter name="template"
           value="${domain}:Type=Server:${alias}"/>
@@ -151,21 +150,15 @@
     </properties>
 
     <config>
+      <option name="jdbcUrl"
+              description="JDBC Url"
+              default="jdbc:informix-sqli://localhost:3500/sysmaster:informixserver=test_shm"/>
       <option name="jdbcUser"
               description="JDBC User"
               default="informix"/>
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
-      <option name="hostname"
-              optional="true"
-              description="Informix Hostname"/>
-      <option name="port"
-              optional="true"
-              description="Informix Port"/>
-      <option name="servername"
-              optional="true"
-              description="Informix Servername"/>
     </config>
 
     <service name="Table">

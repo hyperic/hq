@@ -81,8 +81,7 @@ public class InformixMeasurementPlugin extends JDBCMeasurementPlugin
 
     protected String getDefaultURL()
     {
-        return "jdbc:informix-sqli://vmlin-002:3500/sysmaster:informixserver=test_shm";
-//        return "jdbc:informix-sqli://localhost:3500/sysmaster:informixserver=test_shm";
+        return getConfig(PROP_URL);
     }
 
     protected void initQueries() 

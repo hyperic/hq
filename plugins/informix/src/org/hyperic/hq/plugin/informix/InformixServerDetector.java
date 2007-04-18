@@ -169,7 +169,6 @@ public class InformixServerDetector
         throws PluginException
     {
         String url  = config.getValue(PROP_URL);
-//String url = "jdbc:informix-sqli://vmlin-002:3500/sysmaster:informixserver=test_shm";
         String user = config.getValue(PROP_USER);
         String pass = config.getValue(PROP_PASSWORD);
 
