@@ -174,6 +174,16 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     protected String getColumnName(Metric jdsn) {
         return "";
     }
+
+    protected Connection getCachedConnection(Metric metric)
+        throws SQLException
+    {
+        Properties props = metric.getProperties();
+        String url  = props.getProperty(PROP_URL),
+               user = props.getProperty(PROP_USER),
+               pass = props.getProperty(PROP_PASSWORD);
+        return getCachedConnection(url, user, pass);
+    }
     
     protected Connection getCachedConnection(String url, String user,
                                              String pass)
