@@ -3093,14 +3093,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         long now = System.currentTimeMillis();
         watch.markTimeBegin("get designated metrics data");
+
+        // Optimization for the fact that we can have multiple indicator
+        // metrics for each category
+        HashSet done = new HashSet();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
             MeasurementTemplateValue templ = dmv.getTemplate();
             String category = templ.getCategory().getName();
 
-            // First let's see if category is availability, we don't want
-            // to have too many different ways of getting availability metric
-            // value
+            if (done.contains(category))
+                continue;
             
             // an array (of length 1) of measurement id's
             Integer[] mids = { dmv.getId() };
@@ -3124,6 +3127,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 summary.setPerformanceUnits(templ.getUnits());
                 summary.setPerformTempl(templ.getId());
             }
+
+            done.add(category);
         }
         watch.markTimeEnd("get designated metrics data");
         if (log.isDebugEnabled()) {
