@@ -2939,9 +2939,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private PageList getResourcesCurrentHealth(AuthzSubjectValue subject,
                                                PageList resources)
         throws AppdefEntityNotFoundException, PermissionException {
+        StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
-            StopWatch watch = new StopWatch();
             AppdefResourceValue resource = (AppdefResourceValue) it.next();
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
         
@@ -2969,8 +2969,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     categories.add(MeasurementConstants.CAT_THROUGHPUT);
                 
                     setResourceDisplaySummaryValueForCategory(
-                        subject, resource.getEntityId(), summary,
-                        categories);
+                        subject, resource.getEntityId(), summary, categories);
                     
                     summary.setMonitorable(Boolean.TRUE);
                     break;
@@ -3010,8 +3009,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }            
             setResourceDisplaySummary(summary, resource, parent);
             summaries.add(summary);
+        }
+        if (log.isDebugEnabled()) {
             log.debug("getResourcesCurrentHealth: " + watch);
-        }        
+        }
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
     }
@@ -3077,33 +3078,30 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (categories.size() == 0)
             return;
         
-        List measurements = findDesignatedMetrics(subject, id, categories);
+        StopWatch watch = new StopWatch();
         
-        // XXX - optimization for the fact that we can have multiple indicator
-        // metrics for each category
-        HashSet done = new HashSet();
+        if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
+            summary.setAvailability(
+                new Double(getAvailability(subject, id)));
+            DerivedMeasurement dm = findAvailabilityMetric(subject, id);
+            summary.setAvailTempl(dm.getTemplate().getId());
+        }
+        
+        watch.markTimeBegin("findDesignatedMetrics");
+        List measurements = findDesignatedMetrics(subject, id, categories);
+        watch.markTimeEnd("findDesignatedMetrics");
+        
         long now = System.currentTimeMillis();
+        watch.markTimeBegin("get designated metrics data");
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
-            String category = dmv.getTemplate().getCategory().getName();
+            MeasurementTemplateValue templ = dmv.getTemplate();
+            String category = templ.getCategory().getName();
 
-            if (done.contains(category))
-                continue;
-            
             // First let's see if category is availability, we don't want
             // to have too many different ways of getting availability metric
             // value
-            if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                summary.setAvailability(
-                    new Double(getAvailability(subject, id)));
-                summary.setAvailTempl(dmv.getTemplate().getId());
-            }
             
-            // We only do throughput and performance right now
-            if (!category.equals(MeasurementConstants.CAT_THROUGHPUT) &&
-                !category.equals(MeasurementConstants.CAT_PERFORMANCE))
-                continue;
-
             // an array (of length 1) of measurement id's
             Integer[] mids = { dmv.getId() };
 
@@ -3119,15 +3117,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             if (category.equals(MeasurementConstants.CAT_THROUGHPUT)) {
                 summary.setThroughput(theValue);
-                summary.setThroughputUnits(dmv.getTemplate().getUnits());
-                summary.setThroughputTempl(dmv.getTemplate().getId());
+                summary.setThroughputUnits(templ.getUnits());
+                summary.setThroughputTempl(templ.getId());
             } else if (category.equals(MeasurementConstants.CAT_PERFORMANCE)) {
                 summary.setPerformance(theValue);
-                summary.setPerformanceUnits(dmv.getTemplate().getUnits());
-                summary.setPerformTempl(dmv.getTemplate().getId());
+                summary.setPerformanceUnits(templ.getUnits());
+                summary.setPerformTempl(templ.getId());
             }
-            
-            done.add(category);
+        }
+        watch.markTimeEnd("get designated metrics data");
+        if (log.isDebugEnabled()) {
+            log.debug("setResourceDisplaySummaryValueForCategory: " + watch);
         }
     }
 
