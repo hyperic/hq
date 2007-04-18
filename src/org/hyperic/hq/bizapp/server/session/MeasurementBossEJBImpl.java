@@ -3079,6 +3079,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (categories.size() == 0)
             return;
         
+        if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
+            summary.setAvailability(
+                new Double(getAvailability(subject, id)));
+            DerivedMeasurement dm = findAvailabilityMetric(subject, id);
+            summary.setAvailTempl(dm.getTemplate().getId());
+        }
+
         List measurements = findDesignatedMetrics(subject, id, categories);
         
         // XXX - optimization for the fact that we can have multiple indicator
@@ -3088,22 +3095,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
             DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
             String category = dmv.getTemplate().getCategory().getName();
-
+            
             if (done.contains(category))
-                continue;
-            
-            // First let's see if category is availability, we don't want
-            // to have too many different ways of getting availability metric
-            // value
-            if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                summary.setAvailability(
-                    new Double(getAvailability(subject, id)));
-                summary.setAvailTempl(dmv.getTemplate().getId());
-            }
-            
-            // We only do throughput and performance right now
-            if (!category.equals(MeasurementConstants.CAT_THROUGHPUT) &&
-                !category.equals(MeasurementConstants.CAT_PERFORMANCE))
                 continue;
 
             // an array (of length 1) of measurement id's
