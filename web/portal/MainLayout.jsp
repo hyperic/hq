@@ -53,7 +53,7 @@
         onloads[i]();
     }
   </script>
-  <script language="JavaScript" src="<html:rewrite page='/js/requests.js'/>" type="text/javascript"></script>
+
 </head>
 <body style="background-color: #FFFFFF;" onload="bodyOnLoad();">
   <c:choose>    

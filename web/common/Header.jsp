@@ -173,8 +173,7 @@
         refreshCount++;
 
         new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
-                         {method: 'get', onSuccess:showRecentAlertResponse,
-                                         onFailure :reportError});
+                         {method: 'get', onSuccess:showRecentAlertResponse});
       }
 
       function showRecentAlertResponse(originalRequest) {
