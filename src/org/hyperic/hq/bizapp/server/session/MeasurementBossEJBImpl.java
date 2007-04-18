@@ -3081,10 +3081,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         StopWatch watch = new StopWatch();
         
         if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
-            summary.setAvailability(
-                new Double(getAvailability(subject, id)));
             DerivedMeasurement dm = findAvailabilityMetric(subject, id);
-            summary.setAvailTempl(dm.getTemplate().getId());
+            if (dm != null) {
+                summary.setAvailability(
+                    new Double(getAvailability(subject, id)));
+                summary.setAvailTempl(dm.getTemplate().getId());
+            }
         }
         
         watch.markTimeBegin("findDesignatedMetrics");
