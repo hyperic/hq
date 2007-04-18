@@ -34,8 +34,9 @@
   <filter name="domain" value="informix"/>
 
   <!-- appended to each template by MeasurementInfoXML -->
-  <property name="template-config"
-            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+  <property name="template-config">
+   jdbcUrl=jdbc:informix-sqli://%hostname%:%port%/sysmaster:informixserver=%servername%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%
+  </property>
 
   <filter name="template"
           value="${domain}:Type=Server:${alias}"/>
@@ -47,7 +48,7 @@
             collectionType="dynamic"/>
 
     <metric name="Total Number of Lock Waits"
-            alias="TotNumLocksWaits"
+            alias="TotNumLockWaits"
             category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"/>
@@ -63,83 +64,84 @@
             indicator="true"
             collectionType="dynamic"/>
 
+    <metric name="Total Number of Lock Waits"
+            alias="TotNumLockWaits"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+
+    <metric name="Total Number of Current Session Writes"
+            alias="TotNumCurrentSessionWrites"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+
+    <metric name="Total Number of Current Session Reads"
+            alias="TotNumCurrentSessionReads"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
   </metrics>
 
   <filter name="template"
           value="${domain}:Type=DBSpace,chunk=%chunk%:${alias}"/>
   <metrics name="DBSpace">
-<!--
-    <metric name="Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            units="percentage"
-            collectionType="dynamic"/>
-
-    <metric name="Space Available"
+    <metric name="Chunk Space Available"
             category="THROUGHPUT"
             indicator="true"
+            units="B"
             collectionType="dynamic"/>
+
+    <metric name="Chunk IO Page Writes"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Chunk IO Page Reads"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
 
     <metric name="Chunk IO Writes"
             category="THROUGHPUT"
             indicator="true"
-            collectionType="dynamic"/>
+            collectionType="trendsup"/>
 
     <metric name="Chunk IO Reads"
             category="THROUGHPUT"
             indicator="true"
-            collectionType="dynamic"/>
--->
+            collectionType="trendsup"/>
   </metrics>
 
   <filter name="template"
           value="${domain}:Type=Table,dbname=%dbname%,table=%table%:${alias}"/>
-  <metrics name="Table">
-<!--
+  <metrics name="TableMetrics">
     <metric name="Availability"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
 
-    <metric name="Number of Lock Waits"
-            alias="NumLocksWaits"
+    <metric name="Number Of Lock Waits"
+            alias="NumberOfLockWaits"
             category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"/>
 
-    <metric name="Number of Users Waiting For Locks"
-            alias="NumUserWaitLocks"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="dynamic"/>
-
-    <metric name="Number of Dead Locks"
-            alias="NumDeadLocks"
+    <metric name="Number Of Dead Locks"
+            alias="NumberOfDeadLocks"
             category="THROUGHPUT"
             collectionType="dynamic"/>
-
-    <metric name="Number of Active Locks"
-            alias="NumActiveLocks"
-            category="UTILIZATION"
-            collectionType="dynamic"/>
--->
   </metrics>
 
   <server name="Informix" 
           version="10.0">
 
+    <plugin type="autoinventory"
+            class="InformixServerDetector"/>
+
     <plugin type="measurement"
             class="InformixMeasurementPlugin"/>
-
-    <property name="port"
-              value="3500"/>
-
-    <property name="servername"
-              value="test_shm"/>
-
-    <property name="hostname"
-              value="localhost"/>
 
     <metrics include="Server"/>
 
@@ -148,19 +150,23 @@
                  description="Informix Version"/>
     </properties>
 
-<!--
     <config>
-      <option name="jdbcUrl"
-              description="JDBC Connection URL"
-              default="jdbc:informix-sqli://vmlin-002:3500/sysmaster:informixserver=test_shm"/>
       <option name="jdbcUser"
               description="JDBC User"
               default="informix"/>
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
+      <option name="hostname"
+              optional="true"
+              description="Informix Hostname"/>
+      <option name="port"
+              optional="true"
+              description="Informix Port"/>
+      <option name="servername"
+              optional="true"
+              description="Informix Servername"/>
     </config>
--->
 
     <service name="Table">
       <plugin type="measurement"
@@ -171,7 +177,7 @@
         <option name="table"
                 description="Table Name"/>
       </config>
-      <metrics include="Table"/>
+      <metrics include="TableMetrics"/>
     </service>
 
     <service name="DBSpace">
@@ -183,16 +189,5 @@
       </config>
       <metrics include="DBSpace"/>
     </service>
-
-<!--
-    <scan registry="SYSTEM\CurrentControlSet\Services\pgsql-*">
-      <include name="ImagePath"/>
-    </scan>
-    <scan registry="SYSTEM\CurrentControlSet\Services\hyperic-hq-database"/>
-    <scan type="file">
-      <include name="/**/bin/postgres"/>
-    </scan>
--->
-
   </server>
 </plugin>
