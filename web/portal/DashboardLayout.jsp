@@ -83,44 +83,82 @@
 </script>
 <script language="JavaScript" type="text/javascript">
     function refreshPortlets() {
-        
+
         var problemPortlet = $('problemResourcesTable');
         var favoritePortlet = $('favoriteTable');
-        
+
         var nodes = document.getElementsByTagName('table');
         var getRecentForm = document.getElementsByTagName('form')
 
-        for(i=0;i<nodes.length;i++) {
-            if(/metricTable/.test(nodes[i].id)) {
-            setInterval("requestMetricsResponse<c:out value="${portlet.token}"/>()", 60000);
-            
+        for (i = 0; i < nodes.length; i++) {
+            if (/metricTable/.test(nodes[i].id)) {
+                var metricTblId = nodes[i].id;
+                var getId = metricTblId.split('_');
+                var metricIdPart = getId[1];
+
+                if (metricIdPart) {
+                    var metricIdToken = '_' + metricIdPart;
+
+                    setInterval("requestMetricsResponse" + metricIdToken + "()", 60000);
+                } else {
+                    setInterval("requestMetricsResponse()", 60000);
+                }
             }
         }
 
-        for(i=0;i<nodes.length;i++) {
-            if(/availTable/.test(nodes[i].id)) {
-            setInterval("requestAvailSummary<c:out value="${portlet.token}"/>()", 60000);
-            }
-         }
 
-        for(i=0;i<getRecentForm.length;i++) {
-            if(/RemoveAlerts/.test(getRecentForm[i].action)) {
-            setInterval("requestRecentAlerts<c:out value="${portlet.token}"/>()", 60000);
+        for (i = 0; i < nodes.length; i++) {
+            if (/availTable/.test(nodes[i].id)) {
+                var availTblId = nodes[i].id;
+                var getId = availTblId.split('_');
+                var availIdPart = getId[1];
+
+                if (availIdPart) {
+                    var availIdToken = '_' + availIdPart;
+
+                    setInterval("requestAvailSummary" + availIdToken + "()", 60000);
+                } else {
+                    setInterval("requestAvailSummary()", 60000);
+                }
             }
         }
 
-        if (problemPortlet){
-        setInterval("requestProblemResponse()", 60000);
+        for (i = 0; i < getRecentForm.length; i++) {
+
+            if (/RemoveAlerts/.test(getRecentForm[i].action)) {
+                for (i = 0; i < nodes.length; i++) {
+                    if (/recentAlertsTable/.test(nodes[i].id)) {
+                        var alertTblId = nodes[i].id;
+                        var getId = alertTblId.split('_');
+                        var alertIdPart = getId[1];
+
+                        if (alertIdPart) {
+                            var alertIdToken = '_' + alertIdPart;
+
+                            setInterval("requestRecentAlerts" + alertIdToken + "()", 60000);
+                        } else {
+                            setInterval("requestRecentAlerts()", 60000);
+                        }
+
+                    }
+                }
+            }
+        }
+
+
+        if (problemPortlet) {
+            setInterval("requestProblemResponse()", 60000);
         }
 
         if (favoritePortlet) {
-        setInterval("requestFavoriteResources()", 60000);
+            setInterval("requestFavoriteResources()", 60000);
         }
     }
 
     onloads.push(refreshPortlets);
 
 </script>
+
 
 <%
   String divStart;
