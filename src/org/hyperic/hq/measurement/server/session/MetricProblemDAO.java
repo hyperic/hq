@@ -33,7 +33,7 @@ public class MetricProblemDAO extends HibernateDAO {
         super(MetricProblem.class, f);
     }
 
-    public MetricProblem findById(MeasurementDataId id) {
+    public MetricProblem get(MeasurementDataId id) {
         return (MetricProblem) super.get(id);
     }
 
