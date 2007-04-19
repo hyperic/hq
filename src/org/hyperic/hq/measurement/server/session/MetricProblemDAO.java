@@ -34,7 +34,7 @@ public class MetricProblemDAO extends HibernateDAO {
     }
 
     public MetricProblem findById(MeasurementDataId id) {
-        return (MetricProblem)super.findById(id);
+        return (MetricProblem)super.get(id);
     }
 
     public void remove(MetricProblem entity) {
