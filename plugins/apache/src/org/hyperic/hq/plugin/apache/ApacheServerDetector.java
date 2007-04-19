@@ -31,10 +31,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
@@ -518,16 +520,32 @@ public class ApacheServerDetector
 
         List services = new ArrayList();
 
-        ServiceResource mod_jk =
-            createServiceResource(JkStatusCollector.JK_NAME);
-        mod_jk.setServiceName(JkStatusCollector.JK_NAME);
-        mod_jk.setProductConfig(config);
-        mod_jk.setMeasurementConfig();
-        services.add(mod_jk);
+        JkStatusCollector jkstatus = new JkStatusCollector();
+        Map stats = jkstatus.getValues(this, config);
+        Set workers = jkstatus.getWorkers();
 
-        //XXX
-        //List workers = JkStatusCollector.getWorkers(config);
-        //services.addAll(workers);
+        for (Iterator it=workers.iterator(); it.hasNext();) {
+            String name = (String)it.next();
+            ServiceResource worker =
+                createServiceResource(JkStatusCollector.WORKER_NAME);
+            worker.setServiceName(JkStatusCollector.WORKER_NAME + " " + name);
+
+            ConfigResponse cprops = new ConfigResponse();
+            for (int i=0; i<JkStatusCollector.WORKER_PROPS.length; i++) {
+                String prop = JkStatusCollector.WORKER_PROPS[i];
+                cprops.setValue(prop,
+                                (String)stats.get(name + "." + prop));
+            }
+
+            ConfigResponse productConfig =
+                new ConfigResponse(config.toProperties()); //clone
+            productConfig.setValue("name", name);
+            worker.setProductConfig(productConfig);
+            worker.setCustomProperties(cprops);
+            worker.setMeasurementConfig();
+
+            services.add(worker);
+        }
 
         return services;
     }

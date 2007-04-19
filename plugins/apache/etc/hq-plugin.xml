@@ -445,39 +445,65 @@
   </metrics>
 
   <filter name="template"
-          value="jk-status:${url.config}:${alias}"/>
+          value="jk-status:${url.config}:%name%.${alias}"/>
 
-  <metrics name="jk-status">
+  <metrics name="jk-worker">
+    <metric name="Availability"
+            template="jk-status:${url.config}:%name%.state"
+            indicator="true"/>
+
+    <metric name="Bytes Read"
+            alias="read"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Bytes Sent"
+            alias="transferred"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Errors"
+            alias="errors"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Client Errors"
+            alias="client_errors"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Busy"
+            alias="busy"
+            category="UTILIZATION"/>
+  </metrics>
+
+  <metrics name="jk-lb">
     <metric name="Availability"
             indicator="true"/>
 
-    <metric name="Reads"
-            category="THROUGHPUT"
-            collectionType="trendsup"
-            units="none"/>
+    <metric name="Good"
+            alias="good"
+            category="UTILIZATION"/>
 
-    <metric name="Errors"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
+    <metric name="Bad"
+            alias="bad"
+            category="UTILIZATION"
+            indicator="true"/>
 
-    <metric name="Retries"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
+    <metric name="Degraded"
+            alias="degraded"
+            category="UTILIZATION"
+            indicator="true"/>
 
-    <metric name="ClientErrors"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
-
-    <metric name="Maps"
-            category="THROUGHPUT"
-            units="none"/>
-
+    <metric name="Busy"
+            alias="busy"
+            category="UTILIZATION"
+            indicator="true"/>
   </metrics>
 
   <help name="restart-server">
@@ -751,7 +777,7 @@ ExtendedStatus On
     ]]>
     </help>
 
-    <service name="mod_jk">
+    <service name="mod_jk Worker">
       <plugin type="measurement"
               class="org.hyperic.hq.product.MeasurementPlugin"/>
 
@@ -762,9 +788,18 @@ ExtendedStatus On
         <option name="path"
                 description="jk-status path"
                 default="/jk-status"/>
+        <option name="name"
+                description="worker name"/>
       </config>
 
-      <metrics include="jk-status"/>
+      <properties>
+         <property name="host"
+                   description="Host"/>
+         <property name="address"
+                   description="Address"/>
+      </properties>
+
+      <metrics include="jk-worker"/>
     </service>
   </server>
 
@@ -862,22 +897,29 @@ ExtendedStatus On
       <metrics include="apache-vhost"/>
     </service>
 
-    <service name="mod_jk">
+    <service name="mod_jk Worker">
       <plugin type="measurement"
               class="org.hyperic.hq.product.MeasurementPlugin"/>
 
       <plugin type="collector"
               class="JkStatusCollector"/>
 
-<!--      <property name="path" value="/jk-status"/> -->
-
       <config include="url">
         <option name="path"
                 description="jk-status path"
                 default="/jk-status"/>
+        <option name="name"
+                description="worker name"/>
       </config>
 
-      <metrics include="jk-status"/>
+      <properties>
+         <property name="host"
+                   description="Host"/>
+         <property name="address"
+                   description="Address"/>  
+    </properties>
+
+      <metrics include="jk-worker"/>
     </service>
   </server>
 

@@ -29,32 +29,61 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.hq.plugin.netservices.HTTPCollector;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 
 public class JkStatusCollector extends HTTPCollector
 {
     private static final Log log =
         LogFactory.getLog(JkStatusCollector.class.getName());
-    private static final String MIME_FLAG = "?mime=prop",
-                                ERRORS_KEY = "Errors",
-                                READS_KEY = "Reads",
-                                CLIENT_ERRORS_KEY = "ClientErrors",
-                                RETRIES_KEY = "Retries",
-                                RECOVER_TIME_KEY = "RecoverTime",
-                                MEMBER_COUNT_KEY = "MemberCount",
-                                MAPCOUNT_KEY = "Maps";
+    private static final String MIME_FLAG = "?mime=prop";
+
     static final String JK_NAME = "mod_jk";
     static final String WORKER_NAME = JK_NAME + " Worker";
+    static final String[] WORKER_PROPS = {
+        //type=ajp13 (cprops)
+        "host", "address",
+    };
+
+    private static final Map _filter = new HashMap();
+    private static final Map _state = new HashMap();
+
+    private Set _lbs = new HashSet();
+    private Set _workers = new HashSet();
+
+    private static void initConstants()
+    {
+        if (_filter.size() != 0) {
+            return;
+        }
+        String[] keys = {
+           //type=lb
+           "member_count", "good", "degraded", "bad", "busy",
+            //type=ajp13 (metrics)
+            "state", "errors", "client_errors", "transferred", "read", "busy"
+        };
+        for (int i=0; i<keys.length; i++) {
+            _filter.put(keys[i], Boolean.TRUE);
+        }
+        for (int i=0; i<WORKER_PROPS.length; i++) {
+            _filter.put(WORKER_PROPS[i], Boolean.TRUE);
+        }
+
+        _state.put("OK", new Double(Metric.AVAIL_UP));
+        _state.put("N/A", new Double(Metric.AVAIL_PAUSED));
+        _state.put("REC", new Double(Metric.AVAIL_WARN));
+        _state.put("ERR", new Double(Metric.AVAIL_DOWN));
+    }
 
     protected void init() throws PluginException
     {
@@ -65,6 +94,8 @@ public class JkStatusCollector extends HTTPCollector
         String url = getURL();
         if (!url.endsWith(MIME_FLAG))
             setURL(url + MIME_FLAG);
+
+        initConstants();
     }
 
     protected void parseResults(HttpMethod method)
@@ -77,56 +108,71 @@ public class JkStatusCollector extends HTTPCollector
         }
     }
 
+    Set getLoadBalancers() {
+        return _lbs;
+    }
+
+    Set getWorkers() {
+        return _workers;
+    }
+
     private void parse(HttpMethod method) throws IOException
     {
-        Map props = getPerfProps(method);
-        setValue(MAPCOUNT_KEY, getCount(props, "map_count"));
-        setValue(RETRIES_KEY, getCount(props, "retries"));
-        setValue(ERRORS_KEY, getCount(props, "errors"));
-        setValue(READS_KEY, getCount(props, "read"));
-        setValue(RETRIES_KEY, getCount(props, "retries"));
-        setValue(RECOVER_TIME_KEY, getCount(props, "recover_time"));
-        setValue(MEMBER_COUNT_KEY, getCount(props, "member_count"));
-        setValue(CLIENT_ERRORS_KEY, getCount(props, "client_errors"));
-    }
-
-    private long getCount(Map props, String key)
-    {
-        long rtn = 0;
-        List list = (List)props.get(key);
-        for (int i=0; i<list.size(); i++)
-        {
-            try {
-            rtn += Integer.parseInt(list.get(i).toString());
-
-            } catch (NumberFormatException e) {
-            }
-        }
-        return rtn;
-    }
-
-    private Map getPerfProps(HttpMethod method) throws IOException
-    {
-        Map rtn = new HashMap();
+        _lbs.clear();
+        _workers.clear();
         InputStream is = method.getResponseBodyAsStream();
         String line;
         BufferedReader bf = new BufferedReader(new InputStreamReader(is));
-        while (null != (line = bf.readLine()))
-        {
-            List list;
-            Object[] array = line.split("\\=");
-            Object[] tmp = array[0].toString().split("\\.");
-            Object key = tmp[tmp.length-1];
-            Object val = (array.length > 1) ? array[1] : "";
-            if (null == (list = (List)rtn.get(key)))
-            {
-                list = new ArrayList();
-                list.add(val);
-                rtn.put(key, list);
+        final String prefix = "worker.";
+        String prevKey = null;
+
+        while (null != (line = bf.readLine())) {
+            int ix = line.indexOf('=');
+            if (ix == -1) {
                 continue;
             }
-            list.add(val);
+            String worker = line.substring(0, ix);
+            String val = line.substring(ix+1);
+            if (!worker.startsWith(prefix)) {
+                continue;
+            }
+            worker = worker.substring(prefix.length());
+            if ((ix = worker.indexOf('.')) == -1) {
+                continue;
+            }
+            String name = worker.substring(0, ix);
+            String key = worker.substring(ix+1);
+
+            if (key.equals("type")) {
+                if (val.equals("lb")) {
+                    _lbs.add(name);
+                }
+                else if (val.startsWith("ajp")) {
+                    if ("balance_workers".equals(prevKey)) {
+                        _workers.add(name);
+                    }
+                }
+                continue;
+            }
+            prevKey = key;
+            if (_filter.get(key) != Boolean.TRUE) {
+                continue;
+            }
+
+            if (key.equals("state")) {
+                Double state = (Double)_state.get(val);
+                double avail;
+                if (state == null) {
+                    avail = Metric.AVAIL_UP;
+                }
+                else {
+                    avail = state.doubleValue();
+                }
+                setValue(worker, avail);
+            }
+            else {
+                setValue(worker, val);
+            }
         }
-        return rtn;
     }
 }
