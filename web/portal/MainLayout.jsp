@@ -45,8 +45,8 @@
      <fmt:param value="${TitleParam2}"/>
     </c:if>
    </fmt:message>
-  </title> 
-  <script>
+  </title>
+<script type="text/javascript">
     var onloads = new Array();
     function bodyOnLoad() {
       for ( var i = 0 ; i < onloads.length ; i++ )

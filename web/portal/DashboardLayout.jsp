@@ -40,16 +40,12 @@
 
   autoLogout = false;
 
-  // Register the removePortlet method
-  ajaxEngine.registerRequest( 'removePortlet',
-                              '<html:rewrite page="/dashboard/RemovePortlet.do"/>' );
-
-  ajaxEngine.registerRequest( 'movePortlet',
-                              '<html:rewrite page="/dashboard/ReorderPortlets.do"/>' );
-
   function removePortlet(name, label) {
-    ajaxEngine.sendRequest( 'removePortlet', 'portletName=' + name );
-    new Effect.BlindUp($(name));
+     var pars = 'portletName=' + name;
+     new Ajax.Request('<html:rewrite page="/dashboard/RemovePortlet.do"/>',{method: 'post', parameters:pars, onSuccess: portletRemoved});
+
+    function portletRemoved()  {
+      new Effect.BlindUp($(name));
 
     var wide = isWide(name);
     if (!wide && !isNarrow(name)) {
@@ -79,7 +75,7 @@
         $('addContentsPortlet' + wide).style.visibility='visible';
     }
   }
-
+ }
 </script>
 <script language="JavaScript" type="text/javascript">
     function refreshPortlets() {
@@ -219,7 +215,8 @@
            format: /^(.*)$/,
            containment: ["<c:out value="narrowList_${narrow}"/>"],
            onUpdate: function() {
-                ajaxEngine.sendRequest( 'movePortlet', Sortable.serialize('<c:out value="narrowList_${narrow}"/>') ); },
+                new Ajax.Request('<html:rewrite page="/dashboard/ReOrderPortlet.do"/>',{method: 'post', onSuccess: Sortable.serialize('<c:out value="narrowList_${narrow}"/>')}); },
+                //ajaxEngine.sendRequest( 'movePortlet', Sortable.serialize('<c:out value="narrowList_${narrow}"/>') ); },
            constraint: 'vertical'});
       -->
       </script>
