@@ -34,19 +34,19 @@
 
 <!-- CONSTANT DEFINITIONS -->
 <hq:constant
-    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_ADHOC_PSS" var="CONST_ADHOC_PSS" />
 <hq:constant
-    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_ADHOC_GRP" var="CONST_ADHOC_GRP" />
 <hq:constant
-    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_ADHOC_APP" var="CONST_ADHOC_APP" />
 <hq:constant
-    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_COMPAT_PS" var="CONST_COMPAT_PS" />
 <hq:constant
-    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
 
 
@@ -67,7 +67,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:param name="rid" value="${Resource.id}"/>
   <c:param name="type" value="${Resource.entityId.type}"/>
   <c:if test="${not empty param.filterBy}">
-    <c:param name="filterBy" value="${param.filterBy}"/> 
+    <c:param name="filterBy" value="${param.filterBy}"/>
   </c:if>
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
@@ -346,8 +346,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 	<tr>
 		<td valign="bottom">
 			<table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <c:choose>  
-            <c:when test="${Resource.groupType == CONST_ADHOC_PSS  }">  
+        <c:choose>
+            <c:when test="${Resource.groupType == CONST_ADHOC_PSS  }">
               <tr>
                   <td class="FilterLine" width="100%" colspan="4"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
                   <td><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -356,18 +356,18 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                   <td nowrap class="FilterLabelText">
                       <fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>
                   </td>
-                  <td class="FilterLabelText">
-                      <input type="text" name="nameFilter" maxlength="55" size="10" 
+                  <td class="FilterLabelText" valign="bottom">
+                      <div style="float:left;display:inline;"><input type="text" name="nameFilter" maxlength="55" size="10"
                              onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                             value="<c:out value="${param.nameFilter}"/>"/>
-                      <html:img page="/images/dash-button_go-arrow.gif" 
-                             border="0" onclick="applyNameFilter()"/>
+                             value="<c:out value="${param.nameFilter}"/>"/></div>
+                      <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/dash-button_go-arrow.gif"
+                             border="0" onclick="applyNameFilter()"/></div>
                   </td>
                   <td nowrap class="FilterLabelText">
                       <fmt:message key="resource.group.inventory.Edit.FilterByTypeLabel"/>
                   </td>
                   <td class="FilterLabelText">
-                      <html:select property="filterBy" styleClass="FilterFormText" 
+                      <html:select property="filterBy" styleClass="FilterFormText"
                             onchange="goToSelectLocation(this, 'filterBy',  '${selfPnFilterAction}');">
                           <hq:optionMessageList property="availResourceTypes" baseKey="resource.hub.filter"/>
                       </html:select>
@@ -376,7 +376,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
               </tr>
             </c:when>
             <c:when test="${ Resource.groupType == CONST_COMPAT_PS ||
-                             Resource.groupType == CONST_COMPAT_SVC }"> 
+                             Resource.groupType == CONST_COMPAT_SVC }">
               <tr>
                   <td class="FilterLine" width="100%" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1"
 border="0"/></td>
@@ -384,17 +384,18 @@ border="0"/></td>
               </tr>
               <tr>
                   <td nowrap class="FilterLabelText" colspan=2>
-                      <fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
+                      <div style="float:left;display:inline;"><fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
                       <input type="text" name="nameFilter" maxlength="55" size="10"
                              onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                             value="<c:out value="${param.nameFilter}"/>"/>&nbsp;
-                      <html:img page="/images/dash-button_go-arrow.gif"
-                             border="0" onclick="applyNameFilter()"/>
+                             value="<c:out value="${param.nameFilter}"/>"/></div>
+
+                      <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/dash-button_go-arrow.gif"
+                             border="0" onclick="applyNameFilter()"/></div>
                   </td>
                   <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
               </tr>
             </c:when>
-            <c:when test="${Resource.groupType == CONST_ADHOC_GRP }">  
+            <c:when test="${Resource.groupType == CONST_ADHOC_GRP }">
               <tr>
                         <td class="FilterLine" width="100%" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
                         <td><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -411,15 +412,15 @@ border="0"/></td>
                 <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
                     </tr>
             </c:when>
-            <c:otherwise >  
+            <c:otherwise >
               <tr>
                         <td class="FilterLine" width="100%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
                         <td><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
                     </tr>
                     <tr>
                 <td nowrap class="FilterLabelText">
-                <c:choose>  
-                    <c:when test="${Resource.groupType == CONST_ADHOC_APP  }">  
+                <c:choose>
+                    <c:when test="${Resource.groupType == CONST_ADHOC_APP  }">
                         <fmt:message key="resource.group.inventory.Edit.GroupTypeLabel"/>
                     </c:when>
                     <c:otherwise>
@@ -444,7 +445,7 @@ border="0"/></td>
 					<td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
 				</tr>
 				<tr>
-           <%-- 
+           <%--
              -- Support three different spacer patterns. The first is for adhoc
              -- grp of grp where you have a single selector. The second supports
              -- a height of 32 pixels to accomodate the slector and name filter.
@@ -461,28 +462,28 @@ border="0"/></td>
               <c:otherwise>
                 <td width="100%" class="FilterLabelText" height="10">&nbsp;</td>
               </c:otherwise>
-            </c:choose>              
-					
+            </c:choose>
+
 				</tr>
 			</table>
 
 		</td>
 	</tr>
-  
+
   <tr>
     <!--  SELECT COLUMN  -->
     <td width="50%" valign="top">
       <!--  TABLED LIST CONTENTS (SELECT COLUMN) -->
       <div id="<c:out value="${widgetInstanceName}"/>FromDiv">
 
-	<display:table padRows="true" rightSidebar="true" items="${AvailableResources}" var="resource" action="${selfPaAction}" 
-                    orderValue="soa" order="${param.soa}" sortValue="sca" sort="${param.sca}" pageValue="pna" 
-                    page="${param.pna}" pageSizeValue="psa" pageSize="${param.psa}" styleId="fromTable" width="100%" 
+	<display:table padRows="true" rightSidebar="true" items="${AvailableResources}" var="resource" action="${selfPaAction}"
+                    orderValue="soa" order="${param.soa}" sortValue="sca" sort="${param.sca}" pageValue="pna"
+                    page="${param.pna}" pageSizeValue="psa" pageSize="${param.psa}" styleId="fromTable" width="100%"
                     cellpadding="0" cellspacing="0" border="0">
           <display:column width="1%" property="entityId.appdefKey" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"fromToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="availableResource" onclick="ToggleSelection(this, widgetProperties)" styleClass="availableListMember"/>
           </display:column>
-          <display:column property="name" title="common.header.Name" width="40%" 
+          <display:column property="name" title="common.header.Name" width="40%"
                     sort="true" defaultSort="true" sortAttr="1"/>
           <c:choose>
           <c:when test="${Resource.groupType == CONST_COMPAT_PS &&
@@ -534,14 +535,14 @@ border="0"/></td>
       <!--  TABLED LIST CONTENTS (SELECT COLUMN) -->
       <div  id='<c:out value="${widgetInstanceName}"/>ToDiv'>
 
-        <display:table padRows="true" leftSidebar="true" items="${PendingResources}" var="resource" action="${selfPpAction}" 
-                    orderValue="sop" order="${param.sop}" sortValue="scp" sort="${param.scp}" pageValue="pnp" 
-                    page="${param.pnp}" pageSizeValue="psp" pageSize="${param.psp}" styleId="toTable" width="100%" 
+        <display:table padRows="true" leftSidebar="true" items="${PendingResources}" var="resource" action="${selfPpAction}"
+                    orderValue="sop" order="${param.sop}" sortValue="scp" sort="${param.scp}" pageValue="pnp"
+                    page="${param.pnp}" pageSizeValue="psp" pageSize="${param.psp}" styleId="toTable" width="100%"
                     cellpadding="0" cellspacing="0" border="0">
           <display:column width="1%" property="entityId.appdefKey" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"toToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="pendingResource" onclick="ToggleSelection(this, widgetProperties)" styleClass="pendingListMember"/>
           </display:column>
-          <display:column property="name" title="common.header.Name" width="40%" 
+          <display:column property="name" title="common.header.Name" width="40%"
                     sort="true" defaultSort="true" sortAttr="1"/>
           <c:choose>
           <c:when test="${Resource.groupType == CONST_COMPAT_PS &&
@@ -574,7 +575,7 @@ border="0"/></td>
 
     </td>
     <!-- / ADD COLUMN  -->
-	
+
   </tr>
 </table>
 <!-- / SELECT & ADD -->

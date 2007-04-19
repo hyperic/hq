@@ -291,11 +291,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>
           </td>
           <td class="FilterLabelText">
-            <input type="text" name="nameFilter" maxlength="55" size="10" 
+             <div style="float:left;display:inline;"><input type="text" name="nameFilter" maxlength="55" size="10"
                    onKeyPress="if (event.keyCode == 13) return applyNameFilter()"
-                               value="<c:out value="${param.nameFilter}"/>"/>
-            <html:img page="/images/dash-button_go-arrow.gif" 
-                      border="0" onclick="applyNameFilter()"/>
+                               value="<c:out value="${param.nameFilter}"/>"/></div>
+            <div style="display:inline;width:17px;padding-left:5px;padding-top:3px;"><html:img page="/images/dash-button_go-arrow.gif"
+                      border="0" onclick="applyNameFilter()"/></div>
           </td>
         </tr>
       </table>
