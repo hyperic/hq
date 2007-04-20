@@ -79,14 +79,9 @@ public class ResourceDesignatedMetricsAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
 
-        List designates;        
-        try {
-            designates =
-                boss.getDesignatedTemplates(sessionId, entityId, CATEGORIES);
-            context.putAttribute(Constants.CTX_SUMMARIES, designates);
-        } catch (MeasurementNotFoundException e) {
-            log.debug("No designated metric for " + entityId + " found");
-        }
+        List designates =
+            boss.getDesignatedTemplates(sessionId, entityId, CATEGORIES);
+        context.putAttribute(Constants.CTX_SUMMARIES, designates);
 
         return null;
     }
