@@ -539,9 +539,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public List getDesignatedTemplates(int sessionId, AppdefEntityID id,
                                        Set cats) 
         throws SessionNotFoundException, SessionTimeoutException,
-               MeasurementNotFoundException, AppdefEntityNotFoundException,
-               PermissionException {
-        List metrics = getDesignatedMetrics(sessionId, id, cats);
+               AppdefEntityNotFoundException, PermissionException {
+        List metrics;
+        try {
+            metrics = getDesignatedMetrics(sessionId, id, cats);
+        } catch (MeasurementNotFoundException e) {
+            return new ArrayList(0);
+        }
         
         ArrayList tmpls = new ArrayList(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
@@ -585,15 +589,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         TreeMap ret = new TreeMap();
         for (int i = 0; i < ids.length; i++) {
-            try {
-                List metrics = getDesignatedTemplates(sessionId, ids[i], cats);
-                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    MeasurementTemplateValue mtv =
-                        (MeasurementTemplateValue) it.next();
-                    ret.put(mtv.getName(), mtv);
-                }
-            } catch (MeasurementNotFoundException e) {
-                // No metrics, no worries
+            List metrics = getDesignatedTemplates(sessionId, ids[i], cats);
+            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                MeasurementTemplateValue mtv =
+                    (MeasurementTemplateValue) it.next();
+                ret.put(mtv.getName(), mtv);
             }
         }
 
@@ -619,10 +619,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         for (Iterator it = entIds.iterator(); it.hasNext(); ) {
             AppdefEntityID aeId = (AppdefEntityID) it.next();
-            try {
-                return getDesignatedTemplates(sessionId, aeId, cats);
-            } catch (MeasurementNotFoundException e) {
-                // continue;
+            List templs = getDesignatedTemplates(sessionId, aeId, cats);
+            if (templs.size() > 0) {
+                return templs;
             }
         }
     
