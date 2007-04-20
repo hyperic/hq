@@ -42,7 +42,6 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -79,14 +78,9 @@ public class ResourceDesignatedMetricsAction extends TilesAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
 
-        List designates;        
-        try {
-            designates =
-                boss.getDesignatedTemplates(sessionId, entityId, CATEGORIES);
-            context.putAttribute(Constants.CTX_SUMMARIES, designates);
-        } catch (MeasurementNotFoundException e) {
-            log.debug("No designated metric for " + entityId + " found");
-        }
+        List designates =
+            boss.getDesignatedTemplates(sessionId, entityId, CATEGORIES);
+        context.putAttribute(Constants.CTX_SUMMARIES, designates);
 
         return null;
     }
