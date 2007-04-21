@@ -141,12 +141,18 @@ public interface PermissionManager {
 
     /**
      * Get viewable resources of a specific type
+     * @param resType the authz resource type name
+     * @param resName if result should filter by resource name
+     * @param appdefTypeStr the Appdef type name, like 'platform', 'server', etc
+     * @param typeId the appdef type ID, e.g. the platform_type_id
      *
      * @return a list of Integers representing instance ids
      */
     public List findViewableResources(AuthzSubjectValue subj,
                                       String resType, 
                                       String resName, 
+                                      String appdefTypeStr,
+                                      Integer typeId,
                                       PageControl pc);
 
     /**

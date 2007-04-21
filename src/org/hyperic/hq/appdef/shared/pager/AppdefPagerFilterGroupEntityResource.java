@@ -26,12 +26,6 @@
 package org.hyperic.hq.appdef.shared.pager;
 
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -167,7 +161,6 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
      * @return flag - true if caught (unless negated)
      */
     public boolean isCaught(Object o) {
-        AppdefResourceValue arv;
         AppdefEntityID entity;
 
         if (!(o instanceof AppdefEntityID)) {
@@ -370,17 +363,9 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         throws AppdefGroupNotFoundException, PermissionException {
         switch(id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat =
-                    PlatformManagerEJBImpl.getOne().getPlatformById(id.getId()); 
-                return resourceType == plat.getPlatformType().getId().intValue();
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server svr =
-                    ServerManagerEJBImpl.getOne().getServerById(id.getId()); 
-                return resourceType == svr.getServerType().getId().intValue();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service svc =
-                    ServiceManagerEJBImpl.getOne().getServiceById(id.getId()); 
-                return resourceType == svc.getServiceType().getId().intValue();
+                return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 AppdefGroupValue group =
                     AppdefGroupManagerEJBImpl.getOne().findGroup(subject, id);
