@@ -47,6 +47,7 @@ import org.hyperic.hq.ui.action.resource.common.monitor.visibility.InventoryHelp
 import org.hyperic.hq.ui.action.resource.platform.monitor.visibility.RootInventoryHelper;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  *
@@ -120,10 +121,14 @@ public class ListChildrenAction extends TilesAction {
                              selectedType);
             
         // get the resource healths
+        StopWatch watch = new StopWatch();
         List healths = AutoGroupHelper.getAutoGroupResourceHealths(ctx,
                                                                    sessionId,
                                                                    entityIds,
                                                                    childTypeId);
+        if (log.isDebugEnabled()) {
+            log.debug("getAutoGroupResourceHealths: " + watch);
+        }
 
         context.putAttribute(Constants.CTX_SUMMARIES, healths);
 
