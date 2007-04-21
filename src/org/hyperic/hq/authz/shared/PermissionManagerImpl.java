@@ -62,15 +62,16 @@ public class PermissionManagerImpl
 
     private String _falseToken = null;
 
-    private static final String VIEWABLE_SQL =
-        "SELECT instance_id, sort_name FROM EAM_RESOURCE " +
-        "WHERE EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
+    private static final String VIEWABLE_SELECT =
+        "SELECT instance_id, EAM_RESOURCE.sort_name FROM EAM_RESOURCE ";
+
+    private static final String VIEWABLE_CLAUSE =
+        " EAM_RESOURCE.fsystem = DB_FALSE_TOKEN AND " +
         "EAM_RESOURCE.resource_type_id = " +
         "(SELECT rt.id FROM EAM_RESOURCE_TYPE rt WHERE rt.name = ?) ";
 
     private static final String VIEWABLE_BYNAME_SQL =
-        VIEWABLE_SQL +
-        "AND (lower(EAM_RESOURCE.name) like '%'||lower(?)||'%' OR " +
+        " AND (lower(EAM_RESOURCE.name) like '%'||lower(?)||'%' OR " +
         " EAM_RESOURCE.instance_id in (SELECT appdef_id FROM EAM_CPROP, " +
         " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND " +
         " appdef_type = ? AND lower(propvalue) like '%'||lower(?)||'%'))";
@@ -175,46 +176,58 @@ public class PermissionManagerImpl
         return (ResourceValue[]) fromLocals(resLocArr, ResourceValue.class);
     }
 
-    public List findViewableResources(AuthzSubjectValue subj,
-                                      String resType, 
-                                      String resName, 
-                                      PageControl pc)
-    {
+    public List findViewableResources(AuthzSubjectValue subj, String resType,
+                                      String resName, String appdefTypeStr,
+                                      Integer typeId, PageControl pc) {
         List viewableInstances = new ArrayList();
         
         PreparedStatement stmt = null;
         ResultSet rs = null;        
         try {
             Connection conn = getConnection();
-            String sql = null;
-            if(resName == null) {
-                sql = VIEWABLE_SQL + "ORDER BY EAM_RESOURCE.sort_name ";
-                if(!pc.isAscending()) {
-                    sql = sql + "DESC";
-                }
-                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN",
-                                         _falseToken);
-                stmt = conn.prepareStatement(sql);
-                stmt.setString(1, resType);
-            } else {
-                sql = VIEWABLE_BYNAME_SQL + "ORDER BY EAM_RESOURCE.sort_name ";
-                if(!pc.isAscending()) {
-                    sql = sql + "DESC";
-                }
-                sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
-                stmt = conn.prepareStatement(sql);
-                stmt.setString(1, resType);
+            String sql = VIEWABLE_SELECT;
+            if (appdefTypeStr != null && typeId != null) {
+                sql += ", eam_" + appdefTypeStr +
+                " appdef WHERE EAM_RESOURCE.instance_id = appdef.id AND " +
+                " appdef." + appdefTypeStr + "_type_id = ? AND ";
+            }
+            else {
+                sql += " WHERE ";
+            }
+            sql += VIEWABLE_CLAUSE;
+            
+            if (resName != null)
+                sql += VIEWABLE_BYNAME_SQL;
+            
+            sql += "ORDER BY EAM_RESOURCE.sort_name ";
+
+            if(!pc.isAscending()) {
+                sql = sql + "DESC";
+            }
+            sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
+ 
+            stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
+            int i = 1;
+            
+            if (appdefTypeStr != null && typeId != null) {
+                stmt.setInt(i++, typeId.intValue());
+            }
+            stmt.setString(i++, resType);
+            
+            if (resName != null) {
                 // Support wildcards
                 resName = resName.replace('*', '%');
                 resName = resName.replace('?', '_');
-                stmt.setString(2, resName);
-                stmt.setInt(3, AppdefUtil.resNameToAppdefTypeId(resType));
-                stmt.setString(4, resName);
+                stmt.setString(i++, resName);
+                stmt.setInt(i++, AppdefUtil.resNameToAppdefTypeId(resType));
+                stmt.setString(i++, resName);
             }
+            
             _log.debug("Viewable SQL: " + sql);
             rs = stmt.executeQuery();
 
-            for(int i = 1; rs.next(); i++) {
+            for(i = 1; rs.next(); i++) {
                 viewableInstances.add(new Integer(rs.getInt(1)));
             }
             return viewableInstances;

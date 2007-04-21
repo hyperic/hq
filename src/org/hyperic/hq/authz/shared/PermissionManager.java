@@ -141,12 +141,16 @@ public interface PermissionManager {
 
     /**
      * Get viewable resources of a specific type
+     * @param clause TODO
+     * @param typeId TODO
      *
      * @return a list of Integers representing instance ids
      */
     public List findViewableResources(AuthzSubjectValue subj,
                                       String resType, 
                                       String resName, 
+                                      String appdefTypeStr,
+                                      Integer typeId,
                                       PageControl pc);
 
     /**

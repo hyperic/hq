@@ -2611,7 +2611,7 @@ public class AppdefBossEJBImpl
     // Return a PageList of authz resources.
     private List findViewableEntityIds(AuthzSubjectValue subject, 
                                        int appdefTypeId, String rName,
-                                       PageControl pc) 
+                                       Integer filterType, PageControl pc) 
     {
         List appentResources = new ArrayList();
 
@@ -2621,9 +2621,27 @@ public class AppdefBossEJBImpl
             String authzResType = 
                 AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
 
+            String appdefTypeStr;
+            if (filterType != null) {
+                switch(appdefTypeId) {
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    appdefTypeStr =
+                        AppdefEntityConstants.typeToString(appdefTypeId);
+                    break;
+                default:
+                    appdefTypeStr = null;
+                    break;
+                }
+            }
+            else {
+                appdefTypeStr = null;
+            }
+            
             List instanceIds =
                 resMgr.findViewableInstances(subject, authzResType, rName, 
-                                             pc);
+                                             appdefTypeStr, filterType, pc);
             
             for (Iterator i = instanceIds.iterator(); i.hasNext(); ) {
                 appentResources.add(new AppdefEntityID(appdefTypeId, 
@@ -2864,18 +2882,20 @@ public class AppdefBossEJBImpl
                                                               grpEntId,
                                                               appdefResTypeId,
                                                               true );
-            } else {
+                filterList.add( erFilter );
+            } else if (groupEntity != null) {
                 erFilter =
                     new AppdefPagerFilterGroupEntityResource (subject,
                                                               groupType,
                                                               appdefTypeId,
                                                               appdefResTypeId,
                                                               true );
-                if (groupEntity != null) {
-                    erFilter.setGroupSelected(true);
-                }
+                erFilter.setGroupSelected(true);
+                filterList.add( erFilter );
             }
-            filterList.add( erFilter );
+            else {
+                erFilter = null;
+            }
         } else {
             erFilter = null;
         }
@@ -2885,8 +2905,11 @@ public class AppdefBossEJBImpl
         // We have to create a new page control because we are no
         // longer limiting the size of the record set in authz.
         watch.markTimeBegin("findViewableEntityIds");
+        Integer filterType =
+            appdefResTypeId != -1 ? new Integer(appdefResTypeId) : null;
+        
         toBePaged = findViewableEntityIds(subject,  appdefTypeId,
-                                          resourceName, pc);
+                                          resourceName, filterType, pc);
         watch.markTimeEnd("findViewableEntityIds");
 
         // Page it, then convert to AppdefResourceValue

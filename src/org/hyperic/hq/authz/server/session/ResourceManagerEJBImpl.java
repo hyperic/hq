@@ -375,6 +375,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public List findViewableInstances(AuthzSubjectValue subject,
                                       String typeName, 
                                       String resName,
+                                      String appdefTypeStr,
+                                      Integer typeId,
                                       PageControl pc) {
         // Authz type and/or resource name must be specified.
         if (typeName == null) {
@@ -383,7 +385,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        return pm.findViewableResources(subject, typeName, resName, pc);
+        return pm.findViewableResources(subject, typeName, resName, appdefTypeStr,
+                                        typeId, pc);
     }
 
     /**
@@ -409,7 +412,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             // Now fetch list by the type
             List ids = this.findViewableInstances(subject, 
                                                   typeName, 
-                                                  null, 
+                                                  null, null, null,
                                                   PageControl.PAGE_ALL);
             if (ids.size() > 0)
                 resourceMap.put(typeName, ids);
