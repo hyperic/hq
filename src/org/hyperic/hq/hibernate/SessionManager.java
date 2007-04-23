@@ -28,6 +28,7 @@ package org.hyperic.hq.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ConnectionReleaseMode;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.engine.SessionFactoryImplementor;
@@ -96,10 +97,29 @@ public class SessionManager {
             
             s = _factory.openSession(null, true, false, 
                                      ConnectionReleaseMode.AFTER_STATEMENT);
+            
+            // Start out sessions as read-only.  They can be upgraded to
+            // read-write if a transaction requires it
+            s.setFlushMode(FlushMode.MANUAL);
             _sessions.set(s);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Upgrade the current running session (if there is one) to read-write
+     */
+    public static void setSessionReadWrite() {
+        INSTANCE.setSessionReadWriteInternal();
+    }
+    
+    private void setSessionReadWriteInternal() {
+        Session s = (Session)_sessions.get();
+    
+        if (s != null) {
+            s.setFlushMode(FlushMode.AUTO);
+        }
     }
     
     /**
