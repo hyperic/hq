@@ -66,6 +66,9 @@
     <property name="OBJECT_NAME"
               value="resin:type=ResinServer"/>
 
+    <property name="PROC_MAIN_CLASS"
+              value="com.caucho.server.resin.Resin"/>
+
     <property name="PROC_HOME_PROPERTY"
               value="resin.home"/>
 
