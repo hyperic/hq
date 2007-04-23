@@ -49,7 +49,7 @@ import org.jboss.invocation.Invocation;
  */
 public class HQApp { 
     private static final HQApp INSTANCE = new HQApp(); 
-    private final Log _log = LogFactory.getLog(HQApp.class);
+    private static final Log _log = LogFactory.getLog(HQApp.class);
     
     private ThreadLocal        _txListeners    = new ThreadLocal();
     private List               _startupClasses = new ArrayList();
@@ -88,17 +88,37 @@ public class HQApp {
                                       boolean isHome) 
             throws Exception 
         {
+            String methName = v.getMethod().getName();
             boolean created = false;
+            boolean readWrite = false;
             
-            created = SessionManager.setupSession(v.getMethod().getName());
+            created = SessionManager.setupSession(methName);
                                                   
             try {
+                if (!(methName.startsWith("get") ||
+                      methName.startsWith("find") ||
+                      methName.startsWith("is") ||
+                      methName.startsWith("check") ||
+                      methName.equals("create")))
+                {
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Upgrading session, due to [" + methName + 
+                                   "] on [" + v.getClass().getName() + "]");
+                    }
+                    readWrite = true;
+                    SessionManager.setSessionReadWrite();
+                }
                 if (isHome)
                     return next.invokeHome(v);
                 else
                     return next.invoke(v);
             } finally { 
                 if (created) {
+                    if (!readWrite && _log.isDebugEnabled()) {
+                        _log.debug("Successfully ran read-only transaction " + 
+                                   "for [" + methName + "] on [" + 
+                                   v.getClass().getName() + "]");
+                    }
                     SessionManager.cleanupSession();
                 }
             }
@@ -111,16 +131,16 @@ public class HQApp {
             return next.invoke(v);
         }
 
-        public Object invokeNext(Interceptor next, Invocation arg0) 
+        public Object invokeNext(Interceptor next, Invocation v) 
             throws Exception 
         {
-            return invokeNextBoth(next, arg0, false);
+            return invokeNextBoth(next, v, false);
         }
         
-        public Object invokeHomeNext(Interceptor next, Invocation arg0) 
+        public Object invokeHomeNext(Interceptor next, Invocation v) 
             throws Exception 
         {
-            return invokeNextBoth(next, arg0, true);
+            return invokeNextBoth(next, v, true);
         }
     }
     
