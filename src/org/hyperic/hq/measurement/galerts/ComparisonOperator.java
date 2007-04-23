@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.galerts.triggers.measurement;
+package org.hyperic.hq.measurement.galerts;
 
 import java.util.List;
 

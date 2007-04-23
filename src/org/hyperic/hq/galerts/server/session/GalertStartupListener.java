@@ -36,5 +36,8 @@ public class GalertStartupListener
         // Make sure the escalation enumeration is loaded and registered so 
         // that the escalations run
         GalertEscalationAlertType.class.getClass();
+        
+        // Make sure we have the aux-log provider loaded
+        GalertAuxLogProvider.class.toString();
     }
 }

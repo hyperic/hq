@@ -23,31 +23,16 @@
  * USA.
  */
 
-package org.hyperic.hq.events.server.session;
+package org.hyperic.hq.appdef.server.session;
 
-import java.util.Collections;
-import java.util.List;
+import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
+import org.hyperic.hq.application.StartupListener;
 
-import org.hyperic.hq.escalation.server.session.EscalatableBase;
-import org.hyperic.hq.events.AlertInterface;
-
-public class ClassicEscalatable
-    extends EscalatableBase
+public class AppdefStartupListener
+    implements StartupListener
 {
-    private Alert _alert;
-
-    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              a.isAckable());
-        
-        _alert = a;
-    }
-
-    public AlertInterface getAlertInfo() {
-        return _alert;
-    }
-
-    public List getAuxLogs() {
-        return Collections.EMPTY_LIST;
+    public void hqStarted() {
+        // Make sure we have the aux-log provider loaded
+        ResourceAuxLogProvider.class.toString();
     }
 }

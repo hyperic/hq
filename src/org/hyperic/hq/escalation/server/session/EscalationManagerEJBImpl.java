@@ -392,7 +392,8 @@ public class EscalationManagerEJBImpl
         try {
             ActionExecutionInfo execInfo = 
                 new ActionExecutionInfo(esc.getShortReason(),
-                                        esc.getLongReason());
+                                        esc.getLongReason(),
+                                        esc.getAuxLogs());
             
             String detail = action.executeAction(esc.getAlertInfo(), execInfo);
             

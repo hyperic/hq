@@ -1248,8 +1248,8 @@ public class EventsBossEJBImpl
                                                timeRange, cur, appentResources);
     
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-        List galerts = gMan.findAlerts(subject, count, priority, timeRange,  
-                                       cur, appentResources); 
+        List galerts = gMan.findEscalatables(subject, count, priority, 
+                                             timeRange, cur, appentResources);   
         alerts.addAll(galerts);
 
         Collections.sort(alerts, new Comparator() {

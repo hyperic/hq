@@ -28,19 +28,25 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
+import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
 
 public class GalertLog
     extends PersistedObject 
-    implements AlertInterface, Escalatable
+    implements AlertInterface
 { 
+    private final Log _log = LogFactory.getLog(GalertLog.class);
+    
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
 
@@ -51,6 +57,7 @@ public class GalertLog
     private String             _longReason;
     private GalertDefPartition _partition;
     private Collection         _actionLog = new ArrayList();
+    private List               _auxLogs = new ArrayList();
     private Long               _stateId;
     private Long               _ackedBy;
     
@@ -140,9 +147,26 @@ public class GalertLog
         return Collections.unmodifiableCollection(_actionLog);
     }
 
-    public ExecutionReason getExecutionReason() {
-        return new ExecutionReason(getShortReason(), getLongReason(),
-                                   _partition);
+    protected void setAuxLogBag(List auxLogs) {
+        _auxLogs = auxLogs;
+    }
+
+    protected List getAuxLogBag() {
+        return _auxLogs;
+    }
+
+    /**
+     * Gets the {@link GalertAuxLog}s associated with this alert.
+     */
+    public List getAuxLogs() {
+        return Collections.unmodifiableList(getAuxLogBag());
+    }
+    
+    GalertAuxLog addAuxLog(AlertAuxLog auxLog, GalertAuxLog parent) { 
+        GalertAuxLog res = new GalertAuxLog(this, auxLog, parent); 
+        
+        getAuxLogBag().add(res);
+        return res;
     }
 
     public boolean isFixed() {
@@ -171,10 +195,6 @@ public class GalertLog
     
     public boolean isAcknowledgeable() {
         return getStateId() != null && getAckedBy() == null;
-    }
-
-    public AlertInterface getAlertInfo() {
-        return this;
     }
 
     public int hashCode() {

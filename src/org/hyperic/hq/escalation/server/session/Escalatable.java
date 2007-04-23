@@ -24,6 +24,9 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.List;
+
+import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertInterface;
 
 /**
@@ -31,9 +34,6 @@ import org.hyperic.hq.events.AlertInterface;
  * an escalation chain.  
  */
 public interface Escalatable {
-    /**
-     * Get the ID of the Escalatable.  
-     */
     Integer getId();
     
     /**
@@ -50,4 +50,9 @@ public interface Escalatable {
     AlertInterface getAlertInfo();
     
     boolean isAcknowledgeable();
+    
+    /**
+     * Get a list of {@link AlertAuxLog}s associated with this escalatable.
+     */
+    List getAuxLogs();
 }

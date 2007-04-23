@@ -22,44 +22,42 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.events;
 
-import java.util.List;
+import org.hyperic.util.HypericEnum;
 
-import org.hyperic.hq.events.server.session.Action;
 
 /**
- * These are value objects passed into 
- * {@link Action#executeAction(AlertInterface, ActionExecutionInfo)
- * which contain the reasons that the action is being executed.
+ * Abstracts the location of the source of auxillary log information.
  */
-public class ActionExecutionInfo {
-    private String   _shortReason;
-    private String   _longReason;
-    private List     _auxLogs;
-    
-    public ActionExecutionInfo(String shortReason, String longReason,
-                               List auxLogs)
-    {
-        _shortReason  = shortReason;
-        _longReason   = longReason;
-        _auxLogs      = auxLogs;
+public abstract class AlertAuxLogProvider 
+    extends HypericEnum 
+{
+    protected AlertAuxLogProvider(int code, String desc) {
+        super(AlertAuxLogProvider.class, code, desc);
     }
     
-    public String getShortReason() {
-        return _shortReason;
+    public static AlertAuxLogProvider findByCode(int code) {
+        return (AlertAuxLogProvider)findByCode(AlertAuxLogProvider.class, code); 
     }
     
-    public String getLongReason() {
-        return _longReason;
-    }
-
     /**
-     * Returns a list of {@link AlertAuxLog}s
+     * Load a provider-specific AlertAuxLog 
+     *
+     * @param auxLogId ID of the auxillary log to which to load aux info for
      */
-    public List getAuxLogs() {
-        return _auxLogs;
-    }
-}
+    public abstract AlertAuxLog load(int auxLogId, long timestamp,
+                                     String description);
     
+    /**
+     * Save an auxillary log (log) to the DB.  This aux log is tied to a real
+     * log, as specified by the auxLogId.  For the time being, this
+     * auxLogId specifies a {@link GalertAuxLog}  
+     */
+    public abstract void save(int auxLogId, AlertAuxLog log);
+    
+    /**
+     * Delete any auxillary logs associated with the specified auxLogId
+     */
+    public abstract void delete(int auxLogId);
+}

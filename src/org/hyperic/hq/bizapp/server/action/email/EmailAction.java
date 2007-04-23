@@ -40,8 +40,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -51,6 +49,7 @@ import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
+import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
@@ -136,15 +135,15 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String createText(AlertDefinitionInterface alertdef,
-                              String longReason, AppdefEntityID aeid,
-                              Integer alertId)
+                              ActionExecutionInfo info,
+                              AppdefEntityID aeid, Integer alertId)
         throws MeasurementNotFoundException
     {
         StringBuffer text = new StringBuffer("The ")
             .append(RES_NAME_HOLDER).append(" ")
             .append(aeid.getTypeName())
             .append(" has generated the following alert -\n")
-            .append(longReason)
+            .append(info.getLongReason())
             .append(SEPARATOR);
 
         text.append("ALERT DETAIL")
@@ -161,7 +160,7 @@ public class EmailAction extends EmailActionConfig
         text.append("\n- Condition Set: ");
 
         // Get the conditions
-        text.append(longReason);
+        text.append(info.getLongReason());
 
         // The rest of the alert details
         text.append("\n- Alert Severity: ")
@@ -169,6 +168,11 @@ public class EmailAction extends EmailActionConfig
 //            .append("\n- Alert Date / Time: ").append(alertTime)
             .append(SEPARATOR);
 
+        if (!info.getAuxLogs().isEmpty()) {
+            text.append("\nAdditional information:\n");
+            addAuxLogs("  ", info.getAuxLogs(), text);
+        }
+        
         try {
             // Create the links
             text.append("\nFor additional detail about this alert, go to ")
@@ -183,11 +187,22 @@ public class EmailAction extends EmailActionConfig
                 .append(SEPARATOR);
         } catch (ConfigPropertyException e) {
             _log.error("Error getting HQ config.  Can't add link to email.", e);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException e) { // Retarded ... XXX
             _log.error("Error finding event id.  Can't add link to email.", e);
         }
-
         return text.toString();
+    }
+    
+    private void addAuxLogs(String prefix, List logs, StringBuffer text) {
+        for (Iterator i=logs.iterator(); i.hasNext(); ) { 
+            AlertAuxLog a = (AlertAuxLog)i.next();
+            
+            text.append(prefix)
+                .append(a.getDescription())
+                .append("\n");
+            
+            addAuxLogs(prefix + "  ", a.getChildren(), text);
+        }
     }
     
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
@@ -211,8 +226,8 @@ public class EmailAction extends EmailActionConfig
             AppdefEntityID appEnt = getResource(alertDef);
 
             String body = isSms() ? info.getShortReason() :
-                                    createText(alertDef, info.getLongReason(), 
-                                               appEnt, alert.getId()); 
+                                    createText(alertDef, info,
+                                               appEnt, alert.getId());
 
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());

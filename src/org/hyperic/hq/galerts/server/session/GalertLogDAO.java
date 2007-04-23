@@ -52,6 +52,10 @@ class GalertLogDAO
     void save(GalertLog log) {
         super.save(log);
     }
+    
+    void save(GalertAuxLog log) {
+        super.save(log);
+    }
 
     void remove(GalertLog log) {
         super.remove(log);

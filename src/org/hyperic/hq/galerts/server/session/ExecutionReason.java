@@ -25,16 +25,23 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.hyperic.hq.events.AlertAuxLog;
+
 public class ExecutionReason {
     private final String             _shortReason;
     private final String             _longReason;
+    private final List               _auxLogs;
     private final GalertDefPartition _partition;
     
-    public ExecutionReason(String shortReason, String longReason,
+    public ExecutionReason(String shortReason, String longReason, List auxLogs,
                            GalertDefPartition partition) 
     {
         _shortReason = shortReason;
         _longReason  = longReason;
+        _auxLogs     = auxLogs;
         _partition   = partition;
     }
     
@@ -44,6 +51,13 @@ public class ExecutionReason {
     
     public String getLongReason() {
         return _longReason;
+    }
+    
+    /**
+     * Returns a list of {@link AlertAuxLog}s
+     */
+    public List getAuxLogs() {
+        return Collections.unmodifiableList(_auxLogs);
     }
     
     public GalertDefPartition getPartition() {

@@ -22,32 +22,32 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+package org.hyperic.hq.galerts.server.session;
 
-package org.hyperic.hq.events.server.session;
+import org.hyperic.hq.events.AlertAuxLog;
+import org.hyperic.hq.events.AlertAuxLogProvider;
+import org.hyperic.hq.events.SimpleAlertAuxLog;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.hyperic.hq.escalation.server.session.EscalatableBase;
-import org.hyperic.hq.events.AlertInterface;
-
-public class ClassicEscalatable
-    extends EscalatableBase
+public class GalertAuxLogProvider
+    extends AlertAuxLogProvider
 {
-    private Alert _alert;
+    public static final GalertAuxLogProvider INSTANCE =  
+        new GalertAuxLogProvider(0, "GAlert Auxillary Metric Data");
 
-    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              a.isAckable());
-        
-        _alert = a;
+    private GalertAuxLogProvider(int code, String desc) {
+        super(code, desc);
     }
 
-    public AlertInterface getAlertInfo() {
-        return _alert;
+    public AlertAuxLog load(int auxLogId, long timestamp, String desc) { 
+        return new SimpleAlertAuxLog(desc, timestamp);
     }
 
-    public List getAuxLogs() {
-        return Collections.EMPTY_LIST;
+    public void save(int auxLogId, AlertAuxLog log) {
+        // NOOP, there is no additional information to save, as it is entirely
+        // contained within the {@link GalertAuxLog} class
+    }
+
+    public void delete(int auxLogId) {
+        // NOOP, these entries are deleted by the Galert manager
     }
 }

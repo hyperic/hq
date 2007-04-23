@@ -51,6 +51,13 @@
       <one-to-many class="GalertActionLog" />
     </bag>
 
+    <bag name="auxLogBag" table="EAM_GALERT_AUX_LOGS" 
+         cascade="all" inverse="true" order-by="TIMESTAMP, ID">
+      <cache usage="read-write" />
+      <key column="GALERT_ID" not-null="true"/>      
+      <one-to-many class="GalertAuxLog" />
+    </bag>
+
     <!-- A better way to use these 2 formula based queries would be to use
          a simple outer-join against the state table.  Unfortuantely, as of
          Hibernate 2.2 this isn't possible.  This could also be optimized to

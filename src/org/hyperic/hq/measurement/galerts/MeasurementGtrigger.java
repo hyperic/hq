@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.galerts.triggers.measurement;
+package org.hyperic.hq.measurement.galerts;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,21 +36,27 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MetricValue;
@@ -170,9 +176,57 @@ public class MeasurementGtrigger
             .append(_comparator)
             .append(" ")
             .append(_metricVal);
+
+        setFired(new FireReason(sr.toString(), lr.toString(), 
+                                formulateAuxLogs()));
+    }
+
+    private List formulateAuxLogs() {
+        // Assemble the aux info
+        List auxLogs = new ArrayList();
+        DerivedMeasurementManagerLocal dmMan = getDMMan();
+        AuthzSubjectValue overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().findOverlord();
+        for (Iterator i=_processedEvents.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            MeasurementZeventSource src = (MeasurementZeventSource)ent.getKey();
+            MetricValue val = (MetricValue)ent.getValue();
+            SimpleAlertAuxLog baseLog; 
+            DerivedMeasurement metric;
+            AppdefEntityValue entVal;
+            AppdefEntityID entId;
+            String descr, entName, metricName;
+            
+            if (!_comparator.isTrue(new Float(val.getValue()), _metricVal)) 
+                continue;
+            
+            metric = dmMan.getMeasurement(new Integer(src.getId()));
+            entId  = new AppdefEntityID(metric.getAppdefType(), 
+                                        metric.getInstanceId());
+            entVal = new AppdefEntityValue(entId, overlord);
+            try {
+                entName = entVal.getName();
+            } catch(Exception e) {
+                entName = entId.toString();
+            }
+            metricName = metric.getTemplate().getName();
+            descr = entName + " reported " + metric.getTemplate().getName() + 
+                    " = " + val.getValue();
+                      
+            baseLog = new SimpleAlertAuxLog(descr, val.getTimestamp());
+            baseLog.addChild(new MetricAuxLog(metricName + " chart", 
+                                              val.getTimestamp(), metric));
+                                              
+            baseLog.addChild(new ResourceAuxLog(entName, val.getTimestamp(), 
+                                                entId));
+            auxLogs.add(baseLog);
+        }
         
-        FireReason reason = new FireReason(sr.toString(), lr.toString());
-        setFired(reason);
+        return auxLogs;
+    }
+    
+    private DerivedMeasurementManagerLocal getDMMan() {
+        return DerivedMeasurementManagerEJBImpl.getOne();
     }
     
     public void setGroup(ResourceGroup rg) {
@@ -184,8 +238,7 @@ public class MeasurementGtrigger
                 AppdefGroupManagerUtil.getLocalHome().create();
             AuthzSubjectManagerLocal sMan = 
                 AuthzSubjectManagerUtil.getLocalHome().create();
-            DerivedMeasurementManagerLocal dMan =
-                DerivedMeasurementManagerUtil.getLocalHome().create();
+            DerivedMeasurementManagerLocal dMan = getDMMan();
             TemplateManagerLocal tMan = 
                 TemplateManagerUtil.getLocalHome().create();
             
@@ -193,7 +246,8 @@ public class MeasurementGtrigger
             List instanceIds = new ArrayList();
             
             _groupSize = g.getTotalSize();
-            for (Iterator i=g.getAppdefGroupEntries().iterator(); i.hasNext(); ) {
+            for (Iterator i=g.getAppdefGroupEntries().iterator(); i.hasNext(); ) 
+            {
                 AppdefEntityID ent = (AppdefEntityID)i.next();
                 
                 instanceIds.add(ent.getId());

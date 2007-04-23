@@ -43,6 +43,10 @@ class GalertEscalatableCreator
     }
     
     public Escalatable createEscalatable() {
-        return _gMan.createAlertLog(_def, _reason);
+        return new GalertEscalatable(_gMan.createAlertLog(_def, _reason));
+    }
+    
+    static Escalatable createEscalatable(GalertLog log) {
+        return new GalertEscalatable(log);
     }
 }

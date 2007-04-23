@@ -25,40 +25,110 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
+import org.hyperic.hq.events.AlertAuxLog;
+import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertInterface;
 
-public class GalertEscalatable implements Escalatable {
-    private GalertLog _galert;
-    private boolean   _acknowledgeable;
+public class GalertEscalatable
+    implements Escalatable
+{
+    private static final Log _log = LogFactory.getLog(GalertEscalatable.class);
+    private GalertLog _alert;
+    private List      _auxLogs;
     
-    GalertEscalatable(GalertLog galert, boolean ackable) {
-        _galert          = galert;
-        _acknowledgeable = ackable;
+    GalertEscalatable(GalertLog alert) {
+        _alert = alert;
+    }
+    
+    public AlertInterface getAlertInfo() {
+        return _alert;
     }
 
-    public AlertInterface getAlertInfo() {
-        return _galert.getAlertInfo();
+    /**
+     * The aux logs stored in the DB come out in a strange formation. 
+     * They look like this:
+     * 
+     * GalertLogs
+     *   |
+     *   \-> GalertAuxLog
+     *           | (recursive)
+     *           \-> GalertAuxLog
+     *                  |
+     *                  \-> Aux Log Specifics (defined by auxtype)
+     * 
+     * We need to pull data out of the DB and re-constitute the tree
+     *
+     * @return a list of {@link AlertAuxLog]s
+     */
+    private List composeAuxLogs() {
+        List gAuxLogs = _alert.getAuxLogs();
+        List res = new ArrayList();
+        Map idToLog = new HashMap(); 
+        
+        // First load all the aux logs
+        for (Iterator i=gAuxLogs.iterator(); i.hasNext(); ) {
+            GalertAuxLog gAuxLog = (GalertAuxLog)i.next();
+
+            AlertAuxLogProvider provider = 
+                AlertAuxLogProvider.findByCode(gAuxLog.getAuxType());
+            AlertAuxLog auxLog = provider.load(gAuxLog.getId().intValue(), 
+                                               gAuxLog.getTimestamp(),
+                                               gAuxLog.getDescription());
+            idToLog.put(gAuxLog.getId(), auxLog);
+            
+            if (gAuxLog.getParent() == null)
+                res.add(auxLog);
+        }
+        
+        // Now process the hierarchy and make sure all the children are setup
+        for (Iterator i=gAuxLogs.iterator(); i.hasNext(); ) {
+            GalertAuxLog gAuxLog = (GalertAuxLog)i.next();
+            
+            if (gAuxLog.getParent() == null) 
+                continue;
+            
+            AlertAuxLog child  = (AlertAuxLog)idToLog.get(gAuxLog.getId());
+            AlertAuxLog parent = (AlertAuxLog)
+                idToLog.get(gAuxLog.getParent().getId());
+            parent.addChild(child);
+        }
+        return res;
+    }        
+    
+    public List getAuxLogs() {
+        if (_auxLogs == null)
+            _auxLogs = composeAuxLogs();
+        
+        return _auxLogs;
     }
 
     public PerformsEscalations getDefinition() {
-        return _galert.getAlertDef();
+        return _alert.getDefinition();
     }
 
     public Integer getId() {
-        return _galert.getId();
+        return _alert.getId();
     }
 
     public String getLongReason() {
-        return _galert.getLongReason();
+        return _alert.getLongReason();
     }
 
     public String getShortReason() {
-        return _galert.getShortReason();
+        return _alert.getShortReason();
     }
 
     public boolean isAcknowledgeable() {
-        return _acknowledgeable;
-    }
+        return _alert.isAcknowledgeable();
+    } 
 }

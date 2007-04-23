@@ -26,6 +26,7 @@
 package org.hyperic.hq.events.ext;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -142,7 +143,8 @@ public class ClassicEscalatableCreator
 
             try {
                 ActionExecutionInfo execInfo = 
-                    new ActionExecutionInfo(shortReason, longReason);
+                    new ActionExecutionInfo(shortReason, longReason,
+                                            Collections.EMPTY_LIST);
                                             
                 String detail = act.executeAction(alert, execInfo);
                 

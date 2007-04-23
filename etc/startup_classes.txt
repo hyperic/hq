@@ -1,3 +1,4 @@
+org.hyperic.hq.appdef.server.session.AppdefStartupListener
 org.hyperic.hq.autoinventory.server.session.AIStartupListener
 org.hyperic.hq.measurement.server.session.MeasurementStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener

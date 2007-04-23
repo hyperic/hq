@@ -65,7 +65,9 @@ public class SimpleStrategy
     public ExecutionReason shouldFire() {
         if (_lastReason != null) {
             return new ExecutionReason(_lastReason.getShortReason(), 
-                                       _lastReason.getLongReason(), _partition);
+                                       _lastReason.getLongReason(), 
+                                       _lastReason.getAuxLogs(),
+                                       _partition);
         }
         return null;
     }

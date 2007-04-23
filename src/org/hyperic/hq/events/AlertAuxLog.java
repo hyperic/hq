@@ -23,31 +23,35 @@
  * USA.
  */
 
-package org.hyperic.hq.events.server.session;
+package org.hyperic.hq.events;
 
-import java.util.Collections;
+import java.net.URL;
 import java.util.List;
 
-import org.hyperic.hq.escalation.server.session.EscalatableBase;
-import org.hyperic.hq.events.AlertInterface;
-
-public class ClassicEscalatable
-    extends EscalatableBase
-{
-    private Alert _alert;
-
-    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              a.isAckable());
-        
-        _alert = a;
-    }
-
-    public AlertInterface getAlertInfo() {
-        return _alert;
-    }
-
-    public List getAuxLogs() {
-        return Collections.EMPTY_LIST;
-    }
+/**
+ * Contains auxillary information about why an alert fired.  
+ */
+public interface AlertAuxLog {
+    /**
+     * Get a text descritption of the log.
+     */
+    String getDescription();
+    
+    /**
+     * Provide an optional URL which can be used to see more information
+     * about the log.
+     */
+    URL getURL();
+    
+    /**
+     * Returns a list of {@link AlertAuxLog}s which are children of this
+     * log.
+     */
+    List getChildren();
+    
+    void addChild(AlertAuxLog child);
+    
+    AlertAuxLogProvider getProvider();
+    
+    long getTimestamp();
 }

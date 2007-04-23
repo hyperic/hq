@@ -28,8 +28,10 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -51,10 +53,13 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.events.AlertAuxLog;
+import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
+import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
@@ -87,6 +92,7 @@ public class GalertManagerEJBImpl
     private EscalationManagerLocal       _escMan;
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
     private GalertDefDAO                 _defDAO;
+    private GalertAuxLogDAO              _auxLogDAO;
     private GalertLogDAO                 _logDAO;
     private CrispoManagerLocal           _crispoMan;
     private GalertActionLogDAO           _actionLogDAO;
@@ -98,6 +104,7 @@ public class GalertManagerEJBImpl
         _stratTypeDAO = new ExecutionStrategyTypeInfoDAO(f); 
         _defDAO       = new GalertDefDAO(f);
         _logDAO       = new GalertLogDAO(f);
+        _auxLogDAO    = new GalertAuxLogDAO(f);
         _crispoMan    = CrispoManagerEJBImpl.getOne();
         _actionLogDAO = new GalertActionLogDAO(f);
     }
@@ -208,12 +215,52 @@ public class GalertManagerEJBImpl
     /**
      * @ejb:interface-method  
      */
+    public GalertAuxLog findAuxLogById(Integer id) {
+        return _auxLogDAO.findById(id);
+    }
+    
+    /**
+     * Save the alert log and associated auxillary log information to the
+     * DB.  
+     * 
+     * DevNote:  Since the GalertAuxLog table needs to be written first 
+     * (for foreign-key from the auxType tables), we first traverse all the 
+     * logs and save them.  Then, we perform the same traversal and save the 
+     * specific logs.
+     * 
+     * @ejb:interface-method  
+     */
     public GalertLog createAlertLog(GalertDef def, ExecutionReason reason) { 
+        Map gAuxLogToAuxLog = new HashMap(); // Stores real logs to auxType logs
         GalertLog newLog = new GalertLog(def, reason, 
                                          System.currentTimeMillis());
-        
+        addAuxLogChildren(newLog, null, reason.getAuxLogs(), gAuxLogToAuxLog);
         _logDAO.save(newLog);
+        
+        for (Iterator i=gAuxLogToAuxLog.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            GalertAuxLog gAuxLog = (GalertAuxLog)ent.getKey();
+            AlertAuxLog auxLog = (AlertAuxLog)ent.getValue();
+            AlertAuxLogProvider provider = auxLog.getProvider();
+            
+            if (provider != null)
+                provider.save(gAuxLog.getId().intValue(), auxLog);
+        }
         return newLog;
+    }
+    
+    private void addAuxLogChildren(GalertLog alert, GalertAuxLog parent, 
+                                   List auxLogs, Map gAuxLogToAuxLog) 
+    {
+        for (Iterator i=auxLogs.iterator(); i.hasNext(); ) {
+            AlertAuxLog auxLog = (AlertAuxLog)i.next();
+            GalertAuxLog newLog;
+            
+            newLog = alert.addAuxLog(auxLog, parent);
+            gAuxLogToAuxLog.put(newLog, auxLog);
+            addAuxLogChildren(alert, newLog, auxLog.getChildren(),
+                              gAuxLogToAuxLog);
+        }
     }
     
     /**
@@ -246,7 +293,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public Escalatable findEscalatableAlert(Integer id) {
-        return _logDAO.findById(id);
+        return GalertEscalatableCreator.createEscalatable(_logDAO.findById(id));
     }
 
     /**
@@ -273,6 +320,28 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * @see findAlerts
+     * @return a list of {@link Escalatable}s
+     * @ejb:interface-method
+     */
+    public List findEscalatables(AuthzSubjectValue subj, int count, 
+                                 int priority, long timeRange, long endTime,
+                                 List includes)
+        throws PermissionException
+    {
+        List alerts = findAlerts(subj, count, priority, timeRange, endTime,
+                                 includes);
+        List res = new ArrayList(alerts.size());
+        
+        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
+            GalertLog alert = (GalertLog)i.next();
+            
+            res.add(GalertEscalatableCreator.createEscalatable(alert));
+        }
+        return res;
+    }
+    
+    /**
      * Find group alerts based on a set of criteria
      *
      * @param subj      Subject doing the finding
@@ -282,6 +351,8 @@ public class GalertManagerEJBImpl
      *                  alerts will be contained in.  e.g. the beginning of the  
      *                  time range will be (current - timeRante)
      * @param includes  A list of entity IDs to include in the result
+     * 
+     * @return a list of {@link GalertLog}s
      * @ejb:interface-method
      */
     public List findAlerts(AuthzSubjectValue subj, int count, int priority,
@@ -330,7 +401,7 @@ public class GalertManagerEJBImpl
     }
 
     /**
-     * Register an execution strategy.  
+     * Register an execution strategy.
      * @ejb:interface-method
      */
     public ExecutionStrategyTypeInfo 
@@ -485,6 +556,13 @@ public class GalertManagerEJBImpl
     public void nukeAlertDef(GalertDef def) {
         List nukeCrispos = new ArrayList();
         Integer defId = def.getId();
+        
+        for (Iterator i=_auxLogDAO.findAll(def).iterator(); i.hasNext(); ) {
+            GalertAuxLog auxLog = (GalertAuxLog)i.next();
+            
+            auxLog.getProvider().delete(auxLog.getId().intValue());
+        }
+        _auxLogDAO.removeAll(def);
         
         // Kill the logs
         _logDAO.removeAll(def);

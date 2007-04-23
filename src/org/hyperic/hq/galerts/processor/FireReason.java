@@ -25,13 +25,22 @@
 
 package org.hyperic.hq.galerts.processor;
 
+import java.util.List;
+
+import org.hyperic.hq.events.AlertAuxLog;
+
 public class FireReason {
     private String _shortReason;
     private String _longReason;
-        
-    public FireReason(String shortReason, String longReason) {
+    private List   _auxLogs;
+
+    /**
+     * @param auxLogs A list of {@link AlertAuxLog}s
+     */
+    public FireReason(String shortReason, String longReason, List auxLogs) {
         _shortReason = shortReason;
         _longReason  = longReason;
+        _auxLogs     = auxLogs;
     }
         
     public String getShortReason() {
@@ -40,6 +49,10 @@ public class FireReason {
 
     public String getLongReason() {
         return _longReason;
+    }
+    
+    public List getAuxLogs() {
+        return _auxLogs;
     }
         
     public String toString() {

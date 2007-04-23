@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.galerts.triggers.measurement;
+package org.hyperic.hq.measurement.galerts;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

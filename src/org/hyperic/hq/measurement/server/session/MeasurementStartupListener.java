@@ -32,6 +32,7 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -42,6 +43,8 @@ public class MeasurementStartupListener
     private static MetricDeleteCallback _deleteCallback;
     
     public void hqStarted() {
+        // Make sure we have the aux-log provider loaded
+        MetricAuxLogProvider.class.toString();
         SRNManagerEJBImpl.getOne().initializeCache();
     
         /**

@@ -41,6 +41,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerUtil;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventSourceId;
@@ -68,7 +70,6 @@ public class GalertProcessor {
 
     private static boolean _initialized = false;
     
-    private final GalertManagerLocal _aMan; 
     private final ZeventManager      _zMan;
     
     // Integer ids -> MemGalertDefs
@@ -79,11 +80,6 @@ public class GalertProcessor {
 
     
     private GalertProcessor() {
-        try {
-            _aMan = GalertManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
         _zMan = ZeventManager.getInstance();
         _zMan.addGlobalListener(new EventListener(this));
     }
@@ -93,11 +89,23 @@ public class GalertProcessor {
      *
      * @param events  A list of {@link Zevent}s to process
      */
-    void processEvents(List events) {
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            Zevent z = (Zevent)i.next();
-            
-            processEvent(z);
+    void processEvents(final List events) {
+        try {
+            SessionManager.runInSession(new SessionRunner() {
+                public String getName() {
+                    return "Event Processor";
+                }
+
+                public void run() throws Exception {
+                    for (Iterator i=events.iterator(); i.hasNext(); ) {
+                        Zevent z = (Zevent)i.next();
+                    
+                        processEvent(z);
+                    }
+                }
+            });
+        } catch(Exception e) {
+            _log.warn("Error processing events", e);
         }
     }
     

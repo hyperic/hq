@@ -23,31 +23,42 @@
  * USA.
  */
 
-package org.hyperic.hq.events.server.session;
+package org.hyperic.hq.galerts.server.session;
 
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hq.escalation.server.session.EscalatableBase;
-import org.hyperic.hq.events.AlertInterface;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.HibernateDAO;
 
-public class ClassicEscalatable
-    extends EscalatableBase
+class GalertAuxLogDAO
+    extends HibernateDAO
 {
-    private Alert _alert;
+    private static final Log _log = LogFactory.getLog(GalertAuxLogDAO.class);
+    
+    GalertAuxLogDAO(DAOFactory f) {
+        super(GalertAuxLog.class, f);
+    }
 
-    public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              a.isAckable());
+    GalertAuxLog findById(Integer id) {
+        return (GalertAuxLog)super.findById(id);
+    }
+    
+    List findAll(GalertDef def) {
+        String sql = "from GalertAuxLog l where l.alert.alertDef = :def";
         
-        _alert = a;
+        return getSession().createQuery(sql)
+                   .setParameter("def", def)
+                   .list();
     }
 
-    public AlertInterface getAlertInfo() {
-        return _alert;
-    }
-
-    public List getAuxLogs() {
-        return Collections.EMPTY_LIST;
+    void removeAll(GalertDef def) {
+        for (Iterator i = findAll(def).iterator(); i.hasNext(); ) {
+            GalertAuxLog log = (GalertAuxLog)i.next();
+            
+            super.remove(log);
+        }
     }
 }
