@@ -25,28 +25,29 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.dao.DAOFactory;
 
 public class DerivedMeasurement extends Measurement
-    implements java.io.Serializable {
+    implements Serializable 
+{
 
-    // Fields    
     private boolean _enabled = true;
-    private long _interval;
-    private String _formula;
+    private long    _interval;
+    private String  _formula;
 
-    // Constructors
     public DerivedMeasurement() {
     }
 
     public DerivedMeasurement(Integer instanceId, MeasurementTemplate template,
-                              long interval) {
+                              long interval) 
+    {
         super(instanceId, template);
         _interval = interval;
     }
 
-    // Property accessors
     public boolean isEnabled() {
         return _enabled;
     }
