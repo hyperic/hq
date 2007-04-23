@@ -941,8 +941,26 @@ function showViewEscResponse(originalRequest) {
         var userListCheck = $('userListDisplay');
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-        
-        if ((selUserEsc == 'Others' || selUserEsc == undefined) && emailAdds == '') {
+
+
+
+        var separatedEmails = emailAdds.split(',');
+
+      for (i = 0; i < separatedEmails.length; i++) {
+                     //alert(separatedEmails[i])
+
+            //var checkedEmaiL = (separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0);
+
+           if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
+            return false;
+                }
+            }
+
+            if ((selUserEsc == 'Others' || selUserEsc == undefined) && emailAdds == '') {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
@@ -960,6 +978,7 @@ function showViewEscResponse(originalRequest) {
                 $('escMsg').innerHTML ='';
                 $('example').style.display= 'none';
                 $('addEscButtons').style.display = "";
+
             return true;
             }
 
