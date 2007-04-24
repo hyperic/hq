@@ -79,7 +79,7 @@ public class ProcessQueueAction extends BaseAction {
         List aiServerList   = new ArrayList();
 
         // Grab a fresh view of the entire AI queue
-        PageList aiQueue = aiBoss.retrieveQueue(sessionId, true, false, true,
+        PageList aiQueue = aiBoss.getQueue(sessionId, true, false, true,
                                                 PageControl.PAGE_ALL);
 
         // Walk the queue.  For each platform in the queue:

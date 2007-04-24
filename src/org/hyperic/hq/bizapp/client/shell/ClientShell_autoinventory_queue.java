@@ -152,7 +152,7 @@ public class ClientShell_autoinventory_queue
             List queue = null;
             try {
                 aiBoss = shell.getBossManager().getAIBoss();
-                queue = aiBoss.retrieveQueue(auth.getAuthToken(), 
+                queue = aiBoss.getQueue(auth.getAuthToken(),
                                              showIgnored, 
                                              showPlaceholders,
                                              null);

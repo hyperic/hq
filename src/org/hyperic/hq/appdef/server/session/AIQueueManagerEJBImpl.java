@@ -212,13 +212,9 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue(AuthzSubjectValue subject,
-                                  boolean showIgnored,
-                                  boolean showPlaceholders,
-                                  PageControl pc) {
-        return retrieveQueue(subject, 
-                             showIgnored, showPlaceholders, 
-                             false, pc);
+    public PageList getQueue(AuthzSubjectValue subject, boolean showIgnored,
+                             boolean showPlaceholders, PageControl pc) {
+        return getQueue(subject, showIgnored, showPlaceholders, false, pc);
     }
 
     /**
@@ -237,11 +233,10 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue(AuthzSubjectValue subject,
-                                  boolean showIgnored,
-                                  boolean showPlaceholders,
-                                  boolean showAlreadyProcessed,
-                                  PageControl pc) {
+    public PageList getQueue(AuthzSubjectValue subject, boolean showIgnored,
+                             boolean showPlaceholders,
+                             boolean showAlreadyProcessed, PageControl pc)
+    {
         Collection queue;
         PageList results;
         pc = PageControl.initDefaults(pc, SortAttribute.DEFAULT);
