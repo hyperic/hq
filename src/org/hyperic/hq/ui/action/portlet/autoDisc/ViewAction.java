@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
@@ -82,7 +81,7 @@ public class ViewAction extends TilesAction {
                          user.getPreference(".dashContent.autoDiscovery.range") ) );
 
         // always show ignored platforms and already-processed platforms
-        PageList aiQueue = boss.retrieveQueue(sessionId, true, false, true, 
+        PageList aiQueue = boss.getQueue(sessionId, true, false, true,
                                               page);
         List queueWithStatus = getStatuses(sessionId, boss, aiQueue);
         context.putAttribute("resources", queueWithStatus);

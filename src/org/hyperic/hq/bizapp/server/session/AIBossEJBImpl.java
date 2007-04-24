@@ -28,9 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
@@ -40,9 +38,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -66,16 +62,12 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -364,15 +356,11 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue(int sessionID,
-                                  boolean showIgnored,
-                                  boolean showPlaceholders,
-                                  PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException {
-        return retrieveQueue(sessionID,
-                             showIgnored, 
-                             showPlaceholders,
-                             false, pc);
+    public PageList getQueue(int sessionID, boolean showIgnored,
+                             boolean showPlaceholders, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException
+    {
+        return getQueue(sessionID, showIgnored, showPlaceholders, false, pc);
     }
 
     /**
@@ -392,22 +380,18 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList retrieveQueue(int sessionID,
-                                  boolean showIgnored,
-                                  boolean showPlaceholders,
-                                  boolean showAlreadyProcessed,
-                                  PageControl pc )
+    public PageList getQueue(int sessionID, boolean showIgnored,
+                             boolean showPlaceholders,
+                             boolean showAlreadyProcessed,
+                             PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
 
         // TODO: pagecontrol is currently ignored here...
-        PageList queue = getAIManager().retrieveQueue(subject,
-                                                      showIgnored,
-                                                      showPlaceholders,
-                                                      showAlreadyProcessed,
-                                                      pc);
-        return queue;
+        return getAIManager().getQueue(subject, showIgnored,
+                                       showPlaceholders, showAlreadyProcessed,
+                                       pc);
     }
 
     /**
