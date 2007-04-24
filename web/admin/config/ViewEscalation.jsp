@@ -947,10 +947,7 @@ function showViewEscResponse(originalRequest) {
         var separatedEmails = emailAdds.split(',');
 
       for (i = 0; i < separatedEmails.length; i++) {
-                     //alert(separatedEmails[i])
-
-            //var checkedEmaiL = (separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0);
-
+         
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
