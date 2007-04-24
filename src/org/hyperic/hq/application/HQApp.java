@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.application;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -88,8 +89,11 @@ public class HQApp {
                                       boolean isHome) 
             throws Exception 
         {
-            String methName = v.getMethod().getName();
-            boolean created = false;
+            Method meth       = v.getMethod();
+            String methName   = meth.getName();
+            Class c           = meth.getDeclaringClass();
+            String className  = c.getName();
+            boolean created   = false;
             boolean readWrite = false;
             
             created = SessionManager.setupSession(methName);
@@ -103,7 +107,7 @@ public class HQApp {
                 {
                     if (_log.isDebugEnabled()) {
                         _log.debug("Upgrading session, due to [" + methName + 
-                                   "] on [" + v.getClass().getName() + "]");
+                                   "] on [" + className + "]");
                     }
                     readWrite = true;
                     SessionManager.setSessionReadWrite();
@@ -117,7 +121,7 @@ public class HQApp {
                     if (!readWrite && _log.isDebugEnabled()) {
                         _log.debug("Successfully ran read-only transaction " + 
                                    "for [" + methName + "] on [" + 
-                                   v.getClass().getName() + "]");
+                                   className + "]");
                     }
                     SessionManager.cleanupSession();
                 }

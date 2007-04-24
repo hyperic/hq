@@ -141,7 +141,13 @@ public class SessionManager {
             }
             
             _sessions.set(null);
-            s.flush();
+            
+            if (s.getFlushMode().equals(FlushMode.MANUAL)) {
+                _log.debug("Completed read-only session for " +
+                           Thread.currentThread().getName() + "]");
+            } else {
+                s.flush();
+            }
             s.close();
         } catch(HibernateException e) {
             _log.warn("Error closing session", e);
