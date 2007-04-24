@@ -30,32 +30,15 @@
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="display" prefix="display" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
-<tiles:importAttribute name="resourceHealth"/>
+<tiles:importAttribute name="resources"/>
 
 <div id="recent" class="DropDown" style="position:absolute; z-index: 300; margin-top: 2px;display:none;">
   <ul style="list-style-type: none;">
 <c:choose>
-<c:when test="${not empty resourceHealth}">   
-  <c:forEach var="resource" items="${resourceHealth}">
+<c:when test="${not empty resources}">
+  <c:forEach var="resource" items="${resources}">
     <li>
-      <c:choose>
-        <c:when test="${resource.availability == 1}">
-          <html:img page="/images/icon_available_green.gif" height="12" width="12" border="0"/> 
-        </c:when>
-        <c:when test="${resource.availability == -0.01}">
-          <html:img page="/images/icon_available_orange.gif" height="12" width="12" border="0"/>
-        </c:when>
-        <c:when test="${resource.availability <= 0}">
-          <html:img page="/images/icon_available_red.gif" height="12" width="12" border="0"/>
-        </c:when>
-        <c:when test="${resource.availability > 0 && resource.availability < 1}">
-          <html:img page="/images/icon_available_yellow.gif" height="12" width="12" border="0"/>
-        </c:when>
-        <c:otherwise>
-          <html:img page="/images/icon_available_error.gif" height="12" width="12" border="0"/>
-        </c:otherwise>
-      </c:choose>
-      <html:link page="/Resource.do?eid=${resource.resourceTypeId}:${resource.resourceId}"><c:out value="${resource.resourceName}"/></html:link>
+      <html:link page="/Resource.do?eid=${resource.entityId}"><c:out value="${resource.name}"/></html:link>
   </c:forEach>
     </li>
   </c:when>

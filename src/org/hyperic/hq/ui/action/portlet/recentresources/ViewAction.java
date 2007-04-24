@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -68,7 +68,7 @@ public class ViewAction extends TilesAction {
         StopWatch timer = new StopWatch();
 
         ServletContext ctx = getServlet().getServletContext();
-        MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
+        AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         WebUser user = (WebUser)
             request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
@@ -81,27 +81,13 @@ public class ViewAction extends TilesAction {
             list = getStuff(key, boss, user);
         }
 
-        context.putAttribute("resourceHealth", list);
-
-        Boolean availability =
-            Boolean.valueOf(user.getPreference(".dashContent.resourcehealth.availability"));
-        Boolean throughput =
-            Boolean.valueOf(user.getPreference(".dashContent.resourcehealth.throughput"));
-        Boolean performance =
-            Boolean.valueOf(user.getPreference(".dashContent.resourcehealth.performance"));
-        Boolean utilization =
-            Boolean.valueOf(user.getPreference(".dashContent.resourcehealth.utilization"));
-
-        context.putAttribute("availability", availability);
-        context.putAttribute("throughput", throughput);
-        context.putAttribute("performance", performance);
-        context.putAttribute("utilization", utilization);
+        context.putAttribute("resources", list);
 
         _log.debug("ViewRecentResources - timing [" + timer.toString() + "]");
         return null;
     }
 
-    private List getStuff(String key, MeasurementBoss boss, WebUser user)
+    private List getStuff(String key, AppdefBoss boss, WebUser user)
         throws Exception {
         List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
         Collections.reverse(entityIds);     // Most recent on top
@@ -109,7 +95,6 @@ public class ViewAction extends TilesAction {
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
-        return boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
-                                               arrayIds);
+        return boss.findByIds(user.getSessionId().intValue(), arrayIds);
     }
 }
