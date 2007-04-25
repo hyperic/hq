@@ -39,6 +39,7 @@
  onloads.push(requestViewEscalation);
 
 var selUserEsc;
+var selActionTypeEsc;
 
  function requestViewEscalation() {
         var alertDefId = $('alertDefId').value;
@@ -351,7 +352,9 @@ function showViewEscResponse(originalRequest) {
 
     function saveAddEscalation () {
         if (!checkEmail()) { return false; }
+        if (!checkSMS()) { return false; }
 
+        //checkSMS();
         var emailTextArea = $('emailinput');
         var emailAdds = emailTextArea.value;
 
@@ -511,6 +514,7 @@ function showViewEscResponse(originalRequest) {
 
         escTr2.appendChild(td4);
         td4.setAttribute('valign', 'top');
+        td4.setAttribute('align', 'left');
 
         td4.appendChild(emailDiv);
         emailDiv.setAttribute('class', 'emailDiv');
@@ -522,8 +526,9 @@ function showViewEscResponse(originalRequest) {
         sysDiv.setAttribute('class', 'escInput');
         sysDiv.setAttribute('id', 'sysloginput');
         $('sysloginput').style.display = 'none';
+        $('sysloginput').style.textAlign = 'left';
         //sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta id=metainput" + " size=30 onMouseOut=copyMeta(this);checkMeta();><br>" + "product: <input type=text name=product id=productinput" + " size=30 onMouseOut=copyProduct(this);checkProduct();><br>" + "version: <input type=text name=version id=versioninput" + " size=30 onMouseOut=copyVersion(this);checkVersion();><br>";
+        sysDiv.innerHTML = "meta:<br> <input type=text name=meta id=metainput" + " size=30 onMouseOut=copyMeta(this);checkMeta();><br>" + "product:<br> <input type=text name=product id=productinput" + " size=30 onMouseOut=copyProduct(this);checkProduct();><br>" + "version:<br> <input type=text name=version id=versioninput" + " size=30 onMouseOut=copyVersion(this);checkVersion();><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -592,10 +597,13 @@ function showViewEscResponse(originalRequest) {
 
         function onchange_handler(el) {
 
-          $('userListDisplay').style.display= "";
         var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
 
+          $('userListDisplay').style.display= "";
+          clearDisplay();
+          $('escMsg').innerHTML ='';
+          $('example').style.display= 'none';
 
 
           if (index == "NoOp") {
@@ -617,6 +625,7 @@ function showViewEscResponse(originalRequest) {
          else {
             showWhoSelect(el);
          }
+            selActionTypeEsc = index;
       }
 
       function onchange_who(el) {
@@ -932,8 +941,23 @@ function showViewEscResponse(originalRequest) {
         var userListCheck = $('userListDisplay');
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
-        
-        if ((selUserEsc == 'Others' || selUserEsc == '') && emailAdds == '') {
+
+
+
+        var separatedEmails = emailAdds.split(',');
+
+      for (i = 0; i < separatedEmails.length; i++) {
+         
+           if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
+            return false;
+                }
+            }
+
+            if ((selUserEsc == 'Others' || selUserEsc == undefined) && emailAdds == '') {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
@@ -951,9 +975,27 @@ function showViewEscResponse(originalRequest) {
                 $('escMsg').innerHTML ='';
                 $('example').style.display= 'none';
                 $('addEscButtons').style.display = "";
+
             return true;
             }
 
+   }
+
+    function checkSMS() {
+       
+        if((selActionTypeEsc == 'SMS') && selUserEsc == undefined) {
+            $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+            //$('saveButton').style.display = "none";
+            return false;
+        } else {
+                $('escMsg').innerHTML ='';
+                $('example').style.display= 'none';
+                $('addEscButtons').style.display = "";
+            return true;
+        }
    }
 
 
