@@ -25,9 +25,9 @@
   USA.
  -->
 
-<plugin name="sybase" class="SybaseProductPlugin">
+<plugin package="org.hyperic.hq.plugin.sybase">
   <classpath>
-    <include name="pdk/lib/jdbc/sybase-jConnect-5_5-jconn2.jar"/>
+    <include name="pdk/lib/jdbc/jconn3.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
@@ -37,130 +37,244 @@
   <property name="template-config"
             value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
-  <metrics name="Sybase 12.x">
+  <filter name="template"
+          value="${domain}:Type=Server:${alias}"/>
+  <metrics name="ServerMetrics">
     <metric name="Availability"
-            alias="Availability"
-            template="${domain}:Type=Server:availability"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
+
   </metrics>
 
+  <filter name="template"
+          value="${domain}:Type=Service,cachename=%cachename%:${alias}"/>
+  <metrics name="SybaseCachePools">
+    <metric name="Cache Misses"
+            category="THROUGHPUT"
+            indicator="false"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Cache Hits"
+            category="THROUGHPUT"
+            indicator="false"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Type=Service,instance=%instance%:${alias}"/>
   <metrics name="Sybase 12.x Instance">
     <metric name="Availability"
-            alias="Availability"
-            template="${domain}:Type=Service,instance=%instance%:availability"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
 
     <metric name="Number of Transactions"
-            alias="NumTx"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="THROUGHPUT"
             indicator="true"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of User Tables"
-            alias="NumUserTables"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
-            indicator="true"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of Active Locks"
-            alias="NumActiveLocks"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Page Locks"
-            alias="NumActivePageLocks"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Table Locks"
-            alias="NumActiveTableLocks"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Servers"
-            alias="NumServers"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Users"
-            alias="ActiveUsers"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Local Transactions"
-            alias="NumLocalTransactions"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="THROUGHPUT"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of External Transactions"
-            alias="NumExternalTransactions"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="THROUGHPUT"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Instance Used Space"
-            alias="InstanceUsedSpace"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Instance Free Space"
-            alias="InstanceFreeSpace"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Instance Total Space"
-            alias="InstanceTotalSpace"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Up Time"
-            alias="UpTime"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="AVAILABILITY"
             units="ms"
             collectionType="static"/>
 
     <metric name="Number of Indexes"
-            alias="NumIndexes"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Tx Logs"
-            alias="NumTxLogs"
-            template="${domain}:Type=Service,instance=%instance%:${alias}"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
   </metrics>
+
+  <filter name="template"
+          value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:${alias}"/>
+  <metrics name="sp_sysmon">
+    <metric name="Deadlocks"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="Avg Lock Contention"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="TDS Packets Sent"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="TDS Packets Received"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="Percent Total Cache Misses"
+            category="THROUGHPUT"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    <metric name="Percent Total Cache Hits"
+            category="THROUGHPUT"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <server name="Sybase"
+          version="12.5.x">
+    <plugin type="measurement"
+            class="SybaseMeasurementPlugin"/>
+    <plugin type="autoinventory"
+            class="SybaseServerDetector"/>
+    <metrics include="ServerMetrics"/>
+    <metrics include="sp_sysmon"/>
+
+    <config>
+      <option name="jdbcUrl"
+              description="JDBC Url"
+              default="jdbc:sybase:Tds:qa1:4100/master"/>
+      <option name="jdbcUser"
+              description="JDBC User"
+              default="sa"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
+      <option name="script"
+              description="sp_sysmon output script"
+              default="pdk/scripts/get_sysmon_stats.pl"/>
+<!--
+              default="/opt/sybase-12.5/sa_admin/bin/sp_sysmon.pl"/>
+-->
+      <option name="interval"
+              description="sp_sysmon interval"
+              default="00:05:00"/>
+      <option name="timeout"
+              description="Timeout for sp_sysmon, must be greater than the interval"
+              default="3500"/>
+    </config>
+
+    <service name="sp_sysmonEngine">
+      <config>
+        <option name="engine"
+                description="Sybase Engine Stats"/>
+      </config>
+      <filter name="template"
+              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%engine%.${alias}"/>
+      <metrics>
+        <metric name="Engine Utilization"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="sp_sysmonCache">
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="cachename"
+                description="Name of Cache"/>
+      </config>
+      <filter name="template"
+              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}"/>
+<!--
+              value="exec:file=%script%,args='s %serverName% -d %samplePeriod% -u %jdbcUser% -p %jdbcPassword%'"/>
+-->
+      <metrics>
+        <metric name="CacheHits"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="CacheMisses"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="sp_monitorconfig">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="configoption"
+                description="Config Option"/>
+      </config>
+      <filter name="template">
+        ${domain}:Type=SP_MonitorConfig,configoption=%configoption%:${alias}
+      </filter>
+      <metrics>
+        <metric name="PercentActive"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+  </server>
 </plugin>
