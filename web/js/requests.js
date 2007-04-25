@@ -226,6 +226,7 @@
                     var ackAnchor = document.createElement("a");
                     //ackAnchor .setAttribute("href", ".");
                      td6.appendChild(ackAnchor);
+                     ackAnchor.setAttribute("text-decoration", "none");
 
                     var imgNode = document.createElement('img');
 
@@ -237,9 +238,11 @@
                     ackAnchor.appendChild(imgNode);
                     ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");");
 
-                    //imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';this.border='0';");
-                    imgNode.onclick = new Function("imgHide", "this.parentNode.parentNode.innerHTML='&nbsp;';");
+                    //imgNode.onclick = new Function("imgHide", "this.parentNode.innerHTML='';");
+                    //ackAnchor.onclick = new Function("imgHide", "this.parentNode.innerHTML='&nbsp;';");
 
+
+                    imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';this.border='0';");
                     ackInstruction.style.display = "";
 
                 } else {
