@@ -944,9 +944,10 @@ function showViewEscResponse(originalRequest) {
 
 
 
-        var separatedEmails = emailAdds.split(',');
 
-      for (i = 0; i < separatedEmails.length; i++) {
+           <%--
+           var separatedEmails = emailAdds.split(',');
+            for (i = 0; i < separatedEmails.length; i++) {
          
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
             $('example').style.display= '';
@@ -956,7 +957,8 @@ function showViewEscResponse(originalRequest) {
             return false;
                 }
             }
-
+            --%>
+        
             if ((selUserEsc == 'Others' || selUserEsc == undefined) && emailAdds == '') {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
