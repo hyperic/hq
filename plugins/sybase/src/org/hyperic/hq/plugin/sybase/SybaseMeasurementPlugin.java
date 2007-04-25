@@ -28,6 +28,8 @@ package org.hyperic.hq.plugin.sybase;
 import java.util.HashMap;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -39,17 +41,24 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
+import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricInvalidException;
+import org.hyperic.hq.product.MetricNotFoundException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
 
 public class SybaseMeasurementPlugin 
-    extends JDBCMeasurementPlugin {
-
+    extends JDBCMeasurementPlugin
+{
     private static final String JDBC_DRIVER = 
-        "com.sybase.jdbc2.jdbc.SybDriver";
+        "com.sybase.jdbc3.jdbc.SybDriver";
 
-    private static final String DEFAULT_URL = 
-        "jdbc:sybase:Tds:localhost:4100/master";
+    private static final String DEFAULT_URL = SybasePluginUtil.DEFAULT_URL;
 
-    private static final String PROP_INSTANCE = "instance";
+    private static final String PROP_INSTANCE = "instance",
+                                TYPE_SP_MONITOR_CONFIG =
+                                    SybasePluginUtil.TYPE_SP_MONITOR_CONFIG,
+                                PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION;
 
     private static HashMap syb12Queries    = null;  // Sybase 12.5 only
     private static HashMap genericQueries  = null;  // Any
@@ -68,17 +77,18 @@ public class SybaseMeasurementPlugin
                                        String user,
                                        String password)
         throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+            String pass = (password == null) ? "" : password;
+        return DriverManager.getConnection(url, user, pass);
     }
 
     protected String getDefaultURL() {
         return DEFAULT_URL;
     }
 
-    protected void initQueries() {
-        if (genericQueries != null) {
+    protected void initQueries()
+    {
+        if (genericQueries != null)
             return;
-        }
 
         syb12Queries = new HashMap();
         genericQueries = new HashMap();
@@ -201,7 +211,7 @@ public class SybaseMeasurementPlugin
         //alias for avail.
         //if we can fetch any metric, consider the server available
         //XXX this check can be more robust
-        genericQueries.put(AVAIL_ATTR,
+        genericQueries.put("Availability",
                            genericQueries.get("NumServers"));
     }
 
@@ -225,6 +235,8 @@ public class SybaseMeasurementPlugin
     protected String getQuery(Metric metric) {
         String queryVal = metric.getAttributeName();
         String query = (String)genericQueries.get(queryVal);
+System.out.println("queryVal -> "+queryVal);
+System.out.println("query    -> "+query);
         
         if (query == null) {
             // Not in the generic queries, check the version specific table
@@ -240,7 +252,51 @@ public class SybaseMeasurementPlugin
         }
 
         query = StringUtil.replace(query, "%instance%", instance);
-         
+System.out.println(query);
         return query;
+    }
+
+    public MetricValue getValue(Metric metric)
+        throws PluginException,
+               MetricUnreachableException,
+               MetricInvalidException,
+               MetricNotFoundException
+    {
+        String objectName = metric.getObjectName(),
+               attr       = metric.getAttributeName();
+        if (objectName.indexOf(PROP_SP_MONITOR_CONFIG) == -1)
+            return super.getValue(metric);
+
+        try
+        {
+            String configOpt = metric.getObjectProperty(PROP_CONFIG_OPTION);
+            Connection conn = getCachedConnection(metric);
+            float value = getPercentActive(conn, configOpt);
+            return new MetricValue(value, System.currentTimeMillis());
+        }
+        catch (SQLException e) {
+            String msg = "Query failed for "+attr+": "+e.getMessage();
+            throw new MetricNotFoundException(msg, e);
+        }
+    }
+
+    private float getPercentActive(Connection conn, String configOpt)
+        throws SQLException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
+            if (rs.next())
+                return rs.getFloat("Pct_act")/100;
+        }
+        finally
+        {
+            if (stmt != null) stmt.close();
+            if (rs != null) rs.close();
+        }
+        throw new SQLException();
     }
 }
