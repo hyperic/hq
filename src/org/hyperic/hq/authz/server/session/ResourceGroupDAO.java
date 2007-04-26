@@ -27,13 +27,11 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
-import org.hibernate.Session;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.dao.DAOFactory;
 
 public class ResourceGroupDAO extends HibernateDAO
 {
@@ -53,21 +51,18 @@ public class ResourceGroupDAO extends HibernateDAO
         ResourceGroup resGrp = new ResourceGroup(createInfo);
         save(resGrp);
 
-        ResourceType resType = 
-            DAOFactory.getDAOFactory().getResourceTypeDAO()
-            .findByName(AuthzConstants.groupResourceTypeName);
+        ResourceType resType = new ResourceTypeDAO(DAOFactory.getDAOFactory())
+            .findById(AuthzConstants.authzGroup);
+        
         if (resType == null) {
             throw new SystemException("ResourceType not found " +
                                       AuthzConstants.groupResourceTypeName);
         }
 
-        Resource resource = 
-            DAOFactory.getDAOFactory().getResourceDAO()
-                      .create(resType, resGrp.getName(), creator, 
-                              resGrp.getId(), isSystem);
+        new ResourceDAO(DAOFactory.getDAOFactory())
+            .create(resType, resGrp.getName(), creator,  resGrp.getId(),
+                    isSystem);
             
-        resGrp.setResource(resource);
-
         return resGrp;
     }
 
@@ -90,8 +85,10 @@ public class ResourceGroupDAO extends HibernateDAO
         entity.getResourceSet().clear();
 
         // remove this resourceGroup itself
-        DAOFactory.getDAOFactory().
-            getResourceDAO().remove(entity.getResource());
+        ResourceDAO dao = new ResourceDAO(DAOFactory.getDAOFactory());
+        Resource resource =
+            dao.findByInstanceId(AuthzConstants.authzGroup, entity.getId());
+        dao.remove(resource);
         
         super.remove(entity);
     }
@@ -162,10 +159,10 @@ public class ResourceGroupDAO extends HibernateDAO
                                                boolean asc)
     {
 
-        String sql="select distinct rg from ResourceGroup rg" +
-                   " join fetch rg.resourceSet r " +
-                   "where rg.resource is not null and r.instanceId = ? and " +
-                   " r.resourceType.id = ? order by rg.sortName " +
+        String sql="select distinct rg from ResourceGroup rg " +
+                   "join fetch rg.resourceSet r " +
+                   "where r.instanceId = ? and  r.resourceType.id = ? " +
+                   "order by rg.sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, instanceId.intValue())

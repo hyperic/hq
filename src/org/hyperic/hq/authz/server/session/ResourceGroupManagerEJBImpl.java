@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -152,10 +153,8 @@ public class ResourceGroupManagerEJBImpl
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 group.getResource().getResourceType(),
-                 group.getId(),
-                 AuthzConstants.groupOpViewResourceGroup);
+        pm.check(whoami.getId(), AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_viewResourceGroup);
         return group;
     }
 
@@ -178,37 +177,38 @@ public class ResourceGroupManagerEJBImpl
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 group.getResource().getResourceType(),
-                 group.getId(),
-                 AuthzConstants.groupOpViewResourceGroup);
+        pm.check(whoami.getId(), AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_viewResourceGroup);
         return group;
     }
 
     /**
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
-     * @param group The ResourceGroup to save.
+     * @param grpVal The ResourceGroup to save.
      * @throws PermissionException whoami may not perform modifyResourceGroup on
      *                             this group.
      * @ejb:interface-method
      */
     public void saveResourceGroup(AuthzSubjectValue whoami,
-                                  ResourceGroupValue group)
+                                  ResourceGroupValue grpVal)
         throws PermissionException 
     {
-        ResourceGroup groupLocal = lookupGroup(group);
+        ResourceGroup group = lookupGroup(grpVal);
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(),
-                 groupLocal.getResource().getResourceType(),
-                 groupLocal.getId(),
-                 AuthzConstants.groupOpModifyResourceGroup);
+                 AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
 
         // check if the name has changed. If it has, update the resource
-        if(!group.getName().equals(groupLocal.getName())) {
-            groupLocal.getResource().setName(group.getName());
+        if (!grpVal.getName().equals(group.getName())) {
+            Resource resource =
+                getResourceDAO().findByInstanceId(AuthzConstants.authzGroup,
+                                                  group.getId());
+
+            resource.setName(grpVal.getName());
         }
-        groupLocal.setResourceGroupValue(group);
+        group.setResourceGroupValue(grpVal);
     }
 
     /**
@@ -226,9 +226,8 @@ public class ResourceGroupManagerEJBImpl
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
         pm.check(whoami.getId(),
-                 resGrp.getResource().getResourceType(),
-                 resGrp.getId(),
-                 AuthzConstants.groupOpRemoveResourceGroup);
+                 AuthzConstants.authzGroup, resGrp.getId(),
+                 AuthzConstants.perm_removeResourceGroup);
 
         GroupingStartupListener.getCallbackObj().preGroupDelete(resGrp);
         dao.remove(resGrp);
@@ -348,27 +347,26 @@ public class ResourceGroupManagerEJBImpl
      * Set the resources for this group.
      * To get the operations call getOperationValues() on the value-object.
      * @param whoami The current running user.
-     * @param group This group.
+     * @param grpVal This group.
      * @param resources Resources to associate with this role.
      * @throws PermissionException whoami does not own the resource.
      * @ejb:interface-method
      */
     public void setResources(AuthzSubjectValue whoami,
-                             ResourceGroupValue group,
+                             ResourceGroupValue grpVal,
                              ResourceValue[] resources)
         throws PermissionException 
     {
-        ResourceGroup groupLocal =
-            getResourceGroupDAO().findById(group.getId());
+        ResourceGroup group =
+            getResourceGroupDAO().findById(grpVal.getId());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
-                 groupLocal.getResource().getResourceType(),
-                 groupLocal.getId(),
-                 AuthzConstants.groupOpModifyResourceGroup);
+                 AuthzConstants.authzGroup, group.getId(),
+                 AuthzConstants.perm_modifyResourceGroup);
 
-        groupLocal.setResourceSet(toPojos(resources));
-        GroupingStartupListener.getCallbackObj().groupMembersChanged(groupLocal);
+        group.setResourceSet(toPojos(resources));
+        GroupingStartupListener.getCallbackObj().groupMembersChanged(group);
     }
 
     /**
@@ -677,32 +675,6 @@ public class ResourceGroupManagerEJBImpl
         return (RoleValue[])fromLocals(groupLocal.getRoles(), RoleValue.class);
     }
 
-    /**
-     * Gives you a value-object with updated attributes.
-     * With many of the methods actions are performed which update the
-     * entity but not the associated value-object. Use this method
-     * to sync up your value-object.
-     * @param old Your current value-object.
-     * @return A new ResourceGroup value-object.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     */
-    public ResourceGroupValue updateResourceGroupValue(ResourceGroupValue old) {
-        ResourceGroup res = getResourceGroupDAO().findById(old.getId());
-        return res.getResourceGroupValue();
-    }
-
-    /**
-     * Get the Resource entity associated with this ResourceGroup.
-     * @exception FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
-     */
-    public ResourceValue getResourceGroupResource(ResourceGroupValue group) {
-        ResourceGroup res = getResourceGroupDAO().findById(group.getId());
-        return res.getResource().getResourceValue();
-    }
-    
     /**
      * Get a ResourceGroup owner's AuthzSubjectValue
      * @param gid The group id

@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
 public class ResourceGroup extends AuthzNamedBean
@@ -45,7 +46,6 @@ public class ResourceGroup extends AuthzNamedBean
     private long _ctime;
     private long _mtime;
     private String _modifiedBy;
-    private Resource _resource;
     private Collection _resourceSet = new HashSet();
     private Collection _roles = new HashSet();
 
@@ -79,7 +79,6 @@ public class ResourceGroup extends AuthzNamedBean
         _ctime = ctime;
         _mtime = mtime;
         _modifiedBy = modifiedBy;
-        _resource = resourceId;
         _resourceSet = resources;
         _roles = roles;
     }
@@ -172,14 +171,6 @@ public class ResourceGroup extends AuthzNamedBean
         _modifiedBy = val;
     }
 
-    public Resource getResource() {
-        return _resource;
-    }
-
-    protected void setResource(Resource val) {
-        _resource = val;
-    }
-
     protected Collection getResourceSet() {
         return _resourceSet;
     }
@@ -189,8 +180,9 @@ public class ResourceGroup extends AuthzNamedBean
         Collection resources = new HashSet();
         // Filter our the resource that is this group
         for (Iterator it = getResourceSet().iterator(); it.hasNext(); ) {
-            Object res = it.next();
-            if (!_resource.equals(res)) {
+            Resource res = (Resource) it.next();
+            if (!res.getResourceType().getId().equals(AuthzConstants.authzGroup)
+                    || !res.getInstanceId().equals(getId())) {
                 resources.add(res);
             }
         }
