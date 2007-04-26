@@ -942,10 +942,7 @@ function showViewEscResponse(originalRequest) {
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
 
-
-
-
-           <%--
+            <%--
            var separatedEmails = emailAdds.split(',');
             for (i = 0; i < separatedEmails.length; i++) {
          
@@ -958,8 +955,8 @@ function showViewEscResponse(originalRequest) {
                 }
             }
             --%>
-        
-            if ((selUserEsc == 'Others' || selUserEsc == undefined) && emailAdds == '') {
+            
+            if ((selUserEsc == 'Others' && emailAdds == '')) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
