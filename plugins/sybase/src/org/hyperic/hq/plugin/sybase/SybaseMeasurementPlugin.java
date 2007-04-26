@@ -267,8 +267,6 @@ public class SybaseMeasurementPlugin
     {
         String objectName = metric.getObjectName(),
                attr       = metric.getAttributeName();
-System.out.println("objectName -> "+objectName);
-System.out.println("attr -> "+attr);
         if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
             && objectName.indexOf(TYPE_STORAGE) == -1)
             return super.getValue(metric);
