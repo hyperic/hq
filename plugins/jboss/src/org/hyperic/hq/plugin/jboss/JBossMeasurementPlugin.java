@@ -37,9 +37,12 @@ public class JBossMeasurementPlugin
 
     static final String ATTR_STATE = "StateString";
 
-    protected static final String ATTR_STATE_MANAGEABLE =
+    static final String ATTR_STATE_MANAGEABLE =
         "StateManageable";
-    
+
+    static final String ATTR_STATISTIC =
+        "Statistic";
+
     //"StateManageable" in 3.x, "stateManageable" in 4.0
     private boolean isStateManageable(String attr) {
         return attr.equalsIgnoreCase(ATTR_STATE_MANAGEABLE);

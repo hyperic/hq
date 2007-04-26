@@ -51,7 +51,7 @@ public class ServerQuery extends JBossQuery {
 
     private static final Log log = LogFactory.getLog("JBossServerQuery");
 
-    private static final String SERVER_NAME =
+    public static final String SERVER_NAME =
         "jboss.system:type=Server";
 
     private static final String SERVER_CONFIG_NAME =
@@ -63,7 +63,7 @@ public class ServerQuery extends JBossQuery {
     private static final String ATTR_HOMEDIR     = "HomeDir";
     private static final String ATTR_SERVER_URL  = "ServerHomeURL";
     private static final String ATTR_SERVER_NAME = "ServerName";
-    private static final String ATTR_VERSION     = "Version";
+    public static final String ATTR_VERSION     = "Version";
 
     private static final String[] ATTRS_SERVER = {
         ATTR_VERSION,

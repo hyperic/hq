@@ -49,6 +49,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -89,10 +90,8 @@ public class JBossUtil {
         }
     };
 
-    private static final String STAT_PROVIDER   = "StatisticsProvider";
-    private static final String STAT_PROVIDER_4 = "statisticsProvider";
-    private static final String STATS           = "Stats";
-    private static final String STATS_4         = "stats";
+    private static final String[] STAT_PROVIDER   = { "StatisticsProvider", "Stats" };
+    private static final String[] STAT_PROVIDER_4 = { "statisticsProvider", "stats" };
 
     private static Log log = LogFactory.getLog("JBossUtil");
 
@@ -150,6 +149,21 @@ public class JBossUtil {
     //we only cache RemoteMBeanServer handles for measurements.
     //jndi lookup won't have much impact for control or discovery
     private static HashMap serverCache = new HashMap();
+    private static HashMap jsr77LowerCase = new HashMap();
+
+    //thanks JBoss, for changing the attribute case in 3.2.8
+    static {
+        String[] attrs = { 
+            JBossMeasurementPlugin.ATTR_STATE_MANAGEABLE,
+        };
+        for (int i=0; i<attrs.length; i++) {
+            String attr = attrs[i];
+            String lcAttr =
+                Character.toLowerCase(attr.charAt(0)) +
+                attr.substring(1);
+            jsr77LowerCase.put(attr, lcAttr);
+        }
+    }
 
     private static MetricInvalidException invalid(Metric metric,
                                                   Exception e) {
@@ -189,6 +203,41 @@ public class JBossUtil {
         return new PluginException(msg, e);
     }
 
+    //dealing with the attribute case change had been done with the HQ server
+    //types JBoss 3.2 and JBoss 4.0, but then 3.2.8 threw that off by making
+    //the same changes as 4.0
+    static void determineJSR77Case(String url, RMIAdaptor mServer) {
+        try {
+            ObjectName server =
+                new ObjectName(ServerQuery.SERVER_NAME);
+            String version =
+                (String)mServer.getAttribute(server, ServerQuery.ATTR_VERSION);
+            if (version.length() < 5) {
+                return;
+            }
+            boolean lc;
+            int majorVersion = Character.getNumericValue(version.charAt(0));
+            if (majorVersion >= 4) {
+                //4.x, 5.x
+                lc = true;
+            }
+            else if (Character.getNumericValue(version.charAt(4)) >= 8) {
+                //3.2.8
+                lc = true;
+            }
+            else {
+                //<= 3.2.7
+                lc = false;
+            }
+            jsr77LowerCase.put(url, lc ? Boolean.TRUE : Boolean.FALSE);
+            if (log.isDebugEnabled()) {
+                log.debug(url + " " + version + " jsr77LowerCase=" + lc);
+            }
+        } catch (Exception e) {
+            //unlikely, but in this case, leave it to the server type to determine the case
+        }
+    }
+
     static Object getRemoteMBeanValue(Metric metric) 
         throws MetricNotFoundException,
                MetricInvalidException,
@@ -214,16 +263,31 @@ public class JBossUtil {
             }
             
             synchronized (serverCache) {
+                determineJSR77Case(url, mServer);
                 serverCache.put(url, mServer);
             }
         }
 
         String attrName = metric.getAttributeName();
+        boolean lc;
+        Boolean jsr77Case = (Boolean)jsr77LowerCase.get(url);
+        if (jsr77Case != null) {
+            lc = jsr77Case.booleanValue();
+        }
+        else {
+            lc = Character.isLowerCase(attrName.charAt(0));
+        }
+
+        String lcAttr;
+        //another 3.2.8 hack
+        if (lc && ((lcAttr = (String)jsr77LowerCase.get(attrName)) != null)) {
+            attrName = lcAttr;
+        }
+
         try {
             ObjectName objName = new ObjectName(metric.getObjectName());
 
             if (attrName.substring(1).startsWith(/*S*/"tatistic")) {
-                boolean lc = Character.isLowerCase(attrName.charAt(0));
                 return getJSR77Statistic(mServer, objName, metric, lc);
             }
             else if (attrName.equals("__INSTANCE__")) {
@@ -237,7 +301,7 @@ public class JBossUtil {
                 }
             }
             else {
-                return mServer.getAttribute(objName, metric.getAttributeName());
+                return mServer.getAttribute(objName, attrName);
             }
         } catch (MalformedObjectNameException e) {
             throw invalid(metric, e);
@@ -280,27 +344,25 @@ public class JBossUtil {
                PluginException {
 
         //jboss changed attribute case in version 4.0
-        String attrStatProvider, attrStats;
+        String[] attrs;
         if (lc) {
-            attrStatProvider = STAT_PROVIDER_4;
-            attrStats        = STATS_4;
+            attrs = STAT_PROVIDER_4;
         }
         else {
-            attrStatProvider = STAT_PROVIDER;
-            attrStats        = STATS;
+            attrs = STAT_PROVIDER;
         }
 
         Stats stats;
         try {
             Boolean provider =
-                (Boolean) mServer.getAttribute(objName, attrStatProvider);
+                (Boolean) mServer.getAttribute(objName, attrs[0]);
             if ((provider == null) || !provider.booleanValue()) {
                 String msg = 
                     "MBeanServer does not provide statistics";
                 throw new PluginException(msg);
             }
 
-            stats = (Stats)mServer.getAttribute(objName, attrStats);
+            stats = (Stats)mServer.getAttribute(objName, attrs[1]);
         } catch (RemoteException e) {
             throw unreachable(metric, e);
         } catch (InstanceNotFoundException e) {
