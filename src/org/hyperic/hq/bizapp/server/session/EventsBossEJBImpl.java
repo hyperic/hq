@@ -96,6 +96,7 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
+import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
@@ -688,22 +689,23 @@ public class EventsBossEJBImpl
 
         ArrayList alertdefs = new ArrayList();
         
-        // Associate with alert definition
-        alertdefs.add(getADM().getById(subject, adid));
+        // check that the user can actually manage alerts for this resource
+        AlertDefinition ad = getADM().getByIdAndCheck(subject, adid);
+        alertdefs.add(ad);
         
         // If there are any children
-        alertdefs.addAll(getADM().findAlertDefinitionChildren(adid));
+        alertdefs.addAll(ad.getChildren());
         
-        // check that the user can actually manage alerts for this resource
+        Action root = null;
+        ActionManagerLocal actMan = getActMan();
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
-            AlertDefinitionValue ad = (AlertDefinitionValue) it.next();
+            ad = (AlertDefinition) it.next();
 
-            getADM().addAction(subject, ad.getId(), action);
-
-            if (action.getParentId() == null) {
-                action.setParentId(action.getId());
-                if (_log.isDebugEnabled())
-                    _log.debug("Set parent ID to " + action.getParentId());
+            if (root == null) {
+                root = actMan.createAction(ad, action, null);
+            }
+            else {
+                actMan.createAction(ad, action, root);
             }
         }
             
