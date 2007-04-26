@@ -878,6 +878,9 @@ public class ControlScheduleManagerEJBImpl
                     new CronTrigger(triggerName, GROUP, jobName, GROUP,
                                     schedule.getStart(), schedule.getEnd(),
                                     cronStr);
+                trigger.setMisfireInstruction(CronTrigger.
+                    MISFIRE_INSTRUCTION_DO_NOTHING);
+
                 this._scheduler.scheduleJob(jobDetail, trigger);
 
                 // Quartz used to throw an exception on scheduleJob if the
