@@ -90,6 +90,7 @@ public class SybaseServerDetector
     static final String SERVER_NAME = "Sybase",
                         TABLE       = "Table",
                         INDEX       = "Index",
+                        VERSION_15  = "15.x",
                         VERSION_12_5 = "12.5.x";
 
     private static List getServerProcessList()
@@ -146,18 +147,25 @@ public class SybaseServerDetector
         productConfig.setValue(PROP_PASSWORD, "");
 
         List servers = new ArrayList();
+        String version = "";
 
         // Only check the binaries if they match the path we expect
         if (path.indexOf("dataserver") == -1)
             return servers;
 
+        if (path.indexOf("12_5") != -1)
+            version = VERSION_12_5;
+        else if (path.indexOf("15_0") != -1)
+            version = VERSION_15;
+        else
+            return servers;
+
         String installdir = getParentDir(path, 2);
         ServerResource server = createServerResource(installdir);
-        String version = getTypeInfo().getVersion();
+//        String version = getTypeInfo().getVersion();
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
-        cprop.setValue("timeout", "10");
         server.setCustomProperties(cprop);
         server.setProductConfig(productConfig);
         server.setMeasurementConfig();

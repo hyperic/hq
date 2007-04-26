@@ -235,8 +235,6 @@ public class SybaseMeasurementPlugin
     protected String getQuery(Metric metric) {
         String queryVal = metric.getAttributeName();
         String query = (String)genericQueries.get(queryVal);
-System.out.println("queryVal -> "+queryVal);
-System.out.println("query    -> "+query);
         
         if (query == null) {
             // Not in the generic queries, check the version specific table
@@ -252,7 +250,6 @@ System.out.println("query    -> "+query);
         }
 
         query = StringUtil.replace(query, "%instance%", instance);
-System.out.println(query);
         return query;
     }
 
@@ -264,7 +261,9 @@ System.out.println(query);
     {
         String objectName = metric.getObjectName(),
                attr       = metric.getAttributeName();
-        if (objectName.indexOf(PROP_SP_MONITOR_CONFIG) == -1)
+System.out.println("objectName -> "+objectName);
+System.out.println("attr -> "+attr);
+        if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1)
             return super.getValue(metric);
 
         try
