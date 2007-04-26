@@ -382,7 +382,8 @@
 
       <metric name="Response Code"
               indicator="true"
-              template="${http.template}:${alias}"/>
+              template="${http.template}:${alias}"
+              collectionType="static"/>
 
       <metric name="Response Time"
               indicator="true"
