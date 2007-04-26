@@ -49,22 +49,6 @@
   </metrics>
 
   <filter name="template"
-          value="${domain}:Type=Service,cachename=%cachename%:${alias}"/>
-  <metrics name="SybaseCachePools">
-    <metric name="Cache Misses"
-            category="THROUGHPUT"
-            indicator="false"
-            units="percentage"
-            collectionType="dynamic"/>
-
-    <metric name="Cache Hits"
-            category="THROUGHPUT"
-            indicator="false"
-            units="percentage"
-            collectionType="dynamic"/>
-  </metrics>
-
-  <filter name="template"
           value="${domain}:Type=Service,instance=%instance%:${alias}"/>
   <metrics name="Sybase 12.x Instance">
     <metric name="Availability"
@@ -150,8 +134,9 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template"
-          value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:${alias}"/>
+  <filter name="template">
+    exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
+  </filter>
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -193,7 +178,7 @@
     <config>
       <option name="jdbcUrl"
               description="JDBC Url"
-              default="jdbc:sybase:Tds:qa1:4100/master"/>
+              default="jdbc:sybase:Tds:localhost:4100/master"/>
       <option name="jdbcUser"
               description="JDBC User"
               default="sa"/>
@@ -212,6 +197,9 @@
       <option name="timeout"
               description="Timeout for sp_sysmon, must be greater than the interval"
               default="3500"/>
+<!--
+!!!NEED TO ADD SYBASE VARS!!!
+-->
     </config>
 
     <service name="sp_sysmonEngine">
@@ -219,8 +207,9 @@
         <option name="engine"
                 description="Sybase Engine Stats"/>
       </config>
-      <filter name="template"
-              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%engine%.${alias}"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
+      </filter>
       <metrics>
         <metric name="Engine Utilization"
                 category="THROUGHPUT"
@@ -230,17 +219,50 @@
       </metrics>
     </service>
 
+    <service name="storage">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="database"
+                description="Sybase Database"/>
+        <option name="segment"
+                description="Sybase Segment"/>
+        <option name="pagesize"
+                description="Sybase Server Pagesize"/>
+      </config>
+      <filter name="template">
+        ${domain}:Type=storage,database=%database%,segment=%segment%,pagesize=%pagesize%:${alias}
+      </filter>
+      <metrics>
+        <metric name="Storage Used"
+                category="THROUGHPUT"
+                indicator="true"
+                units="MB"
+                collectionType="dynamic"/>
+        <metric name="Percent Used"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
     <service name="sp_sysmonCache">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
       <plugin type="measurement"
               class="SybaseMeasurementPlugin"/>
       <config>
         <option name="cachename"
                 description="Name of Cache"/>
       </config>
-      <filter name="template"
-              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
+      </filter>
 <!--
-              value="exec:file=%script%,args='s %serverName% -d %samplePeriod% -u %jdbcUser% -p %jdbcPassword%'"/>
+        exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}
 -->
       <metrics>
         <metric name="CacheHits"
@@ -266,7 +288,7 @@
                 description="Config Option"/>
       </config>
       <filter name="template">
-        ${domain}:Type=SP_MonitorConfig,configoption=%configoption%:${alias}
+        ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
       </filter>
       <metrics>
         <metric name="PercentActive"
@@ -277,4 +299,23 @@
       </metrics>
     </service>
   </server>
+
+  <server name="Sybase"
+          version="15.x">
+          include="12.5.x"/>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Sybase">
+    <![CDATA[
+    <p>
+    <h3>Configure Sybase ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+      Please run the HQ agent on the local Sybase server as the sybase user.
+      This is neccessary to get the proper ENV vars setup in order to execute
+      the sp_sysmon procedure.
+    </p>
+    ]]>
+  </help>
 </plugin>
