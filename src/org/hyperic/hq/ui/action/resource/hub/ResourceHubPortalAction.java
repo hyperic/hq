@@ -378,9 +378,11 @@ public class ResourceHubPortalAction extends BaseAction {
         watch.markTimeEnd("batchCheckControlPermissions");
 
         // retrieve inventory summary
+        watch.markTimeBegin("getInventorySummary");
         AppdefInventorySummary summary =
             appdefBoss.getInventorySummary(sessionId);
         request.setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
+        watch.markTimeEnd("getInventorySummary");
 
         watch.markTimeBegin("findAllResourceTypes");
         // generate list of selectable resource types for the chosen
