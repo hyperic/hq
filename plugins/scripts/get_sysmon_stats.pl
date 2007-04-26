@@ -169,7 +169,7 @@ sub printOutput
 
 sub getSysmonOutput
 {
-    my $cmd = "isql -Usa -P $Passwd -S ${Server} <<-EOF1\n".
+    my $cmd = "isql -Usa -P $Passwd -S $Server <<-EOF1\n".
               "use master\n".
               "go\n".
               "sp_sysmon '$Interval'\n".
