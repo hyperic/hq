@@ -134,8 +134,9 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template"
-          value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:${alias}"/>
+  <filter name="template">
+    exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
+  </filter>
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -206,8 +207,9 @@
         <option name="engine"
                 description="Sybase Engine Stats"/>
       </config>
-      <filter name="template"
-              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%engine%.${alias}"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
+      </filter>
       <metrics>
         <metric name="Engine Utilization"
                 category="THROUGHPUT"
@@ -256,10 +258,11 @@
         <option name="cachename"
                 description="Name of Cache"/>
       </config>
-      <filter name="template"
-              value="exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
+      </filter>
 <!--
-              value="exec:file=%script%,args='-s %serverName% -i %interval% -u %jdbcUser% -p %jdbcPassword%'"/>
+        exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}
 -->
       <metrics>
         <metric name="CacheHits"
@@ -301,4 +304,18 @@
           version="15.x">
           include="12.5.x"/>
   </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Sybase">
+    <![CDATA[
+    <p>
+    <h3>Configure Sybase ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+      Please run the HQ agent on the local Sybase server as the sybase user.
+      This is neccessary to get the proper ENV vars setup in order to execute
+      the sp_sysmon procedure.
+    </p>
+    ]]>
+  </help>
 </plugin>
