@@ -98,6 +98,8 @@ public class DataPurgeService
             CronTrigger trigger = new CronTrigger(TRIGGER, GROUP, JOB, 
                                                   GROUP, new Date(), 
                                                   null, this.getSchedule());
+            trigger.setMisfireInstruction(CronTrigger.
+                MISFIRE_INSTRUCTION_DO_NOTHING);
 
             scheduler.scheduleJob(job, trigger);
         } catch (Exception e) {
