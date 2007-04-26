@@ -734,11 +734,14 @@ public class AlertDefinitionManagerEJBImpl
         TreeMap ret = new TreeMap();
         Collection adefs;
             
-        if (parentId != null &&
-            EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) 
-        {
-            AlertDefinition def = getAlertDefDAO().findById(parentId);
-            adefs = def.getChildren();
+        if (parentId != null) {
+            if (EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
+                adefs = aDao.findByAppdefEntityType(id);
+            }
+            else  {
+                AlertDefinition def = getAlertDefDAO().findById(parentId);
+                adefs = def.getChildren();
+            }
         } else {
             canManageAlerts(subj, id);
             adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
