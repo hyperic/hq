@@ -9,25 +9,21 @@ my $debug = 0;
 
 my (@Output);
 
-my $Interval = "00:00:31";
-#my $Interval = "00:05:00";
+my $Interval = "00:05:00";
 my $Username = "sa";
 my $Passwd = "";
-#my $Server = uc(hostname());
-my $Server = "HYPERIC";
+my $Server = uc(hostname());
 
 sub main
 {
     getArgs();
-#    @Output = getSysmonOutput();
-    @Output = `cat sysmon.output`;
+    @Output = getSysmonOutput();
     printDeadLocks();
     printAvgLockContention();
     printTotalLockReqs();
     printCacheStats();
     printNetworkStats();
     printEngineStats();
-    printOutput();
 }
 
 main();
