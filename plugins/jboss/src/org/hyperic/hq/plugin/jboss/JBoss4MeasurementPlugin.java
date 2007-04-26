@@ -31,7 +31,8 @@ import org.hyperic.util.StringUtil;
 public class JBoss4MeasurementPlugin extends JBossMeasurementPlugin {
 
     private static final String TMPL_STATE = ":" + ATTR_STATE_MANAGEABLE;
-    
+    private static final String TMPL_STATISTIC = ":" + ATTR_STATISTIC;
+
     //jboss 4.0 changed the case of these attributes.
     //rather than maintain two sets of metrics in hq-plugin.xml
     //we make the adjustments here.
@@ -41,9 +42,9 @@ public class JBoss4MeasurementPlugin extends JBossMeasurementPlugin {
                                           TMPL_STATE,
                                           ":stateManageable");
         }
-        else if (template.indexOf(":Statistic") != -1) {
+        else if (template.indexOf(TMPL_STATISTIC) != -1) {
             template = StringUtil.replace(template,
-                                          ":Statistic",
+                                          TMPL_STATISTIC,
                                           ":statistic");
         }
 
