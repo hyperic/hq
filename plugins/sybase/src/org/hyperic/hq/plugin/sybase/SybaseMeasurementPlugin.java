@@ -32,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.ResultSetMetaData;
 
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
@@ -58,6 +59,10 @@ public class SybaseMeasurementPlugin
     private static final String PROP_INSTANCE = "instance",
                                 TYPE_SP_MONITOR_CONFIG =
                                     SybasePluginUtil.TYPE_SP_MONITOR_CONFIG,
+                                TYPE_STORAGE = SybasePluginUtil.TYPE_STORAGE,
+                                PROP_DATABASE = SybasePluginUtil.PROP_DATABASE,
+                                PROP_SEGMENT  = SybasePluginUtil.PROP_SEGMENT,
+                                PROP_PAGESIZE = SybasePluginUtil.PROP_PAGESIZE,
                                 PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION;
 
     private static HashMap syb12Queries    = null;  // Sybase 12.5 only
@@ -232,7 +237,8 @@ public class SybaseMeasurementPlugin
         return super.getConfigSchema(info, config);
     }
 
-    protected String getQuery(Metric metric) {
+    protected String getQuery(Metric metric)
+    {
         String queryVal = metric.getAttributeName();
         String query = (String)genericQueries.get(queryVal);
         
@@ -261,20 +267,106 @@ public class SybaseMeasurementPlugin
     {
         String objectName = metric.getObjectName(),
                attr       = metric.getAttributeName();
-        if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1)
+        if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
+            && objectName.indexOf(TYPE_STORAGE) == -1)
             return super.getValue(metric);
 
         try
         {
-            String configOpt = metric.getObjectProperty(PROP_CONFIG_OPTION);
             Connection conn = getCachedConnection(metric);
-            float value = getPercentActive(conn, configOpt);
-            return new MetricValue(value, System.currentTimeMillis());
+            if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1)
+                return getSP_MonitorConfigValue(metric, attr, conn);
+            else // objectName.indexOf(TYPE_STORAGE) != -1
+                return getStorageValue(metric, attr, conn);
         }
         catch (SQLException e) {
             String msg = "Query failed for "+attr+": "+e.getMessage();
             throw new MetricNotFoundException(msg, e);
         }
+    }
+
+    private MetricValue getStorageValue(Metric metric,
+                                        String attr,
+                                        Connection conn)
+        throws SQLException
+    {
+        String database = metric.getObjectProperty(PROP_DATABASE),
+               segment = metric.getObjectProperty(PROP_SEGMENT);
+        int pagesize = Integer.parseInt(metric.getObjectProperty(PROP_PAGESIZE));
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("use "+database);
+            stmt.execute("sp_helpsegment '"+segment+"'");
+            rs = getResultSet(stmt, "total_pages");
+            rs.next();
+            long total_pages = rs.getLong("total_pages"),
+                 free_pages = rs.getLong("free_pages"),
+                 used_pages = rs.getLong("used_pages");
+            if (attr.equals("PercentUsed"))
+            {
+                float percent_used = (getSegmentSize(used_pages, pagesize)
+                                     / getSegmentSize(total_pages, pagesize));
+                return new MetricValue(percent_used, System.currentTimeMillis());
+            }
+            else //attr.equals("StorageUsed")
+            {
+                float storage_used = getSegmentSize(used_pages, pagesize);
+                return new MetricValue(storage_used, System.currentTimeMillis());
+            }
+        }
+        finally
+        {
+            stmt.execute("use master");
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+        }
+    }
+
+    private ResultSet getResultSet(Statement stmt, String col) throws SQLException
+    {
+        do
+        {
+            ResultSet rs = null;
+            try
+            {
+                rs = stmt.getResultSet();
+                if (rs == null)
+                    break;
+                rs.findColumn(col);
+                return rs;
+            }
+            catch (SQLException e) {
+                //don't close the resultset!!!
+            }
+        }
+        while (stmt.getMoreResults() == true && stmt.getUpdateCount() != -1);
+        throw new SQLException();
+    }
+
+    private void printMetaCols(ResultSetMetaData md) throws SQLException
+    {
+        for (int i=1; i<=md.getColumnCount(); i++)
+        {
+            System.out.println(md.getColumnName(i));
+        }
+    }
+
+    private float getSegmentSize(long pages, int pagesize)
+    {
+        return pages/1024*pagesize/1024;
+    }
+
+    private MetricValue getSP_MonitorConfigValue(Metric metric,
+                                                 String attr,
+                                                 Connection conn)
+        throws SQLException
+    {
+        String configOpt = metric.getObjectProperty(PROP_CONFIG_OPTION);
+        float value = getPercentActive(conn, configOpt);
+        return new MetricValue(value, System.currentTimeMillis());
     }
 
     private float getPercentActive(Connection conn, String configOpt)
@@ -291,8 +383,8 @@ public class SybaseMeasurementPlugin
         }
         finally
         {
-            if (stmt != null) stmt.close();
             if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
         }
         throw new SQLException();
     }

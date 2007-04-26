@@ -30,10 +30,14 @@ public class SybasePluginUtil
     static boolean DEBUG = false;
 
     static final String JDBC_DRIVER    = "com.sybase.jdbc3.jdbc.SybDriver",
-                        DEFAULT_URL    = "jdbc:sybase:Tds:qa1:4100/master",
-                        PROP_ENGINE     = "engine",
+                        DEFAULT_URL    = "jdbc:sybase:Tds:localhost:4100/master",
+                        PROP_ENGINE    = "engine",
+                        PROP_PAGESIZE  = "pagesize",
+                        PROP_DATABASE  = "database",
+                        PROP_SEGMENT   = "segment",
                         PROP_CACHE_NAME = "cachename",
                         PROP_CONFIG_OPTION = "configoption",
                         TYPE_SP_SYSMON     = "sp_sysmon",
+                        TYPE_STORAGE       = "storage",
                         TYPE_SP_MONITOR_CONFIG = "sp_monitorconfig";
 }

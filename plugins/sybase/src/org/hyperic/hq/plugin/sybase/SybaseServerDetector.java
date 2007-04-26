@@ -61,11 +61,15 @@ public class SybaseServerDetector
     static final String JDBC_DRIVER        = SybasePluginUtil.JDBC_DRIVER,
                         DEFAULT_URL        = SybasePluginUtil.DEFAULT_URL,
                         PROP_ENGINE        = SybasePluginUtil.PROP_ENGINE,
+                        PROP_PAGESIZE      = SybasePluginUtil.PROP_PAGESIZE,
+                        PROP_DATABASE      = SybasePluginUtil.PROP_DATABASE,
+                        PROP_SEGMENT       = SybasePluginUtil.PROP_SEGMENT,
                         PROP_CACHE_NAME    = SybasePluginUtil.PROP_CACHE_NAME,
                         PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION,
                         TYPE_SP_MONITOR_CONFIG =
                                 SybasePluginUtil.TYPE_SP_MONITOR_CONFIG,
                         TYPE_SP_SYSMON = SybasePluginUtil.TYPE_SP_SYSMON,
+                        TYPE_STORAGE  = SybasePluginUtil.TYPE_STORAGE,
                         PROP_TABLE    = SybaseMeasurementPlugin.PROP_TABLE,
                         PROP_URL      = SybaseMeasurementPlugin.PROP_URL,
                         PROP_USER     = SybaseMeasurementPlugin.PROP_USER,
@@ -202,13 +206,79 @@ public class SybaseServerDetector
             setCacheServices(rtn, conn, stmt);
             setSPMonitorConfigServices(rtn, conn, stmt);
             setEngineServices(rtn, conn, stmt);
+            setSpaceAvailServices(rtn, conn, stmt);
         }
         catch (SQLException e) {
             String msg = "Error querying for services: "+e.getMessage();
-            throw new PluginException(msg);
+            throw new PluginException(msg, e);
         }
         finally {
             DBUtil.closeJDBCObjects(this.log, conn, stmt, rs);
+        }
+        return rtn;
+    }
+
+    private void setSpaceAvailServices(List services, Connection conn, Statement stmt)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            rs = stmt.executeQuery("select pagesize=@@maxpagesize");
+            int pagesize = -1;
+            if (rs.next())
+                pagesize = rs.getInt("pagesize");
+            else
+                throw new SQLException();
+            rs.close();
+            List databases = getDatabases(stmt);
+            for (int i=0; i<databases.size(); i++)
+            {
+                String database = (String)databases.get(i);
+                stmt.execute("use "+database);
+                stmt.execute("sp_helpsegment");
+                rs = stmt.getResultSet();
+                while (rs.next())
+                {
+                    String segment = rs.getString("name");
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, TYPE_STORAGE);
+                    service.setServiceName(database+"."+segment);
+                    ConfigResponse productConfig = new ConfigResponse();
+                    productConfig.setValue(PROP_DATABASE, database);
+                    productConfig.setValue(PROP_SEGMENT, segment);
+                    productConfig.setValue(PROP_PAGESIZE, pagesize);
+                    service.setProductConfig(productConfig);
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
+                    services.add(service);
+                }
+            }
+        }
+        finally
+        {
+            if (rs != null) rs.close();
+            stmt.execute("use master");
+        }
+    }
+
+    private List getDatabases(Statement stmt) throws SQLException
+    {
+        List rtn = new ArrayList();
+        ResultSet rs = null;
+        try
+        {
+            stmt.execute("use master");
+            rs = stmt.executeQuery("select name from sysdatabases");
+            int name_col = rs.findColumn("name");
+            while (rs.next())
+            {
+                String database = rs.getString(name_col);
+                rtn.add(database);
+            }
+        }
+        finally {
+            if (rs != null) rs.close();
         }
         return rtn;
     }
