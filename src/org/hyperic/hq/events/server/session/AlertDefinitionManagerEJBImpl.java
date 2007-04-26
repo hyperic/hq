@@ -423,25 +423,6 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Add an action to an alert definition
-     * @ejb:interface-method
-     */
-    public void addAction(AuthzSubjectValue subj, Integer defId,
-                          ActionValue action)
-        throws PermissionException {
-        AlertDefinition def = getAlertDefDAO().findById(defId);
-        
-        canManageAlerts(subj, def);
-        
-        Action parent = null;
-        
-        if (action.getParentId() != null)
-            parent = getActionDAO().findById(action.getParentId());
-            
-        def.createAction(action, parent);
-    }
-
-    /** 
      * Remove alert definitions
      * @ejb:interface-method
      */

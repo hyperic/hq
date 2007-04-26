@@ -39,7 +39,7 @@ import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
 import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.Action;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,17 +109,9 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public ActionValue createAction(AlertDefinitionValue def, ActionValue val) {
-        AlertDefinition aDef;
-        Action res, parent;
-        
-        parent = val.getParentId() == null ? null :
-            _actDAO.findById(val.getParentId());
-            
-        aDef = _defDAO.findById(def.getId());
-        res = aDef.createAction(val, parent);
-        
-        return res.getActionValue();
+    public Action createAction(AlertDefinition def, ActionValue val,
+                               Action parent) {
+        return def.createAction(val, parent);
     }
 
     /**
