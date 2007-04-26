@@ -5094,6 +5094,14 @@ has already been defined.
 	
     <schemaSpec version="3.23">
       <schema-directSQL>
+        <statement desc="Drop redundant RESOURCE_ID column in EAM_RESOURCE_GROUP">
+          ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN RESOURCE_ID 
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.24">
+      <schema-directSQL>
         <statement>
             ALTER TABLE EAM_CRISPO_OPT RENAME COLUMN KEY TO PROPKEY
         </statement>
@@ -5103,7 +5111,7 @@ has already been defined.
     <!-- Add the missing RT tables for .org.  Deliberately skipping Oracle, since
          users who use Oracle (likely Enterprise customers) will already have these
          tables -->
-    <schemaSpec version="3.24">
+    <schemaSpec version="3.25">
       <schema-directSQL>
         <statement desc="Add eam_error_code table" fail="false" targetDB="postgresql">
           CREATE TABLE eam_error_code (
@@ -5196,14 +5204,6 @@ has already been defined.
         <statement desc="Add eam_stat_errors foreign key constraint" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_stat_errors
             ADD CONSTRAINT fk6f2383a82de89070 FOREIGN KEY (reqstat_id) REFERENCES eam_request_stat(id) ON DELETE CASCADE;
-        </statement>
-      </schema-directSQL>
-    </schemaSpec>
-
-    <schemaSpec version="3.25">
-      <schema-directSQL>
-        <statement desc="Drop redundant RESOURCE_ID column in EAM_RESOURCE_GROUP">
-          ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN RESOURCE_ID 
         </statement>
       </schema-directSQL>
     </schemaSpec>
