@@ -5091,7 +5091,8 @@ has already been defined.
                       
       </schema-directSQL>
     </schemaSpec>
-    <schemaSpec version="3.25">
+
+    <schemaSpec version="3.23">
       <schema-directSQL>
         <statement desc="Drop redundant RESOURCE_ID column in EAM_RESOURCE_GROUP">
           ALTER TABLE EAM_RESOURCE_GROUP DROP COLUMN RESOURCE_ID 
