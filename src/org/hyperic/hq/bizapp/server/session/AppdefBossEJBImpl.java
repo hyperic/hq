@@ -3598,7 +3598,7 @@ public class AppdefBossEJBImpl
     * @param allConfigsRollback The configuation to rollback to if an error 
     *                           occurs.
     * @ejb:interface-method
-    * @ejb:transaction type="NOTSUPPORTED"
+    * @ejb:transaction type="REQUIRED"
     */
     public void setAllConfigResponses(int sessionInt, 
                                       AllConfigResponses allConfigs,
