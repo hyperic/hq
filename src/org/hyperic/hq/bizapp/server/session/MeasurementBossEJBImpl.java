@@ -114,6 +114,7 @@ import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.ResourcesWithoutDataHelper;
 import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
@@ -189,9 +190,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             // Now iterate through and throw out the metrics we don't need
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                DerivedMeasurementValue dmv =
-                    (DerivedMeasurementValue) it.next();
-                if (!cats.contains(dmv.getTemplate().getCategory().getName()))
+                DerivedMeasurement dm = (DerivedMeasurement) it.next();
+                if (!cats.contains(dm.getTemplate().getCategory().getName()))
                     it.remove();
             }
         }
@@ -549,8 +549,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         ArrayList tmpls = new ArrayList(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
-            tmpls.add(dmv.getTemplate());
+            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            tmpls.add(dm.getTemplate().getMeasurementTemplateValue());
         }
             
         return tmpls;
@@ -944,9 +944,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the the designated measurement for the given resource
      * and corresponding category.
      * @return array of derived measurement IDs
-     * @ejb:interface-method
      */
-    public List getDesignatedMetrics(int sessionId, AppdefEntityID id, Set cats) 
+    private List getDesignatedMetrics(int sessionId, AppdefEntityID id, Set cats) 
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
@@ -986,8 +985,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (appSvcs[i].getIsEntryPoint()) {
                     // Recursively call with the entry point
                     try {
-                        metrics =
-                            getDesignatedMetrics(sessionId, id, cats);
+                        metrics = getDesignatedMetrics(sessionId, id, cats);
                         break;
                     } catch (MeasurementNotFoundException ignore) {
                         // No measurement to be used
@@ -1001,7 +999,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     
                     if (dm != null) {
                         metrics = new ArrayList(1);
-                        metrics.add(dm.getDerivedMeasurementValue());
+                        metrics.add(dm);
                     }
                 }
             }
@@ -1039,8 +1037,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Now iterate through and throw out the metrics we don't need
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
-            if (!cats.contains(dmv.getTemplate().getCategory().getName()))
+            DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            if (!cats.contains(dm.getTemplate().getCategory().getName()))
                 it.remove();
         }
     
@@ -3094,9 +3092,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         HashSet done = new HashSet();
         long now = System.currentTimeMillis();
         for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
-            String category = dmv.getTemplate().getCategory().getName();
-            
+            DerivedMeasurement dmv = (DerivedMeasurement) it.next();
+            MeasurementTemplate templ = dmv.getTemplate();
+            String category = templ.getCategory().getName();
+
             if (done.contains(category))
                 continue;
 

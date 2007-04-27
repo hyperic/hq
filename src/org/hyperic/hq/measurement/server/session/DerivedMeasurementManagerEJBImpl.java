@@ -949,9 +949,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id) {
 
-        List mlocals = getDerivedMeasurementDAO().
-            findDesignatedByInstance(id.getType(), id.getID());
-        return valuePager.seek(mlocals, PageControl.PAGE_ALL);
+        return getDerivedMeasurementDAO().findDesignatedByInstance(id.getType(),
+                                                                   id.getID());
     }
 
     /**
@@ -964,9 +963,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public List findDesignatedMeasurements(AuthzSubjectValue subject,
                                            AppdefEntityID id,
                                            String cat) {
-        List mlocals = getDerivedMeasurementDAO()
+        return getDerivedMeasurementDAO()
             .findDesignatedByInstanceForCategory(id.getType(), id.getID(), cat);
-        return valuePager.seek(mlocals, PageControl.PAGE_ALL);
     }
 
     /**
