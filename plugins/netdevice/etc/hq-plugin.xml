@@ -266,17 +266,19 @@
 
     <metric name="Used"
             template="${snmp.template}:hrStorageUsed:${storage.config}"
-            category="THROUGHPUT"
+            category="UTILIZATION"
+            units="B"
             indicator="true"/>
 
     <metric name="Size"
             template="${snmp.template}:hrStorageSize:${storage.config}"
-            category="THROUGHPUT"
+            category="UTILIZATION"
+            units="B"
             indicator="true"/>
 
     <metric name="Allocation Failures"
             template="${snmp.template}:hrStorageAllocationFailures:${storage.config}"
-            category="THROUGHPUT"
+            category="AVAILABILITY"
             collectionType="trendsup"/>
   </metrics>
 
