@@ -2671,8 +2671,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 
                 // Get absolute last data point
                 Map avails = getDataMan().getLastDataPoints(mids, end -
-                    MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
-
+                    (resType.getAppdefTypeId() ==
+                        AppdefEntityConstants.APPDEF_TYPE_PLATFORM ?
+                    MeasurementConstants.ACCEPTABLE_LIVE_MILLIS :            
+                    MeasurementConstants.ACCEPTABLE_SERVICE_LIVE_MILLIS));
+                
                 if (avails.size() == 0)
                     summary.setAvailability(
                         new Double(MeasurementConstants.AVAIL_UNKNOWN));
