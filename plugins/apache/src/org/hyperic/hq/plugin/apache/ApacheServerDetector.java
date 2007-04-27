@@ -27,12 +27,16 @@ package org.hyperic.hq.plugin.apache;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.Collector;
@@ -218,16 +222,25 @@ public class ApacheServerDetector
                       " does not exist, discovering as type: " +
                       TYPE_HTTPD);
             productConfig = new ConfigResponse();
-            String port = "80";
-            String address =
-                getListenAddress(port, this.defaultIp);
 
-            productConfig.setValue(Collector.PROP_PROTOCOL,
-                                   getConnectionProtocol(port));
-            productConfig.setValue(Collector.PROP_SSL, isSSL(port));
-            productConfig.setValue(Collector.PROP_HOSTNAME, address);
-            productConfig.setValue(Collector.PROP_PORT, port);
-            productConfig.setValue(Collector.PROP_PATH, "/server-status");
+            //meant for command-line testing: -Dhttpd.url=http://localhost:8080/
+            if (configureURL(getManagerProperty("httpd.url"), productConfig)) {
+                server.setMeasurementConfig();
+            }
+            else {
+                String port = "80";
+                String address =
+                    getListenAddress(port, this.defaultIp);
+
+                productConfig.setValue(Collector.PROP_PROTOCOL,
+                                       getConnectionProtocol(port));
+                productConfig.setValue(Collector.PROP_SSL, isSSL(port));
+                productConfig.setValue(Collector.PROP_HOSTNAME, address);
+                productConfig.setValue(Collector.PROP_PORT, port);
+                productConfig.setValue(Collector.PROP_PATH, "/server-status");
+                //XXX need to auto-configure port and path
+                //server.setMeasurementConfig();
+            }
 
             server.setDescription("mod_status monitor");
             server.setType(TYPE_HTTPD);
@@ -235,8 +248,6 @@ public class ApacheServerDetector
             //we won't clash w/ the other types
             server.setIdentifier(TYPE_HTTPD + " " + server.getInstallPath());
             server.setProductConfig(productConfig);
-            //XXX need to auto-configure port and path
-            //server.setMeasurementConfig();
 
             return true;
         }
@@ -458,6 +469,90 @@ public class ApacheServerDetector
     protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
 
+        List services = new ArrayList();
+
+        List vhosts = discoverVHostServices(serverConfig);
+        if (vhosts != null) {
+            services.addAll(vhosts);
+        }
+
+        List workers = discoverJkServices(serverConfig);
+        if (workers != null) {
+            services.addAll(workers);
+        }
+
+        return services;
+    }
+
+    protected boolean configureURL(String urlstr, ConfigResponse config) {
+        if (urlstr == null) {
+            return false;
+        }
+
+        URL url;
+        try {
+            url = new URL(urlstr);
+        } catch (MalformedURLException e) {
+            log.error("Malformed url=" + urlstr);
+            return false;
+        }
+
+        config.setValue(Collector.PROP_HOSTNAME, url.getHost());
+        config.setValue(Collector.PROP_PORT, String.valueOf(url.getPort()));
+        config.setValue(Collector.PROP_PATH, url.getPath());
+        config.setValue(Collector.PROP_PROTOCOL, Collector.PROTOCOL_HTTP);
+        if (url.getProtocol().equals(Collector.PROTOCOL_HTTPS)) {
+            config.setValue(Collector.PROP_SSL, "true");
+        }
+
+        return true;
+    }
+
+    protected List discoverJkServices(ConfigResponse serverConfig)
+        throws PluginException {
+
+        ConfigResponse config = new ConfigResponse();
+
+        //XXX must be defined in agent.properties for now
+        if (!configureURL(getManagerProperty("jkstatus.url"), config)) {
+            return null;
+        }
+
+        List services = new ArrayList();
+
+        JkStatusCollector jkstatus = new JkStatusCollector();
+        Map stats = jkstatus.getValues(this, config);
+        Set workers = jkstatus.getWorkers();
+
+        for (Iterator it=workers.iterator(); it.hasNext();) {
+            String name = (String)it.next();
+            ServiceResource worker =
+                createServiceResource(JkStatusCollector.WORKER_NAME);
+            worker.setServiceName(JkStatusCollector.WORKER_NAME + " " + name);
+
+            ConfigResponse cprops = new ConfigResponse();
+            for (int i=0; i<JkStatusCollector.WORKER_PROPS.length; i++) {
+                String prop = JkStatusCollector.WORKER_PROPS[i];
+                cprops.setValue(prop,
+                                (String)stats.get(name + "." + prop));
+            }
+
+            ConfigResponse productConfig =
+                new ConfigResponse(config.toProperties()); //clone
+            productConfig.setValue("name", name);
+            worker.setProductConfig(productConfig);
+            worker.setCustomProperties(cprops);
+            worker.setMeasurementConfig();
+
+            services.add(worker);
+        }
+
+        return services;
+    }
+
+    protected List discoverVHostServices(ConfigResponse serverConfig)
+        throws PluginException {
+    
         if (serverConfig.getValue(SNMPClient.PROP_IP) == null) {
             return null; //server type "Apache httpd"
         }
