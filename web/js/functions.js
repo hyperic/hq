@@ -285,6 +285,7 @@ function goToLocationSelfAndElement(param,elementName,base) {
     var sep = base.indexOf("?") >=0 ? '&' : "?";
     var val = document.forms[0].elements[elementName].value;
     window.location = base + sep + param + "=" + val;
+    return false;
 }
 
 /*--------------------------- END getters for individual elements ------------------------------*/

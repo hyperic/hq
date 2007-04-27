@@ -45,9 +45,15 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
-<c:url var="selfPnaAction" value="/dashboard/Admin.do">
+<c:url var="selfAction" value="/Admin.do" context="/dashboard">
   <c:param name="mode" value="${param.mode}"/>
   <c:param name="key" value="${param.key}"/>  
+  <c:if test="${not empty param.token}">
+    <c:param name="token" value="${param.token}"/>
+  </c:if>
+</c:url>
+
+<c:url var="selfPnaAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -78,14 +84,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPnFilterAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>
+<c:url var="selfPnFilterAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -113,14 +117,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="ffAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>    
+<c:url var="ffAction" value="${selfAction}">
   <c:if test="${not empty param.psa}">
     <c:param name="psa" value="${param.psa}"/>
   </c:if>
@@ -142,14 +144,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="ftAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>  
+<c:url var="ftAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -174,14 +174,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPnpAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/> 
+<c:url var="selfPnpAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -209,14 +207,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPsaAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>  
+<c:url var="selfPsaAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -244,14 +240,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPspAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>  
+<c:url var="selfPspAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -279,14 +273,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPaAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>  
+<c:url var="selfPaAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -311,14 +303,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.scp}">
     <c:param name="scp" value="${param.scp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
 
-<c:url var="selfPpAction" value="/dashboard/Admin.do">
-  <c:param name="mode" value="${param.mode}"/>
-  <c:param name="key" value="${param.key}"/>  
+<c:url var="selfPpAction" value="${selfAction}">
   <c:if test="${not empty param.ff}">
     <c:param name="ff" value="${param.ff}"/>
   </c:if>  
@@ -343,8 +333,38 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.psp}">
     <c:param name="psp" value="${param.psp}"/>
   </c:if>
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
+  <c:if test="${not empty param.nameFilter}">
+    <c:param name="nameFilter" value="${param.nameFilter}"/>
+  </c:if>
+</c:url>
+
+<c:url var="nfAction" value="${selfAction}">
+  <c:if test="${not empty param.ff}">
+    <c:param name="ff" value="${param.ff}"/>
+  </c:if>  
+  <c:if test="${not empty param.ft}">
+    <c:param name="ft" value="${param.ft}"/>
+  </c:if>
+  <c:if test="${not empty param.psa}">
+    <c:param name="psa" value="${param.psa}"/>
+  </c:if>
+  <c:if test="${not empty param.soa}">
+    <c:param name="soa" value="${param.soa}"/>
+  </c:if>
+  <c:if test="${not empty param.sca}">
+    <c:param name="sca" value="${param.sca}"/>
+  </c:if>
+  <c:if test="${not empty param.psp}">
+    <c:param name="psp" value="${param.psp}"/>
+  </c:if>
+  <c:if test="${not empty param.pnp}">
+    <c:param name="pnp" value="${param.pnp}"/>
+  </c:if>
+  <c:if test="${not empty param.sop}">
+    <c:param name="sop" value="${param.sop}"/>
+  </c:if>
+  <c:if test="${not empty param.scp}">
+    <c:param name="scp" value="${param.scp}"/>
   </c:if>
 </c:url>
 
@@ -366,31 +386,24 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
      </tiles:insert>
     </td>
   </tr>
-  <c:if test="${noFilter}">
-      <html:hidden property="ff"/>
-      <html:hidden property="ft"/>
-  </c:if>
-  <c:if test="${empty noFilter}">
-  <tr>
+  <c:choose>
+  <c:when test="${noFilter}">
     <td width="50%" valign="top">
       <!--  FILTER TOOLBAR CONTENTS -->
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-          <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
+          <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
         </tr>
         <tr>
-          <td class="FilterLabelText" nowrap align="right">View:</td>
-          <td class="FilterLabelText" width="100%">      
-            <html:select property="ff" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ff', '${ffAction}');">
-              <hq:optionMessageList property="functions" baseKey="resource.hub.filter"/>
-            </html:select>
-            
-            <html:select property="ft" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ft', '${ftAction}');">
-              <html:option value="-1" key="resource.hub.filter.AllResourceTypes"/>
-              <html:optionsCollection property="types"/>
-            </html:select>
-            
+          <td nowrap class="FilterLabelText" colspan="2"><fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
+              <html:text property="nameFilter" maxlength="55" size="10"
+                     onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
+
+              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/dash-button_go-arrow.gif"
+                     border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
+      <html:hidden property="ff"/>
+      <html:hidden property="ft"/>
           </td>
           <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>
         </tr>
@@ -404,13 +417,65 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <td class="FilterLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
         <tr>
-          <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>
+          <td><html:img page="/images/spacer.gif" width="5" height="32" border="0"/></td>
           <td width="100%" class="FilterLabelText">&nbsp;</td>
         </tr>
       </table>
     </td>
   </tr>
-  </c:if>
+  </c:when>
+  <c:otherwise>
+  <tr>
+    <td width="50%" valign="top">
+      <!--  FILTER TOOLBAR CONTENTS -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+          <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
+        </tr>
+        <tr>
+          <td class="FilterLabelText" nowrap align="right"><fmt:message key="Filter.ViewLabel"/></td>
+          <td class="FilterLabelText" width="100%">      
+            <html:select property="ff" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ff', '${ffAction}');">
+              <hq:optionMessageList property="functions" baseKey="resource.hub.filter"/>
+            </html:select>
+            
+            <html:select property="ft" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, 'ft', '${ftAction}');">
+              <html:option value="-1" key="resource.hub.filter.AllResourceTypes"/>
+              <html:optionsCollection property="types"/>
+            </html:select>
+            
+          </td>
+          <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>
+        </tr>
+        <tr>
+          <td nowrap class="FilterLabelText" colspan="2"><fmt:message key="resource.group.inventory.Edit.FilterByNameLabel"/>&nbsp;
+              <html:text property="nameFilter" maxlength="55" size="10"
+                     onkeypress="if (event.keyCode == 13) return goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');" /></div>
+
+              <div style="display:inline;width:17px;padding-left:5px;"><html:img page="/images/dash-button_go-arrow.gif"
+                     border="0" onclick="goToLocationSelfAndElement('nameFilter', 'nameFilter', '${nfAction}');"/></div>
+          </td>
+          <td><html:img page="/images/spacer.gif" width="5" height="30" border="0"/></td>
+        </tr>
+      </table>
+    </td>
+    <td><html:img page="/images/spacer.gif" width="40" height="1" border="0"/></td>
+    <td>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
+          <td class="FilterLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+        </tr>
+        <tr>
+          <td><html:img page="/images/spacer.gif" width="5" height="62" border="0"/></td>
+          <td width="100%" class="FilterLabelText">&nbsp;</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  </c:otherwise>
+  </c:choose>
   <c:if test="${Resource.groupType == 2}"> <!-- AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT-->
     <tr>
       <td valign="bottom">

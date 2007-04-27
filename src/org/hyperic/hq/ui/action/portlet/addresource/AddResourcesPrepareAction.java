@@ -127,8 +127,7 @@ public class AddResourcesPrepareAction extends Action {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log =
-            LogFactory.getLog(AddResourcesPrepareAction.class.getName());
+        Log log = LogFactory.getLog(AddResourcesPrepareAction.class.getName());
 
         AddResourcesForm addForm = (AddResourcesForm)form;
             
@@ -236,7 +235,7 @@ public class AddResourcesPrepareAction extends Action {
                                              appdefType, 
                                              DEFAULT_RESOURCE_TYPE,
                                              resourceType,
-                                             null,
+                                             addForm.getNameFilter(),
                                              pendingEntities,
                                              pcAvail);
         }
@@ -245,7 +244,8 @@ public class AddResourcesPrepareAction extends Action {
                                              appdefType, 
                                              resourceType, 
                                              null, 
-                                             pendingEntities , 
+                                             pendingEntities,
+                                             addForm.getNameFilter(),
                                              pcAvail);                 
         }
 
