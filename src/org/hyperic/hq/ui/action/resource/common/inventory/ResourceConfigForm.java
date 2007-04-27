@@ -42,7 +42,7 @@ public class ResourceConfigForm extends ResourceForm {
     private List controlConfigOptions = new ArrayList();
     private List rtConfigOptions = new ArrayList();
     private boolean serverBasedAutoInventory;
-    protected boolean validationErrors = false;
+    protected boolean validationErrors;
     private boolean serviceRTEnabled;
     private boolean euRTEnabled;
     
@@ -120,7 +120,11 @@ public class ResourceConfigForm extends ResourceForm {
     }
     
     public void reset(ActionMapping mapping, HttpServletRequest request) {
-    super.reset(mapping, request);
+        super.reset(mapping, request);
+        serverBasedAutoInventory = false;
+        validationErrors = false;
+        serviceRTEnabled = false;
+        euRTEnabled = false;
     }
 
 }
