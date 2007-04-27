@@ -237,12 +237,12 @@
       </filter>
       <metrics>
         <metric name="Storage Used"
-                category="THROUGHPUT"
+                category="UTILIZATION"
                 indicator="true"
                 units="MB"
                 collectionType="dynamic"/>
         <metric name="Percent Used"
-                category="THROUGHPUT"
+                category="UTILIZATION"
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
@@ -292,7 +292,7 @@
       </filter>
       <metrics>
         <metric name="PercentActive"
-                category="THROUGHPUT"
+                category="UTILIZATION"
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
