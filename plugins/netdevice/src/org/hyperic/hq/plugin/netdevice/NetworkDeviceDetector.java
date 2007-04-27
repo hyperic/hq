@@ -32,9 +32,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.SNMPDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -89,7 +91,47 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             log.debug("Using snmp config=" + serverConfig);
         }
 
+        services.addAll(discoverInterfaces(serverConfig));
+
+        List extServices =
+            SNMPDetector.discoverServices(this,
+                                          serverConfig,
+                                          this.session);
+        services.addAll(extServices);
+
+        closeSession();
+
+        return services;
+    }
+
+    protected boolean hasInterfaceService() {
         String type = getServiceTypeName(SVC_NAME);
+        ProductPluginManager manager =
+            (ProductPluginManager)getManager().getParent();
+        MeasurementPlugin plugin =
+            manager.getMeasurementPlugin(type);
+        if (plugin == null) {
+            //Interface service is not defined
+            return false;
+        }
+        else {
+            //Check that ifMtu cprop exists, if so assume standard IF-MIB interface
+            return plugin.getCustomPropertiesSchema().getOption("ifMtu") != null;
+        }
+    }
+
+    protected List discoverInterfaces(ConfigResponse serverConfig)
+        throws PluginException {
+
+        Log log = getLog();
+        List services = new ArrayList();
+
+        String type = getServiceTypeName(SVC_NAME);
+
+        if (!hasInterfaceService()) {
+            log.debug("Skipping discovery of " + type);
+            return services;
+        }
 
         String[] keys =
             getCustomPropertiesSchema(type).getOptionNames();
@@ -219,14 +261,6 @@ public class NetworkDeviceDetector extends PlatformServiceDetector {
             }
             services.add(service);
         }
-
-        List extServices =
-            SNMPDetector.discoverServices(this,
-                                          serverConfig,
-                                          this.session);
-        services.addAll(extServices);
-
-        closeSession();
 
         return services;
     }

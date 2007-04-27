@@ -195,18 +195,23 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
         if (description != null) {
             platform.setDescription(description);
 
-            //this works for Cisco IOS at least
-            StringTokenizer tok =
-                new StringTokenizer(description, " ,");
+            boolean hasVersionCprop =
+                getCustomPropertiesSchema().getOption(PROP_VERSION) != null;
 
-            while (tok.hasMoreTokens()) {
-                String s = tok.nextToken();
-                if (s.equalsIgnoreCase(PROP_VERSION) &&
-                    tok.hasMoreTokens())
-                {
-                    String version = tok.nextToken();
-                    cprops.setValue(PROP_VERSION, version);
-                    break;
+            if (hasVersionCprop) {
+                //this works for Cisco IOS at least
+                StringTokenizer tok =
+                    new StringTokenizer(description, " ,");
+
+                while (tok.hasMoreTokens()) {
+                    String s = tok.nextToken();
+                    if (s.equalsIgnoreCase(PROP_VERSION) &&
+                        tok.hasMoreTokens())
+                    {
+                        String version = tok.nextToken();
+                        cprops.setValue(PROP_VERSION, version);
+                        break;
+                    }
                 }
             }
         }
