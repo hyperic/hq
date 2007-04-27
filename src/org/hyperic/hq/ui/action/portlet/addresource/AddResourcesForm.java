@@ -54,6 +54,7 @@ public class AddResourcesForm extends ResourceForm  {
     private Integer ff;
     private List functions;
     private List types;
+    private String nameFilter;
     private String token;
     
     //-------------------------------------constructors
@@ -257,8 +258,14 @@ public class AddResourcesForm extends ResourceForm  {
         }
     }
     
-// ******************** support methods ***********************************
-    
+    public String getNameFilter() {
+        return nameFilter;
+    }
+
+    public void setNameFilter(String nameFilter) {
+        this.nameFilter = nameFilter;
+    }
+
     public String getToken() {
         return token;
     }
@@ -267,11 +274,13 @@ public class AddResourcesForm extends ResourceForm  {
         this.token = token;
     }
 
+    // ******************** support methods ***********************************
     private void setDefaults() {
         ff = null;
         ft = new Integer(-1);
         functions = new ArrayList();        
         types = new ArrayList();
+        nameFilter = null;
         token = null;
     }
 }
