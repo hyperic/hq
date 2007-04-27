@@ -101,6 +101,10 @@ public class AlertDefinitionManagerEJBImpl
         return new AlertDAO(DAOFactory.getDAOFactory());
     }
 
+    private AlertConditionDAO getConditionDAO() {
+        return new AlertConditionDAO(DAOFactory.getDAOFactory());
+    }
+
     /** 
      * Remove alert definitions
      */
@@ -111,14 +115,15 @@ public class AlertDefinitionManagerEJBImpl
     {
         canManageAlerts(subj, alertdef);
         
-        boolean survivors = false;
+        boolean hasChildren = alertdef.getChildren().size() > 0;
         
         // If there are any children, delete them, too
-        for (Iterator i = alertdef.getChildren().iterator(); i.hasNext();) {
-            AlertDefinition child = (AlertDefinition) i.next();
-            survivors |= deleteAlertDefinition(subj, child, force);
+        for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext();)
+        {
+            AlertDefinition child = (AlertDefinition) it.next();
+            deleteAlertDefinition(subj, child, force);
+            it.remove();
         }
-        alertdef.clearChildren();
 
         // Get rid of their triggers first
         TriggerDAO tdao = getTriggerDAO();
@@ -126,7 +131,8 @@ public class AlertDefinitionManagerEJBImpl
 
         AlertDAO dao = getAlertDAO();
         // See if there are any alerts
-        if (survivors || (!force && dao.countAlerts(alertdef).intValue() > 0)) {
+        if (hasChildren || (!force && dao.countAlerts(alertdef).intValue() > 0))
+        {
             alertdef.setDeleted(true);
             alertdef.setEnabled(false);
             
@@ -162,6 +168,12 @@ public class AlertDefinitionManagerEJBImpl
         // Delete the alerts
         dao.deleteByAlertDefinition(alertdef);
 
+        // Remove the conditions
+        getConditionDAO().removeConditions(alertdef);
+        
+        // Remove the actions
+        getActionDAO().removeActions(alertdef);
+        
         // Actually remove the definition
         getAlertDefDAO().remove(alertdef);
         
@@ -198,8 +210,7 @@ public class AlertDefinitionManagerEJBImpl
         
         // Create new conditions
         AlertConditionValue[] conds = a.getConditions();
-        AlertConditionDAO acDAO = 
-            DAOFactory.getDAOFactory().getAlertConditionDAO();
+        AlertConditionDAO acDAO = getConditionDAO();
         for (int i = 0; i < conds.length; i++) {
             RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
                 tDAO.findById(conds[i].getTriggerId()) : null;

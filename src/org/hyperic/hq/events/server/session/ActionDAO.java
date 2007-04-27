@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
 import java.util.List;
 import java.io.Serializable;
 
@@ -50,6 +51,13 @@ public class ActionDAO extends HibernateDAO {
 
     protected void remove(Action entity) {
         super.remove(entity);
+    }
+
+    void removeActions(AlertDefinition def) {
+        for (Iterator it = def.getActions().iterator(); it.hasNext(); ) {
+            remove(it.next());
+        }
+        def.clearActions();
     }
 
     /**

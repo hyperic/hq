@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -38,5 +40,12 @@ public class AlertConditionDAO extends HibernateDAO {
 
     void save(AlertCondition cond) {
         super.save(cond);
+    }
+
+    void removeConditions(AlertDefinition def) {
+        for (Iterator it = def.getConditions().iterator(); it.hasNext(); ) {
+            remove(it.next());
+        }
+        def.clearConditions();
     }
 }
