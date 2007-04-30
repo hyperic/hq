@@ -95,7 +95,7 @@ public class SessionManager {
                            Thread.currentThread().getName() + "]");
             }
             
-            s = _factory.openSession(null, true, false, 
+            s = _factory.openSession(null, false, false, 
                                      ConnectionReleaseMode.AFTER_STATEMENT);
             
             // Start out sessions as read-only.  They can be upgraded to
