@@ -25,74 +25,67 @@
 
 package org.hyperic.util.timer;
 
+import org.hyperic.util.StringUtil;
+
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class StopWatch {
 
-    private long start;
-    private long end;
-    private Map markerMap;
+    private long _start;
+    private long _end;
+    private Map _markerMap;
     
     public StopWatch() {
         reset();
     }
 
     public void markTimeBegin (String marker) {
-        if (markerMap.containsKey(marker)) {
-            TimeSlice ts = (TimeSlice)markerMap.get(marker);
+        if (_markerMap.containsKey(marker)) {
+            TimeSlice ts = (TimeSlice)_markerMap.get(marker);
             ts.cont();
         } else {
-            markerMap.put(marker, new TimeSlice(marker));
+            _markerMap.put(marker, new TimeSlice(marker));
         }
     }
 
     public void markTimeEnd (String marker) {
-        if (!markerMap.containsKey(marker)) {
+        if (!_markerMap.containsKey(marker)) {
             throw new IllegalArgumentException("Invalid marker");
         }
-        TimeSlice ts = (TimeSlice)markerMap.get(marker);
+        TimeSlice ts = (TimeSlice)_markerMap.get(marker);
         ts.setFinished();
     }
 
     public StopWatch(long start) {
-        this.start = start;
-        markerMap = new HashMap();
+        _start = start;
+        _markerMap = new HashMap();
     }
 
     public long reset() {
         try {
             return this.getElapsed();
         } finally {
-            start = System.currentTimeMillis();
-            markerMap = new HashMap();
+            _start = System.currentTimeMillis();
+            _markerMap = new HashMap();
         }
     }
     
     public long getElapsed() {
-        end = System.currentTimeMillis();
-        return end - start;
+        _end = System.currentTimeMillis();
+        return _end - _start;
     }
 
     public String toString() {
         long elap = this.getElapsed();
 
-        String fraction = (elap % 1000) + "";
-        int pad = 3 - fraction.length();
+        StringBuffer buf = new StringBuffer();
+        buf.append(StringUtil.formatDuration(elap, 2, true));
 
-        StringBuffer buf = new StringBuffer()
-            .append(elap / 1000).append('.');
-
-        //for example, 15 millseconds formatted as ".015" rather than ".15"
-        while (pad-- > 0) {
-            buf.append("0");
-        }
-        buf.append(fraction);
-
-        if (markerMap.size() > 0) {
+        if (_markerMap.size() > 0) {
             buf.append(" { Markers: ");
-            for (Iterator i=markerMap.values().iterator();i.hasNext();) {
+            for (Iterator i=_markerMap.values().iterator();i.hasNext();) {
                 TimeSlice ts = (TimeSlice)i.next();
                 ts.writeBuf(buf);
             }
@@ -102,27 +95,28 @@ public class StopWatch {
     }
 
     class TimeSlice {
-        String marker;
-        long begin;
-        long end;
+        String _marker;
+        long _begin;
+        long _end;
 
         public TimeSlice (String marker) {
-            this.marker = marker;
-            this.begin=this.end=System.currentTimeMillis();
+            _marker = marker;
+            _begin = _end=System.currentTimeMillis();
         }
 
         public void setFinished () {
-            this.end= System.currentTimeMillis();
+            _end= System.currentTimeMillis();
         }
 
         public void cont () {
-            begin -= (end-begin);
+            _begin -= (_end - _begin);
         }
 
         public void writeBuf(StringBuffer buf) {
-            long elap = end-begin;
-            buf.append(" [").append(marker).append("=")
-               .append(elap/1000).append('.').append(elap%1000).append("] ");
+            long elap = _end - _begin;
+            buf.append(" [").append(_marker).append("=")
+               .append(StringUtil.formatDuration(elap, 2, true))
+               .append("]");
         }
     }
 }
