@@ -81,6 +81,7 @@ import org.apache.commons.logging.LogFactory;
  *      local-jndi-name="LocalAIBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
@@ -102,7 +103,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Finder for all of the scheduled AI scans for an appdef entity.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList findScheduledJobs(int sessionId, AppdefEntityID id,
                                       PageControl pc)
@@ -119,7 +119,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIScheduleValue findScheduledJobById(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -138,7 +137,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Get a job history based on appdef id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList findJobHistory(int sessionId, AppdefEntityID id, 
                                    PageControl pc)
@@ -157,7 +155,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Delete a AIJob based on an id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * @param ids Array of job ids to be deleted
      */
     public void deleteAIJob(int sessionId, Integer[] ids)
@@ -180,7 +177,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @return A Map, where the keys are the names of the ServerTypeValues,
      * and the values are the ServerSignature objects.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Map getServerSignatures(int sessionID,
                                    List serverTypes)
@@ -208,7 +204,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param schedule Describes when the scan should be run.  If this is null,
      * then the scan is run as an immediate, one-time only scan.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void startGroupScan(int sessionID,
                                int groupID,
@@ -243,7 +238,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param schedule Describes when the scan should be run.  If this is null,
      * then the scan is run as an immediate, one-time only scan.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void startScan(int sessionID,
                           int platformID,
@@ -267,7 +261,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void startScan(int sessionID,
                           String agentToken,
@@ -283,7 +276,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Stop an autoinventory scan.
      * @param platformID The platform ID of the platform to stop scanning on.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void stopScan(int sessionID,
                          int platformID)
@@ -302,7 +294,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Get status for a running autoinventory scan.
      * @param platformID The platform ID of the platform to get scan status for.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ScanStateCore getScanStatus(int sessionID,
                                        int platformID)
@@ -324,7 +315,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get status for a running autoinventory scan given the agentToken
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ScanStateCore getScanStatusByAgentToken(int sessionID,
                                                    String agentToken)
@@ -354,7 +344,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getQueue(int sessionID, boolean showIgnored,
                              boolean showPlaceholders, PageControl pc)
@@ -378,7 +367,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getQueue(int sessionID, boolean showIgnored,
                              boolean showPlaceholders,
@@ -397,7 +385,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single platform from the AI queue, by aiplatformID
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -418,7 +405,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single platform from the AI queue, by FQDN
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -438,7 +424,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single server from the AI queue, by serverID
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIServerValue findAIServerById(int sessionID, int serverID)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -457,7 +442,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single server from the AI queue, by name
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIServerValue findAIServerByName( int sessionID, String name ) 
         throws SessionNotFoundException, SessionTimeoutException {
@@ -474,7 +458,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single ip from the AI queue, by ipID
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIIpValue findAIIpById( int sessionID, int ipID ) 
         throws SessionNotFoundException, SessionTimeoutException {
@@ -491,7 +474,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get details on a single ip from the AI queue, by address
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AIIpValue findAIIpByAddress(int sessionID, String address)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -512,7 +494,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void processQueue(int sessionID,
                              List platformList,
@@ -539,7 +520,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param doEnable If true, runtime autodiscovery will be enabled,
      * if false, it will be disabled.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void toggleRuntimeScan(int sessionID,
                                   AppdefEntityID id,

@@ -1455,7 +1455,6 @@ public class AppdefBossEJBImpl
      * Create an application
      * @return ApplicationValue - the saved application
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ApplicationValue createApplication(int sessionID,
                                               ApplicationValue appVal,
@@ -1759,7 +1758,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService)
         throws NamingException, FinderException, ValidationException,
@@ -1830,7 +1828,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform)
         throws FinderException, ValidationException,
@@ -2129,7 +2126,6 @@ public class AppdefBossEJBImpl
      * which operations occurred.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public String importBatchData(int sessionID, BatchImportData data)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -2148,7 +2144,6 @@ public class AppdefBossEJBImpl
     /**
      * @return The updated Resource
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public AppdefResourceValue changeResourceOwner(int sessionId,
                                                    AppdefEntityID eid,
@@ -2692,7 +2687,6 @@ public class AppdefBossEJBImpl
      * @param resourceName    - resource name (or name substring) to search for.
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList findCompatInventory(int sessionId, int groupType,
                                         int appdefTypeId, int groupEntTypeId,
@@ -2726,7 +2720,6 @@ public class AppdefBossEJBImpl
      *                          example: linux, jboss, vhost
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList findCompatInventory(int sessionId, int appdefTypeId,
                                         int appdefResTypeId,
@@ -2760,7 +2753,6 @@ public class AppdefBossEJBImpl
      * @param resourceName    - resource name (or name substring) to search for.
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList findCompatInventory(int sessionId, int appdefTypeId,
                                         int appdefResTypeId,
@@ -2973,7 +2965,6 @@ public class AppdefBossEJBImpl
      * @return page list of value objects that extend AppdefResourceValue
      * @throws AppdefGroupNotFoundException if the group is not found
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList findCompatInventory(int sessionId, int appdefTypeId,
                                         int appdefResTypeId,
@@ -3007,7 +2998,6 @@ public class AppdefBossEJBImpl
      *                          deployed services (false)
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList 
         findCompatServiceInventory(int sessionId, int appdefTypeId,
@@ -3061,7 +3051,6 @@ public class AppdefBossEJBImpl
      * @param sessionId       - valid auth token
      * @return page list of value objects that extend AppdefResourceValue
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList
         findCompatServiceInventory(int sessionId, Integer appId,
@@ -3575,7 +3564,6 @@ public class AppdefBossEJBImpl
      * Returns a 2x2 array mapping "appdef type id" to its corresponding
      * label. Suitable for populating an HTML selector.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public String[][] getAppdefTypeStrArrMap () {
         int[] validTypes = AppdefEntityConstants.getAppdefTypes();

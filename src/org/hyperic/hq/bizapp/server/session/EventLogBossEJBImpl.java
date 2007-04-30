@@ -51,7 +51,7 @@ import org.hyperic.hq.events.shared.EventLogManagerUtil;
  *      view-type="both"
  *      type="Stateless"
  * 
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="REQUIRED"
  */
 public class EventLogBossEJBImpl extends BizappSessionEJB implements
         SessionBean {

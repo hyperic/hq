@@ -138,7 +138,7 @@ import org.json.JSONObject;
  *      view-type="both"
  *      type="Stateless"
  * 
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="REQUIRED"
  */
 
 public class EventsBossEJBImpl 
@@ -412,7 +412,6 @@ public class EventsBossEJBImpl
      * Create an alert definition
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AlertDefinitionValue createAlertDefinition(int sessionID, 
                                                      AlertDefinitionValue adval)
@@ -499,7 +498,6 @@ public class EventsBossEJBImpl
      * Create an alert definition for a resource type
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AlertDefinitionValue createResourceTypeAlertDefinition(
         int sessionID, AppdefEntityTypeID aetid, AlertDefinitionValue adval)
@@ -614,7 +612,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void inheritResourceTypeAlertDefinition(AuthzSubjectValue subject,
                                                    AppdefEntityID id)
@@ -668,7 +665,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ActionValue createAction(int sessionID, Integer adid,
                                     String className, ConfigResponse config)
@@ -716,7 +712,6 @@ public class EventsBossEJBImpl
      * Enable/Disable a collection of alert definitions
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void enableAlertDefinitions(int sessionID, Integer[] ids,
                                        boolean enable)
@@ -743,7 +738,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval)
         throws TriggerCreateException, InvalidOptionException,
@@ -832,7 +826,6 @@ public class EventsBossEJBImpl
      * Update an action
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException 
@@ -845,7 +838,6 @@ public class EventsBossEJBImpl
      * Delete a collection of alert definitions
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -859,7 +851,6 @@ public class EventsBossEJBImpl
      * Delete a collection of alert definitions for a type
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteResourceTypeAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException, 
@@ -873,7 +864,6 @@ public class EventsBossEJBImpl
      * Delete list of alerts
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void deleteAlerts(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -895,7 +885,6 @@ public class EventsBossEJBImpl
      * Delete all alerts for a resource
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -909,7 +898,6 @@ public class EventsBossEJBImpl
      * Delete all alerts for a given period of time
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlerts(int sessionID, long begin, long end)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -925,7 +913,6 @@ public class EventsBossEJBImpl
      * @throws FinderException if alert definition is not found
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1362,7 +1349,6 @@ public class EventsBossEJBImpl
      * Create a trigger
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Integer addRegisteredTrigger(int sessionID, String className,
                                         ConfigResponse config,
@@ -1417,7 +1403,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteEscalationByName(int sessionID, String name)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1431,7 +1416,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1443,7 +1427,6 @@ public class EventsBossEJBImpl
     /**
      * remove escalation by id
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteEscalationById(int sessionID, Integer[] ids)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1475,7 +1458,6 @@ public class EventsBossEJBImpl
      * retrieve escalation name by alert definition id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
                                                EscalationAlertType alertType)
@@ -1492,7 +1474,6 @@ public class EventsBossEJBImpl
      * set escalation name by alert definition id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setEscalationByAlertDefId(int sessionID, Integer id,
                                           Integer escId,
@@ -1511,7 +1492,6 @@ public class EventsBossEJBImpl
      * unset escalation by alert definition id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void unsetEscalationByAlertDefId(int sessionID, Integer id,
                                             EscalationAlertType alertType) 
@@ -1528,7 +1508,6 @@ public class EventsBossEJBImpl
      * retrieve escalation JSONObject by alert definition id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
                                                  EscalationAlertType alertType)
@@ -1546,7 +1525,6 @@ public class EventsBossEJBImpl
      * retrieve escalation object by escalation id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Escalation findEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1563,7 +1541,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addAction(int sessionID, Escalation e, 
                           ActionConfigInterface cfg, long waitTime)  
@@ -1577,7 +1554,6 @@ public class EventsBossEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAction(int sessionID, Integer escId, Integer actId)  
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1596,7 +1572,6 @@ public class EventsBossEJBImpl
      * escalations in the system.  
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getActiveEscalations(int sessionId, int maxEscalations) 
         throws SessionException
@@ -1609,7 +1584,6 @@ public class EventsBossEJBImpl
     /**
      * Gets the escalatable associated with the specified state
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Escalatable getEscalatable(int sessionId, EscalationState state) 
         throws SessionException
@@ -1625,7 +1599,6 @@ public class EventsBossEJBImpl
      * DAO finder convention
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public JSONArray listAllEscalationName(int sessionID)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
@@ -1652,7 +1625,6 @@ public class EventsBossEJBImpl
      * will also be associated with the given alert definition.  
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Escalation createEscalation(int sessionID, String name, String desc,
                                        boolean allowPause, long maxWaitTime,
@@ -1681,7 +1653,6 @@ public class EventsBossEJBImpl
      * Update basic escalation properties
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void updateEscalation(int sessionID, Escalation escalation,
                                  String name, String desc, long maxWait,
@@ -1697,7 +1668,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void acknowledgeAlert(int sessionID, EscalationAlertType alertType, 
                                  Integer alertID, long pauseWaitTime,
@@ -1712,7 +1682,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
                          Integer alertID, String moreInfo)
@@ -1726,7 +1695,6 @@ public class EventsBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void startup() {
         _log.info("Events Boss starting up!");

@@ -71,6 +71,7 @@ import org.hyperic.util.pager.PageList;
  *      local-jndi-name="LocalAuthzBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class AuthzBossEJBImpl extends BizappSessionEJB 
     implements SessionBean {
@@ -86,7 +87,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Check if the current logged in user can administer CAM
      * @return true - if user has adminsterCAM op false otherwise
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean hasAdminPermission(int sessionId)
         throws NamingException, FinderException, 
@@ -102,7 +102,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getAllResourceTypes(Integer sessionId, PageControl pc)
         throws NamingException, CreateException, FinderException,
@@ -118,7 +117,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getAllResourceTypes(Integer sessionId)
         throws NamingException, CreateException, FinderException,
@@ -133,7 +131,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getAllOperations(Integer sessionId, PageControl pc)
         throws NamingException, FinderException, PermissionException,
@@ -149,7 +146,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getAllOperations(Integer sessionId)
         throws NamingException, FinderException, PermissionException,
@@ -163,7 +159,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getAllSubjects(Integer sessionId, Collection excludes,
                                    PageControl pc)
@@ -179,7 +174,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * id values.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public PageList getSubjectsById(Integer sessionId, Integer[] ids,
                                     PageControl pc)
@@ -195,7 +189,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getAllSubjects(Integer sessionId)
         throws FinderException, SessionTimeoutException,
@@ -209,7 +202,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * resource type in the system that the user is allowed to view.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public List getAllResourceGroups(Integer sessionId, PageControl pc)
         throws NamingException, FinderException, PermissionException,
@@ -224,7 +216,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * specified id values.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList getResourceGroupsById(Integer sessionId, Integer[] ids,
                                           PageControl pc)
@@ -239,7 +230,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Remove resources by appdef id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeResources(AppdefEntityID[] ids) {
         // should do some permission checks here.
@@ -255,7 +245,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * as principal tables.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeSubject(Integer sessionId, Integer[] ids)
         throws FinderException, RemoveException, PermissionException,
@@ -336,7 +325,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Save a subject
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveSubject(Integer sessionId, AuthzSubjectValue user)
         throws NamingException, FinderException, RemoveException,
@@ -352,7 +340,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * as principal tables.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue createSubject(Integer sessionId,
                                            AuthzSubjectValue user)
@@ -370,7 +357,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubject getCurrentSubject(int sessionid) 
         throws SessionException
@@ -380,7 +366,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubject getCurrentSubject(String name)
         throws SessionException, ApplicationException
@@ -394,7 +379,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * the given subject id.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubject(Integer sessionId,
                                          Integer subjectId)
@@ -410,7 +394,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * the given username.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectByName(Integer sessionId,
                                                String subjectName)
@@ -430,7 +413,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * have permissions to view other users.
      * See bug #5452 for more information
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AuthzSubjectValue findSubjectByNameNoAuthz(Integer sessionId,
                                                       String subjectName)
@@ -448,7 +430,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * @throws ConfigPropertyException
      * @throws LoginException
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ConfigResponse getUserPrefs(String username)
         throws SessionNotFoundException, ApplicationException,
@@ -461,7 +442,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     /**
      * Return a ConfigResponse matching the UserPreferences
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId)
         throws ApplicationException {
@@ -478,7 +458,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     /**
      * Set the UserPreferences 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setUserPrefs(Integer sessionId, Integer subjectId,
                              ConfigResponse prefs)
@@ -501,7 +480,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     /**
      * Get the email of a user by name
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailByName(Integer sessionId, String userName) 
         throws FinderException, SessionTimeoutException,
@@ -513,7 +491,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     /**
      * Get the email of a user by id
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getEmailById(Integer sessionId, Integer userId) 
         throws FinderException, SessionTimeoutException,
