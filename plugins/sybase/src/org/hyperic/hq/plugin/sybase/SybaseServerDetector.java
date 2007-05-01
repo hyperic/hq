@@ -164,7 +164,7 @@ public class SybaseServerDetector
         else
             return servers;
 
-        String installdir = getParentDir(path, 2);
+        String installdir = getParentDir(path, 3);
         ServerResource server = createServerResource(installdir);
 //        String version = getTypeInfo().getVersion();
         // Set custom properties
