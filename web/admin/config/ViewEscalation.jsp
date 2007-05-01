@@ -351,10 +351,34 @@ function showViewEscResponse(originalRequest) {
 
 
     function saveAddEscalation () {
-        if (!checkEmail()) { return false; }
-        if (!checkSMS()) { return false; }
 
-        //checkSMS();
+        if (selActionTypeEsc==undefined) {
+           $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>'
+            //$('saveButton').style.display = "none";
+            return false;
+        }
+
+        
+        if (selUserEsc==undefined) {
+           $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = "&nbsp;";
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectWhoMethod"/>'
+            //$('saveButton').style.display = "none";
+            return false;
+        }
+
+        if (selUserEsc == 'Others') {
+        if (!checkEmail()) { return false; }
+        }
+
+        if(selActionTypeEsc=="SMS") {
+        if (!checkSMS()) { return false; }
+        }
+
         var emailTextArea = $('emailinput');
         var emailAdds = emailTextArea.value;
 
@@ -492,6 +516,7 @@ function showViewEscResponse(originalRequest) {
         select2.setAttribute('id', 'Email_' + liID);
         select2.onchange = function(){onchange_handler(this);clearDisplay();clearOthers();}
         select2.setAttribute('name', 'action');
+        addOption(select2, 'Select', '<fmt:message key="alert.config.escalation.notify.how"/>');
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
@@ -600,19 +625,18 @@ function showViewEscResponse(originalRequest) {
         var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
 
-          $('userListDisplay').style.display= "";
-          clearDisplay();
-          $('escMsg').innerHTML ='';
-          $('example').style.display= 'none';
-
-
+        clearDisplay();
+        $('escMsg').innerHTML ='';
+        $('example').style.display= 'none';    
+        $('userListDisplay').style.display= "";
+   
           if (index == "NoOp") {
           writeAction.innerHTML = '<fmt:message key="inform.config.escalation.scheme.NoOP"/>';
           } else {
           writeAction.innerHTML = 'Action: ' +index;
           }
 
-         if (index == "Email" || index == "SMS" || index == "NoOp") {
+         if (index == "Email" || index == "SMS" || index == "NoOp" || index == "Select") {
             hideSyslogInput(el);
          }
          else {
@@ -630,7 +654,11 @@ function showViewEscResponse(originalRequest) {
 
       function onchange_who(el) {
          clearOthers();
-        $('userListDisplay').style.display= "";
+         $('escMsg').innerHTML ='';
+         $('example').style.display= 'none';
+         $('addEscButtons').style.display = "";
+
+
         var index= el.options[el.selectedIndex].value
         var idStr = el.id;
         var getId = idStr.split('_');
@@ -942,6 +970,10 @@ function showViewEscResponse(originalRequest) {
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
 
+       if (selActionTypeEsc=="NoOp" || selActionTypeEsc=="Syslog" || selActionTypeEsc=="Select"){
+           return true;
+           }else 
+
             <%--
            var separatedEmails = emailAdds.split(',');
             for (i = 0; i < separatedEmails.length; i++) {
@@ -955,8 +987,8 @@ function showViewEscResponse(originalRequest) {
                 }
             }
             --%>
-            
-            if ((selUserEsc == 'Others' && emailAdds == '')) {
+       
+            if (selUserEsc == 'Others' && emailAdds == '') {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
             $('okCheck').innerHTML = "&nbsp;";
