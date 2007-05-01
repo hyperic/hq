@@ -991,6 +991,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * Look up a list of DerivedMeasurement objects by category
+     *
+     * @ejb:interface-method
+     */
+    public List findMeasurementsByCategory(String cat)
+    {
+        return getDerivedMeasurementDAO().findByCategory(cat);
+    }
+
+    /**
      * Look up a list of derived measurement EJBs for a category
      *
      * @return a list of DerivedMeasurement value
