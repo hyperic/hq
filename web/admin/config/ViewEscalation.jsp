@@ -355,7 +355,7 @@ function showViewEscResponse(originalRequest) {
         if (selActionTypeEsc==undefined) {
            $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>'
             //$('saveButton').style.display = "none";
             return false;
@@ -365,7 +365,7 @@ function showViewEscResponse(originalRequest) {
         if (selUserEsc==undefined) {
            $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectWhoMethod"/>'
             //$('saveButton').style.display = "none";
             return false;
@@ -915,7 +915,7 @@ function showViewEscResponse(originalRequest) {
         if(metaText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
         $('metainput').focus();
         return false;
@@ -933,7 +933,7 @@ function showViewEscResponse(originalRequest) {
         if(productText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
         $('productinput').focus();
         return false;
@@ -951,7 +951,7 @@ function showViewEscResponse(originalRequest) {
         if(versionText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
         $('versioninput').focus();
          return false;
@@ -981,7 +981,7 @@ function showViewEscResponse(originalRequest) {
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
             return false;
                 }
@@ -989,16 +989,17 @@ function showViewEscResponse(originalRequest) {
             --%>
        
             if (selUserEsc == 'Others' && emailAdds == '') {
-            $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
-            //$('saveButton').style.display = "none";
+                $('example').style.display= '';
+                $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+                $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+                $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+               
+                       //$('saveButton').style.display = "none";
             return false;
             } else if (emailAdds.match(illegalChars)) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
             //$('saveButton').style.display = "none";
             return false;
@@ -1029,7 +1030,23 @@ function showViewEscResponse(originalRequest) {
         }
    }
 
-
+ function textCounter( field, countfield, maxlimit ) {
+   if ( field.value.length > maxlimit )
+   {
+     field.value = field.value.substring( 0, maxlimit );
+     $('example').style.display= '';
+     $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+     $('okCheck').innerHTML = "&nbsp;";
+     $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+    return false;
+   } else {
+     $('escMsg').innerHTML ='';
+     $('example').style.display= 'none';
+     $('addEscButtons').style.display = "";
+     return true;
+    }
+ }
+ 
 </script>
 
 <html:form action="/alerts/ConfigEscalation" method="GET">
@@ -1165,7 +1182,7 @@ function showViewEscResponse(originalRequest) {
         <tr>
           <td class="BlockLabel" valign="top"><fmt:message
             key="common.label.Description" /></td>
-          <td><textarea cols="40" rows="4" name="description" id="escDesc"></textarea>
+          <td><textarea cols="40" rows="4" name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);"></textarea>
           </td>
         </tr>
       </table>

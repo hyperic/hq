@@ -752,6 +752,23 @@ function showViewEscResponse(originalRequest) {
             $('example').style.display= 'none';
     }
 
+
+    function textCounter( field, countfield, maxlimit ) {
+       if ( field.value.length > maxlimit )
+       {
+         field.value = field.value.substring( 0, maxlimit );
+         $('example').style.display= '';
+         //$('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+        return false;
+       } else {
+         $('escMsg').innerHTML ='';
+         $('example').style.display= 'none';
+         return true;
+        }
+     }
+
+
 </script>
 
 <html:form action="/alerts/ConfigEscalation" method="GET">
@@ -804,7 +821,7 @@ function showViewEscResponse(originalRequest) {
 
 <div id="example" style="display:none;">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <td class="ErrorBlock">
+  <td class="ErrorBlock" width="9">
     <html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>
   </td>
   <td class="ErrorBlock" width="100%">
@@ -861,7 +878,7 @@ function showViewEscResponse(originalRequest) {
           <fmt:message key="common.label.Description" />
       </td>
       <td style="padding:3px;" align="left" width="80%">
-          <textarea name="description" id="escDesc"></textarea>
+          <textarea name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);"></textarea>
       </td>
     </tr>
   </tbody>
