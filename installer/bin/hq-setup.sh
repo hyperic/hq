@@ -20,9 +20,9 @@ else
     JRE_TMP=${TMPDIR}
 fi
 
-VAL=`touch /tmp/_hq > /dev/null 2>&1`
+VAL=`touch ${JRE_TMP}/_hq > /dev/null 2>&1`
 if [ "$?" = "0" ]; then
-    rm /tmp/_hq;
+    rm ${JRE_TMP}/_hq;
 else
     echo "Temporary directory $JRE_TMP is not writable."
     echo ""
