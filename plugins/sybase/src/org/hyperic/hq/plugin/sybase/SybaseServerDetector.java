@@ -323,7 +323,7 @@ public class SybaseServerDetector
                 String cacheName = rs.getString(name_col).trim().replaceAll("\\s+", "_");
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TYPE_SP_SYSMON+"Cache");
-                service.setServiceName("cachename="+cacheName);
+                service.setServiceName("Cachename="+cacheName);
                 ConfigResponse productConfig = new ConfigResponse();
                 productConfig.setValue("cachename", cacheName);
                 service.setProductConfig(productConfig);
@@ -351,7 +351,7 @@ public class SybaseServerDetector
                 String configOption = rs.getString("Name").trim();
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TYPE_SP_MONITOR_CONFIG);
-                service.setServiceName("configoption="+configOption);
+                service.setServiceName("ConfigOption="+configOption);
                 ConfigResponse productConfig = new ConfigResponse();
                 productConfig.setValue(PROP_CONFIG_OPTION, configOption);
                 service.setProductConfig(productConfig);

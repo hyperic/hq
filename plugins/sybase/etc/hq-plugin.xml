@@ -165,12 +165,12 @@
             category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"/>
-    <metric name="Percent Total Cache Misses"
+    <metric name="Total Cache Misses Ratio"
             category="THROUGHPUT"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
-    <metric name="Percent Total Cache Hits"
+    <metric name="Total Cache Hits Ratio"
             category="THROUGHPUT"
             indicator="true"
             units="percentage"
@@ -271,12 +271,12 @@
         exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
       </filter>
       <metrics>
-        <metric name="CacheHits"
+        <metric name="Cache Hits Ratio"
                 category="THROUGHPUT"
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
-        <metric name="CacheMisses"
+        <metric name="Cache Misses Ratio"
                 category="THROUGHPUT"
                 indicator="true"
                 units="percentage"
@@ -298,7 +298,7 @@
         ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
       </filter>
       <metrics>
-        <metric name="PercentActive"
+        <metric name="Resource Utilization Ratio"
                 category="UTILIZATION"
                 indicator="true"
                 units="percentage"

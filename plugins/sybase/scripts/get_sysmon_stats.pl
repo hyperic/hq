@@ -90,9 +90,9 @@ sub printNamedCacheStats
         return;
     }
     my @array = split /\s+/, $Output[$$i];
-    print "$cache_name.CacheHits=".($array[6]/100)."\n";
+    print "$cache_name.CacheHitsRatio=".($array[6]/100)."\n";
     @array = split /\s+/, $Output[$$i+=2];
-    print "$cache_name.CacheMisses=".($array[6]/100)."\n";
+    print "$cache_name.CacheMissesRatio=".($array[6]/100)."\n";
 }
 
 sub printSummaryStats
@@ -100,10 +100,10 @@ sub printSummaryStats
     my ($i) = @_;
     my $line = $Output[++$$i];
     my @array = split /\s+/, $line;
-    print "PercentTotalCacheHits=".($array[7]/100)."\n";
+    print "TotalCacheHitsRatio=".($array[7]/100)."\n";
     $line = $Output[++$$i];
     @array = split /\s+/, $line;
-    print "PercentTotalCacheMisses=".($array[7]/100)."\n";
+    print "TotalCacheMissesRatio=".($array[7]/100)."\n";
 }
 
 sub printNetworkStats
