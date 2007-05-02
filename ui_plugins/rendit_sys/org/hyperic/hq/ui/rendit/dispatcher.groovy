@@ -6,9 +6,10 @@ import org.hyperic.hq.ui.rendit.metaclass.AppdefLiveDataCategory
 import org.hyperic.hq.ui.rendit.metaclass.AppdefMetricCategory
 import org.hyperic.hq.ui.rendit.metaclass.CategoryInfo
 import org.hyperic.hq.ui.rendit.metaclass.MetricMetricCategory
+import org.hyperic.hq.ui.rendit.PluginLoadException
+import org.hyperic.hq.ui.rendit.PluginLoadInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 
-import org.codehaus.groovy.runtime.InvokerHelper
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -18,6 +19,9 @@ import org.apache.commons.logging.LogFactory
  * setting up the environment, and invoking the request.  
  */
 class Dispatcher {
+    final int API_MAJOR = 0
+    final int API_MINOR = 1
+    
     private static final CATEGORIES = [
         AppdefAppdefCategory,                               
         AppdefLiveDataCategory,
@@ -26,8 +30,6 @@ class Dispatcher {
     ]
     private Log log = LogFactory.getLog(Dispatcher.class);
 
-    private String controllerName
-    private String action
     private List   path
     private def    invokeArgs
 	
@@ -38,17 +40,32 @@ class Dispatcher {
     }
     
     def Dispatcher(invokeArgs) {
-        def req      = invokeArgs.request
-        def servPath = req.servletPath
-        def reqUri   = req.requestURI
-
-        path = reqUri[(servPath.length() + 1)..-1].split('/')
         this.invokeArgs = invokeArgs
     }
     
     def invoke() {
-        if (invokeController())
-            return
+        switch (invokeArgs.type) {
+        case 'request':
+            return invokeController()
+        case 'load':
+            return loadPlugin()
+        }
+    }
+    
+    def loadPlugin() {
+        def eng = new GroovyScriptEngine(invokeArgs.pluginDir.absolutePath)
+        def binding = new Binding()
+        def plugin  = new PluginLoadInfo()
+        binding.setVariable("plugin", plugin)
+        eng.run('init.groovy', binding)
+        
+        if (plugin.apiMajor != API_MAJOR) {
+            throw new PluginLoadException("Plugin API version " +  
+                             "${plugin.apiMajor}.${plugin.apiMinor} is " + 
+                             "incompatable with HQU API version ${API_MAJOR}" +
+                             ".${API_MINOR}")
+        }
+		return plugin
     }
     
     /**
@@ -61,10 +78,15 @@ class Dispatcher {
      * request)                  
      */
     def invokeController() {
+        def req      = invokeArgs.request
+        def servPath = req.servletPath
+        def reqUri   = req.requestURI
+        def path     = reqUri[(servPath.length() + 1)..-1].split('/')
+
         if (path.size() < 3)
             return false
         
-        controllerName = capitalize(path[1]) + "Controller"
+        def controllerName = capitalize(path[1]) + "Controller"
 
         def pluginDir = invokeArgs.pluginDir
         def appDir    = new File(pluginDir, "app")
@@ -77,7 +99,7 @@ class Dispatcher {
         def controller = Class.forName(controllerName, true, 
                                        loader).newInstance() 
 
-        action = path[2]
+        def action = path[2]
         controller.setAction(action)
         controller.setControllerName(path[1])
         controller.setPluginDir(invokeArgs.pluginDir)

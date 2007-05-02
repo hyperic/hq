@@ -1,9 +1,31 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
 package org.hyperic.hq.ui.rendit.servlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -13,10 +35,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.ui.rendit.PluginWrapper;
 import org.hyperic.hq.ui.rendit.RenditServer;
 import org.hyperic.hq.ui.rendit.servlet.DirWatcher.DirWatcherCallback;
 import org.hyperic.util.StringUtil;
+import org.jboss.system.server.ServerConfigLocator;
 
 public class RenditServlet 
     extends HttpServlet
@@ -26,24 +48,29 @@ public class RenditServlet
     private static boolean INITIALIZED;
     
     private static DirWatcher _watcher;
-    private static Thread _watcherThread;
-    
-    protected void doGet(HttpServletRequest req, HttpServletResponse response) 
+    private static Thread     _watcherThread;
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
         throws ServletException, IOException 
     {
+        handleRequest(req, resp);
+    }
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+        throws ServletException, IOException 
+    {
+        handleRequest(req, resp);
+    }
+    
+    protected void handleRequest(HttpServletRequest req, 
+                                 HttpServletResponse resp)
+        throws ServletException, IOException
+    {
         String servPath = req.getServletPath();
-        String reqUri = req.getRequestURI();
+        String reqUri   = req.getRequestURI();
         
         initPlugins();
-        
-        if (!reqUri.startsWith(servPath)) {
-            _log.warn("Request path [" + reqUri + "] does not start with " + 
-                      "servlet [" + servPath + "]");
-            return;
-        }
 
-        // XXX:  Make sure the following is sane -- needs to be escaped?  
-        // any weird attacks?
         reqUri = reqUri.substring(servPath.length());
         List path = StringUtil.explode(reqUri, "/");
         
@@ -53,10 +80,12 @@ public class RenditServlet
         
         String plugin = (String)path.get(0);
         _log.info("Request for [" + plugin + "]: " + req.getRequestURI() + 
-                  "?" + req.getQueryString());
+                  (req.getQueryString() == null ? "" 
+                                               : ("?" + req.getQueryString())));
                   
         try {
-            RenditServer.getInstance().handleRequest(plugin, req, response);
+            RenditServer.getInstance().handleRequest(plugin, req, resp,
+                                                     getServletContext());
         } catch(Exception e) {
             throw new ServletException(e);
         }
@@ -72,42 +101,29 @@ public class RenditServlet
             if (INITIALIZED)
                 return;
         
-            String home = System.getProperty("jboss.home.url");
-                
-            if (home == null) {
-                _log.info("Can't find JBOSS Home");
-                return;
-            }
-            
-            URL url;
-            try {
-                url = new URL(home);
-            } catch (MalformedURLException e) {
-                _log.error("Malformed jboss.home.url=" + home);
-                return;
-            }
-            
-            File homeDir = new File(url.getFile());
-            
-            // XXX:  Hardcoded sysdir for now
-            String sysPath = System.getProperty("jboss.server.home.dir") +
-                    "/deploy/hq.ear/rendit_sys";
-            File sysDir = new File(sysPath);
+            File homeDir   = ServerConfigLocator.locate().getServerHomeDir();
+            File deployDir = new File(homeDir, "deploy");
+            File earDir    = new File(deployDir, "hq.ear");
+            File warDir    = new File(earDir, "hq.war");
+            File pluginDir = new File(warDir, "hqu");
+            File sysDir    = new File(earDir, "rendit_sys");
             RenditServer.getInstance().setSysDir(sysDir);
 
+            _log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
             _log.info("Watching for HQU plugins in [" + 
-                      homeDir.getAbsolutePath() + "]");
-            _watcher = new DirWatcher(homeDir, new DirWatcherCallback() {
+                      pluginDir.getAbsolutePath() + "]");
+            _watcher = new DirWatcher(pluginDir, new DirWatcherCallback() {
                 public void fileAdded(File f) {
-                    if (PluginWrapper.isValidPlugin(f)) {
-                        RenditServer.getInstance().addPluginDir(f.getName(), f);
+                    try {
+                        RenditServer.getInstance().addPluginDir(f);
+                    } catch(Exception e) {
+                        _log.warn("Unable to add plugin in [" + 
+                                  f.getAbsolutePath() + "]", e);
                     }
                 }
 
                 public void fileRemoved(File f) {
-                    if (PluginWrapper.isValidPlugin(f)) {
-                        RenditServer.getInstance().removePluginDir(f.getName());
-                    }
+                    RenditServer.getInstance().removePluginDir(f.getName());
                 }
             });
             

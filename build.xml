@@ -442,14 +442,16 @@
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
-  <target name="rendit-deploy" depends="init">
+  <target name="hqu-deploy" depends="init">
   	<!-- Just a quick way to copy rendit_sys into JBoss -->
     <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
        <fileset dir="${rendit_sys.dir}"/>
     </copy>
-    <copy todir="${jboss.home}">
+    <mkdir dir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
+    <copy todir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu">
        <fileset dir="${basedir}/ui_plugins">
-         <include name="hqu_*/**"/>
+         <exclude name="rendit_sys"/>
+         <exclude name="old"/>
        </fileset>
     </copy>
   </target>
