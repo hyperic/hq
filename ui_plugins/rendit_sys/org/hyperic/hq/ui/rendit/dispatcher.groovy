@@ -61,7 +61,8 @@ class Dispatcher {
      */
     def invokeRequest() {
         def dispatcher = new DefaultControllerDispatcher()
-
+        def pluginInfo = loadPlugin()
+		
         return dispatcher.invoke(invokeArgs)
      }
 }
