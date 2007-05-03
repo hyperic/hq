@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.agent.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -69,6 +68,7 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
@@ -94,7 +94,9 @@ public class MeasurementCommandsServer
 
     private MeasurementCommandsAPI   verAPI;         // Common API specifics
     private Thread                   scheduleThread; // Thread of scheduler
+    private Thread                   availThread;    // Thread for platform avail
     private ScheduleThread           scheduleObject; // Our scheduler
+    private ScheduleThread           availObject;    // Scheduler for avail
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
     private AgentStorageProvider     storage;        // Agent storage
@@ -113,7 +115,9 @@ public class MeasurementCommandsServer
     public MeasurementCommandsServer(){
         this.verAPI         = new MeasurementCommandsAPI();
         this.scheduleThread = null;
+        this.availThread    = null;
         this.scheduleObject = null;
+        this.availObject    = null;
         this.senderThread   = null;
         this.senderObject   = null;
         this.storage        = null;
@@ -143,6 +147,9 @@ public class MeasurementCommandsServer
         this.scheduleObject = new ScheduleThread(this.senderObject, 
                                                  this.pluginManager);
 
+        this.availObject = new ScheduleThread(this.senderObject,
+                                              this.pluginManager);
+
         this.trackerObject =
             new TrackerThread(this.ctPluginManager,
                               this.ltPluginManager,
@@ -153,11 +160,14 @@ public class MeasurementCommandsServer
         senderThread.setDaemon(true);
         this.scheduleThread = new Thread(this.scheduleObject,"ScheduleThread");
         scheduleThread.setDaemon(true);
+        this.availThread = new Thread(this.availObject, "AvailScheduleThread");
+        availThread.setDaemon(true);
         this.trackerThread = new Thread(this.trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
 
         this.senderThread.start();
         this.scheduleThread.start();
+        this.availThread.start();
         this.trackerThread.start();
     }
 
@@ -185,7 +195,7 @@ public class MeasurementCommandsServer
         this.log.debug("Scheduling " + nMeas + " metrics for " + ent + 
                        ": new SRN = " + srn.getRevisionNumber());
         try {
-            this.scheduleObject.unscheduleMeasurements(ent);
+            unscheduleMeasurements(ent);
             this.schedStorage.deleteMeasurements(ent);
         } catch(UnscheduledItemException exc){
             // OK to ignore
@@ -210,8 +220,7 @@ public class MeasurementCommandsServer
                 this.log.debug("Failed to put measurement in storage: " + 
                                exc.getMessage());
             }
-            
-            this.scheduleObject.scheduleMeasurement(sMetric);
+            scheduleMeasurement(sMetric);
         }
 
         try {
@@ -240,7 +249,7 @@ public class MeasurementCommandsServer
 
             try {
                 try {
-                    this.scheduleObject.unscheduleMeasurements(ent);
+                    unscheduleMeasurements(ent);
                     this.schedStorage.removeSRN(ent);
                 } catch(UnscheduledItemException exc){
                     resExc    = exc;
@@ -554,8 +563,7 @@ public class MeasurementCommandsServer
         i = this.schedStorage.getMeasurementList();
         while(i.hasNext()){
             ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
-            
-            this.scheduleObject.scheduleMeasurement(meas);
+            scheduleMeasurement(meas);
         }
 
         agent.registerMonitor("camMetric.schedule", this.scheduleObject);
@@ -571,6 +579,24 @@ public class MeasurementCommandsServer
         }
 
         this.log.info("Measurement Commands Server started up");
+    }
+
+    private void scheduleMeasurement(ScheduledMeasurement m) {
+        // Temporary workaround for delayed availability measurements for
+        // platforms.  Collect them in their own thread.
+        if (m.getEntity().isPlatform() &&
+            m.getDSN().endsWith("system.avail:Type=Platform:Availability")) {
+            this.availObject.scheduleMeasurement(m);
+        } else {
+            this.scheduleObject.scheduleMeasurement(m);
+        }
+    }
+
+    private void unscheduleMeasurements(AppdefEntityID id)
+        throws UnscheduledItemException
+    {
+        this.scheduleObject.unscheduleMeasurements(id);
+        this.availObject.unscheduleMeasurements(id);
     }
 
     public void handleNotification(String msgClass, String msg){
@@ -607,11 +633,13 @@ public class MeasurementCommandsServer
     public void shutdown(){
         this.log.info("Measurement Commands Server shutting down");
         this.scheduleObject.die();
+        this.availObject.die();
         this.senderObject.die();
 
         try {
             this.interruptThread(this.senderThread);
             this.interruptThread(this.scheduleThread);
+            this.interruptThread(this.availThread);
         } catch(InterruptedException exc){
             // Someone wants us to die badly .... ok 
             this.log.warn("shutdown interrupted");
