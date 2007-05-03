@@ -417,6 +417,7 @@ function showViewEscResponse(originalRequest) {
     function updateEscView( originalRequest ) {
         $('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
         $('example').style.display= '';
+        $('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
         $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
         setTimeout( "requestViewEscalation()", 1200 );
@@ -1018,7 +1019,7 @@ function showViewEscResponse(originalRequest) {
         if((selActionTypeEsc == 'SMS') && selUserEsc == undefined) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             //$('saveButton').style.display = "none";
             return false;
@@ -1036,7 +1037,7 @@ function showViewEscResponse(originalRequest) {
      field.value = field.value.substring( 0, maxlimit );
      $('example').style.display= '';
      $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-     $('okCheck').innerHTML = "&nbsp;";
+     $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
      $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
     return false;
    } else {
@@ -1046,7 +1047,7 @@ function showViewEscResponse(originalRequest) {
      return true;
     }
  }
- 
+
 </script>
 
 <html:form action="/alerts/ConfigEscalation" method="GET">
@@ -1077,8 +1078,7 @@ function showViewEscResponse(originalRequest) {
 <div id="example" style="display:none;" class="ConfirmationBlock">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td style="padding-right:5px;" id="okCheck"><html:img
-      page="/images/tt_check.gif" height="9" width="9" border="0" alt="" /></td>
+    <td style="padding-right:5px;" id="okCheck"><html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" /></td>
     <td width="100%">
     <div id="escMsg"></div>
     </td>
