@@ -207,7 +207,7 @@ public class ListAlertAction extends TilesAction {
             precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
 
             // convert() can't handle Double.NaN -- just display ?? for the value
-            if ( value == null ) {
+            if ( value == null || value.length() == 0 ) {
                 bean.setValue(Constants.UNKNOWN);
             } else {
                 double dval =
