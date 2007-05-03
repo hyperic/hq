@@ -115,7 +115,7 @@ function showEscRows(originalRequest) {
 
 
     var td2 = document.createElement("td");
-    td2.setAttribute('title', 'click scheme name to edit')
+    td2.setAttribute('title', '<fmt:message key="admin.config.message.ClickEscNameEdit"/>')
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
       td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name + '</b>';
       td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
@@ -133,6 +133,8 @@ function showEscRows(originalRequest) {
 
     if (schemes.length > 1) {
       td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + $('deleteBtn').innerHTML + '</a>';
+    } else {
+        td3.innerHTML="&nbsp;";
     }
 
     if (schemes[i].id == '<c:out value="${param.escId}"/>') {
