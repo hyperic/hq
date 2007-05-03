@@ -569,37 +569,40 @@ public class DefinitionForm extends ResourceForm  {
         // depending on which frequency type we're using.  If we're
         // using FREQ_COUNTER, EventsBoss expects at least 1 for the
         // count.
-        long count = 1;
-        try {
-            if (this.getWhenEnabled() == EventConstants.FREQ_DURATION) {
-                count = AlertDefUtil.getSecondsConsideringUnits
-                    ( getMeetTimeTP().longValue(), getMeetTimeUnitsTP() );
-            } else if (this.getWhenEnabled() == EventConstants.FREQ_COUNTER) {
-                count = getNumTimesNT().intValue();
+        if (getWhenEnabled() != EventConstants.FREQ_EVERYTIME) {
+            long count = 1;
+            try {
+                if (this.getWhenEnabled() == EventConstants.FREQ_DURATION) {
+                    count = AlertDefUtil.getSecondsConsideringUnits
+                        ( getMeetTimeTP().longValue(), getMeetTimeUnitsTP() );
+                } else if (this.getWhenEnabled() == EventConstants.FREQ_COUNTER)
+                {
+                    count = getNumTimesNT().intValue();
+                }
+            } catch (NumberFormatException e) {
+                // Use default value of 1
             }
-        } catch (NumberFormatException e) {
-            // Use default value of 1
-        }
-        
-        if (count <= 0) {
-            count = 1; // must be at least 1
-        }
-        adv.setCount(count);
-
-        // EventsBoss expects range in seconds
-        long numSeconds = 1;
-        try {
-            if (this.getHowLong() != null) {
-                numSeconds = AlertDefUtil.getSecondsConsideringUnits
-                    ( getHowLong().longValue(), getHowLongUnits() );
+            
+            if (count <= 0) {
+                count = 1; // must be at least 1
             }
-        } catch (NumberFormatException e) {
-            // Use default value of 1
+            adv.setCount(count);
+    
+            // EventsBoss expects range in seconds
+            long numSeconds = 1;
+            try {
+                if (this.getHowLong() != null) {
+                    numSeconds = AlertDefUtil.getSecondsConsideringUnits
+                        ( getHowLong().longValue(), getHowLongUnits() );
+                }
+            } catch (NumberFormatException e) {
+                // Use default value of 1
+            }
+            if (numSeconds <= 0)
+                numSeconds = 1;
+            
+            adv.setRange(numSeconds);
         }
-        if (numSeconds <= 0)
-            numSeconds = 1;
-        
-        adv.setRange(numSeconds);
     }
 
     public void resetConditions() {
