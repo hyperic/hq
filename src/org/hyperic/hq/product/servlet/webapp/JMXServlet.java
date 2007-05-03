@@ -265,6 +265,11 @@ public final class JMXServlet extends HttpServlet {
                 continue;
             }
 
+            // we don't want to risk opening a dbconnection
+            // which won't get closed (i.e. Tomcat) :@(
+            if (oname.getKeyProperty("type").equals("DataSource"))
+                continue;
+
             String name = oname.toString();
 
             // ERS Tomcat uses Standalone: rather than Catalina: prefix for some 
