@@ -25,16 +25,16 @@
 
 package org.hyperic.util.shell;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.hyperic.util.PrintfFormat;
 
 public class MultiwordShellCommand extends ShellCommandBase {
 
-    private Map itsSubHandlerMap = new HashMap();
+    private Map itsSubHandlerMap = new TreeMap();
 
     public ShellCommandHandler getSubHandler ( String subName ) {
         return (ShellCommandHandler) itsSubHandlerMap.get(subName);
