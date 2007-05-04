@@ -1221,5 +1221,18 @@ public class ClientShellEntityFetcher {
 
         return boss.getConfigSchema(auth.getAuthToken(), id, command);
     }
+
+    public void clearCaches() 
+        throws RemoteException, NamingException,
+               ClientShellAuthenticationException, PluginException,
+               PermissionException, SessionTimeoutException, 
+               SessionNotFoundException
+    {
+        ProductBoss boss;
+
+        boss = this.bossManager.getProductBoss();
+
+        boss.clearCaches(auth.getAuthToken());
+    }
 }
 

@@ -35,6 +35,8 @@ import java.util.Map;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
@@ -475,6 +477,16 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         }
     }
      
+    /**
+     * Clear out all the caches
+     * @ejb:interface-method
+     */
+    public void clearCaches(int sessionId) {
+        CacheManager cacheManager = CacheManager.getInstance();
+        
+        cacheManager.clearAll();
+    }
+    
     public static ProductBossLocal getOne() {
         try {
             return ProductBossUtil.getLocalHome().create();
