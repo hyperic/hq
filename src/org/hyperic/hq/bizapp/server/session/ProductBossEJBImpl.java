@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +37,8 @@ import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -47,14 +52,17 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.ProductBossLocal;
+import org.hyperic.hq.bizapp.shared.ProductBossUtil;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.file.FileUtil;
 
 /**
  * The Product Boss
@@ -70,7 +78,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 {
     private Log log = LogFactory.getLog(ProductBossEJBImpl.class.getName());
 
-    // Session manager
     private SessionManager sessionManager = SessionManager.getInstance();
 
     public void ejbCreate() {}
@@ -414,5 +421,65 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         String comment = ProductProperties.getComment();
 
         return "(build #" + build + " - " + buildDate + " - " + comment + ")";
+    }
+    
+    /**
+     * Preload the 2nd level caches
+     * @ejb:interface-method
+     */
+    public void preload(){
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream is = 
+            loader.getResourceAsStream("META-INF/preload_caches.txt"); 
+        List lines;
+            
+        try {
+            lines = FileUtil.readLines(is);
+        } catch(IOException e) {
+            log.warn("Unable to preload.  IO exception reading " + 
+                     "preload_caches.txt", e);
+            return;
+        } finally {
+            try { is.close(); } catch(Exception e) {}
+        }
+            
+        Session s = Util.getSessionFactory().getCurrentSession();
+        for (Iterator i=lines.iterator(); i.hasNext(); ) {
+            String className = (String)i.next();
+            long start, end;
+            Collection vals;
+            Class c;
+            
+            className = className.trim();
+            if (className.length() == 0 || className.startsWith("#"))
+                continue;
+            
+            try {
+                c = Class.forName(className);
+            } catch(Exception e) {
+                log.warn("Unable to find preload cache for class [" + 
+                         className + "]", e);
+                continue;
+            }
+            
+            start = System.currentTimeMillis();
+            vals  = s.createCriteria(c).list();
+            end   = System.currentTimeMillis();
+            log.info("Preloaded " + vals.size()+ " [" + c.getName() + 
+                     "] in " + (end - start) + " millis");
+            
+            // Evict, to avoid dirty checking everything in the inventory
+            for (Iterator j=vals.iterator(); j.hasNext(); ) {
+                s.evict(j.next());
+            }
+        }
+    }
+     
+    public static ProductBossLocal getOne() {
+        try {
+            return ProductBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 }
