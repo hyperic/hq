@@ -118,7 +118,7 @@ public class PrepareAction extends BaseAction {
         pForm.setServiceTypes(serviceTypes);
 
         AppdefInventorySummary summary = appdefBoss.getInventorySummary( 
-                                            user.getSessionId().intValue() );
+                                            user.getSessionId().intValue(), true );
 
         request.setAttribute("summary", summary);
 

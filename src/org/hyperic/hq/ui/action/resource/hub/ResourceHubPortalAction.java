@@ -380,7 +380,7 @@ public class ResourceHubPortalAction extends BaseAction {
         // retrieve inventory summary
         watch.markTimeBegin("getInventorySummary");
         AppdefInventorySummary summary =
-            appdefBoss.getInventorySummary(sessionId);
+            appdefBoss.getInventorySummary(sessionId, false);
         request.setAttribute(Constants.RESOURCE_SUMMARY_ATTR, summary);
         watch.markTimeEnd("getInventorySummary");
 

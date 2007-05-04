@@ -69,24 +69,27 @@ public class AppdefInventorySummary implements java.io.Serializable {
     private Map serverTypeMap      = null;
     private Map serviceTypeMap     = null;
     private Map appTypeMap         = null;
-    private Map compatGrpCountMap  = null;
     private List platformTypes     = null;
     private List serverTypes       = null;
     private List serviceTypes      = null;
-
+    
     public AppdefInventorySummary(AuthzSubjectValue user) {
+        this(user, true);
+    }
+
+    public AppdefInventorySummary(AuthzSubjectValue user, boolean countTypes) {
         this.user = user;
-        init();
+        init(countTypes);
     }
 
     /**
      * Populate the summary
      */
-    private void init() {
-        getPlatformSummary();
-        getServerSummary();
-        getServiceSummary();
-        getAppSummary();
+    private void init(boolean countTypes) {
+        getPlatformSummary(countTypes);
+        getServerSummary(countTypes);
+        getServiceSummary(countTypes);
+        getAppSummary(countTypes);
         getGroupSummary();
     }
 
@@ -198,35 +201,51 @@ public class AppdefInventorySummary implements java.io.Serializable {
         return appTypeMap;
     }
     
-    private void getPlatformSummary() {
-        platformTypeMap = getAppdefStatManager()
-            .getPlatformCountsByTypeMap(this.user);
-        if (platformTypeMap != null) {
-            platformCount = countMapTotals(platformTypeMap);
+    private void getPlatformSummary(boolean countTypes) {
+        if (countTypes) {
+            platformTypeMap = getAppdefStatManager()
+                .getPlatformCountsByTypeMap(user);
+            if (platformTypeMap != null) {
+                platformCount = countMapTotals(platformTypeMap);
+            }
+        } else {
+            platformCount = getAppdefStatManager().getPlatformsCount(user);
         }
     }
 
-    private void getServerSummary() {
-        serverTypeMap = getAppdefStatManager()
-            .getServerCountsByTypeMap(this.user);
-        if (serverTypeMap != null) {
-            serverCount = countMapTotals(serverTypeMap);
+    private void getServerSummary(boolean countTypes) {
+        if (countTypes) {
+            serverTypeMap = getAppdefStatManager()
+                .getServerCountsByTypeMap(this.user);
+            if (serverTypeMap != null) {
+                serverCount = countMapTotals(serverTypeMap);
+            }
+        } else {
+            serverCount = getAppdefStatManager().getServersCount(user);
         }
     }
 
-    private void getServiceSummary() {
-        serviceTypeMap = getAppdefStatManager()
-            .getServiceCountsByTypeMap(this.user);
-        if (serviceTypeMap != null) {
-            serviceCount = countMapTotals(serviceTypeMap);
+    private void getServiceSummary(boolean countTypes) {
+        if (countTypes) {
+            serviceTypeMap = getAppdefStatManager()
+                .getServiceCountsByTypeMap(this.user);
+            if (serviceTypeMap != null) {
+                serviceCount = countMapTotals(serviceTypeMap);
+            }
+        } else {
+            serviceCount = getAppdefStatManager().getServicesCount(user);
         }
     }
 
-    private void getAppSummary() {
-        appTypeMap = getAppdefStatManager()
-            .getApplicationCountsByTypeMap(this.user);
-        if (appTypeMap != null) {
-            appCount = countMapTotals(appTypeMap);
+    private void getAppSummary(boolean countTypes) {
+        if (countTypes) {
+            appTypeMap = getAppdefStatManager()
+                .getApplicationCountsByTypeMap(this.user);
+            if (appTypeMap != null) {
+                appCount = countMapTotals(appTypeMap);
+            }
+        } else {
+            appCount = getAppdefStatManager().getApplicationsCount(user);
         }
     }
 
