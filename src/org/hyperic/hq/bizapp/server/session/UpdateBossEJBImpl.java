@@ -314,12 +314,17 @@ public class UpdateBossEJBImpl
      
     private static class UpdateFetcher implements Runnable {
         public void run() {
+            long interval = getCheckInterval();
             while(true) {
                 try {
                     UpdateBossEJBImpl.getOne().fetchReport();
-                    Thread.sleep(getCheckInterval());
                 } catch(Exception e) {
                     _log.warn("Error getting update notification", e);
+                }
+                try {
+                    Thread.sleep(interval);
+                } catch(InterruptedException e) {
+                    return;
                 }
             }
         }
