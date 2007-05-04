@@ -32,6 +32,9 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -126,9 +129,10 @@ public class AppdefEntityValue {
         }
     }
 
-    private PlatformTypeValue getPlatformType()
-        throws AppdefEntityNotFoundException, PermissionException {
-        return ((PlatformValue) getPlatform(true)).getPlatformType();
+    private PlatformType getPlatformType()
+        throws AppdefEntityNotFoundException {
+        return getPlatformManager()
+            .findPlatformById(_id.getId()).getPlatformType();
     }
 
     private AppdefResourceValue getPlatform(boolean full)
@@ -177,9 +181,9 @@ public class AppdefEntityValue {
         return serverManagerLocal;
     }
 
-    private ServerTypeValue getServerType()
-        throws AppdefEntityNotFoundException, PermissionException {
-        return ((ServerValue) getServer(true)).getServerType();
+    private ServerType getServerType()
+        throws AppdefEntityNotFoundException {
+        return getServerManager().getServerById(_id.getId()).getServerType();
     }
 
     private AppdefResourceValue getServer(boolean full)
@@ -213,9 +217,9 @@ public class AppdefEntityValue {
         }
     }
 
-    private ServiceTypeValue getServiceType()
-        throws AppdefEntityNotFoundException, PermissionException {
-        return ((ServiceValue) getService(true)).getServiceType();
+    private ServiceType getServiceType()
+        throws AppdefEntityNotFoundException {
+        return getServiceManager().getServiceById(_id.getId()).getServiceType();
     }
 
     private AppdefResourceValue getService(boolean full)
