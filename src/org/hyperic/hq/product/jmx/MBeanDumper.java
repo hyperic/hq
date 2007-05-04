@@ -25,47 +25,91 @@
 
 package org.hyperic.hq.product.jmx;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Properties;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class MBeanDumper {
 
-    public static void main(String[] args) throws Exception {
-        String serviceUrl;
-        if (args.length == 0) {
-            serviceUrl =
-                "service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi";
-        }
-        else {
-            serviceUrl = args[0];
-        }
-        Map map = new HashMap();
+    private static Log log = LogFactory.getLog(MBeanDumper.class);
 
+    private static final String DEFAULT_URL =
+        "service:jmx:rmi://localhost/jndi/rmi://localhost:1099/jmxrmi";
+
+    private static boolean isValidObjectName(String name) {
+        try {
+            new ObjectName(name);
+            return true;
+        } catch (MalformedObjectNameException e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidURL(String url) {
+        if (url.startsWith(MxUtil.PTQL_PREFIX)) {
+            return true;
+        }
+        try {
+            new JMXServiceURL(url);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        String url = DEFAULT_URL;
+        String query = "*:*";
+
+        for (int i=0; i<args.length; i++) {
+            String arg = args[i];
+            if (isValidURL(arg)) {
+                url = arg;
+            }
+            else if (isValidObjectName(arg)) {
+                query = arg;
+            }
+            else {
+                System.err.println("Invalid argument: " + arg);
+                return;
+            }
+        }
+
+        Properties config = new Properties();
+        config.putAll(System.getProperties());
+
+        if (config.getProperty(MxUtil.PROP_JMX_URL) == null) {
+            config.setProperty(MxUtil.PROP_JMX_URL, url);
+        }
+
+        //compat
         String user = System.getProperty("user");
         String pass = System.getProperty("pass");
-        if ((user != null) && (pass != null)) {
-            map.put("jmx.remote.credentials",
-                    new String[] {user, pass});
+        if (user != null) {
+            config.setProperty(MxUtil.PROP_JMX_USERNAME, user);
+        }
+        if (pass != null) {
+            config.setProperty(MxUtil.PROP_JMX_PASSWORD, pass);
         }
 
-        JMXServiceURL url = new JMXServiceURL(serviceUrl);
-        JMXConnector connector = JMXConnectorFactory.connect(url, map);
-        MBeanServerConnection mServer = connector.getMBeanServerConnection();
+        MBeanServerConnection mServer = MxUtil.getMBeanServer(config);
+        ObjectName qName = new ObjectName(query);
 
-        Iterator iter = mServer.queryNames(null, null).iterator();
+        Iterator iter = mServer.queryNames(qName, null).iterator();
 
         while (iter.hasNext()) {
             ObjectName obj = (ObjectName)iter.next();
@@ -92,7 +136,9 @@ public class MBeanDumper {
                         }
                     } catch (Exception e) {
                         value = "ERROR";
-                        e.printStackTrace();
+                        if (log.isDebugEnabled()) {
+                            e.printStackTrace();
+                        }
                     }
                     String perms = "";
                     if (attrs[k].isReadable()) {
@@ -119,7 +165,9 @@ public class MBeanDumper {
                                        ops[i].getName() + " " + sig);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                if (log.isDebugEnabled()) {
+                    e.printStackTrace();
+                }
             }
 
             System.out.println("");
