@@ -37,6 +37,9 @@
   <property name="template-config"
             value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
 
+  <filter name="sysmon_script"
+          value="pdk/work/scripts/sybase/get_sysmon_stats.pl"/>
+
   <filter name="template"
           value="${domain}:Type=Server:${alias}"/>
   <metrics name="ServerMetrics">
@@ -135,8 +138,16 @@
   </metrics>
 
   <filter name="template">
-    exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
+    exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
   </filter>
+  <metrics name="SybaseAvailability">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"/>
+  </metrics>
+
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -154,12 +165,12 @@
             category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"/>
-    <metric name="Percent Total Cache Misses"
+    <metric name="Total Cache Misses Ratio"
             category="THROUGHPUT"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
-    <metric name="Percent Total Cache Hits"
+    <metric name="Total Cache Hits Ratio"
             category="THROUGHPUT"
             indicator="true"
             units="percentage"
@@ -172,6 +183,7 @@
             class="SybaseMeasurementPlugin"/>
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
+    <metrics include="SybaseAvailability"/>
     <metrics include="ServerMetrics"/>
     <metrics include="sp_sysmon"/>
 
@@ -185,21 +197,15 @@
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
-      <option name="script"
-              description="sp_sysmon output script"
-              default="pdk/scripts/get_sysmon_stats.pl"/>
-<!--
-              default="/opt/sybase-12.5/sa_admin/bin/sp_sysmon.pl"/>
--->
+      <option name="serverName"
+              description="Sybase Server Name"
+              default="LOCALHOST"/>
       <option name="interval"
               description="sp_sysmon interval"
               default="00:05:00"/>
       <option name="timeout"
               description="Timeout for sp_sysmon, must be greater than the interval"
               default="3500"/>
-<!--
-!!!NEED TO ADD SYBASE VARS!!!
--->
     </config>
 
     <service name="sp_sysmonEngine">
@@ -207,8 +213,9 @@
         <option name="engine"
                 description="Sybase Engine Stats"/>
       </config>
+      <metrics include="SybaseAvailability"/>
       <filter name="template">
-        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
+        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
       </filter>
       <metrics>
         <metric name="Engine Utilization"
@@ -232,6 +239,7 @@
         <option name="pagesize"
                 description="Sybase Server Pagesize"/>
       </config>
+      <metrics include="SybaseAvailability"/>
       <filter name="template">
         ${domain}:Type=storage,database=%database%,segment=%segment%,pagesize=%pagesize%:${alias}
       </filter>
@@ -258,19 +266,17 @@
         <option name="cachename"
                 description="Name of Cache"/>
       </config>
+      <metrics include="SybaseAvailability"/>
       <filter name="template">
-        exec:timeout=%timeout%,file=%script%,args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
+        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
       </filter>
-<!--
-        exec:timeout=%timeout%,file=%script%,args=-i %interval%:%cachename%.${alias}
--->
       <metrics>
-        <metric name="CacheHits"
+        <metric name="Cache Hits Ratio"
                 category="THROUGHPUT"
                 indicator="true"
                 units="percentage"
                 collectionType="dynamic"/>
-        <metric name="CacheMisses"
+        <metric name="Cache Misses Ratio"
                 category="THROUGHPUT"
                 indicator="true"
                 units="percentage"
@@ -287,11 +293,12 @@
         <option name="configoption"
                 description="Config Option"/>
       </config>
+      <metrics include="SybaseAvailability"/>
       <filter name="template">
         ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
       </filter>
       <metrics>
-        <metric name="PercentActive"
+        <metric name="Resource Utilization Ratio"
                 category="UTILIZATION"
                 indicator="true"
                 units="percentage"
