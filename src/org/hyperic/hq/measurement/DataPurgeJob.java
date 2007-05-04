@@ -51,7 +51,7 @@ import org.quartz.JobExecutionException;
 public class DataPurgeJob implements Job {
 
     private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
-
+    private static final Object RUNNING_LOCK = new Object();
     private static boolean running = false;
 
     private static long HOUR = 60 * 60 * 1000;
@@ -98,11 +98,13 @@ public class DataPurgeJob implements Job {
             DataCompressUtil.getLocalHome().create();
 
         // First check if we are already running
-        if (running) {
-            _log.info("Not starting data compression. (Already running)");
-            return;
-        } else {
-            running = true;
+        synchronized (RUNNING_LOCK) {
+            if (running) {
+                _log.info("Not starting data compression. (Already running)");
+                return;
+            } else {
+                running = true;
+            }
         }
 
         // Announce
@@ -115,7 +117,9 @@ public class DataPurgeJob implements Job {
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
         } finally {
-            running = false;
+            synchronized (RUNNING_LOCK) {
+                running = false;
+            }
         }
         
         long time_end = System.currentTimeMillis();
