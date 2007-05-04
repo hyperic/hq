@@ -213,7 +213,7 @@ function showViewEscResponse() {
               </c:forEach>
           }
           
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + roleNames + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/>: " + roleNames + "<br>";
       }
   
       escTr2.appendChild(td3);

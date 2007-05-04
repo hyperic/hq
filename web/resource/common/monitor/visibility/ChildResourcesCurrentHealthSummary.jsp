@@ -71,14 +71,14 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
      <c:url var="stoplightUrl" value="/resource/AvailStoplight">
        <c:param name="rid" value="${summary.entityId.ID}" />
        <c:param name="type" value="${summary.entityId.type}" />
-       <c:param name="ctype" value="${summary.resourceType.appdefTypeId}:${summary.resourceType.id}" />
+       <c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
      </c:url>
       </c:when>
       <c:otherwise>
      <c:url var="stoplightUrl" value="/resource/AvailStoplight">
        <c:param name="rid" value="${Resource.id}" />
        <c:param name="type" value="${Resource.entityId.type}" />
-       <c:param name="ctype" value="${summary.resourceType.appdefTypeId}:${summary.resourceType.id}" />
+       <c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
      </c:url>
       </c:otherwise>
     </c:choose>

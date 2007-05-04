@@ -48,10 +48,10 @@ chbtWidgetProps['subGroup'] = 'chbtListMember';
 <hq:constant classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" symbol="APPDEF_TYPE_SERVICE" var="SERVICE_TYPE"/>
 
 <c:choose>
-  <c:when test="${not empty ChildResourceType && ChildResourceType.appdefTypeId == SERVER_TYPE}">
+  <c:when test="${not empty ChildResourceType && ChildResourceType.appdefType == SERVER_TYPE}">
     <fmt:message var="ChildTH" key="resource.common.monitor.visibility.ServerTH"/>
   </c:when>
-  <c:when test="${not empty ChildResourceType && ChildResourceType.appdefTypeId == SERVICE_TYPE}">
+  <c:when test="${not empty ChildResourceType && ChildResourceType.appdefType == SERVICE_TYPE}">
     <fmt:message var="ChildTH" key="resource.common.monitor.visibility.ServiceTH"/>
   </c:when>
   <c:when test="${not empty memberTypeLabel}">

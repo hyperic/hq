@@ -46,7 +46,7 @@
 <html:hidden property="type" value="${Resource.entityId.type}"/>
   </c:when>
   <c:otherwise>
-<html:hidden property="type" value="${ResourceType.appdefTypeId}"/>
+<html:hidden property="type" value="${ResourceType.appdefType}"/>
 <html:hidden property="resourceType" value="${ResourceType.id}"/>
   </c:otherwise>
 </c:choose>

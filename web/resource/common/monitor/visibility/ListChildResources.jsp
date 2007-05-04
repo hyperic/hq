@@ -79,12 +79,12 @@
     <c:choose>
       <c:when test="${summary.summaryType == CLUSTER}">
         <c:param name="eid" value="${summary.entityId.appdefKey}" />
-        <c:param name="ctype" value="${summary.resourceType.appdefTypeId}:${summary.resourceType.id}" />
+        <c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
       </c:when>
       <c:otherwise>
         <c:param name="rid" value="${Resource.id}" />
         <c:param name="type" value="${Resource.entityId.type}" />
-        <c:param name="ctype" value="${summary.resourceType.appdefTypeId}:${summary.resourceType.id}" />
+        <c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
       </c:otherwise>
     </c:choose>
   </c:url>

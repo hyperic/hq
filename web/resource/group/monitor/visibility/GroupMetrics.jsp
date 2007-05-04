@@ -84,7 +84,7 @@
 <html:hidden property="type"/>
 <html:hidden name="Resource" property="name"/>
 <html:hidden property="ctype" value="${Resource.groupEntType}:${Resource.groupEntResType}" />
-<html:hidden property="appdefTypeId" value="${Resource.groupEntType}" />
+<html:hidden property="appdefType" value="${Resource.groupEntType}" />
 </html:form>
     </td>
   </tr>
