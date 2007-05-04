@@ -533,7 +533,7 @@
     <metric name="Disk Usage"
             template="sigar:Type=DirUsage,Arg=%path%:DiskUsage"
             category="UTILIZATION"
-            units="KB"
+            units="B"
             collectionType="dynamic"/>
   </metrics>
 
