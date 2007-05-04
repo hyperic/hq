@@ -98,4 +98,8 @@ public class GroupTypeValue extends AppdefResourceTypeValue
 	  return(str.toString());
    }
 
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_GROUP;
+    }
+
 }

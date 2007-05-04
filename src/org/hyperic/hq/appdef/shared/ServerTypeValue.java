@@ -354,4 +354,8 @@ public class ServerTypeValue
 	  return result;
    }
 
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+    }
+
 }

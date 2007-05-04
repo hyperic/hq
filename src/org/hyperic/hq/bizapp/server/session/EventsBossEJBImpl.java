@@ -624,7 +624,7 @@ public class EventsBossEJBImpl
         
         // Find the alert definitions for the type
         AppdefEntityTypeID aetid =
-            new AppdefEntityTypeID(type.getAppdefTypeId(), type.getId());
+            new AppdefEntityTypeID(type.getAppdefType(), type.getId());
         List defs = getADM().findAlertDefinitions(subject,
             aetid, EventConstants.TYPE_ALERT_DEF_ID, PageControl.PAGE_ALL);
         

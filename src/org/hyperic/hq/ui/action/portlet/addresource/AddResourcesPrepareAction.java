@@ -285,7 +285,7 @@ public class AddResourcesPrepareAction extends Action {
             AppdefResourceTypeValue rVal = aVal.getAppdefResourceTypeValue();
             if (rVal == null)
                 continue;
-            int id = rVal.getAppdefTypeId();
+            int id = rVal.getAppdefType();
             if (id == filterType.intValue())
                 resources.add(aVal);
         }

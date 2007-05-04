@@ -331,4 +331,8 @@ public class PlatformTypeValue
 	  return result;
    }
 
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+    }
+
 }

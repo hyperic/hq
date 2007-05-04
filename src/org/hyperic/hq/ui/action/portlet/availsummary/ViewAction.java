@@ -219,7 +219,7 @@ public class ViewAction extends BaseAction {
         }
 
         public int getAppdefType() {
-            return _type.getAppdefTypeId();
+            return _type.getAppdefType();
         }
 
         public Integer getAppdefTypeId() {

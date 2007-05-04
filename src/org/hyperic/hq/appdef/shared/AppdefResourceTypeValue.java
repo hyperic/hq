@@ -91,39 +91,11 @@ public abstract class AppdefResourceTypeValue {
      * @return a string based id
      */
     public String getAppdefTypeKey(){
-        return this.getAppdefTypeId() + ":" + this.getId();
+        return getAppdefType() + ":" + getId();
     }
 
-    /** This method determines the appdef type based on an instanceof
-     *  comparison of the class that extends us.
-     * 
-     * Note: This design uncovers the evil of xdoclet and its limitations.
-     * Even super classes of lowly value objects should never have to
-     * have knowledge of its descendents!
-     * 
+    /** 
      * @return appdef int value designator of entity type.
-     * @throws InvalidAppdefTypeException
      */
-    public int getAppdefTypeId () throws InvalidAppdefTypeException {
-        if (this instanceof
-               org.hyperic.hq.appdef.shared.PlatformTypeValue)
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        else if (this instanceof
-               org.hyperic.hq.appdef.shared.ServerTypeValue)
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        else if (this instanceof 
-               org.hyperic.hq.appdef.shared.ServiceTypeValue)
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        else if (this instanceof
-               org.hyperic.hq.appdef.shared.ApplicationTypeValue)
-           return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        else if (this instanceof
-               org.hyperic.hq.appdef.shared.GroupTypeValue)
-            return AppdefEntityConstants.APPDEF_TYPE_GROUP;
-        else
-            throw new
-              InvalidAppdefTypeException("No appdef entity constant "+
-                                         "defined for this class.");
-    }
-
+    public abstract int getAppdefType();
 }

@@ -76,7 +76,7 @@ public class ClientShell_resourcetype_key_delete
         key      = (String)parseRes.getValue(BLOCK_KEY);
         
         try {
-            this.getEntityFetcher().deleteCPropKey(resource.getAppdefTypeId(),
+            this.getEntityFetcher().deleteCPropKey(resource.getAppdefType(),
                                                    resource.getId().intValue(),
                                                    key);
         } catch(CPropKeyNotFoundException exc){

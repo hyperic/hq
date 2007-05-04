@@ -72,8 +72,8 @@ public class AppdefGroupPagerFilterResource implements AppdefPagerFilter {
     protected boolean resourceTypeMatches ( AppdefGroupValue groupVo ) {
       boolean retVal = false;
       try {
-        if ( groupVo.getAppdefResourceTypeValue().getAppdefTypeId() ==
-             entityResType.getAppdefTypeId() &&
+        if ( groupVo.getAppdefResourceTypeValue().getAppdefType() ==
+             entityResType.getAppdefType() &&
              groupVo.getAppdefResourceTypeValue().getId() ==
              entityResType.getId())
           return true;

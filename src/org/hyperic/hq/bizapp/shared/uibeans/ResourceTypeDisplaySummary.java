@@ -134,7 +134,7 @@ public abstract class ResourceTypeDisplaySummary
 
     public Integer getAppdefTypeId() {
         if (_appdefTypeId == null && _resourceType != null)
-            _appdefTypeId = new Integer(_resourceType.getAppdefTypeId());
+            _appdefTypeId = new Integer(_resourceType.getAppdefType());
         return _appdefTypeId;
     }
 

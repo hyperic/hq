@@ -114,7 +114,7 @@ public class ConfigMetricsFormPrepareAction extends TilesAction {
             request.setAttribute(Constants.MONITOR_ENABLED_ATTR, Boolean.FALSE);
             request.setAttribute(Constants.RESOURCE_TYPE_ATTR, resourceTypeVal);
             request.setAttribute("section", AppdefEntityConstants.typeToString(
-                resourceTypeVal.getAppdefTypeId()));
+                resourceTypeVal.getAppdefType()));
             
         } catch(ParameterNotFoundException e) {
 	        AppdefEntityID appdefId = RequestUtils.getEntityId(request);

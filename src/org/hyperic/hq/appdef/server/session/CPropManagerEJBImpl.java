@@ -184,7 +184,7 @@ public class CPropManagerEJBImpl
         if(cpKey != null){
             throw new CPropKeyExistsException("Key, '" + key.getKey() + "', " +
                "already exists for " +
-               AppdefEntityConstants.typeToString(recValue.getAppdefTypeId()) +
+               AppdefEntityConstants.typeToString(recValue.getAppdefType()) +
                " type, '" + recValue.getName() + "'");
         }
 

@@ -2513,7 +2513,7 @@ public class AppdefBossEJBImpl
         if (resType != null) {
             // Add a filter to weed out groups incompatible with this entity
             filterList.add(new AppdefGroupPagerFilterGrpEntRes(
-                    resType.getAppdefTypeId(), resType.getId().intValue(),
+                    resType.getAppdefType(), resType.getId().intValue(),
                     true));
         }
         

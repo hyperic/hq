@@ -79,7 +79,7 @@ public class ClientShell_resourcetype_key_add
         key      = (String)parseRes.getValue(BLOCK_KEY);
         desc     = (String)parseRes.getValue(BLOCK_DESC);
         
-        propKey = new CPropKeyValue(null, resource.getAppdefTypeId(),
+        propKey = new CPropKeyValue(null, resource.getAppdefType(),
                                     resource.getId().intValue(), key, desc);
         try {
             this.getEntityFetcher().addCPropKey(propKey);

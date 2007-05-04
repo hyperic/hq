@@ -910,7 +910,7 @@ class ImportHelper
                 }
                 
                 aGroup = _groupMan.createGroup(_subject,
-                                               resVal.getAppdefTypeId(),
+                                               resVal.getAppdefType(),
                                                resVal.getId().intValue(),
                                                name, description,
                                                location);

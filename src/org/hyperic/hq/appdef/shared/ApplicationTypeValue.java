@@ -302,4 +302,8 @@ public class ApplicationTypeValue
 	  return result;
    }
 
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+    }
+
 }
