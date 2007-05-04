@@ -73,7 +73,7 @@ public class ViewAction extends TilesAction {
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);            
         WebUser user = (WebUser) request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
         AppdefInventorySummary summary = appdefBoss.getInventorySummary( 
-                                            user.getSessionId().intValue() );
+                                            user.getSessionId().intValue(), true );
 
         context.putAttribute("summary", summary);            
 

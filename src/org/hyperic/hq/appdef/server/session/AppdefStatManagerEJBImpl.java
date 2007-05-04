@@ -67,6 +67,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 
@@ -103,7 +104,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         int               subjectId = subject.getId().intValue();
-
+    
         try {
             Connection conn = getDBConn();
             String sql =
@@ -113,7 +114,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "  AND PLAT.ID IN (" + getResourceTypeSQL("EAM_PLATFORM") + ") " + 
                 "GROUP BY PLATT.NAME ORDER BY PLATT.NAME";
             stmt = conn.prepareStatement(sql);
-
+    
             if (log.isDebugEnabled())
                 log.debug(sql);
     
@@ -129,7 +130,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 total   = rs.getInt(2);
                 platMap.put(platTypeName,new Integer(total));
             }
-
+    
         } catch (SQLException e) {
             log.error("Caught SQL Exception finding Platforms by type: " + 
                       e, e);
@@ -139,6 +140,46 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             disconnect();
         } 
         return platMap;
+    }
+
+    /**
+     * <p>Return platforms count.</p>
+     * @ejb:interface-method
+     * @ejb:transaction type="Supports"
+     */
+    public int getPlatformsCount (AuthzSubjectValue subject) {
+        PreparedStatement stmt = null;
+        ResultSet         rs = null;
+
+        try {
+            Connection conn = getDBConn();
+            
+            String sql =
+                "SELECT COUNT(PLAT.ID) " +
+                "FROM EAM_PLATFORM_TYPE PLATT, EAM_PLATFORM PLAT " +
+                "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID " +
+                "  AND PLAT.ID IN (" + getResourceTypeSQL("EAM_PLATFORM") + ")";
+            stmt = conn.prepareStatement(sql);
+
+            if (log.isDebugEnabled())
+                log.debug(sql);
+    
+            pm.prepareResourceTypeSQL(stmt, 0, subject.getId().intValue(),
+                                      AuthzConstants.platformResType,
+                                      AuthzConstants.platformOpViewPlatform);
+            rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            log.error("Caught SQL Exception counting Platforms: " + e, e);
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
+        } 
+        return 0;
     }
 
     /**
@@ -152,7 +193,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         int               subjectId = subject.getId().intValue();
-
+    
         try {
             Connection conn = getDBConn();
             String sql =
@@ -175,7 +216,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 total   = rs.getInt(2);
                 servMap.put(servTypeName,new Integer(total));
             }
-
+    
         } catch (SQLException e) {
              log.error ("Caught SQL Exception finding Servers by type: " +
                         e, e);
@@ -185,6 +226,42 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             disconnect();
         } 
         return servMap;
+    }
+
+    /**
+     * <p>Return servers count.</p>
+     * @ejb:interface-method
+     * @ejb:transaction type="Supports"
+     */
+    public int getServersCount (AuthzSubjectValue subject) {
+        PreparedStatement stmt = null;
+        ResultSet         rs = null;
+        try {
+            Connection conn = getDBConn();
+            String sql =
+                "SELECT COUNT(SERV.ID) " +
+                "FROM EAM_SERVER_TYPE SERVT, EAM_SERVER SERV " +
+                "WHERE SERV.SERVER_TYPE_ID = SERVT.ID " +
+                "  AND SERV.ID IN (" + getResourceTypeSQL("EAM_SERVER") + ") ";
+            stmt = conn.prepareStatement(sql);
+    
+            pm.prepareResourceTypeSQL(stmt, 0, subject.getId().intValue(),
+                                      AuthzConstants.serverResType,
+                                      AuthzConstants.serverOpViewServer);
+            rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+             log.error ("Caught SQL Exception finding Servers by type: " +
+                        e, e);
+             throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
+        } 
+        return 0;
     }
 
     /**<p>Return map of service counts.</p>
@@ -197,7 +274,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         int               subjectId = subject.getId().intValue();
-
+    
         try {
             Connection conn = getDBConn();
             String sql =
@@ -220,7 +297,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 total   = rs.getInt(2);
                 svcMap.put(serviceTypeName,new Integer(total));
             }
-
+    
         } catch (SQLException e) {
             log.error ("Caught SQL Exception finding Services by type: " +
                        e, e);
@@ -230,6 +307,41 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             disconnect();
         } 
         return svcMap;
+    }
+
+    /**<p>Return services count.</p>
+     * @ejb:interface-method
+     * @ejb:transaction type="Supports"
+     */
+    public int getServicesCount (AuthzSubjectValue subject) {
+        PreparedStatement stmt = null;
+        ResultSet         rs = null;
+        try {
+            Connection conn = getDBConn();
+            String sql =
+                "SELECT COUNT(SVC.ID) " +
+                "FROM EAM_SERVICE_TYPE SVCT, EAM_SERVICE SVC " +
+                "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID " +
+                "  AND SVC.ID IN (" + getResourceTypeSQL("EAM_SERVICE") + ") ";
+            stmt = conn.prepareStatement(sql);
+    
+            pm.prepareResourceTypeSQL(stmt, 0, subject.getId().intValue(), 
+                                      AuthzConstants.serviceResType,
+                                      AuthzConstants.serviceOpViewService);
+            rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            log.error ("Caught SQL Exception finding Services by type: " +
+                       e, e);
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
+        } 
+        return 0;
     }
 
     /**<p>Return map of app counts.</p>
@@ -242,7 +354,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         PreparedStatement stmt = null;
         ResultSet         rs = null;
         int               subjectId = subject.getId().intValue();
-
+    
         try {
             Connection conn = getDBConn();
             String sql =
@@ -265,7 +377,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 total   = rs.getInt(2);
                 appMap.put(appTypeName,new Integer(total));
             }
-
+    
         } catch (SQLException e) {
             log.error ("Caught SQL Exception finding applications by type: " +
                        e, e);
@@ -275,6 +387,43 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             disconnect();
         } 
         return appMap;
+    }
+
+    /**<p>Return apps count.</p>
+     * @ejb:interface-method
+     * @ejb:transaction type="Supports"
+     */
+    public int getApplicationsCount(AuthzSubjectValue subject) {
+        PreparedStatement stmt = null;
+        ResultSet         rs = null;
+        
+        try {
+            Connection conn = getDBConn();
+            String sql =
+                "SELECT COUNT(APP.ID) " +
+                "FROM EAM_APPLICATION_TYPE APPT, EAM_APPLICATION APP " +
+                "WHERE APP.APPLICATION_TYPE_ID = APPT.ID " +
+                " AND APP.ID IN (" + getResourceTypeSQL("EAM_APPLICATION") +
+                ") ";
+            stmt = conn.prepareStatement(sql);
+    
+            pm.prepareResourceTypeSQL(stmt, 0, subject.getId().intValue(), 
+                                      AuthzConstants.applicationResType,
+                                      AuthzConstants.appOpViewApplication);
+            rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            log.error ("Caught SQL Exception finding applications by type: " +
+                       e, e);
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            disconnect();
+        } 
+        return 0;
     }
 
     /**<p>Return map of grp counts.</p>
@@ -288,10 +437,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResultSet         rs = null;
         int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
         int  subjectId = subject.getId().intValue();
-
+    
         try {
             Connection conn = getDBConn();
-
+    
             for (int x=0;x< groupTypes.length; x++) {
                 String sql =
                     "SELECT COUNT(*) FROM EAM_RESOURCE_GROUP GRP " +
@@ -1632,7 +1781,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     // The methods in this class should call getDBConn() to obtain a connection,
     // because it also initializes the private database-related variables
     private Connection getDBConn() throws SQLException {
-        Connection conn = DAOFactory.getDAOFactory().getPlatformDAO()
+        Connection conn = new PlatformDAO(DAOFactory.getDAOFactory())
             .getSession().connection();
         
         if (DB_TYPE == -1) {
@@ -1643,7 +1792,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
     
     private void disconnect() {
-        DAOFactory.getDAOFactory().getPlatformDAO().getSession().disconnect();
+        new PlatformDAO(DAOFactory.getDAOFactory()).getSession().disconnect();
     }
 
     private int getChildEntityType (int type) {

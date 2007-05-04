@@ -3553,11 +3553,12 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AppdefInventorySummary getInventorySummary(int sessionId)
+    public AppdefInventorySummary getInventorySummary(int sessionId,
+                                                      boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException 
     {
         AuthzSubjectValue who = this.manager.getSubject(sessionId);
-        return new AppdefInventorySummary(who);
+        return new AppdefInventorySummary(who, countTypes);
     }
 
     /**
