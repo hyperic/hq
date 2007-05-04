@@ -1,0 +1,7 @@
+org.hyperic.hq.appdef.server.session.Platform
+org.hyperic.hq.appdef.server.session.Server
+org.hyperic.hq.appdef.server.session.Service
+org.hyperic.hq.events.server.session.RegisteredTrigger
+org.hyperic.hq.measurement.server.session.Baseline
+org.hyperic.hq.measurement.server.session.Measurement
+org.hyperic.hq.measurement.server.session.MeasurementTemplate
