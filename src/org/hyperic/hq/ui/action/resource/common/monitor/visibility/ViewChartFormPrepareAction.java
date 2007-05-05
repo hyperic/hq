@@ -330,11 +330,11 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
     }
 
-    private void _setupMetricData(HttpServletRequest request,
-                                  int sessionId,
-                                  ViewChartForm chartForm,
-                                  AppdefResourceValue[] resources,
-                                  MeasurementBoss mb)
+    protected void _setupMetricData(HttpServletRequest request,
+                                    int sessionId,
+                                    ViewChartForm chartForm,
+                                    AppdefResourceValue[] resources,
+                                    MeasurementBoss mb)
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, MeasurementNotFoundException,
                RemoteException, AppdefEntityNotFoundException,
@@ -441,14 +441,14 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
             return obj instanceof BaseMetricDisplayComparator;
         }
     }
-    private static final BaseMetricDisplayComparator comp =
+    protected static final BaseMetricDisplayComparator comp =
         new BaseMetricDisplayComparator();
 
-    private void _setupPageData(HttpServletRequest request,
-                                int sessionId,
-                                ViewChartForm chartForm,
-                                AppdefResourceValue[] resources,
-                                MeasurementBoss mb)
+    protected void _setupPageData(HttpServletRequest request,
+                                  int sessionId,
+                                  ViewChartForm chartForm,
+                                  AppdefResourceValue[] resources,
+                                  MeasurementBoss mb)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, RemoteException,
@@ -494,12 +494,12 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                                     chartedMetrics, mb);
     }
 
-    private void _setupBaselineExpectedRange(HttpServletRequest request,
-                                             int sessionId,
-                                             ViewChartForm chartForm,
-                                             AppdefResourceValue[] resources,
-                                             ChartedMetricBean[] chartedMetrics,
-                                             MeasurementBoss mb)
+    protected void _setupBaselineExpectedRange(HttpServletRequest request,
+                                               int sessionId,
+                                               ViewChartForm chartForm,
+                                               AppdefResourceValue[] resources,
+                                               ChartedMetricBean[] chartedMetrics,
+                                               MeasurementBoss mb)
         throws SessionTimeoutException,
                SessionNotFoundException,
                MeasurementNotFoundException,
