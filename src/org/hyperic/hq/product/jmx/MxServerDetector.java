@@ -34,6 +34,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.Metric;
@@ -50,6 +52,7 @@ public class MxServerDetector
     extends DaemonDetector
     implements AutoServerDetector
 {
+    private static final Log log = LogFactory.getLog(MxServerDetector.class);
     static final String PROP_SERVICE_NAME = "name";
     public static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
     public static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
@@ -167,6 +170,8 @@ public class MxServerDetector
     {
         List procs = new ArrayList();
         long[] pids = getPids(getProcQuery());
+        log.debug(getProcQuery() + " matched " + pids.length + " processes");
+
         String homeProp = "-D" + getProcHomeProperty() + "=";
 
         for (int i=0; i<pids.length; i++) {
