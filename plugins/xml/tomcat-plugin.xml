@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.tomcat" name="tomcat">
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+    <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
+    <include name="server/lib/commons-modeler-*.jar"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <metrics name="Runtime_Metrics">
+    <metric name="UpTime"
+            alias="UpTime"
+            indicator="true"
+            template="${OBJECT_NAME}:Stats.${alias}"
+            units="ms"
+            collectionType="static"/>
+<!--
+    <metric name="JVM Heap Size"
+            alias="HeapSize"
+            indicator="true"
+            template="${OBJECT_NAME}:Stats.${alias}"
+            units="B"/>
+-->
+  </metrics>
+
+  <server name="Apache Tomcat"
+          version="5.5">
+
+    <metrics include="Runtime_Metrics"/>
+
+    <property name="VERSION_FILE"
+              value="server/lib/catalina-storeconfig.jar"/>
+
+    <property name="domain"
+              value="Catalina"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Runtime"/>
+
+    <!-- derive installpath from -Dcatalina.base=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+
+    <property name="DEFAULT_CONF"
+              value="conf/server.xml"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/catalina.out"/>
+
+    <config>
+      <option name="jmx.url"
+              description="JMX URL to MBeanServer"
+              default="service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi"/>
+      <option name="jmx.username"
+              description="JMX username"
+              optional="true"
+              default="system"/>
+      <option name="jmx.password"
+              description="JMX password"
+              optional="true"
+              default="manager"
+              type="secret"/>
+    </config>
+
+<!--
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+-->
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <service name="DataSource Pool">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=DataSource,path=*,host=localhost,class=*,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="path"
+                description="Context Path of Deployed Application"
+                default=""/>
+        <option name="class"
+                description="Associated Java Class"
+                default=""/>
+        <option name="name"
+                description="Name of Attribute"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Active DataSource Connections"
+              alias="numActive"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+    </service>
+  </server>
+</plugin>
