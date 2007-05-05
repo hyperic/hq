@@ -270,8 +270,6 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
             }
             resources = new AppdefResourceValue[children.size()];
             resources = (AppdefResourceValue[])children.toArray(resources);
-            resources = mb.pruneResourcesNotCollecting(sessionId, resources,
-                                                       chartForm.getM()[0]);
         } else if (resource instanceof AppdefGroupValue) {
             AppdefGroupValue grpVal = (AppdefGroupValue) resource;
             AppdefEntityID[] grpMembers =
@@ -286,6 +284,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         } else {
             resources = new AppdefResourceValue[] { resource };
         }
+        resources = mb.pruneResourcesNotCollecting(sessionId, resources,
+                                                   chartForm.getM()[0]);
         request.setAttribute("resources", resources);
         request.setAttribute( "resourcesSize", new Integer(resources.length) );
 
@@ -508,7 +508,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                AppdefEntityNotFoundException,
                RemoteException
     {
-        DerivedMeasurementValue dmv;
+        DerivedMeasurementValue dmv = null;
         
         if (chartForm.getMode().equals(Constants.MODE_MON_CHART_SMSR) ||
             chartForm.getMode().equals(Constants.MODE_MON_CHART_SMMR)) {
