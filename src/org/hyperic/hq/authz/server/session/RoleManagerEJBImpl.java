@@ -1750,7 +1750,12 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public PageList getSubjects(AuthzSubjectValue whoami, Integer roleId,
                                 PageControl pc) 
         throws PermissionException, FinderException {
-        Role roleLocal = lookupRole(roleId);
+        Role roleLocal = getRoleDAO().get(roleId);
+        
+        if (roleLocal == null) {
+            return new PageList();
+        }
+        
         AuthzSubject subj = lookupSubject(whoami);
         // check if this user is a member of this role
         boolean roleHasUser = roleLocal.getSubjects().contains(subj);
