@@ -34,26 +34,77 @@
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
 
-  <metrics name="Runtime_Metrics">
-    <metric name="UpTime"
-            alias="UpTime"
+  <metrics name="Thread Metrics">
+    <metric name="Thread Count"
+            alias="ThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Current Thread Cpu Time"
+            alias="CurrentThreadCpuTime"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Current Thread User Time"
+            alias="CurrentThreadUserTime"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Daemon Thread Count"
+            alias="DaemonThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Peak Thread Count"
+            alias="PeakThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="static"/>
+  </metrics>
+
+  <metrics name="OS Metrics">
+    <metric name="Free Swap Space Size"
+            alias="FreeSwapSpaceSize"
             indicator="true"
-            template="${OBJECT_NAME}:Stats.${alias}"
+            template="${OBJECT_NAME}:${alias}"
+            units="GB"
+            collectionType="dynamic"/>
+    <metric name="Free Physical Memory Size"
+            alias="FreePhysicalMemorySize"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="GB"
+            collectionType="dynamic"/>
+    <metric name="Process Cpu Time"
+            alias="ProcessCpuTime"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Open File Descriptor Count"
+            alias="OpenFileDescriptorCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="Runtime Metrics">
+    <metric name="UpTime"
+            alias="Uptime"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
             units="ms"
             collectionType="static"/>
-<!--
-    <metric name="JVM Heap Size"
-            alias="HeapSize"
-            indicator="true"
-            template="${OBJECT_NAME}:Stats.${alias}"
-            units="B"/>
--->
   </metrics>
 
   <server name="Apache Tomcat"
           version="5.5">
-
-    <metrics include="Runtime_Metrics"/>
 
     <property name="VERSION_FILE"
               value="server/lib/catalina-storeconfig.jar"/>
@@ -63,6 +114,15 @@
 
     <property name="OBJECT_NAME"
               value="java.lang:type=Runtime"/>
+    <metrics include="Runtime Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=OperatingSystem"/>
+    <metrics include="OS Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Threading"/>
+    <metrics include="Thread Metrics"/>
 
     <!-- derive installpath from -Dcatalina.base=... -->
     <property name="PROC_HOME_PROPERTY"
@@ -89,10 +149,8 @@
               type="secret"/>
     </config>
 
-<!--
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.jmx.MxServerDetector"/>
--->
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
@@ -100,15 +158,221 @@
     <metric name="Availability"
             indicator="true"/>
 
+    <service name="Web Module Stats">
+      <property name="OBJECT_NAME"
+                value="${domain}:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=*"/>
+      <config>
+        <option name="name"
+                description="Name Of Web Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="sec"/>
+    </service>
+
+    <service name="Thread Pools">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=ThreadPool,name=*"/>
+      <config>
+        <option name="name"
+                description="Listener Name"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Current Thread Count"
+              alias="currentThreadCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Current Thread Busy"
+              alias="currentThreadBusy"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+    </service>
+
+    <service name="Servlet Monitor">
+      <property name="OBJECT_NAME"
+                value="${domain}:j2eeType=Servlet,name=*,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="WebModule"
+                description="Deployed Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Class Load Time"
+              alias="classLoadTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Error Count"
+              alias="errorCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Load Time"
+              alias="loadTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Request Count"
+              alias="requestCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="JSP Monitor">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=JspMonitor,name=jsp,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+      <plugin type="autoinventory"/>
+      <config>
+        <option name="WebModule"
+                description="Deployed Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="JSP Count"
+              alias="jspCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="JSP Reload Count"
+              alias="jspReloadCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="Global Request Processor">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=GlobalRequestProcessor,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="name"
+                description="Listener Name"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Bytes Sent"
+              alias="bytesSent"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Bytes Received"
+              alias="bytesReceived"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Error Count"
+              alias="errorCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Request Count"
+              alias="requestCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="Cache">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=Cache,host=*,path=*"/>
+
+      <config>
+        <option name="path"
+                description="Context Path of Deployed Application"
+                default=""/>
+        <option name="host"
+                description="Hostname"
+                default=""/>
+                description="Associated Java Class"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Access Count"
+              alias="accessCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Hits Count"
+              alias="hitsCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
     <service name="DataSource Pool">
       <property name="OBJECT_NAME"
-                value="${domain}:type=DataSource,path=*,host=localhost,class=*,name=*"/>
+                value="${domain}:type=DataSource,path=*,host=*,class=*,name=*"/>
 
       <plugin type="autoinventory"/>
 
       <config>
         <option name="path"
                 description="Context Path of Deployed Application"
+                default=""/>
+        <option name="host"
+                description="Hostname"
                 default=""/>
         <option name="class"
                 description="Associated Java Class"
@@ -120,9 +384,14 @@
 
       <metric name="Availability"
               indicator="true"/>
+      <metric name="Idle DataSource Connections"
+              alias="numIdle"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
       <metric name="Active DataSource Connections"
               alias="numActive"
-              indicator="false"
+              indicator="true"
               template="${OBJECT_NAME}:${alias}"
               units="none"/>
     </service>
