@@ -95,6 +95,10 @@ public class RoleDAO extends HibernateDAO {
         return role;
     }
 
+    public Role get(Integer id) {
+        return (Role) super.get(id);
+    }
+    
     public Role findById(Integer id) {
         return (Role) super.findById(id);
     }

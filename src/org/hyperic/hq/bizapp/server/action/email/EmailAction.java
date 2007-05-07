@@ -302,6 +302,10 @@ public class EmailAction extends EmailActionConfig
             } catch (UnsupportedEncodingException e) {
                 _log.warn("Username encoding error", e);
                 continue;
+            } catch (Exception e) {
+                _log.warn("Email lookup failed");
+                _log.debug("Email lookup failed", e);
+                continue;
             }
         }
 
