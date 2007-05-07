@@ -299,7 +299,7 @@
 
     <copy todir="${ear.dir}/META-INF" overwrite="true">
         <fileset dir="etc" 
-                 includes="application.xml,jboss-app.xml,startup_classes.txt,tweak.properties" />
+                 includes="application.xml,jboss-app.xml,startup_classes.txt,preload_caches.txt,tweak.properties" />
         <fileset dir="${build.dir}/classes/META-INF">
             <include name="**/*.hbm.xml" />
             <include name="*.cfg.xml" />
