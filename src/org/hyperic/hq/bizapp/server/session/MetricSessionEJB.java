@@ -126,6 +126,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         // Create the EntityIds array and map of counts
         Integer[] eids = new Integer[resources.size()];
+        AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
         AppdefEntityID aeid = null;
         Map totalCounts = new HashMap();
         Iterator it = resources.iterator();
@@ -152,7 +153,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     "not understand resource class: " + resource.getClass());
             }
             
-            eids[i] = aeid.getId();
+            eids[i]  = aeid.getId();
+            aeids[i] = aeid;
         }
         
         if (log.isTraceEnabled()) {
@@ -168,7 +170,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         // Get the intervals, keyed by template ID's as well
         Map intervals = this.getDerivedMeasurementManager()
-                            .findMetricIntervals(subject, eids, mtids);
+                            .findMetricIntervals(subject, aeids, mtids);
             
         if (log.isTraceEnabled()) {
             log.trace("getResourceMetrics -> getAggregateData took " +

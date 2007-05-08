@@ -112,7 +112,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
             .setInteger(0, type)
-            .setInteger(1, id).list();
+            .setInteger(1, id)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
+            .list();
     }
 
     int deleteByInstances(AppdefEntityID[] ids)

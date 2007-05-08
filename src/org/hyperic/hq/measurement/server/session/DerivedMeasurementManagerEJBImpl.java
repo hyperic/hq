@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -1055,36 +1056,48 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public Map findMetricIntervals(AuthzSubjectValue subject,
-                                   Integer[] eids, Integer[] tids) {
-        HashMap intervals = new HashMap(tids.length);
-        for (int a = 0; a < eids.length; a++) {
-            for (int i = 0; i < tids.length; i++) {
-
-                DerivedMeasurement dm = getDerivedMeasurementDAO()
-                    .findByTemplateForInstance(tids[i], eids[a]);
-                if (dm == null) {
-                    // Preserve prior FinderException behaviour
-                    continue;
-                }
-                    
-                if (intervals.containsKey(tids[i])) {
-                    // Compare with existing value
-                    if (!intervals.get(tids[i]).
-                        equals(new Long(dm.getInterval())))
-                            intervals.put(tids[i], new Long(0));
+                                   AppdefEntityID[] aeids, Integer[] tids) 
+    {
+        DerivedMeasurementDAO ddao = getDerivedMeasurementDAO();
+        Map intervals = new HashMap(tids.length);
+        for (int a = 0; a < aeids.length; a++) {
+            /* Find all the derived measurements for a given entity, and filter
+               out by template id, so as to not do a query per template */
+            List metrics = ddao.findByInstance(aeids[a].getType(),
+                                               aeids[a].getID());
+            
+            for (Iterator i=metrics.iterator(); i.hasNext(); ) {
+                DerivedMeasurement dm = (DerivedMeasurement)i.next();
+                Integer templateId = dm.getTemplate().getId();
+                Long previous = (Long)intervals.get(templateId);
+                Long interval = new Long(dm.getInterval());
+                
+                if (previous == null) {
+                    intervals.put(templateId, interval);
                 } else {
-                    // There's no point if measurement is disabled
-                    if (!dm.isEnabled()) {
-                        continue;
+                    if (!previous.equals(interval)) {
+                        intervals.put(templateId, new Long(0));
                     }
-                    
-                    // Not the first one, so there must have been others
-                    // that were disabled
-                    if (a > 0)
-                        intervals.put(tids[i], new Long(0));
-                    else
-                        intervals.put(tids[i], new Long(dm.getInterval()));
                 }
+            }
+        }
+        
+        // Filter by template IDs, since we only pay attention to what was
+        // passed, but may have more than that in our map.
+        for (int i=0; i<tids.length; i++) {
+            if (!intervals.containsKey(tids[i]))
+                intervals.put(tids[i], new Long(0));
+        }
+        
+        List tidList = Arrays.asList(tids);
+        // Copy the keys, since we are going to be modifying the interval map
+        Set keys     = new HashSet(intervals.keySet());
+        for (Iterator i=keys.iterator(); i.hasNext(); ) {
+            Integer templateId = (Integer)i.next();
+
+            if (tidList.indexOf(templateId) == -1) {
+                // Wasn't asked for, so don't return it
+                intervals.remove(templateId);
             }
         }
         return intervals;
