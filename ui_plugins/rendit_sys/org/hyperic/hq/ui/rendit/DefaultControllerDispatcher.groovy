@@ -46,16 +46,6 @@ class DefaultControllerDispatcher {
         controller.setPluginDir(invokeArgs.pluginDir)
         controller.setInvokeArgs(invokeArgs)
         
-        def runner = controller."$action"
-        if (runner == null)
-            throw new IllegalArgumentException("Unknown action [$action]")
-        	
-        def start = System.currentTimeMillis()
-
-        runner(invokeArgs.request.parameterMap)
-		
-        log.info "Executed $controllerName:$action in " +   
-                 "${System.currentTimeMillis() - start} ms"
-        return true
+        return controller.dispatchRequest()
 	}
 }
