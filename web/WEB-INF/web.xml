@@ -44,7 +44,7 @@
 
   <filter-mapping>
     <filter-name>Authentication-Filter</filter-name>
-    <url-pattern>/hqu/*</url-pattern>
+    <url-pattern>*.hqu</url-pattern>
   </filter-mapping>
   <filter-mapping>
     <filter-name>Authentication-Filter</filter-name>
@@ -170,7 +170,7 @@
 
   <servlet-mapping>
     <servlet-name>hqu</servlet-name>
-    <url-pattern>/hqu/*</url-pattern>
+    <url-pattern>*.hqu</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>metricdata</servlet-name>

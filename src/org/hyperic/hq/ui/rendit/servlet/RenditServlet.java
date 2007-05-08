@@ -66,19 +66,18 @@ public class RenditServlet
                                  HttpServletResponse resp)
         throws ServletException, IOException
     {
-        String servPath = req.getServletPath();
-        String reqUri   = req.getRequestURI();
+        String reqUri = req.getRequestURI();
         
         initPlugins();
 
-        reqUri = reqUri.substring(servPath.length());
-        List path = StringUtil.explode(reqUri, "/");
-        
-        if (path.size() < 1) {
+        List fullPath = StringUtil.explode(reqUri, "/");
+        if (fullPath.size() < 2 || !fullPath.get(0).equals("hqu")) {
             throw new ServletException("Illegal request path");
         }
         
-        String plugin = (String)path.get(0);
+        List subPath  = fullPath.subList(1, fullPath.size());
+        
+        String plugin = (String)subPath.get(0);
         _log.info("Request for [" + plugin + "]: " + req.getRequestURI() + 
                   (req.getQueryString() == null ? "" 
                                                : ("?" + req.getQueryString())));

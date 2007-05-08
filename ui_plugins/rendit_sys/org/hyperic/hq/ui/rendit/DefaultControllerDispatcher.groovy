@@ -19,11 +19,11 @@ class DefaultControllerDispatcher {
     }
     
 	def invoke(invokeArgs) {
-        def req      = invokeArgs.request
-        def servPath = req.servletPath
-        def reqUri   = req.requestURI
-        def path     = reqUri[(servPath.length() + 1)..-1].split('/')
+        def req  = invokeArgs.request
+        def path = req.requestURI.split('/')[-3..-1]
 
+        log.info "Path is ${path}"
+        if (path.size() )
         if (path.size() < 3)
             return false
         
@@ -40,7 +40,7 @@ class DefaultControllerDispatcher {
         def controller = Class.forName(controllerName, true, 
                                        loader).newInstance() 
 
-        def action = path[2]
+        def action = path[2][0..-5]  // Strip out the .hqu
         controller.setAction(action)
         controller.setControllerName(path[1])
         controller.setPluginDir(invokeArgs.pluginDir)
