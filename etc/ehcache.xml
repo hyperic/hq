@@ -14,6 +14,12 @@
          timeToLiveSeconds="0"/>
 
   <!-- Measurement caches -->
+  <cache name="org.hyperic.hq.measurement.server.session.DerivedMeasurement.baselinesBag"
+         maxElementsInMemory="50000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Measurement"
          maxElementsInMemory="50000"
          eternal="true"

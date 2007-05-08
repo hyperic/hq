@@ -54,6 +54,11 @@
       <property name="formula" type="string">
         <column name="DSN" length="500" />
       </property>
+      <bag name="baselinesBag" inverse="true" table="EAM_MEASUREMENT_BL">
+        <cache usage="read-write"/>
+        <key column="MEASUREMENT_ID" />
+        <one-to-many class="Baseline" />
+      </bag>
     </subclass>
 
     <subclass name="RawMeasurement" extends="Measurement"
