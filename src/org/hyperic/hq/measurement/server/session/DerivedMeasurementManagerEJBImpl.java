@@ -92,6 +92,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.util.timer.StopWatch;
 import org.quartz.SchedulerException;
 
 /** The DerivedMeasurementManagerEJB class is a stateless session bean that can
@@ -1408,6 +1409,15 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public void preload() {
+        StopWatch s = new StopWatch();
+        
+        getDerivedMeasurementDAO().findAllCollected();
+    }
+    
     public static DerivedMeasurementManagerLocal getOne() {
         try {
             return DerivedMeasurementManagerUtil.getLocalHome().create();

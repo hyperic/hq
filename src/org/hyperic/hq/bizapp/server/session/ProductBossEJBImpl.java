@@ -58,6 +58,7 @@ import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -475,6 +476,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                 s.evict(j.next());
             }
         }
+        DerivedMeasurementManagerEJBImpl.getOne().preload();
     }
      
     /**
