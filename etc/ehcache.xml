@@ -56,6 +56,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="DerivedMeasurement.findByInstance_with_interval"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="DerivedMeasurement.findByInstance"
          maxElementsInMemory="10000"
          eternal="true"
