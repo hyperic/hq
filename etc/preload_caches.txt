@@ -9,4 +9,3 @@ org.hyperic.hq.events.server.session.AlertDefinition
 org.hyperic.hq.events.server.session.RegisteredTrigger
 org.hyperic.hq.measurement.server.session.MonitorableType
 org.hyperic.hq.measurement.server.session.Baseline
-org.hyperic.hq.measurement.server.session.Measurement

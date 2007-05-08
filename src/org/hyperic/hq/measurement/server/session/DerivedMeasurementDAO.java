@@ -77,6 +77,12 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .list();
     }
 
+    List findAllCollected() {
+        String sql = "from DerivedMeasurement m " + 
+            "where m.interval is not null";
+        return getSession().createQuery(sql).list();
+    }
+    
     public DerivedMeasurement findByTemplateForInstance(Integer tid,
                                                         Integer iid) {
         String sql =
