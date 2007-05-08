@@ -26,6 +26,9 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.dao.DAOFactory;
@@ -33,11 +36,11 @@ import org.hyperic.dao.DAOFactory;
 public class DerivedMeasurement extends Measurement
     implements Serializable 
 {
-
-    private boolean _enabled = true;
-    private long    _interval;
-    private String  _formula;
-
+    private boolean    _enabled = true;
+    private long       _interval;
+    private String     _formula;
+    private Collection _baselines = new ArrayList();
+    
     public DerivedMeasurement() {
     }
 
@@ -75,16 +78,40 @@ public class DerivedMeasurement extends Measurement
     public int getAppdefType() {
         return getTemplate().getMonitorableType().getAppdefType();
     }
+    
+    protected void setBaselinesBag(Collection baselines) {
+        _baselines = baselines;
+    }
+    
+    protected Collection getBaselinesBag() {
+        return _baselines;
+    }
+    
+    public Collection getBaselines() {
+        return Collections.unmodifiableCollection(_baselines);
+    }
+    
+    void setBaseline(Baseline b) {
+        clearBaseline();
+        getBaselinesBag().add(b);
+    }
+    
+    public Baseline getBaseline() {
+        if (getBaselinesBag().isEmpty())
+            return null;
+        else
+            return (Baseline)getBaselinesBag().iterator().next();
+    }
+    
+    void clearBaseline() {
+        getBaselinesBag().clear();
+    }
 
     /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) DerivedMeasurement object instead
      */
     public DerivedMeasurementValue getDerivedMeasurementValue() {
-
-        BaselineDAO dao = DAOFactory.getDAOFactory().getBaselineDAO();
-        Baseline b = dao.findByMeasurementId(getId());
-
         DerivedMeasurementValue val = new DerivedMeasurementValue();
         val.setId(getId());
         val.setEnabled(isEnabled());
@@ -94,7 +121,10 @@ public class DerivedMeasurement extends Measurement
         val.setInstanceId(getInstanceId());
         val.setMtime(getMtime());
         val.setTemplate(getTemplate().getMeasurementTemplateValue());
-        if (b != null) {
+
+        if (!getBaselines().isEmpty()) {
+            Baseline b = (Baseline)getBaselines().iterator().next();
+            
             val.setBaseline(b.getBaselineValue());
         }
         return val;
