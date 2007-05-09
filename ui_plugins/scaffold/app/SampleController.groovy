@@ -4,5 +4,6 @@ class SampleController
 	extends BaseController
 {
     def index = { params ->
+    	render(locals:[ pluginInfo : pluginInfo ])
     }
 }
