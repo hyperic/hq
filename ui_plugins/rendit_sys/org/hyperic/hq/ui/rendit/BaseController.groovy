@@ -4,6 +4,7 @@ import org.hyperic.hq.ui.rendit.html.FormGenerator
 import org.hyperic.hq.ui.rendit.html.HtmlUtil
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.hyperic.hq.ui.rendit.PluginLoadInfo
 
 import groovy.text.SimpleTemplateEngine
 
@@ -18,6 +19,7 @@ abstract class BaseController {
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
     OutputStreamWriter output
+    PluginLoadInfo     pluginInfo
     
     private invokeArgs
     private File viewDir
@@ -129,7 +131,7 @@ abstract class BaseController {
         try {
         	new File(subViewDir, actionArg + '.gsp').withReader { reader ->
 	        	output = outWriter
-				def eng = new SimpleTemplateEngine(true)
+				def eng = new SimpleTemplateEngine(pluginInfo.dumpScripts)
 				def template = eng.createTemplate(reader)
 				template.make(locals).writeTo(outWriter)
 				outWriter.flush()

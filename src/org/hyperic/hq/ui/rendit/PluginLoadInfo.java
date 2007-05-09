@@ -28,12 +28,13 @@ package org.hyperic.hq.ui.rendit;
  * Returned from a UI plugin when the dispatcher is asked to load it.
  */
 public class PluginLoadInfo {
-    private String _pluginName;
-    private String _description;
-    private int    _major;
-    private int    _minor;
-    private int    _apiMajor;
-    private int    _apiMinor;
+    private String  _pluginName;
+    private String  _description;
+    private int     _major;
+    private int     _minor;
+    private int     _apiMajor;
+    private int     _apiMinor;
+    private boolean _dumpScripts=false;
     
     public String getName() {
         return _pluginName;
@@ -81,5 +82,13 @@ public class PluginLoadInfo {
     
     public int getApiMinor() {
         return _apiMinor;
+    }
+
+    public void setDumpScripts(boolean dump) {
+        _dumpScripts = dump;
+    }
+    
+    public boolean getDumpScripts() {
+        return _dumpScripts;
     }
 }

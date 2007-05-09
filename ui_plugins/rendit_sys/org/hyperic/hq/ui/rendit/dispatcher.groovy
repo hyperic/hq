@@ -63,7 +63,7 @@ class Dispatcher {
         def dispatcher = new DefaultControllerDispatcher()
         def pluginInfo = loadPlugin()
 		
-        return dispatcher.invoke(invokeArgs)
+        return dispatcher.invoke(pluginInfo, invokeArgs)
      }
 }
 

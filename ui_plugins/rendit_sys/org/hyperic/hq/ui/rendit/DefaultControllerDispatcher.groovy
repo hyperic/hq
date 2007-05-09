@@ -18,7 +18,7 @@ class DefaultControllerDispatcher {
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
     
-	def invoke(invokeArgs) {
+	def invoke(pluginInfo, invokeArgs) {
         def req  = invokeArgs.request
         def path = req.requestURI.split('/')[-3..-1]
 
@@ -45,6 +45,7 @@ class DefaultControllerDispatcher {
         controller.setControllerName(path[1])
         controller.setPluginDir(invokeArgs.pluginDir)
         controller.setInvokeArgs(invokeArgs)
+        controller.setPluginInfo(pluginInfo)
         
         return controller.dispatchRequest()
 	}
