@@ -923,12 +923,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * Get platform service POJOs (children of virtual servers)
+     * Get platform service POJOs
      * @ejb:interface-method
      */
     public Collection getPlatformServices(AuthzSubjectValue subject,
-                                          Integer platId) {
-        return getServiceDAO().findPlatformServices_orderName(platId, true);
+                                          Integer platId)
+        throws ServiceNotFoundException, PermissionException {
+        Collection services =
+            getServiceDAO().findPlatformServices_orderName(platId, true);
+        return filterUnviewable(subject, services);
     }
     
     /**
