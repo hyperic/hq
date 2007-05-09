@@ -27,7 +27,9 @@ package org.hyperic.hq.bizapp.server.action.email;
 
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -136,15 +138,15 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String createText(AlertDefinitionInterface alertdef,
-                              String longReason, AppdefEntityID aeid,
-                              Integer alertId)
+                              ActionExecutionInfo info,
+                              AppdefEntityID aeid, AlertInterface alert)
         throws MeasurementNotFoundException
     {
         StringBuffer text = new StringBuffer("The ")
             .append(RES_NAME_HOLDER).append(" ")
             .append(aeid.getTypeName())
             .append(" has generated the following alert -\n")
-            .append(longReason)
+            .append(info.getShortReason())
             .append(SEPARATOR);
 
         text.append("ALERT DETAIL")
@@ -161,18 +163,25 @@ public class EmailAction extends EmailActionConfig
         text.append("\n- Condition Set: ");
 
         // Get the conditions
-        text.append(longReason);
+        text.append(info.getLongReason());
+
+        // XXX: Ashamed of myself, this is definitely not localizable
+        // um, when we figger out how we want to make the user's locale
+        // something that is accessible to the backend, this should be
+        // un-hardcoded
+        SimpleDateFormat dformat = new SimpleDateFormat("MM/dd/yyyy hh:mm aaa");
+        String alertTime = dformat.format(new Date(alert.getTimestamp()));
 
         // The rest of the alert details
         text.append("\n- Alert Severity: ")
             .append(EventConstants.getPriority(alertdef.getPriority()))
-//            .append("\n- Alert Date / Time: ").append(alertTime)
+            .append("\n- Alert Date / Time: ").append(alertTime)
             .append(SEPARATOR);
 
         try {
             // Create the links
             text.append("\nFor additional detail about this alert, go to ")
-                .append(createLink(aeid, alertId))
+                .append(createLink(aeid, alert.getId()))
                 .append(SEPARATOR);
 
             // Public Service Announcement
@@ -211,8 +220,7 @@ public class EmailAction extends EmailActionConfig
             AppdefEntityID appEnt = getResource(alertDef);
 
             String body = isSms() ? info.getShortReason() :
-                                    createText(alertDef, info.getLongReason(), 
-                                               appEnt, alert.getId()); 
+                                    createText(alertDef, info, appEnt, alert);
 
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());
