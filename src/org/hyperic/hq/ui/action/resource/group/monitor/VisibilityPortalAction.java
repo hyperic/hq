@@ -48,6 +48,7 @@ import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceVisibilityPortalAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.ListPageFetcher;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -95,7 +96,19 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
                                          HttpServletResponse response)
         throws Exception {
         setResource(request);
-        findResourceHealths(request);
+        List healths = findResourceHealths(request);
+        
+        if (healths != null) {
+            request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
+                                 healths);
+            request.setAttribute(Constants.CTX_SUMMARIES, healths);
+
+            PageControl pc = RequestUtils.getPageControl(request);
+            // Let's not try to resort
+            pc.setSortorder(PageControl.SORT_UNSORTED);
+            ListPageFetcher lpf = new ListPageFetcher(healths);
+            request.setAttribute("pagedMembers", lpf.getPage(pc));
+        }
 
         super.resourceMetrics(mapping, form, request, response);
 
@@ -119,7 +132,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
         return null;
     }
 
-    private void findResourceHealths(HttpServletRequest request)
+    private List findResourceHealths(HttpServletRequest request)
         throws Exception {
         AppdefEntityID entityId = null;
 
@@ -134,18 +147,15 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
             RequestUtils.getResource(request);
         if (group == null) {
             // setResource already set a request error
-            return;
+            return null;
         }
         List healths = boss.findGroupCurrentHealth(sessionId, entityId);
 
         if (log.isTraceEnabled())
             log.trace("got " + healths.size()
                       + " ResourceTypeDisplays getting group member's health");
-        request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
-                             healths);
-        request.setAttribute(Constants.CTX_SUMMARIES, healths);
-
         setHostsCurrentHealth(request, group);
+        return healths;
     }
 
     private void setHostsCurrentHealth(HttpServletRequest request,

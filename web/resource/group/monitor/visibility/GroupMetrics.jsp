@@ -74,7 +74,7 @@
     </fmt:message>
     </div>
 <tiles:insert definition=".resource.common.monitor.visibility.childResourcesCurrentHealthByType">
-  <tiles:put name="summaries" beanName="GroupMemberHealthSummaries"/>
+  <tiles:put name="summaries" beanName="pagedMembers"/>
   <tiles:put name="memberTypeLabel" beanName="memberTypeLabel" />
   <tiles:put name="selfAction" beanName="selfAction"/>
 </tiles:insert>
