@@ -4,12 +4,12 @@ class ConsoleController extends BaseController {
     def index = { params ->
     	def r = [:]
     
-    	if (params['code_input'] && params['code_input'].size() == 1) {
-		    r['last_code']   = params['code_input'][0]
+    	if (params.hasOne('code_input')) {
+		    r['last_code']   = params.getOne('code_input')
 			r['last_result'] = executeCode(r['last_code']) 
 		} else {
-			r['last_code']   = 'nada'
-			r['last_result'] = 'nada'
+			r['last_code']   = '1 + 2'
+			r['last_result'] = '3'
 		}
     	
     	render(locals:[r:r])

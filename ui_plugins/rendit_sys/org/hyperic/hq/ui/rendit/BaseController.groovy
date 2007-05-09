@@ -58,10 +58,10 @@ abstract class BaseController {
 	    rendered = false
 	    
 	    try {
-    		runner(params)
-	
-    		if (!rendered)
+    	    runner(params)
+    		if (!rendered) {
     		    render([action : action])
+	        }
 	    } finally {
     		log.info "Executed $controllerName:$action in " +   
 	        	     "${System.currentTimeMillis() - start} ms"
@@ -116,8 +116,8 @@ abstract class BaseController {
         rendered = true
 		def outStream = invokeArgs.response.outputStream
 		def outWriter = new OutputStreamWriter(outStream)
-		                
-        invokeArgs.response.contentType = args.get('type', 'text/html')
+
+        invokeArgs.response.setContentType(args.get('type', 'text/html'))
 		if (args['inline']) {
 		    return render_inline(args['inline'], outWriter)
 		} 
@@ -130,17 +130,19 @@ abstract class BaseController {
         locals.putAll(addIns)
         try {
         	new File(subViewDir, actionArg + '.gsp').withReader { reader ->
-	        	output = outWriter
+	        	setOutput(outWriter)
 				def eng = new SimpleTemplateEngine(pluginInfo.dumpScripts)
 				def template = eng.createTemplate(reader)
 				template.make(locals).writeTo(outWriter)
 				outWriter.flush()
 			}
         } catch(Exception e) {
-            def pw = new PrintWriter(output)
-            e.printStackTrace(pw)
-			pw.flush()
-            output.flush()
+            if (output) {
+            	def pw = new PrintWriter(output)
+            	e.printStackTrace(pw)
+				pw.flush()
+            	output.flush()
+            }
             throw e
         } finally {
             output = null

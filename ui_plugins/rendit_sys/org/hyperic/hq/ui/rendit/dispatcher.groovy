@@ -3,6 +3,7 @@ package org.hyperic.hq.ui.rendit
 import org.hyperic.hq.ui.rendit.InvocationBindings
 import org.hyperic.hq.ui.rendit.PluginLoadException
 import org.hyperic.hq.ui.rendit.PluginLoadInfo
+import org.hyperic.hq.ui.rendit.metaclass.MapCategory
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -63,7 +64,9 @@ class Dispatcher {
         def dispatcher = new DefaultControllerDispatcher()
         def pluginInfo = loadPlugin()
 		
-        return dispatcher.invoke(pluginInfo, invokeArgs)
+        use (MapCategory){
+        	return dispatcher.invoke(pluginInfo, invokeArgs)
+        }
      }
 }
 
