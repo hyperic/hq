@@ -1,6 +1,8 @@
 import org.hyperic.hq.ui.rendit.BaseController
 
-class SampleController {
+class SampleController 
+	extends BaseController
+{
     def index = {
     }
 }
