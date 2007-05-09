@@ -74,6 +74,10 @@
 
   <property name="rendit_sys.dir" 
 	        value="${basedir}/ui_plugins/rendit_sys"/>
+  <property name="hqu.deployed.dir"
+            value="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
+  <property name="hqu.deployed.rendit_sys.dir"
+	        value="${jboss.home}/server/default/deploy/hq.ear/rendit_sys"/>
 	
   <path id="pdknative">
     <fileset dir="${sigar.lib}" includes="*.jar" />
@@ -556,11 +560,11 @@
   
   <!-- HQU == UI Plugins -->
   <target name="hqu-deploy" depends="init">
-    <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
+    <copy todir="${hqu.deployed.rendit_sys.dir}">
 	  <fileset dir="${rendit_sys.dir}"/>
 	</copy>
-	<mkdir dir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
-	<copy todir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu">
+	<mkdir dir="${hqu.deployed.dir}"/>
+	<copy todir="${hqu.deployed.dir}">
 	  <fileset dir="${basedir}/ui_plugins">
 	    <exclude name="rendit_sys/**"/>
 	  	<exclude name="scaffold/**"/>
@@ -568,7 +572,13 @@
 	  </fileset>
 	</copy>
   </target>
-	
+
+  <target name="hqu-undeploy" depends="init">
+    <delete dir="${hqu.deployed.dir}"/>
+    <mkdir dir="${hqu.deployed.dir}"/>
+    <delete dir="${hqu.deployed.rendit_sys.dir}"/>
+  </target>
+
   <target name="hqu-gen-scaffold" depends="init">
     <fail unless="plugin.name">
 		You must use -Dplugin.name=my_plugin to specify the plugin name
