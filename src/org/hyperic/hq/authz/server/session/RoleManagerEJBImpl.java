@@ -166,19 +166,28 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                            Collection roles, 
                                            Integer[] excludeIds)         
         throws PermissionException, NamingException, FinderException {
+        try {
+            PermissionManager pm = PermissionManagerFactory.getInstance();
+            ResourceTypeDAO dao =
+                new ResourceTypeDAO(DAOFactory.getDAOFactory());
+            pm.check(who.getId(),
+                     dao.findByName(AuthzConstants.roleResourceTypeName),
+                     AuthzConstants.rootResourceId,
+                     AuthzConstants.roleOpViewRole);
+        } catch (PermissionException e) {
+            return new ArrayList(0);
+        }
+        
         List excludeList = null;
         boolean hasExclude = (excludeIds != null && excludeIds.length > 0);
         if (hasExclude)
             excludeList = java.util.Arrays.asList(excludeIds);
         
-        // finally scope down to only the ones the user can see
-        List viewable = getViewableRolePKs(who);
+        // Throw out the excludes
         for (Iterator i = roles.iterator(); i.hasNext();) {
             Object role = i.next();
             Integer pk = ((Role) role).getId();
-            if (!viewable.contains(pk)) {
-                i.remove();
-            } else if (hasExclude && excludeList.contains(pk)) {
+            if (hasExclude && excludeList.contains(pk)) {
                 i.remove();
             }
         }
