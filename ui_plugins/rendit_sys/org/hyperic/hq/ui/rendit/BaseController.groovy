@@ -1,16 +1,22 @@
 package org.hyperic.hq.ui.rendit
 
+import org.hyperic.hq.ui.rendit.html.FormGenerator
+import org.hyperic.hq.ui.rendit.html.HtmlUtil
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import groovy.text.SimpleTemplateEngine
 
+/**
+ * The base controller is invoked by the dispatcher when it detects that
+ * a controller method is being requested.
+ */
 abstract class BaseController { 
     Log log = LogFactory.getLog(this.getClass())
     
-    String             action
-    File               pluginDir
-    String             controllerName
+    String             action          // Current action being executed
+    File               pluginDir       // Directory of plugin containing us
+    String             controllerName  // Name of the controller
     OutputStreamWriter output
     
     private invokeArgs
@@ -33,12 +39,14 @@ abstract class BaseController {
     }
     
     /**
-     * Called by the dispatcher when an controller action is dispatched.
+     * Called by the dispatcher when a controller action is dispatched.
      *
      * If the execution of the action does not explicitly perform any 
      * rendering, the view of the current action will be displayed.
      */
     def dispatchRequest() {
+		def params = invokeArgs.request.parameterMap
+        
     	def runner = this."$action"
     	if (runner == null)
         	throw new IllegalArgumentException("Unknown action [$action]")
@@ -48,7 +56,7 @@ abstract class BaseController {
 	    rendered = false
 	    
 	    try {
-    		runner(invokeArgs.request.parameterMap)
+    		runner(params)
 	
     		if (!rendered)
     		    render([action : action])
@@ -58,24 +66,22 @@ abstract class BaseController {
 	    }
     }
     
-    def url_for(opts) {
-        println opts
-        def res = ''
-        if (opts['action']) {
-        	res += opts['action'] + '.hqu'    
-        }
-        res
+    /**
+     * Specifies additional methods available to rendered scripts.  
+     * Controllers may override this method if they want to add additional
+     * commands (but will likely also want to merge it with the results
+     * from this base method)
+     */
+    protected getAddIns() {
+		[form_for : this.&form_for,
+		 url_for  : HtmlUtil.&url_for,
+		 h        : HtmlUtil.&escapeHtml]
     }
-    
-    def form_for(opts, form_closure) {
-        //<textarea name='MY_THING', rows='20', cols='80'></textarea>
         
-        def form = new Expando()
-        form.text_area = { '<textarea>' }
-        output.write("<form action='${url_for(opts)}' method='post'>")
-        form_closure(form)
-        output.write("</form>")
-        output.flush()
+    
+    private def form_for(opts, form_closure) {
+        def form = new FormGenerator(formOpts:opts)
+        form.write(output, form_closure)
     }
     
     /**
@@ -84,7 +90,7 @@ abstract class BaseController {
      *   
      *   action:  Specifies the action to render.  Defaults to the action,
      *            currently being executed
-     *   args:    Provides a map of variables to make accessable to the
+     *   locals:  Provides a map of variables to make accessable to the
      *            .gsp which is being rendered
      *   controller:  Specifies a controller (other than the current one) to
      *                render the view for
@@ -96,7 +102,7 @@ abstract class BaseController {
      * render([action : 'list'])
      *   - Renders the 'list' view for the current controller
      *
-     * render([args : [foo:3] ])
+     * render([locals: [foo:3] ])
      *   - Renders the currently executed action, providing 3 as a value for
      *     the variable 'foo', which is available to the .gsp
      *
@@ -104,10 +110,6 @@ abstract class BaseController {
      *   - Writes the text to the browser
      */
     def render(args) {
-		def ADD_INS = [form_for : this.&form_for,
-		               url_for  : this.&url_for]
-		              	
-		    
         args = (args == null) ? [:] : args
         rendered = true
 		def outStream = invokeArgs.response.outputStream
@@ -120,19 +122,24 @@ abstract class BaseController {
 
         def actionArg  = args.get('action', action)
         def contArg    = args.get('controller', controllerName)
-		def gspArgs    = args.get('args', [:])
+		def locals     = args.get('locals', [:])
         def subViewDir = new File(viewDir, contArg)
 
-        gspArgs.putAll(ADD_INS)
-        log.info "gspArgs = [${gspArgs}]"
+        locals.putAll(addIns)
         try {
         	new File(subViewDir, actionArg + '.gsp').withReader { reader ->
 	        	output = outWriter
 				def eng = new SimpleTemplateEngine(true)
 				def template = eng.createTemplate(reader)
-				template.make(gspArgs).writeTo(outWriter)
+				template.make(locals).writeTo(outWriter)
 				outWriter.flush()
 			}
+        } catch(Exception e) {
+            def pw = new PrintWriter(output)
+            e.printStackTrace(pw)
+			pw.flush()
+            output.flush()
+            throw e
         } finally {
             output = null
         }
