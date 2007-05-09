@@ -145,7 +145,7 @@ public class EmailAction extends EmailActionConfig
             .append(RES_NAME_HOLDER).append(" ")
             .append(aeid.getTypeName())
             .append(" has generated the following alert -\n")
-            .append(info.getLongReason())
+            .append(info.getShortReason())
             .append(SEPARATOR);
 
         text.append("ALERT DETAIL")
