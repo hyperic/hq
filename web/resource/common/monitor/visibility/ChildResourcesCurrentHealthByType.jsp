@@ -90,16 +90,12 @@ chbtWidgetProps['subGroup'] = 'chbtListMember';
      </display:column>
      <display:column width="50%" property="resourceName" title="${ChildTH}" isLocalizedTitle="false" sort="true" sortAttr="5" defaultSort="true" styleClass="ListCell"
                      href="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=currentHealth&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
-
-     <display:column width="4%" value="${tmpImg}" title="&nbsp;"
-                     isLocalizedTitle="false" styleClass="ListCellCheckboxLeftLine"
-                     href="/alerts/Alerts.do?mode=list&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
      <display:column property="resourceId" width="8%" title="resource.common.monitor.visibility.AVAILTH" styleClass="ListCellCheckboxLeftLine" align="center">
       <display:availabilitydecorator resourceId="${summary.resourceId}" resourceTypeId="${summary.resourceTypeId}"/>
      </display:column>
-     <display:column width="8%" property="throughput" title="resource.common.monitor.visibility.USAGETH" styleClass="ListCellCheckboxLeftLine">
-     <display:metricdecorator unit="${summary.throughputUnits}" defaultKey="common.value.notavail"/>
-     </display:column>
+     <display:column width="4%" value="${tmpImg}" title="&nbsp;"
+                     isLocalizedTitle="false" styleClass="ListCellCheckboxLeftLine"
+                     href="/alerts/Alerts.do?mode=list&type=${summary.resourceTypeId}" paramId="rid" paramProperty="resourceId" nowrap="true"/>
     </display:table>
 
 <!--  /  -->
