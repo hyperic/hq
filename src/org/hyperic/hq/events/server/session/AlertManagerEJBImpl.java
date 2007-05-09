@@ -460,6 +460,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertConditionLog[] logs = (AlertConditionLog[])
             clogs.toArray(new AlertConditionLog[clogs.size()]);
 
+        double val;
+        FormattedNumber av;
         StringBuffer text = new StringBuffer();
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = logs[i].getCondition();
@@ -476,16 +478,16 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 //            eventMap.get( cond.getTriggerId() );
 
             DerivedMeasurementDAO dmDao =
-                DAOFactory.getDAOFactory().getDerivedMeasurementDAO();
-            DerivedMeasurement dmv;
+                new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
+            DerivedMeasurement dm;
             
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
                 text.append(cond.getName()).append(" ")
-                        .append(cond.getComparator()).append(" ");
+                    .append(cond.getComparator()).append(" ");
 
-                dmv = dmDao.findById(new Integer(cond.getMeasurementId()));
+                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
 
                 if (cond.getType() == EventConstants.TYPE_BASELINE) {
                     text.append(cond.getThreshold());
@@ -501,25 +503,24 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                         text.append("Baseline");
                     }
                 } else {
-                    FormattedNumber th = UnitsConvert.convert(cond
-                            .getThreshold(), dmv.getTemplate().getUnits());
+                    FormattedNumber th =
+                        UnitsConvert.convert(cond.getThreshold(),
+                                             dm.getTemplate().getUnits());
                     text.append(th.toString());
                 }
 
-                // Make sure the event is present to be displayed
-                /*
-                 * FormattedNumber av = UnitsConvert.convert ( val,
-                 * dmv.getTemplate().getUnits() );
-                 */
-                text.append(" (actual value = ").append(logs[i].getValue())
-                        .append(")");
+                // Format the number
+                val =
+                    NumberUtil.stringAsNumber(logs[i].getValue()).doubleValue();
+                av = UnitsConvert.convert(val, dm.getTemplate().getUnits());
+                text.append(" (actual value = ").append(av.toString())
+                    .append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
                 text.append(cond.getName());
                 break;
             case EventConstants.TYPE_CHANGE:
-                dmv =
-                    dmDao.findById(new Integer(cond.getMeasurementId()));
+                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
                 text.append(cond.getName()).append(" value changed");
                 // Parse out old value. This is a hack.
                 // Basically, we use the MessageFormat from the
@@ -548,10 +549,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                     text.append(NOTAVAIL);
                 }
 
-                double val = NumberUtil.stringAsNumber(logs[i].getValue())
-                        .doubleValue();
-                FormattedNumber av = UnitsConvert.convert(val, dmv
-                        .getTemplate().getUnits());
+                val =
+                    NumberUtil.stringAsNumber(logs[i].getValue()).doubleValue();
+                av = UnitsConvert.convert(val, dm.getTemplate().getUnits());
                 text.append(", new value = ").append(av.toString()).append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
@@ -560,18 +560,17 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 break;
             case EventConstants.TYPE_LOG:
                 text.append("Event/Log Level(")
-                        .append(
-                                ResourceLogEvent.getLevelString(Integer
-                                        .parseInt(cond.getName())))
+                    .append(ResourceLogEvent
+                              .getLevelString(Integer.parseInt(cond.getName())))
                         .append(")");
                 if (cond.getOptionStatus() != null
                         && cond.getOptionStatus().length() > 0) {
                     text.append(" and matching substring ").append('"')
-                            .append(cond.getOptionStatus()).append('"');
+                        .append(cond.getOptionStatus()).append('"');
                 }
 
                 text.append("\n").append(indent).append("Log: ")
-                        .append(logs[i].getValue());
+                    .append(logs[i].getValue());
                 break;
             default:
                 break;
