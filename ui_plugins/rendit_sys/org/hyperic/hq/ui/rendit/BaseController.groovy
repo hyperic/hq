@@ -6,10 +6,12 @@ import org.apache.commons.logging.LogFactory
 import groovy.text.SimpleTemplateEngine
 
 abstract class BaseController { 
-    Log     log = LogFactory.getLog(this.getClass())
-    String  action
-    File    pluginDir
-    String  controllerName
+    Log log = LogFactory.getLog(this.getClass())
+    
+    String             action
+    File               pluginDir
+    String             controllerName
+    OutputStreamWriter output
     
     private invokeArgs
     private File viewDir
@@ -56,6 +58,26 @@ abstract class BaseController {
 	    }
     }
     
+    def url_for(opts) {
+        println opts
+        def res = ''
+        if (opts['action']) {
+        	res += opts['action'] + '.hqu'    
+        }
+        res
+    }
+    
+    def form_for(opts, form_closure) {
+        //<textarea name='MY_THING', rows='20', cols='80'></textarea>
+        
+        def form = new Expando()
+        form.text_area = { '<textarea>' }
+        output.write("<form action='${url_for(opts)}' method='post'>")
+        form_closure(form)
+        output.write("</form>")
+        output.flush()
+    }
+    
     /**
      * Render output to the browser.  This method takes a map of named 
      * arguments:
@@ -82,6 +104,10 @@ abstract class BaseController {
      *   - Writes the text to the browser
      */
     def render(args) {
+		def ADD_INS = [form_for : this.&form_for,
+		               url_for  : this.&url_for]
+		              	
+		    
         args = (args == null) ? [:] : args
         rendered = true
 		def outStream = invokeArgs.response.outputStream
@@ -97,11 +123,19 @@ abstract class BaseController {
 		def gspArgs    = args.get('args', [:])
         def subViewDir = new File(viewDir, contArg)
 
-        new File(subViewDir, actionArg + '.gsp').withReader { reader -> 
-			def eng = new SimpleTemplateEngine(false)
-			def template = eng.createTemplate(reader)
-			template.make(gspArgs).writeTo(outWriter)
-		}
+        gspArgs.putAll(ADD_INS)
+        log.info "gspArgs = [${gspArgs}]"
+        try {
+        	new File(subViewDir, actionArg + '.gsp').withReader { reader ->
+	        	output = outWriter
+				def eng = new SimpleTemplateEngine(true)
+				def template = eng.createTemplate(reader)
+				template.make(gspArgs).writeTo(outWriter)
+				outWriter.flush()
+			}
+        } finally {
+            output = null
+        }
     }
     
     private def render_inline(text, writer) {
