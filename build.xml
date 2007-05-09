@@ -443,19 +443,6 @@
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
-  <target name="hqu-deploy" depends="init">
-    <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
-       <fileset dir="${rendit_sys.dir}"/>
-    </copy>
-    <mkdir dir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
-    <copy todir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu">
-       <fileset dir="${basedir}/ui_plugins">
-         <exclude name="rendit_sys/**"/>
-         <exclude name="old/**"/>
-       </fileset>
-    </copy>
-  </target>
-  	
   <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
     <!-- generate EAR MANIFEST file -->
     <pathconvert targetos="unix" pathSep="," property="Class-Path">
@@ -567,6 +554,42 @@
   <target name="build-war" description="Build and create the war" 
           depends="compile,pack-war" />
   
+  <!-- HQU == UI Plugins -->
+  <target name="hqu-deploy" depends="init">
+    <copy todir="${jboss.home}/server/default/deploy/hq.ear/rendit_sys">
+	  <fileset dir="${rendit_sys.dir}"/>
+	</copy>
+	<mkdir dir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
+	<copy todir="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu">
+	  <fileset dir="${basedir}/ui_plugins">
+	    <exclude name="rendit_sys/**"/>
+	  	<exclude name="scaffold/**"/>
+	    <exclude name="old/**"/>
+	  </fileset>
+	</copy>
+  </target>
+	
+  <target name="hqu-gen-scaffold" depends="init">
+    <fail unless="plugin.name">
+		You must use -Dplugin.name=my_plugin to specify the plugin name
+    </fail>
+    <copy todir="${basedir}/ui_plugins/${plugin.name}" verbose="true">
+      <fileset dir="${basedir}/ui_plugins/scaffold"/>
+    </copy>
+  	
+  	<replace dir="${basedir}/ui_plugins/${plugin.name}" 
+  		     token="@PLUGIN_NAME@" value="${plugin.name}"/>
+  	<replace dir="${basedir}/ui_plugins/${plugin.name}" 
+  		     token="@NEW_PLUGIN_PATH@" 
+  		     value="${basedir}/ui_plugins/${plugin.name}"/>
+
+  	<echo>
+ 		Your plugin is in ${basedir}/ui_plugins/${plugin.name}
+  		To deploy it to your server:  ant hqu-deploy
+  		The URL to access it:  localhost:7080/hqu/${plugin.name}/sample/index.hqu
+  	</echo>
+  </target>
+	  	
   <!-- ==================== UI packaging ==================== -->
   
   <target name="compile-ui" depends="init">
