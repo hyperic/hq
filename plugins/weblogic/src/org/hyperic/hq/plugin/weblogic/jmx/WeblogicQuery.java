@@ -92,7 +92,9 @@ public class WeblogicQuery {
                                  ObjectName name,
                                  String[] attrNames) {
 
-
+        if (name == null) {
+            return false;
+        }
         if (attrNames.length == 0) {
             setName(name.getKeyProperty("Name"));
             return true;

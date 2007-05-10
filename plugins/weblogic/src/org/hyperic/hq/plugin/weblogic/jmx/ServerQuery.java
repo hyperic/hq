@@ -51,9 +51,10 @@ public class ServerQuery
     private String url;
     private boolean isAdmin = false;
     private boolean isRunning = true; //innocent until proven guilty
+    private String jvmType = "JVMRuntime";
     private File cwd;
 
-    public static final String MBEAN_TYPE = "ServerConfig";
+    public static final String MBEAN_TYPE = "Server";
 
     public static final String PROTOCOL_T3  = "t3";
     public static final String PROTOCOL_T3S = "t3s";
@@ -223,7 +224,9 @@ public class ServerQuery
 
     private ObjectName getJVMRuntime() {
         String jvm = getAttribute(ATTR_JVM_RUNTIME);
-
+        if (jvm == null) {
+            return null;
+        }
         try {
             return new ObjectName(jvm);
         } catch (MalformedObjectNameException e) {
@@ -327,9 +330,14 @@ public class ServerQuery
                                         runtimeName,
                                         SERVER_RUNTIME_ATTRS);
                 if (this.isRunning) {
-                    super.getAttributes(nodeServer,
-                                        getJVMRuntime(),
-                                        JVM_RUNTIME_ATTRS);
+                    if (getJVMRuntime() == null) {
+                        this.isRunning = false;
+                    }
+                    else {
+                        super.getAttributes(nodeServer,
+                                            getJVMRuntime(),
+                                            JVM_RUNTIME_ATTRS);
+                    }
                     super.getAttributes(nodeServer,
                                         logName,
                                         LOG_ATTRS);
@@ -472,8 +480,15 @@ public class ServerQuery
                           this.discover.getDomain());
         props.setProperty(WeblogicMetric.PROP_SERVER,
                           getName());
-        props.setProperty(WeblogicMetric.PROP_JVM,
-                          getJVMRuntime().getKeyProperty("Type"));
+
+        String jvmType;
+        if (getJVMRuntime() != null) {
+            jvmType = getJVMRuntime().getKeyProperty("Type");
+        }
+        else {
+            jvmType = this.jvmType; //server is not running
+        }
+        props.setProperty(WeblogicMetric.PROP_JVM, jvmType);
 
         String log = getAttribute("FileName");
         if (log != null) {
