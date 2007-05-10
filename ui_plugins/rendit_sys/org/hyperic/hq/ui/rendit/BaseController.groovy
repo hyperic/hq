@@ -18,12 +18,13 @@ abstract class BaseController {
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
-    OutputStreamWriter output
+    Writer             output
     PluginLoadInfo     pluginInfo
     
-    private invokeArgs
-    private File viewDir
-    private boolean rendered
+    private invokeArgs           // Info about the request
+    private File    viewDir      // Path to plugin/app/views
+    private boolean rendered     // Have we already performed a rendering op?
+    private String  templ        // Template to use (or null)
     
     private void setControllerName(String name) {
         this.controllerName = name
@@ -33,6 +34,14 @@ abstract class BaseController {
         this.invokeArgs = args
     }
     
+    protected void setTemplate(String templ) {
+        this.templ = templ
+    }
+    
+    protected String getTemplate() {
+        this.templ
+    }
+
     def getInvokeArgs() { invokeArgs }
     
     void setPluginDir(File pluginDir) {
@@ -86,6 +95,10 @@ abstract class BaseController {
         form.write(output, form_closure)
     }
     
+    def use_template(arg) {
+        log.info arg
+    }
+    
     /**
      * Render output to the browser.  This method takes a map of named 
      * arguments:
@@ -98,6 +111,13 @@ abstract class BaseController {
      *                render the view for
      *   type:    Allows the caller to explicitly specify the content type.
      *            Defaults to text/html
+     *   output:  If specified, is a Writer to which the output of the rendering
+     *            will be written.  Defaults to the request output stream
+     *   template:  If specified, provides a template to render.  The body
+     *              of the template will be specified by the rest of the 
+     *              arguments (action, etc.).  You can also use setTemplate()
+     *              in the constructor of your controller to always have a 
+     *              default template
      *
      * Examples:
      *   
@@ -114,27 +134,61 @@ abstract class BaseController {
     def render(args) {
         args = (args == null) ? [:] : args
         rendered = true
-		def outStream = invokeArgs.response.outputStream
-		def outWriter = new OutputStreamWriter(outStream)
+
+        def useOut         = args.get('output') 
+        def ignoreDefTempl = args.get('ignoreDefaultTemplate', false)
+        def templ          = args.get('template')
+        def actionArg      = args.get('action', action)
+        def contArg        = args.get('controller', controllerName)
+		def locals         = args.get('locals', [:])
+        def subViewDir     = new File(viewDir, contArg)
+
+        if (useOut == null) {
+    		def outStream = invokeArgs.response.outputStream
+    		def outWriter = new OutputStreamWriter(outStream)
+
+            useOut = outWriter            
+        }
+        
+		if (args['inline']) {
+		    return render_inline(args['inline'], useOut)
+		}
+		
+        if (templ == null && !ignoreDefTempl) {
+		    templ = getTemplate()
+		    ignoreDefTempl = true
+        }
 
         invokeArgs.response.setContentType(args.get('type', 'text/html'))
-		if (args['inline']) {
-		    return render_inline(args['inline'], outWriter)
-		} 
-
-        def actionArg  = args.get('action', action)
-        def contArg    = args.get('controller', controllerName)
-		def locals     = args.get('locals', [:])
-        def subViewDir = new File(viewDir, contArg)
-
-        locals.putAll(addIns)
+		locals.putAll(addIns)
         try {
-        	new File(subViewDir, actionArg + '.gsp').withReader { reader ->
-	        	setOutput(outWriter)
+            def gspFile
+            			  
+            if (templ == null) {
+                gspFile = new File(subViewDir, actionArg + '.gsp')
+            } else {
+                // When rendering a template, we initialize the 'body' part
+                // with the original body
+                gspFile = new File(viewDir, 'templates')
+                gspFile = new File(gspFile, templ + '.gsp')
+                    
+                // Recurse, and render the body to insert into the template
+                def body = new StringWriter()
+                render([action : actionArg, output : body, 
+                        ignoreDefaultTemplate : ignoreDefTempl, 
+                        locals : locals])
+                
+                // And finally, provide it as a local to the template which
+                // we will be rendering
+                locals['template'] = ['body' : body.toString() ]
+            }
+                          
+            gspFile.withReader { reader ->
+	        	setOutput(useOut)
 				def eng = new SimpleTemplateEngine(pluginInfo.dumpScripts)
 				def template = eng.createTemplate(reader)
-				template.make(locals).writeTo(outWriter)
-				outWriter.flush()
+				template.make(locals).writeTo(useOut)
+				useOut.flush()
 			}
         } catch(Exception e) {
             if (output) {
