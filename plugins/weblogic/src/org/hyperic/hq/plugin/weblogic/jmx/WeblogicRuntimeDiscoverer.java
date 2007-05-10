@@ -218,6 +218,7 @@ public class WeblogicRuntimeDiscoverer
                     serverQuery.getDiscover().getDomain().equals(domainName))
                 {
                     aServer.setId(new Integer(serverId));
+                    aServer.setPlaceholder(true);
                     //maintain existing installpath,
                     //MBeanServer CurrentDirectory might be different
                     if (installpath != null) {
@@ -304,7 +305,9 @@ public class WeblogicRuntimeDiscoverer
         }
         else {
             //out-of-the-box weblogic w/o changing ListenAddress
-            if (serverFqdn.equals("localhost")) {
+            if (serverFqdn.equals("localhost") ||
+                serverFqdn.equals("127.0.0.1"))
+            {
                 fqdn = this.aiplatform.getFqdn();
             }
             else {
