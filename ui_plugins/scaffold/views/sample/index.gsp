@@ -1,24 +1,20 @@
-<html>
-<body>
-  <p>
+<p>
     Congratulations!  
-  </p>
-  <p>
+</p>
+<p>
      Plugin Name: <b><%= pluginInfo.name %></b><br/>
      Description: <b><%= pluginInfo.description %></b><br/>
      Major Version: <b><%= pluginInfo.major %></b><br/>
      Minor Version: <b><%= pluginInfo.minor %></b><br/>
      Dumping Scripts: <b><%= pluginInfo.dumpScripts %></b><br/>
-  </p>
-  <p>
+</p>
+<p>
     You should rename your controller from 
     <b>@NEW_PLUGIN_PATH@/app/SampleController.groovy</b> to
     something cooler, like <b>ConsoleController.groovy</b>
-  </p>
-  <p>
+</p>
+<p>
     You'll also want to change init.groovy at <b>@NEW_PLUGIN_PATH@</b> to use
     a better description.  (which is currently 
     <i><%= pluginInfo.description %></i>)
-  </p>
-</body>
-</html>
+</p>
