@@ -363,6 +363,14 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getEventsBoss();
         return boss.deleteAlerts(this.auth.getAuthToken(), begin, end);
     }
+    
+    public void flushRegisteredTriggers()
+        throws ClientShellAuthenticationException, NamingException,
+               SessionNotFoundException, SessionTimeoutException,
+               RemoteException {
+        EventsBoss boss = bossManager.getEventsBoss();
+        boss.flushRegisteredTriggers(auth.getAuthToken());
+    }
 
     public List findResourceAlertDefinitions(AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,

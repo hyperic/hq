@@ -32,10 +32,10 @@ import org.hyperic.util.shell.ShellCommandInitException;
 public class ClientShell_alertdef 
     extends MultiwordShellCommand 
 {
-    private ClientShell shell;
+    private ClientShell _shell;
 
     public ClientShell_alertdef(ClientShell shell){
-        this.shell = shell;
+        _shell = shell;
     }
 
     public void init(String commandName, ShellBase shell)
@@ -43,10 +43,11 @@ public class ClientShell_alertdef
     {
         super.init(commandName, shell);
 
-        registerSubHandler("add",  new ClientShell_alertdef_add(this.shell));
-        registerSubHandler("create",  new ClientShell_alertdef_create(this.shell));
-        registerSubHandler("delete",  new ClientShell_alertdef_delete(this.shell));
-        registerSubHandler("list", new ClientShell_alertdef_list(this.shell));
+        registerSubHandler("add",  new ClientShell_alertdef_add(_shell));
+        registerSubHandler("create",  new ClientShell_alertdef_create(_shell));
+        registerSubHandler("delete",  new ClientShell_alertdef_delete(_shell));
+        registerSubHandler("list", new ClientShell_alertdef_list(_shell));
+        registerSubHandler("flush", new ClientShell_alertdef_flush(_shell));
     }
 
     public String getUsageShort(){
