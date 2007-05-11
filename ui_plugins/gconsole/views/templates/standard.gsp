@@ -5,5 +5,7 @@
 	
 <body>
 	<%= template.body %>
+
+<% render(partial:'footer') %>
 </body>
 </html>

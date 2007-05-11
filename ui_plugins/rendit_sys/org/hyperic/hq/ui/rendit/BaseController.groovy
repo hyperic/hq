@@ -18,13 +18,39 @@ abstract class BaseController {
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
-    Writer             output
     PluginLoadInfo     pluginInfo
     
     private invokeArgs           // Info about the request
     private File    viewDir      // Path to plugin/app/views
     private boolean rendered     // Have we already performed a rendering op?
     private String  templ        // Template to use (or null)
+    private List    outputStack = []  // Stack of Writers
+    private List    rendLocals = [] // Stack of locals in recursirve rendering
+    private boolean contentTypeSet = false
+
+    protected Writer getOutput() {
+        outputStack.empty ? null : outputStack[-1]
+    }
+    
+    private void pushOutput(Writer out) {
+        outputStack << out
+    }
+    
+    private Writer popOutput() {
+        outputStack.pop()
+    }
+    
+    private Map getRenderLocals() {
+        this.rendLocals.empty ? [:] : this.rendLocals[-1]
+    }
+    
+    private void pushRenderLocals(Map locals) {
+        this.rendLocals << locals
+    }
+    
+    private Map popRenderLocals() {
+        this.rendLocals.pop()
+    }
     
     private void setControllerName(String name) {
         this.controllerName = name
@@ -86,7 +112,8 @@ abstract class BaseController {
     protected getAddIns() {
 		[form_for : this.&form_for,
 		 url_for  : HtmlUtil.&url_for,
-		 h        : HtmlUtil.&escapeHtml]
+		 h        : HtmlUtil.&escapeHtml,
+		 render   : this.&render]
     }
         
     
@@ -135,36 +162,55 @@ abstract class BaseController {
         args = (args == null) ? [:] : args
         rendered = true
 
-        def useOut         = args.get('output') 
+        def partial        = args.partial
+        def useOut         = args.output 
         def ignoreDefTempl = args.get('ignoreDefaultTemplate', false)
-        def templ          = args.get('template')
+        def templ          = args.template
         def actionArg      = args.get('action', action)
         def contArg        = args.get('controller', controllerName)
 		def locals         = args.get('locals', [:])
         def subViewDir     = new File(viewDir, contArg)
 
-        if (useOut == null) {
-    		def outStream = invokeArgs.response.outputStream
-    		def outWriter = new OutputStreamWriter(outStream)
-
-            useOut = outWriter            
-        }
-        
-		if (args['inline']) {
-		    return render_inline(args['inline'], useOut)
-		}
-		
         if (templ == null && !ignoreDefTempl) {
 		    templ = getTemplate()
 		    ignoreDefTempl = true
         }
 
-        invokeArgs.response.setContentType(args.get('type', 'text/html'))
-		locals.putAll(addIns)
+        if (!contentTypeSet) {
+            invokeArgs.response.setContentType(args.get('type', 'text/html'))
+            contentTypeSet = true
+        }
+        
+        // Merge previously specified locals with new ones
+        def useLocals = new HashMap(addIns)
+        useLocals.putAll(renderLocals)
+        useLocals.putAll(locals)
+        
         try {
             def gspFile
-            			  
-            if (templ == null) {
+            
+            if (useOut) {
+                pushOutput(useOut)
+            } else if (outputStack.empty) {
+        		def outStream = invokeArgs.response.outputStream
+        		def outWriter = new OutputStreamWriter(outStream)
+                pushOutput(outWriter)
+            } else {
+                pushOutput(outputStack[-1])   
+            }
+            pushRenderLocals(useLocals)
+            
+            if (partial) {
+                // If we're in a template context, use that dir
+                if (templ != null) {
+                    gspFile = new File(viewDir, 'templates')
+                    gspFile = new File(gspFile, "_${partial}.gsp")
+                } else {
+                    gspFile = new File(subViewDir, "_${partial}.gsp")
+                }
+            } else if (args['inline']) {
+    		    return render_inline(args['inline'], output)
+    		} else if (templ == null) { 
                 gspFile = new File(subViewDir, actionArg + '.gsp')
             } else {
                 // When rendering a template, we initialize the 'body' part
@@ -174,32 +220,31 @@ abstract class BaseController {
                     
                 // Recurse, and render the body to insert into the template
                 def body = new StringWriter()
+                log.info "Locals are ${renderLocals}"
                 render([action : actionArg, output : body, 
                         ignoreDefaultTemplate : ignoreDefTempl, 
-                        locals : locals])
+                        locals : renderLocals])
                 
                 // And finally, provide it as a local to the template which
                 // we will be rendering
-                locals['template'] = ['body' : body.toString() ]
+                renderLocals['template'] = ['body' : body.toString() ]
             }
                           
             gspFile.withReader { reader ->
-	        	setOutput(useOut)
 				def eng = new SimpleTemplateEngine(pluginInfo.dumpScripts)
 				def template = eng.createTemplate(reader)
-				template.make(locals).writeTo(useOut)
-				useOut.flush()
+				template.make(renderLocals).writeTo(output)
+				output.flush()
 			}
         } catch(Exception e) {
-            if (output) {
-            	def pw = new PrintWriter(output)
-            	e.printStackTrace(pw)
-				pw.flush()
-            	output.flush()
-            }
+            def pw = new PrintWriter(output)
+            e.printStackTrace(pw)
+			pw.flush()
+            output.flush()
             throw e
         } finally {
-            output = null
+            popRenderLocals()
+            popOutput()
         }
     }
     
