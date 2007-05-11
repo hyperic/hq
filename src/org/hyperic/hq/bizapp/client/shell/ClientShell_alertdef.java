@@ -49,6 +49,7 @@ public class ClientShell_alertdef
         registerSubHandler("disable", new ClientShell_alertdef_disable(_shell));
         registerSubHandler("enable", new ClientShell_alertdef_enable(_shell));
         registerSubHandler("list", new ClientShell_alertdef_list(_shell));
+        registerSubHandler("flush", new ClientShell_alertdef_flush(_shell));
     }
 
     public String getUsageShort(){

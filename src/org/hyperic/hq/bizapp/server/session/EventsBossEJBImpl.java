@@ -96,6 +96,7 @@ import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
+import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -1399,6 +1400,18 @@ public class EventsBossEJBImpl
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getRTM().getAllTriggers();
+    }
+    
+    /**
+     * Flush registered triggers cache
+     * @throws SessionTimeoutException 
+     * @throws SessionNotFoundException 
+     * @ejb:interface-method
+     */
+    public void flushRegisteredTriggers(int sessionID)
+        throws SessionNotFoundException, SessionTimeoutException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        RegisteredTriggers.reinitialize();
     }
 
     /**
