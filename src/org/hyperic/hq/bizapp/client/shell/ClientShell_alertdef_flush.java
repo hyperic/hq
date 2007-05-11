@@ -50,7 +50,7 @@ public class ClientShell_alertdef_flush extends ShellCommandBase {
                 _entityFetcher.flushRegisteredTriggers();
             } catch (Exception e) {
                 throw new ShellCommandExecException(
-                                                    "Unable to enable alert definitions", e);
+                    "Unable to enable alert definitions", e);
             }
         }
         else {
@@ -67,7 +67,7 @@ public class ClientShell_alertdef_flush extends ShellCommandBase {
     }
 
     public String getUsageHelp(String[] args) {
-        return "    " + this.getUsageShort() + "\n" +
+        return "    " + this.getUsageShort() + "\n\n" +
                "    triggers - flush triggers cache";
     }
 }
