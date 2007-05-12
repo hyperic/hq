@@ -55,7 +55,11 @@ public class ActionDAO extends HibernateDAO {
 
     void removeActions(AlertDefinition def) {
         for (Iterator it = def.getActions().iterator(); it.hasNext(); ) {
-            remove(it.next());
+            Action action = (Action) it.next();
+            if (action.getParent() != null) {
+                action.getParent().getChildrenBag().remove(action);
+            }
+            remove(action);
         }
         def.clearActions();
     }
