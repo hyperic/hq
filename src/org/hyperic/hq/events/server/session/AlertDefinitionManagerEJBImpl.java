@@ -187,7 +187,9 @@ public class AlertDefinitionManagerEJBImpl
         
         // Delete the alerts
         watch.markTimeBegin("deleteByAlertDefinition");
-        dao.deleteByAlertDefinition(alertdef);
+        if (force) {
+            dao.deleteByAlertDefinition(alertdef);
+        }
         watch.markTimeEnd("deleteByAlertDefinition");
 
         // Remove the conditions
