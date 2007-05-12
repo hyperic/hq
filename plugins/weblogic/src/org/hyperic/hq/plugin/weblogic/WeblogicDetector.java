@@ -120,8 +120,10 @@ public class WeblogicDetector
 
         if (isWin32()) {
             String version = getTypeInfo().getVersion();
-            File dir = WeblogicFinder.getAdminServicePath(version);
-            if (dir != null) {
+            List dirs = WeblogicFinder.getAdminServicePaths(version);
+            for (int i=0; i<dirs.size(); i++) {
+                File dir = (File)dirs.get(i);
+                log.debug("Checking service path=" + dir);
                 search(dir, servers);
             }
         }

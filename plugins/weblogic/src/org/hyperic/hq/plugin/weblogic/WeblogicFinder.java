@@ -163,29 +163,27 @@ public class WeblogicFinder {
         return dir;
     }
 
-    static File getAdminServicePath(String version) {
-        WeblogicService service = getWeblogicService(version, true);
-        if (service == null) {
-            return null;
+    static List getAdminServicePaths(String version) {
+        List paths = new ArrayList();
+        List services = getWeblogicServices(version, true);
+        for (int i=0; i<services.size(); i++) {
+            WeblogicService service =
+                (WeblogicService)services.get(i);
+            paths.add(new File(service.getExecDir()));
         }
-
-        return new File(service.getExecDir());
+        return paths;
     }
 
-    private static WeblogicService getWeblogicService(String version,
-                                                      boolean adminOnly) {
+    private static List getWeblogicServices(String version, boolean adminOnly) {
+        List wls = new ArrayList();
         List services = getWindowsServices();
-        int size = services.size();
-        if (size == 0) {
-            return null;
-        }
 
         int v = 0;
         if (version != null) {
             v = version.charAt(0);
         }
 
-        for (int i=0; i<size; i++) {
+        for (int i=0; i<services.size(); i++) {
             WeblogicService service =
                 (WeblogicService)services.get(i);
 
@@ -198,11 +196,21 @@ public class WeblogicFinder {
                     continue;
                 }
             }
-
-            return service;
+            wls.add(service);
         }
 
-        return null;
+        return wls;
+    }
+
+    private static WeblogicService getWeblogicService(String version,
+                                                      boolean adminOnly) {
+        List services = getWeblogicServices(version, adminOnly);
+        if (services.size() == 0) {
+            return null;
+        }
+        else {
+            return (WeblogicService)services.get(0);
+        }
     }
 
     public static File getInstallRoot(String dir) {
