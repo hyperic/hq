@@ -169,6 +169,7 @@ public class AlertDefinitionManagerEJBImpl
                  it.hasNext(); ) {
                 Action act = (Action) it.next();
                 act.setParent(null);
+                act.getChildrenBag().clear();
             }
             
             // Disassociated from escalations
@@ -187,7 +188,9 @@ public class AlertDefinitionManagerEJBImpl
         
         // Delete the alerts
         watch.markTimeBegin("deleteByAlertDefinition");
-        dao.deleteByAlertDefinition(alertdef);
+        if (force) {
+            dao.deleteByAlertDefinition(alertdef);
+        }
         watch.markTimeEnd("deleteByAlertDefinition");
 
         // Remove the conditions
