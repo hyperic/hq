@@ -33,6 +33,7 @@ import java.util.List;
 import javax.ejb.FinderException;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.util.pager.PageControl;
@@ -56,6 +57,10 @@ public interface PermissionManager {
      */
     public void check(Integer subject, ResourceType type,
                       Integer instanceId, String operation)
+        throws PermissionException;
+
+    public void check(Integer subject, ResourceType type,
+                      Integer instanceId, Operation operation)
         throws PermissionException;
 
      /**
