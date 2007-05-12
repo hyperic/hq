@@ -39,6 +39,8 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -63,6 +65,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * <p> Stores Events to and deletes Events from storage
@@ -80,6 +83,8 @@ public class AlertDefinitionManagerEJBImpl
     extends SessionBase
     implements SessionBean 
 {
+    private Log log = LogFactory.getLog(AlertDefinitionManagerEJBImpl.class);
+    
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
@@ -111,28 +116,43 @@ public class AlertDefinitionManagerEJBImpl
     private boolean deleteAlertDefinition(AuthzSubjectValue subj,
                                           AlertDefinition alertdef,
                                           boolean force)
-        throws RemoveException, PermissionException 
-    {
+        throws RemoveException, PermissionException {
+        StopWatch watch = new StopWatch();
+        
+        watch.markTimeBegin("canManageAlerts");
         canManageAlerts(subj, alertdef);
+        watch.markTimeEnd("canManageAlerts");
         
         boolean hasChildren = alertdef.getChildren().size() > 0;
         
         // If there are any children, delete them, too
+        watch.markTimeBegin("delete children");
         for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext();)
         {
             AlertDefinition child = (AlertDefinition) it.next();
             deleteAlertDefinition(subj, child, force);
             it.remove();
         }
+        watch.markTimeEnd("delete children");
 
         // Get rid of their triggers first
+        watch.markTimeBegin("removeTriggers");
         TriggerDAO tdao = getTriggerDAO();
         tdao.removeTriggers(alertdef);
+        watch.markTimeEnd("removeTriggers");
+
+        // Delete escalation state
+        watch.markTimeBegin("endEscalation");
+        if (alertdef.getEscalation() != null) {
+            EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
+        }
+        watch.markTimeEnd("endEscalation");
 
         AlertDAO dao = getAlertDAO();
         // See if there are any alerts
         if (hasChildren || (!force && dao.countAlerts(alertdef).intValue() > 0))
         {
+            watch.markTimeBegin("mark deleted");
             alertdef.setDeleted(true);
             alertdef.setEnabled(false);
             
@@ -157,26 +177,37 @@ public class AlertDefinitionManagerEJBImpl
             // Disassociate from parent, too
             alertdef.setParent(null);
             
+            watch.markTimeEnd("mark deleted");
+            if (log.isDebugEnabled()) {
+                log.debug("deleteAlertDefinition: " + watch);
+            }
+
             return true;
         }
         
-        // Delete escalation state
-        if (alertdef.getEscalation() != null) {
-            EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
-        }
-
         // Delete the alerts
+        watch.markTimeBegin("deleteByAlertDefinition");
         dao.deleteByAlertDefinition(alertdef);
+        watch.markTimeEnd("deleteByAlertDefinition");
 
         // Remove the conditions
+        watch.markTimeBegin("removeConditions");
         getConditionDAO().removeConditions(alertdef);
+        watch.markTimeEnd("deleteByAlertDefinition");
         
         // Remove the actions
+        watch.markTimeBegin("removeActions");
         getActionDAO().removeActions(alertdef);
+        watch.markTimeEnd("removeActions");
         
         // Actually remove the definition
+        watch.markTimeBegin("remove");
         getAlertDefDAO().remove(alertdef);
+        watch.markTimeBegin("remove");
         
+        if (log.isDebugEnabled()) {
+            log.debug("deleteAlertDefinition: " + watch);
+        }
         return false;
     }
 

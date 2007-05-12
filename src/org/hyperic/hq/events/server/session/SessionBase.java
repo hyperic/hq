@@ -26,6 +26,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.naming.InitialContext;
@@ -38,7 +39,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -110,13 +114,29 @@ public abstract class SessionBase {
      * @throws PermissionException if the user is not authorized to perform the
      * operation on the resource
      */
+    private static Map resourceTypes = new HashMap();
+    private static Map operations = new HashMap();
+    
     private static void checkPermission(Integer subjectId,
                                         String rtName, Integer instId,
-                                        String operation)
+                                        String opName)
         throws PermissionException {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
-        // note, using the "SLOWER" permission check
-        permMgr.check(subjectId, rtName, instId, operation);
+
+        if (!resourceTypes.containsKey(rtName)) {
+            resourceTypes.put(rtName, 
+            new ResourceTypeDAO(DAOFactory.getDAOFactory()).findByName(rtName));
+        }
+        ResourceType resType = (ResourceType) resourceTypes.get(rtName);
+        
+        if (!operations.containsKey(opName)) {
+            operations.put(opName,
+                           new OperationDAO(DAOFactory.getDAOFactory())
+                                .findByTypeAndName(resType, opName));
+        }
+        Operation operation = (Operation) operations.get(opName);
+        
+        permMgr.check(subjectId, resType, instId, operation);
         // Permission Check Succesful
     }
 
