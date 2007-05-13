@@ -63,6 +63,10 @@ public class TriggerDAO extends HibernateDAO {
     }
 
     public RegisteredTrigger findById(Integer id) {
-        return (RegisteredTrigger)super.findById(id);
+        return (RegisteredTrigger) super.findById(id);
+    }
+
+    public RegisteredTrigger get(Integer id) {
+        return (RegisteredTrigger) super.get(id);
     }
 }
