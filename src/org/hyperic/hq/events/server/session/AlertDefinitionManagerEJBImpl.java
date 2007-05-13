@@ -150,8 +150,11 @@ public class AlertDefinitionManagerEJBImpl
 
         AlertDAO dao = getAlertDAO();
         // See if there are any alerts
+        watch.markTimeBegin("countAlerts");
         if (hasChildren || (!force && dao.countAlerts(alertdef).intValue() > 0))
         {
+            watch.markTimeEnd("countAlerts");
+            
             watch.markTimeBegin("mark deleted");
             alertdef.setDeleted(true);
             alertdef.setEnabled(false);
@@ -184,7 +187,8 @@ public class AlertDefinitionManagerEJBImpl
 
             return true;
         }
-        
+        watch.markTimeEnd("countAlerts");
+
         // Delete the alerts
         watch.markTimeBegin("deleteByAlertDefinition");
         if (force) {
@@ -563,7 +567,11 @@ public class AlertDefinitionManagerEJBImpl
      * @return the ID of the alert definition
      */
     public Integer getIdFromTrigger(Integer tid) {
-        RegisteredTrigger trigger = getTriggerDAO().findById(tid);
+        RegisteredTrigger trigger = getTriggerDAO().get(tid);
+        if (trigger == null) {
+            return null;
+        }
+        
         AlertDefinition def = trigger.getAlertDefinition();
         
         if (def != null && def.isEnabled() && !def.isDeleted()) {
