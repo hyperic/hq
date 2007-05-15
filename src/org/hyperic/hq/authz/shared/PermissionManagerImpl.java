@@ -116,9 +116,6 @@ public class PermissionManagerImpl
                       String operation)
         throws PermissionException {}
 
-    public void check(Integer subject, ResourceType type, Integer instanceId, Operation operation)
-        throws PermissionException {}
-
     public boolean hasAdminPermission(AuthzSubjectValue who) {
         return true;
     }
