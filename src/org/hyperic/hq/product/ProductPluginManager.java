@@ -363,6 +363,8 @@ public class ProductPluginManager extends PluginManager {
             PluginManager mgr = mgrs[i];
             mgr.init(this);
             this.managers.put(mgr.getName(), mgr);
+            log.debug(mgr.getName() + " plugins enabled=" +
+                      isPluginTypeEnabled(mgr.getName()));
         }
     }
 
@@ -585,6 +587,11 @@ public class ProductPluginManager extends PluginManager {
                 this.log.error("createPlugin=" + plugin.getName(), e);
             }
         }
+    }
+
+    private boolean isPluginTypeEnabled(String type) {
+        String typeProp = getPropertyKey(type, "disable");
+        return !"true".equals(getProperty(typeProp));
     }
 
     public boolean isLoadablePluginName(String name) {
@@ -887,6 +894,9 @@ public class ProductPluginManager extends PluginManager {
                 if(type.equals(ProductPlugin.TYPE_PRODUCT))
                     continue;
 
+                if (!isPluginTypeEnabled(type)) {
+                    continue;
+                }
                 PluginManager pm =
                     (PluginManager)managers.get(type);
 
