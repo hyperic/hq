@@ -136,7 +136,7 @@ public abstract class SessionBase {
         }
         Operation operation = (Operation) operations.get(opName);
         
-        permMgr.check(subjectId, resType, instId, operation);
+        permMgr.check(subjectId, resType.getId(), instId, operation.getId());
         // Permission Check Succesful
     }
 
