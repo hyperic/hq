@@ -1,5 +1,8 @@
 package org.hyperic.hq.ui.rendit.helpers
 
+import org.hyperic.hq.ui.rendit.html.FormGenerator
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import groovy.text.SimpleTemplateEngine
 
 
@@ -13,8 +16,8 @@ import groovy.text.SimpleTemplateEngine
  *            .gsp which is being rendered
  *   controller:  Specifies a controller (other than the current one) to
  *                render the view for
- *   type:    Allows the caller to explicitly specify the content type.
- *            Defaults to text/html
+ *   contentType:  Allows the caller to explicitly specify the content type.
+ *                 Defaults to text/html
  *   output:  If specified, is a Writer to which the output of the rendering
  *            will be written.  Defaults to the request output stream
  *   template:  If specified, provides a template to render.  The body
@@ -22,6 +25,11 @@ import groovy.text.SimpleTemplateEngine
  *              arguments (action, etc.).  You can also use setTemplate()
  *              in the constructor of your controller to always have a 
  *              default template
+ *   
+ * Internal arguments:
+ *   setContentType:  A closure that will set the content type
+ *   createDefaultOutput:  A closure which will return a Writer that can be
+ *                         used to send the response.  
  *
  * Examples:
  *   
@@ -36,16 +44,36 @@ import groovy.text.SimpleTemplateEngine
  *   - Writes the text to the browser
  */
 class RenderFrame {
-    private Map            opts
-    private controller
+    Log log = LogFactory.getLog(RenderFrame)
+     
+    private Map    opts
+    private Writer output
+    private        controller
+    private        parent
     
     RenderFrame(opts, controller) {
-        this.opts       = opts
-        this.controller = controller
+        this(opts, controller, null)
     }
     
-    Writer getOutput() {
-        opts.output
+    RenderFrame(opts, controller, parent) {
+        this.opts       = opts
+        this.controller = controller
+        this.parent     = parent
+
+        def locals = new HashMap(opts['locals'])
+        locals.putAll(implicitLocals)
+        this.opts = new HashMap(opts)
+        this.opts['locals'] = locals
+    }
+
+    private Map getImplicitLocals() {
+        [formFor : this.&formFor,
+         ]
+    }
+
+    private def formFor(formOpts, formClosure) {
+        def form = new FormGenerator(formOpts)
+        form.write(output, formClosure)
     }
     
     /**
@@ -57,70 +85,75 @@ class RenderFrame {
     }
     
     def render() {
+        def contentType    = opts.get('contentType', 'text/html')
         def ignoreDefTempl = opts.get('ignoreDefaultTemplate', false)
+        def partial        = opts.partial
+        def createOutput   = opts.createDefaultOutput
+            output         = opts.output
         def templ          = opts.template
         def actionArg      = opts.get('action', controller.action)
         def contArg        = opts.get('controller', controller.controllerName)
 		def locals         = opts.get('locals', [:])
         def subViewDir     = new File(controller.viewDir, contArg)
+        def partialDir     = opts.get('partialDir', subViewDir)
 
-        if (templ == null && !ignoreDefTempl) {
-		    templ = controller.template
-		    ignoreDefTempl = true
-        }
-
-/*
-        if (!contentTypeSet) {
-            invokeArgs.response.setContentType(args.get('type', 'text/html'))
-            contentTypeSet = true
-        }
-*/
+        opts['setContentType'](contentType)
         
-        // Merge previously specified locals with new ones
-        def useLocals = new HashMap(controller.addIns)
-        useLocals.putAll(locals)
+        if (!output)
+            output = createOutput()
+            
+        // Merge locals with parent, if we have one
+        if (parent) {
+            def parentLocals = new HashMap(parent.opts.get('locals', [:]))
+            parentLocals.putAll(locals)
+            locals = parentLocals
+        }
+        locals = new HashMap(locals)
         
         try {
             def gspFile
-            /*
-            if (partial) {
-                // If we're in a template context, use that dir
-                if (templ != null) {
-                    gspFile = new File(viewDir, 'templates')
-                    gspFile = new File(gspFile, "_${partial}.gsp")
-                } else {
-                    gspFile = new File(subViewDir, "_${partial}.gsp")
-                }
-            } else if (args['inline']) {
-    		    return render_inline(args['inline'], output)
-    		} else 
-    		if (templ == null) {
-    		    */ 
-                gspFile = new File(subViewDir, "${actionArg}.gsp")
-    		    /*
-            } else {
-                // When rendering a template, we initialize the 'body' part
+    	    if (opts.inline) {
+                return output.write(opts.inline, 0, opts.inline.length())
+    	    } else if(partial) { 
+                gspFile = new File(partialDir, "_${partial}.gsp")
+    	    } else if(templ) {
+    	        // When rendering a template, we initialize the 'body' part
                 // with the original body
-                gspFile = new File(controller.viewDir, 'templates')
-                gspFile = new File(gspFile, templ + '.gsp')
+                def templateDir = new File(controller.viewDir, 'templates')
+                gspFile = new File(templateDir, "${templ}.gsp")
                     
                 // Recurse, and render the body to insert into the template
                 def body = new StringWriter()
-                //log.info "Locals are ${renderLocals}"
-                
-                render([action : actionArg, output : body, 
-                        ignoreDefaultTemplate : ignoreDefTempl, 
-                        locals : renderLocals])
+    	        def passOpts = new HashMap(opts)
+    	        passOpts.remove('template')
+    	        passOpts['ignoreDefaultTemplate'] = ignoreDefTempl
+    	        passOpts['output'] = body
+                def frame = new RenderFrame(passOpts, controller, this)
+    	        frame.render()
                 
                 // And finally, provide it as a local to the template which
                 // we will be rendering
-                renderLocals['template'] = ['body' : body.toString() ]
-            }
-*/
+                locals['template'] = ['body' : body.toString() ]
+                partialDir = templateDir
+    	    } else {
+                gspFile = new File(subViewDir, "${actionArg}.gsp")
+    	    }
+            
             gspFile.withReader { reader ->
 				def eng = new SimpleTemplateEngine(controller.pluginInfo.dumpScripts)
 				def template = eng.createTemplate(reader)
-				template.make(useLocals).writeTo(output)
+				locals['render'] = { subOpts ->
+                    // Setup a new closure for 'render' so that the context
+                    // gets copied around.  Also merge parent rendering options
+                    // with sub-options
+				    def passOpts = new HashMap(opts)
+				    passOpts.putAll(subOpts)
+                    if (!passOpts['output'])
+                        passOpts['output'] = output
+                    passOpts['partialDir'] = partialDir                        
+                    new RenderFrame(passOpts, controller, this).render()
+				}
+				template.make(locals).writeTo(output)
 				output.flush()
 			}
         } catch(Exception e) {
@@ -130,10 +163,5 @@ class RenderFrame {
             output.flush()
             throw e
         }
-    }
-    
-    private def render_inline(text, writer) {
-        writer.write(text, 0, text.length())
-        writer.flush()
     }
 }

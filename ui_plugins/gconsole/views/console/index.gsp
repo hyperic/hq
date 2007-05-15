@@ -1,15 +1,13 @@
-<% form_for([action:'index']) { f -> %>
+<% formFor([action:'index']) { f -> %>
 <p>
-  <%= f.text_area([name:'code_input', value:r['last_code']]) %>
+  <%= f.text_area(name:'code_input', value:r['last_code']) %>
 </p>
 <p>
   <%= f.submit_button([label:'Execute']) %>
 </p>
 <% } %>
-  
-<br/>
-Result:
-<blockquote><code>
-  <%= h(r['last_result']) %>
-</code></blockquote>
+
+<div>
+  <% render(partial:'result', locals:[foo:'bar']) %>
+</div>
   

@@ -1,1 +1,4 @@
-Now is the time for all good men to come to the aid of their country
+<hr/>
+<div>
+  The Nifty Groovy Console
+</div>

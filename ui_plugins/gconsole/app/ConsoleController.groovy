@@ -2,7 +2,7 @@ import org.hyperic.hq.ui.rendit.BaseController
 
 class ConsoleController extends BaseController { 
 	def ConsoleController() {
-	    setTemplate('standard')
+        setTemplate('standard')
 	}
 	
     def index = { params ->
@@ -16,6 +16,7 @@ class ConsoleController extends BaseController {
 			r['last_result'] = '3'
 		}
     	
+    	//render(inline:'Hello world')
     	render(locals:[r:r])
     }
     

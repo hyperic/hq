@@ -12,32 +12,18 @@ import org.hyperic.hq.ui.rendit.helpers.RenderFrame
  * a controller method is being requested.
  */
 abstract class BaseController { 
-    Log log = LogFactory.getLog(this.getClass())
+    Log log = LogFactory.getLog(BaseController)
     
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
     PluginLoadInfo     pluginInfo
+    String             template
     
     private invokeArgs           // Info about the request
     private File    viewDir      // Path to plugin/app/views
     private boolean rendered     // Have we already performed a rendering op?
-    private String  templ        // Template to use (or null)
-    private List    renderStack = []  // Stack of RenderFrames
-    private boolean contentTypeSet = false
 
-    protected RenderFrame getRenderFrame() {
-        renderStack.empty ? null : renderStack[-1]
-    }
-
-    private void pushRenderFrame(RenderFrame frame) {
-        renderStack << frame
-    }
-    
-    private RenderFrame popRenderFrame() {
-        renderStack.pop()
-    }
-    
     private void setControllerName(String name) {
         this.controllerName = name
     }
@@ -46,14 +32,6 @@ abstract class BaseController {
         this.invokeArgs = args
     }
     
-    protected void setTemplate(String templ) {
-        this.templ = templ
-    }
-    
-    public String getTemplate() {
-        this.templ
-    }
-
     def getInvokeArgs() { invokeArgs }
     
     void setPluginDir(File pluginDir) {
@@ -100,44 +78,35 @@ abstract class BaseController {
      * from this base method)
      */
     def getAddIns() {
-		[form_for : this.&form_for,
-		 url_for  : HtmlUtil.&url_for,
+		[url_for  : HtmlUtil.&url_for,
 		 h        : HtmlUtil.&escapeHtml]
     }
     
     protected void render(opts) {
-        rendered = true
         opts = (opts == null) ? [:] : opts
 
-        def frame
-        if (!renderFrame)  {
-            // Setup the base frame
-            // TODO:  We may want to move getting the outputStream into the
-            //        actual renderframe, since we don't know exactly if it
-            //        needs to set the content type, etc.
-            if (!opts.output) {
-                def outStream = invokeArgs.response.outputStream
-                def outWriter = new OutputStreamWriter(outStream)
-                opts.output = outWriter
-            }
-            
-            frame = new RenderFrame(opts, this)
-        } else {
-            frame = renderFrame.createNewFrame(opts)
+        if (rendered) {
+            throw new IllegalArgumentException("Only able to render once " + 
+                                               "per controller call")
         }
-        
-        try {
-            pushRenderFrame(frame)
-            rendered = true
-            frame.render()
-        } finally {
-            popRenderFrame()
+        rendered = true
+        opts['createDefaultOutput'] = {
+            def outStream = invokeArgs.response.outputStream
+            new OutputStreamWriter(outStream)
         }
-    }
-    
-    private def form_for(opts, form_closure) {
-        assert renderFrame
-        def form = new FormGenerator(formOpts:opts)
-        form.write(renderFrame.output, form_closure)
+        opts['setContentType'] = { contentType ->
+            invokeArgs.response.setContentType(contentType)
+        }
+        def locals    = opts.get('locals', [:])
+        def newLocals = new HashMap(addIns)
+        newLocals.putAll(locals)
+        opts = new HashMap(opts) // Clone
+        opts['locals'] = newLocals
+        if (!opts['template'])
+            opts['template'] = template
+        if (!opts['partialDir'])
+            opts['partialDir'] = new File(viewDir, controllerName) 
+                
+        new RenderFrame(opts, this).render()
     }
 }

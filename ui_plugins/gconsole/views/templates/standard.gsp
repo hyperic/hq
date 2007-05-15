@@ -6,6 +6,6 @@
 <body>
 	<%= template.body %>
 
-<% render(partial:'footer') %>
+    <% render(partial:'footer') %>
 </body>
 </html>

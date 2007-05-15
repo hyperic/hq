@@ -8,6 +8,7 @@ class HtmlUtil {
     }
     
     static String url_for(opts) {
+        println "Ops are ${opts}"
         def res = ''
         if (opts['action']) {
         	res += opts['action'] + '.hqu'    
