@@ -227,16 +227,17 @@ public class ScheduleThread
     private void logCache(String basicMsg, String dsn, String msg,
                           Exception exc, boolean printStack){
         String oldMsg;
+        boolean isDebug = this.log.isDebugEnabled();
 
         synchronized(this.dsnErrors){
             oldMsg = (String)this.dsnErrors.get(dsn);
         }
 
-        if(oldMsg != null && oldMsg.equals(msg)){
+        if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
             return;
         }
 
-        if(this.log.isDebugEnabled()){
+        if(isDebug){
             this.log.error(basicMsg + " while processing Metric '" + dsn + "'",
                            exc);
         } else {
