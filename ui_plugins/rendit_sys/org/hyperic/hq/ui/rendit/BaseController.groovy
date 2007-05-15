@@ -5,7 +5,7 @@ import org.hyperic.hq.ui.rendit.html.HtmlUtil
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.hyperic.hq.ui.rendit.PluginLoadInfo
-import org.hyperic.hq.ui.rendit.helpers.RenderFrame
+import org.hyperic.hq.ui.rendit.render.RenderFrame
 
 /**
  * The base controller is invoked by the dispatcher when it detects that

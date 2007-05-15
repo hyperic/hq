@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit.helpers
+package org.hyperic.hq.ui.rendit.render
 
 import org.hyperic.hq.ui.rendit.html.FormGenerator
 import org.apache.commons.logging.Log
