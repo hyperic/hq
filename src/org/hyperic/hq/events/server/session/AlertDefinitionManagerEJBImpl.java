@@ -123,11 +123,9 @@ public class AlertDefinitionManagerEJBImpl
         canManageAlerts(subj, alertdef);
         watch.markTimeEnd("canManageAlerts");
         
-        boolean hasChildren = alertdef.getChildren().size() > 0;
-        
         // If there are any children, delete them, too
         watch.markTimeBegin("delete children");
-        for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext();)
+        for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext(); )
         {
             AlertDefinition child = (AlertDefinition) it.next();
             deleteAlertDefinition(subj, child, force);
@@ -149,12 +147,7 @@ public class AlertDefinitionManagerEJBImpl
         watch.markTimeEnd("endEscalation");
 
         AlertDAO dao = getAlertDAO();
-        // See if there are any alerts
-        watch.markTimeBegin("countAlerts");
-        if (hasChildren || (!force && dao.countAlerts(alertdef).intValue() > 0))
-        {
-            watch.markTimeEnd("countAlerts");
-            
+        if (!force || alertdef.getChildren().size() > 0) {
             watch.markTimeBegin("mark deleted");
             alertdef.setDeleted(true);
             alertdef.setEnabled(false);
@@ -187,13 +180,10 @@ public class AlertDefinitionManagerEJBImpl
 
             return true;
         }
-        watch.markTimeEnd("countAlerts");
 
         // Delete the alerts
         watch.markTimeBegin("deleteByAlertDefinition");
-        if (force) {
-            dao.deleteByAlertDefinition(alertdef);
-        }
+        dao.deleteByAlertDefinition(alertdef);
         watch.markTimeEnd("deleteByAlertDefinition");
 
         // Remove the conditions
@@ -338,7 +328,9 @@ public class AlertDefinitionManagerEJBImpl
         throws AlertConditionCreateException, ActionCreateException,
                FinderException, RemoveException 
     {
-        AlertDefinition aldef = getAlertDefDAO().findById(adval.getId());
+        AlertDefinitionDAO dao = getAlertDefDAO();
+        ActionDAO actDao = getActionDAO();
+        AlertDefinition aldef = dao.findById(adval.getId());
         
         // See if the conditions changed
         if (adval.getAddedConditions().size()   > 0 ||
@@ -349,8 +341,6 @@ public class AlertDefinitionManagerEJBImpl
             // we'll create new conditions and update the alert
             // definition, but we won't remove the old conditions.
             AlertConditionValue[] conds = adval.getConditions();
-            AlertDefinitionDAO r = getAlertDefDAO();
-
             aldef.clearConditions();
             for (int i = 0; i < conds.length; i++) {
                 RegisteredTrigger trigger = null;
@@ -372,15 +362,14 @@ public class AlertDefinitionManagerEJBImpl
             // we'll create new actions and update the alert
             // definition, but we won't remove the old conditions.
             ActionValue[] actions = adval.getActions();
-            AlertDefinitionDAO r = getAlertDefDAO();
-
             aldef.clearActions();
             for (int i = 0; i <  actions.length; i++) {
                 Action parent = null;
                 
                 if (actions[i].getParentId() != null)
                     parent = getActionDAO().findById(actions[i].getParentId());
-                aldef.createAction(actions[i], parent);
+                
+                actDao.save(aldef.createAction(actions[i], parent));
             }
         }
 
@@ -409,6 +398,9 @@ public class AlertDefinitionManagerEJBImpl
             aldef.setEscalation(escl);
         }
         
+        // Alert definitions are the root of the cascade relationship, so
+        // we must explicitly save them
+        dao.save(aldef);
         return aldef.getAlertDefinitionValue();
     }
 
