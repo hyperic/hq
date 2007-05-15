@@ -19,6 +19,7 @@ abstract class BaseController {
     String             controllerName  // Name of the controller
     PluginLoadInfo     pluginInfo
     String             template
+    ResourceBundle     bundle
     
     private invokeArgs           // Info about the request
     private File    viewDir      // Path to plugin/app/views
@@ -51,7 +52,9 @@ abstract class BaseController {
      */
     def dispatchRequest() {
 		def params = invokeArgs.request.parameterMap
-        
+    
+		bundle = ResourceBundle.getBundle('MyBundle')
+		log.info "Found bundle ${bundle}"
     	def runner = this."$action"
     	if (runner == null)
         	throw new IllegalArgumentException("Unknown action [$action]")
