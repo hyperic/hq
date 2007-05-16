@@ -294,4 +294,21 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 .setInteger(0, rid.intValue())
                 .setString(1, "ARG1").list();
     }
+
+    List findByCategory(String cat) {
+        String sql =
+            "select distinct m from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
+            "join t.category c " +
+            "where m.enabled = true " +
+            "and m.interval is not null and " +
+            "c.name = ?";
+
+        return getSession().createQuery(sql)
+            .setString(0, cat)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findByCategory")
+            .list();
+    }
 }

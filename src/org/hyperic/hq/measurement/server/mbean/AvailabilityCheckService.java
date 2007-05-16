@@ -25,17 +25,12 @@
 
 package org.hyperic.hq.measurement.server.mbean;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.common.SessionMBeanBase;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
@@ -56,11 +50,12 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.server.session.SRNCache;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -71,17 +66,6 @@ public class AvailabilityCheckService
     extends SessionMBeanBase
     implements AvailabilityCheckServiceMBean
 {
-    private static final String ENABLED_AVAIL_METRICS_SQL = 
-        "SELECT m.id, m.mtime, m.coll_interval, mt.appdef_type, m.instance_id " +
-        "FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
-             "EAM_MEASUREMENT_CAT cat, EAM_MONITORABLE_TYPE mt " +
-        "WHERE m.enabled = DB_TRUE_TOKEN AND m.coll_interval IS NOT NULL AND " +
-             "m.template_id = t.id AND t.monitorable_type_id = mt.id AND " +
-             "t.category_id = cat.id AND cat.name = '" +
-             MeasurementConstants.CAT_AVAILABILITY + "'";
-       
-    private static final String DATASOURCE = HQConstants.DATASOURCE;    
-    
     private final String logCtx = AvailabilityCheckService.class.getName();
     private Log log = LogFactory.getLog(logCtx);
 
@@ -89,12 +73,20 @@ public class AvailabilityCheckService
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     
-    private DataManagerLocal dataMan;
+    private DataManagerLocal _dataMan;
     private DataManagerLocal getDataMan() {
-        if (dataMan == null)
-            dataMan = DataManagerEJBImpl.getOne();
+        if (_dataMan == null)
+            _dataMan = DataManagerEJBImpl.getOne();
         
-        return dataMan;
+        return _dataMan;
+    }
+
+    private DerivedMeasurementManagerLocal _dmLocal;
+    private DerivedMeasurementManagerLocal getDMManager() {
+        if (_dmLocal == null) {
+            _dmLocal = DerivedMeasurementManagerEJBImpl.getOne();
+        }
+        return _dmLocal;
     }
 
     /**
@@ -106,6 +98,7 @@ public class AvailabilityCheckService
     
     protected void hitInSession(Date lDate) {
 
+        StopWatch watch = new StopWatch();
         long current = lDate.getTime();
 
         // Don't start backfilling immediately
@@ -119,8 +112,11 @@ public class AvailabilityCheckService
         SRNCache srnCache = SRNCache.getInstance();
         
         // Fetch all derived availablity measurements
-        List dmList = getEnabledAvailabilityMetrics();
+        watch.markTimeBegin("getEnabledAvailabilityMetrics");
+        List dmList = getDMManager().
+            findMeasurementsByCategory(MeasurementConstants.CAT_AVAILABILITY);
         MetricDataCache metCache = MetricDataCache.getInstance();
+        watch.markTimeEnd("getEnabledAvailabilityMetrics");
         
         if (log.isDebugEnabled())
             log.debug("Total of " + dmList.size() +
@@ -135,32 +131,31 @@ public class AvailabilityCheckService
         // Let's be safe and reset the time to current
         current = System.currentTimeMillis();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmVo =
-                (DerivedMeasurementValue) it.next();
+            DerivedMeasurement dm = (DerivedMeasurement) it.next();
             
             AppdefEntityID aeid =
-                new AppdefEntityID(dmVo.getAppdefType(), dmVo.getInstanceId());
+                new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
                                                  
-            if (dmVo.getAppdefType() !=
+            if (dm.getAppdefType() !=
                 AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                availMap.put(aeid, dmVo);
+                availMap.put(aeid, dm);
                 continue;
             }
 
             // End is at least more than 1/2 interval away
             long end = TimingVoodoo.closestTime(
-                current - dmVo.getInterval(), dmVo.getInterval());
+                current - dm.getInterval(), dm.getInterval());
 
             // We have to get at least the measurement interval
-            long maxInterval = Math.max(this.interval, dmVo.getInterval());
+            long maxInterval = Math.max(this.interval, dm.getInterval());
             
             // Begin is maximum of mbean interval or measurement create time
             long begin = Math.max(end - maxInterval,
-                                  dmVo.getMtime() + dmVo.getInterval());
-            begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+                                  dm.getMtime() + dm.getInterval());
+            begin = TimingVoodoo.roundDownTime(begin, dm.getInterval());
 
             if (log.isDebugEnabled())
-                log.debug("Check metric ID: " + dmVo.getId() +
+                log.debug("Check metric ID: " + dm.getId() +
                           " from " + begin + " to " + end);
 
             // If our time range is negative, then we just wait until next
@@ -170,7 +165,7 @@ public class AvailabilityCheckService
             long[] theMissing;
             try {
                 theMissing = getDataMan().getMissingDataTimestamps(
-                        dmVo.getId(), dmVo.getInterval(), begin, end);
+                        dm.getId(), dm.getInterval(), begin, end);
             } catch (DataNotAvailableException e) {
                 log.error("Failed in AvailabilityCheckService", e);
                 continue;
@@ -180,19 +175,19 @@ public class AvailabilityCheckService
             MetricValue mval;
             for (int i = theMissing.length - 1; i >= 0; i--) {
                 if (log.isDebugEnabled())
-                    log.debug("Metric ID: " + dmVo.getId() +
+                    log.debug("Metric ID: " + dm.getId() +
                               " missing data at " + theMissing[i]);
 
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
                                        theMissing[i]);
-                addData.add(new DataPoint(dmVo.getId(), mval));
+                addData.add(new DataPoint(dm.getId(), mval));
             }
             
             // Check SRN to see if somehow the agent lost the schedule
             if (theMissing.length > 0) {
                 // First see if it was reported recently
-                if (metCache.get(dmVo.getId(),
+                if (metCache.get(dm.getId(),
                     theMissing[theMissing.length - 1] + 1) != null)
                     continue;
                 
@@ -253,23 +248,22 @@ public class AvailabilityCheckService
 
         // Go through the server and service metrics and backfill them
         for (Iterator it = metrics.iterator(); it.hasNext();) {
-            DerivedMeasurementValue dmVo =
-                (DerivedMeasurementValue) it.next();
+            DerivedMeasurement dm = (DerivedMeasurement) it.next();
 
             // End is at least more than 1/2 interval away
             long end = TimingVoodoo.closestTime(
-                current - dmVo.getInterval(), dmVo.getInterval());
+                current - dm.getInterval(), dm.getInterval());
 
             // We have to get at least the measurement interval
-            long maxInterval = Math.max(this.interval, dmVo.getInterval());
+            long maxInterval = Math.max(this.interval, dm.getInterval());
 
             // Begin is maximum of mbean interval or measurement create time
             long begin = Math.max(end - maxInterval,
-                                  dmVo.getMtime() + dmVo.getInterval());
-            begin = TimingVoodoo.roundDownTime(begin, dmVo.getInterval());
+                                  dm.getMtime() + dm.getInterval());
+            begin = TimingVoodoo.roundDownTime(begin, dm.getInterval());
 
             if (log.isDebugEnabled())
-                log.debug("Check metric ID: " + dmVo.getId() +
+                log.debug("Check metric ID: " + dm.getId() +
                     " from " + begin + " to " + end);
 
             // If our time range is negative, then we just wait until next
@@ -279,7 +273,7 @@ public class AvailabilityCheckService
             long[] theMissing;
             try {
                 theMissing = getDataMan().getMissingDataTimestamps(
-                    dmVo.getId(), dmVo.getInterval(), begin, end);
+                    dm.getId(), dm.getInterval(), begin, end);
             } catch (DataNotAvailableException e) {
                 log.error("Failed in AvailabilityCheckService", e);
                 continue;
@@ -289,57 +283,20 @@ public class AvailabilityCheckService
             MetricValue mval;
             for (int i = theMissing.length - 1; i >= 0; i--) {
                 if (log.isDebugEnabled())
-                    log.debug("Metric ID: " + dmVo.getId() +
-                        " missing data at " + theMissing[i]);
+                    log.debug("Metric ID: " + dm.getId() +
+                              " missing data at " + theMissing[i]);
 
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
                                        theMissing[i]);
-                addData.add(new DataPoint(dmVo.getId(), mval));
+                addData.add(new DataPoint(dm.getId(), mval));
             }
         }
+        watch.markTimeBegin("addData");
         getDataMan().addData(addData, false);
-    }
-    
-    /**
-     * Optimized method of retrieving enabled availability measurements
-     * This is done because retrieving this every 5 mintues via entity beans
-     * results in massive overhead for returning 3 values per measurement
-     * @return List of DerivedMeasurementValue which ONLY have id, mtime, and
-     *         interval enabled. These DMVs are NOT fully initialized.
-     *         DO NOT USE THEM ANYWHERE ELSE
-     */
-    private List getEnabledAvailabilityMetrics() {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        List dms = new ArrayList();
-        try {
-            conn = DBUtil.getConnByContext(new InitialContext(), DATASOURCE);
-            stmt = conn.createStatement();
-            String query =
-                StringUtil.replace(ENABLED_AVAIL_METRICS_SQL, "DB_TRUE_TOKEN", 
-                                   DBUtil.getBooleanValue(true, conn));
-            
-            if (log.isDebugEnabled())
-                log.debug("Executing query: " + query);
-            
-            rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                DerivedMeasurementValue dmv = new DerivedMeasurementValue();
-                dmv.setId(new Integer(rs.getInt(1)));
-                dmv.setMtime(rs.getLong(2));
-                dmv.setInterval(rs.getLong(3));
-                dmv.setAppdefType(rs.getInt(4));
-                dmv.setInstanceId(new Integer(rs.getInt(5)));
-                dms.add(dmv);
-            }
-        } catch (Exception e) {
-            log.error("Unable to get enabled availability measurements", e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-        return dms;
+        watch.markTimeEnd("addData");
+
+        log.debug(watch);
     }
 
     /**
