@@ -82,6 +82,9 @@ public interface SNMPSession {
     public Map getTable(String mibName, int index)
         throws SNMPException;
 
+    public SNMPValue getTableValue(String name, int index, String leaf)
+        throws SNMPException;
+
     public List getBulk(String mibName)
         throws SNMPException;
 }

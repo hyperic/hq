@@ -40,12 +40,13 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
-import org.snmp4j.smi.Integer32;
-import org.snmp4j.smi.Null;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
+import org.snmp4j.util.DefaultPDUFactory;
+import org.snmp4j.util.TreeEvent;
+import org.snmp4j.util.TreeUtils;
 
 class SNMPSession_v1 implements SNMPSession {
 
@@ -98,7 +99,7 @@ class SNMPSession_v1 implements SNMPSession {
         this.target.setCommunity(new OctetString(community));
         this.target.setVersion(this.version);
         this.target.setRetries(1);
-        this.target.setTimeout(500);
+        this.target.setTimeout(1500);
 
         try {
             this.session = getSessionInstance();
@@ -133,7 +134,7 @@ class SNMPSession_v1 implements SNMPSession {
         pdu.setType(type);
 
         if (type == PDU.GETBULK) {
-            pdu.setMaxRepetitions(16);
+            pdu.setMaxRepetitions(10);
             pdu.setNonRepeaters(0);
         }
 
@@ -142,24 +143,30 @@ class SNMPSession_v1 implements SNMPSession {
         return pdu;
     }
 
-    private PDU walk(PDU request, List values) throws IOException {
-        OID rootOID = request.get(0).getOid();
-        PDU response = null;
-        int requests = 0, vars = 0;
-        
-        do {
-            ResponseEvent responseEvent =
-                this.session.send(request, target);
-            if (responseEvent == null) {
-                return null;
-            }
+    private boolean walk(OID rootOID, List values) throws IOException {
+        int requests = 0;
+        int vars = 0;
+        boolean isError = false;
+        TreeUtils treeUtils = new TreeUtils(this.session, new DefaultPDUFactory());
+        List events = treeUtils.getSubtree(this.target, rootOID);
+
+        for (int i=0; i<events.size(); i++) {
+            TreeEvent e = (TreeEvent)events.get(i);
             requests++;
-            response = responseEvent.getResponse();
-            if (response == null) {
-                return null;
+            if (e.isError()) {
+                isError = true;
+                log.error(rootOID + " walk: " + e.getErrorMessage(),
+                          e.getException());
             }
-            vars += response.size();
-        } while (walk(response, request, rootOID, values));
+
+            VariableBinding[] vb = e.getVariableBindings();
+            if (vb != null) {
+                vars += vb.length;
+                for (int j=0; j<vb.length; j++) {
+                    values.add(new SNMPValue(vb[j]));
+                }
+            }            
+        }
 
         if (log.isDebugEnabled()) {
             log.debug(rootOID + " walk: " + requests + " requests, " +
@@ -167,50 +174,7 @@ class SNMPSession_v1 implements SNMPSession {
                       vars / requests);
         }
 
-        return response;
-    }
-
-    private boolean walk(PDU response, PDU request,
-                         OID rootOID, List values) {
-
-        if ((response == null) || (response.getErrorStatus() != 0)) {
-            return false;
-        }
-
-        boolean finished = false;
-        OID lastOID = request.get(0).getOid();
-        int size = response.size();
-
-        for (int i=0; (!finished) && (i<size); i++) {
-            VariableBinding vb = response.get(i);
-
-            if ((vb.getOid() == null) ||
-                (vb.getOid().size() < rootOID.size()) ||
-                (rootOID.leftMostCompare(rootOID.size(), vb.getOid()) != 0))
-            {
-                finished = true;
-            }
-            else if (Null.isExceptionSyntax(vb.getVariable().getSyntax())) {
-                finished = true;
-            }
-            else if (vb.getOid().compareTo(lastOID) <= 0) {
-                finished = true;
-            }
-            else {
-                values.add(new SNMPValue(vb));
-                lastOID = vb.getOid();
-            }
-        }
-        if (size == 0) {
-            finished = true;
-        }
-        if (!finished) {
-            VariableBinding next = response.get(size-1);
-            next.setVariable(new Null());
-            request.set(0, next);
-            request.setRequestID(new Integer32(0));
-        }
-        return !finished;
+        return !isError;
     }
 
     private SNMPValue getValue(String name, int type)
@@ -257,15 +221,13 @@ class SNMPSession_v1 implements SNMPSession {
         List values = new ArrayList();
         
         try {
-            PDU response =
-                walk(getPDU(name, PDU.GETBULK), values);
-            if (response == null) {
+            if (!walk(getOID(name), values)) {
                 throw new SNMPException("No response for " + name);
             }
         } catch (IOException e) {
             throw new SNMPException(e.getMessage(), e);
         }
-        
+
         return values;
     }
 
@@ -292,7 +254,7 @@ class SNMPSession_v1 implements SNMPSession {
     public Map getTable(String name, int index)
         throws SNMPException {
 
-        OID oid = (OID)SNMPClient.getMibOID(name).clone();
+        OID oid = (OID)getOID(name).clone();
         oid.append(index);
 
         HashMap map = new HashMap();
@@ -307,6 +269,39 @@ class SNMPSession_v1 implements SNMPSession {
         }
 
         return map;
+    }
+
+    public SNMPValue getTableValue(String name, int index, String leaf)
+        throws SNMPException {
+
+        OID oid = (OID)getOID(name).clone();
+        oid.append(index);
+        oid.append(leaf);
+
+        PDU request = new PDU();
+        request.setType(PDU.GET);
+        request.add(new VariableBinding(oid));
+
+        PDU response;
+        ResponseEvent event = null;
+        try {
+            event =
+                this.session.send(request, this.target);
+        } catch (IOException e) {
+            throw new SNMPException("Failed to get " + name, e);
+        }
+
+        if (event == null) {
+            throw new SNMPException("No response for " + name);
+        }
+
+        response = event.getResponse();
+
+        if (response == null) {
+            throw new SNMPException("No response for " + name);
+        }
+
+        return new SNMPValue(response.get(0));
     }
 
     public List getBulk(String name)
