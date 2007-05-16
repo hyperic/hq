@@ -212,10 +212,10 @@ public class AlertDefinitionManagerEJBImpl
      * Create a new alert definition
      * @ejb:interface-method
      */
-    public AlertDefinitionValue createAlertDefinition(AuthzSubjectValue subj,
+    public AlertDefinition createAlertDefinition(AuthzSubjectValue subj,
                                                       AlertDefinitionValue a)
         throws AlertDefinitionCreateException, ActionCreateException,
-               FinderException, PermissionException 
+               PermissionException 
     {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
             canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
@@ -288,7 +288,24 @@ public class AlertDefinitionManagerEJBImpl
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         adDAO.save(res);
-        return res.getAlertDefinitionValue();
+        return res;
+    }
+    
+    /**
+     * Create Alert Definition with a parent
+     * @throws PermissionException if user is not allowed to creating alerts
+     * @throws AlertDefinitionCreateException if error occurs during creation
+     * @throws ActionCreateException if error occurs during action creation
+     * @ejb:interface-method
+     */
+    public AlertDefinition createAlertDefinition(AuthzSubjectValue subject,
+                                                 AlertDefinitionValue adval,
+                                                 AlertDefinition parent)
+        throws ActionCreateException, AlertDefinitionCreateException,
+               PermissionException {
+        AlertDefinition child = createAlertDefinition(subject, adval);
+        child.setParent(parent);
+        return child;
     }
 
     /**
