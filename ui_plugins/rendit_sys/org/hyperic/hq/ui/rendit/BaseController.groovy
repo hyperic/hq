@@ -1,30 +1,39 @@
 package org.hyperic.hq.ui.rendit
 
-import org.hyperic.hq.ui.rendit.html.FormGenerator
-import org.hyperic.hq.ui.rendit.html.HtmlUtil
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.hyperic.hq.ui.rendit.PluginLoadInfo
 import org.hyperic.hq.ui.rendit.render.RenderFrame
+import org.hyperic.hq.ui.rendit.html.FormGenerator
+import org.hyperic.hq.ui.rendit.html.HtmlUtil
+
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 
 /**
  * The base controller is invoked by the dispatcher when it detects that
  * a controller method is being requested.
  */
 abstract class BaseController { 
-    Log log = LogFactory.getLog(BaseController)
+    Log log = LogFactory.getLog(this.getClass())
     
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
-    PluginLoadInfo     pluginInfo
-    String             template
-    ResourceBundle     bundle
+    PluginLoadInfo     pluginInfo      // The results of init.groovy
+    String             template        // Default template when rendering
     
-    private invokeArgs           // Info about the request
-    private File    viewDir      // Path to plugin/app/views
-    private boolean rendered     // Have we already performed a rendering op?
+    private invokeArgs                 // Info about the request
+    private File    viewDir            // Path to plugin/app/views
+    private boolean rendered           // Have we already performed a render?
+    private         localeBundle = [:] // l10n bundle, must support getAt()
 
+    def getLocaleBundle() {
+        localeBundle
+    }
+    
+    void setLocaleBundle(newBundle) {
+        this.localeBundle = newBundle
+    }
+    
     private void setControllerName(String name) {
         this.controllerName = name
     }
@@ -52,10 +61,8 @@ abstract class BaseController {
      */
     def dispatchRequest() {
 		def params = invokeArgs.request.parameterMap
-    
-		bundle = ResourceBundle.getBundle('MyBundle')
-		log.info "Found bundle ${bundle}"
-    	def runner = this."$action"
+
+		def runner = this."$action"
     	if (runner == null)
         	throw new IllegalArgumentException("Unknown action [$action]")
     	

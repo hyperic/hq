@@ -68,7 +68,7 @@ class RenderFrame {
 
     private Map getImplicitLocals() {
         [formFor : this.&formFor,
-         ]
+         l       : controller.localeBundle]
     }
 
     private def formFor(formOpts, formClosure) {

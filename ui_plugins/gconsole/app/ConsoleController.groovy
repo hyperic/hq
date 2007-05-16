@@ -16,7 +16,6 @@ class ConsoleController extends BaseController {
 			r['last_result'] = '3'
 		}
     	
-    	//render(inline:'Hello world')
     	render(locals:[r:r])
     }
     

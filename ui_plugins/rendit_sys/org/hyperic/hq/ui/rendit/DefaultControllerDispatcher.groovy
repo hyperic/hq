@@ -1,5 +1,6 @@
 package org.hyperic.hq.ui.rendit
 
+import org.hyperic.hq.ui.rendit.i18n.BundleMapFacade
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -31,14 +32,25 @@ class DefaultControllerDispatcher {
 
         def pluginDir = invokeArgs.pluginDir
         def appDir    = new File(pluginDir, "app")
+        def etcDir    = new File(pluginDir, "etc")
         def contFile  = new File(appDir, controllerName + ".groovy")
         if (!contFile.isFile())
             return false
         
-        def loader    = this.class.classLoader
+        def loader = this.class.classLoader
         loader.addURL(appDir.toURL())
+        loader.addURL(etcDir.toURL())
         def controller = Class.forName(controllerName, true, 
-                                       loader).newInstance() 
+                                       loader).newInstance()
+
+        try {
+            def b = ResourceBundle.getBundle("${pluginInfo.name}_i18n", 
+                                             req.locale, loader)
+            controller.setLocaleBundle(new BundleMapFacade(b))
+        } catch(MissingResourceException e) {
+            log.warn "Unable to find resource bundle for " + 
+                     "${pluginInfo.name}_i18n"
+        }
 
         def action = path[2][0..-5]  // Strip out the .hqu
         controller.setAction(action)
