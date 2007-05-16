@@ -324,13 +324,10 @@ public class SNMPMeasurementPlugin
                     String oid = props.getProperty(PROP_OID);
                     boolean found = false;
 
-                    Map svals = session.getTable(varName, idx+1);
-                    if (svals != null) {
-                        SNMPValue snmpValue = (SNMPValue)svals.get(oid);
-                        if (snmpValue != null) {
-                            value = getDoubleValue(snmpValue);
-                            found = true;
-                        }
+                    SNMPValue snmpValue = session.getTableValue(varName, idx+1, oid);
+                    if (snmpValue != null) {
+                        value = getDoubleValue(snmpValue);
+                        found = true;
                     }
 
                     if (!found) {
