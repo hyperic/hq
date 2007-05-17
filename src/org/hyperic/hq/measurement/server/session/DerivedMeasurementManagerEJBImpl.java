@@ -1069,6 +1069,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     public Map findMetricIntervals(AuthzSubjectValue subject,
                                    AppdefEntityID[] aeids, Integer[] tids) 
     {
+        final Long disabled = new Long(-1);
         DerivedMeasurementDAO ddao = getDerivedMeasurementDAO();
         Map intervals = new HashMap(tids.length);
         for (int a = 0; a < aeids.length; a++) {
@@ -1077,12 +1078,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             List metrics = ddao.findByInstance(aeids[a].getType(),
                                                aeids[a].getID());
             
-            for (Iterator i=metrics.iterator(); i.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement)i.next();
-                Integer templateId = dm.getTemplate().getId();
-                Long previous = (Long)intervals.get(templateId);
+            for (Iterator i = metrics.iterator(); i.hasNext();) {
+                DerivedMeasurement dm = (DerivedMeasurement) i.next();
                 Long interval = new Long(dm.getInterval());
+
+                if (!dm.isEnabled()) {
+                    interval = disabled;
+                }
                 
+                Integer templateId = dm.getTemplate().getId();
+                Long previous = (Long) intervals.get(templateId);
+
                 if (previous == null) {
                     intervals.put(templateId, interval);
                 } else {
@@ -1092,7 +1098,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 }
             }
         }
-        
+
         // Filter by template IDs, since we only pay attention to what was
         // passed, but may have more than that in our map.
         for (int i=0; i<tids.length; i++) {
@@ -1102,12 +1108,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         
         List tidList = Arrays.asList(tids);
         // Copy the keys, since we are going to be modifying the interval map
-        Set keys     = new HashSet(intervals.keySet());
-        for (Iterator i=keys.iterator(); i.hasNext(); ) {
-            Integer templateId = (Integer)i.next();
+        Set keys = new HashSet(intervals.keySet());
+        for (Iterator i = keys.iterator(); i.hasNext();) {
+            Integer templateId = (Integer) i.next();
 
-            if (tidList.indexOf(templateId) == -1) {
-                // Wasn't asked for, so don't return it
+            if (tidList.indexOf(templateId) == -1 || // Wasn't asked for
+                disabled.equals(intervals.get(templateId))) { // Disabled
+                // so don't return it
                 intervals.remove(templateId);
             }
         }
@@ -1297,9 +1304,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                     continue;
                 
             try {
-                // Call back into ourselves to force a new transation to be
-                // created.
-                getDMManager().enableMeasurement(dm, false);
+                enableMeasurement(dm, false);
             } catch (MeasurementNotFoundException e) {
                 // This is quite impossible, we just looked it up
                 throw new SystemException(e);
