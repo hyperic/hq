@@ -31,11 +31,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
@@ -120,11 +118,6 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.zevents.Zevent;
-import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.zevents.ZeventPayload;
-import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -458,7 +451,6 @@ public class EventsBossEJBImpl
         ArrayList triggers = new ArrayList();
         
         AlertDefinitionValue parent = null;
-        AlertDefinitionManagerLocal adm = getADM();
         // Iterate through to create the appropriate triggers and alertdef
         for (Iterator it = appdefIds.iterator(); it.hasNext(); ) {
             AppdefEntityID id = (AppdefEntityID) it.next();
@@ -487,13 +479,17 @@ public class EventsBossEJBImpl
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
 
-            // Now create the alert definition
-            AlertDefinitionValue created =
-                adm.createAlertDefinition(subject, adval)
-                .getAlertDefinitionValue();
-            
-            if (parent == null)
-                parent = created;
+            try {
+                // Now create the alert definition
+                AlertDefinitionValue created =
+                    getADM().createAlertDefinition(subject, adval);
+                
+                if (parent == null)
+                    parent = created;
+                    
+            } catch (FinderException e) {
+                throw new AlertDefinitionCreateException(e.getMessage());
+            }
         }
 
         return parent;
@@ -518,21 +514,76 @@ public class EventsBossEJBImpl
                 "Conditions cannot be null or empty");
         }
         
+        AlertDefinitionValue parent;
+        
         // Create the parent alert definition
         adval.setAppdefType(aetid.getType());
         adval.setAppdefId(aetid.getID());
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
         
-        AlertDefinition parent;
+        try {
+            // Now create the alert definition
+            parent = getADM().createAlertDefinition(subject, adval);
+        } catch (FinderException e) {
+            throw new AlertDefinitionCreateException(e.getMessage());
+        }
+
+        adval.setParentId(parent.getId());
+
+        // Lookup resources
+        Integer[] entIds;
+        switch (aetid.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            entIds =
+                getPlatformManager().getPlatformIds(subject, aetid.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            entIds =
+                getServerManager().getServerIds(subject, aetid.getId());
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            entIds =
+                getServiceManager().getServiceIds(subject, aetid.getId());
+            break;
+        default:
+            throw new InvalidOptionException(
+                "Alerts cannot be defined on appdef entity type " +
+                aetid.getType());
+        }
         
-        // Now create the alert definition
-        parent = getADM().createAlertDefinition(subject, adval);
+        ArrayList triggers = new ArrayList();
+        
+        // Iterate through to create the appropriate triggers and alertdef
+        for (int ei = 0; ei < entIds.length; ei++) {
+            AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
-        GlobalDefinitionCreatedZevent zevent =
-                    new GlobalDefinitionCreatedZevent(parent, subject);
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+            // Reset the value object with this entity ID
+            adval.setAppdefId(id.getID());
+            
+            // Scrub the triggers just in case
+            adval.removeAllTriggers();
 
-        return parent.getAlertDefinitionValue();
+            cloneParentConditions(subject, id, adval, parent.getConditions());
+                        
+            // Create the triggers
+            createTriggers(subject, adval);
+            triggers.addAll(Arrays.asList(adval.getTriggers()));
+
+            // Make sure the actions have the proper parentId
+            cloneParentActions(id, adval, parent.getActions());
+            
+            // Create a measurement AlertLogAction if necessary
+            setMetricAlertAction(adval);
+
+            try {
+                // Now create the alert definition
+                getADM().createAlertDefinition(subject, adval);
+            } catch (FinderException e) {
+                throw new AlertDefinitionCreateException(e.getMessage());
+            }
+        }
+
+        return parent;
     }
 
     private void setMetricAlertAction(AlertDefinitionValue adval) {
@@ -604,8 +655,12 @@ public class EventsBossEJBImpl
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
     
-            // Now create the alert definition
-            getADM().createAlertDefinition(subject, adval);
+            try {
+                // Now create the alert definition
+                getADM().createAlertDefinition(subject, adval);
+            } catch (FinderException e) {
+                throw new AlertDefinitionCreateException(e.getMessage());
+            }
         }
     }
 
@@ -1327,9 +1382,8 @@ public class EventsBossEJBImpl
             acval.setComparator("=");
             adval.addCondition(acval);           
             
-            AlertDefinition def =
-                getADM().createAlertDefinition(subject, adval);
-            return def.getId();
+            adval = getADM().createAlertDefinition(subject, adval);
+            return adval.getId();
         }
         
         return trigger.getId();
@@ -1658,12 +1712,6 @@ public class EventsBossEJBImpl
     public void startup() {
         _log.info("Events Boss starting up!");
         
-        Set listenEvents = new HashSet();
-        listenEvents.add(GlobalDefinitionCreatedZevent.class);
-        ZeventManager.getInstance()
-                     .addBufferedListener(listenEvents,
-                                          new GlobalDefinitionPropagator());
-        
         HQApp app = HQApp.getInstance();
         app.registerCallbackListener(DefaultMetricEnableCallback.class,
                                      new DefaultMetricEnableCallback() 
@@ -1690,151 +1738,6 @@ public class EventsBossEJBImpl
         }
     }
     
-    class GlobalDefinitionPropagator implements ZeventListener {
-
-        public void processEvents(List events) {
-            for (Iterator it = events.iterator(); it.hasNext(); ) {
-                GlobalDefinitionCreatedZevent event =
-                    (GlobalDefinitionCreatedZevent) it.next();
-                
-                // Get payload out of event
-                AuthzSubjectValue subject = event.getSubject();
-                AlertDefinition parent = event.getDef();
-                AlertDefinitionValue adval = parent.getAlertDefinitionValue();
-                
-                try {
-                    AppdefEntityTypeID aetid =
-                        new AppdefEntityTypeID(adval.getAppdefType(),
-                                               adval.getAppdefId());
-
-                    // Reset parent ID, we'll use the POJO later
-                    adval.setParentId(null);
-                    
-                    // Lookup resources
-                    Integer[] entIds;
-                    switch (aetid.getType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                        entIds =
-                            getPlatformManager().getPlatformIds(subject,
-                                                                aetid.getId());
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        entIds = getServerManager().getServerIds(subject,
-                                                                 aetid.getId());
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        entIds =
-                            getServiceManager().getServiceIds(subject,
-                                                              aetid.getId());
-                        break;
-                    default:
-                        throw new InvalidOptionException(
-                            "Alerts cannot be defined on appdef entity type "
-                                    + aetid.getType());
-                    }
-
-                    ArrayList triggers = new ArrayList();
-
-                    // Iterate through to create the appropriate triggers and
-                    // alertdef
-                    AlertConditionValue[] parentConds = adval.getConditions();
-                    ActionValue[] parentActions = adval.getActions();
-                    AlertDefinitionManagerLocal adm = getADM();
-                    for (int ei = 0; ei < entIds.length; ei++) {
-                        AppdefEntityID id =
-                            new AppdefEntityID(aetid.getType(), entIds[ei]);
-
-                        // Reset the value object with this entity ID
-                        adval.setAppdefId(id.getID());
-
-                        // Scrub the triggers just in case
-                        adval.removeAllTriggers();
-
-                        cloneParentConditions(subject, id, adval, parentConds);
-
-                        // Create the triggers
-                        createTriggers(subject, adval);
-                        triggers.addAll(Arrays.asList(adval.getTriggers()));
-
-                        // Make sure the actions have the proper parentId
-                        cloneParentActions(id, adval, parentActions);
-
-                        // Create a measurement AlertLogAction if necessary
-                        setMetricAlertAction(adval);
-
-                        // Now create the alert definition
-                        adm.createAlertDefinition(subject, adval, parent);
-                    }
-                } catch (Exception e) {
-                    _log.debug("Exception cloning global alert definition " +
-                               adval.getId(), e);
-                    continue;
-                }
-            }
-        }
-    }
-    
-    static class GlobalDefinitionCreatedZevent extends Zevent {
-        
-        static {
-            ZeventManager.getInstance().
-                registerEventClass(GlobalDefinitionCreatedZevent.class);
-        }
-    
-        public GlobalDefinitionCreatedZevent(AlertDefinition global,
-                                             AuthzSubjectValue subj) {
-            super(new GlobalDefinitionZeventSource(global.getId()),
-                  new GlobalDefinitionZeventPayload(global, subj));
-        }
-    
-        public AlertDefinition getDef() {
-            return ((GlobalDefinitionZeventPayload) getPayload()).getDef();
-        }
-        
-        public AuthzSubjectValue getSubject() {
-            return ((GlobalDefinitionZeventPayload) getPayload()).getSubject();
-        }
-    
-        private static class GlobalDefinitionZeventSource
-            implements ZeventSourceId {
-            
-            private Integer _id;
-    
-            public GlobalDefinitionZeventSource(Integer id) {
-                _id = id;
-            }
-            
-            public int hashCode() {
-                return _id.hashCode();
-            }
-            
-            public boolean equals(Object other) {
-                return _id.equals(other);
-            }
-        }
-        
-        private static class GlobalDefinitionZeventPayload
-            implements ZeventPayload {
-            
-            private AlertDefinition _def;
-            private AuthzSubjectValue _subj;
-    
-            public GlobalDefinitionZeventPayload(AlertDefinition def,
-                                                 AuthzSubjectValue subj) {
-                _def = def;
-                _subj = subj;
-            }
-    
-            public AlertDefinition getDef() {
-                return _def;
-            }
-            
-            public AuthzSubjectValue getSubject() {
-                return _subj;
-            }
-        }
-    }
-
     /**
      * @ejb:create-method
      */

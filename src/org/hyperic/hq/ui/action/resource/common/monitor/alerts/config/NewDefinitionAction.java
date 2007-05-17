@@ -120,13 +120,8 @@ public class NewDefinitionAction extends BaseAction {
             RequestUtils.setError
                 (request, "resource.common.monitor.alert.config.error.SomeMetricsDisabled");
         } else {
-            String confirm;
-            if (defForm.getRid() != null)
-                confirm = "resource.common.monitor.alert.config.confirm.Create";
-            else
-                confirm = "resource.common.monitor.global.alert.config.confirm.Create";
-            
-            RequestUtils.setConfirmation(request, confirm);
+            RequestUtils.setConfirmation
+                (request, "resource.common.monitor.alert.config.confirm.Create");
         }
         return returnSuccess(request, mapping, params);
     }
