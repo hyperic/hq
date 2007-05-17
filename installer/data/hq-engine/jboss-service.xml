@@ -251,7 +251,7 @@
    <mbean code="org.jboss.tm.TransactionManagerService"
       name="jboss:service=TransactionManager"
       xmbean-dd="resource:xmdesc/TransactionManagerService-xmbean.xml">
-      <attribute name="TransactionTimeout">300</attribute>
+      <attribute name="TransactionTimeout">900</attribute>
       <!-- set to false to disable transaction demarcation over IIOP -->
       <attribute name="GlobalIdsEnabled">true</attribute>
       <depends optional-attribute-name="XidFactory">jboss:service=XidFactory</depends>
