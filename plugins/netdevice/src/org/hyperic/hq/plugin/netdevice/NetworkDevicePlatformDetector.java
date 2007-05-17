@@ -97,6 +97,10 @@ public class NetworkDevicePlatformDetector extends PlatformDetector {
         throws PluginException {
 
         String platformIp = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
+        //for command-line -DsnmpIp=x.x.x.x usage
+        platformIp =
+            getIpProp(SNMPClient.PROP_IP, platformIp, platformIp);
+
         String defaultVersion =
             getIpProp(SNMPClient.PROP_VERSION,
                       platformIp,
