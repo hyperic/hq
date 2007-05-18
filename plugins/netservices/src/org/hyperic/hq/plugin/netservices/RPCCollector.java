@@ -27,6 +27,8 @@ package org.hyperic.hq.plugin.netservices;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -35,8 +37,16 @@ import org.hyperic.sigar.RPC;
 
 public class RPCCollector extends NetServicesCollector {
 
+    static final String RPC_VERSION = "2";
+    static final String PROGRAM_NFS = "nfs";
+    private static final Map PROGRAMS = new HashMap();
+
+    static {
+        PROGRAMS.put(PROGRAM_NFS, new Long(100003));
+    }
+
     private long program, version;
-    
+
     protected void init() throws PluginException {
         if (GenericPlugin.isWin32()) {
             String msg = "This service is not supported on Windows";
@@ -45,10 +55,22 @@ public class RPCCollector extends NetServicesCollector {
         super.init();
 
         String program = getProperty("program");
-        this.program = RPC.getProgram(program);
+        Long pnum = (Long)PROGRAMS.get(program);
+        if (pnum != null) {
+            this.program = pnum.longValue();
+        }
+        else {
+            this.program = RPC.getProgram(program);
+        }
 
         String version = getProperty("version");
-        this.version = Long.parseLong(version);
+        try {
+            this.version = Long.parseLong(version);
+        } catch (NumberFormatException e) {
+            //XXX workaround for cmd-line where "version"
+            //is overwritten w/ the hq version
+            this.version = 2;
+        }
 
         setSource("portmapper@" + getHostname());
     }

@@ -42,6 +42,7 @@ import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.sigar.FileSystem;
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.NetServices;
@@ -53,6 +54,8 @@ import org.hyperic.util.config.ConfigResponse;
 public class NetServicesDetector
     extends ServerDetector
     implements AutoServerDetector {
+
+    private static final String RPC = "RPC";
 
     private ServerResource getServer(ConfigResponse config) {
         ServerResource server = createServerResource("/");
@@ -147,20 +150,75 @@ public class NetServicesDetector
         return new StringTokenizer(address, ".", true).countTokens() == 7;
     }
     
+    private void discoverNFS(List services) {
+        if (isWin32()) {
+            return;
+        }
+
+        FileSystem[] fslist; 
+        try {
+            fslist = getSigar().getFileSystemList();
+        } catch (SigarException e) {
+            return;
+        }
+
+        for (int i=0; i<fslist.length; i++) {
+            FileSystem fs = fslist[i];
+            if (fs.getType() != FileSystem.TYPE_NETWORK) {
+                continue;
+            }
+            String type = fs.getSysTypeName();
+            if (!type.equals(RPCCollector.PROGRAM_NFS)) {
+                continue;
+            }
+            String dev = fs.getDevName();
+            int ix = dev.indexOf(':');
+            if (ix == -1) {
+                continue;
+            }
+            String host = dev.substring(0, ix);
+            ServiceResource service = new ServiceResource();
+
+            ConfigResponse config = new ConfigResponse();
+            config.setValue(NetServicesCollector.PROP_HOSTNAME,
+                            host);
+            config.setValue("program", type);
+            config.setValue("version", RPCCollector.RPC_VERSION);
+            service.setProductConfig(config);
+            service.setType(RPC);
+
+            String name = getPlatformName() + " NFS mount " + dev;
+            service.setName(name);
+            service.setDescription("Local mount point: " + fs.getDirName());
+
+            services.add(service);
+        }
+    }
+
+    private String getDiscover(String type) {
+        String key = "netservices.discover";
+        if (type != null) {
+            key += "." + type;
+        }
+        return getManager().getProperty(key);
+    }
+
     protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
 
+        ArrayList services = new ArrayList();
+
+        if (!"false".equals(getDiscover(RPC))) {
+            discoverNFS(services);
+        }
+
         //not enabled by default, but helpful for testing.
-        String discover =
-            getManager().getProperty("netservices.discover");
-        if (!"true".equals(discover)) {
-            return null;
+        if (!"true".equals(getDiscover(null))) {
+            return services;
         }
 
         String ip =
             serverConfig.getValue(ProductPlugin.PROP_PLATFORM_IP);
-
-        ArrayList services = new ArrayList();
 
         ProductPluginManager ppm =
             (ProductPluginManager)getManager().getParent();
