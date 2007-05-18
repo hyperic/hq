@@ -403,9 +403,11 @@ public class MultiConditionTrigger
 
             // Clean up unused event
             if (toDelete != null) {
-                etracker.updateReference(getId(),
-                                         toDelete.getId(),
-                                         event, getTimeRange());
+                if (getTimeRange() > 0) {
+                    etracker.updateReference(getId(),
+                                             toDelete.getId(),
+                                             event, getTimeRange());
+                }
             } else {
                 etracker.addReference(getId(),
                                       event, getTimeRange());
