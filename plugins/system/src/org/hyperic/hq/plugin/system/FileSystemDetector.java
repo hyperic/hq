@@ -53,8 +53,8 @@ public class FileSystemDetector
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
 
-        _discoverNfs = //XXX should this be off by default?
-            !"false".equals(manager.getProperty(PROP_DISCOVER_NFS));
+        _discoverNfs =
+            "true".equals(manager.getProperty(PROP_DISCOVER_NFS));
     }
 
     protected String getServerType() {
