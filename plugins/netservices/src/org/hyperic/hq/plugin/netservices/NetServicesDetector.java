@@ -185,6 +185,7 @@ public class NetServicesDetector
             config.setValue("program", type);
             config.setValue("version", RPCCollector.RPC_VERSION);
             service.setProductConfig(config);
+            service.setMeasurementConfig();
             service.setType(RPC);
 
             String name = getPlatformName() + " NFS mount " + dev;
