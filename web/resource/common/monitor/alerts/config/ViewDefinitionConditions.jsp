@@ -38,7 +38,7 @@
 </tiles:insert>
 
 <!-- Condition Content -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine ">
   <c:forEach var="cond" items="${alertDefConditions}">
   <tr valign="top">
     <td width="20%" class="BlockLabel">
@@ -92,7 +92,12 @@
       </fmt:message>
     </td>
   </tr>
-  <tr>
-    <td colspan="2" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+<c:if test="${alertDef.willRecover}">
+  <tr valign="top">
+    <td class="BlockLabel">&nbsp;</td>
+    <td class="BlockContent">
+        <fmt:message key="alert.config.props.CB.Content.UntilReenabled"/>
+    </td>
   </tr>
+</c:if>
 </table>

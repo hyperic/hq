@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.ui.Constants;
@@ -124,7 +125,7 @@ public class ViewDefinitionAction extends TilesAction {
 
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
-
+        
         return null;
     }
 }
