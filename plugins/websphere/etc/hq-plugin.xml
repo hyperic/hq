@@ -1050,6 +1050,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
       <option name="server.name"
               description="App Server Name"
               default="server1"/>
+      <option name="server.port"
+              description="App Server Port"
+              default="9080"/>
     </config>
 
     <properties>
@@ -1104,6 +1107,10 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
         <option name="webapp"
                 description="Webapp Name"
                 default="examples"/>
+
+        <option name="webapp.context"
+                description="Webapp Context"
+                default="/examples"/>
       </config>
     </service>
 

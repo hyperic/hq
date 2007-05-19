@@ -25,17 +25,10 @@
 
 package org.hyperic.hq.plugin.websphere;
 
-import java.io.File;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.SchemaBuilder;
-
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.TypeInfo;
 
 public class WebsphereMeasurementPlugin5 
     extends WebsphereMeasurementPlugin {
@@ -53,29 +46,4 @@ public class WebsphereMeasurementPlugin5
 
         return WebsphereUtil.getMBeanCount(metric);
     }
-     
-     public ConfigSchema getConfigSchema(TypeInfo info,
-                                         ConfigResponse config) {
- 
-         SchemaBuilder schema = new SchemaBuilder(config);
- 
-         switch (info.getType()) {
-          case TypeInfo.TYPE_SERVER:
-              if (info.getName().indexOf("Admin") == -1) {
-                  schema.add(WebsphereProductPlugin.PROP_SERVER_PORT,
-                             "Application Server Port",
-                             "9080");
-              }
-              break;
-           case TypeInfo.TYPE_SERVICE:
-             if (info.isService(WebsphereProductPlugin.WEBAPP_NAME)) {
-                schema.add(WebsphereProductPlugin.PROP_WEBAPP_CONTEXT,
-                           "Webapp Context Name",
-                           File.separator+"examples");
-             }
-             break;
-         }
- 
-         return schema.getSchema();
-     }
 }
