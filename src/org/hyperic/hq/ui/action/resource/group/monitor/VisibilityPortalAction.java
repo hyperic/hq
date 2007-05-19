@@ -79,8 +79,14 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
                                        HttpServletResponse response)
         throws Exception {
         setResource(request);
-        findResourceHealths(request);
-
+        List healths = findResourceHealths(request);
+        
+        if (healths != null) {
+            request.setAttribute(Constants.GROUP_MEMBER_HEALTH_SUMMARIES_ATTR,
+                                 healths);
+            request.setAttribute(Constants.CTX_SUMMARIES, healths);
+        }
+        
         super.currentHealth(mapping, form, request, response);
 
         request.setAttribute(Constants.DEPL_CHILD_MODE_ATTR, "resourceMetrics");
