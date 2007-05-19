@@ -28,23 +28,10 @@
 <plugin name="websphere" class="WebsphereProductPlugin"> 
   <filter name="domain"
            value="%server.node%/%server.name%"/>
-  <filter name="EA"
-	  value="Node=%server.node%,Application=%app%"/>
   <filter name="auth"
           value="username=%username%,password=%password%"/>
   <property name="template-config"
             value="admin.host=%admin.host%,admin.port=%admin.port%,admin.vers=${admin.vers},${auth}"/>
-
-  <metrics name="WebSphere AE Admin 4.0">
-    <metric name="Availability"
-            alias="Availability"
-            template="ws.avail:Node=%server.node%:Avail"
-            category="AVAILABILITY"
-            group="Reliability"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
-  </metrics>
 
   <metrics name="websphere-mem-bytes">
     <metric name="JVM Total Memory"
@@ -317,7 +304,6 @@
             group="Resource Utilization"
             collectionType="trendsup"
             units="none"/>
-    <!-- XXX beanModule concurrentActives is 4.0 only -->
     <!-- XXX beanModule avgMethodRt, avgCreateTime,
              avgRemoveTime, avgDrainSize -->
     <metric name="EJB Creates"
@@ -441,17 +427,6 @@
             units="none"/>
   </metrics>
 
-  <metrics name="WebSphere AE 4.0" include="server-pmi,websphere-mem-bytes">
-    <metric name="Server Availability"
-            alias="Availability"
-            template="ws.avail:Node=%server.node%,AppServer=%server.name%:Avail"
-            category="AVAILABILITY"
-            group="Reliability"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
-  </metrics>
-
   <property name="webapp.name"
             value="%server.name%.%webapp.display%"/>
 
@@ -490,168 +465,6 @@
             units="none"/>
   </metrics>
 
-  <metrics name="servlet-timer">
-    <metric name="Total Processing Time"
-            alias="TotalTime"
-            template="hyperic-hq:type=Context,name=%webapp.context%:TotalTime"
-            category="PERFORMANCE"
-            indicator="true"
-            units="ms"
-            collectionType="trendsup"/>
-    <metric name="CPU Total Time"
-            alias="CpuTotal"
-            template="hyperic-hq:type=Context,name=%webapp.context%:CpuTotal"
-            category="PERFORMANCE"
-            units="ms"
-            collectionType="trendsup"/>
-    <metric name="CPU User Time"
-            alias="CpuUser"
-            template="hyperic-hq:type=Context,name=%webapp.context%:CpuUser"
-            category="PERFORMANCE"
-            units="ms"
-            collectionType="trendsup"/>
-    <metric name="CPU System Time"
-            alias="CpuSys"
-            template="hyperic-hq:type=Context,name=%webapp.context%:CpuSys"
-            category="PERFORMANCE"
-            units="ms"
-            collectionType="trendsup"/>
-  </metrics>
-
-  <metrics name="WebSphere AE 4.0 Webapp" include="webapp-pmi,servlet-timer">
-    <!-- XXX this avail check can be more robust -->
-    <metric name="Webapp Availability"
-            alias="Availability"
-            template="ws.avail:${EA},Module=%webapp%:Avail"
-            category="AVAILABILITY"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
-  </metrics>
-
-  <property name="ejb.module"
-	    value="Default EJB Container.%ejb.jndi%"/>
-
-  <metrics name="ejb-pmi">
-    <!-- XXX beanModule concurrentActives is 4.0 only -->
-    <!-- XXX beanModule avgMethodRt, avgCreateTime,
-             avgRemoveTime, avgDrainSize -->
-    <metric name="EJB Creates"
-            alias="Creates"
-            template="${domain}/beanModule:Module=${ejb.module}:creates"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Removes"
-            alias="Removes"
-            template="${domain}/beanModule:Module=${ejb.module}:removes"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Activates"
-            alias="Activates"
-            template="${domain}/beanModule:Module=${ejb.module}:activates"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Passivates"
-            alias="Passivates"
-            template="${domain}/beanModule:Module=${ejb.module}:passivates"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Instantiates"
-            alias="Instantiates"
-            template="${domain}/beanModule:Module=${ejb.module}:instantiates"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Destroys"
-            alias="Destroys"
-            template="${domain}/beanModule:Module=${ejb.module}:destroys"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Loads"
-            alias="Loads"
-            template="${domain}/beanModule:Module=${ejb.module}:loads"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Stores"
-            alias="Stores"
-            template="${domain}/beanModule:Module=${ejb.module}:stores"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Conncurrent Lives"
-            alias="ConcurrentLives"
-            template="${domain}/beanModule:Module=${ejb.module}:concurrentLives"
-            category="UTILIZATION"
-            collectionType="dynamic"
-            units="none"/>
-    <metric name="EJB Total Method Calls"
-            alias="TotalMethodCalls"
-            template="${domain}/beanModule:Module=${ejb.module}:totalMethodCalls"
-            category="UTILIZATION"
-            indicator="true"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Active Methods"
-            alias="ActiveMethods"
-            template="${domain}/beanModule:Module=${ejb.module}:activeMethods"
-            category="UTILIZATION"
-            indicator="true"
-            collectionType="dynamic"
-            units="none"/>
-    <metric name="EJB Gets From Pool"
-            alias="GetsFromPool"
-            template="${domain}/beanModule:Module=${ejb.module}:getsFromPool"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Gets Found"
-            alias="GetsFound"
-            template="${domain}/beanModule:Module=${ejb.module}:getsFound"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Returns to Pool"
-            alias="ReturnsToPool"
-            template="${domain}/beanModule:Module=${ejb.module}:returnsToPool"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Returns Discarded"
-            alias="ReturnsDiscarded"
-            template="${domain}/beanModule:Module=${ejb.module}:returnsDiscarded"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Drains From Pool"
-            alias="DrainsFromPool"
-            template="${domain}/beanModule:Module=${ejb.module}:drainsFromPool"
-            category="UTILIZATION"
-            collectionType="trendsup"
-            units="none"/>
-    <metric name="EJB Pool Size"
-            alias="EjbPoolSize"
-            template="${domain}/beanModule:Module=${ejb.module}:poolSize"
-            category="UTILIZATION"
-            collectionType="dynamic"
-            units="none"/>
-  </metrics>
-
-  <metrics name="WebSphere AE 4.0 EJB" include="ejb-pmi">
-    <metric name="EJB Availability"
-            alias="Availability"
-            template="ws.avail:${EA},Module=%ejb%:Avail"
-            category="AVAILABILITY"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
-  </metrics>
-
   <metrics name="thread-pool-pmi">
     <!-- XXX percentMaxed -->
     <metric name="Thread Pool Creates"
@@ -679,16 +492,6 @@
             indicator="true"
             collectionType="dynamic"
             units="none"/>
-  </metrics>
-
-  <metrics name="WebSphere AE 4.0 Thread Pool" include="thread-pool-pmi">
-    <metric name="Thread Pool Availability"
-            alias="Availability"
-            template="${domain}/threadPoolModule:Module=%thrpool%:Availability"
-            category="AVAILABILITY"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
   </metrics>
 
   <metrics name="conn-pool-pmi">
@@ -743,26 +546,6 @@
             category="UTILIZATION"
             collectionType="trendsup"
             units="none"/>
-  </metrics>
-
-  <metrics name="WebSphere AE 4.0 Connection Pool" include="conn-pool-pmi">
-    <metric name="JDBC Pool Availability"
-            alias="Availability"
-            template="ws.avail:DataSource=%connpool%:Avail"
-            category="AVAILABILITY"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
-  </metrics>
-
-  <metrics name="WebSphere AE 4.0 Application">
-    <metric name="Application Availability"
-            alias="Availability"
-            template="ws.avail:${EA}:Avail"
-            category="AVAILABILITY"
-            indicator="true"
-            collectionType="dynamic"
-            units="percentage"/>
   </metrics>
 
   <!-- 5.0 -->
@@ -836,15 +619,13 @@
             units="percentage"/>
   </metrics>
 
-  <!-- XXX same as 4.0 but different format for webapp.module -->
-
   <property name="webapp.name"
             value="%app%#%webapp%"/>
 
   <property name="app.props"
 	    value="${server.props},Application=%app%"/>
 
-  <metrics name="WebSphere 5.0 Webapp" include="servlet-timer">
+  <metrics name="WebSphere 5.0 Webapp">
     <!-- XXX this avail check can be more robust -->
     <metric name="Webapp Availability"
             alias="Availability"
@@ -887,7 +668,6 @@
             units="none"/>
   </metrics>
 
-  <!-- XXX same as 4.0 but different format for ejb.module -->
   <property name="ejb.module"
 	    value="%app%#%ejb%"/>
 
@@ -900,7 +680,6 @@
             indicator="true"
             collectionType="dynamic"
             units="percentage"/>
-    <!-- XXX beanModule concurrentActives is 4.0 only -->
     <!-- XXX beanModule avgMethodRt, avgCreateTime,
              avgRemoveTime, avgDrainSize -->
     <metric name="EJB Creates"
@@ -1007,33 +786,6 @@
             units="none"/>
   </metrics>
 
-  <help name="enable-pmi-4-win32">
-  <![CDATA[
-    <p><h4>Enable WebSphere PMI</h4></p>
-
-    <ul>
-    <li>Run the Resource Analyzer: Program Files -> IBM WebSphere ->
-        Application Server V4.0 AE -> Resource Analyzer </li>
-    <li>Right click on ${server.node} -> Monitoring Settings </li>
-    <li>Select High </li>
-    <li>Click OK </li>
-    </ul>
-  ]]>
-  </help>
-
-  <help name="enable-pmi-4-unix">
-  <![CDATA[
-    <p><h4>Enable WebSphere PMI</h4></p>
-
-    <ul>
-    <li>Run the Resource Analyzer: ${installpath}/bin/ra.sh </li>
-    <li>Right click on ${server.node} -> Monitoring Settings </li>
-    <li>Select High </li>
-    <li>Click OK </li>
-    </ul>
-  ]]>
-  </help>
-
   <help name="enable-pmi-5">
   <![CDATA[
     <p><h4>Enable WebSphere PMI</h4></p>
@@ -1073,19 +825,6 @@
   ]]>
   </help>
 
-  <help name="agent-setup-4">
-  <![CDATA[
-    <p>
-    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
-    </p>
-    
-    <pre>
-    ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${installpath}${FILE.sep}java
-    ${CMD.prompt} hq-agent.${CMD.ext} start
-    </pre>
-  ]]>
-  </help>
-
   <help name="agent-setup-5">
   <![CDATA[
     <p>
@@ -1112,21 +851,6 @@
     <pre>
     ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
     ${CMD.prompt} hq-agent.${CMD.ext} start
-    </pre>
-  ]]>
-  </help>
-
-  <help name="config-auth-4" append="client-props">
-  <![CDATA[
-    <p>
-    <h4>Edit ${installpath}${FILE.sep}properties${FILE.sep}sas.client.props</h4>
-    Change the following properties for client authentication:
-    </p>
-
-    <pre>
-    com.ibm.CORBA.loginSource=properties
-    com.ibm.CORBA.loginUserid=adminUserName
-    com.ibm.CORBA.loginPassword=adminPassword
     </pre>
   ]]>
   </help>
@@ -1170,17 +894,11 @@
   ]]>
   </help>
 
-  <help name="WebSphere AE Admin 4.0"
-        include="agent-setup-4,enable-pmi-4-unix,config-auth-4"/>
-
   <help name="WebSphere Admin 5.0"
         include="agent-setup-5,enable-pmi-5,config-auth-5"/>
 
   <help name="WebSphere Admin 6.1"
         include="agent-setup-6,enable-pmi-6,config-auth-6"/>
-
-  <help name="WebSphere AE Admin 4.0 Win32"
-        include="agent-setup-4,enable-pmi-4-win32,config-auth-4"/>
 
   <help name="WebSphere Admin 5.0 Win32,config-auth-5"
         include="enable-pmi-5"/>
@@ -1201,7 +919,6 @@
   ]]>
   </help>
 
-  <help name="WebSphere AE 4.0" include="websphere-server"/>
   <help name="WebSphere 5.0" include="websphere-server"/>
 
   <property name="websphere5-webinf"
