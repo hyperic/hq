@@ -27,7 +27,6 @@ package org.hyperic.hq.plugin.websphere;
 
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
@@ -40,13 +39,18 @@ import org.hyperic.util.StringUtil;
 public abstract class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
-    protected abstract double getAvailValue(Metric metric);
+    protected double getAvailValue(Metric metric) {
+        return WebsphereUtil.isRunning(metric) ?
+                Metric.AVAIL_UP :
+                Metric.AVAIL_DOWN;
+    }
 
     protected double getCustomValue(Metric metric)
         throws PluginException,
         MetricUnreachableException,
         MetricNotFoundException {
-        throw new MetricInvalidException(); //wont happen
+
+        return WebsphereUtil.getMBeanCount(metric);
     }
     
     public MetricValue getValue(Metric metric)

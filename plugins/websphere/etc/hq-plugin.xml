@@ -1014,7 +1014,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               value="lib/jmxc.jar"/>
 
     <plugin type="measurement"
-            class="WebsphereMeasurementPlugin5"/>
+            class="WebsphereMeasurementPlugin"/>
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
@@ -1038,7 +1038,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
           description="Application Server">
 
     <plugin type="measurement"
-            class="WebsphereMeasurementPlugin5"/>
+            class="WebsphereMeasurementPlugin"/>
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
