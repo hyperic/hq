@@ -36,6 +36,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -48,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -60,12 +60,10 @@ import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
 import org.hyperic.hq.bizapp.shared.uibeans.ProblemMetricSummary;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
-import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -168,10 +166,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Map datamap = this.getDataMan().getAggregateData(mtids, eids, begin, 
                                                          end);
         
-        // Get the intervals, keyed by template ID's as well
-        Map intervals = this.getDerivedMeasurementManager()
-                            .findMetricIntervals(subject, aeids, mtids);
-            
         if (log.isTraceEnabled()) {
             log.trace("getResourceMetrics -> getAggregateData took " +
                       timer.getElapsed());
@@ -199,12 +193,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 resmap.put(category, summaries);
             }
                 
-            Long interval = (Long) intervals.get(tmpl.getId());
-    
             // Now create a MetricDisplaySummary and add it to the list
             MetricDisplaySummary summary =
-                this.getMetricDisplaySummary(tmpl, interval, begin, end,
-                                             data, total);
+                getMetricDisplaySummary(tmpl, begin, end, data, total);
             summaries.add(summary);
         }
         
@@ -235,9 +226,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     protected MetricDisplaySummary
-        getMetricDisplaySummary(MeasurementTemplateValue tmpl, Long interval,
-                                long begin, long end, double[] data,
-                                int totalConfigured) {
+        getMetricDisplaySummary(MeasurementTemplateValue tmpl, long begin,
+                                long end, double[] data, int totalConfigured) {
         // Create a new metric summary bean
         MetricDisplaySummary summary = new MetricDisplaySummary();
             
@@ -255,11 +245,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
         summary.setDesignated(Boolean.valueOf(tmpl.getDesignate()));
         summary.setMetricSource(tmpl.getMonitorableType().getName());
         
-        summary.setCollecting(interval != null);
-        
-        if (summary.getCollecting())
-            summary.setInterval(interval.longValue());
-    
         if (data == null)
             return summary;
         

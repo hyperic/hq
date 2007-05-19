@@ -2060,8 +2060,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Use previous function to set most values, including only 1 resource
         MetricDisplaySummary summary =
-            getMetricDisplaySummary(tmpl, new Long(dmval.getInterval()),
-                                         begin, end, data, 1);
+            getMetricDisplaySummary(tmpl, begin, end, data, 1);
 
         if (dmval.getBaseline() != null) {
             BaselineValue bval = dmval.getBaseline();
