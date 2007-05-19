@@ -1880,8 +1880,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         mtids.add(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = getResourceMetrics(subject, resources,
-                                              mtids, begin, end, false);
+        Map results = getResourceMetrics(subject, resources, mtids, begin, end,
+                                         null);
 
         // Should only be one
         if (log.isDebugEnabled()) {
@@ -1942,8 +1942,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         mtids.add(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = getResourceMetrics(subject, resources,
-                                              mtids, begin, end, false);
+        Map results = getResourceMetrics(subject, resources, mtids, begin, end,
+                                         null);
         
         // Should only be one
         if (log.isDebugEnabled()) {
@@ -2060,7 +2060,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Use previous function to set most values, including only 1 resource
         MetricDisplaySummary summary =
-            getMetricDisplaySummary(tmpl, begin, end, data, 1);
+            getMetricDisplaySummary(tmpl, new Long(dmval.getInterval()),
+                                         begin, end, data, 1);
 
         if (dmval.getBaseline() != null) {
             BaselineValue bval = dmval.getBaseline();
