@@ -58,18 +58,11 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String WEBAPP_NAME   = "Webapp";
     public static final String EJB_NAME      = "EJB";
 
-    public static final String VERSION_AE  = "AE";
     public static final String VERSION_WS5 = "WAS50";
-
-    public static final String SERVER_NAME_AE =
-        SERVER_NAME + " " + VERSION_AE;
-    public static final String ADMIN_NAME_AE =
-        SERVER_NAME_AE + " " + ADMIN_NAME;
 
     public static final String SERVER_ADMIN_NAME =
         SERVER_NAME + " " + ADMIN_NAME;
 
-    public static final String VERSION_40  = "4.0";
     public static final String VERSION_50  = "5.0";
 
     public static final String PROP_INSTALL_ROOT   = "was.install.root";
@@ -109,7 +102,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
         "5.0.0.0",
         "6.0.0.0",
         "6.1.0.0"
-        //no point in looking for 4.0, requires agent to run w/ ibm jdk
     };
 
     private static Log log = LogFactory.getLog("WebsphereProductPlugin");

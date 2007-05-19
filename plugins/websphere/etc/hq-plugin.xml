@@ -1071,7 +1071,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
     <service name="Application">
       <plugin type="control"
-              class="WebsphereAppControl5_0"/>
+              class="WebsphereAppControl"/>
 
       <config>
         <option name="app"

@@ -47,7 +47,6 @@ public class WebsphereControlPlugin
     private InetPortPinger portPinger;
     private String binDir = null;
     private String[] ctlArgs = new String[0];
-    private boolean is40;
 
     protected String getDefaultScript() {
         return
@@ -105,26 +104,22 @@ public class WebsphereControlPlugin
 
         this.binDir = getControlProgramDir();
 
-        this.is40 = getName().indexOf(WebsphereProductPlugin.VERSION_40) > 0;
+        //5.0 startup script takes server.name as an arg
+        //and stop takes user/pass w/ global security enabled
+        String username = getUsername();
+        String password = getPassword();
 
-        if (!this.is40) {
-            //5.0 startup script takes server.name as an arg
-            //and stop takes user/pass w/ global security enabled
-            String username = getUsername();
-            String password = getPassword();
-
-            if ((username != null) && (password != null)) {
-                this.ctlArgs = new String[] {
-                    getServerName(),
-                    "-username", username,
-                    "-password", password
-                };
-            }
-            else {
-                this.ctlArgs = new String[] {
-                    getServerName()
-                };
-            }
+        if ((username != null) && (password != null)) {
+            this.ctlArgs = new String[] {
+                getServerName(),
+                "-username", username,
+                "-password", password
+            };
+        }
+        else {
+            this.ctlArgs = new String[] {
+                getServerName()
+            };
         }
 
         try {

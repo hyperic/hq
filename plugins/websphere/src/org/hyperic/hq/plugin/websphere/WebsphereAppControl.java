@@ -33,11 +33,10 @@ import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 
-
 /**
  * Application control for WebSphere 5.0
  */
-public class WebsphereAppControl5_0
+public class WebsphereAppControl
     extends ControlPlugin {
 
     private static final String[] ACTIONS = {
@@ -64,11 +63,6 @@ public class WebsphereAppControl5_0
     private static final String[] APP_SIG = {
         STRING_CLASS,
     };
-
-    public WebsphereAppControl5_0() {
-        super();
-        setName(WebsphereProductPlugin.NAME);
-    }
 
     public List getActions() {
         return COMMANDS;
