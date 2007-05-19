@@ -1020,7 +1020,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             class="WebsphereControlPlugin"/>
 
     <plugin type="autoinventory"
-            class="WebsphereDetector5"/>
+            class="WebsphereDetector"/>
 
     <scan registry="${websphere.regkey}">
       <include name="InstallLocation"/>

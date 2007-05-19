@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.util.config.ConfigResponse;
 
+import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer5;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
@@ -51,11 +52,7 @@ import org.hyperic.hq.product.ServerResource;
 
 import org.hyperic.sigar.win32.RegistryKey;
 
-/**
- * Base class for WebSphere 4.0/5.0 Admin Server file scan discovery.
- */
-
-public abstract class WebsphereDetector
+public class WebsphereDetector
     extends ServerDetector 
     implements FileServerDetector,
                RegistryServerDetector,
@@ -66,25 +63,172 @@ public abstract class WebsphereDetector
         WebsphereProductPlugin.PROP_ADMIN_HOST
     };
 
-    protected Log log = LogFactory.getLog("WebsphereDetector");
+    protected Log log =
+        LogFactory.getLog(WebsphereDetector.class.getName());
 
-    public WebsphereDetector() {
-        super();
-        setName(WebsphereProductPlugin.SERVER_NAME);
+    private static final String PTQL_QUERY =
+        "State.Name.eq=java,Args.*.eq=com.ibm.ws.runtime.WsServer";
+
+    private static final String SOAP_PORT_EXPR =
+        "//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@port";
+
+    private WebsphereRuntimeDiscoverer5 discoverer = null;
+    private String node = null;
+    private String port = null;
+    private String installpath;
+
+    protected List discoverServers(ConfigResponse config)
+        throws PluginException {
+
+        if (this.discoverer == null) {
+            String version = getTypeInfo().getVersion();
+            this.discoverer = new WebsphereRuntimeDiscoverer5(version);
+        }
+
+        //for use w/ -jar hq-product.jar or agent.properties
+        Properties props = getManager().getProperties();
+        String[] credProps = {
+            WebsphereProductPlugin.PROP_USERNAME,
+            WebsphereProductPlugin.PROP_PASSWORD,
+            WebsphereProductPlugin.PROP_SERVER_NODE
+        };
+        for (int i=0; i<credProps.length; i++) {
+            String name = credProps[i];
+            String value =
+                props.getProperty(name, config.getValue(name));
+            if (value == null) {
+                //prevent NPE since user/pass is not required
+                value = "";
+            }
+            config.setValue(name, value);
+        }
+
+        return this.discoverer.discoverServers(config);
     }
 
-    protected abstract List discoverServers(ConfigResponse config)
-        throws PluginException;
+    protected String getProcessQuery() {
+        return PTQL_QUERY;
+    }
 
-    protected abstract String getProcessQuery();
+    protected String getAdminHost() {
+        return getManager().getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
+                                        "localhost");
+    }
 
-    protected abstract String getAdminHost();
+    private File findServerIndex() {
+        //any serverindex.xml will do.
+        File[] cells =
+            new File(this.installpath + "/config/cells").listFiles();
 
-    protected abstract String getAdminPort();
+        if (cells == null) {
+            return null;
+        }
 
-    protected abstract String getNodeName();
+        for (int i=0; i<cells.length; i++) {
+            File[] nodes =
+                new File(cells[i], "nodes").listFiles();
 
-    protected abstract String getStartupScript();
+            if (nodes == null) {
+                continue;
+            }
+
+            for (int j=0; j<nodes.length; j++) {
+                File index = new File(nodes[j], "serverindex.xml");
+                if (index.exists() && index.canRead()) {
+                    return index;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected String getAdminPort() {
+        if (this.port != null) {
+            return this.port;
+        }
+        final String prop =
+            WebsphereProductPlugin.PROP_ADMIN_PORT;
+
+        File index = findServerIndex();
+
+        if (index != null) {
+            this.port =
+                getXPathValue(index, SOAP_PORT_EXPR);
+            getLog().debug("Configuring " + prop + "=" + this.port +
+                           " from: " + index);
+        }
+
+        if (this.port == null) {
+            this.port =
+                getManager().getProperty(prop, "8880");
+        }
+
+        return this.port;
+    }
+
+    protected String getNodeName() {
+        return this.node;
+    }
+
+    protected String getStartupScript() {
+        if (isWin32()) {
+            return "bin\\startNode.bat";
+        }
+        else {
+            return "bin/startNode.sh";
+        }
+    }
+
+    protected void initDetector(File root) {
+        this.installpath = root.getAbsolutePath();
+
+        //sadly, the setupCmdLine script is the
+        //best way to determine the node name
+        final String NODE_PROP = "WAS_NODE=";
+
+        File cmdline =
+            new File(root, "bin/setupCmdLine" +
+                     getScriptExtension());
+        Reader reader = null;
+
+        try {
+            reader = new FileReader(cmdline);
+            BufferedReader buffer =
+                new BufferedReader(reader);
+            String line;
+
+            while ((line = buffer.readLine()) != null) {
+                line = line.trim();
+                if (line.length() == 0) {
+                    continue;
+                }
+                int ix = line.indexOf(NODE_PROP);
+                if (ix == -1) {
+                    continue;
+                }
+                this.node =
+                    line.substring(ix + NODE_PROP.length());
+                break;
+            }
+        } catch (IOException e) {
+            
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {}
+            }
+        }
+    }
+
+    public static String getRunningInstallPath() {
+        return getRunningInstallPath(PTQL_QUERY);
+    }
+
+    static List getServerProcessList() {
+        return getServerProcessList(PTQL_QUERY);
+    }
 
     protected Properties loadProps(File file) {
         Properties props = new Properties();
@@ -133,9 +277,6 @@ public abstract class WebsphereDetector
                                  node);
 
         return productProps;
-    }
-
-    protected void initDetector(File root) {
     }
 
     protected boolean isServiceControl() {

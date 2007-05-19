@@ -187,10 +187,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
         if (dir == null) {
-            //we only check for WebSphere5 since 4.0 requires
-            //the agent to be run with the WebSphere JDK.
-            //in which case dir already set from getInstallPathFromJDK()
-            dir = WebsphereDetector5.getRunningInstallPath();
+            dir = WebsphereDetector.getRunningInstallPath();
             if (dir != null) {
                 where = "process table";
             }
@@ -383,7 +380,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
             defaultSoapConfig +=
                 File.separator + "profiles" + File.separator;
 
-            List servers = WebsphereDetector5.getServerProcessList();
+            List servers = WebsphereDetector.getServerProcessList();
             if (servers.size() != 0) {
                 WebsphereDetector.Process process =
                     (WebsphereDetector.Process)servers.get(0);
