@@ -56,11 +56,12 @@ import org.hyperic.hq.plugin.websphere.WebsphereUtil;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
 /**
- * WebSphere 5.0 Application server and service discovery.
+ * WebSphere Application server and service discovery.
  */
-public class WebsphereRuntimeDiscoverer5 {
+public class WebsphereRuntimeDiscoverer {
 
-    private Log log = LogFactory.getLog("WebsphereRuntimeDiscoverer5");
+    private Log log =
+        LogFactory.getLog(WebsphereRuntimeDiscoverer.class.getName());
     private String version;
 
     static final WebSphereQuery[] serviceQueries = {
@@ -74,7 +75,7 @@ public class WebsphereRuntimeDiscoverer5 {
         new WebModuleQuery(),
     };
 
-    public WebsphereRuntimeDiscoverer5(String version) {
+    public WebsphereRuntimeDiscoverer(String version) {
         this.version = version;
     }
 

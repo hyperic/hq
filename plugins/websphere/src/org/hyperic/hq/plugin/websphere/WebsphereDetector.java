@@ -41,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hyperic.util.config.ConfigResponse;
 
-import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer5;
+import org.hyperic.hq.plugin.websphere.jmx.WebsphereRuntimeDiscoverer;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
@@ -72,7 +72,7 @@ public class WebsphereDetector
     private static final String SOAP_PORT_EXPR =
         "//specialEndpoints[@endPointName=\"SOAP_CONNECTOR_ADDRESS\"]//@port";
 
-    private WebsphereRuntimeDiscoverer5 discoverer = null;
+    private WebsphereRuntimeDiscoverer discoverer = null;
     private String node = null;
     private String port = null;
     private String installpath;
@@ -82,7 +82,7 @@ public class WebsphereDetector
 
         if (this.discoverer == null) {
             String version = getTypeInfo().getVersion();
-            this.discoverer = new WebsphereRuntimeDiscoverer5(version);
+            this.discoverer = new WebsphereRuntimeDiscoverer(version);
         }
 
         //for use w/ -jar hq-product.jar or agent.properties
