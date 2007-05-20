@@ -36,7 +36,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.util.StringUtil;
 
-public abstract class WebsphereMeasurementPlugin
+public class WebsphereMeasurementPlugin
     extends MeasurementPlugin {
 
     protected double getAvailValue(Metric metric) {
