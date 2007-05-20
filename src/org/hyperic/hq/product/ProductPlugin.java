@@ -168,7 +168,7 @@ public abstract class ProductPlugin extends GenericPlugin {
         try {
             return (GenericPlugin)pluginClass.newInstance();
         } catch (Exception e) {
-            plugin.getLog().error("Error creating " + plugin +
+            plugin.getLog().error("Error creating " + pluginClass.getName() +
                                   ": " + e, e);
         }
 
