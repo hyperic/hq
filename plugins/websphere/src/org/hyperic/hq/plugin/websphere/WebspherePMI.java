@@ -46,15 +46,12 @@ import com.ibm.websphere.pmi.client.CpdLoad;
 import com.ibm.websphere.pmi.client.CpdStat;
 import com.ibm.websphere.pmi.client.CpdValue;
 import com.ibm.websphere.pmi.client.PerfDescriptor;
-import com.ibm.websphere.pmi.client.PerfLevelSpec;
 import com.ibm.websphere.pmi.client.PmiClient;
 
 /**
  * map a Metric to the WebSphere PMI api.
  */
 public class WebspherePMI {
-
-    private static final String AVAIL_ATTR = "Availability";
 
     private static HashMap clientCache = new HashMap();
     private static HashMap descriptorCache = new HashMap();
@@ -149,29 +146,6 @@ public class WebspherePMI {
         return pmiclient;
     }
 
-    public static void enablePMI(PmiClient pmiclient,
-                                 String node,
-                                 String server)
-        throws PluginException {
-
-        try {
-            PerfLevelSpec[] level = 
-                pmiclient.getInstrumentationLevel(node, server);
-
-            if (level == null) {
-                throw new PluginException(pmiclient.getErrorMessage());
-            }
-
-            for (int i=0; i<level.length; i++) {
-                level[i].setLevel(PmiConstants.LEVEL_HIGH);
-            }
-
-            pmiclient.setInstrumentationLevel(node, server, level, true);
-        } catch (PmiException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
-    }
-
     public static PerfDescriptor getModuleDescriptor(PmiClient pmiclient,
                                                      Metric metric) {
         String key = metric.getObjectName();
@@ -210,7 +184,7 @@ public class WebspherePMI {
         //server/service it is considered available.  this will remain
         //the case for certain services such as EJB, JDBC and Thread Pools
         //others such as server and webapp should have more robust checks.
-        boolean isAvail = metric.getAttributeName().equals(AVAIL_ATTR);
+        boolean isAvail = metric.isAvail();
 
         PmiClientWrapper pmiclient;
 

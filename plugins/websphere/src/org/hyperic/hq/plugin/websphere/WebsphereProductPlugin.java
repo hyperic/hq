@@ -38,8 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 
-import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
@@ -81,8 +79,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
     public static final String PROP_APP_NAME       = "app";
     public static final String PROP_WEBAPP_NAME    = "webapp";
     public static final String PROP_EJB_NAME       = "ejb";
-
-    public static final String PROP_PMI_ENABLE     = "pmi.enable";
 
     public static final String PROP_WEBAPP_DISPLAY_NAME =
         PROP_WEBAPP_NAME + ".display";
@@ -499,18 +495,5 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
             installDir + "/etc/tmx4jTransform.jar",
         };
-    }
-
-    public static boolean enablePMI(ConfigResponse config) {
-        String pmiConfig = config.getValue(PROP_PMI_ENABLE);
-        if (pmiConfig == null) {
-            return false;
-        }
-        return Boolean.valueOf(pmiConfig) == Boolean.TRUE;
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println("websphere.installpath=" + 
-                           findInstallDir());
     }
 }
