@@ -111,9 +111,7 @@ public class WebsphereCollector extends Collector {
         this.perf = resolve(mServer, this.perf);
     }
 
-    protected WSStats getStatsObject(AdminClient mServer, ObjectName name)
-        throws PluginException {
-
+    protected WSStats getStatsObject(AdminClient mServer, ObjectName name) {
         Object[] params = { name, Boolean.FALSE };
         String[] sig = {
             ObjectName.class.getName(),
@@ -124,7 +122,8 @@ public class WebsphereCollector extends Collector {
             return (WSStats)mServer.invoke(this.perf,
                                            "getStatsObject", params, sig);
         } catch (Exception e) {
-            throw new PluginException(e.getMessage(), e);
+            log.error("getStatsObject(" + name + "): " + e.getMessage(), e);
+            return null;
         }
     }
 
@@ -207,6 +206,34 @@ public class WebsphereCollector extends Collector {
 
     public MetricValue getValue(Metric metric, CollectorResult result) {
         return super.getValue(metric, result);
+    }
+
+    protected void collectStats(ObjectName name) {
+        AdminClient mServer = getMBeanServer();
+        if (mServer == null) {
+            return;
+        }
+        collectStats(mServer, name);
+    }
+
+    protected void collectStats(AdminClient mServer, ObjectName oname) {
+        Stats stats = getStats(mServer, oname);
+        if (stats == null) {
+            return;
+        }
+        setAvailability(true);
+
+        String[] names = stats.getStatisticNames();
+        Map values = getResult().getValues();
+        for (int i=0; i<names.length; i++) {
+            double val = getStatCount(stats, names[i]);
+
+            //pmi names have lowercase 1st char
+            String name =
+                Character.toLowerCase(names[i].charAt(0)) +
+                names[i].substring(1);
+            values.put(name, new Double(val));
+        }
     }
 
     public void collect() {
