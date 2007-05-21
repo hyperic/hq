@@ -52,44 +52,6 @@ my %modules = (
         }],
         jars => [qw{lib/admin.jar lib/wsexception.jar}],
     },
-    'websphere-ejs' => {
-        classes => [qw{
-            com.ibm.ejs.sm.beans.Attribute
-            com.ibm.ejs.sm.beans.ClientAccess
-            com.ibm.ejs.sm.beans.BinaryAttrSerialization
-            com.ibm.ejs.sm.beans.ClientAccessHome
-            com.ibm.ejs.sm.beans.CloneOnlyAwareConfig
-            com.ibm.ejs.sm.beans.DataSource
-            com.ibm.ejs.sm.beans.EnterpriseApp
-            com.ibm.ejs.sm.beans.EJBServer
-            com.ibm.ejs.sm.beans.EJBServerAttributes
-            com.ibm.ejs.sm.beans.J2EEResourceConfig
-            com.ibm.ejs.sm.beans.Module
-            com.ibm.ejs.sm.beans.Node
-            com.ibm.ejs.sm.beans.Server
-            com.ibm.ejs.sm.beans.Type
-            com.ibm.ejs.sm.beans.Model
-            com.ibm.ejs.sm.beans.Relation
-            com.ibm.ejs.sm.beans.Resource
-            com.ibm.ejs.sm.beans.LiveRepositoryObject
-            com.ibm.ejs.sm.beans.LiveObjectAttributes
-            com.ibm.ejs.sm.beans.RepositoryObject
-            com.ibm.ejs.sm.beans.RepositoryObjectName
-            com.ibm.ejs.sm.beans.RepositoryObjectNameElem
-            com.ibm.ejs.sm.beans.TransportConfig
-            com.ibm.ejs.sm.beans.WebContainerConfig
-            com.ibm.ejs.sm.exception.AttributeDoesNotExistException
-            com.ibm.ejs.sm.exception.AttributeNotSetException
-            com.ibm.ejs.sm.exception.OpException
-            com.ibm.ejs.sm.util.act.Act
-            com.ibm.ejs.sm.active.ActiveObject
-            com.ibm.ejs.sm.active.ActiveEJBServerConfig
-            com.ibm.ejs.sm.active.ActiveModuleConfig
-            com.ibm.ejs.sm.active.ActiveServerConfig
-            com.ibm.ejs.sm.agent.Containment
-        }],
-        jars => [qw{lib/repository.jar lib/utils.jar lib/admin.jar}],
-    },
     'websphere-pmi' => {
         classes => [qw{
             com/ibm/websphere/pmi/Pmi.*\.class
@@ -98,39 +60,6 @@ my %modules = (
             com/ibm/websphere/pmi/stat/.*\.class
         }],
         jars => [qw{lib/pmiclient.jar lib/pmi.jar}],
-    },
-    'silverstream-37' => {
-        classes => [qw{
-            com.sssw.rt.util.AgRuntime
-            com.sssw.rt.util.AgiUserLogin
-            com.sssw.rt.util.AgiParentedException
-            com.sssw.rt.util.AgiRemoteServerSessionList
-            com.sssw.rt.util.AgoException
-            com.sssw.rt.util.AgoApiException
-            com.sssw.rt.util.AgoRsrcMgr
-            com.sssw.rt.util.AgoSecurityException
-            com.sssw.rt.util.AgoSystemException
-            com.sssw.rt.util.AgrServerSession
-            com.sssw.rt.util.AgoUnrecoverableSystemException
-            com.sssw.rt.util.AgoUserLoginInfo
-            com.sssw.rts.adminclient.AgAdmin
-            com.sssw.rts.acl.AgiPrincipalFactory
-            com.sssw.rts.acl.AgoPermission
-            com.sssw.rts.adminapi.AgiAdmChanges
-            com.sssw.rts.adminapi.AgiAdmContainer
-            com.sssw.rts.adminapi.AgiAdmContainerBase
-            com.sssw.rts.adminapi.AgiAdmElement
-            com.sssw.rts.adminapi.AgiAdmElementBase
-            com.sssw.rts.adminapi.AgiAdmPropertyBag
-            com.sssw.rts.adminapi.AgiAdmServer
-            com.sssw.rts.adminapi.AgiAdmStatistics
-            com.sssw.rts.adminapi.AgiAdmSession
-            com.sssw.rts.adminapi.AgiAdmStatContainer
-            com.sssw.rts.adminapi.AgiAdmStatElement
-            com.sssw.rts.adminapi.AgiAdmStatSet
-            com.sssw.rts.adminapi.AgoAdmStatInfo
-        }],
-        jars => [qw{lib/SilverServerAll.zip}],
     },
 );
 
