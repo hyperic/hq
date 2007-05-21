@@ -33,32 +33,7 @@
   <property name="template-config"
             value="admin.host=%admin.host%,admin.port=%admin.port%,admin.vers=${admin.vers},${auth}"/>
 
-  <metrics name="websphere-mem-bytes">
-    <metric name="JVM Total Memory"
-            alias="TotalMemory"
-            template="${domain}:Module=jvmRuntimeModule:totalMemory"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="B"/>
-    <metric name="JVM Free Memory"
-            alias="FreeMemory"
-            template="${domain}:Module=jvmRuntimeModule:freeMemory"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            indicator="true"
-            collectionType="dynamic"
-            units="B"/>
-    <metric name="JVM Used Memory"
-            alias="UsedMemory"
-            template="${domain}:Module=jvmRuntimeModule:usedMemory"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="B"/>
-  </metrics>
-
-  <metrics name="websphere-mem-kbytes">
+  <metrics name="websphere-jvm">
     <metric name="JVM Total Memory"
             alias="TotalMemory"
             template="${domain}:Module=jvmRuntimeModule:totalMemory"
@@ -571,7 +546,7 @@
             units="none"/>
   </metrics>
 
-  <metrics name="WebSphere 5.0" include="server-pmi,websphere-mem-kbytes">
+  <metrics name="WebSphere 5.0" include="server-pmi,websphere-jvm">
     <!-- XXX this avail check can be more robust -->
     <metric name="Server Availability"
             alias="Availability"
