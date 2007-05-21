@@ -554,7 +554,7 @@
     <!-- XXX this avail check can be more robust -->
     <metric name="Availability"
             alias="Availability"
-	    template="url.availability:hostname=%admin.host%,port=%admin.port%,protocol=ping,timeout=60:availability"
+	    template="TCP Socket:hostname=%admin.host%,port=%admin.port%,timeout=60:Availability"
             category="AVAILABILITY"
             group="Reliability"
             indicator="true"
