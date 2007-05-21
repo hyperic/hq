@@ -5100,6 +5100,14 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.23.1">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+            CREATE INDEX trigger_event_id_idx ON eam_trigger_event(event_id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
     <schemaSpec version="3.24">
       <schema-directSQL>
         <statement>
