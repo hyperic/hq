@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Iterator;
 
@@ -110,7 +111,12 @@ public class DumpMBeans {
                 try {
                     Object o = mServer.getAttribute(obj, name);
                     if (o != null) {
-                        value = o.toString();
+                        if (o.getClass().isArray()) {
+                            value = Arrays.asList((Object[])o).toString();
+                        }
+                        else {
+                            value = o.toString();
+                        }
                     }
                 } catch (Exception e) {
 
