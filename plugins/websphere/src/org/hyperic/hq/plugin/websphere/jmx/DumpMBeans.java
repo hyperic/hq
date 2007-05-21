@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Iterator;
@@ -130,7 +131,14 @@ public class DumpMBeans {
             MBeanOperationInfo[] ops = info.getOperations();
 
             for (int i=0; i<ops.length; i++) {
-                System.out.println("\t Operation: " + ops[i].getName());
+                ArrayList sig = new ArrayList();
+                MBeanParameterInfo[] params = ops[i].getSignature();
+                for (int j=0; j<params.length; j++) {
+                    sig.add(params[j].getType());
+                }
+                System.out.println("\t Operation: " +
+                                   ops[i].getReturnType() + " " +
+                                   ops[i].getName() + " " + sig);
             }
         }
     }
