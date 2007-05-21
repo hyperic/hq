@@ -11,7 +11,7 @@
     <cache usage="read-write" />
 
     <id name="id" type="integer">
-      <column name="ID" not-null="true" index="meas_id_class"/>
+      <column name="ID" not-null="true" index="MEAS_ID_CLASS"/>
       <generator class="sequence">
         <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
       </generator>
@@ -19,7 +19,7 @@
 
     <discriminator>
       <column name="MEASUREMENT_CLASS" not-null="true" sql-type="character"
-              length="1" index="meas_id_class"/>
+              length="1" index="MEAS_ID_CLASS"/>
     </discriminator>
 
     <version name="_version_" type="long">
@@ -46,7 +46,7 @@
     <subclass name="DerivedMeasurement" extends="Measurement"
               discriminator-value="D">
       <property name="enabled" type="boolean">
-        <column name="ENABLED" not-null="false"/>
+        <column name="ENABLED" not-null="false" index="MEAS_ENABLED_IDX"/>
       </property>
       <property name="interval" type="long">
         <column name="COLL_INTERVAL" />
