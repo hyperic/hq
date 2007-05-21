@@ -13,7 +13,7 @@
       </key-property>
 
       <key-many-to-one name="eventId" class="Event">
-        <column name="EVENT_ID" not-null="true" />
+        <column name="EVENT_ID" not-null="true" index="TRIGGER_EVENT_ID_IDX"/>
       </key-many-to-one>
     </composite-id>
 
