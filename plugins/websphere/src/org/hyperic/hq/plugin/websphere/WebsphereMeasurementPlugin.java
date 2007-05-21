@@ -91,6 +91,7 @@ public class WebsphereMeasurementPlugin
         String domain = metric.getDomainName();
         Properties props = new Properties();
         props.putAll(metric.getProperties());
+        props.putAll(metric.getObjectProperties());
 
         StringTokenizer tok = new StringTokenizer(domain, "/");
         props.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE,
