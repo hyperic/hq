@@ -135,7 +135,11 @@ public class WebsphereCollector extends Collector {
     protected String getServerName() {
         return getProperty(WebsphereProductPlugin.PROP_SERVER_NAME);
     }
-    
+
+    protected String getModuleName() {
+        return getProperty("Module");
+    }
+
     protected AdminClient getMBeanServer() {
         try {
             return WebsphereUtil.getMBeanServer(getProperties());
