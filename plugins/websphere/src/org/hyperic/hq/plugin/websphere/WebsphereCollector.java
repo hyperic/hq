@@ -47,6 +47,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
+import com.ibm.websphere.pmi.stat.WSStats;
 
 public class WebsphereCollector extends Collector {
 
@@ -54,6 +55,7 @@ public class WebsphereCollector extends Collector {
         LogFactory.getLog(WebsphereCollector.class.getName());
 
     private ObjectName jvm;
+    private ObjectName perf;
     private String domain;
 
     protected ObjectName newObjectNamePattern(String attrs)
@@ -79,13 +81,8 @@ public class WebsphereCollector extends Collector {
     }
 
     protected void init() throws PluginException {
-        AdminClient mServer;
-        try {
-            mServer =
-                WebsphereUtil.getMBeanServer(getProperties());
-        } catch (MetricUnreachableException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
+        AdminClient mServer = getMBeanServer();
+
         try {
             this.domain = mServer.getDomainName();
         } catch (ConnectorException e) {
@@ -105,6 +102,30 @@ public class WebsphereCollector extends Collector {
                                   getServerAttributes());
 
         this.jvm = resolve(mServer, this.jvm);
+
+        this.perf =
+            newObjectNamePattern("name=PerfMBean," +
+                                 "type=Perf," +
+                                 getProcessAttributes());
+        
+        this.perf = resolve(mServer, this.perf);
+    }
+
+    protected WSStats getStatsObject(AdminClient mServer, ObjectName name)
+        throws PluginException {
+
+        Object[] params = { name, Boolean.FALSE };
+        String[] sig = {
+            ObjectName.class.getName(),
+            Boolean.class.getName()
+        };
+
+        try {
+            return (WSStats)mServer.invoke(this.perf,
+                                           "getStatsObject", params, sig);
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        }
     }
 
     protected String getNodeName() {
