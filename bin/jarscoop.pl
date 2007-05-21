@@ -95,6 +95,7 @@ my %modules = (
             com/ibm/websphere/pmi/Pmi.*\.class
             com/ibm/websphere/pmi/client/(Cpd|Perf|Pmi).*\.class
             com/ibm/websphere/pmi/client/event/Cpd.*\.class
+            com/ibm/websphere/pmi/stat/.*\.class
         }],
         jars => [qw{lib/pmiclient.jar lib/pmi.jar}],
     },
