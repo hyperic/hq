@@ -575,7 +575,7 @@
     <!-- XXX this avail check can be more robust -->
     <metric name="Server Availability"
             alias="Availability"
-            template="ws.avail:node=%server.node%,type=Server,name=%server.name%:name"
+            template="${domain}:Module=jvmRuntimeModule:Availability"
             category="AVAILABILITY"
             group="Reliability"
             indicator="true"
@@ -1039,6 +1039,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
     <plugin type="measurement"
             class="WebsphereMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="WebsphereCollector"/>
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>

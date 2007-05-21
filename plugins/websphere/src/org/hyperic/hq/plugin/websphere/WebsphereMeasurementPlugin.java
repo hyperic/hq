@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import java.util.Properties;
+import java.util.StringTokenizer;
+
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -70,14 +73,37 @@ public class WebsphereMeasurementPlugin
             //XXX these templates have been removed
             return MetricValue.NONE;
         }
+        else if (WebsphereProductPlugin.useJMX) {
+            return super.getValue(metric); //collector
+        }
+        else {
+            MetricValue mValue = null;
 
-        MetricValue mValue = null;
+            Double val = WebspherePMI.getValue(metric);
 
-        Double val = WebspherePMI.getValue(metric);
+            mValue = new MetricValue(val, System.currentTimeMillis());
 
-        mValue = new MetricValue(val, System.currentTimeMillis());
+            return mValue;
+        }
+    }
 
-        return mValue;
+    public Properties getCollectorProperties(Metric metric) {
+        String domain = metric.getDomainName();
+        Properties props = new Properties();
+        props.putAll(metric.getProperties());
+
+        StringTokenizer tok = new StringTokenizer(domain, "/");
+        props.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE,
+                          tok.nextToken());
+        props.setProperty(WebsphereProductPlugin.PROP_SERVER_NAME,
+                          tok.nextToken());
+
+        if (tok.hasMoreTokens()) {
+            //services only
+            props.setProperty("type", tok.nextToken());
+        }
+
+        return props;
     }
 
     public String translate(String template, ConfigResponse config) {

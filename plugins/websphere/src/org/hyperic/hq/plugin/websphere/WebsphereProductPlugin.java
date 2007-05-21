@@ -106,6 +106,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
     private static boolean isOSGi = false;
+    static boolean useJMX = false;
 
     //if we are running with the ibm jdk we can configure
     //websphere.installpath ourselves.
@@ -320,9 +321,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         Properties managerProps = manager.getProperties();
 
-        if ("true".equals(managerProps.getProperty("websphere.autort"))) {
-            autoRT = true;
-        }
+        autoRT = "true".equals(managerProps.getProperty("websphere.autort"));
+
+        useJMX = "true".equals(managerProps.getProperty("websphere.usejmx"));
 
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
