@@ -74,12 +74,15 @@ public class ExecutableProcess extends Collector {
     protected double getAvailValue(int rc) {
         switch (rc) {
             case 0:
-                return Metric.AVAIL_UP;
+                return Metric.AVAIL_UP;      //green light
             case 1:
-                return Metric.AVAIL_WARN; //yellow light
+                return Metric.AVAIL_WARN;    //yellow light
             case 2:
-                return Metric.AVAIL_DOWN;
+                return Metric.AVAIL_DOWN;    //red light
             case 3:
+                return Metric.AVAIL_UNKNOWN; //grey light
+            case 4:
+                return Metric.AVAIL_PAUSED;  //orange light
             default:
                 return Metric.AVAIL_UNKNOWN;
         }        
