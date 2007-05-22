@@ -63,9 +63,8 @@ public class ResourceDAO
         save(resource);
 
         /* add it to the root resourcegroup */
-        ResourceGroup authzGroup = 
-            DAOFactory.getDAOFactory().getResourceGroupDAO()
-            .findRootGroup();
+        ResourceGroup authzGroup =
+            new ResourceGroupDAO(DAOFactory.getDAOFactory()).findRootGroup();
         authzGroup.addResource(resource);
 
         return resource;
@@ -86,13 +85,9 @@ public class ResourceDAO
         // Have to iterate thru resoucegroups and remove from each group
         // the resource belongs to.  Wish Hibernate supported cascade deletes
         // on many-to-many collections.
-        ResourceGroupDAO dao = DAOFactory.getDAOFactory().getResourceGroupDAO();
-        for(Iterator i=entity.getResourceGroups().iterator(); i.hasNext();) {
-            ResourceGroup rg = (ResourceGroup)i.next();
-            ResourceGroup resourceGroup = dao.get(rg.getId());
-            if (resourceGroup != null) {
-                resourceGroup.getResourceSet().remove(entity);
-            }
+        for (Iterator i = entity.getResourceGroups().iterator(); i.hasNext();) {
+            ResourceGroup rg = (ResourceGroup) i.next();
+            rg.removeResource(entity);
         }
         entity.getResourceGroups().clear();
         super.remove(entity);
