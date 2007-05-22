@@ -105,6 +105,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setInteger("tid", tid.intValue())
             .setParameterList("ids", iids)
+            .setCacheable(true)
+            .setCacheRegion("DerivedMeasurement.findIdsByTemplateForInstances")
             .list();
     }
 
