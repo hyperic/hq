@@ -841,15 +841,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public Integer[] findMeasurementIds(AuthzSubjectValue subject, Integer tid,
                                         Integer[] ids) {
-        ArrayList results = new ArrayList();
-        for (int i = 0; i < ids.length; i++) {
-            try {
-                results.add(getIdByTemplateAndInstance(tid, ids[i]));
-            } catch (FinderException e) {
-                continue;
-            }
-        }
-        return (Integer[]) results.toArray(new Integer[0]);
+        List results =
+            getDerivedMeasurementDAO().findIdsByTemplateForInstances(tid, ids); 
+        return (Integer[]) results.toArray(new Integer[results.size()]);
     }
 
     private List sortMetrics(List mcol, PageControl pc) {

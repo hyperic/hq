@@ -98,6 +98,16 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
+        String sql = "select id from DerivedMeasurement " +
+                     "where template.id = :tid and instanceId IN (:ids)";
+
+        return getSession().createQuery(sql)
+            .setInteger("tid", tid.intValue())
+            .setParameterList("ids", iids)
+            .list();
+    }
+
     List findByTemplate(Integer id) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
