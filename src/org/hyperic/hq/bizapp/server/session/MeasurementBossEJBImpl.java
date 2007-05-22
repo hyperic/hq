@@ -1411,9 +1411,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                MeasurementNotFoundException, DataNotAvailableException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        DerivedMeasurementValue dmv =
-            getDerivedMeasurementManager().getMeasurementValue(mid);
-        MeasurementTemplateValue tmpl = dmv.getTemplate();
+        DerivedMeasurement dmv =
+            getDerivedMeasurementManager().getMeasurement(mid);
+        MeasurementTemplate tmpl = dmv.getTemplate();
         
         Integer[] mids = new Integer[] { mid };
         return getDataMan().getHistoricalData(mids, begin, end, interval,
@@ -2693,19 +2693,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (summary.getThroughput() != null && 
                     summary.getThroughput().intValue() > 0) {
                     for (int i = 0; i < mids.length ; i++) {
-                        try {
-                            DerivedMeasurementValue dmv =
-                                getDerivedMeasurementManager()
-                                    .getMeasurementValue(mids[i]);
-                            
-                            summary.setThroughputUnits(
-                                    dmv.getTemplate().getUnits());
-                            
-                            break;
-                        } catch (MeasurementNotFoundException e) {
-                            // Try the next one
-                            continue;
-                        }
+                        DerivedMeasurement dmv =
+                            getDerivedMeasurementManager()
+                                .getMeasurement(mids[i]);
+                        
+                        summary.setThroughputUnits(
+                                dmv.getTemplate().getUnits());
+                        
+                        break;
                     }
                 }
             }
