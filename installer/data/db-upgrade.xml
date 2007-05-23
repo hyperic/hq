@@ -5114,6 +5114,17 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.23.2">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          alter table eam_agent alter column address type character varying(255)
+        </statement>
+        <statement targetDB="oracle">
+          alter table eam_agent modify address varchar2(255)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

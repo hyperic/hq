@@ -582,9 +582,11 @@ public class AgentClient {
                                        " use to contact the agent",
                                        getDefaultIpAddress(),
                                        QPROP_AGENTIP);
+            
+            // Attempt to resolve, as a safeguard
             try {
                 localHost = InetAddress.getByName(agentIP);
-                agentIP   = localHost.getHostAddress();
+                localHost.getHostAddress();
                 break;
             } catch(UnknownHostException exc){
                 System.err.println("- Unable to resolve host");
