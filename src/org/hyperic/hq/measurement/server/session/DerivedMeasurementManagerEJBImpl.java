@@ -252,7 +252,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurement objects
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -577,7 +576,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * and an alias.
      *
      * @return a DerivedMeasurement value
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public DerivedMeasurementValue getMeasurement(AuthzSubjectValue subject,
@@ -602,23 +600,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      */
     public DerivedMeasurement getMeasurement(Integer mid) {
         return getDerivedMeasurementDAO().get(mid);
-    }
-
-    /**
-     * Look up a DerivedMeasurementValue by Id.
-     *
-     * @return a DerivedMeasurement value
-     * @ejb:transaction type="REQUIRESNEW"
-     * @deprecated Use getMeasurement instead.
-     * @ejb:interface-method
-     */
-    public DerivedMeasurementValue getMeasurementValue(Integer mid)
-        throws MeasurementNotFoundException {
-        DerivedMeasurement dm = getMeasurement(mid);
-        if (dm == null) {
-            throw new MeasurementNotFoundException(mid);
-        }
-        return dm.getDerivedMeasurementValue();
     }
 
     /**
@@ -778,30 +759,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Lookup a derived measurement by id
-     * @ejb:interface-method 
-     */
-    public DerivedMeasurementValue findMeasurement(Integer mid)
-        throws MeasurementNotFoundException {
-        DerivedMeasurement dm = getDerivedMeasurementDAO().findById(mid);
-        if (dm != null) {
-            throw new MeasurementNotFoundException("No measurement found " +
-                                                   "for id=" + mid);
-        }
-        return dm.getDerivedMeasurementValue();
-    }
-
-    /**
-     * Look up a derived measurement EJB
+     * Look up a derived measurement value for a resource
      *
      * @return a DerivedMeasurement value
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
-                                                   Integer tid, Integer iid)
-        throws MeasurementNotFoundException
-    {
+    public DerivedMeasurement findMeasurement(Integer tid, Integer iid)
+        throws MeasurementNotFoundException {
         DerivedMeasurement dm =
             getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
             
@@ -810,7 +774,25 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "for " + iid + " with " +
                                                    "template " + tid);
         }
+        return dm;
+    }
 
+    /**
+     * Look up a derived measurement POJO
+     *
+     * @return a DerivedMeasurement value
+     * @ejb:interface-method
+     */
+    public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
+                                                   Integer tid, Integer iid)
+        throws MeasurementNotFoundException {
+        DerivedMeasurement dm = findMeasurement(tid, iid);
+            
+        if (dm == null) {
+            throw new MeasurementNotFoundException("No measurement found " +
+                                                   "for " + iid + " with " +
+                                                   "template " + tid);
+        }
         return dm.getDerivedMeasurementValue();
     }
 
@@ -882,7 +864,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a list of derived measurement EJBs for a category
      *
      * @return a list of DerivedMeasurement value
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
@@ -910,7 +891,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Look up a list of derived measurement EJBs for a category
      *
      * @return a list of DerivedMeasurement value
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public PageList findMeasurements(AuthzSubjectValue subject,
@@ -1119,7 +1099,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Enable or Disable measurement in a new transaction.  We need to have the
      * transaction finalized before sending out messages
-     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public void enableMeasurement(DerivedMeasurement m, boolean enabled)
