@@ -735,6 +735,17 @@ public class AlertDefinitionManagerEJBImpl
         return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
 
+    /**
+     * Get list of alert definition POJOs for a resource
+     * @throws PermissionException if user cannot manage alerts for resource
+     * @ejb:interface-method
+     */
+    public List findAlertDefinitions(AuthzSubjectValue subj, AppdefEntityID id)
+        throws PermissionException {
+        canManageAlerts(subj, id);
+        return getAlertDefDAO().findByAppdefEntity(id.getType(), id.getID());
+    }
+    
     /** 
      * Get list of children alert definition for a parent alert definition
      * @ejb:interface-method

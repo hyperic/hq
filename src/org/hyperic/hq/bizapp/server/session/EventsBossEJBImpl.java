@@ -451,6 +451,7 @@ public class EventsBossEJBImpl
         ArrayList triggers = new ArrayList();
         
         AlertDefinitionValue parent = null;
+        AlertDefinitionManagerLocal adm = getADM();
         // Iterate through to create the appropriate triggers and alertdef
         for (Iterator it = appdefIds.iterator(); it.hasNext(); ) {
             AppdefEntityID id = (AppdefEntityID) it.next();
@@ -482,7 +483,7 @@ public class EventsBossEJBImpl
             try {
                 // Now create the alert definition
                 AlertDefinitionValue created =
-                    getADM().createAlertDefinition(subject, adval);
+                    adm.createAlertDefinition(subject, adval);
                 
                 if (parent == null)
                     parent = created;
@@ -554,6 +555,7 @@ public class EventsBossEJBImpl
         ArrayList triggers = new ArrayList();
         
         // Iterate through to create the appropriate triggers and alertdef
+        AlertDefinitionManagerLocal adm = getADM();
         for (int ei = 0; ei < entIds.length; ei++) {
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
@@ -577,7 +579,7 @@ public class EventsBossEJBImpl
 
             try {
                 // Now create the alert definition
-                getADM().createAlertDefinition(subject, adval);
+                adm.createAlertDefinition(subject, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -629,6 +631,7 @@ public class EventsBossEJBImpl
         List defs = getADM().findAlertDefinitions(subject,
             aetid, EventConstants.TYPE_ALERT_DEF_ID, PageControl.PAGE_ALL);
         
+        AlertDefinitionManagerLocal adm = getADM();
         ArrayList triggers = new ArrayList();
         for (Iterator it = defs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue adval = (AlertDefinitionValue) it.next();
@@ -657,7 +660,7 @@ public class EventsBossEJBImpl
     
             try {
                 // Now create the alert definition
-                getADM().createAlertDefinition(subject, adval);
+                adm.createAlertDefinition(subject, adval);
             } catch (FinderException e) {
                 throw new AlertDefinitionCreateException(e.getMessage());
             }
@@ -753,6 +756,7 @@ public class EventsBossEJBImpl
                 "Conditions cannot be null or empty");
         }        
 
+        AlertDefinitionManagerLocal adm = getADM();
         ArrayList triggers = new ArrayList();
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -791,7 +795,7 @@ public class EventsBossEJBImpl
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
             
                 // Now update the alert definition
-                getADM().updateAlertDefinition(child);
+                adm.updateAlertDefinition(child);
             }
         }
         else {
@@ -804,7 +808,7 @@ public class EventsBossEJBImpl
             triggers.addAll(Arrays.asList(adval.getTriggers()));
                 
             // Now update the alert definition
-            getADM().updateAlertDefinition(adval);
+            adm.updateAlertDefinition(adval);
         }
     }
 
@@ -923,8 +927,9 @@ public class EventsBossEJBImpl
         
         // Delete alerts for definition and its children
         int count = 0;
+        AlertDefinitionManagerLocal adm = getADM();
         for (int i = 0; i < adids.length; i++) {
-            AlertDefinition def = getADM().getByIdAndCheck(subject, adids[i]);
+            AlertDefinition def = adm.getByIdAndCheck(subject, adids[i]);
             count += getAM().deleteAlerts(subject, def);
             
             Collection children = def.getChildren();
@@ -967,19 +972,6 @@ public class EventsBossEJBImpl
         }
         */
         return getAM().getById(id);
-    }
-
-    /**
-     * Find an alert by ID
-     *
-     * @ejb:interface-method
-     */
-    public AlertValue getAlert(int sessionID, Integer adid, long ctime)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               AlertNotFoundException, PermissionException 
-    {
-        return getAM().getByAlertDefAndTime(manager.getSubject(sessionID),
-                                            adid, ctime);
     }
 
     /**
@@ -1062,13 +1054,13 @@ public class EventsBossEJBImpl
         List resourceIds = new ArrayList();
         resourceIds.add(id);
         // First add all the regular servers and services.
-    	for(Iterator p = tree.getPlatformIterator();p.hasNext();) {
-    	    PlatformNode pn = (PlatformNode)p.next();
-            for(Iterator s = pn.getServerIterator(); s.hasNext();) {
-                ServerNode sn = (ServerNode)s.next();
+    	for (Iterator p = tree.getPlatformIterator(); p.hasNext();) {
+            PlatformNode pn = (PlatformNode) p.next();
+            for (Iterator s = pn.getServerIterator(); s.hasNext();) {
+                ServerNode sn = (ServerNode) s.next();
                 resourceIds.add(sn.getServer().getEntityId());
-                for(Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
-                    ServiceNode svn = (ServiceNode)sv.next();
+                for (Iterator sv = sn.getServiceIterator(); sv.hasNext();) {
+                    ServiceNode svn = (ServiceNode) sv.next();
                     resourceIds.add(svn.getService().getEntityId());
                 }
             }
@@ -1084,11 +1076,11 @@ public class EventsBossEJBImpl
             resourceIds.add(platformService.getEntityId());
         }
 
+        AlertDefinitionManagerLocal adm = getADM();
         List alertDefs = new ArrayList();
         for(int i = 0; i < resourceIds.size(); i++) {
             AppdefEntityID anId = (AppdefEntityID)resourceIds.get(i);
-            alertDefs.addAll(findAlertDefinitions(sessionID, anId,  
-                                                  PageControl.PAGE_ALL));
+            alertDefs.addAll(adm.findAlertDefinitions(subject, anId));
         }
         return alertDefs;
     }
@@ -1115,17 +1107,14 @@ public class EventsBossEJBImpl
     public void updateAlertsByAgent(int sessionID, AppdefEntityID platId,
                                     boolean enable)
         throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException 
+               AppdefEntityNotFoundException, PermissionException
     {
-        List allAlerts = this.findAlertDefinitionsByAgent(sessionID, platId);
-        for(int i = 0; i < allAlerts.size(); i++) {
-            AlertDefinitionValue ad = (AlertDefinitionValue)allAlerts.get(i);
-            try {
-                enableAlertDefinitions(sessionID, new Integer[]{ad.getId()}, 
-                                       enable);
-            } catch (FinderException e) {
-                // skip it
-            }
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        List allAlerts = findAlertDefinitionsByAgent(sessionID, platId);
+        AlertDefinitionManagerLocal adm = getADM();
+        for (Iterator it = allAlerts.iterator(); it.hasNext();) {
+            AlertDefinition ad = (AlertDefinition) it.next();
+            adm.updateAlertDefinitionEnable(subject, ad, enable);
         }
     }
     
@@ -1134,14 +1123,16 @@ public class EventsBossEJBImpl
      * @return true if they are all enabled false if they are all disabled
      * @ejb:interface-method
      */
-    public boolean checkAllAgentAlertsEnabled(int sessionID, AppdefEntityID platId)
+    public boolean checkAllAgentAlertsEnabled(int sessionID,
+                                              AppdefEntityID platId)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException 
     {
-        List allAgentAlerts = this.findAlertDefinitionsByAgent(sessionID, platId);
+        List allAgentAlerts = findAlertDefinitionsByAgent(sessionID, platId);
         for(int i = 0; i < allAgentAlerts.size(); i++) {
-            AlertDefinitionValue ad = (AlertDefinitionValue)allAgentAlerts.get(i);
-            if(!ad.getEnabled()) return false;
+            AlertDefinition ad = (AlertDefinition) allAgentAlerts.get(i);
+            if(!ad.isEnabled())
+                return false;
         }
         return true;
     }
