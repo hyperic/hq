@@ -320,88 +320,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return getTemplateManager().getTemplates(ids, pc);
     }
 
-    /** Retrieve list of available measurement templates applicable to an
-     * appdef entity, minus the exclude list of templates
-     * @param id the appdef entity ID
-     * @return a List of MeasurementTemplateValue objects
-     * @ejb:interface-method
-     */
-    public PageList findAvailableMeasurementTemplates(int sessionId,
-                                                      AppdefEntityID id,
-                                                      String cat,
-                                                      Integer[] tmplIds,
-                                                      PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-    
-        String mtype = null;
-        
-        // First get the list of measurements currently configured
-        List measurements =
-            getDerivedMeasurementManager().findMeasurements(
-                subject, id, null, PageControl.PAGE_ALL);
-        
-        // the excluded tempate id's might contain those that were previously
-        // created but were disabled -- those should _not_ be excluded
-        for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmval = (DerivedMeasurementValue) it.next();
-            if (!dmval.getEnabled())
-                it.remove();
-        }        
-        
-        // Create a list of excludes
-        Integer[] excludes = new Integer[tmplIds.length + measurements.size()];
-        int i;
-        for (i = 0; i < tmplIds.length; i++)
-            excludes[i] = tmplIds[i];
-        
-        // Create a HashSet of the template ID's
-        for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmval = (DerivedMeasurementValue) it.next();
-            excludes[i++] = dmval.getTemplate().getId();
-            
-            if (mtype == null)
-                mtype = dmval.getTemplate().getMonitorableType().getName();
-        }
-    
-        if (mtype == null) {
-            AppdefEntityValue av = new AppdefEntityValue(id, subject);
-            mtype = av.getMonitorableType();
-        }
-    
-        // Now fetch the list of templates
-        return getTemplateManager().findTemplates(mtype, cat, excludes,pc);
-    }
-
-    /** Retrieve list of available measurement templates applicable to an
-     * appdef autogroup , minus the exclude list of templates
-     * @param id the parent appdef entity ID
-     * @param ctype the type of the children to look for
-     * @return a List of MeasurementTemplateValue objects
-     * @ejb:interface-method
-     */
-    public List findAvailableAGMeasurementTemplates(int sessionId,
-                                                    AppdefEntityID id,
-                                                    AppdefEntityTypeID ctype,
-                                                    String cat,
-                                                    Integer[] tmplIds,
-                                                    PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, PermissionException {    
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List kids = getAGMemberIds(subject, id, ctype);
-        if (kids.isEmpty()) {
-            log.debug("Entity: " + id + " has no children of type: " + ctype);
-            return new ArrayList();
-        }
-        return findAvailableMeasurementTemplates(sessionId,
-                                                 (AppdefEntityID)kids.get(0),
-                                                 cat, 
-                                                 tmplIds,
-                                                 pc);
-    }
-
     /** Retrieve a measurement template given specific ID
      * @ejb:interface-method
      */
@@ -1052,7 +970,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public DerivedMeasurementValue getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        return getDerivedMeasurementManager().getMeasurementValue(id);
+        return getDerivedMeasurementManager().getMeasurement(id)
+            .getDerivedMeasurementValue();
     }
 
     /**
@@ -1100,9 +1019,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
-                DerivedMeasurementValue dmv =
-                    getDerivedMeasurementManager()
-                        .findMeasurement(subject, tids[i], aeid.getId());
+                DerivedMeasurement dmv = getDerivedMeasurementManager()
+                    .findMeasurement(tids[i], aeid.getId());
                 mids[i] = dmv.getId();
                 interval = Math.max(interval, dmv.getInterval());
             } catch (MeasurementNotFoundException e) {
