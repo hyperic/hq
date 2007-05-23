@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.ejb.FinderException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.util.Messenger;
@@ -46,9 +48,11 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatable;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertValue;
 
@@ -82,18 +86,6 @@ public class ClassicEscalatableCreator
      * May or may not be the right place to do that.
      */
     public Escalatable createEscalatable() {
-        AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
-
-        // Start the Alert object
-        AlertValue aVal = new AlertValue();
-        aVal.setAlertDefId(_def.getId());
-
-        // Create time is the same as the fired event
-        aVal.setCtime(_event.getTimestamp());
-
-        // Now create the alert
-        aVal = alertMan.createAlert(aVal);
-
         // Create the trigger event map
         Map trigMap = new HashMap();
         TriggerFiredEvent[] events = _event.getRootEvents();
@@ -101,6 +93,11 @@ public class ClassicEscalatableCreator
             trigMap.put(events[i].getInstanceId(), events[i]);
         }
     
+        AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
+
+        // Now create the alert
+        AlertValue aVal = alertMan.createAlert(_def, _event.getTimestamp());
+
         // Create a alert condition logs for every condition
         Collection conds = _def.getConditions();
         for (Iterator i = conds.iterator(); i.hasNext();) {
@@ -130,8 +127,7 @@ public class ClassicEscalatableCreator
         // AlertFiredEvent
         Messenger sender = new Messenger();
         sender.publishMessage(EventConstants.EVENTS_TOPIC,
-                              new AlertFiredEvent(_event, aVal.getId(),
-                                                  _def));
+                              new AlertFiredEvent(_event, aVal.getId(), _def));
 
         String shortReason = alertMan.getShortReason(alert);
         String longReason  = alertMan.getLongReason(alert);

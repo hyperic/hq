@@ -115,9 +115,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue createAlert(AlertValue val) {
-        AlertDefinition def = getAlertDefDAO().findById(val.getAlertDefId());
-        Alert alert = def.createAlert(val);
+    public AlertValue createAlert(AlertDefinition def, long ctime) {
+        Alert alert = new Alert();
+        alert.setAlertDefinition(def);
+        alert.setCtime(ctime);
         getAlertDAO().save(alert);
         return alert.getAlertValue();
     }
@@ -185,6 +186,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return alert;
     }
 
+    public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
+        AlertConditionDAO dao = getAlertConDAO();
+        for (int i = 0; i < logs.length; i++) {
+            AlertCondition cond = dao.findById(logs[i].getCondition().getId());
+            alert.createConditionLog(logs[i].getValue(), cond);
+        }
+    }
+    
     /** Remove alerts
      * @ejb:interface-method
      */
