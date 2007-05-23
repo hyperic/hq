@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -78,9 +79,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     List findAllCollected() {
-        String sql = "from DerivedMeasurement m " + 
-            "where m.interval is not null";
-        return getSession().createQuery(sql).list();
+        return createCriteria()
+            .add(Restrictions.isNotNull("interval"))
+            .list();
     }
     
     public DerivedMeasurement findByTemplateForInstance(Integer tid,
@@ -254,22 +255,18 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     List findDesignatedByInstanceForCategory(int appdefType, int iid,
-                                             String cat) {
-        String sql =
-            "select distinct m from DerivedMeasurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "where m.instanceId = ? " +
-            "and t.designate = true " +
-            "and mt.appdefType = ? " +
-            "and t.category.name = ?";
-
-        return getSession().createQuery(sql)
-            .setInteger(0, iid)
-            .setInteger(1, appdefType)
-            .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findDesignatedByInstanceForCategory")
-            .setString(2, cat).list();
+                                             String cat) 
+    {
+        List res = findDesignatedByInstance(appdefType, iid);
+        
+        for (Iterator i=res.iterator(); i.hasNext(); ) {
+            DerivedMeasurement dm = (DerivedMeasurement)i.next();
+            
+            if (!dm.getTemplate().getCategory().getName().equals(cat))
+                i.remove();
+        }
+        
+        return res;
     }
 
     List findDesignatedByInstance(int type, int id) {

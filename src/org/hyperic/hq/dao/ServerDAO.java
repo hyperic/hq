@@ -145,6 +145,8 @@ public class ServerDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setBoolean(1, virtual.booleanValue())
+            .setCacheable(true)
+            .setCacheRegion("Server.findByPlatform_orderName")
             .list();
     }
 
@@ -171,6 +173,8 @@ public class ServerDAO extends HibernateDAO
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
             .setBoolean(2, isVirtual.booleanValue())
+            .setCacheable(true)
+            .setCacheRegion("Server.findByPlatformAndType_orderName")
             .list();
     }
 
