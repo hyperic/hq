@@ -252,6 +252,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurement objects
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -1099,6 +1100,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Enable or Disable measurement in a new transaction.  We need to have the
      * transaction finalized before sending out messages
+     * @ejb:transaction type="REQUIRESNEW"
      * @ejb:interface-method
      */
     public void enableMeasurement(DerivedMeasurement m, boolean enabled)
