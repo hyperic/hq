@@ -411,7 +411,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                            Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        return getTemplateManager().getTemplateValue(id);
+        return getTemplateManager()
+            .getTemplate(id).getMeasurementTemplateValue();
     }
 
     /**
@@ -1413,9 +1414,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                MeasurementNotFoundException, DataNotAvailableException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        DerivedMeasurementValue dmv =
-            getDerivedMeasurementManager().getMeasurementValue(mid);
-        MeasurementTemplateValue tmpl = dmv.getTemplate();
+        DerivedMeasurement dmv =
+            getDerivedMeasurementManager().getMeasurement(mid);
+        MeasurementTemplate tmpl = dmv.getTemplate();
         
         Integer[] mids = new Integer[] { mid };
         return getDataMan().getHistoricalData(mids, begin, end, interval,
@@ -1445,8 +1446,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-        MeasurementTemplateValue tmpl =
-            getTemplateManager().getTemplateValue(tid);
+        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
             
         Integer[] mids = getMetricIdsForResource(subject, aid, tmpl);
         if (mids == null || mids.length == 0) {
@@ -1512,8 +1512,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
-        MeasurementTemplateValue tmpl = null;
-        tmpl = getTemplateManager().getTemplateValue(tid);
+        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
@@ -1595,7 +1594,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             mids = (Integer[]) midMap.values().toArray(new Integer[0]);
         }
         else {
-            mids = getMetricIdsForResource(subject, aid, tmpl);
+            MeasurementTemplate template =
+                getTemplateManager().getTemplate(tmpl.getId());
+            mids = getMetricIdsForResource(subject, aid, template);
             if (mids == null || mids.length == 0) {
                 throw new MeasurementNotFoundException(
                         "There is no measurement for " + aid + " with template " + 
@@ -1724,7 +1725,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         
         // Get the template
-        getTemplateManager().getTemplateValue(tid);
+        getTemplateManager().getTemplate(tid);
         
         List entities;
 
@@ -1956,8 +1957,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException, DataNotAvailableException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        MeasurementTemplateValue tmpl =
-            getTemplateManager().getTemplateValue(tid);
+        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
 
         List pruned = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
@@ -1975,7 +1975,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     private Integer[] getMetricIdsForResource(AuthzSubjectValue subject,
                                               AppdefEntityID aid,
-                                              MeasurementTemplateValue tmpl)
+                                              MeasurementTemplate tmpl)
         throws PermissionException, AppdefEntityNotFoundException,
                MeasurementNotFoundException {
         // Find the measurement ID based on entity type
@@ -2695,19 +2695,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (summary.getThroughput() != null && 
                     summary.getThroughput().intValue() > 0) {
                     for (int i = 0; i < mids.length ; i++) {
-                        try {
-                            DerivedMeasurementValue dmv =
-                                getDerivedMeasurementManager()
-                                    .getMeasurementValue(mids[i]);
-                            
-                            summary.setThroughputUnits(
-                                    dmv.getTemplate().getUnits());
-                            
-                            break;
-                        } catch (MeasurementNotFoundException e) {
-                            // Try the next one
-                            continue;
-                        }
+                        DerivedMeasurement dmv =
+                            getDerivedMeasurementManager()
+                                .getMeasurement(mids[i]);
+                        
+                        summary.setThroughputUnits(
+                                dmv.getTemplate().getUnits());
+                        
+                        break;
                     }
                 }
             }
