@@ -68,6 +68,8 @@ public class VirtualDAO extends HibernateDAO {
         return getSession().createQuery(sql)
                 .setString(0, rtName)
                 .setInteger(1, id.intValue())
+                .setCacheable(true)
+                .setCacheRegion("Virtual.findVirtualByPhysicalId")
                 .list();
     }
 

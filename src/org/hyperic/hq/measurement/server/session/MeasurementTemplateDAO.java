@@ -268,6 +268,17 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(0, tId.intValue())
             .setString(1, template).uniqueResult();
     }
+    
+    List findAllUsed() {
+        // This should be distinct as well, but see below error about BLOB
+        String sql = 
+            "select   t from MeasurementTemplate t, " + 
+            "                DerivedMeasurement dm " + 
+            " where dm.template.id = t.id " + 
+            " and dm.interval is not null";
+        
+        return getSession().createQuery(sql).list();
+    }
 
     List findDerivedByMonitorableType(String name) {
         // Oracle doesn't like 'distinct' qualifier on select when

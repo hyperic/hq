@@ -1413,9 +1413,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public void preload() {
-        StopWatch s = new StopWatch();
-        
         getDerivedMeasurementDAO().findAllCollected();
+        getMeasurementTemplateDAO().findAllUsed();
     }
     
     public static DerivedMeasurementManagerLocal getOne() {
