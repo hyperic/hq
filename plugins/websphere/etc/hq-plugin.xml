@@ -573,10 +573,9 @@
   </metrics>
 
   <metrics name="WebSphere 5.0 Thread Pool" include="thread-pool-pmi">
-    <!-- XXX this avail check can be more robust -->
     <metric name="Thread Pool Availability"
             alias="Availability"
-            template="ws.avail:node=%server.node%,process=%server.name%,type=ThreadPool,name=%thrpool%:name"
+            template="${domain}/threadPoolModule:Module=%thrpool%:Availability"
             category="AVAILABILITY"
             indicator="true"
             collectionType="dynamic"
@@ -1109,6 +1108,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
     <service name="Thread Pool"
              internal="true">
+
+      <plugin type="collector"
+              class="ThreadPoolCollector"/>
 
       <config>
         <option name="thrpool"
