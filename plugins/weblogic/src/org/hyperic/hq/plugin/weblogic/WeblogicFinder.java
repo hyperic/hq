@@ -32,7 +32,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.ServiceConfig;
@@ -40,13 +43,16 @@ import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.timer.StopWatch;
 
 public class WeblogicFinder {
+    private static final String BEASVC_EXE = "beasvc.exe";
+    private static final String NOTE_BEASVC_EXE = "weblogic." + BEASVC_EXE;
+
+    private static final Log log =
+        LogFactory.getLog(WeblogicFinder.class.getName());
 
     private static final String REG_SERVICES =
         "System\\CurrentControlSet\\Services\\";
 
     private static final HashMap skipDirs = new HashMap();
-
-    private static List windowsServices;
 
     static {
         skipDirs.put("ldap", Boolean.TRUE);
@@ -111,12 +117,10 @@ public class WeblogicFinder {
     }
 
     private static List getWindowsServices() {
-        if (windowsServices == null) {
-            windowsServices = new ArrayList();
-        }
-        else {
-            return windowsServices;
-        }
+        List windowsServices = new ArrayList();
+
+        StopWatch timer = new StopWatch();
+
         List names;
 
         try {
@@ -131,7 +135,7 @@ public class WeblogicFinder {
                 service = new Service((String)names.get(i));
                 ServiceConfig config = service.getConfig();
                 String path = config.getPath().trim();
-                if (!path.endsWith("beasvc.exe")) {
+                if (!path.endsWith(BEASVC_EXE)) {
                     continue;
                 }
                 WeblogicService beaSvc =
@@ -145,6 +149,9 @@ public class WeblogicFinder {
                 }
             }
         }
+
+        log.debug(BEASVC_EXE + " matches=" + windowsServices.size() +
+                  ", took: " + timer);
 
         return windowsServices;
     }
@@ -163,9 +170,19 @@ public class WeblogicFinder {
         return dir;
     }
 
-    static List getAdminServicePaths(String version) {
+    static List getAdminServicePaths(WeblogicDetector plugin) {
         List paths = new ArrayList();
-        List services = getWeblogicServices(version, true);
+        String version = plugin.getTypeInfo().getVersion();
+        //cache for reuse by each server type version.
+        //the cache is cleared when scan is completed.
+        Map notes = plugin.getManager().getNotes();
+        List windowsServices = (List)notes.get(NOTE_BEASVC_EXE);
+        if (windowsServices == null) {
+            windowsServices = getWindowsServices();
+            notes.put(NOTE_BEASVC_EXE, windowsServices);
+        }
+
+        List services = getWeblogicServices(windowsServices, version, true);
         for (int i=0; i<services.size(); i++) {
             WeblogicService service =
                 (WeblogicService)services.get(i);
@@ -174,9 +191,11 @@ public class WeblogicFinder {
         return paths;
     }
 
-    private static List getWeblogicServices(String version, boolean adminOnly) {
+    private static List getWeblogicServices(List services, String version, boolean adminOnly) {
         List wls = new ArrayList();
-        List services = getWindowsServices();
+        if (services == null) {
+            services = getWindowsServices();
+        }
 
         int v = 0;
         if (version != null) {
@@ -204,7 +223,7 @@ public class WeblogicFinder {
 
     private static WeblogicService getWeblogicService(String version,
                                                       boolean adminOnly) {
-        List services = getWeblogicServices(version, adminOnly);
+        List services = getWeblogicServices(null, version, adminOnly);
         if (services.size() == 0) {
             return null;
         }
