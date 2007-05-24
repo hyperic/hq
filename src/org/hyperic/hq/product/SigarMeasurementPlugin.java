@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.product;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarProxyCache;
@@ -53,6 +56,14 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     private Sigar      sigar        = null;
     private SigarProxy sigarProxy   = null;
     private ProcessFinder processFinder = null;
+    private static final Map AVAIL_ATTRS = new HashMap();
+
+    //Availaiblity helpers. Assume resource is available if
+    //we can collect the given attribute.
+    static {
+        AVAIL_ATTRS.put("DirUsage", "Total");
+        AVAIL_ATTRS.put("FileInfo", "Total");
+    }
 
     protected Sigar getSigar() throws PluginException {
         if (this.sigar != null) {
@@ -139,7 +150,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             toString();
     }
 
-    private boolean isAvailAttr(String attr) {
+    private boolean isProcessState(String attr) {
         return attr.equals("State");
     }
 
@@ -169,6 +180,22 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                                       "Type=MountedFileSystemUsage");
         }
 
+        boolean isAvail = false;
+        boolean isProcessState = false;
+        //check for Availability attribute aliases
+        if (attr.equals(Metric.ATTR_AVAIL)) {
+            String type =
+                metric.getObjectProperty(SigarInvokerJMX.PROP_TYPE);
+            String alias = (String)AVAIL_ATTRS.get(type);
+            if (alias != null) {
+                attr = alias;
+                isAvail = true;
+            }
+        }
+        else {
+            isAvail = isProcessState = isProcessState(attr);
+        }
+        
         SigarInvokerJMX invoker =
             SigarInvokerJMX.getInstance(sigarProxy, name);
 
@@ -177,7 +204,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                 systemValue = invoker.invoke(attr);
             }
         } catch (SigarException e) {
-            if (isAvailAttr(attr)) {
+            if (isAvail) {
                 return new MetricValue(Metric.AVAIL_DOWN);
             }
             else {
@@ -185,7 +212,10 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             }
         }
 
-        if (systemValue instanceof Double) {
+        if (isAvail && !isProcessState) {
+            useVal = new Double(Metric.AVAIL_UP);
+        }
+        else if (systemValue instanceof Double) {
             useVal = (Double)systemValue;
         }
         else if (systemValue instanceof Long) {
@@ -197,7 +227,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         else if (systemValue instanceof Character) {
             char c = ((Character)systemValue).charValue();
             //process state
-            if (isAvailAttr(attr)) {
+            if (isProcessState(attr)) {
                 double avail;
                 switch (c) {
                   case 'Z':
