@@ -1,6 +1,6 @@
 package org.hyperic.hq.ui.rendit
 
-import org.hyperic.hq.ui.rendit.PluginLoadInfo
+import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.ui.rendit.render.RenderFrame
 import org.hyperic.hq.ui.rendit.html.FormGenerator
 import org.hyperic.hq.ui.rendit.html.HtmlUtil
@@ -18,7 +18,7 @@ abstract class BaseController {
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
-    PluginLoadInfo     pluginInfo      // The results of init.groovy
+    UIPluginDescriptor pluginInfo      // The results of init.groovy
     String             template        // Default template when rendering
     
     private invokeArgs                 // Info about the request

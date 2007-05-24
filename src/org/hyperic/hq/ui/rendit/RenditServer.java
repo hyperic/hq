@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.UIPluginDescriptor;
 
 public class RenditServer {
     private static final RenditServer INSTANCE = new RenditServer();
@@ -113,10 +115,10 @@ public class RenditServer {
         Binding b = new Binding();
         b.setVariable("invokeArgs", 
                       InvocationBindings.newLoad(plugin.getPluginDir()));
-        PluginLoadInfo pInfo;
+        UIPluginDescriptor pInfo;
 
         try {
-            pInfo = (PluginLoadInfo) 
+            pInfo = (UIPluginDescriptor) 
                 plugin.run("org/hyperic/hq/ui/rendit/dispatcher.groovy", b);
         } catch(PluginLoadException e) {
             throw e;
@@ -126,9 +128,11 @@ public class RenditServer {
         }
 
         _log.info(pInfo.getName() + " [" + pInfo.getDescription() + 
-                  "] version " + pInfo.getMajor() + "." + pInfo.getMinor() + 
+                  "] version " + pInfo.getVersion() + 
                   " loaded at [" + path.getName() + "]");
                   
+        UIPluginManagerEJBImpl.getOne().createPlugin(pInfo);
+        
         synchronized (CFG_LOCK) {
             _plugins.put(path.getName(), plugin);
         }

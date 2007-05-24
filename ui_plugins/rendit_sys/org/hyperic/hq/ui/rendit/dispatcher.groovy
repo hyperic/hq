@@ -2,8 +2,8 @@ package org.hyperic.hq.ui.rendit
 
 import org.hyperic.hq.ui.rendit.InvocationBindings
 import org.hyperic.hq.ui.rendit.PluginLoadException
-import org.hyperic.hq.ui.rendit.PluginLoadInfo
 import org.hyperic.hq.ui.rendit.metaclass.MapCategory
+import org.hyperic.hq.hqu.UIPluginDescriptor
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -42,7 +42,7 @@ class Dispatcher {
     def loadPlugin() {
         def eng     = new GroovyScriptEngine(invokeArgs.pluginDir.absolutePath)
         def binding = new Binding()
-        def pinfo   = new PluginLoadInfo()
+        def pinfo   = new UIPluginDescriptor()
         binding.setVariable("plugin", pinfo)
         eng.run('init.groovy', binding)
         

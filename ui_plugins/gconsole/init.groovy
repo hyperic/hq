@@ -1,7 +1,7 @@
 plugin.name = "gconsole"
 plugin.description = "Groovy Console"
-plugin.major = 0
-plugin.minor = 1
+plugin.version = '0.3'
 plugin.apiMajor = 0
 plugin.apiMinor = 1
 plugin.dumpScripts = false
+plugin.addView('/console/index.hqu', 'I do something cool, here', "admin")

@@ -22,19 +22,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.ui.rendit;
+package org.hyperic.hq.hqu;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Returned from a UI plugin when the dispatcher is asked to load it.
  */
-public class PluginLoadInfo {
+public class UIPluginDescriptor {
     private String  _pluginName;
     private String  _description;
-    private int     _major;
-    private int     _minor;
+    private String  _version;
     private int     _apiMajor;
     private int     _apiMinor;
     private boolean _dumpScripts=false;
+    private List    _viewDescriptors = new ArrayList();
     
     public String getName() {
         return _pluginName;
@@ -52,22 +55,14 @@ public class PluginLoadInfo {
         _description = desc;
     }
     
-    public void setMajor(int major) {
-        _major = major;
-    }
-    
-    public int getMajor() {
-        return _major;
-    }
-    
-    public void setMinor(int minor) {
-        _minor = minor;
-    }
-    
-    public int getMinor() {
-        return _minor;
+    public void setVersion(String version) {
+        _version = version;
     }
 
+    public String getVersion() {
+        return _version;
+    }
+    
     public void setApiMajor(int major) {
         _apiMajor = major;
     }
@@ -90,5 +85,14 @@ public class PluginLoadInfo {
     
     public boolean getDumpScripts() {
         return _dumpScripts;
+    }
+    
+    public void addView(String path, String descr, String attachType) {
+        _viewDescriptors.add(new UIPluginViewDescriptor(path, descr, 
+                                                        attachType));
+    }
+    
+    public List getViews() {
+        return _viewDescriptors;
     }
 }
