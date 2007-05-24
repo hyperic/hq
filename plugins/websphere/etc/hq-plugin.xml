@@ -1110,9 +1110,6 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     <service name="Thread Pool"
              internal="true">
 
-      <plugin type="collector"
-              class="ThreadPoolCollector"/>
-
       <config>
         <option name="thrpool"
                 description="Thread Pool Name"
