@@ -102,6 +102,11 @@ public class WeblogicDetector
             return new File(dir, scripts[0]);
         }
     }
+
+    //just here to override protected access.
+    void adjustWeblogicClassPath(String installpath) {
+        adjustClassPath(installpath);
+    }
     
     public List getServerResources(ConfigResponse platformConfig, String path)
         throws PluginException {

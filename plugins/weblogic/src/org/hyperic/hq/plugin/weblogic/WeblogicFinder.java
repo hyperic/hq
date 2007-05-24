@@ -187,6 +187,13 @@ public class WeblogicFinder {
             WeblogicService service =
                 (WeblogicService)services.get(i);
             paths.add(new File(service.getExecDir()));
+
+            //adjust classpath to cover the case of weblogic service
+            //be installed after the HQ agent has been started.
+            File installpath = getInstallRoot(service.getBinaryPath());
+            if (installpath != null) {
+                plugin.adjustWeblogicClassPath(installpath.getPath());
+            }
         }
         return paths;
     }

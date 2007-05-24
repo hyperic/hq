@@ -27,6 +27,18 @@
 
 <plugin name="weblogic" class="WeblogicProductPlugin">
 
+  <classpath>
+    <!-- look for service pack jar as weblogic does in their scripts. -->
+    <include name="server/lib/weblogic_sp.jar"/>
+    <include name="server/lib/weblogic.jar"/>
+    <include name="server/lib/wlcipher.jar"/>
+    <include name="server/lib/webservices.jar"/>
+    <!-- 9.x+ssl -->
+    <include name="server/lib/jsafe.jar"/>
+    <!-- 6.1 -->
+    <include name="lib/weblogic.jar"/>
+  </classpath>
+
   <!-- appended to every template -->
   <property name="template-config"
             value="admin.url=%admin.url%,admin.username=%admin.username%,admin.password=%admin.password%"/>

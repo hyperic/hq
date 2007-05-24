@@ -142,6 +142,9 @@ public class WeblogicProductPlugin extends ProductPlugin {
             System.setProperty(key, (String)entry.getValue());
         }
 
+        //the jars relative to installpath
+        String[] classpath = super.getClassPath(manager);
+
         if (installpath == null) {
             File path = null;
 
@@ -161,7 +164,7 @@ public class WeblogicProductPlugin extends ProductPlugin {
             }
 
             if (path == null) {
-                return new String[0];
+                return classpath; //can be adjusted later
             }
             else {
                 installpath = path.getAbsolutePath();
@@ -194,14 +197,10 @@ public class WeblogicProductPlugin extends ProductPlugin {
             }
         } catch (IOException e) { }
 
-        return new String[] {
-            //look for service pack jar as weblogic does in their scripts.
-            installpath + "/server/lib/weblogic_sp.jar",
-            installpath + "/server/lib/weblogic.jar", 
-            installpath + "/server/lib/wlcipher.jar",
-            installpath + "/server/lib/webservices.jar",
-            installpath + "/server/lib/jsafe.jar", //9.x+ssl
-            installpath + "/lib/weblogic.jar" //6.1
-        };
+        for (int i=0; i<classpath.length; i++) {
+            classpath[i] = installpath + "/" + classpath[i];
+        }
+
+        return classpath;
     }
 }
