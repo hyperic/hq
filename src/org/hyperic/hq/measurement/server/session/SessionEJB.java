@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,16 +35,9 @@ import javax.ejb.FinderException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
-import org.hyperic.hq.measurement.server.session.CategoryDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
-import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.ScheduleRevNumDAO;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -64,18 +56,15 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.express.ExpressionManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
+import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -84,9 +73,6 @@ import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  *This is the base class to Measurement Session EJB's

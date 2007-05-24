@@ -95,4 +95,5 @@ public class HQConstants {
     
     public static final String JBOSSCACHE = "jboss.cache:service=hqTreeCache";
     public static final String EventLogPurge = "EVENT_LOG_PURGE";
+    public static final String OOBEnabled = "OOB_ENABLED";
 }

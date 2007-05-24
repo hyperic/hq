@@ -47,9 +47,9 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
@@ -503,7 +503,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         _log.debug("Loading default purge intervals");
         Properties conf;
         try {
-            conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
+            conf = ServerConfigManagerEJBImpl.getOne().getConfig();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -2065,9 +2065,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:create-method
      */
     public void ejbCreate() throws CreateException {
-        analyzer = (Analyzer) ProductProperties
-            .getPropertyInstance("hyperic.hq.measurement.analyzer");
-
+        boolean analyze = true;
+        try {
+            Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
+            if (conf.containsKey(HQConstants.OOBEnabled)) {
+                analyze = Boolean.getBoolean(
+                    conf.getProperty(HQConstants.OOBEnabled));
+            }
+        } catch (Exception e) {
+            _log.debug("Error looking up server configs", e);
+        } finally {
+            if (analyze) {
+                analyzer = (Analyzer) ProductProperties
+                    .getPropertyInstance("hyperic.hq.measurement.analyzer");    
+            }
+        }
     }
 
     public void ejbPostCreate() {}
