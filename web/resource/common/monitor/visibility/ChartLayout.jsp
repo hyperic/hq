@@ -80,7 +80,6 @@
 
 setInterval("RefreshChartForm()",300000); // 5 minute page refresh  300000
 </script>
-<div><a href="javascript:checkrefresh();">test</a></div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td colspan="4">
