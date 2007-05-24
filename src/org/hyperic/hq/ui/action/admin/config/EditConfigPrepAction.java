@@ -70,12 +70,6 @@ public class EditConfigPrepAction extends TilesAction {
         UpdateStatusMode upMode = uboss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
         
-        // See if the property exists
-        if (props.containsKey(HQConstants.SNMPVersion)) {
-            String ver = props.getProperty(HQConstants.SNMPVersion);
-            request.setAttribute("snmpEnabled", new Boolean(ver.length() > 0));
-        }
-
         return null;
     }
 }

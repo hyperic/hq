@@ -211,15 +211,13 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             }
 
             // create properties that are still left in tempProps
-            if (prefix != null) {
-                if (tempProps.size() > 0 ) {
-                    Enumeration propsToAdd = tempProps.propertyNames();
-                    while ( propsToAdd.hasMoreElements() ) {
-                        key = (String) propsToAdd.nextElement();
-                        propValue = tempProps.getProperty(key);
-                        // create the new property
-                        ccLH.create(prefix, key, propValue, propValue);
-                    }
+            if (tempProps.size() > 0 ) {
+                Enumeration propsToAdd = tempProps.propertyNames();
+                while ( propsToAdd.hasMoreElements() ) {
+                    key = (String) propsToAdd.nextElement();
+                    propValue = tempProps.getProperty(key);
+                    // create the new property
+                    ccLH.create(prefix, key, propValue, propValue);
                 }
             }
         } catch (FinderException e) {
