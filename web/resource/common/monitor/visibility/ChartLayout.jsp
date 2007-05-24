@@ -68,9 +68,19 @@
 
 <script language="JavaScript" src="<html:rewrite page="/js/chart.js"/>" type="text/javascript"></script>
 <script language="javascript">
-setTimeout("window.location.reload()",300000); // 5 minute page refresh
-</script>
+    function RefreshChartForm() {
+        var forms = document.getElementsByTagName('form');
 
+          for (i = 0; i < forms.length; i++) {
+           //alert(forms[i].name)
+          document.forms[0].submit();
+    }
+
+ }
+
+setInterval("RefreshChartForm()",300000); // 5 minute page refresh  300000
+</script>
+<div><a href="javascript:checkrefresh();">test</a></div>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td colspan="4">
