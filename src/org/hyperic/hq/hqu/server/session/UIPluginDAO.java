@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.server.session;
 
 import java.util.Iterator;
 
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
@@ -49,6 +50,12 @@ class UIPluginDAO
 
     void remove(UIPlugin p) {
         super.remove(p);
+    }
+    
+    UIPlugin findByName(String name) {
+        return (UIPlugin)createCriteria()
+            .add(Restrictions.eq("name", name))
+            .uniqueResult();
     }
     
     UIPlugin create(UIPluginDescriptor pInfo) {

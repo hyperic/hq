@@ -131,7 +131,7 @@ public class RenditServer {
                   "] version " + pInfo.getVersion() + 
                   " loaded at [" + path.getName() + "]");
                   
-        UIPluginManagerEJBImpl.getOne().createPlugin(pInfo);
+        UIPluginManagerEJBImpl.getOne().createOrUpdate(pInfo);
         
         synchronized (CFG_LOCK) {
             _plugins.put(path.getName(), plugin);

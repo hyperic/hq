@@ -69,6 +69,53 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
+    public UIPlugin createOrUpdate(UIPluginDescriptor pInfo) {
+        UIPlugin p = findPluginByName(pInfo.getName());
+        
+        if (p == null)
+            p = _pluginDAO.create(pInfo);
+        else
+            updatePlugin(p, pInfo);
+        return p;
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public UIPlugin findPluginByName(String name) {
+        return _pluginDAO.findByName(name);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public UIPlugin findPluginById(Integer id) {
+        return _pluginDAO.findById(id);
+    }
+    
+    /**
+     * Remove a plugin, all its views, and attach points from the system.
+     * @ejb:interface-method
+     */
+    public void deletePlugin(UIPlugin p) {
+        _pluginDAO.remove(p);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void updatePlugin(UIPlugin p, UIPluginDescriptor pInfo) {
+        if (!p.getDescription().equals(pInfo.getDescription()))
+            p.setDescription(pInfo.getDescription());
+        if (!p.getPluginVersion().equals(pInfo.getVersion()))
+            p.setPluginVersion(pInfo.getVersion());
+        
+        // TODO:  Update the views
+    }
+
+    /**
+     * @ejb:interface-method
+     */
     public Collection findAll() {
         return _pluginDAO.findAll();
     }
