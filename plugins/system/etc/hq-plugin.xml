@@ -563,11 +563,11 @@
 
     <metric name="Sockets"/>
 
-    <metric name="Total"
-            indicator="true"/>
-
+    <metric name="Total"/>
+ 
     <metric name="Disk Usage"
-            units="B"/>
+            units="B"
+            indicator="true"/>
   </metrics>
 
   <filter name="script.args"
