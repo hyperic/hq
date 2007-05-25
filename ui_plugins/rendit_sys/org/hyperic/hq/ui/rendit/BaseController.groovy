@@ -89,7 +89,8 @@ abstract class BaseController {
      */
     def getAddIns() {
 		[url_for  : HtmlUtil.&url_for,
-		 h        : HtmlUtil.&escapeHtml]
+		 h        : HtmlUtil.&escapeHtml,
+		 link_to  : HtmlUtil.&link_to]
     }
     
     protected void render(opts) {
