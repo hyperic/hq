@@ -120,6 +120,8 @@ function showViewEscResponse(originalRequest) {
       var configMeta = actionConfig.meta;
       var configVersion = actionConfig.version;
       var configProduct = actionConfig.product;
+      var configSnmpOID = actionConfig.oid;
+      var configSnmpIP = actionConfig.address;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -137,6 +139,7 @@ function showViewEscResponse(originalRequest) {
       var waitDiv = document.createElement('div');
       var editWaitDiv = document.createElement('div');
       var sysDiv = document.createElement('div');
+      var snmpDiv = document.createElement('div');
       var escTable = document.createElement('table');
       var escTableBody = document.createElement('tbody');
       var escTr1 = document.createElement('tr');
@@ -223,8 +226,10 @@ function showViewEscResponse(originalRequest) {
            } else if (actionClass[d] == "NoOpAction") {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
-            }
-       }
+            } else if (actionClass[d] == "SnmpAction") {
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+           }
+      }
 
       if (configListType == "1"){
           var emailAdds = emailInfo.split(',');
@@ -278,7 +283,7 @@ function showViewEscResponse(originalRequest) {
               </c:forEach>
           }
 
-          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Users"/>: " + roleNames + "<br>";
+          usersTextDiv.innerHTML = "<fmt:message key="monitoring.events.MiniTabs.Roles"/>: " + roleNames + "<br>";
       }
 
       escTr2.appendChild(td3);
@@ -351,10 +356,59 @@ function showViewEscResponse(originalRequest) {
 
 
     function saveAddEscalation () {
-        if (!checkEmail()) { return false; }
-        if (!checkSMS()) { return false; }
 
-        //checkSMS();
+        if (selActionTypeEsc==undefined) {
+           $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>'
+            //$('saveButton').style.display = "none";
+            return false;
+        }
+
+
+        if (selUserEsc==undefined && selActionTypeEsc != "SNMP") {
+           $('example').style.display= '';
+            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectWhoMethod"/>'
+            //$('saveButton').style.display = "none";
+            return false;
+        }
+        
+        if (selUserEsc == 'Others') {
+        if (!checkEmail()) { return false; }
+        }
+
+        if(selActionTypeEsc=="SMS") {
+        if (!checkSMS()) { return false; }
+        }
+
+        var IPInput = $('snmpIPinput');
+        var OIDInput = $('snmpOIDinput');
+
+
+        var snmpDivIn = $('snmpinput');
+        if (snmpDivIn.style.display != 'none') {
+          if (IPInput.value == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
+        $('snmpIPinput').focus();
+               return false;
+           }
+
+          if (OIDInput.value == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
+        $('snmpOIDinput').focus();
+              return false;
+           }
+        }
+
         var emailTextArea = $('emailinput');
         var emailAdds = emailTextArea.value;
 
@@ -393,6 +447,7 @@ function showViewEscResponse(originalRequest) {
     function updateEscView( originalRequest ) {
         $('example').setAttribute((document.all ? 'className' : 'class'), "ConfirmationBlock");
         $('example').style.display= '';
+        $('okCheck').innerHTML = '<html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" />';
         $('escMsg').innerHTML ="The action has been added to the escalation. The escalation is complete. You can add additional actions as needed.";
         cancelAddEscalation();
         setTimeout( "requestViewEscalation()", 1200 );
@@ -425,6 +480,7 @@ function showViewEscResponse(originalRequest) {
         var othersDiv = document.createElement('div');
         var emailDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
+        var snmpDiv = document.createElement('div');
         var escTable = document.createElement('table');
         var escTableBody = document.createElement('tbody');
         var escTrHeader = document.createElement('tr');
@@ -464,7 +520,7 @@ function showViewEscResponse(originalRequest) {
                 td5.setAttribute('width', '30%');
                 td5.setAttribute('rowSpan', '3');
                 td5.setAttribute('id', 'displaySelAction');
-                td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
+                td5.innerHTML = '<table cellpadding="2" cellspacing="0" border="0" width="100%"><tbody><tr><td class=BlockTitle colSpan=3>Action Details</td></tr><tr><td id="actionName" vAlign="top" width="50%">Action: Email</td></tr><tr><td id="userListDisplay" valign="top" style="display:none;"></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=metaText style="display:none"></td></tr><tr><td id=productText style="display:none"></td></tr><tr><td id=versionText style="display:none"></td></tr></table></td></tr><tr><td><table cellpadding="2" cellspacing="0" border="0"><tr><td id=IPText style="display:none"></td></tr><tr><td id=OIDText style="display:none"></td></tr></table></td></tr><tr><td id="time" colspan="3" valign="top" style="display:none;"></td></tr></tbody></table>';
 
 
         escTr1.appendChild(td1);
@@ -492,9 +548,13 @@ function showViewEscResponse(originalRequest) {
         select2.setAttribute('id', 'Email_' + liID);
         select2.onchange = function(){onchange_handler(this);clearDisplay();clearOthers();}
         select2.setAttribute('name', 'action');
+        addOption(select2, 'Select', '<fmt:message key="alert.config.escalation.notify.how"/>');
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
+        <c:if test="${snmpEnabled}">
+        addOption(select2, 'SNMP', 'SNMP Trap');
+        </c:if>
         addOption(select2, 'NoOp', 'Suppress Alerts');
 
         escTr2.appendChild(td3);
@@ -529,6 +589,14 @@ function showViewEscResponse(originalRequest) {
         $('sysloginput').style.textAlign = 'left';
         //sysDiv.setAttribute('width', '40%');
         sysDiv.innerHTML = "meta:<br> <input type=text name=meta id=metainput" + " size=30 onMouseOut=copyMeta(this);checkMeta();><br>" + "product:<br> <input type=text name=product id=productinput" + " size=30 onMouseOut=copyProduct(this);checkProduct();><br>" + "version:<br> <input type=text name=version id=versioninput" + " size=30 onMouseOut=copyVersion(this);checkVersion();><br>";
+
+        td4.appendChild(snmpDiv);
+        snmpDiv.setAttribute('class', 'escInput');
+        snmpDiv.setAttribute('id', 'snmpinput');
+        $('snmpinput').style.display = 'none';
+        $('snmpinput').style.textAlign = 'left';
+        //sysDiv.setAttribute('width', '40%');
+        snmpDiv.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: <fmt:message key="inform.config.escalation.scheme.IPAddress"/><br> <input type=text name=snmpIP id=snmpIPinput' + " size=30 onMouseOut=copysnmpIP(this);checkIP(this);><br>" + '<fmt:message key="admin.settings.SNMPTrapOID"/> <fmt:message key="inform.config.escalation.scheme.OID"/><br> <input type=text name=snmpOID id=snmpOIDinput' + " size=30 onMouseOut=copysnmpOID(this);checkOID(this);><br>";
 
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
@@ -582,12 +650,26 @@ function showViewEscResponse(originalRequest) {
         versionDisplay.innerHTML = 'version: ' + el.value;
       }
 
+      function copysnmpOID(el) {
+        var OIDDisplay = $('OIDText');
+        OIDDisplay.style.display = "";
+        OIDDisplay.innerHTML = '<fmt:message key="admin.settings.SNMPTrapOID"/> ' + el.value;
+      }
+
+      function copysnmpIP(el) {
+        var IPDisplay = $('IPText');
+        IPDisplay.style.display = "";
+        IPDisplay.innerHTML = '<fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + el.value;
+      }
+
       function clearDisplay() {
        $('userListDisplay').innerHTML = "";
        $('metaText').innerHTML = "";
        $('productText').innerHTML = "";
        $('versionText').innerHTML = "";
        $('time').innerHTML = "";
+       $('IPText').innerHTML = "";
+       $('OIDText').innerHTML = "";
       }
 
       function clearOthers() {
@@ -600,26 +682,31 @@ function showViewEscResponse(originalRequest) {
         var writeAction = $('actionName');
         var index= el.options[el.selectedIndex].value
 
-          $('userListDisplay').style.display= "";
-          clearDisplay();
-          $('escMsg').innerHTML ='';
-          $('example').style.display= 'none';
-
-
+        clearDisplay();
+        $('escMsg').innerHTML ='';
+        $('example').style.display= 'none';    
+        $('userListDisplay').style.display= "";
+   
           if (index == "NoOp") {
           writeAction.innerHTML = '<fmt:message key="inform.config.escalation.scheme.NoOP"/>';
           } else {
           writeAction.innerHTML = 'Action: ' +index;
           }
 
-         if (index == "Email" || index == "SMS" || index == "NoOp") {
-            hideSyslogInput(el);
-         }
-         else {
-            showSyslogInput(el);
+        if (index == "Email" || index == "SMS" || index == "NoOp" || index == "SNMP") {
+         hideSyslogInput(el);
+         } else {
+         showSyslogInput(el);
          }
 
-         if (index == "Syslog" || index == "NoOp") {
+         if (index == "SNMP") {
+            showSnmpInput(el);
+         }
+         else {
+            hideSnmpInput(el);
+         }
+
+         if (index == "Syslog" || index == "NoOp" || index == "SNMP") {
             hideWhoSelect(el);
          }
          else {
@@ -630,7 +717,11 @@ function showViewEscResponse(originalRequest) {
 
       function onchange_who(el) {
          clearOthers();
-        $('userListDisplay').style.display= "";
+         $('escMsg').innerHTML ='';
+         $('example').style.display= 'none';
+         $('addEscButtons').style.display = "";
+
+
         var index= el.options[el.selectedIndex].value
         var idStr = el.id;
         var getId = idStr.split('_');
@@ -679,6 +770,20 @@ function showViewEscResponse(originalRequest) {
         var syslogDivIn = $('sysloginput');
         syslogDivIn.style.display='none';
     }
+
+    function showSnmpInput(el) {
+
+        var snmpDivIn = $('snmpinput');
+        snmpDivIn.style.display='';
+        $('snmpinput').focus();
+    }
+
+    function hideSnmpInput(el) {
+
+         var snmpDivIn = $('snmpinput');
+         snmpDivIn.style.display='none';
+     }
+
 
     function onchange_time(el) {
 
@@ -887,7 +992,7 @@ function showViewEscResponse(originalRequest) {
         if(metaText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noMetaInput"/>';
         $('metainput').focus();
         return false;
@@ -905,7 +1010,7 @@ function showViewEscResponse(originalRequest) {
         if(productText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noProductInput"/>';
         $('productinput').focus();
         return false;
@@ -923,7 +1028,7 @@ function showViewEscResponse(originalRequest) {
         if(versionText == '') {
         $('example').style.display= '';
         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = "&nbsp;";
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noVersionInput"/>';
         $('versioninput').focus();
          return false;
@@ -935,12 +1040,54 @@ function showViewEscResponse(originalRequest) {
         }
     }
 
+    function checkIP() {
+
+      var IPText = $('snmpIPinput').value;
+        if(IPText == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
+        $('snmpIPinput').focus();
+        return false;
+
+        } else {
+            $('escMsg').innerHTML ='';
+            $('example').style.display= 'none';
+            $('addEscButtons').style.display = "";
+        }
+    }
+
+         
+    function checkOID() {
+        var OIDText = $('snmpOIDinput').value;
+
+        if(OIDText == '') {
+        $('example').style.display= '';
+        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
+        $('snmpOIDinput').focus();
+        return false;
+
+        } else {
+            $('escMsg').innerHTML ='';
+            $('example').style.display= 'none';
+            $('addEscButtons').style.display = "";
+        }
+    }
+
+
     function checkEmail() {
 
         var emailTextArea = $('emailinput');
         var userListCheck = $('userListDisplay');
         var emailAdds = emailTextArea.value;
         var illegalChars= /[\(\)\<\>\;\:\\\/\"\[\]]/;
+
+       if (selActionTypeEsc=="NoOp" || selActionTypeEsc=="Syslog" || selActionTypeEsc=="Select" || selActionTypeEsc=="SNMP"){
+           return true;
+           }else 
 
             <%--
            var separatedEmails = emailAdds.split(',');
@@ -949,24 +1096,25 @@ function showViewEscResponse(originalRequest) {
            if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
             return false;
                 }
             }
             --%>
-            
-            if ((selUserEsc == 'Others' && emailAdds == '')) {
-            $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noEmailAddressInput"/>';
-            //$('saveButton').style.display = "none";
+       
+            if (selUserEsc == 'Others' && emailAdds == '') {
+                $('example').style.display= '';
+                $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+                $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+                $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
+               
+                       //$('saveButton').style.display = "none";
             return false;
             } else if (emailAdds.match(illegalChars)) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
             //$('saveButton').style.display = "none";
             return false;
@@ -985,7 +1133,7 @@ function showViewEscResponse(originalRequest) {
         if((selActionTypeEsc == 'SMS') && selUserEsc == undefined) {
             $('example').style.display= '';
             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = "&nbsp;";
+            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             //$('saveButton').style.display = "none";
             return false;
@@ -997,6 +1145,22 @@ function showViewEscResponse(originalRequest) {
         }
    }
 
+ function textCounter( field, countfield, maxlimit ) {
+   if ( field.value.length > maxlimit )
+   {
+     field.value = field.value.substring( 0, maxlimit );
+     $('example').style.display= '';
+     $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+     $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+     $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.250Char"/>';
+    return false;
+   } else {
+     $('escMsg').innerHTML ='';
+     $('example').style.display= 'none';
+     $('addEscButtons').style.display = "";
+     return true;
+    }
+ }
 
 </script>
 
@@ -1028,8 +1192,7 @@ function showViewEscResponse(originalRequest) {
 <div id="example" style="display:none;" class="ConfirmationBlock">
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td style="padding-right:5px;" id="okCheck"><html:img
-      page="/images/tt_check.gif" height="9" width="9" border="0" alt="" /></td>
+    <td style="padding-right:5px;" id="okCheck"><html:img page="/images/tt_check.gif" height="9" width="9" border="0" alt="" /></td>
     <td width="100%">
     <div id="escMsg"></div>
     </td>
@@ -1133,7 +1296,7 @@ function showViewEscResponse(originalRequest) {
         <tr>
           <td class="BlockLabel" valign="top"><fmt:message
             key="common.label.Description" /></td>
-          <td><textarea cols="40" rows="4" name="description" id="escDesc"></textarea>
+          <td><textarea cols="40" rows="4" name="description" id="escDesc" onkeypress="textCounter(this,this.form.counter,250);" onblur="textCounter(this,this.form.counter,250);"></textarea>
           </td>
         </tr>
       </table>
