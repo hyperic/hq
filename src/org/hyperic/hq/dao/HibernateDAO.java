@@ -29,7 +29,6 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +50,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     void remove(DerivedMeasurement entity) {
-        MeasurementStartupListener
-            .getDeleteMetricCallback()
-            .beforeMetricsDeleted(Collections.singleton(entity));
-        
+        if (entity.getBaseline() != null)
+            super.remove(entity.getBaseline());
         super.remove(entity);
     }
 
@@ -140,8 +137,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     int deleteByInstances(AppdefEntityID[] ids)
     {
         Map map = AppdefUtil.groupByAppdefType(ids);
-        StringBuffer sql = new StringBuffer()
-            .append("from DerivedMeasurement where ");
+        StringBuffer sql = new StringBuffer("from DerivedMeasurement where ");
         for (int i = 0; i < map.size(); i++) {
             if (i > 0) {
                 sql.append(" or ");
@@ -150,8 +146,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                        "(select m.id from DerivedMeasurement m " +
                        "join m.template t " +
                        "join t.monitorableType mt where " +
-                       "  m.interval is not null and ")
-                .append("mt.appdefType=")
+                       "mt.appdefType=")
                 .append(":appdefType"+i)
                 .append(" and ")
                 .append("m.instanceId in (:list" + i + ")")
@@ -174,12 +169,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         }
         
         List v = q.list();
-        MeasurementStartupListener
-            .getDeleteMetricCallback()
-            .beforeMetricsDeleted(v);
-        
-        for (Iterator i=v.iterator(); i.hasNext(); ) {
-            super.remove(i.next());
+        for (Iterator it = v.iterator(); it.hasNext(); ) {
+            remove((DerivedMeasurement) it.next());
         }
         return v.size();
     }

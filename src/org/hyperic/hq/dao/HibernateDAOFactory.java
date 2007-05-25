@@ -47,7 +47,6 @@ import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
@@ -158,10 +157,6 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public ServiceTypeDAO getServiceTypeDAO() {
         return new ServiceTypeDAO(this);
-    }
-
-    public BaselineDAO getBaselineDAO() {
-        return new BaselineDAO(this);
     }
 
     public CategoryDAO getCategoryDAO() {
