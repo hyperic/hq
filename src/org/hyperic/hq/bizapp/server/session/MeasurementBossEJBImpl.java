@@ -821,28 +821,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
-     * Remove all measurements for multiple instances
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void removeMeasurements(int sessionId, AppdefEntityID[] ids)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, RemoveException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
-        StopWatch timer = new StopWatch();
-        // First remove all the Derived Measurements
-        getDerivedMeasurementManager().removeMeasurements(subject, ids[0],
-                                                               ids);
-        log.debug("Remove Derived Measurements timing: " + timer.reset());
-
-        // Then remove the Raw Measurements
-        getRawMeasurementManager().removeMeasurements(ids);
-
-        log.debug("Remove Raw Measurements timing: " + timer.getElapsed());
-    }
-
-    /**
      * Disable all measurements for an instance
      * @param id the resource's ID
      * @ejb:interface-method

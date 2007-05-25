@@ -1601,12 +1601,11 @@ public class AppdefBossEJBImpl
 
         try {
             // Lookup the platform (make sure someone else hasn't deleted it)
-            PlatformValue platRes =
-                getPlatformManager().getPlatformValueById(subject,platformId);
+            Platform plat = getPlatformManager().getPlatformById(platformId);
 
             // Add it to the list
             List unscheduleList = new ArrayList();
-            unscheduleList.add(platRes);
+            unscheduleList.add(plat.getPlatformLightValue());
 
             // Add dependent children to the list of metrics to unschedule
             // XXX: Use POJOs here.
@@ -1620,8 +1619,6 @@ public class AppdefBossEJBImpl
                 svcMgrLoc.getServicesByPlatform(subject, platformId,
                                                 PageControl.PAGE_ALL));
 
-            MeasurementBossLocal measBoss = getMeasurementBoss();
-            
             AppdefEntityID[] toDeleteResourceIds =
                 new AppdefEntityID[unscheduleList.size()];
             ArrayList toDeleteIdsList = new ArrayList();
@@ -1648,7 +1645,12 @@ public class AppdefBossEJBImpl
                 toDeleteIdsList.toArray(new AppdefEntityID[0]);
 
             // now remove the measurements
-            measBoss.removeMeasurements(sessionId, toDeleteIds);
+            // First remove all the Derived Measurements
+            getDerivedMeasurementManager()
+                .removeMeasurements(subject, plat.getEntityId(), toDeleteIds);
+            
+            // Then remove the Raw Measurements
+            getRawMeasurementManager().removeMeasurements(toDeleteIds);
 
             // Remove from AI queue
             try {
