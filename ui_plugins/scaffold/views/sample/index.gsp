@@ -4,8 +4,7 @@
 <p>
      Plugin Name: <b><%= pluginInfo.name %></b><br/>
      Description: <b><%= pluginInfo.description %></b><br/>
-     Major Version: <b><%= pluginInfo.major %></b><br/>
-     Minor Version: <b><%= pluginInfo.minor %></b><br/>
+     Version: <b><%= pluginInfo.version%></b><br/>
      Dumping Scripts: <b><%= pluginInfo.dumpScripts %></b><br/>
 </p>
 <p>
