@@ -48,10 +48,6 @@ public class TriggerDAO extends HibernateDAO {
         return res;
     }
 
-    void remove(RegisteredTrigger trig) {
-        super.remove(trig);
-    }
-
     void removeTriggers(AlertDefinition def) {
         EventsStartupListener.getChangedTriggerCallback()
             .beforeTriggersDeleted(def.getTriggers());
