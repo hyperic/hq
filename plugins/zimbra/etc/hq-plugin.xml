@@ -1,0 +1,246 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+
+  <!-- extends NetServicesCollector -->
+  <classpath>
+    <include name="pdk/plugins/netservices-plugin.jar"/>
+  </classpath>
+
+  <server name="Zimbra"
+          version="4.5.x">
+
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.zimbra.ZimbraStats"/>
+
+    <filter name="template"
+            value="zimbra:Type=Server:${alias}"/>
+
+    <metric name="Availability"
+            category="AVAILABILITY"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="Number of LMTP Msgs Received"
+            category="THROUGHPUT"
+            alias="lmtp_rcvd_msgs"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Number of LMTP Bytes Received"
+            category="THROUGHPUT"
+            alias="lmtp_rcvd_bytes"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Number of LMTP Recipients"
+            category="THROUGHPUT"
+            alias="lmtp_rcvd_rcpt"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Number of LMTP Msgs Delivered"
+            category="THROUGHPUT"
+            alias="lmtp_dlvd_msgs"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Number of LMTP Bytes Delivered"
+            category="THROUGHPUT"
+            alias="lmtp_dlvd_bytes"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="DB Pool Size"
+            category="THROUGHPUT"
+            alias="db_pool_size"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="DB Connection Count"
+            category="THROUGHPUT"
+            alias="db_conn_count"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Avg Time to Obtain a DB Connection"
+            category="THROUGHPUT"
+            alias="db_conn_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="LDAP Connection Count"
+            category="THROUGHPUT"
+            alias="ldap_dc_count"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Avg Time to Obtain a LDAP Connection"
+            category="THROUGHPUT"
+            alias="ldap_dc_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Mbox Add Message Count"
+            category="THROUGHPUT"
+            alias="mbox_add_msg_count"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Avg Time to Add a Message"
+            category="THROUGHPUT"
+            alias="mbox_add_msg_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="Message Body Hit Rate Cache"
+            category="THROUGHPUT"
+            alias="mbox_msg_cache"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Message Item Hit Rate Cache"
+            category="THROUGHPUT"
+            alias="mbox_item_cache"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="SOAP Count"
+            category="THROUGHPUT"
+            alias="soap_count"
+            indicator="false"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Avg Time for SOAP Operation"
+            category="THROUGHPUT"
+            alias="soap_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="IMAP Count"
+            category="THROUGHPUT"
+            alias="imap_count"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Avg Time for IMAP Operation"
+            category="THROUGHPUT"
+            alias="imap_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="POP Count"
+            category="THROUGHPUT"
+            alias="pop_count"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Avg Time for POP Operation"
+            category="THROUGHPUT"
+            alias="pop_ms_avg"
+            indicator="false"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="Lucene Index Writer Count"
+            category="THROUGHPUT"
+            alias="idx_wrt_avg"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Java VM Heap Memory (MB)"
+            category="THROUGHPUT"
+            alias="java_heap_MB"
+            indicator="true"
+            collectionType="dynamic"
+            units="MB"/>
+    <metric name="MySQL Open Tables"
+            category="THROUGHPUT"
+            alias="mysql_opened_tables"
+            indicator="false"
+            collectionType="static"
+            units="none"/>
+    <metric name="MySQL Slow Queries"
+            category="THROUGHPUT"
+            alias="mysql_slow_queries"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="MySQL Threads Connected"
+            category="THROUGHPUT"
+            alias="mysql_threads_connected"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="MySQL InnoDB Pages Read"
+            category="THROUGHPUT"
+            alias="innodb_pages_read"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="MySQL InnoDB Pages Written"
+            category="THROUGHPUT"
+            alias="innodb_pages_written"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="MySQL Thread Connected"
+            category="THROUGHPUT"
+            alias="mysql_threads_connected"
+            indicator="false"
+            collectionType="static"
+            units="none"/>
+    <metric name="MySQL InnoDB Buffer Pool Hit Rate"
+            category="THROUGHPUT"
+            alias="innodb_bp_hit_rate"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Active POP Connections"
+            category="THROUGHPUT"
+            alias="pop_conn"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Active POP SSL Connections"
+            category="THROUGHPUT"
+            alias="pop_ssl_conn"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Active IMAP Connections"
+            category="THROUGHPUT"
+            alias="imap_conn"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Active IMAP SSL Connections"
+            category="THROUGHPUT"
+            alias="imap_ssl_conn"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+  </server>
+</plugin>
