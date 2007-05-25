@@ -269,6 +269,7 @@ function showViewEscResponse(originalRequest) {
         var othersDiv = document.createElement('div');
         var emailDiv = document.createElement('div');
         var sysDiv = document.createElement('div');
+        var snmpDiv = document.createElement('div');
         var escTable = document.createElement('table');
         var escTableBody = document.createElement('tbody');
         var escTr1 = document.createElement('tr');
@@ -344,6 +345,10 @@ function showViewEscResponse(originalRequest) {
         addOption(select2, 'Email', 'Email');
         addOption(select2, 'SMS', 'SMS');
         addOption(select2, 'Syslog', 'Sys Log');
+        <c:if test="${snmpEnabled}">
+        addOption(select2, 'SNMP', 'SNMP Trap');
+        </c:if>
+
         addOption(select2, 'NoOp', 'Suppress Alerts');
 
         escTr2.appendChild(td3);
@@ -379,7 +384,7 @@ function showViewEscResponse(originalRequest) {
         $('sysloginput'+ liID).style.display = 'none';
         sysDiv.setAttribute('width', '40%');
         sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
-
+  
         td4.appendChild(usersDiv);
         usersDiv.setAttribute('id', 'usersDiv' + liID);
         $('usersDiv'+ liID).style.display = 'none';
@@ -425,14 +430,19 @@ function showViewEscResponse(originalRequest) {
         //alert(el+", value="+ el.options[el.selectedIndex].value );
         var index= el.options[el.selectedIndex].value
 
-         if (index == "Email" || index == "SMS" || index == "NoOp") {
-            hideSyslogInput(el);
-         }
-         else {
-            showSyslogInput(el);
-         }
+          if (index != "Syslog") {
+          hideSyslogInput(el);
+          } else {
+          showSyslogInput(el);
+          }
 
-         if (index == "Syslog" || index == "NoOp") {
+          if (index == "SNMP") {
+          showSnmpInput(el);
+          } else {
+          hideSnmpInput(el);
+          }
+
+         if (index == "Syslog" || index == "NoOp" || index == "SNMP") {
             hideWhoSelect(el);
          }
          else {
@@ -488,6 +498,20 @@ function showViewEscResponse(originalRequest) {
         var getId = idStr.split('_');
         var syslogDivIn = $('sysloginput' + getId[1]);
         syslogDivIn.style.display='none';
+    }
+
+    function showSnmpInput(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var snmpDivIn = $('snmpinput' + getId[1]);
+        snmpDivIn.style.display='';
+    }
+
+    function hideSnmpInput(el) {
+        var idStr = el.id;
+        var getId = idStr.split('_');
+        var snmpDivIn = $('snmpinput' + getId[1]);
+        snmpDivIn.style.display='none';
     }
 
     function hideDisplay() {
