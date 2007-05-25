@@ -119,20 +119,25 @@ public class AlertDefinitionManagerEJBImpl
         throws RemoveException, PermissionException {
         StopWatch watch = new StopWatch();
         
-        watch.markTimeBegin("canManageAlerts");
-        canManageAlerts(subj, alertdef);
-        watch.markTimeEnd("canManageAlerts");
-        
-        // If there are any children, delete them, too
-        watch.markTimeBegin("delete children");
-        for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext(); )
-        {
-            AlertDefinition child = (AlertDefinition) it.next();
-            deleteAlertDefinition(subj, child, force);
-            it.remove();
-        }
-        watch.markTimeEnd("delete children");
+        if (!force) {
+            watch.markTimeBegin("canManageAlerts");
+            canManageAlerts(subj, alertdef);
+            watch.markTimeEnd("canManageAlerts");
 
+            // If there are any children, delete them, too
+            watch.markTimeBegin("delete children");
+            for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext(); )
+            {
+                AlertDefinition child = (AlertDefinition) it.next();
+                deleteAlertDefinition(subj, child, force);
+                it.remove();
+            }
+            watch.markTimeEnd("delete children");
+        }
+        
+        // Disassociate from parent, too
+        alertdef.setParent(null);
+        
         // Get rid of their triggers first
         watch.markTimeBegin("removeTriggers");
         TriggerDAO tdao = getTriggerDAO();
@@ -144,67 +149,27 @@ public class AlertDefinitionManagerEJBImpl
         if (alertdef.getEscalation() != null) {
             EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
         }
+        // Disassociated from escalations
+        alertdef.setEscalation(null);        
         watch.markTimeEnd("endEscalation");
 
-        AlertDAO dao = getAlertDAO();
-        if (!force || alertdef.getChildren().size() > 0) {
-            watch.markTimeBegin("mark deleted");
-            alertdef.setDeleted(true);
-            alertdef.setEnabled(false);
-            
-            // Make sure to disassociated from all triggers
-            alertdef.setActOnTrigger(null);
-            
-            for (Iterator it = alertdef.getConditions().iterator();
-                 it.hasNext(); ) {
-                AlertCondition cond = (AlertCondition) it.next();
-                cond.setTrigger(null);
-            }
-            
-            for (Iterator it = alertdef.getActions().iterator();
-                 it.hasNext(); ) {
-                Action act = (Action) it.next();
-                act.setParent(null);
-            }
-            
-            // Disassociated from escalations
-            alertdef.setEscalation(null);
-            
-            // Disassociate from parent, too
-            alertdef.setParent(null);
-            
-            watch.markTimeEnd("mark deleted");
-            if (log.isDebugEnabled()) {
-                log.debug("deleteAlertDefinition: " + watch);
-            }
-
-            return true;
+        watch.markTimeBegin("mark deleted");
+        alertdef.setDeleted(true);
+        alertdef.setEnabled(false);
+        
+        for (Iterator it = alertdef.getActions().iterator();
+             it.hasNext(); ) {
+            Action act = (Action) it.next();
+            act.setParent(null);
+            act.getChildrenBag().clear();
         }
-
-        // Delete the alerts
-        watch.markTimeBegin("deleteByAlertDefinition");
-        dao.deleteByAlertDefinition(alertdef);
-        watch.markTimeEnd("deleteByAlertDefinition");
-
-        // Remove the conditions
-        watch.markTimeBegin("removeConditions");
-        getConditionDAO().removeConditions(alertdef);
-        watch.markTimeEnd("deleteByAlertDefinition");
         
-        // Remove the actions
-        watch.markTimeBegin("removeActions");
-        getActionDAO().removeActions(alertdef);
-        watch.markTimeEnd("removeActions");
-        
-        // Actually remove the definition
-        watch.markTimeBegin("remove");
-        getAlertDefDAO().remove(alertdef);
-        watch.markTimeBegin("remove");
-        
+        watch.markTimeEnd("mark deleted");
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinition: " + watch);
         }
-        return false;
+
+        return true;
     }
 
     /** 
@@ -491,8 +456,9 @@ public class AlertDefinitionManagerEJBImpl
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException 
     {
+        canManageAlerts(subj, aeid);
+
         AlertDefinitionDAO aDao = getAlertDefDAO();
-        
         List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
         
         for (Iterator i = adefs.iterator(); i.hasNext(); ) {
@@ -504,6 +470,46 @@ public class AlertDefinitionManagerEJBImpl
             }
             
             deleteAlertDefinition(subj, adef, true);
+        }
+    }
+    
+    /** Clean up alert definitions and alerts for removed resources
+     * 
+     * @ejb:interface-method
+     */
+    public void cleanupAlertDefinitions(AppdefEntityID aeid) {
+        StopWatch watch = new StopWatch();
+        
+        AlertDefinitionDAO aDao = getAlertDefDAO();
+        List adefs = aDao.findAllByEntity(aeid);
+        
+        for (Iterator i = adefs.iterator(); i.hasNext(); ) {
+            AlertDefinition alertdef = (AlertDefinition) i.next();
+            AlertDAO dao = getAlertDAO();
+
+            // Delete the alerts
+            watch.markTimeBegin("deleteByAlertDefinition");
+            dao.deleteByAlertDefinition(alertdef);
+            watch.markTimeEnd("deleteByAlertDefinition");
+
+            // Remove the conditions
+            watch.markTimeBegin("removeConditions");
+            getConditionDAO().removeConditions(alertdef);
+            watch.markTimeEnd("deleteByAlertDefinition");
+
+            // Remove the actions
+            watch.markTimeBegin("removeActions");
+            getActionDAO().removeActions(alertdef);
+            watch.markTimeEnd("removeActions");
+
+            // Actually remove the definition
+            watch.markTimeBegin("remove");
+            getAlertDefDAO().remove(alertdef);
+            watch.markTimeBegin("remove");
+
+            if (log.isDebugEnabled()) {
+                log.debug("deleteAlertDefinition: " + watch);
+            }
         }
     }
 

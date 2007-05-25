@@ -132,8 +132,9 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByEntity(AppdefEntityID id) {
-        String sql = "delete Alert a WHERE a.alertDefinition.appdefType = :aType " +
-            "and a.alertDefinition.appdefId = :aId";
+        String sql = "delete Alert WHERE alertDefinition in " +
+            "(SELECT d FROM AlertDefinition d WHERE d.appdefType = :aType " +
+               "and d.appdefId = :aId)";
 
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())
@@ -173,7 +174,7 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByAlertDefinition(AlertDefinition def) {
-        String sql = "delete Alert WHERE alertDefinition = :alertDef";
+        String sql = "DELETE Alert WHERE alertDefinition = :alertDef";
 
         return getSession().createQuery(sql)
             .setParameter("alertDef", def)
