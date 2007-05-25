@@ -27,7 +27,6 @@ package org.hyperic.hq.ui.json.action.escalation.crud;
 
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +39,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.bizapp.shared.action.SnmpActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -50,6 +50,7 @@ import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.StringUtil;
 import org.json.JSONException;
+
 
 
 /**
@@ -79,6 +80,8 @@ public class SaveAction extends BaseAction {
             cfg = makeEmailActionCfg(e, map, true);
         } else if(action.equalsIgnoreCase("Syslog")) {
             cfg = makeSyslogActionCfg(e, map);
+        } else if(action.equalsIgnoreCase("SNMP")) {
+            cfg = makeSNMPActionCfg(e, map);
         } else if (action.equalsIgnoreCase("noop")) {
             cfg = new NoOpAction();  // Yow.
         } else {
@@ -96,6 +99,15 @@ public class SaveAction extends BaseAction {
         String product = ((String[])p.get("product"))[0];
         
         return new SyslogActionConfig(meta, product, version);
+    }
+    
+    private ActionConfigInterface
+        makeSNMPActionCfg(Escalation e, Map p)
+    {
+        String address = ((String[])p.get("snmpIP"))[0];
+        String oid     = ((String[])p.get("snmpOID"))[0];
+        
+        return new SnmpActionConfig(address, oid);
     }
     
     private ActionConfigInterface 
