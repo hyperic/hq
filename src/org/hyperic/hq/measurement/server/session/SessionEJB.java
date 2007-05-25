@@ -101,7 +101,7 @@ public abstract class SessionEJB {
     private InitialContext ic;
 
     protected BaselineDAO getBaselineDAO() {
-        return DAOFactory.getDAOFactory().getBaselineDAO();
+        return new BaselineDAO(DAOFactory.getDAOFactory());
     }
 
     protected CategoryDAO getCategoryDAO() {

@@ -69,7 +69,6 @@ import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.AlertDefinitionDAO;
 import org.hyperic.hq.events.server.session.EventLogDAO;
 import org.hyperic.hq.events.server.session.TriggerDAO;
-import org.hyperic.hq.measurement.server.session.BaselineDAO;
 import org.hyperic.hq.measurement.server.session.CategoryDAO;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementArgDAO;
@@ -136,7 +135,6 @@ public abstract class DAOFactory {
     public abstract RoleDAO          getRoleDAO();
 
     // Measurement DAOs
-    public abstract BaselineDAO getBaselineDAO();
     public abstract CategoryDAO getCategoryDAO();
     public abstract MonitorableTypeDAO getMonitorableTypeDAO();
     public abstract RawMeasurementDAO getRawMeasurementDAO();

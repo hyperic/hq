@@ -39,7 +39,6 @@ public class MeasurementStartupListener
 {
     private static final Object LOCK = new Object();
     private static DefaultMetricEnableCallback _defEnableCallback;
-    private static MetricDeleteCallback _deleteCallback;
     
     public void hqStarted() {
         SRNManagerEJBImpl.getOne().initializeCache();
@@ -60,20 +59,12 @@ public class MeasurementStartupListener
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)
                 app.registerCallbackCaller(DefaultMetricEnableCallback.class);
-            _deleteCallback = (MetricDeleteCallback)
-                app.registerCallbackCaller(MetricDeleteCallback.class);
         }
     }
     
     static DefaultMetricEnableCallback getDefaultEnableObj() {
         synchronized (LOCK) {
             return _defEnableCallback;
-        }
-    }
-    
-    static MetricDeleteCallback getDeleteMetricCallback() {
-        synchronized (LOCK) {
-            return _deleteCallback;
         }
     }
 }

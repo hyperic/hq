@@ -86,19 +86,30 @@ public class MeasurementTemplateDAO extends HibernateDAO {
      *        with measurements. -- JMT 2/26/07
      */
     private void removeMeasurements(MeasurementTemplate mt) {
-        MetricDeleteCallback deleteCallback =  
-            MeasurementStartupListener.getDeleteMetricCallback();
-
         String sql = "from Measurement where template.id=?";
         List measurements = getSession().createQuery(sql)
             .setInteger(0, mt.getId().intValue())
             .list();
 
-        deleteCallback.beforeMetricsDeleted(measurements);
-        for (Iterator i=measurements.iterator(); i.hasNext(); ) {
-            Measurement m = (Measurement)i.next();
-            
-            super.remove(m);
+        DerivedMeasurementDAO dDao = null;
+        RawMeasurementDAO rDao = null;
+        
+        boolean derived = mt.getMeasurementArgs().size() > 0;
+        
+        if (derived) {
+            dDao = new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
+        }
+        else {
+            rDao = new RawMeasurementDAO(DAOFactory.getDAOFactory());
+        }
+
+        for (Iterator it = measurements.iterator(); it.hasNext();) {
+            if (derived) {
+                dDao.remove((DerivedMeasurement) it.next());
+            }
+            else {
+                rDao.remove((RawMeasurement) it.next());
+            }
         }
     }
 

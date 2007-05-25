@@ -522,15 +522,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
-    private void sendRemovedMetricsEvent(Integer[] mids) {
-        // Now send a message that we've deleted the metrics
-        Messenger sender = new Messenger();
-        MetricOperationEvent event =
-            new MetricOperationEvent(MetricOperationEvent.ACTION_DELETE,
-                                     mids);
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
-    }
-
     /**
      * Remove all measurements for multiple instances
      *
@@ -542,34 +533,19 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws RemoveException, PermissionException
     {
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-        List toUnschedule = new ArrayList();
-
+        /* Authz check should be performed on entity removal
         for (int i = 0; i < entIds.length; i++) {
             // Authz check
-            super.checkDeletePermission(subject, entIds[i]);
-            
-            // First find them, then delete them
-            List mcol = dao.findByInstance(entIds[i].getType(),
-                                           entIds[i].getID());
-            for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-                DerivedMeasurement m = (DerivedMeasurement)it.next();
-                toUnschedule.add(m.getId());
-            }
+            checkDeletePermission(subject, entIds[i]);
         }
+        */
         dao.deleteByInstances(entIds);
-
-        // Now unschedule the DerivedMeasurments
-        Integer[] mids = (Integer[])
-            toUnschedule.toArray(new Integer[toUnschedule.size()]);
-        unscheduleJobs(mids);
 
         // send queue message to unschedule
         UnScheduleArgs unschBean = new UnScheduleArgs(agentEnt, entIds);
         Messenger msg = new Messenger();
         log.info("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
         msg.sendMessage(MeasurementConstants.SCHEDULE_QUEUE, unschBean);
-
-        sendRemovedMetricsEvent(mids);
     }
 
     /** 

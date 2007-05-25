@@ -51,9 +51,6 @@ public class RawMeasurementDAO extends HibernateDAO {
     }
     
     void remove(RawMeasurement entity) {
-        MeasurementStartupListener
-            .getDeleteMetricCallback() 
-            .beforeMetricsDeleted(Collections.singleton(entity));
         super.remove(entity);
     }
 
@@ -99,18 +96,15 @@ public class RawMeasurementDAO extends HibernateDAO {
         int j = 0;
         Query q = getSession().createQuery(sql.toString());
         for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
-            Integer appdefType = (Integer)i.next();
-            List list = (List)map.get(appdefType);
-            q.setInteger("appdefType"+j, appdefType.intValue())
-                .setParameterList("list"+j, list);
+            Integer appdefType = (Integer) i.next();
+            List list = (List) map.get(appdefType);
+            q.setInteger("appdefType" + j, appdefType.intValue())
+             .setParameterList("list" + j, list);
         }
         
         List v = q.list();
-        MeasurementStartupListener
-            .getDeleteMetricCallback()
-            .beforeMetricsDeleted(v);
         for (Iterator i=v.iterator(); i.hasNext(); ) {
-            super.remove(i.next());
+            remove(i.next());
         }
         return v.size();
     }
