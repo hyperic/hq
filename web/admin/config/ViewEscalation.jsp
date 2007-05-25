@@ -220,9 +220,8 @@ function showViewEscResponse(originalRequest) {
 
       var actionClass = actionsClassName.split('.');
 
-      for (var d = 0; d < actionClass.length; d++) {
-
-      if (actionClass[d] == "SyslogAction") {
+        for (var d = 0; d < actionClass.length; d++) {
+            if (actionClass[d] == "SyslogAction") {
             usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
            } else if (actionClass[d] == "NoOpAction") {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
@@ -1090,7 +1089,7 @@ function showViewEscResponse(originalRequest) {
            return true;
            }else 
 
-
+            <%--
            var separatedEmails = emailAdds.split(',');
             for (i = 0; i < separatedEmails.length; i++) {
          
@@ -1102,7 +1101,7 @@ function showViewEscResponse(originalRequest) {
             return false;
                 }
             }
-
+            --%>
        
             if (selUserEsc == 'Others' && emailAdds == '') {
                 $('example').style.display= '';
@@ -1523,4 +1522,3 @@ function showViewEscResponse(originalRequest) {
 
 <br>
 <br>
-<div id="testing"></div>
