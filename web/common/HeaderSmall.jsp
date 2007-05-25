@@ -45,7 +45,7 @@
               <td><html:img page="/customer/${applicationScope.smallLogoName}" width="225" height="22" alt="" border="0"/></td>          
             </c:when>
             <c:otherwise>
-              <td><html:img page="/images/logo_small.gif" width="119" height="22" alt="" border="0"/></td>
+              <td><html:link page="/Dashboard.do"><html:img page="/images/logo_small.gif" width="119" height="22" alt="Click for Dashboard" border="0"/> </html:link></td>
             </c:otherwise>
           </c:choose>           
           <td width="100%" class="logoSm"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
