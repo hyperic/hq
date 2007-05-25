@@ -70,6 +70,7 @@ public class SystemPlugin extends ProductPlugin {
     public static final String FILE_NAME  = "File";
     public static final String SCRIPT_NAME = "Script";
     public static final String DIR_NAME   = "Directory";
+    public static final String DIR_TREE_NAME = "Directory Tree";
     public static final String NETIF_NAME = "Interface";
     public static final String CPU_NAME   = "CPU";
     public static final String PROCESS_NAME = "Process";
@@ -80,6 +81,7 @@ public class SystemPlugin extends ProductPlugin {
         FS_NAME,
         FILE_NAME,
         DIR_NAME,
+        DIR_TREE_NAME
     };
 
     public static final String[] NETWORK_SERVICES = {
@@ -432,7 +434,9 @@ public class SystemPlugin extends ProductPlugin {
                            "Path to File", 
                            "log/agent.log");
             }
-            else if (info.isService(DIR_NAME)) {
+            else if (info.isService(DIR_NAME) ||
+                     info.isService(DIR_TREE_NAME))
+            {
                 schema.add(PROP_PATH,
                            "Path to Directory", 
                            "data");

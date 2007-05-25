@@ -537,6 +537,39 @@
             collectionType="dynamic"/>
   </metrics>
 
+  <filter name="template"
+          value="sigar:Type=DirUsage,Arg=%path%:${alias}"/>
+
+  <metrics name="FileServer Directory Tree">
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Regular Files"
+            alias="Files"
+            indicator="true"/>
+
+    <metric name="Subdirectories"
+            alias="Subdirs"
+            indicator="true"/>
+
+    <metric name="Symbolic Links"
+            alias="Symlinks"/>
+
+    <metric name="Character Devices"
+            alias="Chrdevs"/>
+
+    <metric name="Block Devices"
+            alias="Blkdevs"/>
+
+    <metric name="Sockets"/>
+
+    <metric name="Total"
+            indicator="true"/>
+
+    <metric name="Disk Usage"
+            units="B"/>
+  </metrics>
+
   <filter name="script.args"
           value="exec=%prefix%,file=%path%,args=%args%,timeout=%timeout%"/>
 
