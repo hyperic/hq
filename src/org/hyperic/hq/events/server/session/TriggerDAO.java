@@ -52,6 +52,12 @@ public class TriggerDAO extends HibernateDAO {
         EventsStartupListener.getChangedTriggerCallback()
             .beforeTriggersDeleted(def.getTriggers());
         
+        def.setActOnTrigger(null);
+        for (Iterator it = def.getConditions().iterator(); it.hasNext(); ) {
+            AlertCondition cond = (AlertCondition) it.next();
+            cond.setTrigger(null);
+        }
+        
         for (Iterator it = def.getTriggers().iterator(); it.hasNext(); ) {
             remove(it.next());
         }

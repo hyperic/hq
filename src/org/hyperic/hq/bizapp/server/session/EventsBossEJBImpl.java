@@ -43,7 +43,9 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -78,6 +80,7 @@ import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.control.server.session.ControlEventListener;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -118,6 +121,8 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -1705,20 +1710,36 @@ public class EventsBossEJBImpl
         
         HQApp app = HQApp.getInstance();
         app.registerCallbackListener(DefaultMetricEnableCallback.class,
-                                     new DefaultMetricEnableCallback() 
-        {
-            public void metricsEnabled(AppdefEntityID ent) {
-                try {
-                    _log.info("Inheriting type-based alert defs for " + ent);
-                    EventsBossLocal eb = EventsBossEJBImpl.getOne();
-                    AuthzSubjectValue overlord = 
-                        AuthzSubjectManagerEJBImpl.getOne().getOverlord();
-                    eb.inheritResourceTypeAlertDefinition(overlord, ent);
-                } catch(Exception e) {
-                    throw new SystemException(e);
+            new DefaultMetricEnableCallback() {
+                public void metricsEnabled(AppdefEntityID ent) {
+                    try {
+                        _log.info("Inheriting type-based alert defs for " +ent);
+                        EventsBossLocal eb = EventsBossEJBImpl.getOne();
+                        AuthzSubjectValue overlord = 
+                            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+                        eb.inheritResourceTypeAlertDefinition(overlord, ent);
+                    } catch(Exception e) {
+                        throw new SystemException(e);
+                    }
                 }
             }
-        });
+        );
+        
+        // Add listener to remove alert definition and alerts after resources
+        // are deleted.
+        ZeventManager.getInstance().addListener(ResourceDeletedZevent.class,
+            new ZeventListener() {
+                public void processEvents(List events) {
+                    AlertDefinitionManagerLocal adm = getADM();
+                    for (Iterator i = events.iterator(); i.hasNext();) {
+                        ResourceZevent z = (ResourceZevent) i.next();
+                        if (z instanceof ResourceDeletedZevent) {
+                            adm.cleanupAlertDefinitions(z.getAppdefEntityID());
+                        }
+                    }
+                }
+            }
+        );
     }
 
     public static EventsBossLocal getOne() {

@@ -60,6 +60,17 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
     
+    public List findAllByEntity(AppdefEntityID aeid) {
+        String sql = "from AlertDefinition d " + 
+            "WHERE d.appdefType = ? AND d.appdefId = ? " +
+            "AND (NOT d.parent.id = 0 OR d.parent IS NULL) ";
+        
+        return getSession().createQuery(sql)
+            .setInteger(0, aeid.getType())
+            .setInteger(1, aeid.getID())
+            .list();
+    }
+    
     /**
      * Find the alert def for a given appdef entity and is child of the parent
      * alert def passed in
@@ -102,5 +113,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
     
     void save(AlertDefinition alert) {
         super.save(alert);
+    }
+    
+    int deleteByEntity(AppdefEntityID ent) {
+        String sql = "DELETE AlertDefinition a WHERE " + 
+            "a.appdefType = :appdefType AND a.appdefId = :appdefId";
+
+        return getSession().createQuery(sql)
+            .setInteger("appdefType", ent.getType())
+            .setInteger("appdefId", ent.getID())
+            .executeUpdate();
     }
 }
