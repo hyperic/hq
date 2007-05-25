@@ -45,6 +45,8 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -106,6 +108,14 @@ public class ConfigAction extends BaseDispatchAction {
             authzBoss.getAllSubjects(sessionId, null, PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
+        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
+        Properties props = boss.getConfig();
+        
+        // See if the property exists
+        if (props.containsKey(HQConstants.SNMPVersion)) {
+            String ver = props.getProperty(HQConstants.SNMPVersion);
+            request.setAttribute("snmpEnabled", new Boolean(ver.length() > 0));
+        }
         return null;        
     }
 
