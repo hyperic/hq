@@ -26,11 +26,9 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Iterator;
 import java.util.List;
-import java.io.Serializable;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hibernate.PersistedObject;
 
 public class ActionDAO extends HibernateDAO {
     public ActionDAO(DAOFactory f) {
@@ -49,7 +47,7 @@ public class ActionDAO extends HibernateDAO {
         super.save(entity);
     }
 
-    protected void remove(Action entity) {
+    void remove(Action entity) {
         super.remove(entity);
     }
 
@@ -58,6 +56,11 @@ public class ActionDAO extends HibernateDAO {
             Action action = (Action) it.next();
             if (action.getParent() != null) {
                 action.getParent().getChildrenBag().remove(action);
+            }
+            
+            for (Iterator ait = action.getLogEntries().iterator();
+                 ait.hasNext(); ) {
+                remove(ait.next());
             }
             remove(action);
         }
