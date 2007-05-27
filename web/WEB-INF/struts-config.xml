@@ -1191,13 +1191,13 @@
               scope="request"
               type="org.apache.struts.tiles.actions.TilesAction"/>
 
-      <action path="/resource/server/control/RemoveControlJobs"
+      <action path="/resource/*/control/RemoveControlJobs"
               type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
               name="RemoveControlJobsForm"
               scope="request"
-              input="/resource/server/Control.do?mode=view">
-        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true"/>
-        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+              input="/resource/{1}/Control.do?mode=view">
+        <forward name="failure" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
       </action>
 
       <!-- / end resource server control -->
