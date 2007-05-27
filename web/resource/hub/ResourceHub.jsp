@@ -462,9 +462,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:if test="${not empty param.keywords}">
     <c:param name="keywords" value="${param.keywords}"/>
   </c:if>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
   <c:if test="${not empty param.so}">
     <c:param name="so" value="${param.so}"/>
   </c:if>
