@@ -77,6 +77,8 @@ function showViewEscResponse() {
       var configMeta = actionConfig.meta;
       var configVersion = actionConfig.version;
       var configProduct = actionConfig.product;
+      var configSnmpOID = actionConfig.oid;
+      var configSnmpIP = actionConfig.address;
       var actionId = actions[i].action.id;
       var actionsClassName = actions[i].action.className;
       var actionsVersion = actions[i].action._version_;
@@ -94,6 +96,7 @@ function showViewEscResponse() {
       var waitDiv = document.createElement('div');
       var editWaitDiv = document.createElement('div');
       var sysDiv = document.createElement('div');
+      var snmpDiv = document.createElement('div');
       var escTable = document.createElement('table');
       var escTableBody = document.createElement('tbody');
       var escTr1 = document.createElement('tr');
@@ -156,12 +159,14 @@ function showViewEscResponse() {
 
         for (var d = 0; d < actionClass.length; d++) {
             if (actionClass[d] == "SyslogAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="4" vAlign="top" style="padding-right:3px;">Log to the Syslog:</td><td>&nbsp;</td></tr><tr><td style="padding:0px 2px 2px 2px;">meta: ' + configMeta + '</td></tr><tr><td style="padding:2px;">product: ' + configProduct + '</td></tr><tr><td style="padding:2px 2px 2px 2px;">version: ' + configVersion + '</td></tr></table>'
            } else if (actionClass[d] == "NoOpAction") {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
-            }
-       }
+            } else if (actionClass[d] == "SnmpAction") {
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td vAlign="top" rowSpan="3" style="padding-right:3px;">Snmp Trap:</td><td>&nbsp;</td></tr><tr><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+           }
+      }
 
       if (configListType == "1"){
           var emailAdds = emailInfo.split(',');
