@@ -28,7 +28,7 @@
 
   <config name="authd">
     <option name="authd.client.port"
-            type="port"
+            type="int"
             description="Authentication Server Port"
             default="0"/>
 
