@@ -267,10 +267,10 @@ public final class JMXServlet extends HttpServlet {
 
             // we don't want to risk opening a dbconnection
             // which won't get closed (i.e. Tomcat) :@(
-            if (oname.getKeyProperty("type") == null)
-                ;
-            else if (oname.getKeyProperty("type").equals("DataSource"))
+            if (oname.getKeyProperty("type") != null &&
+                oname.getKeyProperty("type").equals("DataSource")) {
                 continue;
+            }
 
             String name = oname.toString();
 
