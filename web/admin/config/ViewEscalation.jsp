@@ -227,8 +227,8 @@ function showViewEscResponse(originalRequest) {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             } else if (actionClass[d] == "SnmpAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
-           }
+                usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+            }
       }
 
       if (configListType == "1"){
@@ -350,97 +350,6 @@ function showViewEscResponse(originalRequest) {
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showViewEscResponse, onFailure: reportError} );
         $('escPropertiesTable').style.display = '';
         $('editPropertiesTable').style.display = 'none';
-
-    }
-
-
-
-    function saveAddEscalation () {
-
-        if (selActionTypeEsc==undefined) {
-           $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>'
-            //$('saveButton').style.display = "none";
-            return false;
-        }
-
-
-        if (selUserEsc==undefined && selActionTypeEsc != "SNMP") {
-           $('example').style.display= '';
-            $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-            $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectWhoMethod"/>'
-            //$('saveButton').style.display = "none";
-            return false;
-        }
-        
-        if (selUserEsc == 'Others') {
-        if (!checkEmail()) { return false; }
-        }
-
-        if(selActionTypeEsc=="SMS") {
-        if (!checkSMS()) { return false; }
-        }
-
-        var IPInput = $('snmpIPinput');
-        var OIDInput = $('snmpOIDinput');
-
-
-        var snmpDivIn = $('snmpinput');
-        if (snmpDivIn.style.display != 'none') {
-          if (IPInput.value == '') {
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
-        $('snmpIPinput').focus();
-               return false;
-           }
-
-          if (OIDInput.value == '') {
-        $('example').style.display= '';
-        $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-        $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-        $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
-        $('snmpOIDinput').focus();
-              return false;
-           }
-        }
-
-        var emailTextArea = $('emailinput');
-        var emailAdds = emailTextArea.value;
-
-        var syslogDivIn = $('sysloginput');
-        if (syslogDivIn.style.display != 'none') {
-          if ($('metainput').value == '') {
-              $('metainput').focus();
-               return false;
-           }
-
-          if ($('productinput').value == '') {
-              $('productinput').focus();
-              return false;
-           }
-
-          if ($('versioninput').value == '') {
-              $('versioninput').focus();
-              return false;
-           }
-        }
-        
-            emailTextArea.value = emailAdds.split(/[\s]/);
-            emailTextArea.value = emailAdds.split(/,/);
-           
-            var id = $('id').value;
-            var serialAddAction = Form.serialize('addEscalation');
-            var pars =  "EscId=" + id + "&" + serialAddAction;
-            var url = '<html:rewrite action="/escalation/saveAction"/>';
-
-            new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
-            document.EscalationForm.reset();
-        
 
     }
 
@@ -1161,6 +1070,101 @@ function showViewEscResponse(originalRequest) {
      return true;
     }
  }
+
+ function saveAddEscalation () {
+
+         if (selActionTypeEsc==undefined) {
+            $('example').style.display= '';
+             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+             $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.SelectEscMethod"/>'
+             //$('saveButton').style.display = "none";
+             return false;
+         }
+
+          if (selUserEsc==undefined && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
+           //if (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP") {
+
+            alert(selActionTypeEsc)
+            $('example').style.display= '';
+             $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+             $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + 'Please enter IPAddress and Trap OID information for this action'
+             //$('saveButton').style.display = "none";
+             return false;
+             //}
+         }
+
+         if (selUserEsc == 'Others') {
+         if (!checkEmail()) { return false; }
+         }
+
+         if(selActionTypeEsc=="SMS") {
+         if (!checkSMS()) { return false; }
+         }
+
+        if(selActionTypeEsc=="SNMP") {
+         var IPInput = $('snmpIPinput');
+         var OIDInput = $('snmpOIDinput');
+
+
+         var snmpDivIn = $('snmpinput');
+         if (snmpDivIn.style.display != 'none') {
+           if (IPInput.value == '') {
+         $('example').style.display= '';
+         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+         $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPIPFormat"/>';
+         $('snmpIPinput').focus();
+                return false;
+            }
+
+           if (OIDInput.value == '') {
+         $('example').style.display= '';
+         $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
+         $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
+         $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="admin.config.message.IncorrectSNMPTrapOIDFormat"/>';
+         $('snmpOIDinput').focus();
+               return false;
+            }
+         }
+            }
+
+         var emailTextArea = $('emailinput');
+         var emailAdds = emailTextArea.value;
+
+         var syslogDivIn = $('sysloginput');
+         if (syslogDivIn.style.display != 'none') {
+           if ($('metainput').value == '') {
+               $('metainput').focus();
+                return false;
+            }
+
+           if ($('productinput').value == '') {
+               $('productinput').focus();
+               return false;
+            }
+
+           if ($('versioninput').value == '') {
+               $('versioninput').focus();
+               return false;
+            }
+         }
+
+             emailTextArea.value = emailAdds.split(/[\s]/);
+             emailTextArea.value = emailAdds.split(/,/);
+
+             var id = $('id').value;
+             var serialAddAction = Form.serialize('addEscalation');
+             var pars =  "EscId=" + id + "&" + serialAddAction;
+             var url = '<html:rewrite action="/escalation/saveAction"/>';
+
+             new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError} );
+             document.EscalationForm.reset();
+
+
+     }
+
 
 </script>
 
