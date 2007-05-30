@@ -256,7 +256,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 left = insertData(conn, left);
                 _log.debug("Num left = " + left.size());
                 
-                if (left.isEmpty())
+                if (!overwrite || left.isEmpty())
                     break;
                 
                 // The insert couldn't insert everything, so attempt to update
@@ -329,9 +329,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
                     continue;
                 }
-                stmt.setInt(1, metricId.intValue());
-                stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, getDecimalInRange(bigDec));
+                int idx = 1;
+                stmt.setBigDecimal(idx++, getDecimalInRange(bigDec));
+                stmt.setInt(idx++, metricId.intValue());
+                stmt.setLong(idx++, val.getTimestamp());
                 stmt.addBatch();
             }
             
