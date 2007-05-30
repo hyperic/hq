@@ -253,7 +253,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
-                left = insertData(conn, left);
+                left = insertData(conn, left, overwrite);
                 _log.debug("Num left = " + left.size());
                 
                 if (!overwrite || left.isEmpty())
@@ -441,18 +441,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
      * be returned in the result list.
+     * @param overwrite TODO
      */
-    private List insertData(Connection conn, List data) 
+    private List insertData(Connection conn, List data, boolean overwrite) 
         throws SQLException
     {
         PreparedStatement stmt = null;
         List left;
         
         try {
-            stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
+            // Use PostgreSQL function to facilitate inserts
+            if (overwrite && DBUtil.isPostgreSQL(conn)) {
+                stmt = conn.prepareStatement("SELECT add_data(?, ?, ?)");
+
+            }
+            else {
+                stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
                                          TAB_DATA + 
                                          " (measurement_id, timestamp, value)"+
                                          " VALUES (?, ?, ?)");
+            }
             
             for (Iterator i=data.iterator(); i.hasNext(); ) {
                 DataPoint pt = (DataPoint)i.next();
