@@ -84,7 +84,7 @@ public class LogFileTailPlugin
                             }
                         }
                     } catch (IOException e) {
-                        System.out.println(e);                    
+                        log.error(info.getName() + ": " + e.getMessage());
                     }
                 }
             };
