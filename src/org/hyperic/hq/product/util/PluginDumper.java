@@ -69,6 +69,7 @@ import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.hq.product.TrackEventPluginManager;
 import org.hyperic.hq.product.TypeInfo;
 
+import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
@@ -125,6 +126,9 @@ public class PluginDumper {
         setInterval("exec.interval", 1);
         //for log/config track
         setInterval(TrackEventPluginManager.PROP_INTERVAL, 1);
+
+        //for FileTail based Collectors (in millis)
+        FileWatcherThread.getInstance().setInterval(1000);
 
         this.config = new PluginDumperConfig();
     }
