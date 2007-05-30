@@ -603,11 +603,17 @@ public class PluginDumper {
     private MetricValue getValue(String template)
         throws Exception {
 
+        int sleep = 1000;
+        String execSleep = getProperty("exec.sleep");
+        if (execSleep != null) {
+            sleep *= Integer.parseInt(execSleep);
+        }
+
         MetricValue value =
             this.mpm.getValue(template);
         while (value.isFuture()) {
             //exec: type metric, keep trying until execution has completed.
-            Thread.sleep(1000);
+            Thread.sleep(sleep);
             value = this.mpm.getValue(template);
         }
         return value;
