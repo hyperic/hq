@@ -164,7 +164,7 @@ function showViewEscResponse() {
             usersTextDiv.innerHTML = 'Suppress duplicate alerts for: ' + actionWaitTime;
             waitDiv.innerHTML = "&nbsp;";
             } else if (actionClass[d] == "SnmpAction") {
-            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td vAlign="top" rowSpan="3" style="padding-right:3px;">Snmp Trap:</td><td>&nbsp;</td></tr><tr><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
+            usersTextDiv.innerHTML = '<table cellpadding="0" cellspacing="0" border="0"><tr><td rowSpan="3" vAlign="top" style="padding-right:3px;">Snmp Trap:</td><td style="padding:0px 2px 2px 2px;"><fmt:message key="resource.autodiscovery.server.IPAddressTH"/>: ' + configSnmpIP + '</td></tr><tr><td style="padding:2px;"><fmt:message key="admin.settings.SNMPTrapOID"/> ' + configSnmpOID + '</td></tr></table>'
            }
       }
 
