@@ -27,6 +27,8 @@ package org.hyperic.hq.hqu;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.hqu.server.session.AttachType;
+
 /**
  * Returned from a UI plugin when the dispatcher is asked to load it.
  */
@@ -88,8 +90,8 @@ public class UIPluginDescriptor {
     }
     
     public void addView(String path, String descr, String attachType) {
-        _viewDescriptors.add(new UIPluginViewDescriptor(path, descr, 
-                                                        attachType));
+        AttachType t = AttachType.findByDescription(attachType);
+        _viewDescriptors.add(new UIPluginViewDescriptor(path, descr, t)); 
     }
     
     public List getViews() {

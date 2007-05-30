@@ -36,6 +36,16 @@
     <many-to-one name="plugin" cascade="save-update" class="UIPlugin">
       <column name="UI_PLUGIN_ID" not-null="true" />
     </many-to-one>
+    
+    <bag name="attachmentsBag" table="EAM_UI_PLUGIN_VIEW_ATTACH">
+      <key column="UI_VIEW_ID" />
+      <one-to-many class="UIPluginViewAttachment" />
+    </bag>
+    
+    <joined-subclass name="UIPluginViewAdmin" table="EAM_UI_PLUGIN_VIEW_ADMIN">
+      <key column="VIEW_ID"/>
+    </joined-subclass>
+    
   </class>
 
 </hibernate-mapping>

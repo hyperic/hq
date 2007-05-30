@@ -33,9 +33,9 @@
       <column name="PLUGIN_VERSION" not-null="true" length="30" />
     </property>
     
-    <bag name="viewsBag" table="EAM_UI_PLUGIN_VIEW">
+    <bag name="viewsBag" table="EAM_UI_PLUGIN_VIEW" lazy="false">
       <key column="UI_PLUGIN_ID" />
-      <one-to-many class="UIPluginView" />
+      <one-to-many class="UIPluginView"/>
     </bag>
     
   </class>

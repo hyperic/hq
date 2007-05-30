@@ -25,26 +25,39 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.hqu.AttachType;
 import org.hyperic.hq.hqu.UIPluginViewDescriptor;
 
-public class UIPluginView
+public abstract class UIPluginView
     extends PersistedObject 
 { 
     private UIPlugin   _plugin;
     private String     _path;
     private String     _descr;
     private AttachType _attachType;
+    private Collection _attachments = new ArrayList();
     
     protected UIPluginView() {}
     
-    UIPluginView(UIPlugin plugin, UIPluginViewDescriptor view) {
+    protected UIPluginView(UIPlugin plugin, UIPluginViewDescriptor view,
+                           AttachType attach) 
+    {
         _plugin     = plugin;
         _path       = view.getPath();
         _descr      = view.getDescription();
-        _attachType = AttachType.findByDescription(view.getAttachType());
+        _attachType = attach;
     }
+    
+    /**
+     * Determine whether or not the view can be attached.  This is useful
+     * for certain view types which are only attachable a single time
+     * (such as admin or masthead areas)
+     */
+    public abstract boolean isAttachable();
     
     public UIPlugin getPlugin() {
         return _plugin;
@@ -81,14 +94,26 @@ public class UIPluginView
     public AttachType getAttachType() {
         return _attachType;
     }
-
+    
+    protected Collection getAttachmentsBag() {
+        return _attachments;
+    }
+    
+    protected void setAttachmentsBag(Collection a) {
+        _attachments = a;
+    }
+    
+    public Collection getAttachments() {
+        return Collections.unmodifiableCollection(_attachments);
+    }
+    
     public String toString() {
         return getPath() + " [" + getDescription() + "] attachable to [" +
             getAttachType().getDescription() + "]";
     }
     
     public boolean equals(Object obj) {
-        if (!(obj instanceof UIPlugin)) {
+        if (!(obj instanceof UIPluginView)) {
             return false;
         }
         

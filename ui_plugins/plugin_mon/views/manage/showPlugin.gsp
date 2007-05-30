@@ -11,6 +11,7 @@ Views
   <tr>
     <th>Path</th>
     <th>Attachable to</th>
+    <th>Can attach?</th>
   </tr>
 </thead>
 <tbody>
@@ -18,6 +19,7 @@ Views
   <tr>
     <td><%= h v.path %></td>
     <td><%= h v.attachType.description %></td>
+    <td><%= h v.attachable %></td>
   </tr>
 <% } %>
 </tbody>

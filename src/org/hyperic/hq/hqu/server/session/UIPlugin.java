@@ -76,8 +76,11 @@ public class UIPlugin
         return Collections.unmodifiableCollection(_views);
     }
     
-    void addView(UIPluginViewDescriptor view) {
-        getViewsBag().add(new UIPluginView(this, view));
+    UIPluginView addView(UIPluginViewDescriptor viewInfo) {
+        UIPluginView view = viewInfo.getAttachType().createView(this, viewInfo);
+        
+        getViewsBag().add(view);
+        return view;
     }
     
     protected Collection getViewsBag() {
