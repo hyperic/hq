@@ -67,6 +67,7 @@ import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.pluginxml.PluginData;
@@ -242,7 +243,14 @@ public class ProductManagerEJBImpl
         //the file will be re-read/parsed when the plugin is redeployed.
         PluginData.deployed(pInfo.resourceLoader);
     }
-    
+
+    private boolean isVirtualServer(TypeInfo type) {
+        if (type.getType() != TypeInfo.TYPE_SERVER) {
+            return false;
+        }
+        return ((ServerTypeInfo)type).isVirtual();
+    }
+
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -303,8 +311,10 @@ public class ProductManagerEJBImpl
                 measurements =
                     this.ppm.getMeasurementPluginManager().getMeasurements(info);
             } catch (PluginNotFoundException e) {
-                this.log.info(info.getName() +
-                              " does not support measurement");
+                if (!isVirtualServer(info)) {
+                    this.log.info(info.getName() +
+                                  " does not support measurement");
+                }
                 continue;
             }
 
