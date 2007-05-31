@@ -559,11 +559,15 @@ public abstract class Collector implements Runnable {
             Collector collector = (Collector)pluginCollectors.get(i);
             CollectorResult result =
                 (CollectorResult)container.results.get(collector.props);
-            if ((result != null) && !result.collected) {
+            int size;
+            if ((result != null) &&
+                !result.collected &&
+                ((size = result.values.size()) != 0))
+            {
                 if (isDebug) {
                     log.debug(collector +
                               " ran " + lastRun(result.timestamp) +
-                              " but hasn't been collected yet, skipping.");
+                              " (" + size + " values) but hasn't been collected yet, skipping.");
                 }
                 continue;
             }
