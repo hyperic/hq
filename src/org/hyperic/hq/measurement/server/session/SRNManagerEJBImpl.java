@@ -153,13 +153,15 @@ public class SRNManagerEJBImpl extends SessionEJB
      */
     public int incrementSrn(AppdefEntityID aid, long newMin) {
         SRNCache cache = SRNCache.getInstance();
+        ScheduleRevNumDAO dao = getScheduleRevNumDAO();
+        
         SrnId id = new SrnId(aid.getType(), aid.getID());
-        ScheduleRevNum srn = cache.get(id);
+        ScheduleRevNum srn = dao.get(id);
 
         // Create the SRN if it does not already exist.
         if (srn == null) {
             // Create it
-            srn = getScheduleRevNumDAO().create(aid.getType(), aid.getID());
+            srn = dao.create(aid.getType(), aid.getID());
             cache.put(srn);
             return srn.getSrn();
         }
@@ -173,10 +175,11 @@ public class SRNManagerEJBImpl extends SessionEJB
                 srn.setMinInterval(newMin);
             } else {
             // Set to default
-                Long defaultMin = getScheduleRevNumDAO().getMinInterval(aid);
+                Long defaultMin = dao.getMinInterval(aid);
                 srn.setMinInterval(defaultMin.longValue());
             }
-            getScheduleRevNumDAO().save(srn);
+            dao.save(srn);
+            cache.put(srn);
         }
         _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
         return srn.getSrn();
