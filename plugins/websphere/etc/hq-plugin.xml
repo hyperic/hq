@@ -583,10 +583,9 @@
   </metrics>
 
   <metrics name="WebSphere 5.0 Connection Pool" include="conn-pool-pmi">
-    <!-- XXX this avail check can be more robust -->
     <metric name="JDBC Pool Availability"
             alias="Availability"
-            template="ws.avail:${server.props},type=JDBCProvider,name=%connpool%:name"
+            template="${domain}/connectionPoolModule:Module=%connpool%:Availability"
             category="AVAILABILITY"
             indicator="true"
             collectionType="dynamic"
@@ -1093,6 +1092,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
 
     <service name="Connection Pool"
              internal="true">
+
+      <plugin type="collector"
+              class="ConnectionPoolCollector"/>
 
       <config>
         <option name="connpool"
