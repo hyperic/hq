@@ -366,8 +366,10 @@ public class ProductPluginManager extends PluginManager {
             PluginManager mgr = mgrs[i];
             mgr.init(this);
             this.managers.put(mgr.getName(), mgr);
-            log.debug(mgr.getName() + " plugins enabled=" +
-                      isPluginTypeEnabled(mgr.getName()));
+            if (!this.isClient || DEBUG_LIFECYCLE) {
+                log.debug(mgr.getName() + " plugins enabled=" +
+                          isPluginTypeEnabled(mgr.getName()));
+            }
         }
     }
 
@@ -605,20 +607,26 @@ public class ProductPluginManager extends PluginManager {
         if (!(name.endsWith("-plugin.jar") ||
               name.endsWith("-plugin.xml")))
         {
-            log.debug(name + " not a loadable plugin");
+            if (DEBUG_LIFECYCLE) {
+                log.debug(name + " not a loadable plugin");
+            }
             return false;
         }
 
         name = name.substring(0, name.length()-11);
         if (this.includePlugins != null) {
             if (this.includePlugins.get(name) == null) {
-                log.debug("Skipping " + name + " (not in plugins.include)");
+                if (DEBUG_LIFECYCLE) {
+                    log.debug("Skipping " + name + " (not in plugins.include)");
+                }
                 return false;
             }
         }
         if (this.excludePlugins != null) {
             if (this.excludePlugins.get(name) != null) {
-                log.debug("Skipping " + name + " (in plugins.exclude)");
+                if (DEBUG_LIFECYCLE) {
+                    log.debug("Skipping " + name + " (in plugins.exclude)");
+                }
                 return false;
             }
         }
