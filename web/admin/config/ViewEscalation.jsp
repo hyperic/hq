@@ -1083,16 +1083,13 @@ function showViewEscResponse(originalRequest) {
          }
 
           if (selUserEsc==undefined && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
-           //if (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP") {
 
-            alert(selActionTypeEsc)
             $('example').style.display= '';
              $('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
              $('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + 'Please enter IPAddress and Trap OID information for this action'
-             //$('saveButton').style.display = "none";
+             $('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>'
+
              return false;
-             //}
          }
 
          if (selUserEsc == 'Others') {
