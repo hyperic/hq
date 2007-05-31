@@ -190,9 +190,7 @@ public class WebsphereCollector extends Collector {
         }
     }
 
-    protected double getStatCount(Stats stats, String metric) {
-        Statistic stat = stats.getStatistic(metric);
-
+    protected double getStatCount(Statistic stat) {
         if (stat instanceof CountStatistic) {
             return ((CountStatistic)stat).getCount();
         }
@@ -200,8 +198,14 @@ public class WebsphereCollector extends Collector {
             return ((RangeStatistic)stat).getCurrent();
         }
         else {
+            log.error("Unsupported stat type: " +
+                      stat.getName() + "/" + stat.getClass().getName());
             return Double.NaN;
-        }
+        }        
+    }
+
+    protected double getStatCount(Stats stats, String metric) {
+        return getStatCount(stats.getStatistic(metric));
     }
 
     public MetricValue getValue(Metric metric, CollectorResult result) {
