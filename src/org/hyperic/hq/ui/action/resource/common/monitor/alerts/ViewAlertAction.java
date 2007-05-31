@@ -43,6 +43,7 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -161,6 +162,14 @@ public class ViewAlertAction extends TilesAction {
 
         request.setAttribute("alertDefConditions", alertDefConditions);
 
+        // if alert is fixed, then there should be a fixed log
+        AlertActionLogValue[] logs = av.getActionLogs();
+        for (int i = logs.length - 1; i >= 0; i--) {
+            if (logs[i].getActionId() == null) {
+                request.setAttribute("fixedNote", logs[i].getDetail());
+            }
+        }
+        
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
 

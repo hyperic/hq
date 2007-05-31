@@ -34,7 +34,7 @@
 <%-- Don't insert the sub-tiles if there is no alert and no alertDef. --%>
 <c:if test="${not empty alert and not empty alertDef}">
 
-<form name="AlertForm" action="<html:rewrite action="/alerts/Alerts"/>">
+<html:form action="/alerts/Alerts">
 <input type=hidden name="a" value="<c:out value="${alert.id}"/>"/>
 <input type=hidden name="mode" id="mode" value=""/>
 
@@ -59,27 +59,42 @@
   <tiles:insert beanName="action"/>
 </c:forEach>
 
+<tiles:insert definition=".header.tab">
+  <tiles:put name="tabKey" value="resource.common.alert.action.fix.header"/>
+</tiles:insert>
 <table cellpadding="10" cellspacing="0" border="0" width="100%" id="fixedSection">
 <tr>
-  <td class="BlockContent" width="40%">&nbsp;</td>
-  <td class="BlockContent" width="5%" style="padding-top: 6px; padding-bottom: 6px;">
+<c:choose>
+<c:when test="${not alert.fixed}">
+  <td class="BlockContent" colspan="3" align="middle">
+    <html:textarea property="fixedNote" cols="70" rows="5"/>
+  </td>
+</tr>
+<tr>
+  <td class="BlockContent" width="40%" align="right">&nbsp;</td>
+  <td class="BlockContent" style="padding-top: 6px; padding-bottom: 6px;">
+</c:when>
+<c:when test="${not empty fixedNote}">
+  <td class="BlockContent" align="middle">
+  <div style="padding: 4px;"><c:out value="${fixedNote}"/></div>
+</c:when>
+<c:otherwise>
+  <td class="BlockContent" align="middle">
+  <div style="padding: 4px;"><fmt:message key="resource.common.alert.beenFixed"/></div>
+</c:otherwise>
+</c:choose>
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.fixed.label"/>
   <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
   <tiles:put name="buttonClick">$('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.fixed.label"/>')</tiles:put>
-  <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
   <tiles:put name="icon"><html:img page="/images/icon_fixed.gif" alt="Click to mark as Fixed" align="middle"/></tiles:put>
+  <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
-  </td>
-  <td class="BlockContent" style="font-style: italic;">
-    <c:choose>
-      <c:when test="${alert.fixed}">
-        <fmt:message key="resource.common.alert.beenFixed"/>
-      </c:when>
-      <c:otherwise>
+    <c:if test="${not alert.fixed}">
+      <td class="BlockContent">
         <fmt:message key="resource.common.alert.clickToFix"/>
-      </c:otherwise>
-    </c:choose>
+      </td>
+    </c:if>
   </td>
 </tr>
 </table>
@@ -88,6 +103,6 @@
 
 <tiles:insert definition=".page.footer"/>
 
-</form>
+</html:form>
 
 </c:if>

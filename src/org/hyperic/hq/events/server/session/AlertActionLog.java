@@ -48,11 +48,11 @@ public class AlertActionLog
     protected AlertActionLog(Alert alert, String detail, Action action,
                              AuthzSubject subject) 
     {
-        _detail    = detail;
         _alert     = alert;
         _action    = action;
         _subject   = subject;
         _timeStamp = System.currentTimeMillis();
+        setDetail(detail);
     }
     
     protected String getDetail() {
@@ -60,7 +60,12 @@ public class AlertActionLog
     }
     
     protected void setDetail(String detail) {
-        _detail = detail;
+        if (detail != null && detail.length() > 500) {
+            _detail = detail.substring(0, 499);
+        }
+        else {
+            _detail = detail;
+        }
     }
     
     protected Alert getAlert() {

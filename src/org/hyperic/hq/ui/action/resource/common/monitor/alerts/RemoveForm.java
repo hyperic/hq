@@ -42,6 +42,8 @@ public class RemoveForm extends ResourceForm  {
     private Integer _ad;
     
     private String _buttonAction;
+    private String _ackNote;
+    private String _fixedNote;
 
     public RemoveForm() {
     }
@@ -93,11 +95,29 @@ public class RemoveForm extends ResourceForm  {
         _buttonAction = action;
     }
     
+    public String getAckNote() {
+        return _ackNote;
+    }
+
+    public void setAckNote(String ackNote) {
+        this._ackNote = ackNote;
+    }
+
+    public String getFixedNote() {
+        return _fixedNote;
+    }
+
+    public void setFixedNote(String fixedNote) {
+        this._fixedNote = fixedNote;
+    }
+
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
         _alerts = null;
         _ealerts = null;
         _ad = null;
         _buttonAction = null;
+        _ackNote = null;
+        _fixedNote = null;
     }
 }

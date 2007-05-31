@@ -235,13 +235,15 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = RequestUtils.getIntParameter(request, "a");
+        String note =
+            RequestUtils.getStringParameter(request, "fixedNote", null);
         AppdefEntityID aeid = null;
         try {
             aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
                 eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
-                            alertId, null);
+                            alertId, note);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -250,7 +252,7 @@ public class PortalAction extends ResourceController {
         if (aeid == null || !aeid.isGroup()) {
             // Fix alert the old fashion way
             eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
-                        null); 
+                        note); 
         }
 
         RequestUtils.setConfirmation(request, "alert.view.confirm.fixed");
