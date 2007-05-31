@@ -20,6 +20,7 @@ Views
     <td><%= h v.path %></td>
     <td><%= h v.attachType.description %></td>
     <td><%= h v.attachable %></td>
+    <td><%= button_to "Attach", [action : 'attach', id : v] %></td>
   </tr>
 <% } %>
 </tbody>

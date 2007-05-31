@@ -17,7 +17,7 @@ class FormGenerator {
     }
     
     void write(output, form_closure) {
-    	output.write("<form action='${HtmlUtil.url_for(formOpts)}' method='post'>")
+    	output.write("<form action='${HtmlUtil.urlFor(formOpts)}' method='post'>")
     	form_closure(this)
     	output.write("</form>")
     	output.flush()

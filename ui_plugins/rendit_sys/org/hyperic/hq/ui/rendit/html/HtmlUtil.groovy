@@ -16,7 +16,7 @@ class HtmlUtil {
      * 
      * TODO:  Add support for arbitrary URL query params
      */
-    static String url_for(opts) {
+    static String urlFor(opts) {
         def res = ''
         if (opts['action']) {
         	res += opts['action'] + '.hqu'    
@@ -35,9 +35,17 @@ class HtmlUtil {
      * Create a text link.
      *
      * text:  The text for the link, which will be HTML escaped
-     * opts:  Options for the link (see url_for)
+     * opts:  Options for the link (see urlFor)
      */
-    static def link_to(text, opts) {
-        "<a href='${url_for(opts)}'>${escapeHtml(text)}</a>"
+    static def linkTo(text, opts) {
+        "<a href='${urlFor(opts)}'>${escapeHtml(text)}</a>"
     }
+        
+	static def buttonTo(text, opts) {
+		"<form method='post' action='${urlFor(opts)}'>" + 
+		"  <div>" + 
+		"    <input value='${escapeHtml(text)}' type='submit'/>" + 
+		"  </div>" +
+		"</form>"
+	}
 }

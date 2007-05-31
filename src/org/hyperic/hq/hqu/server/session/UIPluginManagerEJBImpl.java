@@ -28,6 +28,7 @@ package org.hyperic.hq.hqu.server.session;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.hq.hqu.server.session.UIPluginView;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import java.util.Collection;
@@ -53,10 +54,13 @@ public class UIPluginManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
-    private UIPluginDAO _pluginDAO;
+    private UIPluginDAO     _pluginDAO;
+    private UIPluginViewDAO _viewDAO;
     
     public UIPluginManagerEJBImpl() {
-        _pluginDAO = new UIPluginDAO(DAOFactory.getDAOFactory()); 
+        DAOFactory fact = DAOFactory.getDAOFactory();
+        _pluginDAO = new UIPluginDAO(fact);
+        _viewDAO   = new UIPluginViewDAO(fact);
     }
 
     /**
@@ -93,6 +97,13 @@ public class UIPluginManagerEJBImpl
         return _pluginDAO.findById(id);
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public UIPluginView findViewById(Integer id) {
+        return _viewDAO.findById(id);
+    }
+
     /**
      * Remove a plugin, all its views, and attach points from the system.
      * @ejb:interface-method

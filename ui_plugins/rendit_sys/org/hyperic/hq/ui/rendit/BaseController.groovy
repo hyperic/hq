@@ -88,10 +88,19 @@ abstract class BaseController {
      * from this base method)
      */
     def getAddIns() {
-		[url_for  : HtmlUtil.&url_for,
-		 h        : HtmlUtil.&escapeHtml,
-		 link_to  : HtmlUtil.&link_to]
+		[url_for   : HtmlUtil.&urlFor,
+		 h         : HtmlUtil.&escapeHtml,
+		 link_to   : HtmlUtil.&linkTo,
+		 button_to : HtmlUtil.&buttonTo]
     }
+    
+	protected void redirectTo(opts) {
+	    def response = invokeArgs.response
+
+	    rendered = true
+	    def targetUrl = response.encodeRedirectURL(HtmlUtil.urlFor(opts))
+		response.sendRedirect(targetUrl)
+	}
     
     protected void render(opts) {
         opts = (opts == null) ? [:] : opts

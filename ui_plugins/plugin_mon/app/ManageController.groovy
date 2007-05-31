@@ -18,4 +18,10 @@ class ManageController
         def plugin = UIPluginManagerEJBImpl.one.findPluginById(pluginId)
         render(locals:[plugin : plugin])
     }
+    
+    def attach = { params ->
+		def viewId = new Integer(params.getOne('id'))
+		def view   = UIPluginManagerEJBImpl.one.findViewById(viewId)
+		redirectTo(action : 'showPlugin', id : view.plugin)
+    }
 }
