@@ -2078,7 +2078,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {
-                analyze = Boolean.getBoolean(
+                analyze = Boolean.parseBoolean(
                     conf.getProperty(HQConstants.OOBEnabled));
             }
         } catch (Exception e) {
