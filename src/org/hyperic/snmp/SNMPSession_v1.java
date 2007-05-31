@@ -155,7 +155,7 @@ class SNMPSession_v1 implements SNMPSession {
             requests++;
             if (e.isError()) {
                 isError = true;
-                log.error(rootOID + " walk: " + e.getErrorMessage(),
+                log.debug(rootOID + " walk: " + e.getErrorMessage(),
                           e.getException());
             }
 
