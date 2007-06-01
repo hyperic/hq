@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.hqu.server.session">
-  <class name="UIPluginView" table="EAM_UI_PLUGIN_VIEW">
+  <class name="UIPlugin" table="EAM_UI_PLUGIN">
 
     <cache usage="read-write" />
 
@@ -13,7 +13,7 @@
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_UI_PLUGIN_VIEW_ID_SEQ</param>
+        <param name="sequence">EAM_UI_PLUGIN_ID_SEQ</param>
       </generator>
     </id>
 
@@ -21,30 +21,23 @@
       <column name ="VERSION_COL" default="0" />
     </version>
 
-    <property name="path" type="string">
-      <column name="PATH" not-null="true" length="255" unique="true" />
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true" />
     </property>
 
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="true" length="255" />
     </property>
 
-    <property name="attachTypeEnum" type="integer">
-      <column name="ATTACH_TYPE" not-null="true" />
+    <property name="pluginVersion" type="string">
+      <column name="PLUGIN_VERSION" not-null="true" length="30" />
     </property>
-
-    <many-to-one name="plugin" cascade="save-update" class="UIPlugin">
-      <column name="UI_PLUGIN_ID" not-null="true" />
-    </many-to-one>
     
-    <bag name="attachmentsBag" table="EAM_UI_PLUGIN_VIEW_ATTACH">
-      <key column="UI_VIEW_ID" />
-      <one-to-many class="UIPluginViewAttachment" />
+    <bag name="viewsBag" table="EAM_UI_PLUGIN_VIEW" cascade="all-delete-orphan"
+         lazy="false" inverse="true">
+      <key column="UI_PLUGIN_ID" />
+      <one-to-many class="UIPluginView"/>
     </bag>
-    
-    <joined-subclass name="UIPluginViewAdmin" table="EAM_UI_PLUGIN_VIEW_ADMIN">
-      <key column="VIEW_ID"/>
-    </joined-subclass>
     
   </class>
 
