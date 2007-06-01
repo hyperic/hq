@@ -106,6 +106,10 @@ public abstract class UIPluginView
         getAttachmentsBag().add(a);
     }
     
+    void removeAttachment(UIPluginViewAttachment a) {
+        getAttachmentsBag().remove(a);
+    }
+    
     protected Collection getAttachmentsBag() {
         return _attachments;
     }

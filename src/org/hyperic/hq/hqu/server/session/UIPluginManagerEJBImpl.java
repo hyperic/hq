@@ -30,6 +30,7 @@ import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginView;
+import org.hyperic.hq.hqu.server.session.UIPluginViewAttachment;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import java.util.Collection;
@@ -55,13 +56,15 @@ public class UIPluginManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
-    private UIPluginDAO     _pluginDAO;
-    private UIPluginViewDAO _viewDAO;
+    private UIPluginDAO               _pluginDAO;
+    private UIPluginViewDAO           _viewDAO;
+    private UIPluginViewAttachmentDAO _attachDAO;
     
     public UIPluginManagerEJBImpl() {
         DAOFactory fact = DAOFactory.getDAOFactory();
         _pluginDAO = new UIPluginDAO(fact);
         _viewDAO   = new UIPluginViewDAO(fact);
+        _attachDAO = new UIPluginViewAttachmentDAO(fact);
     }
 
     /**
@@ -109,12 +112,27 @@ public class UIPluginManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public UIPluginViewAttachment findAttachmentById(Integer id) {
+        return _attachDAO.findById(id);
+    }
+
+    /**
      * Remove a plugin, all its views, and attach points from the system.
      * @ejb:interface-method
      */
     public void deletePlugin(UIPlugin p) {
         _log.info("Deleting plugin " + p);
         _pluginDAO.remove(p);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void detach(UIPluginViewAttachment a) {
+        _log.info("Detaching " + a);
+        a.getView().removeAttachment(a);
     }
 
     /**
@@ -132,6 +150,7 @@ public class UIPluginManagerEJBImpl
                                                "incompatable with view");
         }
         
+        _log.info("Attaching " + view);
         viewType.attach(view, d);
     }
     
