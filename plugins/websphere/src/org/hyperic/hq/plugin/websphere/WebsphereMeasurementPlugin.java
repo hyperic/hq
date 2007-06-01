@@ -102,6 +102,11 @@ public class WebsphereMeasurementPlugin
         if (tok.hasMoreTokens()) {
             //services only
             props.setProperty("type", tok.nextToken());
+            if (tok.hasMoreTokens()) {
+                //webapp servlet metrics
+                String module = tok.nextToken();
+                props.setProperty("Module", module);
+            }
         }
 
         return props;
