@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.hqu.UIPluginViewDescriptor;
+import org.hyperic.hq.hqu.ViewDescriptor;
 
 public class UIPlugin
     extends PersistedObject 
@@ -76,8 +76,8 @@ public class UIPlugin
         return Collections.unmodifiableCollection(_views);
     }
     
-    UIPluginView addView(UIPluginViewDescriptor viewInfo) {
-        UIPluginView view = viewInfo.getAttachType().createView(this, viewInfo);
+    View addView(ViewDescriptor viewInfo) {
+        View view = viewInfo.getAttachType().createView(this, viewInfo);
         
         getViewsBag().add(view);
         return view;

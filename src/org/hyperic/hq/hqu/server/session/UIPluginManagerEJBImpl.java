@@ -26,11 +26,11 @@
 package org.hyperic.hq.hqu.server.session;
 
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.server.session.UIPluginView;
-import org.hyperic.hq.hqu.server.session.UIPluginViewAttachment;
+import org.hyperic.hq.hqu.server.session.View;
+import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import java.util.Collection;
@@ -57,14 +57,14 @@ public class UIPluginManagerEJBImpl
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
     private UIPluginDAO               _pluginDAO;
-    private UIPluginViewDAO           _viewDAO;
-    private UIPluginViewAttachmentDAO _attachDAO;
+    private ViewDAO           _viewDAO;
+    private AttachmentDAO _attachDAO;
     
     public UIPluginManagerEJBImpl() {
         DAOFactory fact = DAOFactory.getDAOFactory();
         _pluginDAO = new UIPluginDAO(fact);
-        _viewDAO   = new UIPluginViewDAO(fact);
-        _attachDAO = new UIPluginViewAttachmentDAO(fact);
+        _viewDAO   = new ViewDAO(fact);
+        _attachDAO = new AttachmentDAO(fact);
     }
 
     /**
@@ -107,14 +107,14 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public UIPluginView findViewById(Integer id) {
+    public View findViewById(Integer id) {
         return _viewDAO.findById(id);
     }
 
     /**
      * @ejb:interface-method
      */
-    public UIPluginViewAttachment findAttachmentById(Integer id) {
+    public Attachment findAttachmentById(Integer id) {
         return _attachDAO.findById(id);
     }
 
@@ -130,7 +130,7 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void detach(UIPluginViewAttachment a) {
+    public void detach(Attachment a) {
         _log.info("Detaching " + a);
         a.getView().removeAttachment(a);
     }
@@ -138,7 +138,7 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void attachView(UIPluginView view, UIPluginAttachmentDescriptor d) {
+    public void attachView(View view, AttachmentDescriptor d) {
         AttachType viewType = view.getAttachType();
         
         if (!view.isAttachable()) {

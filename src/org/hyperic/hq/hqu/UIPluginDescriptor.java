@@ -91,7 +91,7 @@ public class UIPluginDescriptor {
     
     public void addView(String path, String descr, String attachType) {
         AttachType t = AttachType.findByDescription(attachType);
-        _viewDescriptors.add(new UIPluginViewDescriptor(path, descr, t)); 
+        _viewDescriptors.add(new ViewDescriptor(path, descr, t)); 
     }
     
     public List getViews() {

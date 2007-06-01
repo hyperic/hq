@@ -31,7 +31,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
-import org.hyperic.hq.hqu.UIPluginViewDescriptor;
+import org.hyperic.hq.hqu.ViewDescriptor;
 
 class UIPluginDAO
     extends HibernateDAO
@@ -63,7 +63,7 @@ class UIPluginDAO
                                     pInfo.getVersion());
         
         for (Iterator i=pInfo.getViews().iterator(); i.hasNext(); ) {
-            UIPluginViewDescriptor view = (UIPluginViewDescriptor)i.next();
+            ViewDescriptor view = (ViewDescriptor)i.next();
             
             res.addView(view);
         }

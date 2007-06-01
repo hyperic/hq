@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.hqu.server.session">
-  <class name="UIPluginViewAttachment" table="EAM_UI_PLUGIN_VIEW_ATTACH">
+  <class name="Attachment" table="EAM_UI_ATTACHMENT">
 
     <cache usage="read-write" />
 
@@ -13,7 +13,7 @@
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_UI_PLUGIN_VIEW_ATTACH_ID_SEQ</param>
+        <param name="sequence">EAM_UI_ATTACHMENT_ID_SEQ</param>
       </generator>
     </id>
 
@@ -25,7 +25,7 @@
       <column name="ATTACH_TIME" not-null="true"/>
     </property>
 
-    <many-to-one name="view" cascade="save-update" class="UIPluginView">
+    <many-to-one name="view" cascade="save-update" class="View">
       <column name="VIEW_ID" not-null="true" />
     </many-to-one>
   </class>

@@ -27,24 +27,24 @@ package org.hyperic.hq.hqu.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 
-public class UIPluginViewAttachment
+public class Attachment
     extends PersistedObject 
 { 
-    private UIPluginView _view;
+    private View _view;
     private long         _attachTime;
     
-    protected UIPluginViewAttachment() {}
+    protected Attachment() {}
     
-    UIPluginViewAttachment(UIPluginView view) {
+    Attachment(View view) {
         _view       = view;
         _attachTime = System.currentTimeMillis();
     }
     
-    public UIPluginView getView() {
+    public View getView() {
         return _view;
     }
     
-    protected void setView(UIPluginView view) {
+    protected void setView(View view) {
         _view = view;
     }
     
@@ -66,11 +66,11 @@ public class UIPluginViewAttachment
      *        each object can do a proper .equals()
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof UIPluginViewAttachment)) {
+        if (!(obj instanceof Attachment)) {
             return false;
         }
         
-        UIPluginViewAttachment o = (UIPluginViewAttachment)obj;
+        Attachment o = (Attachment)obj;
         return o.getView().equals(getView()) &&
             o.getAttachTime() == getAttachTime();
     }

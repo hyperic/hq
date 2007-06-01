@@ -36,7 +36,7 @@
     <bag name="viewsBag" table="EAM_UI_PLUGIN_VIEW" cascade="all-delete-orphan"
          lazy="false" inverse="true">
       <key column="UI_PLUGIN_ID" />
-      <one-to-many class="UIPluginView"/>
+      <one-to-many class="View"/>
     </bag>
     
   </class>

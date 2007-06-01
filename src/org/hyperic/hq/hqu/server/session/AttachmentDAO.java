@@ -28,14 +28,14 @@ package org.hyperic.hq.hqu.server.session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-class UIPluginViewAttachmentDAO
+class AttachmentDAO
     extends HibernateDAO
 {
-    UIPluginViewAttachmentDAO(DAOFactory f) {
-        super(UIPluginViewAttachment.class, f);
+    AttachmentDAO(DAOFactory f) {
+        super(Attachment.class, f);
     }
 
-    UIPluginViewAttachment findById(Integer id) {
-        return (UIPluginViewAttachment)super.findById(id);
+    Attachment findById(Integer id) {
+        return (Attachment)super.findById(id);
     }
 }

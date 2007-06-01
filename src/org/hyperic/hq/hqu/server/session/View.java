@@ -30,10 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
-import org.hyperic.hq.hqu.UIPluginViewDescriptor;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.ViewDescriptor;
 
-public abstract class UIPluginView
+public abstract class View
     extends PersistedObject 
 { 
     private UIPlugin   _plugin;
@@ -42,9 +42,9 @@ public abstract class UIPluginView
     private AttachType _attachType;
     private Collection _attachments = new ArrayList();
     
-    protected UIPluginView() {}
+    protected View() {}
     
-    protected UIPluginView(UIPlugin plugin, UIPluginViewDescriptor view,
+    protected View(UIPlugin plugin, ViewDescriptor view,
                            AttachType attach) 
     {
         _plugin     = plugin;
@@ -64,7 +64,7 @@ public abstract class UIPluginView
      * Return a prototype attachment descriptor that can be filled out when
      * performing an attachment.
      */
-    public abstract UIPluginAttachmentDescriptor getPrototype();
+    public abstract AttachmentDescriptor getPrototype();
     
     public UIPlugin getPlugin() {
         return _plugin;
@@ -102,11 +102,11 @@ public abstract class UIPluginView
         return _attachType;
     }
     
-    void addAttachment(UIPluginViewAttachment a) {
+    void addAttachment(Attachment a) {
         getAttachmentsBag().add(a);
     }
     
-    void removeAttachment(UIPluginViewAttachment a) {
+    void removeAttachment(Attachment a) {
         getAttachmentsBag().remove(a);
     }
     
@@ -128,11 +128,11 @@ public abstract class UIPluginView
     }
     
     public boolean equals(Object obj) {
-        if (!(obj instanceof UIPluginView)) {
+        if (!(obj instanceof View)) {
             return false;
         }
         
-        UIPluginView o = (UIPluginView)obj;
+        View o = (View)obj;
         return o.getPlugin().equals(getPlugin()) &&
                o.getPath().equals(getPath());
     }

@@ -25,13 +25,17 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
-import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.HibernateDAO;
 
-public class UIPluginAttachmentDescriptorAdmin 
-    extends UIPluginAttachmentDescriptor
+class ViewDAO
+    extends HibernateDAO
 {
-    public AttachType getAttachType() {
-        return AttachType.ADMIN;
+    ViewDAO(DAOFactory f) {
+        super(View.class, f);
+    }
+
+    View findById(Integer id) {
+        return (View)super.findById(id);
     }
 }

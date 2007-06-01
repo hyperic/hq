@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.hqu.server.session">
-  <class name="UIPluginView" table="EAM_UI_PLUGIN_VIEW">
+  <class name="View" table="EAM_UI_VIEW">
 
     <cache usage="read-write" />
 
@@ -13,7 +13,7 @@
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
       <generator class="sequence">
-        <param name="sequence">EAM_UI_PLUGIN_VIEW_ID_SEQ</param>
+        <param name="sequence">EAM_UI_VIEW_ID_SEQ</param>
       </generator>
     </id>
 
@@ -37,13 +37,13 @@
       <column name="UI_PLUGIN_ID" not-null="true" />
     </many-to-one>
     
-    <bag name="attachmentsBag" table="EAM_UI_PLUGIN_VIEW_ATTACH"
+    <bag name="attachmentsBag" table="EAM_UI_ATTACHMENT"
          cascade="all-delete-orphan" inverse="true">
       <key column="VIEW_ID" />
-      <one-to-many class="UIPluginViewAttachment" />
+      <one-to-many class="Attachment" />
     </bag>
     
-    <joined-subclass name="UIPluginViewAdmin" table="EAM_UI_PLUGIN_VIEW_ADMIN">
+    <joined-subclass name="ViewAdmin" table="EAM_UI_VIEW_ADMIN">
       <key on-delete="cascade" column="VIEW_ID"/>
     </joined-subclass>
     
