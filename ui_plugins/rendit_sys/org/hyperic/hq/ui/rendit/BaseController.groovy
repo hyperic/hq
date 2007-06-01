@@ -1,5 +1,6 @@
 package org.hyperic.hq.ui.rendit
 
+import java.text.SimpleDateFormat
 import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.ui.rendit.render.RenderFrame
 import org.hyperic.hq.ui.rendit.html.FormGenerator
@@ -88,10 +89,19 @@ abstract class BaseController {
      * from this base method)
      */
     def getAddIns() {
-		[url_for   : HtmlUtil.&urlFor,
-		 h         : HtmlUtil.&escapeHtml,
-		 link_to   : HtmlUtil.&linkTo,
-		 button_to : HtmlUtil.&buttonTo]
+		[
+		 url_for     : HtmlUtil.&urlFor,
+		 h           : HtmlUtil.&escapeHtml,
+		 link_to     : HtmlUtil.&linkTo,
+		 button_to   : HtmlUtil.&buttonTo,
+		 format_date : this.&formatDate,
+		]
+    }
+    
+    String formatDate(String fmt, Date d) {
+        SimpleDateFormat df = new SimpleDateFormat(fmt, 
+                                                   invokeArgs.request.locale)
+        df.format(d)
     }
     
 	protected void redirectTo(opts) {

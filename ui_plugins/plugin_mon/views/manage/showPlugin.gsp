@@ -5,13 +5,14 @@
 <br/>
 <br/>
 <br/>
-${l.Views}
+<h3>${l.Views}</h3>
 <table>
 <thead>
   <tr>
     <th>${l.Path}</th>
     <th>${l.AttachableTo}</th>
     <th>${l.CanAttach}</th>
+    <th>${l.AttachedAt}</th>
   </tr>
 </thead>
 <tbody>
@@ -20,8 +21,24 @@ ${l.Views}
     <td><%= h v.path %></td>
     <td><%= h v.attachType.description %></td>
     <td><%= h v.attachable %></td>
-    <td><%= button_to "Attach", [action : 'attach', id : v] %></td>
+    <% if (v.attachable) { %>
+      <td><%= button_to "Attach", [action : 'attach', id : v] %></td>
+    <% } %>
   </tr>
+  <% for (a in v.attachments) { %>
+    <tr>
+      <td/>
+      <td/>
+      <td/>
+      <td>
+        <%= format_date("yy.MM.dd HH:mm:ss z", new Date(a.attachTime)) %>
+      </td>
+      <td>
+        <%= button_to "Detach", [action : 'detach', id : a] %></td>
+      </td>
+    </tr>
+  <% } %>
+
 <% } %>
 </tbody>
 </table>

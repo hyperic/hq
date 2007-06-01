@@ -28,7 +28,15 @@ class ManageController
     }
     
     def attach = { params ->
-		def view   = pMan.findViewById(new Integer(params.getOne('id')))
+		def view  = pMan.findViewById(new Integer(params.getOne('id')))
+		pMan.attachView(view, view.prototype)
 		redirectTo(action : 'showPlugin', id : view.plugin)
+    }
+
+    def detach = { params ->
+	    def attachment = 
+	        pMan.findAttachmentById(new Integer(params.getOne('id')))
+	    pMan.detach(attachment)
+	    redirectTo(action : 'showPlugin', id : attachment.view.plugin)
     }
 }
