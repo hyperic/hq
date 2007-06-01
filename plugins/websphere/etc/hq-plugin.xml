@@ -643,10 +643,9 @@
 	    value="%app%#%ejb%"/>
 
   <metrics name="WebSphere 5.0 EJB">
-    <!-- XXX this avail check can be more robust -->
     <metric name="EJB Availability"
             alias="Availability"
-            template="ws.avail:${app.props},type=EJBModule,name=%ejb%:name"
+            template="${domain}/beanModule:Module=${ejb.module}:Availability"
             category="AVAILABILITY"
             indicator="true"
             collectionType="dynamic"
