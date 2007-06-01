@@ -562,10 +562,9 @@
 	    value="node=%server.node%,Server=%server.name%"/>
 
   <metrics name="WebSphere 5.0 Application">
-    <!-- XXX this avail check no workie -->
     <metric name="Application Availability"
             alias="Availability"
-            template="ws.avail:${server.props},type=Application,name=%app%:name"
+            template="${domain}/applicationModule:Module=%app%:Availability"
             category="AVAILABILITY"
             indicator="true"
             collectionType="dynamic"
