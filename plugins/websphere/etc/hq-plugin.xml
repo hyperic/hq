@@ -598,10 +598,9 @@
 	    value="${server.props},Application=%app%"/>
 
   <metrics name="WebSphere 5.0 Webapp">
-    <!-- XXX this avail check can be more robust -->
     <metric name="Webapp Availability"
             alias="Availability"
-            template="ws.avail:${app.props},type=WebModule,name=%webapp%:name"
+            template="${domain}/webAppModule:Module=${webapp.name}:Availability"
             category="AVAILABILITY"
             indicator="true"
             collectionType="dynamic"
