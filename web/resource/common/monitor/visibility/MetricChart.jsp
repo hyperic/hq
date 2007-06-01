@@ -64,7 +64,6 @@
           <td class="MonitorChartCell" width="755">
             <c:forEach var="i" varStatus="status" begin="0" end="${chartDataKeysSize - 1}">
             <c:url var="chartUrl" value="/resource/MetricChart">
-            <c:param name="chartDataKey" value="${chartDataKeys[i]}"/>
             <c:param name="unitUnits" value="${chartedMetrics[i].unitUnits}"/>
             <c:param name="unitScale" value="${chartedMetrics[i].unitScale}"/>
             <c:param name="showPeak" value="${ViewChartForm.showPeak}"/>
@@ -79,6 +78,12 @@
             <c:param name="baseline" value="${chartedMetrics[i].baselineRaw}"/>
             <c:param name="highRange" value="${chartedMetrics[i].highRangeRaw}"/>
             <c:param name="lowRange" value="${chartedMetrics[i].lowRangeRaw}"/>
+            <c:param name="start" value="${ViewChartForm.startDate.time}"/>
+            <c:param name="end" value="${ViewChartForm.endDate.time}"/>
+            <c:param name="m" value="${ViewChartForm.m[i]}"/>
+            <c:forEach var="eid" items="${checkedResources}">
+              <c:param name="eid" value="${eid.entityId}"/>
+            </c:forEach>
             </c:url>
             <b><fmt:message key="resource.common.monitor.visibility.chart.Metric"/></b>
             <c:out value="${chartedMetrics[i].metricName}"/><br>

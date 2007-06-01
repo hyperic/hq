@@ -233,7 +233,7 @@ key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
 <html:hidden property="ctype"/>
-<html:hidden property="appdefTypeId"/>
+<html:hidden property="appdefType"/>
 <html:hidden property="name"/>
 <c:forEach var="r" items="${CompareMetricsForm.r}">
 <input type="hidden" name="r" value="<c:out value="${r}"/>">

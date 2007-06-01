@@ -130,14 +130,14 @@ public class CompareMetricsForm extends MetricsControlForm {
     /**
      * @return
      */
-    public Integer getAppdefTypeId() {
+    public Integer getAppdefType() {
         return appdefTypeId;
     }
 
     /**
      * @param integer
      */
-    public void setAppdefTypeId(Integer integer) {
+    public void setAppdefType(Integer integer) {
         appdefTypeId = integer;
     }
     /**

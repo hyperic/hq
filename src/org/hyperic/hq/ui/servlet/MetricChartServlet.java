@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.servlet;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,13 +35,29 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.events.shared.EventLogValue;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.ChartDataBean;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.image.chart.Chart;
 import org.hyperic.image.chart.ColumnChart;
 import org.hyperic.image.chart.DataPointCollection;
 import org.hyperic.image.chart.EventPointCollection;
 import org.hyperic.image.chart.LineChart;
 import org.hyperic.image.chart.VerticalChart;
+import org.hyperic.util.TimeUtil;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  * <p>Extends ChartServlet to graph one or more metrics.  By default,
@@ -77,13 +95,37 @@ public class MetricChartServlet extends VerticalChartServlet {
     public MetricChartServlet () {}
 
     /**
+     * Create the image being rendered.
+     *
+     * @param request the servlet request
+     */
+    protected Object createImage(HttpServletRequest request)
+        throws ServletException {
+        ChartDataBean dataBean;
+        try {
+            dataBean = getupMetricData(request);
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
+        // initialize the chart
+        Chart chart = createChart(request, dataBean);
+        initializeChart(chart, request);
+
+        // the subclass is responsible for plotting the data
+        log.debug("Plotting data.");
+        plotData(request, chart, dataBean);
+        return chart;
+    }
+    
+    /**
      * Create and return the chart.  This method will be called after
      * the parameters have been parsed.
      *
      * @return the newly created chart
      */
-    protected Chart createChart(ChartDataBean dataBean,
-                                HttpServletRequest request) {
+    protected Chart createChart(HttpServletRequest request,
+                                ChartDataBean dataBean) {
         // We will actually set a flag here to determine whether we
         // should draw a LineChart or a column chart. If we are
         // charting just one set of data / event points, we'll plot a
@@ -165,9 +207,6 @@ public class MetricChartServlet extends VerticalChartServlet {
             // increment
             ++i;
         }
-
-        String chartDataKey = getChartDataKey(request);
-        request.getSession().removeAttribute(chartDataKey);
     }
 
     /**
@@ -226,8 +265,85 @@ public class MetricChartServlet extends VerticalChartServlet {
         return true;
     }
 
-    protected String getChartDataKey(HttpServletRequest request) {
-        return parseRequiredStringParameter(request, CHART_DATA_KEY_PARAM);
+    protected ChartDataBean getupMetricData(HttpServletRequest request)
+        throws SessionNotFoundException, SessionTimeoutException,
+               DataNotAvailableException, MeasurementNotFoundException,
+               RemoteException, AppdefEntityNotFoundException,
+               PermissionException, ServletException {
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+        MeasurementBoss mb =
+            ContextUtils.getMeasurementBoss(getServletContext());
+        EventLogBoss eb =
+            ContextUtils.getEventLogBoss(getServletContext());
+    
+        String[] eids = request.getParameterValues( Constants.ENTITY_ID_PARAM );
+        AppdefEntityID[] resources = new AppdefEntityID[eids.length];
+        for (int i = 0; i < eids.length; i++) {
+            resources[i] = new AppdefEntityID(eids[i]);
+        }
+        
+        // Get data for charts and put it in session.  In reality only
+        // one of either resources or metrics can have more than one
+        // entry, so it's really not as much of a nested loop as it
+        // seems.  However, the code is written this way so that it
+        // can be used in both the multi-resource and the multi-metric
+        // case.
+        // data points for chart
+        Integer mid = new Integer(request.getParameter("m"));
+    
+        long startDate = Long.parseLong(request.getParameter("start"));
+        long endDate = Long.parseLong(request.getParameter("end"));
+        // Use the current time concatenated with metric
+        // template id for key.
+    
+        List dataPointsList = new ArrayList(resources.length);
+        List eventPointsList = new ArrayList(resources.length);
+        for (int j = 0; j < resources.length; ++j) {
+            if (log.isDebugEnabled()) {
+                log.debug("mtid=" + mid + ", rid=" + resources[j].getId());
+                log.debug("startDate=" + startDate);
+                log.debug("endDate=" + endDate);
+            }
+    
+            long interval = TimeUtil
+                    .getInterval(startDate, endDate,
+                                 Constants.DEFAULT_CHART_POINTS);
+    
+    
+            if (interval > 0) {
+                try {
+                    PageList data = mb.findMeasurementData
+                        ( sessionId, mid, resources[j],
+                          startDate,
+                          endDate,
+                          interval, true, PageControl.PAGE_ALL );
+                    if ( log.isDebugEnabled() ) {
+                        log.debug("Found " + data.size() +
+                                  " datapoints.");
+                        if ( log.isTraceEnabled() ) {
+                            log.trace("data: " + data);
+                        }
+                    }
+                    dataPointsList.add(data);
+                } catch (MeasurementNotFoundException e) {
+                    dataPointsList.add(new PageList());
+                }
+    
+                List controlActions = eb
+                .getEvents(sessionId,
+                           org.hyperic.hq.control.ControlEvent.class
+                           .getName(), resources[j], startDate, endDate);
+                // We need to make sure that the event IDs get set
+                // for the legend.
+                int k = 0;
+                for (Iterator it = controlActions.iterator(); it.hasNext();) {
+                    EventLogValue event = (EventLogValue) it.next();
+                    event.setEventID(++k);
+                }
+                eventPointsList.add(controlActions);
+            }
+        }
+        return new ChartDataBean(dataPointsList, eventPointsList);
     }
 }
 

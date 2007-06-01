@@ -57,7 +57,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.BaseMetricDisplay;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
@@ -70,7 +69,6 @@ import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.beans.ChartDataBean;
 import org.hyperic.hq.ui.beans.ChartedMetricBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -340,9 +338,6 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                RemoteException, AppdefEntityNotFoundException,
                PermissionException {
         
-        ServletContext ctx = getServlet().getServletContext();
-        EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-
         List eventPointsList = new ArrayList(resources.length);
 
         // Get data for charts and put it in session.  In reality only
@@ -362,7 +357,6 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
             chartDataKeys[i] =
                 String.valueOf( System.currentTimeMillis() ) + m[i];
 
-            List dataPointsList = new ArrayList(resources.length);
             for (int j = 0; j < resources.length; ++j) {
                 if (log.isDebugEnabled()) {
                     log.debug("mtid=" + m[i] + ", rid=" + resources[j].getId());
@@ -375,44 +369,6 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                     chartForm.getEndDate().getTime(),
                     Constants.DEFAULT_CHART_POINTS);
 
-                if (chartForm.isLastnSelected() &&
-                    chartForm.getRu().intValue() ==
-                        MonitorUtils.UNIT_COLLECTION_POINTS) {
-                    int count = chartForm.getRn().intValue();
-                    // if this # is > 60, the backend will crap out
-                    // ... we will be displaying a validation message
-                    // in this case, but we still need to limit the #
-                    // from here to avoid the exception
-                    if (count > 60) {
-                        count = 60;
-                    }
-                    List data = mb.findMeasurementData(sessionId,
-                        m[i], resources[j].getId().intValue(), count);
-                    dataPointsList.add(data);
-                } else {
-                    if (interval > 0) {
-                        try {
-                            PageList data = mb.findMeasurementData
-                                ( sessionId, m[i], resources[j].getEntityId(),
-                                  chartForm.getStartDate().getTime(),
-                                  chartForm.getEndDate().getTime(),
-                                  interval, true, PageControl.PAGE_ALL );
-                            if ( log.isDebugEnabled() ) {
-                                log.debug("Found " + data.size() +
-                                          " datapoints.");
-                                if ( log.isTraceEnabled() ) {
-                                    log.trace("data: " + data);
-                                }
-                            }
-                            dataPointsList.add(data);
-                        } catch (MeasurementNotFoundException e) {
-                            dataPointsList.add(new PageList());
-                        }
-                    }
-                }
-
-                // No matter how many metrics there are, there's only
-                // one legend (set of control actions / events).
                 if (i == 0) {
                     if (interval > 0) {
                         List controlActions = new ArrayList();
@@ -420,11 +376,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                     }
                 }
             }
-            request.getSession().setAttribute(chartDataKeys[i],
-                    new ChartDataBean(dataPointsList, eventPointsList));
             log.debug("Store into session: " + chartDataKeys[i]);
         }
-        request.setAttribute(Constants.CHART_DATA_KEYS, chartDataKeys);
         request.setAttribute(Constants.CHART_DATA_KEYS_SIZE, new Integer(
                              chartDataKeys.length));
         request.setAttribute("chartLegend", eventPointsList);

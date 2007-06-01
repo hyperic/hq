@@ -67,8 +67,8 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart(ChartDataBean dataBean,
-                                HttpServletRequest request) {
+    protected Chart createChart(HttpServletRequest request,
+                                ChartDataBean dataBean) {
         return new AvailabilityReportChart();
     }
 

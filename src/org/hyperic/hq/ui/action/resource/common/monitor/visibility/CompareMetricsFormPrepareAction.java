@@ -97,7 +97,7 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
 
         AppdefEntityID[] entIds = new AppdefEntityID[rids.length];        
         for (int i = 0; i < rids.length; i++) {
-            entIds[i] = new AppdefEntityID(cform.getAppdefTypeId().intValue(), rids[i].intValue());
+            entIds[i] = new AppdefEntityID(cform.getAppdefType().intValue(), rids[i].intValue());
             if (log.isTraceEnabled())
                 log.trace("will compare metrics for " + entIds[i]);
         }

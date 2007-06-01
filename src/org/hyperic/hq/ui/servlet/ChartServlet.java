@@ -146,24 +146,13 @@ public abstract class ChartServlet extends ImageServlet {
      */
     protected Object createImage(HttpServletRequest request)
         throws ServletException {
-        // chart data key
-        String chartDataKey = getChartDataKey(request);
-        log.debug("Get from session: " + chartDataKey);
-        
-        ChartDataBean dataBean = null;
-        if (chartDataKey != null) {
-            HttpSession session = request.getSession();
-            dataBean = (ChartDataBean) session.getAttribute(chartDataKey);
-            session.removeAttribute(chartDataKey);
-        }
-
         // initialize the chart
-        Chart chart = createChart(dataBean, request);
+        Chart chart = createChart(request, null);
         initializeChart(chart, request);
 
         // the subclass is responsible for plotting the data
         log.debug("Plotting data.");
-        plotData(request, chart, dataBean);
+        plotData(request, chart, null);
         return chart;
     }
 
@@ -262,12 +251,11 @@ public abstract class ChartServlet extends ImageServlet {
     /**
      * Create and return the chart.  This method will be called after
      * the parameters have been parsed.
-     * @param dataBean TODO
      * @param request TODO
-     *
+     * @param dataBean TODO
      * @return the newly created chart
      */
-    protected abstract Chart createChart(ChartDataBean dataBean, HttpServletRequest request);
+    protected abstract Chart createChart(HttpServletRequest request, ChartDataBean dataBean);
 
     /**
      * Initialize the chart.  This method will be called after the
@@ -435,10 +423,6 @@ public abstract class ChartServlet extends ImageServlet {
             sb.append(LOWRANGE_PARAM); sb.append(": "); sb.append(info.lowRange);
             log.debug( sb.toString() );
         }
-    }
-
-    protected String getChartDataKey(HttpServletRequest request) {
-        return null;
     }
 }
 

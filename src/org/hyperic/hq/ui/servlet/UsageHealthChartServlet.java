@@ -45,8 +45,8 @@ public class UsageHealthChartServlet extends CurrentHealthChartServlet {
      *
      * @return the newly created chart
      */
-    protected Chart createChart(ChartDataBean dataBean,
-                                HttpServletRequest request) {
+    protected Chart createChart(HttpServletRequest request,
+                                ChartDataBean dataBean) {
         return new UsageChart( getImageWidth(request), getImageHeight(request) );
     }
 

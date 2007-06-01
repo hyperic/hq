@@ -66,7 +66,7 @@ public class HighLowChartServlet extends ChartServlet {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.servlet.ChartServlet#createChart()
      */
-    protected Chart createChart(ChartDataBean dataBean, HttpServletRequest request) {
+    protected Chart createChart(HttpServletRequest request, ChartDataBean dataBean) {
         log.trace("plotting a high low chart");
         return new HighLowChart( getImageWidth(request), getImageHeight(request) );
     }
