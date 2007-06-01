@@ -49,12 +49,11 @@ import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
 import com.ibm.websphere.pmi.stat.WSStats;
 
-public class WebsphereCollector extends Collector {
+public abstract class WebsphereCollector extends Collector {
 
     private static final Log log =
         LogFactory.getLog(WebsphereCollector.class.getName());
 
-    private ObjectName jvm;
     private ObjectName perf;
     private String domain;
 
@@ -94,21 +93,24 @@ public class WebsphereCollector extends Collector {
         init(mServer);
     }
 
-    protected void init(AdminClient mServer) throws PluginException {
-        this.jvm =
-            newObjectNamePattern("name=JVM," +
-                                 "type=JVM," +
-                                 "j2eeType=JVM," +
-                                  getServerAttributes());
+    protected void init(AdminClient mServer)
+        throws PluginException {
 
-        this.jvm = resolve(mServer, this.jvm);
+    }
 
-        this.perf =
-            newObjectNamePattern("name=PerfMBean," +
-                                 "type=Perf," +
-                                 getProcessAttributes());
+    protected ObjectName getPerfObjectName(AdminClient mServer)
+        throws PluginException {
+
+        if (this.perf == null) {
+            this.perf =
+                newObjectNamePattern("name=PerfMBean," +
+                                     "type=Perf," +
+                                     getProcessAttributes());
         
-        this.perf = resolve(mServer, this.perf);
+            this.perf = resolve(mServer, this.perf);
+        }
+
+        return this.perf;
     }
 
     protected WSStats getStatsObject(AdminClient mServer, ObjectName name) {
@@ -119,7 +121,7 @@ public class WebsphereCollector extends Collector {
         };
 
         try {
-            return (WSStats)mServer.invoke(this.perf,
+            return (WSStats)mServer.invoke(getPerfObjectName(mServer),
                                            "getStatsObject", params, sig);
         } catch (Exception e) {
             log.error("getStatsObject(" + name + "): " + e.getMessage(), e);
@@ -237,28 +239,6 @@ public class WebsphereCollector extends Collector {
                 Character.toLowerCase(names[i].charAt(0)) +
                 names[i].substring(1);
             values.put(name, new Double(val));
-        }
-    }
-
-    public void collect() {
-        AdminClient mServer = getMBeanServer();
-        if (mServer == null) {
-            return;
-        }
-
-        setAvailability(true);
-
-        Map values = getResult().getValues();
-
-        Stats jvmStats =
-            (Stats)getStats(mServer, this.jvm);
-
-        if (jvmStats != null) {
-            double total = getStatCount(jvmStats, "HeapSize");
-            double used  = getStatCount(jvmStats, "UsedMemory");
-            values.put("totalMemory", new Double(total));
-            values.put("usedMemory", new Double(total));
-            values.put("freeMemory", new Double(total-used));
         }
     }
 }

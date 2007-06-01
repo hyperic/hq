@@ -1014,7 +1014,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             class="WebsphereMeasurementPlugin"/>
 
     <plugin type="collector"
-            class="WebsphereCollector"/>
+            class="WebsphereServerCollector"/>
 
     <plugin type="control"
             class="WebsphereControlPlugin"/>
