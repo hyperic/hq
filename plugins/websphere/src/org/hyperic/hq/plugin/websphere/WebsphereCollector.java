@@ -182,14 +182,22 @@ public abstract class WebsphereCollector extends Collector {
             throw new PluginException(msg, e);
         }
     }
-    
-    protected Stats getStats(AdminClient mServer, ObjectName name) {
+
+    protected Object getAttribute(AdminClient mServer,
+                                  ObjectName name,
+                                  String attr) {
+
         try {
-            return (Stats)mServer.getAttribute(name, "stats");
+            return mServer.getAttribute(name, attr);
         } catch (Exception e) {
-            log.error("getStats(" + name + "): " + e.getMessage(), e);
+            log.error("getAttribute(" + name + ", " + attr +
+                      "): " + e.getMessage(), e);
             return null;
         }
+    }
+
+    protected Stats getStats(AdminClient mServer, ObjectName name) {
+        return (Stats)getAttribute(mServer, name, "stats");
     }
 
     protected double getStatCount(Statistic stat) {
