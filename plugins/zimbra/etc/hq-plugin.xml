@@ -23,27 +23,30 @@
   USA.
  -->
 
-<plugin>
-
-  <!-- extends NetServicesCollector -->
-  <classpath>
-    <include name="pdk/plugins/netservices-plugin.jar"/>
-  </classpath>
+<plugin package="org.hyperic.hq.plugin.zimbra">
 
   <server name="Zimbra"
           version="4.5.x">
 
+    <plugin type="autoinventory"
+            class="ZimbraServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
     <plugin type="collector"
-            class="org.hyperic.hq.plugin.zimbra.ZimbraStats"/>
+            class="org.hyperic.hq.plugin.zimbra.ZimbraCollector"/>
 
     <filter name="template"
-            value="zimbra:Type=Server:${alias}"/>
+            value="zimbra-stats:Type=Server:${alias}"/>
+
+    <config>
+      <option name="ptql"
+              default="State.Name.re=zmtomcatmgr$"
+              description="Sigar PTQL Process Query"/>
+    </config>
 
     <metric name="Availability"
-            category="AVAILABILITY"
-            units="percentage"
-            indicator="true"
-            collectionType="dynamic"/>
+            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            indicator="true"/>
     <metric name="Number of LMTP Msgs Received"
             category="THROUGHPUT"
             alias="lmtp_rcvd_msgs"
