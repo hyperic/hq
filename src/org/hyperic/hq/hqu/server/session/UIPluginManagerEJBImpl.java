@@ -26,6 +26,7 @@
 package org.hyperic.hq.hqu.server.session;
 
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginView;
@@ -76,10 +77,13 @@ public class UIPluginManagerEJBImpl
     public UIPlugin createOrUpdate(UIPluginDescriptor pInfo) {
         UIPlugin p = findPluginByName(pInfo.getName());
         
-        if (p == null)
+        if (p == null) {
+            _log.info("Creating plugin [" + pInfo.getName() + "]");
             p = _pluginDAO.create(pInfo);
-        else
+        } else {
+            _log.info("Updating plugin [" + pInfo.getName() + "]");
             updatePlugin(p, pInfo);
+        }
         return p;
     }
 
@@ -109,9 +113,28 @@ public class UIPluginManagerEJBImpl
      * @ejb:interface-method
      */
     public void deletePlugin(UIPlugin p) {
+        _log.info("Deleting plugin " + p);
         _pluginDAO.remove(p);
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public void attachView(UIPluginView view, UIPluginAttachmentDescriptor d) {
+        AttachType viewType = view.getAttachType();
+        
+        if (!view.isAttachable()) {
+            throw new IllegalArgumentException("View [" + view + "] is not " +
+                                               "attachable");
+        }
+        if (!viewType.equals(d.getAttachType())) {
+            throw new IllegalArgumentException("Attachment descriptor is " + 
+                                               "incompatable with view");
+        }
+        
+        viewType.attach(view, d);
+    }
+    
     /**
      * @ejb:interface-method
      */

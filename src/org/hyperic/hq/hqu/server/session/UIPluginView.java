@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginViewDescriptor;
 
 public abstract class UIPluginView
@@ -58,6 +59,12 @@ public abstract class UIPluginView
      * (such as admin or masthead areas)
      */
     public abstract boolean isAttachable();
+    
+    /**
+     * Return a prototype attachment descriptor that can be filled out when
+     * performing an attachment.
+     */
+    public abstract UIPluginAttachmentDescriptor getPrototype();
     
     public UIPlugin getPlugin() {
         return _plugin;
@@ -93,6 +100,10 @@ public abstract class UIPluginView
     
     public AttachType getAttachType() {
         return _attachType;
+    }
+    
+    void addAttachment(UIPluginViewAttachment a) {
+        getAttachmentsBag().add(a);
     }
     
     protected Collection getAttachmentsBag() {

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginViewDescriptor;
 import org.hyperic.util.HypericEnum;
 
@@ -37,10 +38,23 @@ public abstract class AttachType
         {
             return new UIPluginViewAdmin(plugin, viewInfo);
         }
+
+        UIPluginViewAttachment attach(UIPluginView view, 
+                                      UIPluginAttachmentDescriptor d) 
+        {
+            assert view.getAttachments().isEmpty();
+            UIPluginViewAttachment a = new UIPluginViewAttachment(view);
+            
+            view.addAttachment(a);
+            return a;
+        }
     };
 
     abstract UIPluginView createView(UIPlugin plugin, 
                                      UIPluginViewDescriptor viewInfo);
+    
+    abstract UIPluginViewAttachment attach(UIPluginView view, 
+                                           UIPluginAttachmentDescriptor d);
     
     public static AttachType findByDescription(String desc) {
         if (desc.equals("admin")) 

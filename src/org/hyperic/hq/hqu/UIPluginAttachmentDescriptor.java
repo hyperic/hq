@@ -23,25 +23,10 @@
  * USA.
  */
 
-package org.hyperic.hq.hqu.server.session;
+package org.hyperic.hq.hqu;
 
-import org.hyperic.hq.hqu.UIPluginAttachmentDescriptor;
-import org.hyperic.hq.hqu.UIPluginViewDescriptor;
+import org.hyperic.hq.hqu.server.session.AttachType;
 
-public class UIPluginViewAdmin
-    extends UIPluginView
-{ 
-    protected UIPluginViewAdmin() {}
-    
-    UIPluginViewAdmin(UIPlugin plugin, UIPluginViewDescriptor view) {
-        super(plugin, view, AttachType.ADMIN);
-    }
-
-    public boolean isAttachable() {
-        return getAttachments().isEmpty();
-    }
-
-    public UIPluginAttachmentDescriptor getPrototype() {
-        return new UIPluginAttachmentDescriptorAdmin();
-    }
+public abstract class UIPluginAttachmentDescriptor {
+    public abstract AttachType getAttachType(); 
 }
