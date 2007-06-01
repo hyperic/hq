@@ -188,7 +188,11 @@ public abstract class WebsphereCollector extends Collector {
                                   String attr) {
 
         try {
-            return mServer.getAttribute(name, attr);
+            Object o = mServer.getAttribute(name, attr);
+            if (o == null) {
+                log.debug("getAttribute(" + name + ", " + attr + ")==null");
+            }
+            return o;
         } catch (Exception e) {
             log.error("getAttribute(" + name + ", " + attr +
                       "): " + e.getMessage(), e);
@@ -222,18 +226,19 @@ public abstract class WebsphereCollector extends Collector {
         return super.getValue(metric, result);
     }
 
-    protected void collectStats(ObjectName name) {
+    protected boolean collectStats(ObjectName name) {
         AdminClient mServer = getMBeanServer();
         if (mServer == null) {
-            return;
+            return false;
         }
-        collectStats(mServer, name);
+        return collectStats(mServer, name);
     }
 
-    protected void collectStats(AdminClient mServer, ObjectName oname) {
+    protected boolean collectStats(AdminClient mServer, ObjectName oname) {
         Stats stats = getStats(mServer, oname);
         if (stats == null) {
-            return;
+            setAvailability(false);
+            return false;
         }
         setAvailability(true);
 
@@ -248,5 +253,7 @@ public abstract class WebsphereCollector extends Collector {
                 names[i].substring(1);
             values.put(name, new Double(val));
         }
+
+        return true;
     }
 }
