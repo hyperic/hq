@@ -1,5 +1,5 @@
 <p>
-    Congratulations!  
+    ${l.Congrats}!  
 </p>
 <p>
      Plugin Name: <b><%= pluginInfo.name %></b><br/>

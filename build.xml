@@ -593,6 +593,8 @@
   		     token="@NEW_PLUGIN_PATH@" 
   		     value="${basedir}/ui_plugins/${plugin.name}"/>
 
+    <move file="${basedir}/ui_plugins/${plugin.name}/etc/scaffold_i18n.properties"
+          tofile="${basedir}/ui_plugins/${plugin.name}/etc/${plugin.name}_i18n.properties"/>
   	<echo>
  		Your plugin is in ${basedir}/ui_plugins/${plugin.name}
   		To deploy it to your server:  ant hqu-deploy
