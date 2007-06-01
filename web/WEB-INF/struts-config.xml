@@ -1743,7 +1743,7 @@
       <!-- DASHBOARD ACTIONS -->           
       <action path="/DashboardController"
               type="org.hyperic.hq.ui.action.portlet.DisplayDashboardAction">
-        <set-property property="title" value="1.0"/> 
+        <set-property property="title" value="Dashboard"/> 
       </action>
       
       <action path="/Dashboard"
@@ -1783,7 +1783,7 @@
               name="SavedQueriesForm"
               scope="request"
               input="/dashboard/Admin.do?mode=savedQueries">
-          <set-property property="title" value="1.3"/>
+          <set-property property="title" value="Dashboard.Charts"/>
           <forward name="success" path="/Dashboard.do" redirect="true"/>   
           <forward name="cancel" path="/Dashboard.do" redirect="true"/>
           <forward name="reset" path="/dashboard/Admin.do?mode=savedQueries"/>
@@ -1806,7 +1806,7 @@
               type="org.hyperic.hq.ui.action.portlet.autoDisc.PrepareAction"
               name="AutoDiscoveryForm"
               scope="request">
-        <set-property property="title" value="1.5"/>
+          <set-property property="title" value="Dashboard.AutoDiscovery"/>
       </action>      
       <action path="/dashboard/ModifyAutoDiscovery"
               type="org.hyperic.hq.ui.action.portlet.autoDisc.ModifyAction"
@@ -1826,7 +1826,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.portlet.resourcehealth.{1}Action"
               input="/dashboard/EditResourceHealth">               
-        <set-property property="title" value="1.1"/>
+        <set-property property="title" value="Dashboard.FavoriteResources"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>   
         <forward name="cancel" path="/Dashboard.do" redirect="true"/>
         <forward name="reset" path="/dashboard/Admin.do?mode=resourceHealth"/>
@@ -1846,7 +1846,7 @@
               name="RecentlyApprovedForm"
               scope="request"
               type="org.hyperic.hq.ui.action.portlet.recentlyApproved.PrepareAction">
-        <set-property property="title" value="1.7"/>
+        <set-property property="title" value="Dashboard.RecentlyAdded"/>
       </action>
       <action path="/dashboard/ModifyRecentlyApproved"
               type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ModifyAction"
@@ -1868,7 +1868,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.portlet.criticalalerts.{1}Action"
               input="/dashboard/EditCriticalAlerts">               
-        <set-property property="title" value="1.2"/>
+        <set-property property="title" value="Dashboard.Alerts"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>   
         <forward name="cancel" path="/Dashboard.do" redirect="true"/>
         <forward name="reset" path="/dashboard/Admin.do?mode=criticalAlerts"/>
@@ -1881,7 +1881,7 @@
               name="SummaryCountsForm"
               scope="request"
               input="/dashboard/Admin.do?mode=summaryCounts">
-        <set-property property="title" value="1.6"/>
+        <set-property property="title" value="Dashboard.Summary"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>   
         <forward name="cancel" path="/Dashboard.do" redirect="true"/>
         <forward name="reset" path="/dashboard/Admin.do?mode=summaryCounts"/>
@@ -1902,7 +1902,7 @@
               name="ControlActionsForm"
               scope="request"
               input="/dashboard/Admin.do?mode=controlActions">               
-        <set-property property="title" value="1.8"/>
+        <set-property property="title" value="Dashboard.Control"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>    
         <forward name="cancel" path="/Dashboard.do" redirect="true"/>
         <forward name="reset" path="/dashboard/Admin.do?mode=controlActions"/>
@@ -1925,6 +1925,7 @@
               name="MetricViewerForm"
               scope="request"
               input="/dashboard/EditMetricViewer">
+        <set-property property="title" value="Dashboard.Availability"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>
         <forward name="cancel" path="/Dashboard.do" redirect="true"/>
         <forward name="reset" path="/dashboard/Admin.do?mode=metricViewer"/>
