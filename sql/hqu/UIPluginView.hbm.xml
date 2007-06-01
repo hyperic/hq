@@ -38,8 +38,8 @@
     </many-to-one>
     
     <bag name="attachmentsBag" table="EAM_UI_PLUGIN_VIEW_ATTACH"
-         cascade="all-delete-orphan">
-      <key column="UI_VIEW_ID" />
+         cascade="all-delete-orphan" inverse="true">
+      <key column="VIEW_ID" />
       <one-to-many class="UIPluginViewAttachment" />
     </bag>
     
