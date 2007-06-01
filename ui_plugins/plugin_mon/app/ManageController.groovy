@@ -8,20 +8,27 @@ class ManageController
         setTemplate('standard')  // in views/templates/standard.gsp 
     }
     
+    private def getPMan() {
+        UIPluginManagerEJBImpl.one
+    }
+    
     def index = { params ->
-    	def plugins = UIPluginManagerEJBImpl.one.findAll()
-    	render(locals:[plugins : plugins])
+    	render(locals:[plugins : pMan.findAll()])
+    }
+    
+    def deletePlugin = { params ->
+	    def plugin = pMan.findPluginById(new Integer(params.getOne('id')))
+	    pMan.deletePlugin(plugin)
+    	redirectTo(action : 'index')
     }
     
     def showPlugin = { params ->
-        def pluginId = new Integer(params.getOne('id'))
-        def plugin = UIPluginManagerEJBImpl.one.findPluginById(pluginId)
+        def plugin = pMan.findPluginById(new Integer(params.getOne('id')))
         render(locals:[plugin : plugin])
     }
     
     def attach = { params ->
-		def viewId = new Integer(params.getOne('id'))
-		def view   = UIPluginManagerEJBImpl.one.findViewById(viewId)
+		def view   = pMan.findViewById(new Integer(params.getOne('id')))
 		redirectTo(action : 'showPlugin', id : view.plugin)
     }
 }

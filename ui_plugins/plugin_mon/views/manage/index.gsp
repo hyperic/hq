@@ -2,9 +2,9 @@
 <table>
 <thead>
   <tr>
-    <th>Name</th>
-    <th>Version</th>
-    <th>Description</th>
+    <th>${l.Name}</th>
+    <th>${l.Version}</th>
+    <th>${l.Description}</th>
   </tr>
 </thead>
 <tbody>
@@ -12,7 +12,8 @@
   <tr>
     <td><%= link_to p.name, [action:'showPlugin', id:p] %></td>    
     <td><%= h p.pluginVersion %></td>    
-    <td><%= h p.description %></td>    
+    <td><%= h p.description %></td>
+    <td><%= button_to 'Delete', [action:'deletePlugin', id:p] %></td>
   </tr>
 <% } %>
 </tbody>

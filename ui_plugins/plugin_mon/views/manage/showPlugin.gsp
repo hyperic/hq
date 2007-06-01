@@ -5,13 +5,13 @@
 <br/>
 <br/>
 <br/>
-Views
+${l.Views}
 <table>
 <thead>
   <tr>
-    <th>Path</th>
-    <th>Attachable to</th>
-    <th>Can attach?</th>
+    <th>${l.Path}</th>
+    <th>${l.AttachableTo}</th>
+    <th>${l.CanAttach}</th>
   </tr>
 </thead>
 <tbody>
