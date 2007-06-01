@@ -23,8 +23,7 @@ class DefaultControllerDispatcher {
         def req  = invokeArgs.request
         def path = req.requestURI.split('/')[-3..-1]
 
-        log.info "Path is ${path}"
-        if (path.size() )
+        log.info "Request: ${path}"
         if (path.size() < 3)
             return false
         
