@@ -47,6 +47,12 @@ public class ThreadPoolCollector extends WebsphereCollector {
     }
 
     public void collect() {
-        collectStats(this.name);
+        if (!collectStats(this.name)) {
+            //XXX certain threadpools have no stats, why?
+            Object o = getAttribute(getMBeanServer(), this.name, "name");
+            if (o != null) {
+                setAvailability(true);
+            }
+        }
     }
 }
