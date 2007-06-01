@@ -41,10 +41,27 @@ class HtmlUtil {
         "<a href='${urlFor(opts)}'>${escapeHtml(text)}</a>"
     }
         
+	/**
+	 * Display a simple button inside a form.  This is useful for creating
+	 * buttons which do destructive things (POSTs to delete objects, for
+	 * instance).  
+	 *
+	 * text:  Text within the button
+	 * opts:  Options for the link (see urlFor).  If the opts contains a
+	 *        key called 'confirm', clicking the button will also open a 
+	 *        confirmation dialog with the value of the confirm.
+	 */
 	static String buttonTo(text, opts) {
+	    def confirmOpt = ""
+	    
+	    if (opts.confirm) {
+	        def eMsg = escapeHtml(opts.confirm)
+			confirmOpt = "onclick=\"return confirm('${eMsg}')\""
+	    }
+	    
 		"<form method='post' action='${urlFor(opts)}'>" + 
 		"  <div>" + 
-		"    <input value='${escapeHtml(text)}' type='submit'/>" + 
+		"    <input ${confirmOpt} value='${escapeHtml(text)}' type='submit'/>" + 
 		"  </div>" +
 		"</form>"
 	}

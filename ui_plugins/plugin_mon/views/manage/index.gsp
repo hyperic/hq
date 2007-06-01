@@ -13,7 +13,8 @@
     <td><%= link_to p.name, [action:'showPlugin', id:p] %></td>    
     <td><%= h p.pluginVersion %></td>    
     <td><%= h p.description %></td>
-    <td><%= button_to 'Delete', [action:'deletePlugin', id:p] %></td>
+    <td><%= button_to 'Delete', [action:'deletePlugin', id:p,
+                                 confirm:'Are you sure?'] %></td>
   </tr>
 <% } %>
 </tbody>
