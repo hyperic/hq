@@ -37,11 +37,11 @@ class HtmlUtil {
      * text:  The text for the link, which will be HTML escaped
      * opts:  Options for the link (see urlFor)
      */
-    static def linkTo(text, opts) {
+    static String linkTo(text, opts) {
         "<a href='${urlFor(opts)}'>${escapeHtml(text)}</a>"
     }
         
-	static def buttonTo(text, opts) {
+	static String buttonTo(text, opts) {
 		"<form method='post' action='${urlFor(opts)}'>" + 
 		"  <div>" + 
 		"    <input value='${escapeHtml(text)}' type='submit'/>" + 
