@@ -1049,6 +1049,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </properties>
 
     <service name="Application">
+      <plugin type="collector"
+              class="ApplicationCollector"/>
+
       <plugin type="control"
               class="WebsphereAppControl"/>
 
@@ -1060,6 +1063,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </service>
 
     <service name="EJB">
+      <plugin type="collector"
+              class="EJBCollector"/>
+
       <config>
         <option name="app"
                 description="Application Name"
@@ -1072,6 +1078,9 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
     </service>
 
     <service name="Webapp">
+      <plugin type="collector"
+              class="WebappCollector"/>
+
       <plugin type="responsetime"
               class="WebsphereRtPlugin"/>
 
