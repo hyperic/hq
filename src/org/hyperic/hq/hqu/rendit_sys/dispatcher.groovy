@@ -1,8 +1,8 @@
 package org.hyperic.hq.hqu.rendit
 
-import org.hyperic.hq.ui.rendit.InvocationBindings
-import org.hyperic.hq.ui.rendit.PluginLoadException
-import org.hyperic.hq.ui.rendit.metaclass.MapCategory
+import org.hyperic.hq.hqu.rendit.InvocationBindings
+import org.hyperic.hq.hqu.rendit.PluginLoadException
+import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.UIPluginDescriptor
 
 import org.apache.commons.logging.Log

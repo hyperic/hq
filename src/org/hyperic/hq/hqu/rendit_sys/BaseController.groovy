@@ -2,9 +2,9 @@ package org.hyperic.hq.hqu.rendit
 
 import java.text.SimpleDateFormat
 import org.hyperic.hq.hqu.UIPluginDescriptor
-import org.hyperic.hq.ui.rendit.render.RenderFrame
-import org.hyperic.hq.ui.rendit.html.FormGenerator
-import org.hyperic.hq.ui.rendit.html.HtmlUtil
+import org.hyperic.hq.hqu.rendit.render.RenderFrame
+import org.hyperic.hq.hqu.rendit.html.FormGenerator
+import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory

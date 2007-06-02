@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.render
 
-import org.hyperic.hq.ui.rendit.html.FormGenerator
+import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import groovy.text.SimpleTemplateEngine

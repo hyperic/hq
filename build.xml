@@ -440,10 +440,6 @@
     <copy tofile="${ear.dir}/lib/jdomb8.jar"
           file="${thirdparty.lib}/jdom_b8.jar" />
 
-    <copy todir="${ear.dir}/rendit_sys">
-       <fileset dir="${rendit_sys.dir}"/>
-    </copy>
-
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
@@ -560,7 +556,8 @@
   
   <!-- HQU == UI Plugins -->
   <target name="hqu-deploy" depends="init">
-    <copy todir="${hqu.deployed.rendit_sys.dir}">
+    <mkdir dir="${hqu.deployed.rendit_sys.dir}/org/hyperic/hq/hqu/rendit"/>
+    <copy todir="${hqu.deployed.rendit_sys.dir}/org/hyperic/hq/hqu/rendit">
 	  <fileset dir="${rendit_sys.dir}"/>
 	</copy>
 	<mkdir dir="${hqu.deployed.dir}"/>
