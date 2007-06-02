@@ -18,7 +18,7 @@
 <tbody>
 <% for (v in plugin.views) { %>
   <tr>
-    <td><%= h v.path %></td>
+    <td><a href="/hqu/${plugin.name}${v.path}"><%= h v.path %></a></td>
     <td><%= h v.attachType.description %></td>
     <td><%= h v.attachable %></td>
     <% if (v.attachable) { %>
