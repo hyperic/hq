@@ -36,7 +36,7 @@
             class="org.hyperic.hq.plugin.zimbra.ZimbraCollector"/>
 
     <filter name="template"
-            value="zimbra-stats:Type=Server:${alias}"/>
+            value="zimbra-stats:installpath=%installpath%:${alias}"/>
 
     <config>
       <option name="ptql"
