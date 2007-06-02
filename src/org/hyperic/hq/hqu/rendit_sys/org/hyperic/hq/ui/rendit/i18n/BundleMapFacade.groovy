@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit.i18n
+package org.hyperic.hq.hqu.rendit.i18n
 
 /**
  * This class wraps a resource bundle and implements methods which make it

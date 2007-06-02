@@ -1,4 +1,4 @@
-import org.hyperic.hq.ui.rendit.BaseController
+import org.hyperic.hq.hqu.rendit.BaseController
 
 class SampleController 
 	extends BaseController

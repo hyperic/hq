@@ -73,7 +73,7 @@
   <property name="installer.dir" value="${build.dir}/installer"/>
 
   <property name="rendit_sys.dir" 
-	        value="${basedir}/ui_plugins/rendit_sys"/>
+	        value="${basedir}/src/org/hyperic/hq/hqu/rendit_sys"/>
   <property name="hqu.deployed.dir"
             value="${jboss.home}/server/default/deploy/hq.ear/hq.war/hqu"/>
   <property name="hqu.deployed.rendit_sys.dir"
@@ -566,7 +566,6 @@
 	<mkdir dir="${hqu.deployed.dir}"/>
 	<copy todir="${hqu.deployed.dir}">
 	  <fileset dir="${basedir}/ui_plugins">
-	    <exclude name="rendit_sys/**"/>
 	  	<exclude name="scaffold/**"/>
 	    <exclude name="old/**"/>
 	  </fileset>

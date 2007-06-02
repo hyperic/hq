@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit.html
+package org.hyperic.hq.hqu.rendit.html
 
 import org.apache.commons.lang.StringEscapeUtils
 

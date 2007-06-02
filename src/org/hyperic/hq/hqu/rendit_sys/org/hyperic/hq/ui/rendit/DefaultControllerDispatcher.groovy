@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit
+package org.hyperic.hq.hqu.rendit
 
 import org.hyperic.hq.ui.rendit.i18n.BundleMapFacade
 import org.apache.commons.logging.Log

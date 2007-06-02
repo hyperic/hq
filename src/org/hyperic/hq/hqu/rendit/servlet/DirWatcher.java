@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit.servlet;
+package org.hyperic.hq.hqu.rendit.servlet;
 
 import java.io.File;
 import java.util.ArrayList;

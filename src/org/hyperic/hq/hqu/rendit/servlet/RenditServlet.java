@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.ui.rendit.servlet;
+package org.hyperic.hq.hqu.rendit.servlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.ui.rendit.RenditServer;
-import org.hyperic.hq.ui.rendit.servlet.DirWatcher.DirWatcherCallback;
+import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.rendit.servlet.DirWatcher.DirWatcherCallback;
 import org.hyperic.util.StringUtil;
 import org.jboss.system.server.ServerConfigLocator;
 

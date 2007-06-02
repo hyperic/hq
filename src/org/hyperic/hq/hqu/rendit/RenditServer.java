@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.ui.rendit;
+package org.hyperic.hq.hqu.rendit;
 
 import groovy.lang.Binding;
 
@@ -119,7 +119,7 @@ public class RenditServer {
 
         try {
             pInfo = (UIPluginDescriptor) 
-                plugin.run("org/hyperic/hq/ui/rendit/dispatcher.groovy", b);
+                plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
         } catch(PluginLoadException e) {
             throw e;
         } catch(Exception e) {
@@ -161,7 +161,7 @@ public class RenditServer {
         b.setVariable("invokeArgs", 
                       InvocationBindings.newRequest(plugin.getPluginDir(), 
                                                     req, resp, ctx));
-        plugin.run("org/hyperic/hq/ui/rendit/dispatcher.groovy", b);
+        plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
     }
     
     public static final RenditServer getInstance() {

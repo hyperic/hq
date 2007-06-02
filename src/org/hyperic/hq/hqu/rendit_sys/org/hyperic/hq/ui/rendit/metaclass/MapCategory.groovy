@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit.metaclass
+package org.hyperic.hq.hqu.rendit.metaclass
 
 class MapCategory {
     /**

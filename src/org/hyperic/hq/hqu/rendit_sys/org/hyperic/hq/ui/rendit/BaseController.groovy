@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.rendit
+package org.hyperic.hq.hqu.rendit
 
 import java.text.SimpleDateFormat
 import org.hyperic.hq.hqu.UIPluginDescriptor
