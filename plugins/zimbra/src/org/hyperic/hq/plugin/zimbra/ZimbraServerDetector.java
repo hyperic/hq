@@ -75,7 +75,6 @@ public class ZimbraServerDetector
         }
         return services;
     }
-*/
 
     private Iterator getOptions()
     {
@@ -84,6 +83,7 @@ public class ZimbraServerDetector
         list.add(obj);
         return list.iterator();
     }
+*/
 
     private static List getServerProcessList()
     {
