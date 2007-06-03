@@ -244,7 +244,9 @@ public class SNMPDetector extends DaemonDetector {
                 //required to auto-enable metric
                 service.setMeasurementConfig();
                 service.setCustomProperties(cprops);
-                service.setDescription(resourceDescr);
+                if (resourceDescr != null) {
+                    service.setDescription(resourceDescr);
+                }
 
                 services.add(service);
             }
@@ -259,7 +261,9 @@ public class SNMPDetector extends DaemonDetector {
                 //required to auto-enable metric
                 server.setMeasurementConfig();
                 server.setCustomProperties(cprops);
-                server.setDescription(resourceDescr);
+                if (resourceDescr != null) {
+                    server.setDescription(resourceDescr);
+                }
 
                 services.add(server);
             }
