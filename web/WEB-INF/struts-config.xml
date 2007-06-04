@@ -895,13 +895,6 @@
               scope="request"
               forward="/resource/platform/monitor/Visibility.do?mode=resourceMetrics"/>
 
-      <action path="/resource/platform/monitor/visibility/PlatformServersMetricsFormPrepare"
-              name="MetricsDisplayForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.monitor.visibility.PlatformServersMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.2.3"/>
-      </action>
-
       <action path="/resource/platform/monitor/visibility/ListChildrenResources"
               type="org.hyperic.hq.ui.action.resource.platform.monitor.visibility.ListChildrenAction">
       </action>
