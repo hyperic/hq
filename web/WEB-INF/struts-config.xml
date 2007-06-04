@@ -371,7 +371,7 @@
       
       <action path="/Login" 
               forward="/common/Login.jsp">
-        <set-property property="title" value="1.0"/>  
+        <set-property property="title" value="Login"/>  
       </action>
 
       <!--======================================================= --> 
@@ -400,7 +400,7 @@
       <action path="/admin/home/AdminHomePortal"
               input="/Admin.do"
               type="org.hyperic.hq.ui.action.admin.home.AdminHomePortalAction">
-        <set-property property="title" value="4.1.0"/>
+        <set-property property="title" value="Admin"/>
       </action>
         
       <!--USER ADMINISTRATION -->
@@ -418,12 +418,12 @@
               name="RemoveUserForm"
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.ListAction">
-        <set-property property="title" value="4.1.1"/>
+        <set-property property="title" value="Admin.User.List"/>
       </action>
       
       <action path="/admin/user/View"
               type="org.hyperic.hq.ui.action.admin.user.ViewAction">
-        <set-property property="title" value="4.1.1.2"/>
+        <set-property property="title" value="Admin.User"/>
       </action>
 
       <action path="/admin/user/EditUserFormPrepare"
@@ -431,12 +431,12 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.EditUserFormPrepareAction">
         <set-property property="workflow" value="user/View"/>
-        <set-property property="title" value="4.1.1.1.1"/>
+        <set-property property="title" value="Admin.Edit"/>
       </action>
-      
+
       <action path="/admin/user/EditPasswordFormPrepare"
               type="org.hyperic.hq.ui.action.admin.user.EditPasswordPrepareAction">        
-              <set-property property="title" value="4.1.1.1.3"/>
+              <set-property property="title" value="Admin.User.Password"/>
       </action>
 
 
@@ -459,7 +459,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
         <set-property property="workflow" value="user/New"/>
-        <set-property property="title" value="4.1.1.1"/>
+        <set-property property="title" value="Admin.User.New"/>
       </action>
 
       <action path="/admin/user/Remove" 
@@ -513,7 +513,7 @@
               name="SystemConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction">
-        <set-property property="title" value="0.7"/>
+        <set-property property="title" value="Admin.HQServer"/>
       </action>
 
       <action path="/admin/config/EditDefaults"
@@ -556,7 +556,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.hub.{1}Action"
               input="/ResourceHub.do">
-        <set-property property="title" value="2.0"/>
+        <set-property property="title" value="Resources"/>
         <forward name="failure" path="/ResourceHub.do"/>
         <forward name="success" path="/ResourceHub.do"/>
         <forward name="newgroup" path="/resource/group/Inventory.do?mode=new" redirect="true"/>
@@ -568,7 +568,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.EditResourceGeneralPropertiesFormPrepareAction">
         <set-property property="workflow" value="resource/GeneralProperties"/>
-        <set-property property="title" value="2.2.6.1"/> 
+        <set-property property="title" value="Inventory.GeneralProperties"/> 
       </action>
 
       <action path="/resource/common/inventory/ChangeResourceOwnerFormPrepare"
@@ -576,14 +576,14 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerFormPrepareAction">
         <set-property property="workflow" value="resource/ChangeOwner"/>  
-        <set-property property="title" value="4.1.2.2.5"/>
+        <set-property property="title" value="Inventory.Owner"/>
       </action>
 
       <action path="/resource/common/inventory/AddResourceGroupsFormPrepare"
               name="AddResourceGroupsForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
-        <set-property property="title" value="2.2.6.4"/>
+        <set-property property="title" value="Group.AddResource"/>
       </action>
 
       <!-- resource common control -->
@@ -629,7 +629,7 @@
               name="NewPlatformForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformFormPrepareAction">
-        <set-property property="title" value="2.2.1"/>
+        <set-property property="title" value="Inventory.Platform.New"/>
       </action>
 
       <action path="/resource/platform/inventory/NewPlatform"
@@ -651,7 +651,7 @@
 
       <action path="/resource/platform/inventory/ViewPlatform"
               type="org.hyperic.hq.ui.action.resource.platform.inventory.ViewPlatformAction">
-        <set-property property="title" value="2.2.6"/>
+        <set-property property="title" value="Inventory.Platform"/>
       </action>
 
       <action path="/resource/platform/inventory/EditPlatformGeneralProperties"
@@ -672,7 +672,7 @@
               name="ChangeResourceOwnerForm"
               scope="request"
               input="/resource/platform/Inventory.do?mode=changeOwner">
-        <set-property property="title" value="2.2.6.5"/>
+        <set-property property="title" value="Inventory.Owner"/>
         <set-property property="workflow" value="resource/ChangeOwner"/>  
         <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
                  redirect="true"/>
@@ -688,7 +688,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkProperties{1}Action"
               input="/resource/platform/Inventory.do?mode=editType">
-        <set-property property="title" value="2.2.6.2"/> 
+        <set-property property="title" value="Inventory.Platform.Properties"/> 
         <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
                  redirect="true"/>
         <forward name="reset" path="/resource/platform/Inventory.do?mode=editType"
@@ -744,7 +744,7 @@
               type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscovery{1}Action"
               input="/resource/platform/AutoDiscovery.do?mode=new">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
-        <set-property property="title" value="2.2.7.1"/>
+        <set-property property="title" value="Inventory.AutoDiscovery"/>
         <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view" redirect="true"/>
         <forward name="scanMethodChange"   path="/resource/platform/AutoDiscovery.do?mode=new"/>
         <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=new"
@@ -837,7 +837,7 @@
               input="/resource/common/monitor/Visibility.do?mode=editRange"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRange{1}Action">
         <set-property property="workflow" value="visibility/MetricDisplayRange"/>
-        <set-property property="title" value="0.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
         <forward name="reset" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
         <forward name="success" path="/Resource.do"/>
       </action>
@@ -852,9 +852,10 @@
               name="CompareMetricsForm"
               scope="request">
         <set-property property="workflow" value="visibility/MetricDisplayRange"/>
-        <set-property property="title" value="0.3"/>
+        <set-property property="title" value="Monitor.Group.Compare"/>
       </action>
 
+      <!-- not sure this is actually used -->
       <action path="/resource/common/monitor/visibility/ViewMetricMetadata"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewMetricMetadataAction"
               name="MetricMetadataForm"
@@ -862,7 +863,8 @@
         <set-property property="title" value="2.2.5.2"/>
         <forward name="success" path="/resource/common/monitor/Visibility.do?mode=metricMetadata"/>
       </action>
-
+      <!-- // -->
+      
       <action path="/resource/common/monitor/visibility/CompareMetrics"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsAction"
               name="CompareMetricsForm"
@@ -885,7 +887,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
               input="/resource/platform/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/platform/monitor/visibility/FilterPlatformMetrics"
@@ -909,7 +911,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
       <action path="/resource/platform/monitor/config/ConfigMetrics"
@@ -930,7 +932,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
               input="/resource/server/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/server/monitor/visibility/ListChildrenResources"
@@ -956,7 +958,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
       <action path="/resource/server/monitor/config/ConfigMetrics"
@@ -978,7 +980,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
               input="/resource/application/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/application/monitor/visibility/ListChildrenResources"
@@ -997,7 +999,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
       </action>
  
       <action path="/resource/application/monitor/config/ConfigMetrics"
@@ -1024,7 +1026,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.server.inventory.NewServerFormPrepareAction">
         <set-property property="workflow" value="server/New"/>
-        <set-property property="title" value="2.3.1.0"/>
+        <set-property property="title" value="Inventory.Server.New"/>
       </action>
 
       <action path="/resource/server/inventory/NewServer"
@@ -1042,7 +1044,7 @@
 
       <action path="/resource/server/inventory/ViewServer"
               type="org.hyperic.hq.ui.action.resource.server.inventory.ViewServerAction">
-        <set-property property="title" value="2.3.6.0"/>
+        <set-property property="title" value="Resources"/>
       </action>
 
       <action path="/resource/*/inventory/RemoveServices" 
@@ -1057,7 +1059,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.server.inventory.ServerGeneralFormPrepareAction">
         <set-property property="workflow" value="server/EditGeneralProperties"/>
-        <set-property property="title" value="2.2.6.1"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/>
       </action>
           
       <action path="/resource/server/inventory/EditGeneralProperties"
@@ -1282,7 +1284,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
               input="/resource/service/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/ListVirtualResources"
@@ -1299,7 +1301,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
       <action path="/resource/service/monitor/config/ConfigMetrics"
@@ -1587,7 +1589,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
               input="/resource/group/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
         <forward name="success" path="/resource/group/monitor/Visibility.do?mode=currentHealth"/>
         <forward name="compare" path="/resource/common/monitor/Visibility.do?mode=compareMetrics"/>
         <forward name="chart" path="/resource/common/monitor/Visibility.do?mode=chartMultiMetricSingleResource" redirect="true"/>
@@ -1610,7 +1612,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
       <action path="/resource/group/monitor/config/ConfigMetrics"
@@ -1684,7 +1686,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupCurrentHealthAction"
               input="/resource/autogroup/monitor/Visibility.do?mode=currentHealth">
-        <set-property property="title" value="2.2.2"/>
+        <set-property property="title" value="Monitor.CurrentHealth"/>
         <forward name="success" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
         <forward name="compare" path="/resource/common/monitor/Visibility.do?mode=compareMetrics"/>
         <forward name="chart" path="/resource/common/monitor/Visibility.do?mode=chartMultiMetricSingleResource" redirect="true"/>
@@ -1708,7 +1710,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.AutoGroupConfigMetricsFormPrepareAction">
-        <set-property property="title" value="2.2.5"/>
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
       <action path="/resource/autogroup/monitor/config/ConfigMetrics"
@@ -1937,7 +1939,7 @@
               type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction"
               name="DashboardAddResourceHealthForm"
               scope="request">
-        <set-property property="title" value="1.1.1"/>
+        <set-property property="title" value="Dashboard.FavoriteResources.Add"/>
       </action>
 
       <action path="/dashboard/*/AddResourcesAction"
@@ -1975,7 +1977,7 @@
               name="RemoveConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
-        <set-property property="title" value="2.2.3"/>
+        <set-property property="title" value="Alert.ListDefinition"/>
       </action>
 
       <action path="/alerts/RemoveConfig" 
@@ -2040,7 +2042,7 @@
               name="FixAlertsForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ListAlertAction">
-        <set-property property="title" value="2.2.4.0"/>        
+        <set-property property="title" value="Alert.List"/>        
       </action>
 
       <action   path="/alerts/RemoveAlerts" 
@@ -2061,7 +2063,7 @@
               name="EditAlertDefinitionPropertiesForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesFormPrepareAction">
-        <set-property property="title" value="2.2.3.5"/>
+        <set-property property="title" value="Alert.Properties"/>
       </action>
 
       <action path="/alerts/EditSyslogActionFormPrepare"
@@ -2081,7 +2083,7 @@
               name="AddAlertUsersForm"
               scope="request"
               input="/alerts/Config.do?mode=addUsers">
-          <set-property property="title" value="2.2.3.2.1"/>
+          <set-property property="title" value="Alert.Notification"/>
           <forward name="cancel" path="/alerts/Config.do?mode=viewUsers"
                    redirect="true"/>
           <forward name="reset" path="/alerts/Config.do?mode=addUsers"
@@ -2096,7 +2098,7 @@
                 name="AddAlertOthersForm"
                 scope="request"
                 type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersFormPrepareAction">
-      <set-property property="title" value="2.2.3.2.1"/>
+      <set-property property="title" value="Alert.Notification"/>
     </action>
 
       <action path="/alerts/config/AddOthers"
@@ -2104,7 +2106,7 @@
               name="AddAlertOthersForm"
               scope="request"
               input="/alerts/Config.do?mode=addOthers">
-          <set-property property="title" value="2.2.3.2.1"/>
+          <set-property property="title" value="Alert.Notification"/>
           <forward name="cancel" path="/alerts/Config.do?mode=viewOthers"
                    redirect="true"/>
           <forward name="reset" path="/alerts/Config.do?mode=addOthers"
