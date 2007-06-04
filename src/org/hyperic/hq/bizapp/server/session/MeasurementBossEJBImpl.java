@@ -1251,12 +1251,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         String mtype = aeVal.getMonitorableType();
 
         IntHashMap dmvs = new IntHashMap();
-        PageList enabledMetrics =
-            getDerivedMeasurementManager().findMeasurements(
-                subject, id, true, cat, PageControl.PAGE_ALL);
+        List enabledMetrics = getDerivedMeasurementManager()
+            .findEnabledMeasurements(subject, id, cat);
         
         for (Iterator it = enabledMetrics.iterator(); it.hasNext(); ) {
-            DerivedMeasurementValue dmv = (DerivedMeasurementValue) it.next();
+            DerivedMeasurement dmv = (DerivedMeasurement) it.next();
             dmvs.put(dmv.getTemplate().getId().intValue(), dmv);
         }
 
@@ -1270,8 +1269,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 new MetricConfigSummary(mtv.getId().intValue(), mtv.getName(),
                                         cat);
             
-            DerivedMeasurementValue dmv =
-                (DerivedMeasurementValue) dmvs.get(mtv.getId().intValue());
+            DerivedMeasurement dmv =
+                (DerivedMeasurement) dmvs.get(mtv.getId().intValue());
             if (dmv != null) {
                 mcs.setInterval(dmv.getInterval());
             }

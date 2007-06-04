@@ -865,14 +865,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a list of derived measurement EJBs for a category
+     * Look up a list of enabled derived measurements for a category
      *
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public PageList findMeasurements(AuthzSubjectValue subject,
-                                     AppdefEntityID id, boolean enabled,
-                                     String cat, PageControl pc) {
+    public List findEnabledMeasurements(AuthzSubjectValue subject,
+                                        AppdefEntityID id, String cat) {
         List mcol;
             
         // See if category is valid
@@ -880,17 +879,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
             mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
                                                              id.getID(),
-                                                             enabled);
+                                                             true);
         } else {
             mcol = getDerivedMeasurementDAO().
                 findByInstanceForCategory(id.getType(), id.getID(),
-                                          enabled, cat);
+                                          true, cat);
         }
-
-        // Need to order the metrics, as the HQL does not allow us to order
-        mcol = sortMetrics(mcol, pc);
-    
-        return valuePager.seek(mcol, pc);
+        return mcol;
     }
 
     /**

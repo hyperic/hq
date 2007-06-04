@@ -53,14 +53,9 @@ public final class GraphBuilder {
         return buildGraph(new Graph(), mt);
     }
 
-    /**
-     * TODO: Convert to use MeasurementTemplate directly.
-     */
-    public static Graph buildGraph(MeasurementTemplateValue mtValue)
+    public static Graph buildGraph(MeasurementTemplate mt)
         throws InvalidGraphException
     {
-        TemplateManagerLocal tmLocal = TemplateManagerEJBImpl.getOne();
-        MeasurementTemplate mt = tmLocal.getTemplate(mtValue.getId());
         return buildGraph(new Graph(), mt);
     }
 

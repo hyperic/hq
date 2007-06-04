@@ -50,11 +50,12 @@ import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
+import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
@@ -84,7 +85,7 @@ public class AgentScheduleSynchronizer {
 
     private HashMap dmMap = new HashMap();
 
-    private void cacheDM(DerivedMeasurementValue dmVo) {
+    private void cacheDM(DerivedMeasurement dmVo) {
         Integer tid = dmVo.getTemplate().getId();
         if (!dmMap.containsKey(tid)) {
             dmMap.put(tid, new HashMap());
@@ -125,18 +126,17 @@ public class AgentScheduleSynchronizer {
         return rman;
     }
 
-    private DerivedMeasurementValue getDMByTemplateAndInstance(
+    private DerivedMeasurement getDMByTemplateAndInstance(
         Integer tid, Integer instanceId)
         throws MeasurementNotFoundException, CreateException,
                SubjectNotFoundException {
         HashMap tmplMap = (HashMap) this.dmMap.get(tid);
         if (tmplMap != null && tmplMap.containsKey(instanceId)) {
-            return (DerivedMeasurementValue) tmplMap.get(instanceId);
+            return (DerivedMeasurement) tmplMap.get(instanceId);
         }
 
         // Otherwise, we need to look it up
-        DerivedMeasurementValue dmVo =
-            getDMan().findMeasurement(getSubject(), tid, instanceId);
+        DerivedMeasurement dmVo = getDMan().findMeasurement(tid, instanceId);
         cacheDM(dmVo);
         
         return dmVo;
@@ -159,8 +159,8 @@ public class AgentScheduleSynchronizer {
 
         Iterator it = dmVos.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            DerivedMeasurementValue dmVo = (DerivedMeasurementValue) it.next();
-            MeasurementTemplateValue tmpl = dmVo.getTemplate();
+            DerivedMeasurement dmVo = (DerivedMeasurement) it.next();
+            MeasurementTemplate tmpl = dmVo.getTemplate();
             
             // Build the graph
             graphs[i] = GraphBuilder.buildGraph(tmpl);
@@ -215,7 +215,7 @@ public class AgentScheduleSynchronizer {
 
                     if (node instanceof DerivedNode) {
                         try {
-                            DerivedMeasurementValue tmpDm =
+                            DerivedMeasurement tmpDm =
                                 getDMByTemplateAndInstance(
                                     templArg.getId(), dmVo.getInstanceId());
                             long targetInterval = tmpDm.getInterval();
@@ -258,8 +258,7 @@ public class AgentScheduleSynchronizer {
                MeasurementUnscheduleException, SubjectNotFoundException 
     {
         log.debug("Reschedule metrics for " + eid);
-        List dms = getDMan().findMeasurements(getSubject(), eid, true, null,  
-                                              PageControl.PAGE_ALL);
+        List dms = getDMan().findEnabledMeasurements(getSubject(), eid, null);
                 
         if (dms.size() > 0)
             reschedule(eid, dms);
