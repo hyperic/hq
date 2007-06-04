@@ -125,14 +125,10 @@ public class WebsphereUtil {
         return getMBeanServer(metric.getProperties());
     }
 
-    //only use this for 1 metric at the moment, to
-    //verify the admin server has been given proper
-    //configuration.
     public static double getMBeanCount(Metric metric)
         throws MetricUnreachableException,
-        MetricNotFoundException {
+               MetricNotFoundException {
 
-        double count = 0;
         AdminClient mServer = getMBeanServer(metric);
         ObjectName query;
         
@@ -147,30 +143,46 @@ public class WebsphereUtil {
             throw new MetricUnreachableException(metric.getObjectName() +
                                                  ": " + e.getMessage(), e);
         }
+
+        return getMBeanCount(mServer, query, metric.getAttributeName());
+    }
+
+    //only use this for 1 metric at the moment, to
+    //verify the admin server has been given proper
+    //configuration.
+    public static double getMBeanCount(AdminClient mServer,
+                                       ObjectName query,
+                                       String attr)
+        throws MetricUnreachableException,
+               MetricNotFoundException {
+
+        double count = 0;
         
         try {
             Set beans = mServer.queryNames(query, null);
             for (Iterator it=beans.iterator(); it.hasNext();) {
                 ObjectName name = (ObjectName)it.next();
                 try {
-                    mServer.getAttribute(name, metric.getAttributeName());
+                    if (attr != null) {
+                        mServer.getAttribute(name, attr);
+                    }
                     count++;
                 } catch (AttributeNotFoundException e) {
-                    throw new MetricNotFoundException(metric.getObjectName());
+                    throw new MetricNotFoundException(name.toString());
                 } catch (InstanceNotFoundException e) {
-                    throw new MetricNotFoundException(metric.getObjectName());
+                    throw new MetricNotFoundException(name.toString());
                 } catch (Exception e) {
                     //e.g. unauthorized
-                    throw new MetricUnreachableException(metric.getObjectName() +
+                    throw new MetricUnreachableException(name +
                                                          ": " + e.getMessage(), e);
                 }
             }
         } catch (ConnectorException e) {
-            throw new MetricUnreachableException(metric.getObjectName(), e);
+            throw new MetricUnreachableException(query.toString(), e);
         }
 
         if (count == 0) {
-            throw new MetricNotFoundException(metric.getObjectName() +
+            throw new MetricNotFoundException(query +
                                               " (Invalid node name?)");
         }
 
