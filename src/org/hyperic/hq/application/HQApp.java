@@ -200,6 +200,11 @@ public class HQApp {
         }
         
         listeners.add(listener);
+        
+        // Unfortunately, it seems that the Tx synchronization will get called
+        // before Hibernate does its flush.  This wasn't the behaviour before,
+        // and looks like it will be fixed up again in 3.3.. :-(
+        Util.getSessionFactory().getCurrentSession().flush();
     }
 
     /**
