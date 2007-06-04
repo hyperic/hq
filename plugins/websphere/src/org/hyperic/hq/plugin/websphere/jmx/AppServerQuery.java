@@ -180,11 +180,15 @@ public class AppServerQuery extends WebSphereQuery {
                               new ObjectName(vms[0]),
                               VM_ATTRS);
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
 
-        return super.getAttributes(mServer, name);
+            //in the try block to catch SecurityException
+            return super.getAttributes(mServer, name);
+        } catch (Exception e) {
+            log.error("Error getting JVM attributes for '" +
+                      name + "': " +
+                      e.getMessage(), e);
+            return false;
+        }
     }
 
     public String[] getAttributeNames() {
