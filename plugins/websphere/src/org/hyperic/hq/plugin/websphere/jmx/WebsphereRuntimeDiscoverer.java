@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.plugin.websphere.jmx;
 
-import java.rmi.RemoteException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -37,8 +35,6 @@ import javax.management.ObjectName;
 
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.client.PerfLevelSpec;
-import com.ibm.websphere.pmi.client.PmiClient;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +47,6 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
-import org.hyperic.hq.plugin.websphere.WebspherePMI;
 import org.hyperic.hq.plugin.websphere.WebsphereUtil;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
 
@@ -124,6 +119,33 @@ public class WebsphereRuntimeDiscoverer {
         }
     }
 
+    private boolean hasValidCredentials(AdminClient mServer,
+                                        String domain,
+                                        String node,
+                                        String server) {
+        String name =
+            domain + ":" +
+            "process=" + server + "," +
+            "node=" + node + "," +
+            "type=Perf,name=PerfMBean,*";
+
+        //try something that'll fail if global security is enabled.
+        //don't want to report the servers/services until credentials
+        //have been given to this admin instance.
+        final String method = "getInstrumentationLevelString";
+        try {
+            Object level =
+                WebsphereUtil.invoke(mServer, name, method,
+                                     new Object[0], new String[0]);
+            log.debug(name + ": level=" + level);
+            return true;
+        } catch (Exception e) {
+            this.log.error("Unable to determine PMI level for '" +
+                           name + "': " + e.getMessage());
+            return false;
+        }
+    }
+
     public List discoverServers(ConfigResponse config)
         throws PluginException {
 
@@ -132,18 +154,6 @@ public class WebsphereRuntimeDiscoverer {
         String domain;
 
         this.log.debug("discover using: " + config);
-
-        PmiClient pmiclient = null;
-
-        try {
-            pmiclient =
-                WebspherePMI.getPmiClient(config.toProperties(),
-                                          WebsphereProductPlugin.
-                                          VERSION_WS5);
-        } catch (RemoteException e) {
-            this.log.warn("Unable to get PMI client", e);
-            return null;
-        }
 
         try {
             mServer = WebsphereUtil.getMBeanServer(config.toProperties());
@@ -181,21 +191,8 @@ public class WebsphereRuntimeDiscoverer {
             ArrayList services = new ArrayList();
             serverQuery = (AppServerQuery)servers.get(i);
             String srvName = serverQuery.getName();
-            PerfLevelSpec[] spec = null;
-            String name = node + "/" + srvName;
 
-            //try something that'll fail if global security is enabled.
-            //don't want to report the servers/services until credentials
-            //have been given to this admin instance.
-            try {
-                spec = pmiclient.getInstrumentationLevel(node, srvName);
-            } catch (Exception e) {
-                this.log.error(e.getMessage(), e);
-            }
-
-            if (spec == null) {
-                this.log.error("Unable to determine PMI level for: " +
-                               name + " (PMI not enabled or invalid credentials?)");
+            if (!hasValidCredentials(mServer, domain, node, srvName)) {
                 continue;
             }
 
