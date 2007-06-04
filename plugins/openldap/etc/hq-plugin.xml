@@ -1,0 +1,233 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.zimbra">
+
+  <server name="OpenLDAP"
+          version="2.3.x">
+
+    <plugin type="autoinventory"
+            class="OpenLDAPServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.zimbra.OpenLDAPCollector"/>
+
+    <filter name="template"
+            value="openldap-stats:installpath=%installpath%:${alias}"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Extended Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Extended,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Extended Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Extended,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Abandon Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Abandon,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Abandon Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Abandon,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Search Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Search,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Search Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Search,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Compare Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Compare,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Compare Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Compare,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Modify Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Modify,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Modify Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Modify,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Modrdn Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Modrdn,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Modrdn Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Modrdn,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Delete Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Delete,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Delete Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Delete,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Add Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Add,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Add Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Add,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Bind Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=Bind,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Bind Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=Bind,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="UnBind Operation Initiated"
+            category="THROUGHPUT"
+            alias="cn=UnBind,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="UnBind Operation Completed"
+            category="THROUGHPUT"
+            alias="cn=UnBind,cn=Operations,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Number of Bytes Sent"
+            category="THROUGHPUT"
+            alias="cn=Bytes,cn=Statistics,cn=Monitor"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Number of PDU Sent"
+            category="THROUGHPUT"
+            alias="cn=PDU,cn=Statistics,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Number of Referrals Sent"
+            category="THROUGHPUT"
+            alias="cn=Referrals,cn=Statistics,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Number of Entries Sent"
+            category="THROUGHPUT"
+            alias="cn=Entries,cn=Statistics,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Max number of threads enabled at startup and the current backload"
+            category="THROUGHPUT"
+            alias="cn=Max,cn=Threads,cn=Monitor"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Contains the number of current write waiters"
+            category="THROUGHPUT"
+            alias="cn=Write,cn=Waiters,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Contains the number of current read waiters"
+            category="THROUGHPUT"
+            alias="cn=Read,cn=Waiters,cn=Monitor"
+            indicator="false"
+            collectionType="dynamic"
+            units="none"/>
+  </server>
+</plugin>
