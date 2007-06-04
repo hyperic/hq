@@ -289,6 +289,22 @@ public class WebsphereUtil {
                                 Object[] args, String[] sig)
         throws PluginException {
 
+        AdminClient mServer;
+        try {
+            mServer = getMBeanServer(props);
+        } catch (MetricUnreachableException e) {
+            throw new PluginException(e.getMessage(), e);
+        }
+
+        return invoke(mServer, objectName, method, args, sig);
+    }
+
+    public static Object invoke(AdminClient mServer,
+                                String objectName,
+                                String method,
+                                Object[] args, String[] sig)
+        throws PluginException {
+
         ObjectName obj;
         try {
             obj = new ObjectName(objectName);
@@ -297,7 +313,6 @@ public class WebsphereUtil {
         }
 
         try {
-            AdminClient mServer = getMBeanServer(props);
             if (obj.isPattern()) {
                 Set beans =
                     mServer.queryNames(obj, null);
@@ -313,8 +328,7 @@ public class WebsphereUtil {
                 }
             }
             return mServer.invoke(obj, method, args, sig);
-        } catch (MetricUnreachableException e) {
-            throw new PluginException(e.getMessage(), e);
+
         } catch (InstanceNotFoundException e) {
             throw new PluginException(e.getMessage(), e);
         } catch (MBeanException e) {
