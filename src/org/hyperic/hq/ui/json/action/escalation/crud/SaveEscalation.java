@@ -79,6 +79,6 @@ public class SaveEscalation
         
         JSONObject result = Escalation.getJSON((e));
         context.setJSONResult(new JSONResult(result));
-        context.getRequest().setAttribute("escalation", result);
+        context.getRequest().setAttribute(Escalation.JSON_NAME, result);
     }
 }

@@ -35,6 +35,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.json.JSONResult;
@@ -69,7 +70,7 @@ public class ListActiveEscalations extends BaseAction {
                                    defInfo.getAppdefId());
             AppdefEntityValue ent = new AppdefEntityValue(entId, meVal);
                 
-            sj.put("escalation", s.getEscalation().toJSON());
+            sj.put(Escalation.JSON_NAME, s.getEscalation().toJSON());
             sj.put("alertId", alert.getId());
             sj.put("alertType", s.getAlertType().getCode());
             sj.put("alertName", defInfo.getName()); 
