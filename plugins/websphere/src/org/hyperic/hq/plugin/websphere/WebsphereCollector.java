@@ -26,7 +26,6 @@
 package org.hyperic.hq.plugin.websphere;
 
 import java.util.Map;
-import java.util.Set;
 
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.CollectorResult;
@@ -156,31 +155,7 @@ public abstract class WebsphereCollector extends Collector {
     protected ObjectName resolve(AdminClient mServer, ObjectName name)
         throws PluginException {
 
-        if (!name.isPattern()) {
-            return name;
-        }
-        try {
-            Set beans = mServer.queryNames(name, null);
-            if (beans.size() != 1) {
-                String msg =
-                    name + " query returned " +
-                    beans.size() + " results";
-                throw new PluginException(msg);
-            }
-
-            ObjectName fullName =
-                (ObjectName)beans.iterator().next();
-
-            if (log.isDebugEnabled()) {
-                log.debug(name + " resolved to: " + fullName);
-            }
-            
-            return fullName;
-        } catch (Exception e) {
-            String msg =
-                "resolve(" + name + "): " + e.getMessage();
-            throw new PluginException(msg, e);
-        }
+        return WebsphereUtil.resolve(mServer, name);
     }
 
     protected Object getAttribute(AdminClient mServer,

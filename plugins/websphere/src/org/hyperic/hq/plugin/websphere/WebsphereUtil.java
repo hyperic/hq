@@ -189,6 +189,36 @@ public class WebsphereUtil {
         return count;
     }
 
+    public static ObjectName resolve(AdminClient mServer, ObjectName name)
+        throws PluginException {
+
+        if (!name.isPattern()) {
+            return name;
+        }
+        try {
+            Set beans = mServer.queryNames(name, null);
+            if (beans.size() != 1) {
+                String msg =
+                    name + " query returned " +
+                    beans.size() + " results";
+                throw new PluginException(msg);
+            }
+
+            ObjectName fullName =
+                (ObjectName)beans.iterator().next();
+
+            if (log.isDebugEnabled()) {
+                log.debug(name + " resolved to: " + fullName);
+            }
+            
+            return fullName;
+        } catch (Exception e) {
+            String msg =
+                "resolve(" + name + "): " + e.getMessage();
+            throw new PluginException(msg, e);
+        }
+    }
+
     public static boolean isRunning(Metric metric) {
         //for the moment avail == 1 MBean is registered.
         AdminClient mServer;
