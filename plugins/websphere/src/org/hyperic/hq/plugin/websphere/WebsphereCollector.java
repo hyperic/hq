@@ -53,8 +53,13 @@ public abstract class WebsphereCollector extends Collector {
     private static final Log log =
         LogFactory.getLog(WebsphereCollector.class.getName());
 
+    protected ObjectName name;
     private ObjectName perf;
     private String domain;
+
+    protected ObjectName getObjectName() {
+        return this.name;
+    }
 
     protected ObjectName newObjectNamePattern(String attrs)
         throws PluginException {

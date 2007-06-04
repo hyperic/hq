@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.ObjectName;
 import javax.management.j2ee.statistics.JDBCConnectionPoolStats;
 import javax.management.j2ee.statistics.JDBCStats;
 
@@ -34,8 +33,6 @@ import org.hyperic.hq.product.PluginException;
 import com.ibm.websphere.management.AdminClient;
 
 public class ConnectionPoolCollector extends WebsphereCollector {
-
-    private ObjectName name;
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);

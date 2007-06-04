@@ -1,13 +1,10 @@
 package org.hyperic.hq.plugin.websphere;
 
-import javax.management.ObjectName;
-
 import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 
 public class WebappCollector extends WebsphereCollector {
-    private ObjectName name;
 
     protected void init(AdminClient mServer) throws PluginException {
         super.init(mServer);
