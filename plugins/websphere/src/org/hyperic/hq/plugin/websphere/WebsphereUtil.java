@@ -314,21 +314,9 @@ public class WebsphereUtil {
 
         try {
             if (obj.isPattern()) {
-                Set beans =
-                    mServer.queryNames(obj, null);
-                if (beans.size() == 1) {
-                    ObjectName fullName =
-                        (ObjectName)beans.iterator().next();
-                    log.debug(obj + " resolved to: " + fullName);
-                    obj = fullName;
-                }
-                else {
-                    throw new PluginException(obj + ": returned " +
-                                              beans.size() + " beans");
-                }
+                obj = resolve(mServer, obj);
             }
             return mServer.invoke(obj, method, args, sig);
-
         } catch (InstanceNotFoundException e) {
             throw new PluginException(e.getMessage(), e);
         } catch (MBeanException e) {
