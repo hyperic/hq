@@ -92,9 +92,11 @@ public abstract class WebsphereCollector extends Collector {
             throw new PluginException(e.getMessage(), e);
         }
 
-        setSource(getNodeName() + "/" + getServerName());
         //resource specific stuff
         init(mServer);
+        if (this.name != null) {
+            setSource(this.name.toString());
+        }
     }
 
     protected void init(AdminClient mServer)
