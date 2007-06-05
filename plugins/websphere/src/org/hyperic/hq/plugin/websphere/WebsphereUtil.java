@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.websphere;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
@@ -219,6 +220,8 @@ public class WebsphereUtil {
         }
     }
 
+    private static HashMap beans = new HashMap();
+
     public static boolean isRunning(Metric metric) {
         //for the moment avail == 1 MBean is registered.
         AdminClient mServer;
@@ -235,41 +238,34 @@ public class WebsphereUtil {
             return false;
         }
 
-        ObjectName scope;
+        String query =
+            domain + ":" +
+            metric.getObjectPropString() + ",*";
 
-        try {
-            scope = new ObjectName(domain + ":" +
-                                   metric.getObjectPropString() + ",*");
-        } catch (MalformedObjectNameException e) {
-            throw new MetricInvalidException(metric.getObjectName());
-        }
-
-        Set beans;
-
-        try {
-            beans = mServer.queryNames(scope, null);
-        } catch (ConnectorException e) {
-            log.debug(scope + ": " + e, e);
-            return false;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(scope + ": returned " + beans.size() + " beans");
-        }
-
-        switch (beans.size()) {
-          case 1:
+        ObjectName name = (ObjectName)beans.get(query);
+        if (name == null) {
+            try {
+                name = new ObjectName(query);
+            } catch (MalformedObjectNameException e) {
+                throw new MetricInvalidException(metric.getObjectName());
+            }
+            try {
+                name = resolve(mServer, name);
+            } catch (PluginException e) {
+                return false;
+            }
+            log.debug("isRunningCache " + query + "-->" + name);
+            beans.put(query, name);
             return true;
-          case 0:
-            return false;
-          default:
-            break;
         }
 
-        String msg = metric.getObjectPropString() +
-            " matched " + beans.size() + " MBeans";
-
-        throw new MetricInvalidException(msg);
+        try {
+            mServer.getMBeanInfo(name);
+            return true;
+        } catch (Exception e) {
+            beans.remove(query);
+            return false;
+        }
     }
 
     /**
