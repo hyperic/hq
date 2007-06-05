@@ -211,17 +211,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                     MeasurementArgValue[] args)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-
-        TemplateManagerLocal tMan = getTemplateManager();
             
-        try {
-            MeasurementTemplateValue mtv = 
-                tMan.createTemplate(subject, name, alias, type, category,
-                                    template, units, collectionType, args);
-            return mtv.getId();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        MeasurementTemplate mtv = getTemplateManager()
+            .createTemplate(subject, name, alias, type, category, template,
+                            units, collectionType, args);
+        return mtv.getId();
     }
 
     /**
@@ -256,16 +250,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                RemoveException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         getTemplateManager().removeTemplate(subject, arg);
-    }
-
-    /** List of all monitorable types
-     * @return a List of MonitorableTypeValue objects
-     * @ejb:interface-method
-     */
-    public List findMonitorableTypes(int sessionId)
-        throws SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return getTemplateManager().findMonitorableTypes();
     }
 
     /**
@@ -546,36 +530,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throw new MeasurementNotFoundException(
             "Autogroup for : " + aids + " of type : " + ctype +
             " does not contain designated measurements");
-    }
-
-    /**
-     * Create the default measurements for a resource
-     * @param id the resource ID
-     * @ejb:interface-method
-     */
-    public void createDefaultMeasurements(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException, SessionNotFoundException,
-               ConfigFetchException, EncodingException, PermissionException,
-               TemplateNotFoundException, AppdefEntityNotFoundException,
-               GroupNotCompatibleException, MeasurementCreateException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-    
-        AppdefEntityValue av = new AppdefEntityValue(id, subject);
-        String mtype = av.getMonitorableType();
-        
-        // Find the default templates
-        List templates =
-            getTemplateManager().findDefaultTemplates(mtype, id.getType());
-        
-        // Get the Template IDs
-        Integer[] tids = new Integer[templates.size()];
-        Iterator it = templates.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-        	MeasurementTemplateValue tmpl = (MeasurementTemplateValue) it.next();
-            tids[i] = tmpl.getId();
-        }
-        
-        createMeasurements(sessionId, id, tids, 0);
     }
 
     /**

@@ -66,8 +66,6 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
@@ -104,16 +102,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return a MeasurementTemplate ID
      * @ejb:interface-method
      */
-    public MeasurementTemplateValue createTemplate(AuthzSubjectValue subject,
-                                                   String name, String alias,
-                                                   String type,
-                                                   String catName,
-                                                   String template,
-                                                   String units,
-                                                   int collectionType,
-                                                   MeasurementArgValue[] args)
-        throws CreateException {
-
+    public MeasurementTemplate createTemplate(AuthzSubjectValue subject,
+                                              String name, String alias,
+                                              String type,
+                                              String catName,
+                                              String template,
+                                              String units,
+                                              int collectionType,
+                                              MeasurementArgValue[] args) {
         MonitorableType t = getMonitorableTypeDAO().findByName(type);
         Category cat = null;
         if (catName != null) { 
@@ -136,15 +132,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         
-        MeasurementTemplateLiteValue lite =
-            new MeasurementTemplateLiteValue(null, name, alias, units, 
+        return
+            getMeasurementTemplateDAO().create(name, alias, units, 
                                              collectionType, false, 
                                              MeasurementConstants.
                                              INTERVAL_DEFAULT_MILLIS,
-                                             false, template, null, null);
-        MeasurementTemplate mt =
-            getMeasurementTemplateDAO().create(lite, t, cat, lis);
-        return mt.getMeasurementTemplateValue();
+                                             false, template, t, cat, lis);
     }
 
     /**
@@ -323,67 +316,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             ids[i] = tmpl.getId();
         }
         return ids;
-    }
-
-    /**
-     * Look up default measurement templates for a monitorable
-     * and agent type.
-     *
-     * @return a MeasurementTemplate value
-     * @ejb:interface-method
-     */
-    public List findDefaultTemplates(String mtype, int atype) {
-        List mts = getMeasurementTemplateDAO().
-            findDefaultsByMonitorableType(mtype, atype);
-        if (mts == null) {
-            return new ArrayList();
-        }
-        
-        ArrayList mtList = new ArrayList();
-        for (Iterator i = mts.iterator(); i.hasNext();) {
-            MeasurementTemplate mt =
-                (MeasurementTemplate)i.next();
-            mtList.add(mt.getMeasurementTemplateValue());
-        }
-        return mtList;
-    }
-
-    /**
-     * Look up designated measurement templates for a monitorable
-     * and agent type.
-     *
-     * @return a MeasurementTemplate value
-     * @ejb:interface-method
-     */
-    public List findDesignatedTemplates(String mtype, int atype) {
-        List mts = getMeasurementTemplateDAO().
-            findDesignatedByMonitorableType(mtype, atype);
-        if (mts == null) {
-            return new ArrayList();
-        }
-        
-        ArrayList mtList = new ArrayList();
-        for (Iterator i = mts.iterator(); i.hasNext();) {
-            MeasurementTemplate mt =
-                (MeasurementTemplate)i.next();
-            mtList.add(mt.getMeasurementTemplateValue());
-        }
-        return mtList;
-    }
-
-    /** List of all monitorable types
-     * @return List of monitorable types
-     * @ejb:interface-method
-     */
-    public List findMonitorableTypes() {
-        List monitorableTypes = new ArrayList();
-
-        Collection types = getMonitorableTypeDAO().findAll();
-        for (Iterator i = types.iterator(); i.hasNext(); ) {
-            MonitorableType mt = (MonitorableType)i.next();
-            monitorableTypes.add(mt.getMonitorableTypeValue());
-        }
-        return monitorableTypes;
     }
 
     /**

@@ -36,7 +36,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateLiteValue;
 import org.hyperic.hq.product.MeasurementInfo;
 
 public class MeasurementTemplateDAO extends HibernateDAO {
@@ -113,21 +112,21 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         }
     }
 
-    MeasurementTemplate create(MeasurementTemplateLiteValue lite,
-                               MonitorableType monitorableType,
-                               Category cat,
-                               Collection lineItems) {
+    MeasurementTemplate create(String name, String alias, String units,
+                               int collectionType, boolean defaultOn,
+                               long defaultInterval, boolean designate,
+                               String template, MonitorableType monitorableType,
+                               Category cat, Collection lineItems) {
         MeasurementTemplate mt = new MeasurementTemplate();
 
-        mt.setName(lite.getName()); 
-        mt.setAlias(lite.getAlias());
-        mt.setUnits(lite.getUnits());
-        mt.setCollectionType(lite.getCollectionType());
-        mt.setDefaultOn(lite.getDefaultOn());
-        mt.setDefaultInterval(lite.getDefaultInterval());
-        mt.setDesignate(lite.getDesignate());
-        mt.setPlugin(lite.getPlugin());
-        mt.setTemplate(lite.getTemplate());
+        mt.setName(name); 
+        mt.setAlias(alias);
+        mt.setUnits(units);
+        mt.setCollectionType(collectionType);
+        mt.setDefaultOn(defaultOn);
+        mt.setDefaultInterval(defaultInterval);
+        mt.setDesignate(designate);
+        mt.setTemplate(template);
         mt.setMonitorableType(monitorableType);
         mt.setCategory(cat);
         mt.setMeasurementArgs(lineItems);
