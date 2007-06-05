@@ -170,9 +170,17 @@ public abstract class WebsphereCollector extends Collector {
                                   String attr) {
 
         try {
+            WebsphereStopWatch timer = new WebsphereStopWatch();
             Object o = mServer.getAttribute(name, attr);
-            if (o == null) {
-                log.debug("getAttribute(" + name + ", " + attr + ")==null");
+            if (log.isDebugEnabled()) {
+                String call = "getAttribute(" + name + ", " + attr + ")";
+                if (o == null) {
+                    log.debug(call + "==null");
+                }
+                if (timer.isTooLong()) {
+                    log.debug(call + " took: " +
+                              timer.getElapsedSeconds() + " seconds");
+                }
             }
             return o;
         } catch (Exception e) {

@@ -50,7 +50,6 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
 
-
 /**
  * WebSphere JMX Utils for version 5.0 +
  * These utils simply wrap javax.management.* and WebSphere
@@ -112,12 +111,20 @@ public class WebsphereUtil {
         throws MetricUnreachableException {
 
         Properties props = WebspherePMI.getAdminProperties(cfg);
+        AdminClient mServer;
+        WebsphereStopWatch timer = new WebsphereStopWatch();
 
         try {
-            return AdminClientFactory.createAdminClient(props);
+            mServer = AdminClientFactory.createAdminClient(props);
         } catch (ConnectorException e) {
             throw new MetricUnreachableException(e.getMessage(), e);
         }
+
+        if (log.isDebugEnabled() && timer.isTooLong()) {
+            log.debug("createAdminClient took: " +
+                      timer.getElapsedSeconds() + " seconds");
+        }
+        return mServer;
     }
 
     public static AdminClient getMBeanServer(Metric metric)
