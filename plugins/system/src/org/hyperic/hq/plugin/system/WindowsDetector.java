@@ -26,7 +26,9 @@
 package org.hyperic.hq.plugin.system;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -57,56 +59,109 @@ public class WindowsDetector
         return null;
     }
 
-    /**
-     * Windows services are created manually.
-     */
-    protected ArrayList getSystemServiceValues(Sigar sigar, ConfigResponse serverConfig)
+    private ServiceConfig setServiceInventoryProperties(String serviceName,
+                                                        AIServiceValue svc,
+                                                        boolean exists) {
+
+        ConfigResponse cprops = new ConfigResponse();     
+        ServiceConfig config;
+        Service service = null;
+        try {
+            service = new Service(serviceName);
+            config = service.getConfig();
+        } catch (Win32Exception e) {
+            String msg =
+                "Error getting config for service=" +
+                serviceName + ": " + e.getMessage();
+            if (exists) {
+                log.error(msg);
+            }
+            else {
+                log.debug(serviceName + " does not exist");
+            }
+            return null;
+        } finally {
+            if (service != null){
+                service.close();
+            }
+        }
+
+        String desc = config.getDescription();
+        if (desc == null) {
+            desc = config.getDisplayName();
+        }
+        svc.setDescription(desc);
+        cprops.setValue("path", config.getPath());
+        cprops.setValue("startupType", config.getStartTypeString());
+        cprops.setValue("displayName", config.getDisplayName());
+        try {
+            svc.setCustomProperties(cprops.encode());
+        } catch (EncodingException e) {
+            log.error("Error encoding cprops: " + e.getMessage());
+            return null;
+        }
+
+        return config;
+    }
+
+    private AIServiceValue findWindowsService(String type, String serviceName) {
+        AIServiceValue svc = createSystemService(type, serviceName);
+        ServiceConfig config =
+            setServiceInventoryProperties(serviceName, svc, false);
+        if (config == null) {
+            return null;
+        }
+        svc.setName(config.getDisplayName());
+        log.debug("Found service " + svc.getName() +
+                  " - " + svc.getDescription());
+        ConfigResponse productConfig = new ConfigResponse();
+        productConfig.setValue(SystemPlugin.PROP_SVC, serviceName);
+        try {
+            svc.setProductConfig(productConfig.encode());
+            svc.setMeasurementConfig(new ConfigResponse().encode());
+            //XXX control config
+        } catch (EncodingException e) {
+            log.error("Error encoding config: " + e.getMessage());
+            return null;
+        }
+    
+        return svc;
+    }
+
+    protected ArrayList getSystemServiceValues(Sigar sigar,
+                                               ConfigResponse serverConfig)
         throws SigarException {
 
         String type = SystemPlugin.SVC_NAME;
-        String prop = SystemPlugin.PROP_SVC;
-
         List serviceConfigs = getServiceConfigs(type);
     
         ArrayList services = new ArrayList();
-    
+
+        //set cprops for manually create resources
         for (int i=0; i<serviceConfigs.size(); i++) {
             ConfigResponse serviceConfig = 
                 (ConfigResponse)serviceConfigs.get(i);
-            ConfigResponse cprops = new ConfigResponse();
 
             String name =
                 serviceConfig.getValue(SystemPlugin.PROP_RESOURCE_NAME);
             String serviceName =
-                serviceConfig.getValue(prop);
-        
-            AIServiceValue svc = createSystemService(type, name);
+                serviceConfig.getValue(SystemPlugin.PROP_SVC);
+            AIServiceValue svc =
+                createSystemService(type, name);
 
-            Service service = null;
-            try {
-                service = new Service(serviceName);
-                ServiceConfig config = service.getConfig();
-                String desc = config.getDescription();
-                if (desc == null) {
-                    desc = config.getDisplayName();
-                }
-                svc.setDescription(desc);
-                cprops.setValue("path", config.getPath());
-                cprops.setValue("startupType", config.getStartTypeString());
-                cprops.setValue("displayName", config.getDisplayName());
-                svc.setCustomProperties(cprops.encode());
-            } catch (Win32Exception e) {
-                String msg =
-                    "Error getting config for service=" +
-                    serviceName + ": " + e.getMessage();
-                log.error(msg);
-            } catch (EncodingException e) {
-                log.error("Error encoding cprops: " + e.getMessage());
-            } finally {
-                if (service != null) {
-                    service.close();
-                }
-            }
+            setServiceInventoryProperties(serviceName, svc, true);
+
+            services.add(svc);
+        }
+
+        //auto-discovery of services
+        Map plugins = getServiceInventoryPlugins();
+        for (Iterator it = plugins.keySet().iterator(); it.hasNext();) {
+            type = (String)it.next();
+            String name = getTypeProperty(type, SystemPlugin.PROP_SVC);
+            log.debug("Looking for " + type + " service=" + name);
+
+            AIServiceValue svc = findWindowsService(type, name);
             services.add(svc);
         }
 
