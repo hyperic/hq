@@ -26,8 +26,6 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -324,25 +322,24 @@ public class GalertBossEJBImpl
         
         PageList alertLogs =
             _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
-        List escalatables = new ArrayList(alertLogs);
         
         JSONArray jarr = new JSONArray();
-        for (Iterator i = escalatables.iterator(); i.hasNext(); ) {
-            Escalatable alert = (Escalatable)i.next();
+        for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
+            GalertLog alert = (GalertLog) i.next();
             
             // Format the alertTime
             SimpleDateFormat df =
                 new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
             String date =
-                df.format(new Date(alert.getAlertInfo().getTimestamp()));
+                df.format(new Date(alert.getTimestamp()));
             
             jarr.put(new JSONObject()
                 .put("id", alert.getId())
                 .put("time", date)
-                .put("name", alert.getDefinition().getName())
-                .put("defId", alert.getDefinition().getId())
+                .put("name", alert.getAlertDefinitionInterface().getName())
+                .put("defId", alert.getAlertDefinitionInterface().getId())
                 .put("reason", alert.getShortReason())
-                .put("fixed", alert.getAlertInfo().isFixed())
+                .put("fixed", alert.isFixed())
                 .put("acknowledgeable", alert.isAcknowledgeable()));
         }
         
