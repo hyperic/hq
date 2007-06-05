@@ -164,10 +164,11 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public Alert findLastUnfixedByDefinition(AlertDefinition def) {
+    public Alert findLastByDefinition(AlertDefinition def, boolean fixed)
+    {
         return (Alert) createCriteria()
             .add(Expression.eq("alertDefinition", def))
-            .add(Expression.eq("fixed", Boolean.FALSE))
+            .add(Expression.eq("fixed", new Boolean(fixed)))
             .addOrder(Order.desc("ctime"))
             .setMaxResults(1)
             .uniqueResult();

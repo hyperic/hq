@@ -67,6 +67,12 @@
 <c:choose>
 <c:when test="${not alert.fixed}">
   <td class="BlockContent" colspan="3" align="middle">
+    <c:if test="${not empty fixedNote}">
+      <div style="padding: 4px;">
+        <span class="BoldText"><fmt:message key="resource.common.alert.previousFix"/></span>
+        <c:out value="${fixedNote}"/>
+      </div>
+    </c:if>
     <html:textarea property="fixedNote" cols="70" rows="5"/>
   </td>
 </tr>
@@ -91,7 +97,7 @@
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
     <c:if test="${not alert.fixed}">
-      <td class="BlockContent">
+      <td class="BlockContent" width="55%">
         <fmt:message key="resource.common.alert.clickToFix"/>
       </td>
     </c:if>

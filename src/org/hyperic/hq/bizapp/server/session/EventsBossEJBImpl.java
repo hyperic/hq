@@ -102,6 +102,8 @@ import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
@@ -1700,6 +1702,33 @@ public class EventsBossEJBImpl
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         
         getEscMan().fixAlert(subject, alertType, alertID, moreInfo);
+    }
+    
+    /** Get the last fix if available
+     * @throws FinderException 
+     * @throws SessionTimeoutException 
+     * @throws SessionNotFoundException 
+     * @ejb:interface-method
+     */
+    public String getLastFix(int sessionID, Integer defId)
+        throws FinderException, SessionNotFoundException, SessionTimeoutException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        
+        // Look for the last fixed alert
+        Alert alert = getAM().findLastFixedByDefinition(subject, defId);
+        if (alert != null) {
+            long lastlog = 0;
+            String fixedNote = null;
+            for (Iterator it = alert.getActionLog().iterator(); it.hasNext(); )
+            {
+                AlertActionLog log = (AlertActionLog) it.next();
+                if (log.getAction() == null && log.getTimeStamp() > lastlog) {
+                    fixedNote = log.getDetail();
+                }
+            }
+            return fixedNote;
+        }
+        return null;
     }
 
     /**

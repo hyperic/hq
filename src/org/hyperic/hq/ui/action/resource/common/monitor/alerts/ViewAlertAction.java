@@ -172,6 +172,13 @@ public class ViewAlertAction extends TilesAction {
                 }
             }
         }
+        else {
+            // See if there might be a previous fixed log
+            String fixedNote = eb.getLastFix(sessionID, adv.getId());
+            if (fixedNote != null) {
+                request.setAttribute("fixedNote", fixedNote);
+            }
+        }
         
         // enablement
         AlertDefUtil.setEnablementRequestAttributes(request, adv);
