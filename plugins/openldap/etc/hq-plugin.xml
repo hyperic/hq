@@ -41,6 +41,12 @@
     <metric name="Availability"
             indicator="true"/>
 
+    <metric name="Connection Time ms"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"
+            units="ms"/>
+
     <metric name="Extended Operation Initiated"
             category="THROUGHPUT"
             alias="cn=Extended,cn=Operations,cn=Monitor"
@@ -230,4 +236,30 @@
             collectionType="dynamic"
             units="none"/>
   </server>
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="OpenLDAP">
+    <![CDATA[
+    <p>
+    <h3>Configure OpenLDAP ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+        In order to obtain the OpenLDAP statistics from the slapd daemon,
+        openldap must be built with configure --enable-monitor.
+
+        After this is done, and OpenLDAP is deployed, to configure monitoring
+        this line needs to be added to slapd.conf:
+
+            database monitor
+
+        It must be added before or after all databases are defined.
+
+        For more information on monitoring slapd see:
+
+        http://www.openldap.org/devel/admin/monitoringslapd.html
+
+        Without this Hyperic HQ will still monitor OpenLDAP, but the statistics
+        are very limited.
+    </p>
+    ]]>
+  </help>
 </plugin>
