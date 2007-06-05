@@ -26,14 +26,18 @@
 
 <plugin>
   <!-- define service type name -->
-  <service name="Netman">
+  <service name="Netman" server="WindowsServer">
+
+    <property name="service_name" value="Netman"/>
+
+    <plugin type="autoinventory"/>
 
     <!-- Log messages from script based metrics -->
     <plugin type="log_track"/>
 
     <!-- Checks that Windows 'Netman' service is running -->
     <metric name="Availability"
-            template="win32:Service=Netman:Availability"
+            template="win32:Service=${service_name}:Availability"
             indicator="true"/>
 
     <!-- example perf counter to template format:
