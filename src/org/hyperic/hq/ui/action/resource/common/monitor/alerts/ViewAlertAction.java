@@ -163,11 +163,13 @@ public class ViewAlertAction extends TilesAction {
         request.setAttribute("alertDefConditions", alertDefConditions);
 
         // if alert is fixed, then there should be a fixed log
-        AlertActionLogValue[] logs = av.getActionLogs();
-        for (int i = logs.length - 1; i >= 0; i--) {
-            if (logs[i].getActionId() == null) {
-                request.setAttribute("fixedNote", logs[i].getDetail());
-                break;
+        if (av.isFixed()) {
+            AlertActionLogValue[] logs = av.getActionLogs();
+            for (int i = logs.length - 1; i >= 0; i--) {
+                if (logs[i].getActionId() == null) {
+                    request.setAttribute("fixedNote", logs[i].getDetail());
+                    break;
+                }
             }
         }
         
