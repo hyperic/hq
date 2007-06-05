@@ -54,19 +54,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.ext.MetricOperationEvent;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
 import org.hyperic.hq.measurement.ext.depgraph.GraphBuilder;
@@ -78,10 +74,7 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
-import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
@@ -92,7 +85,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.timer.StopWatch;
 import org.quartz.SchedulerException;
 
 /** The DerivedMeasurementManagerEJB class is a stateless session bean that can
@@ -146,20 +138,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return m;
     }
 
-    private Integer getIdByTemplateAndInstance(Integer tid,
-                                               Integer iid)
-        throws FinderException {
-        
-        DerivedMeasurement m =
-            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid);
-        if (m == null) {
-            // Fix me
-            throw new FinderException();
-        }
-
-        return m.getId();
-    }
-
     private Integer getRawIdByTemplateAndInstance(Integer tid, Integer iid) {
         RawMeasurement m =
             getRawMeasurementDAO().findByTemplateForInstance(tid, iid);
@@ -169,9 +147,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return m.getId();
     }
 
-    private RawMeasurementValue createRawMeasurement(Integer instanceId, 
-                                                     Integer templateId,
-                                                     ConfigResponse props)
+    private RawMeasurement createRawMeasurement(Integer instanceId, 
+                                                Integer templateId,
+                                                ConfigResponse props)
         throws MeasurementCreateException {
         return getRmMan().createMeasurement(templateId, instanceId, props);
     }

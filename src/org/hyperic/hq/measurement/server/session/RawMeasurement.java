@@ -27,8 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
-
 public class RawMeasurement 
     extends Measurement
     implements Serializable 
@@ -51,20 +49,6 @@ public class RawMeasurement
     
     protected void setDsn(String dsn) {
         _dsn = dsn;
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) RawMeasurement object instead
-     */
-    public RawMeasurementValue getRawMeasurementValue() {
-        RawMeasurementValue value = new RawMeasurementValue();
-        value.setId(getId());
-        value.setDsn(getDsn());
-        value.setInstanceId(getInstanceId());
-        value.setMtime(getMtime());
-        value.setTemplate(getTemplate().getMeasurementTemplateValue());
-        return value;
     }
 
     public boolean equals(Object obj) {

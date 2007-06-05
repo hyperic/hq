@@ -49,7 +49,6 @@ import org.hyperic.hq.measurement.ext.MonitorInterface;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.shared.RawMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerUtil;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -97,9 +96,9 @@ public class RawMeasurementManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public RawMeasurementValue createMeasurement(Integer templateId,
-                                                 Integer instanceId,
-                                                 ConfigResponse config)
+    public RawMeasurement createMeasurement(Integer templateId,
+                                            Integer instanceId,
+                                            ConfigResponse config)
         throws MeasurementCreateException {
      
         try {
@@ -108,9 +107,7 @@ public class RawMeasurementManagerEJBImpl
             String tmpl = mt.getTemplate();
             String dsn = translate(tmpl, config);
 
-            RawMeasurement rm = getRawMeasurementDAO().create(instanceId, mt,
-                                                              dsn);
-            return rm.getRawMeasurementValue();
+            return getRawMeasurementDAO().create(instanceId, mt, dsn);
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);
         }
@@ -139,16 +136,6 @@ public class RawMeasurementManagerEJBImpl
         } catch (MetricInvalidException e) {
             throw new MeasurementCreateException("Invalid DSN generated", e);
         }
-    }
-
-    /**
-     * Look up a raw measurement EJB
-     *
-     * @ejb:interface-method
-     */
-    public RawMeasurementValue getMeasurement(Integer mid) {
-        RawMeasurement rm = getRawMeasurementDAO().findById(mid);
-        return rm.getRawMeasurementValue();
     }
 
     private static final int SAMPLE_SIZE = 4;
@@ -283,9 +270,10 @@ public class RawMeasurementManagerEJBImpl
         String[] dsns = new String[mids.length];
 
         // Assume at this point, that all mids are for the same resource
+        RawMeasurementDAO dao = getRawMeasurementDAO();
         for (int i = 0; i < mids.length; i++) {
             // First, find the raw measurement
-            RawMeasurementValue rm = this.getMeasurement(mids[i]);
+            RawMeasurement rm = dao.findById(mids[i]);
             
             if (entity == null) {        
                 int entityType =
@@ -301,49 +289,11 @@ public class RawMeasurementManagerEJBImpl
     }
 
     /**
-     * Look up a raw measurement EJB
-     * @ejb:interface-method
-     */
-    public RawMeasurementValue findMeasurement(String dsn, Integer id) {
-        RawMeasurement rm = getRawMeasurementDAO().findByDsnForInstance(dsn, id);
-        return rm.getRawMeasurementValue();
-    }
-
-    /**
      * Look up a RawMeasurement
      * @ejb:interface-method
      */
     public RawMeasurement findMeasurement(Integer tid, Integer instanceId) {
         return getRawMeasurementDAO().findByTemplateForInstance(tid, instanceId);
-    }
-
-    /**
-     * Look up a RawMeasurementValue
-     * @deprecated Use findMeasurement instead.
-     * @ejb:interface-method
-     */
-    public RawMeasurementValue findMeasurementValue(Integer tid,
-                                                    Integer instanceId){
-        return findMeasurement(tid, instanceId).getRawMeasurementValue();
-    }
-
-    /**
-     * Look up a list of raw measurement EJB
-     *
-     * @return a list of RawMeasurement value
-     * @ejb:interface-method
-     */
-    public List findMeasurements(AppdefEntityID id) {
-        List mlist = new ArrayList();
-        
-        Collection mcol = getRawMeasurementDAO().findByInstance(id.getType(),
-                                                                id.getID());
-        for (Iterator i = mcol.iterator(); i.hasNext();) {
-            RawMeasurement rm = (RawMeasurement) i.next();
-            mlist.add(rm.getRawMeasurementValue());
-        }
-
-        return mlist;
     }
 
     /**
