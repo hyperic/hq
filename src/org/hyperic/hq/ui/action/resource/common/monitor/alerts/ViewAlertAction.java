@@ -167,6 +167,7 @@ public class ViewAlertAction extends TilesAction {
         for (int i = logs.length - 1; i >= 0; i--) {
             if (logs[i].getActionId() == null) {
                 request.setAttribute("fixedNote", logs[i].getDetail());
+                break;
             }
         }
         
