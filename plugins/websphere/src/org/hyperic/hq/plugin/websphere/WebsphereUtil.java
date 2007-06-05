@@ -58,6 +58,8 @@ import org.hyperic.hq.product.PluginException;
  */
 public class WebsphereUtil {
 
+    private static HashMap cache = new HashMap();
+
     private static Log log = LogFactory.getLog("WebSphereUtil");
 
     public static Object getRemoteMBeanValue(Metric metric) 
@@ -83,27 +85,25 @@ public class WebsphereUtil {
             throw new MetricInvalidException(e.getMessage(), e);
         }
         
-        synchronized (mServer) {
-            try {
-                return mServer.getAttribute(objName,
-                                            metric.getAttributeName());
-            } catch (MBeanException e) {
-                String msg = "MBeanException: " + e.getMessage();
-                throw new PluginException(msg, e);
-            } catch (AttributeNotFoundException e) {
-                String msg = "Attribute '" + attributeName + "' " +
-                    "not found for '" + objName + "'";
-                throw new MetricNotFoundException(msg, e);
-            } catch (InstanceNotFoundException e) {
-                String msg = "MBean '" + objName + "' not found";
-                throw new MetricNotFoundException(msg, e);
-            } catch (ReflectionException e) {
-                String msg = "ReflectionException: " + e.getMessage();
-                throw new PluginException(msg, e);
-            } catch (ConnectorException e) {
-                String msg = "ConnectorException: " + e.getMessage();
-                throw new PluginException(msg, e);
-            }
+        try {
+            return mServer.getAttribute(objName,
+                                        metric.getAttributeName());
+        } catch (MBeanException e) {
+            String msg = "MBeanException: " + e.getMessage();
+            throw new PluginException(msg, e);
+        } catch (AttributeNotFoundException e) {
+            String msg = "Attribute '" + attributeName + "' " +
+                         "not found for '" + objName + "'";
+            throw new MetricNotFoundException(msg, e);
+        } catch (InstanceNotFoundException e) {
+            String msg = "MBean '" + objName + "' not found";
+            throw new MetricNotFoundException(msg, e);
+        } catch (ReflectionException e) {
+            String msg = "ReflectionException: " + e.getMessage();
+            throw new PluginException(msg, e);
+        } catch (ConnectorException e) {
+            String msg = "ConnectorException: " + e.getMessage();
+            throw new PluginException(msg, e);
         }
     }
 
@@ -123,7 +123,26 @@ public class WebsphereUtil {
     public static AdminClient getMBeanServer(Metric metric)
         throws MetricUnreachableException {
 
-        return getMBeanServer(metric.getProperties());
+        String key = metric.getPropString();
+        AdminClient mServer =
+            (AdminClient)cache.get(key);
+
+        if (mServer != null) {
+            try {
+                mServer.getDomainName();
+            } catch (ConnectorException e) {
+                mServer = null;
+                log.debug("getMBeanServer stale connection: " + key);
+            }
+        }
+
+        if (mServer == null) {
+            mServer = getMBeanServer(metric.getProperties());
+            cache.put(key, mServer);
+            log.debug("getMBeanServer caching: " + key);
+        }
+
+        return mServer;
     }
 
     public static double getMBeanCount(Metric metric)
