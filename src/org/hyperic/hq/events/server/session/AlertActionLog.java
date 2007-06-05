@@ -55,7 +55,7 @@ public class AlertActionLog
         setDetail(detail);
     }
     
-    protected String getDetail() {
+    public String getDetail() {
         return _detail;
     }
     
