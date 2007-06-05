@@ -502,9 +502,7 @@ public class EscalationManagerEJBImpl
             return;
         }
         
-        if (moreInfo != null)
-            moreInfo = " (" + moreInfo + ")";
-        else
+        if (moreInfo == null)
             moreInfo = "";
         
         if (fixed) {  
@@ -512,7 +510,7 @@ public class EscalationManagerEJBImpl
             type.changeAlertState(alertId, subject, 
                                   EscalationStateChange.FIXED); 
             type.logActionDetails(alertId, null, 
-                                  subject.getFullName() + " fixed the alert" +
+                                  "(Fixed by " + subject.getFullName() + ") " +
                                   moreInfo, subject);
             if (state != null)
                 endEscalation(state);
