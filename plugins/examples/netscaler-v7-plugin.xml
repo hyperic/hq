@@ -177,6 +177,35 @@
         <metric name="Services Going Out of Service"
                 alias="vsvrCurServicesTransToOutOfSvc"/>
 
+        <metric name="Requests"
+                alias="vsvrTotalRequests"
+                collectionType="trendsup"
+                rate="1s"
+                category="THROUGHPUT"
+                defaultOn="true"/>
+
+        <metric name="Responses"
+                alias="vsvrTotalResponses"
+                collectionType="trendsup"
+                rate="1s"
+                category="THROUGHPUT"
+                defaultOn="true"/>
+
+        <metric name="RxBytes"
+                alias="vsvrTotalRequestBytes"
+                collectionType="trendsup"
+                units="B"
+                rate="1s"
+                category="THROUGHPUT"
+                defaultOn="true"/>
+
+        <metric name="TxBytes"
+                alias="vsvrTotalResponseBytes"
+                collectionType="trendsup"
+                units="B"
+                category="THROUGHPUT"
+                rate="1s"
+                defaultOn="true"/>
       </service>
 
       <service name="Load Balancing Vserver">
