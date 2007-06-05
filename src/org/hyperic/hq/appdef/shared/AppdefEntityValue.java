@@ -313,45 +313,18 @@ public class AppdefEntityValue {
             return getTypeName();
         default:
             throw new IllegalArgumentException(_id.getTypeName() + 
-                                               " does not support " +
-                                               "measurement");
+                                               " does not support measurement");
         }
     }
 
     public String getName()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(_id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return getPlatform(false).getName();
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return getServer(false).getName();
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService(false).getName();
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return getApplication().getName();
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup(true).getName();
-        default:
-            throw new IllegalStateException("Unknown appdef entity type");
-        }
+        return getLiteResourceValue().getName();
     }
 
     public String getDescription()
         throws PermissionException, AppdefEntityNotFoundException {
-        switch(_id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return getPlatform(false).getDescription();
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return getServer(false).getDescription();
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService(false).getDescription();
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return getApplication().getDescription();
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return getGroup(true).getDescription();
-        default:
-            throw new IllegalStateException("Unknown appdef entity type");
-        }
+        return getLiteResourceValue().getDescription();
     }
 
     public String getTypeName()
@@ -843,8 +816,7 @@ public class AppdefEntityValue {
             platform = name;
         }
         else {
-            List platforms =
-                getAssociatedPlatforms(PageControl.PAGE_ALL);
+            List platforms = getAssociatedPlatforms(PageControl.PAGE_ALL);
             PlatformValue pValue = (PlatformValue)platforms.get(0);
             platform = pValue.getPlatformType().getName();
         }
