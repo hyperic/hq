@@ -1711,7 +1711,7 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      */
     public String getLastFix(int sessionID, Integer defId)
-        throws FinderException, SessionNotFoundException, SessionTimeoutException {
+        throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         
         // Look for the last fixed alert
