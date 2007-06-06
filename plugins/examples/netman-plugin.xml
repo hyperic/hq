@@ -35,6 +35,13 @@
     <!-- Log messages from script based metrics -->
     <plugin type="log_track"/>
 
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <properties>
+      <property name="path" description="Binary path"/>
+    </properties>
+
     <!-- Checks that Windows 'Netman' service is running -->
     <metric name="Availability"
             template="win32:Service=${service_name}:Availability"
