@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
@@ -236,14 +237,21 @@ public class PortalAction extends ResourceController {
 
         Integer alertId = RequestUtils.getIntParameter(request, "a");
         String note =
-            RequestUtils.getStringParameter(request, "fixedNote", null);
+            RequestUtils.getStringParameter(request, "fixedNote", "");
+        
+        MessageResources res = getResources(request);
+        String fixNote =
+            res.getMessage("resource.common.alert.fixBy",
+                           RequestUtils.getWebUser(request).getName(),
+                           note);
+        
         AppdefEntityID aeid = null;
         try {
             aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
                 eb.fixAlert(sessionID, GalertEscalationAlertType.GALERT,
-                            alertId, note);
+                            alertId, fixNote);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -252,7 +260,7 @@ public class PortalAction extends ResourceController {
         if (aeid == null || !aeid.isGroup()) {
             // Fix alert the old fashion way
             eb.fixAlert(sessionID, ClassicEscalationAlertType.CLASSIC, alertId,
-                        note); 
+                        fixNote); 
         }
 
         RequestUtils.setConfirmation(request, "alert.view.confirm.fixed");

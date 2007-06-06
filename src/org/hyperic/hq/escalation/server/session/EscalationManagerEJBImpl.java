@@ -502,19 +502,20 @@ public class EscalationManagerEJBImpl
             return;
         }
         
-        if (moreInfo == null)
-            moreInfo = "";
-        
         if (fixed) {  
+            if (moreInfo == null)
+                moreInfo = "(Fixed by " + subject.getFullName() + ")";
+            
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
-            type.changeAlertState(alertId, subject, 
+            type.changeAlertState(alertId, subject,
                                   EscalationStateChange.FIXED); 
-            type.logActionDetails(alertId, null, 
-                                  "(Fixed by " + subject.getFullName() + ") " +
-                                  moreInfo, subject);
+            type.logActionDetails(alertId, null, moreInfo, subject);
             if (state != null)
                 endEscalation(state);
         } else {
+            if (moreInfo == null)
+                moreInfo = "";
+            
             if (state.getAcknowledgedBy() != null) {
                 _log.warn(subject.getFullName() + " attempted to acknowledge "+
                           type + " alert=" + alertId + " but it was already "+
