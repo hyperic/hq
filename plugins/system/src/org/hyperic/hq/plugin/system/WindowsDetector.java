@@ -225,6 +225,13 @@ public class WindowsDetector
         for (Iterator it = plugins.keySet().iterator(); it.hasNext();) {
             type = (String)it.next();
             String name = getTypeProperty(type, SystemPlugin.PROP_SVC);
+            if (name == null) {
+                log.warn("Service type '" + type +
+                         "' has autoinventory plugin " +
+                         "without '" + SystemPlugin.PROP_SVC +
+                         "' property defined.");
+                continue;
+            }
             log.debug("Looking for " + type + " service=" + name);
 
             AIServiceValue svc = findWindowsService(type, name);
