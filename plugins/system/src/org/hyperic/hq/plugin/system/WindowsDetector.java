@@ -40,7 +40,9 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
 import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPluginManager;
 
 public class WindowsDetector
     extends SystemServerDetector {
@@ -58,6 +60,35 @@ public class WindowsDetector
 
         //should not get invoked if !win32, but just incase.
         return null;
+    }
+
+    private boolean setCustomProperty(String type, ConfigResponse cprops,
+                                      String key, String val) {
+
+        //XXX code below does not work for the builtin
+        //service type because the cprops are defined by
+        //the SystemPlugin/ProductPlugin rather than hq-plugin.xml
+        if (type.equals(SystemPlugin.SVC_NAME)) {
+            cprops.setValue(key, val);
+            return true;
+        }
+
+        ProductPluginManager manager =
+            (ProductPluginManager)getManager().getParent();
+        MeasurementPlugin plugin =
+            manager.getMeasurementPlugin(type);
+
+        if (plugin == null) {
+            return false;
+        }
+
+        if (plugin.getCustomPropertiesSchema().getOption(key) == null) {
+            return false;
+        }
+        else {
+            cprops.setValue(key, val);
+            return true;
+        }
     }
 
     private ServiceConfig setServiceInventoryProperties(String serviceName,
@@ -100,9 +131,14 @@ public class WindowsDetector
             desc = config.getDisplayName();
         }
         svc.setDescription(desc);
-        cprops.setValue("path", config.getPath());
-        cprops.setValue("startupType", config.getStartTypeString());
-        cprops.setValue("displayName", config.getDisplayName());
+
+        String type = svc.getServiceTypeName();
+        setCustomProperty(type, cprops,
+                          "path", config.getPath());
+        setCustomProperty(type, cprops,
+                          "startupType", config.getStartTypeString());
+        setCustomProperty(type, cprops,
+                          "displayName", config.getDisplayName());
         try {
             svc.setCustomProperties(cprops.encode());
         } catch (EncodingException e) {
