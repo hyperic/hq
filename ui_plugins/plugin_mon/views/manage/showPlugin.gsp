@@ -10,6 +10,7 @@
 <thead>
   <tr>
     <th>${l.Path}</th>
+    <th>${l.Description}</th>
     <th>${l.AttachableTo}</th>
     <th>${l.CanAttach}</th>
     <th>${l.AttachedAt}</th>
@@ -19,6 +20,7 @@
 <% for (v in plugin.views) { %>
   <tr>
     <td><a href="/hqu/${plugin.name}${v.path}"><%= h v.path %></a></td>
+    <td><%= h v.description %></td>
     <td><%= h v.attachType.description %></td>
     <td><%= h v.attachable %></td>
     <% if (v.attachable) { %>
@@ -27,6 +29,7 @@
   </tr>
   <% for (a in v.attachments) { %>
     <tr>
+      <td/>
       <td/>
       <td/>
       <td/>
