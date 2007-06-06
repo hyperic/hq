@@ -35,6 +35,7 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -86,6 +87,14 @@ public class WindowsDetector
             }
         }
 
+        if (!exists) {
+            if (config.getStartType() == ServiceConfig.START_DISABLED) {
+                log.debug("Skipping " + serviceName +
+                          ", start type=" + config.getStartTypeString());
+                return null;
+            }
+        }
+
         String desc = config.getDescription();
         if (desc == null) {
             desc = config.getDisplayName();
@@ -128,6 +137,27 @@ public class WindowsDetector
         return svc;
     }
 
+    private void discoverWindowsServices(String names, ArrayList services)
+        throws Win32Exception {
+
+        List serviceNames;
+        if ("true".equals(names)) {
+            serviceNames = Service.getServiceNames();
+        }
+        else {
+            serviceNames = StringUtil.explode(names, ",");
+        }
+
+        for (int i=0; i<serviceNames.size(); i++) {
+            String name = (String)serviceNames.get(i);
+            AIServiceValue svc = 
+                findWindowsService(SystemPlugin.SVC_NAME, name);
+            if (svc != null) {
+                services.add(svc);
+            }
+        }
+    }
+
     protected ArrayList getSystemServiceValues(Sigar sigar,
                                                ConfigResponse serverConfig)
         throws SigarException {
@@ -154,7 +184,7 @@ public class WindowsDetector
             services.add(svc);
         }
 
-        //auto-discovery of services
+        //auto-discovery of services (plugin defined types)
         Map plugins = getServiceInventoryPlugins();
         for (Iterator it = plugins.keySet().iterator(); it.hasNext();) {
             type = (String)it.next();
@@ -162,7 +192,16 @@ public class WindowsDetector
             log.debug("Looking for " + type + " service=" + name);
 
             AIServiceValue svc = findWindowsService(type, name);
-            services.add(svc);
+            if (svc != null) {
+                services.add(svc);
+            }
+        }
+
+        //auto-discover of any generic windows service
+        String windowsServices =
+            getManager().getProperty("windows.services.discover");
+        if (windowsServices != null) {
+            discoverWindowsServices(windowsServices, services);
         }
 
         return services;
