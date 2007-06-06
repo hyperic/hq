@@ -28,14 +28,14 @@ public class ZimbraServerDetector
     extends ServerDetector
     implements AutoServerDetector
 {
-    private static final String VERSION = "4.5.x";
+    private static final String VERSION_4_5_x = "4.5.x";
+    private static final String VERSION_4_5_x_JAVA = "jdk1.5.0_08";
     private static final String SERVER_NAME = "Zimbra";
     // generic process name, generic server daemon
-    private static final String PROCESS_NAME = "zmlogger";
+    private static final String PROCESS_NAME = "zmtomcatmgr";
     // this PTQL query matches the PROCESS_NAME and returns the parent process id
     private static final String PTQL_QUERY = 
-        "State.Name.re=perl|"+PROCESS_NAME+",Args.1.re=.*"+PROCESS_NAME+"$";
-//rpm -q --queryformat "%{version}_%{release}" zimbra-core
+        "State.Name.eq="+PROCESS_NAME+",State.Name.Pne=$1,Args.0.re=.*"+PROCESS_NAME+"$";
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException
@@ -52,49 +52,16 @@ public class ZimbraServerDetector
         return servers;
     }
 
-/*
-    protected List discoverServices(ConfigResponse config)
-        throws PluginException
-    {
-        List services = new ArrayList();
-        Iterator options = getOptions();
-        while (options.hasNext())
-        {
-            ZimbraPluginOptions obj = (ZimbraPluginOptions)options.next();
-            ServiceResource service = new ServiceResource();
-            service.setType(this, "Zimbra Service");
-            service.setServiceName(obj.getServicename());
-//            ConfigResponse productConfig = new ConfigResponse();
-//            service.setProductConfig(productConfig);
-            service.setProductConfig();
-            // set an empty measurement config
-            service.setMeasurementConfig();
-            // set an empty control config
-            service.setControlConfig();
-            services.add(service);
-        }
-        return services;
-    }
-
-    private Iterator getOptions()
-    {
-        List list = new ArrayList();
-        ZimbraPluginOptions obj = new ZimbraPluginOptions("service", "option1", "option2");
-        list.add(obj);
-        return list.iterator();
-    }
-*/
-
     private static List getServerProcessList()
     {
         List servers = new ArrayList();
         long[] pids = getPids(PTQL_QUERY);
         for (int i=0; i<pids.length; i++)
         {
-            String[] args = getProcArgs(pids[i]);
-            if (args[1] == null || !args[1].matches(".*zmlogger$"))
+            String exe = getProcExe(pids[i]);
+            if (exe == null)
                 continue;
-            File binary = new File(args[1]);
+            File binary = new File(exe);
             if (!binary.isAbsolute())
                 continue;
             servers.add(binary.getAbsolutePath());
@@ -108,7 +75,9 @@ public class ZimbraServerDetector
 
         List servers = new ArrayList();
         String installdir = getParentDir(path, 2);
-        String version = VERSION;
+        String version = "";
+        if ((new File(installdir+"/"+VERSION_4_5_x_JAVA+"/")).exists())
+            version = VERSION_4_5_x;
 
         // Only check the binaries if they match the path we expect
         if (path.indexOf(PROCESS_NAME) == -1)
