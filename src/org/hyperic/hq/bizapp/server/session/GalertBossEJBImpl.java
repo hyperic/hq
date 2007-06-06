@@ -352,15 +352,10 @@ public class GalertBossEJBImpl
     }
     
     /** Get the last fix if available
-     * @throws FinderException 
-     * @throws SessionTimeoutException 
-     * @throws SessionNotFoundException 
      * @ejb:interface-method
      */
-    public String getLastFix(int sessionID, Integer defId)
-        throws SessionNotFoundException, SessionTimeoutException {
-        GalertDef def = _galertMan.findById(defId);
-        
+    public String getLastFix(int sessionID, GalertDef def)
+        throws SessionNotFoundException, SessionTimeoutException {        
         // Look for the last fixed alert
         GalertLog alert = _galertMan.findLastFixedByDef(def);
         if (alert != null) {
