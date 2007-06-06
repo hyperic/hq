@@ -35,6 +35,8 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -68,6 +70,15 @@ class GalertLogDAO
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
+    }
+    
+    public GalertLog findLastByDefinition(GalertDef def, boolean fixed) {
+        return (GalertLog) createCriteria()
+            .add(Expression.eq("alertDef", def))
+            .add(Expression.eq("fixed", new Boolean(fixed)))
+            .addOrder(Order.desc("timestamp"))
+            .setMaxResults(1)
+            .uniqueResult();
     }
 
     PageList findByTimeWindow(ResourceGroup g, long begin, long end,

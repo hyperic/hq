@@ -282,6 +282,17 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method  
+     */
+    public GalertLog findLastFixedByDef(GalertDef def) {
+        try {
+            return _logDAO.findLastByDefinition(def, true);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * Simply sets the 'fixed' flag on an alert
      * @ejb:interface-method  
      */
