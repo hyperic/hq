@@ -283,6 +283,33 @@ public class JBossDetector
         }
     }
 
+    //http://www.multiplan.co.uk/software/javaservice/docs/index.html
+    private static void findServiceExe(GenericPlugin plugin, List servers) {
+        //XXX cant assume name will be 'jboss.exe'
+        String query = "State.Name.eq=jboss";
+        long[] pids = getPids(query);
+
+        for (int i=0; i<pids.length; i++) {
+            String exe = getProcExe(pids[i]);
+
+            if (exe == null) {
+                continue;
+            }
+
+            //strip bin\jboss.exe
+            File root =
+                new File(exe).getParentFile().getParentFile();
+
+            //XXX should check:
+            //HKLM\SYSTEM\CurrentControlSet\Services\$service_name\Parameters
+            //for -c serverName
+            String configPath =
+                getServerConfigPath(root, "default");
+
+            servers.add(new JBossInstance(root.getPath(), configPath));
+        }
+    }
+
     private static List getServerProcessList(GenericPlugin plugin) {
         ArrayList servers = new ArrayList();
 
@@ -293,6 +320,8 @@ public class JBossDetector
         //look for jboss within brand.exe on Win32 only
         if (isWin32()) {
             findBrandedExe(plugin, servers);
+            
+            findServiceExe(plugin, servers);
         }
 
         return servers;
