@@ -27,23 +27,10 @@ package org.hyperic.hq.hqu.rendit;
 import java.io.File;
 
 /**
- * This class encapsulates the data which is passed from RenditServer into 
- * the groovy dispatcher.
+ * The invocation bindings required to load a plugin 
  */
-public abstract class InvocationBindings {
-    private String  _type;
-    private File    _pluginDir;
-    
-    protected InvocationBindings(String type, File pluginDir) {
-        _type      = type;
-        _pluginDir = pluginDir;
-    }
-    
-    public File getPluginDir() {
-        return _pluginDir;
-    }
-    
-    public String getType() {
-        return _type;
+public class LoadInvocationBindings extends InvocationBindings {
+    LoadInvocationBindings(File pluginDir) {
+        super("load", pluginDir);
     }
 }

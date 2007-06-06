@@ -37,7 +37,7 @@ import java.net.URLClassLoader;
  * artifacts.
  */
 public class PluginWrapper {
-    private final File               _pluginDir;
+    private       File               _pluginDir;
     private final GroovyScriptEngine _engine;
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
@@ -46,7 +46,7 @@ public class PluginWrapper {
         URL[] u;
 
         _pluginDir = pluginDir;
-        
+
         try {
             u = new URL[] {
                 sysDir.toURL(),

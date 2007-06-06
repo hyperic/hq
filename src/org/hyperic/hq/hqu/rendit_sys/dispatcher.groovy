@@ -29,14 +29,21 @@ class Dispatcher {
 	
     def invoke() {
         switch (invokeArgs.type) {
-        case 'request':
-            return invokeRequest()
-        case 'load':
-            return loadPlugin()
-        default:
-            throw new IllegalStateException("Unhandled invocation type " +
-                                            "${invokeArgs.type}")
+        	case 'request':
+            	return invokeRequest()
+        	case 'load':
+            	return loadPlugin()
+        	case 'invokeMethod':
+        	    return invokeMethod()
+        	default:
+            	throw new IllegalStateException("Unhandled invocation type " +
+                                            	"${invokeArgs.type}")
         }
+    }
+    
+    def invokeMethod() {
+        def dispatcher = new InvokeMethodDispatcher()
+        dispatcher.invoke(invokeArgs)
     }
     
     def loadPlugin() {
@@ -64,7 +71,7 @@ class Dispatcher {
         def dispatcher = new DefaultControllerDispatcher()
         def pluginInfo = loadPlugin()
 		
-        use (MapCategory){
+		use (MapCategory) {
         	return dispatcher.invoke(pluginInfo, invokeArgs)
         }
      }

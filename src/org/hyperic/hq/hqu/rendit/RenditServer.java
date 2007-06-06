@@ -27,8 +27,11 @@ package org.hyperic.hq.hqu.rendit;
 import groovy.lang.Binding;
 
 import java.io.File;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -37,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 
 public class RenditServer {
     private static final RenditServer INSTANCE = new RenditServer();
@@ -57,6 +60,19 @@ public class RenditServer {
         synchronized (CFG_LOCK) {
             return _sysDir;
         }
+    }
+    
+    private PluginWrapper getPlugin(String name) {
+        PluginWrapper res;
+        
+        synchronized (CFG_LOCK) {
+            res = (PluginWrapper)_plugins.get(name);
+        }
+        
+        if (res == null) {
+            throw new IllegalArgumentException("Unknown plugin [" + name + "]"); 
+        }
+        return res;
     }
     
     /**
@@ -112,14 +128,13 @@ public class RenditServer {
         PluginWrapper plugin = new PluginWrapper(path, getSysDir(), 
                                                  getUseLoader());
         
-        Binding b = new Binding();
-        b.setVariable("invokeArgs", 
-                      InvocationBindings.newLoad(plugin.getPluginDir()));
+        InvocationBindings bindings = 
+            new LoadInvocationBindings(plugin.getPluginDir());
+        
         UIPluginDescriptor pInfo;
 
         try {
-            pInfo = (UIPluginDescriptor) 
-                plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
+            pInfo = (UIPluginDescriptor)invokeDispatcher(plugin, bindings);
         } catch(PluginLoadException e) {
             throw e;
         } catch(Exception e) {
@@ -146,24 +161,48 @@ public class RenditServer {
                               HttpServletResponse resp, ServletContext ctx) 
         throws Exception
     {
-        PluginWrapper plugin;
-        
-        synchronized (CFG_LOCK) {
-            plugin = (PluginWrapper)_plugins.get(pluginName);
-        }
-        
-        if (plugin == null) {
-            throw new IllegalArgumentException("Unknown plugin [" + 
-                                               pluginName + "]");
-        }
-        
-        Binding b = new Binding();
-        b.setVariable("invokeArgs", 
-                      InvocationBindings.newRequest(plugin.getPluginDir(), 
-                                                    req, resp, ctx));
-        plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
+        PluginWrapper plugin = getPlugin(pluginName);
+        InvocationBindings bindings = 
+            new RequestInvocationBindings(plugin.getPluginDir(), 
+                                          req, resp, ctx);
+        invokeDispatcher(plugin, bindings);
     }
     
+    /**
+     * Renders a template (.gsp file) to a Writer
+     * This facility relies on a plugin being registered under the name
+     * 'tmpl_render' which how to deal with a render invocation from the
+     * dispatcher.
+     * 
+     * @params template The template to render
+     * @params params   Local variables to pass to the template
+     * @params output   Writer to render to
+     */
+    public void renderTemplate(File template, Map params, Writer output)
+        throws Exception
+    {
+        PluginWrapper plugin = getPlugin("tmpl_render");
+        List args = new ArrayList();
+        
+        args.add(template);
+        args.add(params);
+        args.add(output);
+        InvocationBindings bindings =
+            new InvokeMethodInvocationBindings(plugin.getPluginDir(),
+                                               "Renderer", "render", args);
+        invokeDispatcher(plugin, bindings);
+    }
+
+    private Object invokeDispatcher(PluginWrapper plugin, 
+                                    InvocationBindings bindings)
+        throws Exception
+    {
+        Binding b = new Binding();
+
+        b.setVariable("invokeArgs", bindings);
+        return plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
+    }
+
     public static final RenditServer getInstance() {
         return INSTANCE;
     }

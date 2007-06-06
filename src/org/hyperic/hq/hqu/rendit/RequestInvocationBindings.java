@@ -26,24 +26,36 @@ package org.hyperic.hq.hqu.rendit;
 
 import java.io.File;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
- * This class encapsulates the data which is passed from RenditServer into 
- * the groovy dispatcher.
+ * The invocation bindings used when a request is made from the servlet.
  */
-public abstract class InvocationBindings {
-    private String  _type;
-    private File    _pluginDir;
+public class RequestInvocationBindings extends InvocationBindings {
+    private HttpServletRequest  _request;
+    private HttpServletResponse _response;
+    private ServletContext      _context;
     
-    protected InvocationBindings(String type, File pluginDir) {
-        _type      = type;
-        _pluginDir = pluginDir;
+    RequestInvocationBindings(File pluginDir, HttpServletRequest request,  
+                              HttpServletResponse response, ServletContext ctx)
+    {
+        super("request", pluginDir);
+        _request  = request;
+        _response = response;
+        _context  = ctx;
     }
     
-    public File getPluginDir() {
-        return _pluginDir;
+    public HttpServletRequest getRequest() {
+        return _request;
     }
     
-    public String getType() {
-        return _type;
+    public HttpServletResponse getResponse() {
+        return _response;
+    }
+    
+    public ServletContext getContext() {
+        return _context;
     }
 }
