@@ -39,14 +39,14 @@
             value="zimbra-stats:installpath=%installpath%:${alias}"/>
 
     <config>
-      <option name="ptql"
-              default="State.Name.re=zmtomcatmgr$"
+      <option name="zimbra-ptql"
+              default="Pid.PidFile.eq=%installpath%/log/zmtomcatmgr.pid"
               description="Sigar PTQL Process Query"/>
     </config>
-
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            template="sigar:Type=ProcState,Arg=%zimbra-ptql%:State"
             indicator="true"/>
+
     <metric name="Number of LMTP Msgs Received"
             category="THROUGHPUT"
             alias="lmtp_rcvd_msgs"
@@ -245,5 +245,127 @@
             indicator="false"
             collectionType="dynamic"
             units="none"/>
+
+    <service name="Zimbra Logger MySQL">
+      <config>
+        <option name="msql-logger-ptql"
+                default="Pid.PidFile.eq=%installpath%/logger/db/mysql.pid"
+                description="PTQL for Zimbra Logger MySQLd"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%mysql-logger-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra MySQL">
+      <config>
+        <option name="mysql-ptql"
+                default="Pid.PidFile.eq=%installpath%/db/mysql.pid"
+                description="PTQL for Zimbra MySQLd"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%mysql-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="OpenLDAP">
+      <config>
+        <option name="openldap-ptql"
+                default="Pid.PidFile.eq=%installpath%/openldap/var/run/slapd.pid"
+                description="PTQL for Zimbra OpenLDAP"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%openldap-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra Cyrus SASL">
+      <config>
+        <option name="sasl-ptql"
+                default="Pid.PidFile.eq=%installpath%/cyrus-sasl/state/saslauthd.pid"
+                description="PTQL for Zimbra Cyrus SASL"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%sasl-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra ClamAV">
+      <config>
+        <option name="clamd-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/clamd.pid"
+                description="PTQL for Zimbra Clam Anti-Virus Daemon"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%clamd-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra Apache Httpd">
+      <config>
+        <option name="httpd-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/httpd.pid"
+                description="PTQL for Zimbra Apache Httpd"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%httpd-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra Postfix">
+      <config>
+        <option name="postfix-ptql"
+                default="Pid.PidFile.eq=%installpath%/postfix/spool/pid/master.pid"
+                description="PTQL for Zimbra Apache Httpd"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%postfix-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra AMaViS">
+      <config>
+        <option name="amavis-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/amavisd.pid"
+                description="PTQL for Zimbra AMaViS"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%amavis-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra Log Watch">
+      <config>
+        <option name="logswatch-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/logswatch.pid"
+                description="PTQL for Zimbra logswatch"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%logswatch-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra Swatch">
+      <config>
+        <option name="swatch-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/swatch.pid"
+                description="PTQL for Zimbra Swatch"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%swatch-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Zimbra MTA Config">
+      <config>
+        <option name="mtaconfig-ptql"
+                default="Pid.PidFile.eq=%installpath%/log/zmmtaconfig.pid"
+                description="PTQL for Zimbra MTA Config"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%mtaconfig-ptql%:State"
+              indicator="true"/>
+    </service>
+
   </server>
 </plugin>
