@@ -29,6 +29,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
@@ -56,8 +57,8 @@ public class UIPluginManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
-    private UIPluginDAO               _pluginDAO;
-    private ViewDAO           _viewDAO;
+    private UIPluginDAO   _pluginDAO;
+    private ViewDAO       _viewDAO;
     private AttachmentDAO _attachDAO;
     
     public UIPluginManagerEJBImpl() {
@@ -172,6 +173,14 @@ public class UIPluginManagerEJBImpl
      */
     public Collection findAll() {
         return _pluginDAO.findAll();
+    }
+    
+    /**
+     * Find all the views attached via a specific attach type
+     * @ejb:interface-method
+     */
+    public Collection findViews(AttachType type) {
+        return _viewDAO.findFor(type);
     }
     
     public static UIPluginManagerLocal getOne() {
