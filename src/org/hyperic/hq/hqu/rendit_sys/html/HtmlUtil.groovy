@@ -13,20 +13,32 @@ class HtmlUtil {
      * action:  The target action within the current controller to execute
      * id:      Either an integer, or an object which answers to .getId(), which
      *          will pass an id= query parameter
-     * 
-     * TODO:  Add support for arbitrary URL query params
+     *
+     * Any additional values in the map will be passed as query parameters
      */
     static String urlFor(opts) {
+        opts = new HashMap(opts) 
         def res = ''
+        def qparams = [:]
         if (opts['action']) {
-        	res += opts['action'] + '.hqu'    
+        	res += opts['action'] + '.hqu'
+        	opts.remove('action')
         }
         if (opts['id'] != null) {
             def id = opts['id']
 
             if (!(id instanceof Number))
                 id = id.id  // Call 'getId' on the object if it's not a number
-            res += "?id=$id"
+            qparams['id'] = "${id}"
+            opts.remove('id')
+        }
+        
+        def addedParam = false
+        for (o in opts) {
+            if (!addedParam)
+                res += '?'
+            res += "${o.key}=${escapeHtml(o.value)}&"
+            addedParam = true
         }
         res
     }
