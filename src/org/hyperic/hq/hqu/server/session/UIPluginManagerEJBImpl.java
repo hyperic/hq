@@ -169,6 +169,7 @@ public class UIPluginManagerEJBImpl
     }
 
     /**
+     * Finds all {@link UIPlugin}s
      * @ejb:interface-method
      */
     public Collection findAll() {
@@ -177,12 +178,24 @@ public class UIPluginManagerEJBImpl
     
     /**
      * Find all the views attached via a specific attach type
+     * 
+     * @return a collection of {@link AttachType}s
      * @ejb:interface-method
      */
     public Collection findViews(AttachType type) {
         return _viewDAO.findFor(type);
     }
     
+    /**
+     * Find all attachments for a specific type
+     * 
+     * @return a collection of {@link Attachment}s
+     * @ejb:interface-method
+     */
+    public Collection findAttachments(AttachType type) {
+        return _attachDAO.findFor(type);
+    }
+
     public static UIPluginManagerLocal getOne() {
         try {
             return UIPluginManagerUtil.getLocalHome().create();
