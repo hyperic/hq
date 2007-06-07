@@ -31,7 +31,19 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
+ <script language="JavaScript" type="text/javascript">
+     function onMouseRow(el) {
+             el.style.background="#a6c2e7";
+         }
 
+         function offMouseRowEven(el) {
+             el.style.background="#F2F4F7";
+         }
+
+         function offMouseRowOdd(el) {
+             el.style.background="#EBEDF2";
+         }
+</script>
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
 	<tr class="ListHeaderDark">
@@ -41,7 +53,7 @@
     <c:forEach var="entry" varStatus="status" items="${platformTypes}">
     <c:choose>
       <c:when test="${even}">
-        <tr class="tableRowEven">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
@@ -69,11 +81,11 @@
 	<c:forEach var="platSvc" varStatus="psStatus" items="${platformServiceTypes}">
     <c:choose>
       <c:when test="${even}">
-        <tr class="tableRowEven">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
-        <tr class="tableRowOdd">
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
@@ -84,11 +96,11 @@
     <c:forEach var="winSvc" varStatus="wsStatus" items="${windowsServiceTypes}">
     <c:choose>
       <c:when test="${even}">
-        <tr class="tableRowEven">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
-        <tr class="tableRowOdd">
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
@@ -112,11 +124,11 @@
     <c:if test="${server.virtual == false}">
     <c:choose>
       <c:when test="${even}">
-        <tr class="tableRowEven">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
-        <tr class="tableRowOdd">
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
@@ -127,11 +139,11 @@
         <c:forEach var="serviceType" varStatus="status" items="${services}">
     <c:choose>
       <c:when test="${even}">
-        <tr class="tableRowEven">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
-        <tr class="tableRowOdd">
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
