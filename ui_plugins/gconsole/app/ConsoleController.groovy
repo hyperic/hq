@@ -1,11 +1,23 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
 class ConsoleController extends BaseController { 
+    final HIBERNATE_PREMADE = """
+import org.hibernate.criterion.Restrictions
+
+def persistedClass = org.hyperic.hq.appdef.server.session.Platform
+def sess  = org.hyperic.hibernate.Util.sessionFactory.currentSession
+
+sess.createCriteria(persistedClass).
+  setMaxResults(10).
+  list()
+"""
+    final TEMPLATES = ['Hibernate Query' : HIBERNATE_PREMADE]
+        
 	def ConsoleController() {
         setTemplate('standard')
 	}
 	
-    def index = { params ->
+    def index(params) {
     	def r = [:]
     
     	if (params.hasOne('code_input')) {
@@ -16,7 +28,12 @@ class ConsoleController extends BaseController {
 			r['last_result'] = '3'
 		}
     	
-    	render(locals:[r:r])
+    	render(action:'index', locals:[r:r, templates:TEMPLATES])
+    }
+    
+    def chooseTemplate(params) {
+        def tmpl = TEMPLATES[params.getOne('template')]
+        index(['code_input' : [tmpl]])
     }
     
     private def executeCode(code) {
