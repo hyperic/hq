@@ -83,4 +83,9 @@ public abstract class EscalationAlertType
     protected abstract void logActionDetails(Integer alertId, Action action,
                                              String detail, 
                                              AuthzSubject subject);
+    
+    /**
+     * Return the note from the last alert instance where the alert was fixed.
+     */
+    protected abstract String getLastFixedNote(PerformsEscalations def);
 }

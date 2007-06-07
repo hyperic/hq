@@ -273,9 +273,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public Alert findLastFixedByDefinition(AuthzSubjectValue subj, Integer id) {
+    public Alert findLastFixedByDefinition(AlertDefinition def) {
         try {
-            AlertDefinition def = getAlertDefDAO().findById(id);
             return getAlertDAO().findLastByDefinition(def, true);
         } catch (Exception e) {
             return null;

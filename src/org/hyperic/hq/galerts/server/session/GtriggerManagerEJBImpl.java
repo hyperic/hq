@@ -31,8 +31,13 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManagerUtil;
+import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
+import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
 
 /**
  * @ejb:bean name="GtriggerManager"
@@ -102,6 +107,14 @@ public class GtriggerManagerEJBImpl
         _ttypeDAO.remove(info);
     }
     
+    public static GtriggerManagerLocal getOne() {
+        try {
+            return GtriggerManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
     public void ejbCreate() {}
     public void ejbRemove() {}
     public void ejbActivate() {}

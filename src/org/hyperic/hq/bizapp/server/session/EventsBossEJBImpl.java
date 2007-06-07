@@ -1704,31 +1704,18 @@ public class EventsBossEJBImpl
         getEscMan().fixAlert(subject, alertType, alertID, moreInfo);
     }
     
-    /** Get the last fix if available
-     * @throws FinderException 
-     * @throws SessionTimeoutException 
-     * @throws SessionNotFoundException 
+    /**
+     * Get the last fix if available
      * @ejb:interface-method
      */
     public String getLastFix(int sessionID, Integer defId)
-        throws SessionNotFoundException, SessionTimeoutException {
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, FinderException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         
         // Look for the last fixed alert
-        Alert alert = getAM().findLastFixedByDefinition(subject, defId);
-        if (alert != null) {
-            long lastlog = 0;
-            String fixedNote = null;
-            for (Iterator it = alert.getActionLog().iterator(); it.hasNext(); )
-            {
-                AlertActionLog log = (AlertActionLog) it.next();
-                if (log.getAction() == null && log.getTimeStamp() > lastlog) {
-                    fixedNote = log.getDetail();
-                }
-            }
-            return fixedNote;
-        }
-        return null;
+        AlertDefinition def = getADM().getByIdAndCheck(subject, defId);
+        return getEscMan().getLastFix(def);
     }
 
     /**

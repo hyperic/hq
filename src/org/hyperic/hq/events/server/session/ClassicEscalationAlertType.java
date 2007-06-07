@@ -126,4 +126,22 @@ public final class ClassicEscalationAlertType
     private ClassicEscalationAlertType(int code, String desc) {
         super(code, desc);
     }
+
+    protected String getLastFixedNote(PerformsEscalations def) {
+        Alert alert =
+            getAlertMan().findLastFixedByDefinition((AlertDefinition) def);
+        if (alert != null) {
+            long lastlog = 0;
+            String fixedNote = null;
+            for (Iterator it = alert.getActionLog().iterator(); it.hasNext(); )
+            {
+                AlertActionLog log = (AlertActionLog) it.next();
+                if (log.getAction() == null && log.getTimeStamp() > lastlog) {
+                    fixedNote = log.getDetail();
+                }
+            }
+            return fixedNote;
+        }
+        return null;
+    }
 }

@@ -46,6 +46,7 @@ import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -174,13 +175,22 @@ public class EmailAction extends EmailActionConfig
         // The rest of the alert details
         text.append("\n- Alert Severity: ")
             .append(EventConstants.getPriority(alertdef.getPriority()))
-            .append("\n- Alert Date / Time: ").append(alertTime)
-            .append(SEPARATOR);
+            .append("\n- Alert Date / Time: ").append(alertTime);
 
         if (!info.getAuxLogs().isEmpty()) {
             text.append("\nAdditional information:\n");
             addAuxLogs("  ", info.getAuxLogs(), text);
         }
+        
+        // See if we can get the previous fix
+        if (alertdef.performsEscalations()) {
+            String lastFix = EscalationManagerEJBImpl.getOne()
+                .getLastFix((PerformsEscalations) alertdef);
+            text.append("\n- Previous Fix: ")
+                .append(lastFix);
+        }
+
+        text.append(SEPARATOR);
         
         try {
             // Create the links

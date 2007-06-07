@@ -611,6 +611,18 @@ public class EscalationManagerEJBImpl
     }
     
     /**
+     * @ejb:interface-method
+     */
+    public String getLastFix(PerformsEscalations def) {
+        if (def != null) {
+            EscalationAlertType type = def.getAlertType();
+            return type.getLastFixedNote(def);
+        }
+        return null;
+    }
+
+    
+    /**
      * @ejb:interface-method  
      */
     public void startup() {

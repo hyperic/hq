@@ -50,20 +50,20 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
-import org.hyperic.hq.galerts.server.session.GalertActionLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
+import org.hyperic.hq.galerts.server.session.GtriggerManagerEJBImpl;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
-import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -96,8 +96,8 @@ public class GalertBossEJBImpl
     public GalertBossEJBImpl() {
         _sessMan = SessionManager.getInstance();
         try {
-            _galertMan  = GalertManagerUtil.getLocalHome().create();
-            _triggerMan = GtriggerManagerUtil.getLocalHome().create();
+            _galertMan  = GalertManagerEJBImpl.getOne();
+            _triggerMan = GtriggerManagerEJBImpl.getOne();
         } catch(Exception e) {
             throw new SystemException(e);
         }
@@ -357,20 +357,7 @@ public class GalertBossEJBImpl
     public String getLastFix(int sessionID, GalertDef def)
         throws SessionNotFoundException, SessionTimeoutException {        
         // Look for the last fixed alert
-        GalertLog alert = _galertMan.findLastFixedByDef(def);
-        if (alert != null) {
-            long lastlog = 0;
-            String fixedNote = null;
-            for (Iterator it = alert.getActionLog().iterator(); it.hasNext(); )
-            {
-                GalertActionLog log = (GalertActionLog) it.next();
-                if (log.getAction() == null && log.getTimeStamp() > lastlog) {
-                    fixedNote = log.getDetail();
-                }
-            }
-            return fixedNote;
-        }
-        return null;
+        return EscalationManagerEJBImpl.getOne().getLastFix(def);
     }
     
     /**

@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.Iterator;
+
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -83,5 +85,22 @@ public final class GalertEscalationAlertType
 
     private GalertEscalationAlertType(int code, String desc) {
         super(code, desc);
+    }
+
+    protected String getLastFixedNote(PerformsEscalations def) {
+        GalertLog alert = getGalertMan().findLastFixedByDef((GalertDef) def);
+        if (alert != null) {
+            long lastlog = 0;
+            String fixedNote = null;
+            for (Iterator it = alert.getActionLog().iterator(); it.hasNext(); )
+            {
+                GalertActionLog log = (GalertActionLog) it.next();
+                if (log.getAction() == null && log.getTimeStamp() > lastlog) {
+                    fixedNote = log.getDetail();
+                }
+            }
+            return fixedNote;
+        }
+        return null;
     }
 }
