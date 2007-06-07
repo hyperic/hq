@@ -23,7 +23,10 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.zimbra">
+<plugin package="org.hyperic.hq.plugin.openldap">
+
+  <property name="template-config"
+    value="ldapDriver=%ldapDriver%,ldapHostURL=%ldapHostURL%,ldapAuthType=%ldapAuthType%,ldapTreePathToDN=%ldapTreePathToDN%,ldapPasswd=%ldapPasswd%"/>
 
   <server name="OpenLDAP"
           version="2.3.x">
@@ -31,207 +34,229 @@
     <plugin type="autoinventory"
             class="OpenLDAPServerDetector"/>
     <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-    <plugin type="collector"
-            class="org.hyperic.hq.plugin.zimbra.OpenLDAPCollector"/>
+            class="OpenLDAPMeasurementPlugin"/>
+
+    <config>
+      <option name="ldapDriver"
+              description="LDAP Driver Class"
+              default="com.sun.jndi.ldap.LdapCtxFactory"/>
+      <option name="ldapHostURL"
+              description="LDAP Host URL"
+              default="ldap://localhost:389"/>
+      <option name="ldapAuthType"
+              description="LDAP Authentication Type"
+              default="simple"/>
+      <option name="ldapTreePathToDN"
+              description="LDAP Path To DN"
+              optional="true"
+              default=""/>
+      <option name="ldapPasswd"
+              type="secret"
+              optional="true"
+              description="LDAP Password DN"
+              default=""/>
+    </config>
 
     <filter name="template"
-            value="openldap-stats:installpath=%installpath%:${alias}"/>
+            value="openldap:Type=Server:${query}"/>
 
     <metric name="Availability"
+            query="availability"
             indicator="true"/>
 
+<!--
     <metric name="Connection Time ms"
             category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="ms"/>
+-->
 
     <metric name="Extended Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Extended,cn=Operations,cn=Monitor"
+            query="cn=Extended,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Extended Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Extended,cn=Operations,cn=Monitor"
+            query="cn=Extended,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Abandon Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Abandon,cn=Operations,cn=Monitor"
+            query="cn=Abandon,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Abandon Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Abandon,cn=Operations,cn=Monitor"
+            query="cn=Abandon,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Search Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Search,cn=Operations,cn=Monitor"
+            query="cn=Search,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Search Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Search,cn=Operations,cn=Monitor"
+            query="cn=Search,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Compare Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Compare,cn=Operations,cn=Monitor"
+            query="cn=Compare,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Compare Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Compare,cn=Operations,cn=Monitor"
+            query="cn=Compare,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Modify Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Modify,cn=Operations,cn=Monitor"
+            query="cn=Modify,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Modify Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Modify,cn=Operations,cn=Monitor"
+            query="cn=Modify,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Modrdn Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Modrdn,cn=Operations,cn=Monitor"
+            query="cn=Modrdn,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Modrdn Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Modrdn,cn=Operations,cn=Monitor"
+            query="cn=Modrdn,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Delete Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Delete,cn=Operations,cn=Monitor"
+            query="cn=Delete,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Delete Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Delete,cn=Operations,cn=Monitor"
+            query="cn=Delete,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Add Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Add,cn=Operations,cn=Monitor"
+            query="cn=Add,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Add Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Add,cn=Operations,cn=Monitor"
+            query="cn=Add,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Bind Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=Bind,cn=Operations,cn=Monitor"
+            query="cn=Bind,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Bind Operation Completed"
             category="THROUGHPUT"
-            alias="cn=Bind,cn=Operations,cn=Monitor"
+            query="cn=Bind,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="UnBind Operation Initiated"
             category="THROUGHPUT"
-            alias="cn=UnBind,cn=Operations,cn=Monitor"
+            query="cn=UnBind,cn=Operations,cn=Monitor:monitorOpInitiated"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="UnBind Operation Completed"
             category="THROUGHPUT"
-            alias="cn=UnBind,cn=Operations,cn=Monitor"
+            query="cn=UnBind,cn=Operations,cn=Monitor:monitorOpCompleted"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Number of Bytes Sent"
             category="THROUGHPUT"
-            alias="cn=Bytes,cn=Statistics,cn=Monitor"
+            query="cn=Bytes,cn=Statistics,cn=Monitor:monitorCounter"
             indicator="true"
             collectionType="dynamic"
-            units="none"/>
+            units="B"/>
 
     <metric name="Number of PDU Sent"
             category="THROUGHPUT"
-            alias="cn=PDU,cn=Statistics,cn=Monitor"
+            query="cn=PDU,cn=Statistics,cn=Monitor:monitorCounter"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Number of Referrals Sent"
             category="THROUGHPUT"
-            alias="cn=Referrals,cn=Statistics,cn=Monitor"
+            query="cn=Referrals,cn=Statistics,cn=Monitor:monitorCounter"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Number of Entries Sent"
             category="THROUGHPUT"
-            alias="cn=Entries,cn=Statistics,cn=Monitor"
+            query="cn=Entries,cn=Statistics,cn=Monitor:monitorCounter"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
-    <metric name="Max number of threads enabled at startup and the current backload"
+    <metric name="Current number of threads enabled"
             category="THROUGHPUT"
-            alias="cn=Max,cn=Threads,cn=Monitor"
+            query="cn=Max,cn=Threads,cn=Monitor:monitoredInfo"
             indicator="true"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Contains the number of current write waiters"
             category="THROUGHPUT"
-            alias="cn=Write,cn=Waiters,cn=Monitor"
+            query="cn=Write,cn=Waiters,cn=Monitor:monitorCounter"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
 
     <metric name="Contains the number of current read waiters"
             category="THROUGHPUT"
-            alias="cn=Read,cn=Waiters,cn=Monitor"
+            query="cn=Read,cn=Waiters,cn=Monitor:monitorCounter"
             indicator="false"
             collectionType="dynamic"
             units="none"/>
@@ -257,7 +282,7 @@
 
         http://www.openldap.org/devel/admin/monitoringslapd.html
 
-        Without this Hyperic HQ will still monitor OpenLDAP, but the statistics
+        Without this, Hyperic HQ will still monitor OpenLDAP but the statistics
         are very limited.
     </p>
     ]]>
