@@ -62,17 +62,12 @@ abstract class BaseController {
      */
     def dispatchRequest() {
 		def params = invokeArgs.request.parameterMap
-
-		def runner = this."$action"
-    	if (runner == null)
-        	throw new IllegalArgumentException("Unknown action [$action]")
-    	
-	    def start = System.currentTimeMillis()
+	    def start  = System.currentTimeMillis()
 
 	    rendered = false
 	    
 	    try {
-    	    runner(params)
+			invokeMethod(action, params)
     		if (!rendered) {
     		    render([action : action])
 	        }
