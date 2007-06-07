@@ -47,6 +47,10 @@
       <key on-delete="cascade" column="VIEW_ID"/>
     </joined-subclass>
     
+    <joined-subclass name="ViewMasthead" table="EAM_UI_VIEW_MASTHEAD">
+      <key on-delete="cascade" column="VIEW_ID"/>
+    </joined-subclass>
+
   </class>
 
 </hibernate-mapping>

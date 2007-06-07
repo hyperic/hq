@@ -33,15 +33,11 @@ public abstract class AttachType
     extends HypericEnum
 {
     public static AttachType ADMIN = new AttachType(0, "admin") {
-        View createView(UIPlugin plugin, 
-                                ViewDescriptor viewInfo) 
-        {
+        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
             return new ViewAdmin(plugin, viewInfo);
         }
 
-        Attachment attach(View view, 
-                                      AttachmentDescriptor d) 
-        {
+        Attachment attach(View view, AttachmentDescriptor d) { 
             assert view.getAttachments().isEmpty();
             Attachment a = new Attachment(view);
             
@@ -50,15 +46,29 @@ public abstract class AttachType
         }
     };
 
-    abstract View createView(UIPlugin plugin, 
-                                     ViewDescriptor viewInfo);
+    public static AttachType MASTHEAD = new AttachType(1, "masthead") {
+        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
+            return new ViewMasthead(plugin, viewInfo);
+        }
+
+        Attachment attach(View view, AttachmentDescriptor d) { 
+            assert view.getAttachments().isEmpty();
+            Attachment a = new Attachment(view);
+            
+            view.addAttachment(a);
+            return a;
+        }
+    };
+
+    abstract View createView(UIPlugin plugin, ViewDescriptor viewInfo); 
     
-    abstract Attachment attach(View view, 
-                                           AttachmentDescriptor d);
+    abstract Attachment attach(View view, AttachmentDescriptor d); 
     
     public static AttachType findByDescription(String desc) {
         if (desc.equals("admin")) 
             return ADMIN;
+        else if (desc.equals("masthead"))
+            return MASTHEAD;
 
         throw new IllegalArgumentException("Unknown AttachType [" + desc + "]");
     }

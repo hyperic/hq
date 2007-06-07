@@ -162,7 +162,7 @@ public class UIPluginManagerEJBImpl
             p.setDescription(pInfo.getDescription());
         if (!p.getPluginVersion().equals(pInfo.getVersion()))
             p.setPluginVersion(pInfo.getVersion());
-        
+
         // TODO:  What do we do here if the views for a particular plugin
         //        have changed?  Work it out.
     }
