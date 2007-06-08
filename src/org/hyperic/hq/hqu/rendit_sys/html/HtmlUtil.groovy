@@ -24,6 +24,7 @@ class HtmlUtil {
         	res += opts['action'] + '.hqu'
         	opts.remove('action')
         }
+        
         if (opts['id'] != null) {
             def id = opts['id']
 
@@ -33,8 +34,9 @@ class HtmlUtil {
             opts.remove('id')
         }
         
+        qparams += opts
         def addedParam = false
-        for (o in opts) {
+        for (o in qparams) {
             if (!addedParam)
                 res += '?'
             res += "${o.key}=${escapeHtml(o.value)}&"
