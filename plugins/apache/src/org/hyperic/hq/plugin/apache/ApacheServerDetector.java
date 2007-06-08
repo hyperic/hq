@@ -125,19 +125,27 @@ public class ApacheServerDetector
             !this.discoverModSnmp;
     }
 
-    private static String getServerRoot(String[] args) {
+    private static void getServerInfo(ApacheBinaryInfo info, String[] args) {
+        final String nameProp = "-Dhq.name=";
+        String root = null;
         for (int i=1; i<args.length; i++) {
             String arg = args[i];
             if (arg.startsWith("-d")) {
-                String root = arg.substring(2, arg.length());
+                root = arg.substring(2, arg.length());
                 if (root.length() == 0) {
                     root = args[i+1];
                 }
-                return root;
+            }
+            else if (arg.startsWith(nameProp)) {
+                info.name = arg.substring(nameProp.length(),
+                                          arg.length());
             }
         }
 
-        return null;
+        if (root != null) {
+            //-d overrides compiled in HTTPD_ROOT
+            info.root = root;
+        }
     }
 
     private static void findServerProcess(List servers, String query,
@@ -157,11 +165,7 @@ public class ApacheServerDetector
                 continue;
             }
 
-            String root = getServerRoot(getProcArgs(pids[i]));
-            if (root != null) {
-                //-d overrides compiled in HTTPD_ROOT
-                info.root = root;
-            }
+            getServerInfo(info, getProcArgs(pids[i]));
 
             if (info.root == null) {
                 continue;
@@ -281,6 +285,9 @@ public class ApacheServerDetector
 
         //name was already set, but we want to include .minor version too
         String name = getPlatformName() + " Apache " + fullVersion;
+        if (binary.name != null) {
+            name += " " + binary.name;
+        }
         sValue.setName(name);
 
         List servers = new ArrayList();

@@ -64,6 +64,7 @@ public class ApacheBinaryInfo {
     public String ctl;
     public String built;
     public String mpm;
+    public String name;
 
     public String errmsg = "";
     private long lastModified = 0;
