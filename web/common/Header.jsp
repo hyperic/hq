@@ -57,7 +57,7 @@
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
-                <html:link page="/Dashboard.do">
+                <html:link action="/Dashboard">
                     <c:choose>
                         <c:when test="${applicationScope.largeLogo}">
                             <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt=""
@@ -99,7 +99,7 @@
                         <td class="MastheadContent" nowrap style="font-weight:bold;padding-right:35px;padding-left:9px;">
                             <c:out value="${sessionScope.webUser.username}"/>
                             &nbsp;-&nbsp;
-                            <html:link page="/Logout.do">Logout</html:link>
+                            <html:link action="/Logout"><fmt:message key="admin.user.generalProperties.Logout"/></html:link>
                         </td>
                         <td height="18" class="MastheadBgTop" nowrap>
                         <table border="0" cellspacing="0" cellpadding="0" height="20">
@@ -124,13 +124,20 @@
                     <tr>
                         <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
                             <html:link page="/Dashboard.do"><span
-                                    style="padding-right:10px;">Dashboard</span></html:link>
+                                    style="padding-right:10px;"><fmt:message key="dash.home.PageTitle"/></span></html:link>
                         </td>
                         <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
-                            <html:link page="/ResourceHub.do"><span style="padding-right:10px;padding-left:10px;">Browse Resources</span></html:link>
+                            <html:link page="/ResourceHub.do"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="resource.hub.ResourceHubPageTitle"/></span></html:link>
                         </td>
+                    <c:if test="${not empty mastheadAttachments}">
+                      <c:forEach var="attachment" items="${mastheadAttachments}">
                         <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
-                            <html:link page="/Admin.do"><span style="padding-right:10px;padding-left:10px;">Administration</span></html:link>
+                            <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><span style="padding-right:10px;padding-left:10px;"><c:out value="${attachment.view.description}"/></span></html:link>
+                        </td>
+                      </c:forEach>
+                    </c:if>
+                        <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
+                            <html:link action="/Admin"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="admin.admin.AdministrationTitle"/></span></html:link>
                         </td>
                         <td style="border-right:2px solid #ffffff" class="mainNavText">
                         <a href="." onclick="toggleMenu('recent');return false;"><span
@@ -141,7 +148,7 @@
                         <td class="mainNavText" nowrap>
                             <html:link href=""
                                        onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');return false;">
-                                <span style="padding-right:10px;padding-left:10px;">Help</span></html:link>
+                                <span style="padding-right:10px;padding-left:10px;"><fmt:message key="common.label.Help"/></span></html:link>
                         </td>
                     </tr>
 

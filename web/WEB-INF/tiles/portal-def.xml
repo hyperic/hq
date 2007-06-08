@@ -162,4 +162,10 @@
         <put name="body" value="/portal/ResourceLayout.jsp" />
     </definition>
 
-</tiles-definitions>
+    <definition name=".attach.layout" 
+                extends=".main.layout"
+                controllerUrl="/attach/Masthead.do">
+        <put name="body"    value="/portal/AttachBody.jsp" />
+    </definition>
+
+ </tiles-definitions>

@@ -384,7 +384,7 @@
               type="org.apache.struts.tiles.actions.ReloadDefinitionsAction"/>
     
       <action path="/admin/tiles/view" 
-                  type="org.apache.struts.tiles.actions.ViewDefinitionsAction"/>
+              type="org.apache.struts.tiles.actions.ViewDefinitionsAction"/>
     
       <action path="/NothingAction"
               name="ToolbarForm"
@@ -2204,6 +2204,12 @@
       <action path="/escalation/ListActiveEscalations"
               scope="request"
               type="org.hyperic.hq.ui.json.action.escalation.finder.ListActiveEscalations"/>
+
+      <action path="/mastheadAttach"
+              forward=".attach.layout"/>
+
+      <action path="/attach/Masthead"
+              type="org.hyperic.hq.ui.action.attach.MastheadAction"/>
 
   </action-mappings>
 

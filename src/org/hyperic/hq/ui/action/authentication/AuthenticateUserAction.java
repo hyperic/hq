@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +45,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -85,11 +85,12 @@ public class AuthenticateUserAction extends TilesAction {
         WebUser webUser;
         HashMap userOpsMap = new HashMap();
         boolean needsRegistration = false;
+        int sid = 0;
         try {
             // authenticate the credentials
             AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-            int sid = authBoss.login(logonForm.getJ_username(),
-                                     logonForm.getJ_password());
+            sid = authBoss.login(logonForm.getJ_username(),
+                                 logonForm.getJ_password());
             Integer sessionId = new Integer(sid);
             if (log.isTraceEnabled()) {
                 log.trace("Logged in as [" + logonForm.getJ_username() +
@@ -198,6 +199,11 @@ public class AuthenticateUserAction extends TilesAction {
         } catch (Throwable t) {
             session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
         }
+        
+        // Look up any UI attach points
+        ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
+        session.setAttribute("mastheadAttachments",
+                             pBoss.findMastAttachments(sid));
 
         return af;
     }

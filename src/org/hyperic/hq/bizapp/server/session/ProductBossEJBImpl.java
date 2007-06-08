@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -48,7 +49,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -58,6 +58,9 @@ import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -487,6 +490,23 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         CacheManager cacheManager = CacheManager.getInstance();
         
         cacheManager.clearAll();
+    }
+    
+    /**
+     * Get the mashead attach points
+     * @ejb:interface-method
+     */
+    public Collection findMastAttachments(int sessionId) {
+        return UIPluginManagerEJBImpl.getOne()
+            .findAttachments(AttachType.MASTHEAD);
+    }
+    
+    /**
+     * Get an attachment view by ID
+     * @ejb:interface-method
+     */
+    public View findViewById(int sessionId, Integer id) {
+        return UIPluginManagerEJBImpl.getOne().findViewById(id);
     }
     
     public static ProductBossLocal getOne() {

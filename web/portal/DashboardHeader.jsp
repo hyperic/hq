@@ -1,10 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-bean" prefix="bean" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="hq" prefix="hq" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
