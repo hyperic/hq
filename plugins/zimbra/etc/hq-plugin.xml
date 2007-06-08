@@ -39,6 +39,9 @@
             value="zimbra-stats:installpath=%installpath%:${alias}"/>
 
     <config>
+      <option name="installpath"
+              default="/opt/zimbra"
+              description="Zimbra Install Path"/>
       <option name="zimbra-ptql"
               default="Pid.PidFile.eq=%installpath%/log/zmtomcatmgr.pid"
               description="Sigar PTQL Process Query"/>
@@ -92,7 +95,7 @@
     <metric name="Avg Time to Obtain a DB Connection"
             category="THROUGHPUT"
             alias="db_conn_ms_avg"
-            indicator="false"
+            indicator="true"
             collectionType="dynamic"
             units="ms"/>
     <metric name="LDAP Connection Count"
@@ -268,7 +271,7 @@
               indicator="true"/>
     </service>
 
-    <service name="OpenLDAP">
+    <service name="Zimbra OpenLDAP">
       <config>
         <option name="openldap-ptql"
                 default="Pid.PidFile.eq=%installpath%/openldap/var/run/slapd.pid"

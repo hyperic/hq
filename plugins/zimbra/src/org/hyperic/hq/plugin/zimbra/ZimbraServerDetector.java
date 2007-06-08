@@ -71,19 +71,21 @@ public class ZimbraServerDetector
 
     public List getServerList(String path) throws PluginException
     {
-        ConfigResponse productConfig = new ConfigResponse();
-
         List servers = new ArrayList();
-        String installdir = getParentDir(path, 2);
+        String installpath = getParentDir(path, 2);
+
+        ConfigResponse productConfig = new ConfigResponse();
+        productConfig.setValue("installpath", installpath);
+
         String version = "";
-        if ((new File(installdir+"/"+VERSION_4_5_x_JAVA+"/")).exists())
+        if ((new File(installpath+"/"+VERSION_4_5_x_JAVA+"/")).exists())
             version = VERSION_4_5_x;
 
         // Only check the binaries if they match the path we expect
         if (path.indexOf(PROCESS_NAME) == -1)
             return servers;
 
-        ServerResource server = createServerResource(installdir);
+        ServerResource server = createServerResource(installpath);
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
@@ -95,5 +97,38 @@ public class ZimbraServerDetector
         servers.add(server);
 
         return servers;
+    }
+
+    protected List discoverServices(ConfigResponse config)
+        throws PluginException
+    {
+        List services = new ArrayList();
+        services.add(getService("Zimbra Tomcat"));
+        services.add(getService("Zimbra Logger MySQL"));
+        services.add(getService("Zimbra MySQL"));
+        services.add(getService("Zimbra OpenLDAP"));
+        services.add(getService("Zimbra Cyrus SASL"));
+        services.add(getService("Zimbra ClamAV"));
+        services.add(getService("Zimbra Apache Httpd"));
+        services.add(getService("Zimbra Postfix"));
+        services.add(getService("Zimbra AMaViS"));
+        services.add(getService("Zimbra Log Watch"));
+        services.add(getService("Zimbra Swatch"));
+        services.add(getService("Zimbra MTA Config"));
+        return services;
+    }
+
+    private ServiceResource getService(String name)
+    {
+        ServiceResource service = new ServiceResource();
+        service.setType(this, name);
+        service.setServiceName(name);
+        ConfigResponse productConfig = new ConfigResponse();
+        service.setProductConfig(productConfig);
+        // set an empty measurement config
+        service.setMeasurementConfig();
+        // set an empty control config
+        service.setControlConfig();
+        return service;
     }
 }
