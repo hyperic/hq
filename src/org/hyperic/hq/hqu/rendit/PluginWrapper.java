@@ -25,26 +25,30 @@
 package org.hyperic.hq.hqu.rendit;
 
 import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.Script;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import org.codehaus.groovy.runtime.InvokerHelper;
+
 /**
  * Basically a wrapper around the classloader and associated groovy 
  * artifacts.
  */
 public class PluginWrapper {
-    private       File               _pluginDir;
-    private final GroovyScriptEngine _engine;
+    private       File              _pluginDir;
+    private final File              _sysDir;
+    private final GroovyClassLoader _loader;
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
-        URLClassLoader urlLoader = new URLClassLoader(new URL[0], 
-                                                      parentLoader);
+        URLClassLoader urlLoader;
         URL[] u;
 
+        _sysDir    = sysDir;
         _pluginDir = pluginDir;
 
         try {
@@ -54,7 +58,9 @@ public class PluginWrapper {
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        _engine = new GroovyScriptEngine(u, urlLoader);
+        
+        urlLoader = URLClassLoader.newInstance(u, parentLoader);
+        _loader = new GroovyClassLoader(urlLoader);
     }
     
     File getPluginDir() {
@@ -66,8 +72,10 @@ public class PluginWrapper {
         ClassLoader oldLoader = curThread.getContextClassLoader();
 
         try {
-            curThread.setContextClassLoader(_engine.getParentClassLoader());
-            return _engine.run(script, b);
+            curThread.setContextClassLoader(_loader);
+            Class c = _loader.parseClass(new File(_sysDir, script));
+            Script s = InvokerHelper.createScript(c, b);
+            return s.run();
         } finally {
             curThread.setContextClassLoader(oldLoader);
         }
