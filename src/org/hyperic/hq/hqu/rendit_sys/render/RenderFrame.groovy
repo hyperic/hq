@@ -113,7 +113,9 @@ class RenderFrame {
         try {
             def gspFile
     	    if (opts.inline) {
-                return output.write(opts.inline, 0, opts.inline.length())
+                output.write(opts.inline, 0, opts.inline.length())
+                output.flush()
+                return
     	    } else if(partial) { 
                 gspFile = new File(partialDir, "_${partial}.gsp")
     	    } else if(templ) {
