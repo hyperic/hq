@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit.render
 
+import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -67,8 +68,11 @@ class RenderFrame {
     }
 
     private Map getImplicitLocals() {
-        [formFor : this.&formFor,
-         l       : controller.localeBundle]
+        [formFor     : this.&formFor,
+         dojoInit    : DojoUtil.&dojoInit,
+         dojoInclude : DojoUtil.&dojoInclude,
+         dojoTable   : DojoUtil.&dojoTable,
+         l           : controller.localeBundle]
     }
 
     private def formFor(formOpts, formClosure) {
