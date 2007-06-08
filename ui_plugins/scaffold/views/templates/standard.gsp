@@ -6,4 +6,4 @@
 <body>
 	<%= template.body %>
 </body>
-</html
+</html>
