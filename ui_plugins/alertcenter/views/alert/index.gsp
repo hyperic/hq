@@ -18,7 +18,7 @@
             filteringTable.columns.push(filteringTable.createMetaData(alertColumns[x]));
         }
         var bindArgs = {
-            url: 'sample2.hqu',
+            url: 'data.hqu',
             method: "get",
             mimetype: "text/json-comment-filtered",
             handle: function(type,data,evt) {
