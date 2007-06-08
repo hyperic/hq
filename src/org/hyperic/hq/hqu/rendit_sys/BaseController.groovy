@@ -84,13 +84,8 @@ abstract class BaseController {
      * from this base method)
      */
     def getAddIns() {
-		[
-		 url_for     : HtmlUtil.&urlFor,
-		 h           : HtmlUtil.&escapeHtml,
-		 link_to     : HtmlUtil.&linkTo,
-		 button_to   : HtmlUtil.&buttonTo,
-		 format_date : this.&formatDate,
-		]
+		[h           : HtmlUtil.&escapeHtml,
+		 format_date : this.&formatDate]
     }
     
     String formatDate(String fmt, Date d) {

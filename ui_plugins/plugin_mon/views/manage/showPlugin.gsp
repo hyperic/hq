@@ -1,6 +1,6 @@
 <h3>Plugin information for <%= h plugin.name %></h3>
 
-<%= link_to '<-- Back to Index', [action:'index'] %>
+<%= linkTo '<-- Back to Index', [action:'index'] %>
 
 <br/>
 <br/>
@@ -24,7 +24,7 @@
     <td><%= h v.attachType.description %></td>
     <td><%= h v.attachable %></td>
     <% if (v.attachable) { %>
-      <td><%= button_to "Attach", [action : 'attach', id : v] %></td>
+      <td><%= buttonTo "Attach", [action : 'attach', id : v] %></td>
     <% } %>
   </tr>
   <% for (a in v.attachments) { %>
@@ -37,7 +37,7 @@
         <%= format_date("yy.MM.dd HH:mm:ss z", new Date(a.attachTime)) %>
       </td>
       <td>
-        <%= button_to "Detach", [action : 'detach', id : a] %></td>
+        <%= buttonTo "Detach", [action : 'detach', id : a] %></td>
       </td>
     </tr>
   <% } %>

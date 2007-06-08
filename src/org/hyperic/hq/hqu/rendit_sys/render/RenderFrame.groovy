@@ -1,6 +1,9 @@
 package org.hyperic.hq.hqu.rendit.render
 
+import org.codehaus.groovy.runtime.MethodClosure
+import java.lang.reflect.Modifier
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
+import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -67,12 +70,22 @@ class RenderFrame {
         this.opts['locals'] = locals
     }
 
+    private Map staticMethodsToMap(clazz) {
+        def res = [:]
+        for (m in clazz.declaredMethods) {
+            if (m.modifiers & Modifier.STATIC && m.name != 'class$')
+                res[m.name] = new MethodClosure(clazz, m.name)
+        }
+        res
+    }
+    
     private Map getImplicitLocals() {
-        [formFor     : this.&formFor,
-         dojoInit    : DojoUtil.&dojoInit,
-         dojoInclude : DojoUtil.&dojoInclude,
-         dojoTable   : DojoUtil.&dojoTable,
-         l           : controller.localeBundle]
+        def res = [formFor : this.&formFor, 
+                   l       : controller.localeBundle]
+
+        res += staticMethodsToMap(DojoUtil)        
+        res += staticMethodsToMap(HtmlUtil)        
+        res
     }
 
     private def formFor(formOpts, formClosure) {

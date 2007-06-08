@@ -10,11 +10,11 @@
 <tbody>
 <% for (p in plugins) { %>
   <tr>
-    <td><%= link_to p.name, [action:'showPlugin', id:p] %></td>    
+    <td><%= linkTo p.name, [action:'showPlugin', id:p] %></td>    
     <td><%= h p.pluginVersion %></td>    
     <td><%= h p.description %></td>
-    <td><%= button_to 'Delete', [action:'deletePlugin', id:p,
-                                 confirm:'Are you sure?'] %></td>
+    <td><%= buttonTo 'Delete', [action:'deletePlugin', id:p,
+                                confirm:'Are you sure?'] %></td>
   </tr>
 <% } %>
 </tbody>

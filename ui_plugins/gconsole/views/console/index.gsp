@@ -1,6 +1,6 @@
 Templates: 
 <% for(t in templates) { %>
-  <%= link_to t.key, [action:'chooseTemplate', template:t.key] %><br/>
+  <%= linkTo t.key, [action:'chooseTemplate', template:t.key] %><br/>
 <% } %>
 <% formFor([action:'index']) { f -> %>
 <p>
