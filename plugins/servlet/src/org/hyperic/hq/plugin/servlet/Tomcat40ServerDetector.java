@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.servlet;
 import java.io.File;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.hyperic.hq.product.AutoServerDetector;
@@ -57,6 +58,7 @@ public class Tomcat40ServerDetector
                AutoServerDetector {
 
     static final String UNIQUE_JAR = "warp.jar";
+    private static final HashMap HQ_NAMES = new HashMap();
 
     private static final String TOMCAT_MAIN =
         "org.apache.catalina.startup.Bootstrap";
@@ -101,6 +103,12 @@ public class Tomcat40ServerDetector
         throws PluginException
     {
         ServerResource server = createServerResource(installpath);
+        //XXX should be more generic, done within ServerDetector
+        String hqname = (String)HQ_NAMES.get(installpath);
+        if (hqname != null) {
+            server.setName(server.getName() + " " + hqname);
+        }
+
         TomcatConfig cfg = null;
 
         // Special case if this is the HQ embedded tomcat
@@ -211,6 +219,8 @@ public class Tomcat40ServerDetector
                                           String uniqueJar) {
         final String baseProp = "-Dcatalina.base=";
         final String homeProp = "-Dcatalina.home=";
+        final String nameProp = "-Dhq.name=";
+
         long[] pids = getPids(query);
 
         for (int i=0; i<pids.length; i++) {
@@ -218,6 +228,7 @@ public class Tomcat40ServerDetector
 
             String base = null;
             String home = null;
+            String name = null;
 
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
@@ -228,6 +239,10 @@ public class Tomcat40ServerDetector
                 }
                 else if (arg.startsWith(homeProp)) {
                     home = arg.substring(homeProp.length(),
+                                         arg.length());
+                }
+                else if (arg.startsWith(nameProp)) {
+                    name = arg.substring(nameProp.length(),
                                          arg.length());
                 }
             }
@@ -278,6 +293,9 @@ public class Tomcat40ServerDetector
                 }
 
                 servers.add(base);
+                if (name != null) {
+                    HQ_NAMES.put(base, name);
+                }
             }
         }
     }
