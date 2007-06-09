@@ -57,7 +57,7 @@
         <c:set var="even" value="false"/>
       </c:when>
       <c:otherwise>
-        <tr class="tableRowOdd">
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
