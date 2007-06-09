@@ -1125,7 +1125,7 @@
               name="ServerControlForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction">
-        <set-property property="title" value="Control.New""/>
+        <set-property property="title" value="Control.New"/>
       </action>
 
       <action path="/resource/server/control/New"   
