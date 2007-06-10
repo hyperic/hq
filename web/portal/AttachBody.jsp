@@ -22,5 +22,5 @@
 <c:url var="attachUrl" context="/hqu/${attachment.plugin.name}" value="${attachment.path}"/>
 
 <div style="border-left: 4px solid #CCCCCC;">
-<iframe src="<c:out value="${attachUrl}"/>" frameborder="no"></iframe>
+<iframe src="<c:out value="${attachUrl}"/>" frameborder="no" width="100%" height="500"></iframe>
 </div>
