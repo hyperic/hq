@@ -26,6 +26,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
@@ -33,7 +34,6 @@ import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.events.shared.EventLogValue;
 
 public class EventLogDAO extends HibernateDAO {
     public EventLogDAO(DAOFactory f) {
@@ -44,22 +44,20 @@ public class EventLogDAO extends HibernateDAO {
         return (EventLog)super.findById(id);
     }
 
-    EventLog create(EventLogValue eVal) {
-        EventLog res = new EventLog(eVal);
-        
+    EventLog create(EventLog res) {
         save(res);
         return res;
     }
 
-    Collection findByEntity(AppdefEntityID ent) {
+    List findByEntity(AppdefEntityID ent) {
         return findByEntity(ent, "desc");
     }
 
-    Collection findByEntityOrderTSAsc(AppdefEntityID ent) {
+    List findByEntityOrderTSAsc(AppdefEntityID ent) {
         return findByEntity(ent, "");
     }
 
-    private Collection findByEntity(AppdefEntityID ent, String order) {
+    private List findByEntity(AppdefEntityID ent, String order) {
         String sql = "from EventLog l where l.entityType = :eType " +
             "and l.entityId = :eId order by l.timestamp " + order;
     
@@ -69,8 +67,8 @@ public class EventLogDAO extends HibernateDAO {
             .list();
     }
     
-    Collection findByEntityAndStatus(AppdefEntityID entId, long begin,
-                                     long end, String status) 
+    List findByEntityAndStatus(AppdefEntityID entId, long begin, long end,
+                               String status) 
     {
         return createCriteria()
             .add(Expression.eq("entityType", new Integer(entId.getType())))
@@ -82,9 +80,8 @@ public class EventLogDAO extends HibernateDAO {
             .list();
     }
     
-    Collection findByEntity(AppdefEntityID entId, long begin, long end,
-                            String[] eventTypes) 
-    {
+    List findByEntity(AppdefEntityID entId, long begin, long end,
+                      String[] eventTypes) {
         Criteria c = createCriteria()
             .add(Expression.eq("entityType", new Integer(entId.getType())))
             .add(Expression.eq("entityId", entId.getId()))
@@ -97,7 +94,7 @@ public class EventLogDAO extends HibernateDAO {
         return c.list();
     }
     
-    Collection findBySubject(String subject) {
+    List findBySubject(String subject) {
         String sql = "from EventLog e where e.subject = :subject";
         
         return getSession().createQuery(sql)

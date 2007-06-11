@@ -29,10 +29,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.RemoveException;
@@ -44,7 +41,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.events.shared.EventLogValue;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 
@@ -72,27 +69,14 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         return DAOFactory.getDAOFactory().getEventLogDAO();
     }
     
-    private List returnValues(Collection logLocals) {
-        List logs = new ArrayList(logLocals.size());
-
-        for (Iterator i = logLocals.iterator(); i.hasNext(); ) {
-            EventLog log = (EventLog) i.next();
-
-            logs.add(log.getEventLogValue());
-        }
-
-        return logs;
-    }
-    
     /** 
      * Create a new vanilla log item
      * 
      * @ejb:interface-method
      */
-    public EventLogValue createLog(AbstractEvent event, String subject,
-                                   String status) 
-    {
-        EventLogValue eval = new EventLogValue();
+    public EventLog createLog(AbstractEvent event, String subject,
+                              String status) {
+        EventLog eval = new EventLog();
 
         // Set the time to the event time
         eval.setTimestamp(event.getTimestamp());
@@ -124,7 +108,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
             eval.setEntityId(aeId.getID());
         }
 
-        return getEventLogDAO().create(eval).getEventLogValue();
+        return getEventLogDAO().create(eval);
     }
 
     /** 
@@ -133,7 +117,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public List findLogs(String subject, int page, int size, int order) {
-        return returnValues(getEventLogDAO().findBySubject(subject));
+        return getEventLogDAO().findBySubject(subject);
     }
     
     /** 
@@ -142,18 +126,15 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public List findLogs(int entityType, int entityId, PageControl pc) {
-        Collection logLocals;
         AppdefEntityID entId = new AppdefEntityID(entityType, entityId);
         
         // Currently we only support sorting by the Timestamp attribute
         if (pc.isAscending()) {
-            logLocals = getEventLogDAO().findByEntityOrderTSAsc(entId);
+            return getEventLogDAO().findByEntityOrderTSAsc(entId);
         } else {
             // Natural order is descending
-            logLocals = getEventLogDAO().findByEntity(entId);
+            return getEventLogDAO().findByEntity(entId);
         }
-
-        return returnValues(logLocals);
     }
 
     /** 
@@ -164,12 +145,10 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     public List findLogs(int entityType, int entityId, String[] eventTypes,
                          long begin, long end)
     {
-        Collection logLocals;
         EventLogDAO eDAO = getEventLogDAO();
         AppdefEntityID entId = new AppdefEntityID(entityType, entityId);
         
-        logLocals = eDAO.findByEntity(entId, begin, end, eventTypes);
-        return returnValues(logLocals);
+        return eDAO.findByEntity(entId, begin, end, eventTypes);
     }
 
     /** 
@@ -183,11 +162,10 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         EventLogDAO eDAO = getEventLogDAO();
         AppdefEntityID ent = new AppdefEntityID(entityType, entityId);
         
-        return returnValues(eDAO.findByEntityAndStatus(ent, begin, end, 
-                                                       status));
+        return eDAO.findByEntityAndStatus(ent, begin, end, status);
     }
 
-    /** 
+    /**
      * Get an array of log record counts based on entity ID and time range
      * 
      * @ejb:interface-method

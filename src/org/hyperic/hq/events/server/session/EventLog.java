@@ -26,13 +26,9 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.util.data.IEventPoint;
 
-import org.hyperic.hq.events.shared.EventLogValue;
-
-public class EventLog  
-    extends PersistedObject
-{
+public class EventLog extends PersistedObject implements IEventPoint {
     private String  _detail;
     private String  _type;
     private int     _entityType;
@@ -40,22 +36,13 @@ public class EventLog
     private long    _timestamp;
     private String  _subject;
     private String  _status;
-
-    private EventLogValue _valueObj;
+    
+    // Not persisted
+    private int     _eventId;
 
     protected EventLog() {
     }
 
-    EventLog(EventLogValue eVal) {
-        _detail     = eVal.getDetail();
-        _type       = eVal.getType();
-        _entityType = eVal.getEntityType();
-        _entityId   = eVal.getEntityId();
-        _timestamp  = eVal.getTimestamp();
-        _subject    = eVal.getSubject();
-        _status     = eVal.getStatus();
-    }
-   
     public String getDetail() {
         return _detail;
     }
@@ -112,28 +99,11 @@ public class EventLog
         _status = status;
     }
 
-    public EventLogValue getEventLogValue() {
-        if (_valueObj == null)
-            _valueObj = new EventLogValue();
-
-        _valueObj.setId(getId());
-        _valueObj.setSubject((getSubject() == null) ? "" : getSubject());
-        _valueObj.setEntityType(getEntityType());
-        _valueObj.setEntityId(getEntityId());
-        _valueObj.setDetail((getDetail() == null) ? "" : getDetail());
-        _valueObj.setTimestamp(getTimestamp());
-        _valueObj.setType((getType() == null) ? "" : getType());
-        _valueObj.setStatus((getStatus() == null) ? "" : getStatus());
-        return _valueObj;
+    public int getEventID() {
+        return _eventId;
     }
 
-    public void setEventLogValue(EventLogValue v) {
-        setSubject(v.getSubject());
-        setEntityType(v.getEntityType());
-        setEntityId(v.getEntityId());
-        setDetail(v.getDetail());
-        setTimestamp(v.getTimestamp());
-        setType(v.getType());
-        setStatus(v.getStatus());
+    public void setEventID(int eventId) {
+        _eventId = eventId;
     }
 }

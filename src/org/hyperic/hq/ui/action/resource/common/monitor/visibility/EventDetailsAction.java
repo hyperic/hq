@@ -42,7 +42,7 @@ import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.control.ControlEvent;
-import org.hyperic.hq.events.shared.EventLogValue;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -124,7 +124,7 @@ public class EventDetailsAction extends BaseAction {
             html = new StringBuffer("<ul class=\"boxy\">");
         
             for (Iterator it = events.iterator(); it.hasNext(); ) {
-                EventLogValue elv = (EventLogValue) it.next();
+                EventLog elv = (EventLog) it.next();
 
                 html.append("<li ");
             

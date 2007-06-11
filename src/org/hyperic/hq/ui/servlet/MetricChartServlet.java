@@ -42,7 +42,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.events.shared.EventLogValue;
+import org.hyperic.hq.control.ControlEvent;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
 import org.hyperic.hq.ui.Constants;
@@ -329,15 +330,15 @@ public class MetricChartServlet extends VerticalChartServlet {
                     dataPointsList.add(new PageList());
                 }
     
-                List controlActions = eb
-                .getEvents(sessionId,
-                           org.hyperic.hq.control.ControlEvent.class
-                           .getName(), resources[j], startDate, endDate);
+                List controlActions =
+                    eb.getEvents(sessionId,
+                                 ControlEvent.class.getName(),
+                                 resources[j], startDate, endDate);
                 // We need to make sure that the event IDs get set
                 // for the legend.
                 int k = 0;
                 for (Iterator it = controlActions.iterator(); it.hasNext();) {
-                    EventLogValue event = (EventLogValue) it.next();
+                    EventLog event = (EventLog) it.next();
                     event.setEventID(++k);
                 }
                 eventPointsList.add(controlActions);

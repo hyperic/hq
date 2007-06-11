@@ -57,10 +57,13 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.BaseMetricDisplay;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.control.ControlEvent;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.measurement.BaselineCreationException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -139,7 +142,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 throw new MeasurementNotFoundException(
                     "No resources found for chart");
 
-            _setupMetricData(request, sessionId, chartForm, resources[1], mb);
+            _setupMetricData(request, sessionId, chartForm, resources[1], mb,
+                             ctx);
         } catch (MeasurementNotFoundException e) {
             return removeBadDashboardLink(request, ctx);
         }
@@ -328,16 +332,16 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         }
     }
 
-    protected void _setupMetricData(HttpServletRequest request,
-                                    int sessionId,
-                                    ViewChartForm chartForm,
-                                    AppdefResourceValue[] resources,
-                                    MeasurementBoss mb)
+    private void _setupMetricData(HttpServletRequest request, int sessionId,
+                                  ViewChartForm chartForm,
+                                  AppdefResourceValue[] resources,
+                                  MeasurementBoss mb, ServletContext ctx)
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, MeasurementNotFoundException,
                RemoteException, AppdefEntityNotFoundException,
                PermissionException {
         
+        EventLogBoss eb = ContextUtils.getEventLogBoss(ctx);
         List eventPointsList = new ArrayList(resources.length);
 
         // Get data for charts and put it in session.  In reality only
@@ -371,7 +375,18 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
 
                 if (i == 0) {
                     if (interval > 0) {
-                        List controlActions = new ArrayList();
+                        List controlActions = eb.getEvents(sessionId,
+                                 ControlEvent.class.getName(),
+                                 resources[j].getEntityId(),
+                                 chartForm.getStartDate().getTime(),
+                                 chartForm.getEndDate().getTime());
+                        // We need to make sure that the event IDs get set
+                        // for the legend.
+                        int k = 0;
+                        for (Iterator it=controlActions.iterator(); it.hasNext();) {
+                            EventLog event = (EventLog)it.next();
+                            event.setEventID(++k);
+                        }
                         eventPointsList.add(controlActions);
                     }
                 }
@@ -383,7 +398,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         request.setAttribute("chartLegend", eventPointsList);
     }
 
-    private static final class BaseMetricDisplayComparator implements Comparator {
+    private static final class BaseMetricDisplayComparator
+        implements Comparator {
         public int compare(Object o1, Object o2) {
             BaseMetricDisplay bmd1 = (BaseMetricDisplay)o1;
             BaseMetricDisplay bmd2 = (BaseMetricDisplay)o2;
