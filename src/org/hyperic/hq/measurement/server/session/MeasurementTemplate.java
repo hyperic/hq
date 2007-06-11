@@ -214,8 +214,8 @@ public class MeasurementTemplate
         value.setCtime(getCtime());
         value.setMtime(getMtime());
 
-        value.setMonitorableType(getMonitorableType().getMonitorableTypeValue());
-        value.setCategory(getCategory().getCategoryValue());
+        value.setMonitorableType(getMonitorableType());
+        value.setCategory(getCategory());
 
         return value;
     }

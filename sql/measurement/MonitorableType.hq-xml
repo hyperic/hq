@@ -35,13 +35,6 @@
     <property name="plugin" type="string">
       <column name="PLUGIN" not-null="true" length="250" />
     </property>
-
-    <bag name="measurementTemplatesBag" table="EAM_MEASUREMENT_TEMPL"
-         cascade="save-update,delete,persist,merge,evict"
-         inverse="true">
-      <key column="MONITORABLE_TYPE_ID" />
-      <one-to-many class="MeasurementTemplate" />
-    </bag>
   </class>
 
 </hibernate-mapping>

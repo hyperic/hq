@@ -28,14 +28,8 @@
  */
 package org.hyperic.hq.measurement.shared;
 
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
+import org.hyperic.hq.measurement.server.session.Category;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 
 /**
  * Value object for MeasurementTemplate.
@@ -71,11 +65,9 @@ public class MeasurementTemplateValue
    private boolean ctimeHasBeenSet = false;
    private long mtime;
    private boolean mtimeHasBeenSet = false;
-   private org.hyperic.hq.measurement.shared.MonitorableTypeValue MonitorableType;
-   private boolean MonitorableTypeHasBeenSet = false;
-   private org.hyperic.hq.measurement.shared.CategoryValue Category;
-   private boolean CategoryHasBeenSet = false;
-
+   private MonitorableType MonitorableType;
+   private Category Category;
+   
    public MeasurementTemplateValue() {}
 
    public MeasurementTemplateValue( Integer id,String name,String alias,String units,int collectionType,boolean defaultOn,long defaultInterval,boolean designate,String template,byte[] expressionData,java.lang.String plugin,long ctime,long mtime )
@@ -139,10 +131,8 @@ public class MeasurementTemplateValue
 	  mtimeHasBeenSet = true;
 	// TODO Clone is better no ?
 	  this.MonitorableType = otherValue.MonitorableType;
-	  MonitorableTypeHasBeenSet = true;
-	// TODO Clone is better no ?
+	  // TODO Clone is better no ?
 	  this.Category = otherValue.Category;
-	  CategoryHasBeenSet = true;
    }
 
    public Integer getId()
@@ -340,23 +330,21 @@ public class MeasurementTemplateValue
 	  return mtimeHasBeenSet;
    }
 
-   public org.hyperic.hq.measurement.shared.MonitorableTypeValue getMonitorableType()
+   public MonitorableType getMonitorableType()
    {
 	  return this.MonitorableType;
    }
-   public void setMonitorableType( org.hyperic.hq.measurement.shared.MonitorableTypeValue MonitorableType )
+   public void setMonitorableType( MonitorableType MonitorableType )
    {
 	  this.MonitorableType = MonitorableType;
-	  MonitorableTypeHasBeenSet = true;
    }
-   public org.hyperic.hq.measurement.shared.CategoryValue getCategory()
+   public Category getCategory()
    {
 	  return this.Category;
    }
-   public void setCategory( org.hyperic.hq.measurement.shared.CategoryValue Category )
+   public void setCategory( Category Category )
    {
 	  this.Category = Category;
-	  CategoryHasBeenSet = true;
    }
 
    public String toString()

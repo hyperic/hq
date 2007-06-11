@@ -25,12 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.measurement.shared.MonitorableTypeValue;
 
 public class MonitorableType 
     extends PersistedObject
@@ -39,8 +34,7 @@ public class MonitorableType
     private Integer    _cid;
     private int        _appdefType;
     private String     _plugin;
-    private Collection _templates = new ArrayList();
-
+    
     protected MonitorableType() {
     }
     
@@ -80,32 +74,5 @@ public class MonitorableType
     
     protected void setPlugin(String plugin) {
         _plugin = plugin;
-    }
-
-    public Collection getMeasurementTemplates() {
-        return Collections.unmodifiableCollection(_templates);
-    }
-    
-    protected Collection getMeasurementTemplatesBag() {
-        return _templates;
-    }
-
-    protected void setMeasurementTemplatesBag(Collection templates) {
-        _templates = templates;
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) MonitorableType object instead
-     */
-    public MonitorableTypeValue getMonitorableTypeValue() {
-
-        MonitorableTypeValue mtype = new MonitorableTypeValue();
-        mtype.setId(getId());
-        mtype.setName(getName());
-        mtype.setAppdefType(getAppdefType());
-        mtype.setPlugin(getPlugin());
-
-        return mtype;
     }
 }
