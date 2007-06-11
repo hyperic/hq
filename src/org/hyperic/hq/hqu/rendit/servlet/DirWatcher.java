@@ -53,11 +53,16 @@ class DirWatcher
                 
                 _lastList.clear();
                 _lastList.addAll(curList);
-                Thread.sleep(1000);
             } catch(Throwable e) { 
                 // Catch everything, including Errors, since things like
                 // IncompatableClassChange errors can sometimes occur
                 _log.warn("Error while processing directory listing", e);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch(InterruptedException e) {
+                _log.info("Dying");
+                return;
             }
         }
     }
