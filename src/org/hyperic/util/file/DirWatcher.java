@@ -1,4 +1,4 @@
-package org.hyperic.hq.hqu.rendit.servlet;
+package org.hyperic.util.file;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * XXX:  JBoss has similar functionality that we should re-use
  */
-class DirWatcher 
+public class DirWatcher 
     implements Runnable
 {
     private final Log _log = LogFactory.getLog(DirWatcher.class);
@@ -24,7 +24,7 @@ class DirWatcher
     
     private final List _lastList = new ArrayList();
     
-    DirWatcher(File dir, DirWatcherCallback callback) {
+    public DirWatcher(File dir, DirWatcherCallback callback) {
         _dir      = dir;
         _cback    = callback;
     }
