@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 
@@ -158,12 +159,13 @@ public class RenditServer {
      * Handles regular web requests for a UI plugin. 
      */
     public void handleRequest(String pluginName, HttpServletRequest req, 
-                              HttpServletResponse resp, ServletContext ctx) 
+                              HttpServletResponse resp, ServletContext ctx,
+                              AuthzSubject user) 
         throws Exception
     {
         PluginWrapper plugin = getPlugin(pluginName);
         InvocationBindings bindings = 
-            new RequestInvocationBindings(plugin.getPluginDir(), 
+            new RequestInvocationBindings(plugin.getPluginDir(), user, 
                                           req, resp, ctx);
         invokeDispatcher(plugin, bindings);
     }

@@ -30,21 +30,30 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+
 /**
  * The invocation bindings used when a request is made from the servlet.
  */
 public class RequestInvocationBindings extends InvocationBindings {
+    private AuthzSubject        _user;
     private HttpServletRequest  _request;
     private HttpServletResponse _response;
     private ServletContext      _context;
     
-    RequestInvocationBindings(File pluginDir, HttpServletRequest request,  
+    RequestInvocationBindings(File pluginDir, AuthzSubject user, 
+                              HttpServletRequest request,  
                               HttpServletResponse response, ServletContext ctx)
     {
         super("request", pluginDir);
+        _user     = user;
         _request  = request;
         _response = response;
         _context  = ctx;
+    }
+    
+    public AuthzSubject getUser() {
+        return _user;
     }
     
     public HttpServletRequest getRequest() {
