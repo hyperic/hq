@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit
 
+import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import java.text.SimpleDateFormat
 import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
@@ -89,9 +90,12 @@ abstract class BaseController {
     }
     
     String formatDate(String fmt, Date d) {
-        SimpleDateFormat df = new SimpleDateFormat(fmt, 
-                                                   invokeArgs.request.locale)
+        SimpleDateFormat df = new SimpleDateFormat(fmt, locale) 
         df.format(d)
+    }
+    
+    Locale getLocale() {
+        invokeArgs.request.locale
     }
     
 	protected void redirectTo(opts) {
@@ -128,5 +132,9 @@ abstract class BaseController {
             opts['partialDir'] = new File(viewDir, controllerName) 
                 
         new RenderFrame(opts, this).render()
+    }
+    
+    protected AlertHelper getAlertHelper() {
+        return new AlertHelper(invokeArgs.user)
     }
 }
