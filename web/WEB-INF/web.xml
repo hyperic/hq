@@ -60,7 +60,7 @@
 
   <servlet>
     <servlet-name>hqu</servlet-name>
-    <servlet-class>org.hyperic.hq.hqu.rendit.servlet.RenditServlet</servlet-class>
+    <servlet-class>org.hyperic.hq.ui.servlet.RenditServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
 
