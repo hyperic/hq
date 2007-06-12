@@ -228,7 +228,7 @@ public class CounterTrigger extends AbstractTrigger
             TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
 
             myEvent.setMessage("Event " + triggerId + " occurred " +
-                               events.size() + " times within " +
+                               (events.size() + 1) + " times within " +
                                timeRange / 1000 + " seconds");
             try {
                 super.fireActions(myEvent);
