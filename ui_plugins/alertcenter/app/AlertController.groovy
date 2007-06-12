@@ -1,5 +1,11 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
+import org.hyperic.hq.events.EventConstants
+import java.text.DateFormat
+import org.json.JSONArray
+import org.json.JSONObject
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
+
 class AlertController 
 	extends BaseController
 {
@@ -12,15 +18,24 @@ class AlertController
     }
     
     def data(params) {
-        def testData = '''
-        /*[{ id:0, "Date": "5/10/07", "Time": "5:10AM", "Alert": "123", "Resource": "Apache 2", "State": "Fixed", "Severity": "high", "Group": "none" },
-        { id:1, "Date": "5/10/07", "Time": "5:10PM", "Alert": "zsdzdv", "Resource": "Linux box", "State": "Fixed", "Severity": "medium", "Group": "Example 3" },
-        { id:2, "Date": "5/10/07", "Time": "5:10PM", "Alert": ",jk,.", "Resource": "another", "State": "Fixed", "Severity": "medium", "Group": "none"  },
-        { id:3, "Date": "5/10/07", "Time": "5:10PM", "Alert": "k,", "Resource": "something", "State": "Fixed", "Severity": "low", "Group": "none" },
-        { id:4, "Date": "5/10/07", "Time": "5:10PM", "Alert": "ewrw3r", "Resource": "Tomcat", "State": "Fixed", "Severity": "medium", "Group": "none" },
-        { id:5, "Date": "5/10/07", "Time": "5:10PM", "Alert": "cv", "Resource": "sql server", "State": "Fixed", "Severity": "medium", "Group": "Example 1" },
-        { id:6, "Date": "5/10/07", "Time": "5:10PM", "Alert": "SDF3wr", "Resource": "Oracle server", "State": "Fixed", "Severity": "medium", "Group": "none" }]*/
-        '''
-		render(inline:testData, contentType:'text/json-comment-filtered')
+        def alerts = alertHelper.findAlerts(10, 0, System.currentTimeMillis(),
+                                            System.currentTimeMillis())
+        def df = DateFormat.getDateTimeInstance(DateFormat.SHORT, 
+                                                DateFormat.SHORT, locale)                                            
+        JSONArray arr = new JSONArray()
+        for (a in alerts) {
+            def d = a.alertDefinition
+            
+            JSONObject o = new JSONObject()
+            o.put("id", a.id)
+            o.put("Date", df.format(a.timestamp))
+            o.put("Alert", d.name)
+            o.put("Resource", d.appdefEntityId.toString())
+            o.put("Fixed", a.fixed ? "Yes" : "No")
+            o.put("Severity", EventConstants.getPriority(d.priority))
+            arr.put(o)
+        }
+        
+		render(inline:"/* ${arr} */", contentType:'text/json-comment-filtered')
     }
 }
