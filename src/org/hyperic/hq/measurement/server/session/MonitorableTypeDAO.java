@@ -45,6 +45,7 @@ public class MonitorableTypeDAO extends HibernateDAO {
         MonitorableType mt = new MonitorableType(name, appdefType, plugin);
 
         save(mt);
+        getSession().flush();
         return mt;
     }
 

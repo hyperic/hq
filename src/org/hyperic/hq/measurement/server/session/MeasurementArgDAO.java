@@ -41,13 +41,11 @@ public class MeasurementArgDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    MeasurementArg create(Integer placement,
-                          MeasurementTemplate mt) {
-        return create(placement, mt, new Integer(0),
-                      new Float(0), new Integer(0));
+    void save(MeasurementArg arg) {
+        super.save(arg);
     }
 
-    MeasurementArg create(Integer placement,
+    MeasurementArg create(int placement,
                           MeasurementTemplate mt,
                           Integer ticks, Float weight,
                           Integer previous) {

@@ -124,7 +124,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 MeasurementTemplate arg =
                     getMeasurementTemplateDAO().findById(args[i].getId());
                 MeasurementArg li =
-                    getMeasurementArgDAO().create(new Integer(i+1), arg,
+                    getMeasurementArgDAO().create(i+1, arg,
                                                   args[i].getTicks(),
                                                   args[i].getWeight(),
                                                   args[i].getPrevious());
@@ -134,10 +134,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         
         return
             getMeasurementTemplateDAO().create(name, alias, units, 
-                                             collectionType, false, 
-                                             MeasurementConstants.
-                                             INTERVAL_DEFAULT_MILLIS,
-                                             false, template, t, cat, lis);
+                                               collectionType, false, 
+                                               MeasurementConstants.
+                                               INTERVAL_DEFAULT_MILLIS,
+                                               false, template, t, cat, null,
+                                               lis);
     }
 
     /**
@@ -452,7 +453,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Integer getMonitorableTypeId(String pluginName, TypeInfo info) {
+    public MonitorableType getMonitorableType(String pluginName, TypeInfo info) {
         MonitorableType t = getMonitorableTypeDAO().findByName(info.getName());
         
         if (t == null) {
@@ -462,7 +463,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             t = getMonitorableTypeDAO().create(info.getName(), a, pluginName);
         }
       
-        return t.getId();
+        return t;
     }
 
     /**
@@ -474,7 +475,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method 
      */
     public Map updateTemplates(String pluginName, TypeInfo ownerEntity, 
-                               Integer monitorableTypeId,
+                               MonitorableType monitorableType,
                                MeasurementInfo[] tmpls)
         throws CreateException, RemoveException 
     {
@@ -486,7 +487,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             tmap.put(tmpls[i].getAlias(), tmpls[i]);
         }
         
-        Collection mts = dao.findRawByMonitorableType(monitorableTypeId);
+        Collection mts = dao.findRawByMonitorableType(monitorableType);
         
         for (Iterator i = mts.iterator(); i.hasNext();) {
             MeasurementTemplate mt = (MeasurementTemplate) i.next();
@@ -551,9 +552,11 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             // can assume this is called in a single thread
             // This is called at hq server startup
             HashMap cats = new HashMap();
-            for (Iterator i = toAdd.keySet().iterator(); i.hasNext();) {
-                Integer monitorableTypeId = (Integer)i.next();
-                Map newMetrics = (Map)toAdd.get(monitorableTypeId);
+            for (Iterator i = toAdd.entrySet().iterator(); i.hasNext();) {
+                Map.Entry entry = (Map.Entry) i.next();
+                MonitorableType monitorableType =
+                    (MonitorableType) entry.getKey();
+                Map newMetrics = (Map) entry.getValue();
                 
                 for (Iterator j = newMetrics.values().iterator(); j.hasNext();){
                     MeasurementInfo info = (MeasurementInfo)j.next();
@@ -581,7 +584,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setBoolean(col++, false);
                     tStmt.setLong(col++, 0l);
                     tStmt.setBoolean(col++, false);
-                    tStmt.setInt(col++, monitorableTypeId.intValue());
+                    tStmt.setInt(col++, monitorableType.getId().intValue());
                     tStmt.setInt(col++, cat.getId().intValue());
                     tStmt.setString(col++, info.getTemplate());
                     tStmt.setString(col++, pluginName);
@@ -604,7 +607,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     tStmt.setBoolean(col++, info.isDefaultOn());
                     tStmt.setLong(col++, info.getInterval());
                     tStmt.setBoolean(col++, info.isIndicator());
-                    tStmt.setInt(col++, monitorableTypeId.intValue());
+                    tStmt.setInt(col++, monitorableType.getId().intValue());
                     tStmt.setInt(col++, cat.getId().intValue());
                     tStmt.setString(col++, MeasurementConstants.TEMPL_IDENTITY);
                     tStmt.setString(col++, pluginName);

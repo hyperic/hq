@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
@@ -62,7 +63,7 @@ public class MeasurementTemplate
         return _cid;
     }
 
-    protected void setCid(Integer cid) {
+    void setCid(Integer cid) {
         _cid = cid;
     }
 
@@ -70,7 +71,7 @@ public class MeasurementTemplate
         return _name;
     }
     
-    protected void setName(String name) {
+    void setName(String name) {
         _name = name;
     }
 
@@ -78,7 +79,7 @@ public class MeasurementTemplate
         return _alias;
     }
     
-    protected void setAlias(String alias) {
+    void setAlias(String alias) {
         _alias = alias;
     }
 
@@ -86,7 +87,7 @@ public class MeasurementTemplate
         return _units;
     }
     
-    protected void setUnits(String units) {
+    void setUnits(String units) {
         _units = units;
     }
 
@@ -94,7 +95,7 @@ public class MeasurementTemplate
         return _collectionType;
     }
 
-    protected void setCollectionType(int collectionType) {
+    void setCollectionType(int collectionType) {
         _collectionType = collectionType;
     }
 
@@ -102,7 +103,7 @@ public class MeasurementTemplate
         return _defaultOn;
     }
     
-    protected void setDefaultOn(boolean defaultOn) {
+    void setDefaultOn(boolean defaultOn) {
         _defaultOn = defaultOn;
     }
 
@@ -110,7 +111,7 @@ public class MeasurementTemplate
         return _defaultInterval;
     }
     
-    protected void setDefaultInterval(long defaultInterval) {
+    void setDefaultInterval(long defaultInterval) {
         _defaultInterval = defaultInterval;
     }
 
@@ -118,7 +119,7 @@ public class MeasurementTemplate
         return _designate;
     }
     
-    protected void setDesignate(boolean designate) {
+    void setDesignate(boolean designate) {
         _designate = designate;
     }
 
@@ -126,7 +127,7 @@ public class MeasurementTemplate
         return _template;
     }
     
-    protected void setTemplate(String template) {
+    void setTemplate(String template) {
         _template = template;
     }
 
@@ -134,7 +135,7 @@ public class MeasurementTemplate
         return _plugin;
     }
     
-    protected void setPlugin(String plugin) {
+    void setPlugin(String plugin) {
         _plugin = plugin;
     }
 
@@ -142,7 +143,7 @@ public class MeasurementTemplate
         return _expressionData;
     }
     
-    protected void setExpressionData(byte[] expressionData) {
+    void setExpressionData(byte[] expressionData) {
         _expressionData = expressionData;
     }
 
@@ -150,7 +151,7 @@ public class MeasurementTemplate
         return _ctime;
     }
     
-    protected void setCtime(long ctime) {
+    void setCtime(long ctime) {
         _ctime = ctime;
     }
 
@@ -158,7 +159,7 @@ public class MeasurementTemplate
         return _mtime;
     }
     
-    protected void setMtime(long mtime) {
+    void setMtime(long mtime) {
         _mtime = mtime;
     }
 
@@ -166,7 +167,7 @@ public class MeasurementTemplate
         return _monitorableType;
     }
     
-    protected void setMonitorableType(MonitorableType monitorableType) {
+    void setMonitorableType(MonitorableType monitorableType) {
         _monitorableType = monitorableType;
     }
 
@@ -174,15 +175,19 @@ public class MeasurementTemplate
         return _category;
     }
     
-    protected void setCategory(Category category) {
+    void setCategory(Category category) {
         _category = category;
     }
 
     public Collection getMeasurementArgs() {
+        return Collections.unmodifiableCollection(getMeasurementArgsBag());
+    }
+    
+    Collection getMeasurementArgsBag() {
         return _measurementArgs;
     }
     
-    protected void setMeasurementArgs(Collection measurementArgs) {
+    void setMeasurementArgs(Collection measurementArgs) {
         _measurementArgs = measurementArgs;
     }
 
@@ -190,7 +195,7 @@ public class MeasurementTemplate
         return _rawMeasurementArgs;
     }
 
-    protected void setRawMeasurementArgs(Collection measurementArgs) {
+    void setRawMeasurementArgs(Collection measurementArgs) {
         _rawMeasurementArgs = measurementArgs;
     }
 

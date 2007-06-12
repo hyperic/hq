@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocalHome;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
@@ -319,12 +320,12 @@ public class ProductManagerEJBImpl
             }
 
             if (measurements != null && measurements.length > 0) {
-                Integer monitorableTypeId =
-                    tMan.getMonitorableTypeId(pluginName, info);
+                MonitorableType monitorableType =
+                    tMan.getMonitorableType(pluginName, info);
                 Map newMeasurements = tMan.updateTemplates(pluginName, info,
-                                                           monitorableTypeId,
+                                                           monitorableType,
                                                            measurements);
-                toAdd.put(monitorableTypeId, newMeasurements);
+                toAdd.put(monitorableType, newMeasurements);
             }
         }
 

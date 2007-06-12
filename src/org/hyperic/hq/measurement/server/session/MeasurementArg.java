@@ -34,7 +34,7 @@ public class MeasurementArg extends PersistedObject
 
     // Fields
     private Integer _cid;
-    private Integer _placement;
+    private int _placement;
     private Integer _ticks;
     private float _weight;
     private Integer _previous;
@@ -45,11 +45,7 @@ public class MeasurementArg extends PersistedObject
     public MeasurementArg() {
     }
 
-    public MeasurementArg(Integer placement) {
-        _placement = placement;
-    }
-
-    public MeasurementArg(Integer placement, Integer ticks,
+    public MeasurementArg(int placement, Integer ticks,
                           float weight, Integer previous,
                           MeasurementTemplate template,
                           MeasurementTemplate templateArg) {
@@ -70,11 +66,11 @@ public class MeasurementArg extends PersistedObject
         _cid = cid;
     }
 
-    public Integer getPlacement() {
+    public int getPlacement() {
         return _placement;
     }
     
-    protected void setPlacement(Integer placement) {
+    protected void setPlacement(int placement) {
         _placement = placement;
     }
 
@@ -127,7 +123,7 @@ public class MeasurementArg extends PersistedObject
         MeasurementArgValue arg = new MeasurementArgValue();
 
         arg.setId(getId());
-        arg.setPlacement(getPlacement());
+        arg.setPlacement(new Integer(getPlacement()));
         arg.setTicks(getTicks());
         arg.setWeight(new Float(getWeight()));
         arg.setPrevious(getPrevious());

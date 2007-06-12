@@ -116,7 +116,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                int collectionType, boolean defaultOn,
                                long defaultInterval, boolean designate,
                                String template, MonitorableType monitorableType,
-                               Category cat, Collection lineItems) {
+                               Category cat, String plugin, List args) {
         MeasurementTemplate mt = new MeasurementTemplate();
 
         mt.setName(name); 
@@ -129,7 +129,11 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setTemplate(template);
         mt.setMonitorableType(monitorableType);
         mt.setCategory(cat);
-        mt.setMeasurementArgs(lineItems);
+        mt.setPlugin(plugin);
+        
+        if (args != null) {
+            mt.setMeasurementArgs(args);
+        }
 
         save(mt);
         return mt;
@@ -248,13 +252,13 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(1, appdefType).list();
     }
 
-    List findRawByMonitorableType(Integer mtId) {
+    List findRawByMonitorableType(MonitorableType mt) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "where t.monitorableType.id=? and t.defaultInterval=0";
+            "where t.monitorableType=? and t.defaultInterval=0";
 
         return getSession().createQuery(sql)
-            .setInteger(0, mtId.intValue()).list();
+            .setParameter(0, mt).list();
     }
 
     List findByMeasurementArg(Integer tId) {
