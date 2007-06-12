@@ -114,7 +114,8 @@ public class OpenLDAPServerDetector
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
-        server.setProductConfig();
+        //server.setProductConfig();
+        setProductConfig(server, new ConfigResponse());
         // sets a default Measurement Config property with no values
         server.setMeasurementConfig();
         server.setName(SERVER_NAME+" "+version);

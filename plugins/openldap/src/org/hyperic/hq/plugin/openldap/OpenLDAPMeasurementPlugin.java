@@ -62,39 +62,38 @@ public class OpenLDAPMeasurementPlugin
     extends MeasurementPlugin
 {
     private Sigar mySigar = new Sigar();
-    private Integer myInt = new Integer(0);
     private DirContext ctx = null;
-
-    public OpenLDAPMeasurementPlugin()
-    {
-    }
+    private Boolean hasMonitoringEnabled = null;
+    private Object myLockObj = new Object();
 
     public DirContext getDirContext(Metric metric)
         throws NamingException
     {
-        if (ctx != null)
-            return ctx;
-        synchronized(myInt)
+        if (this.ctx != null)
+            return this.ctx;
+        synchronized(this)
         {
-            if (ctx != null)
-                return ctx;
+            if (this.ctx != null)
+                return this.ctx;
             Properties props = metric.getProperties();
             Collection rtn = new TreeSet();
             Hashtable ldapEnv = new Hashtable();
             String ldapDriver   = props.getProperty("ldapDriver"),
                    ldapHostURL  = props.getProperty("ldapHostURL"),
                    ldapAuthType = props.getProperty("ldapAuthType"),
-                   ldapPasswd   = "",
-//                   ldapPasswd   = props.getProperty("ldapPasswd"),
-                   ldapTreePathToDN = "";
-//                   ldapTreePathToDN = props.getProperty("ldapTreePathToDN");
+                   ldapPasswd   = props.getProperty("ldapPasswd"),
+                   ldapTreePathToDN = props.getProperty("ldapTreePathToDN");
+            ldapTreePathToDN = (ldapTreePathToDN == null) ?
+                                                "" : ldapTreePathToDN;
+            ldapPasswd = (ldapPasswd == null) ?  "" : ldapPasswd;
+            ldapPasswd = (ldapPasswd.matches("^\\s*$")) ?  "" : ldapPasswd;
             ldapEnv.put(Context.INITIAL_CONTEXT_FACTORY, ldapDriver);
             ldapEnv.put(Context.PROVIDER_URL, ldapHostURL);
             ldapEnv.put(Context.SECURITY_AUTHENTICATION, ldapAuthType);
             ldapEnv.put(Context.SECURITY_PRINCIPAL, ldapTreePathToDN);
             ldapEnv.put(Context.SECURITY_CREDENTIALS, ldapPasswd);
-            ctx = new InitialDirContext(ldapEnv);
-            return ctx;
+            this.ctx = new InitialDirContext(ldapEnv);
+            return this.ctx;
         }
     }
 
@@ -118,8 +117,21 @@ public class OpenLDAPMeasurementPlugin
         {
             if (objectName.indexOf("Server") != -1)
             {
+                if (hasMonitoringEnabled == null)
+                {
+                    synchronized(myLockObj)
+                    {
+                        hasMonitoringEnabled = (hasMonitoringEnabled == null) ?
+                                                 hasMonitoringEnabled(metric) :
+                                                 hasMonitoringEnabled;
+                    }
+                }
                 if (alias.equalsIgnoreCase("availability"))
                     return getAvail(metric);
+                else if (alias.equalsIgnoreCase("connectiontimems"))
+                    return getConnTimeMetric(metric);
+                else if (hasMonitoringEnabled == null || !hasMonitoringEnabled.booleanValue())
+                    return MetricValue.NONE;
 
                 String[] attrs = alias.split(":");
                 if (attrs[0] == null || attrs[1] == null)
@@ -135,6 +147,15 @@ public class OpenLDAPMeasurementPlugin
         catch (MetricNotFoundException e) {
             throw new MetricNotFoundException("Service "+objectName+", "+alias+" not found", e);
         }
+    }
+
+    private MetricValue getConnTimeMetric(Metric metric)
+        throws NamingException
+    {
+        long start = System.currentTimeMillis();
+        hasMonitoringEnabled(metric);
+        long now = System.currentTimeMillis();
+        return new MetricValue((now - start), now);
     }
 
     private MetricValue getMetric(Metric metric, String tree, String attr)
@@ -169,27 +190,55 @@ public class OpenLDAPMeasurementPlugin
     private MetricValue getAvail(Metric metric)
         throws NamingException
     {
-        NamingEnumeration enumer = null;
+        return (null == hasMonitoringEnabled(metric)) ?
+            new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis()) :
+            new MetricValue(Metric.AVAIL_UP, System.currentTimeMillis());
+    }
+
+    /**
+     * @return true  = monitoring is enabled
+     * @return false = monitoring is not enabled
+     * @return null  = not available
+     */
+    private Boolean hasMonitoringEnabled(Metric metric)
+        throws NamingException
+    {
+        NamingEnumeration enumer = null,
+                          enumerx = null,
+                          enumery = null;
         try
         {
-            String[] a = {"+"};
+            String[] a = {"monitorContext"};
             SearchControls cons = new SearchControls();
             cons.setSearchScope(SearchControls.OBJECT_SCOPE);
             cons.setReturningAttributes(a);
             enumer = getDirContext(metric).search("", "(&(objectClass=*))", cons);
-            return new MetricValue(Metric.AVAIL_UP, System.currentTimeMillis());
+            while (enumer.hasMore())
+            {
+                SearchResult searchresult = (SearchResult)enumer.next();
+                Attributes attrs = searchresult.getAttributes();
+                enumerx = attrs.getIDs();
+                while (enumerx.hasMore())
+                {
+                    String id = (String)enumerx.next();
+                    Attribute attr = attrs.get(id);
+                    return Boolean.TRUE;
+                }
+            }
+            return Boolean.FALSE;
         }
         catch (InvalidSearchFilterException e) {
-            return new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
         }
         catch (InvalidSearchControlsException e) {
-            return new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
         }
         catch (NamingException e) {
-            return new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
         }
-        finally {
+        finally
+        {
             if (enumer != null) enumer.close();
+            if (enumerx != null) enumerx.close();
+            if (enumery != null) enumery.close();
         }
+        return null;
     }
 }

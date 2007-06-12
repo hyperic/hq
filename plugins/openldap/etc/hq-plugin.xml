@@ -28,50 +28,9 @@
   <property name="template-config"
     value="ldapDriver=%ldapDriver%,ldapHostURL=%ldapHostURL%,ldapAuthType=%ldapAuthType%,ldapTreePathToDN=%ldapTreePathToDN%,ldapPasswd=%ldapPasswd%"/>
 
-  <server name="OpenLDAP"
-          version="2.3.x">
-
-    <plugin type="autoinventory"
-            class="OpenLDAPServerDetector"/>
-    <plugin type="measurement"
-            class="OpenLDAPMeasurementPlugin"/>
-
-    <config>
-      <option name="ldapDriver"
-              description="LDAP Driver Class"
-              default="com.sun.jndi.ldap.LdapCtxFactory"/>
-      <option name="ldapHostURL"
-              description="LDAP Host URL"
-              default="ldap://localhost:389"/>
-      <option name="ldapAuthType"
-              description="LDAP Authentication Type"
-              default="simple"/>
-      <option name="ldapTreePathToDN"
-              description="LDAP Path To DN"
-              optional="true"
-              default=""/>
-      <option name="ldapPasswd"
-              type="secret"
-              optional="true"
-              description="LDAP Password DN"
-              default=""/>
-    </config>
-
-    <filter name="template"
-            value="openldap:Type=Server:${query}"/>
-
-    <metric name="Availability"
-            query="availability"
-            indicator="true"/>
-
-<!--
-    <metric name="Connection Time ms"
-            category="THROUGHPUT"
-            indicator="true"
-            collectionType="dynamic"
-            units="ms"/>
--->
-
+  <filter name="template"
+          value="openldap:Type=Server:${query}"/>
+  <metrics name="Ldap Monitoring Metrics">
     <metric name="Extended Operation Initiated"
             category="THROUGHPUT"
             query="cn=Extended,cn=Operations,cn=Monitor:monitorOpInitiated"
@@ -260,6 +219,51 @@
             indicator="false"
             collectionType="dynamic"
             units="none"/>
+  </metrics>
+
+  <server name="OpenLDAP"
+          version="2.3.x">
+    <plugin type="autoinventory"
+            class="OpenLDAPServerDetector"/>
+    <plugin type="measurement"
+            class="OpenLDAPMeasurementPlugin"/>
+
+    <config>
+      <option name="ldapDriver"
+              description="LDAP Driver Class"
+              default="com.sun.jndi.ldap.LdapCtxFactory"/>
+      <option name="ldapHostURL"
+              description="LDAP Host URL"
+              default="ldap://localhost:389"/>
+      <option name="ldapAuthType"
+              description="LDAP Authentication Type"
+              default="simple"/>
+      <option name="ldapTreePathToDN"
+              description="LDAP Path To DN"
+              optional="true"
+              default=""/>
+      <option name="ldapPasswd"
+              type="secret"
+              optional="true"
+              description="LDAP Password DN"
+              default=""/>
+    </config>
+
+    <filter name="template"
+            value="openldap:Type=Server:${alias}"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+<!--            query="availability" -->
+
+    <metric name="Connection Time"
+            alias="ConnectionTimeMS"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"
+            units="ms"/>
+
+    <metrics include="Ldap Monitoring Metrics"/>
   </server>
   <!-- ==================== Plugin Help =========================== -->
   <help name="OpenLDAP">
