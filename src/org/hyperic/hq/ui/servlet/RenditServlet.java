@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit.servlet;
+package org.hyperic.hq.ui.servlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,9 +35,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl;
 import org.hyperic.hq.hqu.rendit.RenditServer;
-import org.hyperic.hq.hqu.rendit.servlet.DirWatcher.DirWatcherCallback;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.file.DirWatcher;
+import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
 import org.jboss.system.server.ServerConfigLocator;
 
 public class RenditServlet 
@@ -81,10 +86,22 @@ public class RenditServlet
         _log.info("Request for [" + plugin + "]: " + req.getRequestURI() + 
                   (req.getQueryString() == null ? "" 
                                                : ("?" + req.getQueryString())));
-                  
+
+        int sessId = RequestUtils.getSessionIdInt(req);
+        AuthzSubject user;
+        
+        try {
+            user = AuthzBossEJBImpl.getOne().getCurrentSubject(sessId);
+        } catch(SessionException e) {
+            // Could not get the current user.  We should default to a 'nobody'
+            // user here.
+            _log.warn("Unable to get current user.  Bailing", e);
+            throw new ServletException(e);
+        }
+
         try {
             RenditServer.getInstance().handleRequest(plugin, req, resp,
-                                                     getServletContext());
+                                                     getServletContext(), user);
         } catch(Exception e) {
             throw new ServletException(e);
         }
