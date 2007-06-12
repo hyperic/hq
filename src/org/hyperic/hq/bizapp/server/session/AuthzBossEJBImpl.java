@@ -27,14 +27,12 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
-import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +43,6 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -54,9 +51,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
+import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -497,6 +495,14 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                SessionNotFoundException {
         AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().getEmailById(userId);
+    }
+    
+    public static AuthzBossLocal getOne() {
+        try {
+            return AuthzBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /** @ejb:create-method */
