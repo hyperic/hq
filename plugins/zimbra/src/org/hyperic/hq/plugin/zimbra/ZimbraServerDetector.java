@@ -17,6 +17,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.ProductPlugin;
 
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -90,7 +91,8 @@ public class ZimbraServerDetector
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
-        server.setProductConfig(productConfig);
+//        server.setProductConfig(productConfig);
+        setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
         server.setMeasurementConfig();
         server.setName(SERVER_NAME+" "+version);
@@ -102,33 +104,36 @@ public class ZimbraServerDetector
     protected List discoverServices(ConfigResponse config)
         throws PluginException
     {
+        String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
         List services = new ArrayList();
-        services.add(getService("Zimbra Tomcat"));
-        services.add(getService("Zimbra Logger MySQL"));
-        services.add(getService("Zimbra MySQL"));
-        services.add(getService("Zimbra OpenLDAP"));
-        services.add(getService("Zimbra Cyrus SASL"));
-        services.add(getService("Zimbra ClamAV"));
-        services.add(getService("Zimbra Apache Httpd"));
-        services.add(getService("Zimbra Postfix"));
-        services.add(getService("Zimbra AMaViS"));
-        services.add(getService("Zimbra Log Watch"));
-        services.add(getService("Zimbra Swatch"));
-        services.add(getService("Zimbra MTA Config"));
+        services.add(getService("Tomcat", installpath));
+        services.add(getService("Logger MySQL", installpath));
+        services.add(getService("MySQL", installpath));
+        services.add(getService("OpenLDAP", installpath));
+        services.add(getService("Cyrus SASL", installpath));
+        services.add(getService("ClamAV", installpath));
+        services.add(getService("Apache Httpd", installpath));
+        services.add(getService("Postfix", installpath));
+        services.add(getService("AMaViS", installpath));
+        services.add(getService("Log Watch", installpath));
+        services.add(getService("Swatch", installpath));
+        services.add(getService("MTA Config", installpath));
         return services;
     }
 
-    private ServiceResource getService(String name)
+    private ServiceResource getService(String name, String installpath)
     {
         ServiceResource service = new ServiceResource();
         service.setType(this, name);
         service.setServiceName(name);
         ConfigResponse productConfig = new ConfigResponse();
-        service.setProductConfig(productConfig);
+        productConfig.setValue(ProductPlugin.PROP_INSTALLPATH, installpath);
+        setProductConfig(service, productConfig);
+//        service.setProductConfig(config);
         // set an empty measurement config
         service.setMeasurementConfig();
         // set an empty control config
-        service.setControlConfig();
+//        service.setControlConfig();
         return service;
     }
 }

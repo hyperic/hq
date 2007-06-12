@@ -249,9 +249,9 @@
             collectionType="dynamic"
             units="none"/>
 
-    <service name="Zimbra Logger MySQL">
+    <service name="Logger MySQL">
       <config>
-        <option name="msql-logger-ptql"
+        <option name="mysql-logger-ptql"
                 default="Pid.PidFile.eq=%installpath%/logger/db/mysql.pid"
                 description="PTQL for Zimbra Logger MySQLd"/>
       </config>
@@ -260,7 +260,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra MySQL">
+    <service name="MySQL">
       <config>
         <option name="mysql-ptql"
                 default="Pid.PidFile.eq=%installpath%/db/mysql.pid"
@@ -271,7 +271,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra OpenLDAP">
+    <service name="OpenLDAP">
       <config>
         <option name="openldap-ptql"
                 default="Pid.PidFile.eq=%installpath%/openldap/var/run/slapd.pid"
@@ -282,7 +282,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra Cyrus SASL">
+    <service name="Cyrus SASL">
       <config>
         <option name="sasl-ptql"
                 default="Pid.PidFile.eq=%installpath%/cyrus-sasl/state/saslauthd.pid"
@@ -293,7 +293,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra ClamAV">
+    <service name="ClamAV">
       <config>
         <option name="clamd-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/clamd.pid"
@@ -304,7 +304,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra Apache Httpd">
+    <service name="Apache Httpd">
       <config>
         <option name="httpd-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/httpd.pid"
@@ -315,7 +315,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra Postfix">
+    <service name="Postfix">
       <config>
         <option name="postfix-ptql"
                 default="Pid.PidFile.eq=%installpath%/postfix/spool/pid/master.pid"
@@ -326,7 +326,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra AMaViS">
+    <service name="AMaViS">
       <config>
         <option name="amavis-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/amavisd.pid"
@@ -337,7 +337,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra Log Watch">
+    <service name="Log Watch">
       <config>
         <option name="logswatch-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/logswatch.pid"
@@ -348,7 +348,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra Swatch">
+    <service name="Swatch">
       <config>
         <option name="swatch-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/swatch.pid"
@@ -359,7 +359,7 @@
               indicator="true"/>
     </service>
 
-    <service name="Zimbra MTA Config">
+    <service name="MTA Config">
       <config>
         <option name="mtaconfig-ptql"
                 default="Pid.PidFile.eq=%installpath%/log/zmmtaconfig.pid"
