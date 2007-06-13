@@ -10,8 +10,10 @@ class AlertHelper extends BaseHelper {
         super(user)
     }
 
-    def findAlerts(int count, int priority, long timeRange, long endTime) {
-        alertMan.findAlerts(userValue, count, priority, timeRange, endTime, 
-                            null)
+    def findAlerts(int priority, long timeRange, long endTime,
+                   int page, int pageSize) 
+    {
+        alertMan.findAlerts(user.id, priority, timeRange, endTime, page,
+                            pageSize)
     }
 }
