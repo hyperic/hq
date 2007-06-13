@@ -187,7 +187,7 @@ public class MeasurementTemplate
         return _measurementArgs;
     }
     
-    void setMeasurementArgs(Collection measurementArgs) {
+    void setMeasurementArgsBag(Collection measurementArgs) {
         _measurementArgs = measurementArgs;
     }
 

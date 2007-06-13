@@ -81,7 +81,7 @@
       <column name="CATEGORY_ID" not-null="true" index="TEMPL_CATEGORY_IDX" />
     </many-to-one>
 
-    <bag name="measurementArgs" table="EAM_MEASUREMENT_ARG"
+    <bag name="measurementArgsBag" table="EAM_MEASUREMENT_ARG"
          cascade="save-update,delete,persist,merge,evict,all-delete-orphan"
          inverse="true">
       <key column="MEASUREMENT_TEMPLATE_ID" />

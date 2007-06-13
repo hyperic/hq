@@ -132,7 +132,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setPlugin(plugin);
         
         if (args != null) {
-            mt.setMeasurementArgs(args);
+            mt.setMeasurementArgsBag(args);
         }
 
         save(mt);
