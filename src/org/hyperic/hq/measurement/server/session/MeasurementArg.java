@@ -27,8 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 
-import org.hyperic.hq.measurement.shared.MeasurementArgValue;
-
 public class MeasurementArg extends PersistedObject
     implements java.io.Serializable {
 
@@ -112,23 +110,5 @@ public class MeasurementArg extends PersistedObject
     
     protected void setTemplateArg(MeasurementTemplate templateArg) {
         _templateArg = templateArg;
-    }
-
-    /**
-     * Legacy EJB DTO pattern
-     * @deprecated Use (this) MeasurementArg object instead
-     */
-    public MeasurementArgValue getMeasurementArgValue() {
-
-        MeasurementArgValue arg = new MeasurementArgValue();
-
-        arg.setId(getId());
-        arg.setPlacement(new Integer(getPlacement()));
-        arg.setTicks(getTicks());
-        arg.setWeight(new Float(getWeight()));
-        arg.setPrevious(getPrevious());
-        arg.setMeasurementTemplateArg(getTemplateArg().
-                                      getMeasurementTemplateValue());
-        return arg;
     }
 }
