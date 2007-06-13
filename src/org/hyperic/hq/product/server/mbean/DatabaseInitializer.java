@@ -29,15 +29,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.util.jdbc.DBUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * Initializer for HQ database, may contain database specific routines
@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
 public class DatabaseInitializer {
     private String logCtx = DatabaseInitializer.class.getName();
     private Log log = LogFactory.getLog(logCtx);
-    
+
     public static void init() {
         new DatabaseInitializer();
     }
@@ -59,20 +59,16 @@ public class DatabaseInitializer {
             return;     // Can't do anything
         }
 
-        // Decide which database routines to run.  Interface and subclasses may
-        // be broken out into own files in the future
-        DatabaseRoutines dbr = null;
         Connection conn = null;
         
         try {
             conn = DBUtil.getConnByContext(ic, HQConstants.DATASOURCE);
             
-            // We only do Postgres right now
-            if (DBUtil.isPostgreSQL(conn))
-                dbr = new PostgresRoutines(conn);
-
-            if (dbr != null)
-                dbr.runRoutines();
+            DatabaseRoutines[] dbrs = getDBRoutines(conn);
+            
+            for (int i = 0; i < dbrs.length; i++) {
+                dbrs[i].runRoutines(conn);
+            }
         } catch (SQLException e) {
             log.error("SQLException creating connection to " +
                       HQConstants.DATASOURCE, e);
@@ -84,18 +80,64 @@ public class DatabaseInitializer {
         }        
     }
     
-    public interface DatabaseRoutines {
-        public void runRoutines() throws SQLException;
+    interface DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException;
+    }
+
+    private DatabaseRoutines[] getDBRoutines(Connection conn)
+        throws SQLException {
+        ArrayList routines = new ArrayList(2);
+        
+        routines.add(new CommonRoutines());
+        
+        if (DBUtil.isPostgreSQL(conn))
+            routines.add(new PostgresRoutines());
+        
+        return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
     }
     
-    private class PostgresRoutines implements DatabaseRoutines {
-        Connection conn = null;
-        
-        public PostgresRoutines(Connection conn) {
-            this.conn = conn;
+    class CommonRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            final String METRIC_DATA_VIEW =
+                "CREATE VIEW eam_measurement_data AS " +
+                "SELECT * FROM metric_data_0d_0s UNION " +
+                "SELECT * FROM metric_data_0d_1s UNION " +
+                "SELECT * FROM metric_data_0d_2s UNION " +
+                "SELECT * FROM metric_data_1d_0s UNION " +
+                "SELECT * FROM metric_data_1d_1s UNION " +
+                "SELECT * FROM metric_data_1d_2s UNION " +
+                "SELECT * FROM metric_data_2d_0s UNION " +
+                "SELECT * FROM metric_data_2d_1s UNION " +
+                "SELECT * FROM metric_data_2d_2s UNION " +
+                "SELECT * FROM metric_data_3d_0s UNION " +
+                "SELECT * FROM metric_data_3d_1s UNION " +
+                "SELECT * FROM metric_data_3d_2s UNION " +
+                "SELECT * FROM metric_data_4d_0s UNION " +
+                "SELECT * FROM metric_data_4d_1s UNION " +
+                "SELECT * FROM metric_data_4d_2s UNION " +
+                "SELECT * FROM metric_data_5d_0s UNION " +
+                "SELECT * FROM metric_data_5d_1s UNION " +
+                "SELECT * FROM metric_data_5d_2s UNION " +
+                "SELECT * FROM metric_data_6d_0s UNION " +
+                "SELECT * FROM metric_data_6d_1s UNION " +
+                "SELECT * FROM metric_data_6d_2s UNION " +
+                "SELECT * FROM metric_data_compat";
+
+            Statement stmt = null;
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(METRIC_DATA_VIEW);
+            } catch (SQLException e) {
+                // View was pre-existing, contine
+            } finally {
+                DBUtil.closeStatement(logCtx, stmt);
+            }
         }
         
-        public void runRoutines() throws SQLException {
+    }
+    
+    class PostgresRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
             Statement stmt = null;
             ResultSet rs = null;
             
@@ -133,6 +175,35 @@ public class DatabaseInitializer {
                 stmt.execute(function);
             } finally {
                 DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            }
+        }
+        
+    }
+
+    class MySQLRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            Statement stmt = null;
+            
+            String function =
+                "DELIMITER |" +
+                "CREATE FUNCTION nextseqval (iname CHAR(50)) " +
+                "RETURNS INT " +
+                "DETERMINISTIC " +
+                "BEGIN " +
+                  "SET @new_seq_val = 0;" +
+                  "UPDATE hq_sequence set seq_val = @new_seq_val:=seq_val+1 " +
+                    "WHERE seq_name=iname; " +
+                  "RETURN @new_seq_val;" +
+                "END;" +
+                "|";
+    
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(function);
+            } catch (SQLException e) {
+                // Function already exists, contine
+            } finally {
+                DBUtil.closeStatement(logCtx, stmt);
             }
         }
         
