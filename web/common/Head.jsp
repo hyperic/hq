@@ -28,7 +28,6 @@
 
 
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
- <link rel=stylesheet href="../hqu/public/hqu.css" type="text/css">
 <script type="text/javascript">
   var imagePath = "<html:rewrite page="/images/"/>";
 </script>
