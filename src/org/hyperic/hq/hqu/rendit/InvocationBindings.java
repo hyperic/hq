@@ -39,6 +39,10 @@ public abstract class InvocationBindings {
         _pluginDir = pluginDir;
     }
     
+    public void setPluginDir(File dir) {
+        _pluginDir = dir;
+    }
+    
     public File getPluginDir() {
         return _pluginDir;
     }

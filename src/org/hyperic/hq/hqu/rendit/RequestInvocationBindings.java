@@ -36,32 +36,59 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
  * The invocation bindings used when a request is made from the servlet.
  */
 public class RequestInvocationBindings extends InvocationBindings {
-    private AuthzSubject        _user;
     private String              _requestURI;
+    private String              _ctxPath;
+    private String              _pathInfo;
+    private String              _servletPath;
+    private String              _queryStr;
+    private AuthzSubject        _user;
     private HttpServletRequest  _request;
     private HttpServletResponse _response;
     private ServletContext      _context;
     
-    RequestInvocationBindings(File pluginDir, AuthzSubject user,
-                              String requestURI, HttpServletRequest request,  
-                              HttpServletResponse response, ServletContext ctx)
+    public RequestInvocationBindings(String requestURI, String ctxPath, 
+                                     String pathInfo, String servletPath, 
+                                     String queryStr, AuthzSubject user,
+                                     HttpServletRequest request,  
+                                     HttpServletResponse response, 
+                                     ServletContext ctx)
     {
-        super("request", pluginDir);
-        _requestURI = requestURI;
-        _user       = user;
-        _request    = request;
-        _response   = response;
-        _context    = ctx;
+        super("request", null);
+        _requestURI  = requestURI;
+        _ctxPath     = ctxPath;
+        _pathInfo    = pathInfo;
+        _servletPath = servletPath;
+        _queryStr    = queryStr;
+        _user        = user;
+        _request     = request;
+        _response    = response;
+        _context     = ctx;
+    }
+    
+    public String getRequestURI() {
+        return _requestURI;
+    }
+
+    public String getContextPath() {
+        return _ctxPath;
+    }
+    
+    public String getPathInfo() {
+        return _pathInfo;
+    }
+    
+    public String getServletPath() {
+        return _servletPath;
+    }
+    
+    public String getQueryStr() {
+        return _queryStr;
     }
     
     public AuthzSubject getUser() {
         return _user;
     }
 
-    public String getRequestURI() {
-        return _requestURI;
-    }
-    
     public HttpServletRequest getRequest() {
         return _request;
     }

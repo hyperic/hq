@@ -158,18 +158,12 @@ public class RenditServer {
     /**
      * Handles regular web requests for a UI plugin. 
      */
-    public void handleRequest(String pluginName, String requestURI, 
-                              HttpServletRequest req, 
-                              HttpServletResponse resp, ServletContext ctx,
-                              AuthzSubject user) 
+    public void handleRequest(String pluginName, RequestInvocationBindings b)
         throws Exception
     {
         PluginWrapper plugin = getPlugin(pluginName);
-        InvocationBindings bindings = 
-            new RequestInvocationBindings(plugin.getPluginDir(), user, 
-                                          requestURI, req, resp, ctx);  
-                                          
-        invokeDispatcher(plugin, bindings);
+        b.setPluginDir(plugin.getPluginDir());
+        invokeDispatcher(plugin, b);
     }
     
     /**
