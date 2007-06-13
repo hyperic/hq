@@ -174,6 +174,9 @@ public class RenditServlet
                       pluginDir.getAbsolutePath() + "]");
             _watcher = new DirWatcher(pluginDir, new DirWatcherCallback() {
                 public void fileAdded(File f) {
+                    if (f.getName().equals("public"))
+                        return;
+                    
                     try {
                         RenditServer.getInstance().addPluginDir(f);
                     } catch(Exception e) {
@@ -183,6 +186,9 @@ public class RenditServlet
                 }
 
                 public void fileRemoved(File f) {
+                    if (f.getName().equals("public"))
+                        return;
+                    
                     RenditServer.getInstance().removePluginDir(f.getName());
                 }
             });
