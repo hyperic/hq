@@ -26,7 +26,6 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
-import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -175,14 +174,17 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public Alert findLastByDefinition(AlertDefinition def, boolean fixed)
-    {
-        return (Alert) createCriteria()
-            .add(Expression.eq("alertDefinition", def))
-            .add(Expression.eq("fixed", new Boolean(fixed)))
-            .addOrder(Order.desc("ctime"))
-            .setMaxResults(1)
-            .uniqueResult();
+    public Alert findLastByDefinition(AlertDefinition def, boolean fixed) {
+        try {
+            return (Alert) createCriteria()
+                .add(Restrictions.eq("alertDefinition", def))
+                .add(Restrictions.eq("fixed", new Boolean(fixed)))
+                .addOrder(Order.desc("ctime"))
+                .setMaxResults(1)
+                .uniqueResult();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     int deleteByAlertDefinition(AlertDefinition def) {

@@ -52,8 +52,6 @@ import org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.ext.ClassicEscalatableCreator;
-import org.hyperic.hq.events.shared.AlertActionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
@@ -116,12 +114,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public AlertValue createAlert(AlertDefinition def, long ctime) {
+    public Alert createAlert(AlertDefinition def, long ctime) {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
         getAlertDAO().save(alert);
-        return alert.getAlertValue();
+        return alert;
     }
 
     /**
@@ -149,42 +147,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                 AuthzSubject subject) 
     {
         alert.createActionLog(detail, action, subject);
-    }
-
-    /**
-     * Update the alert
-     *
-     * @ejb:interface-method
-     */
-    public Alert updateAlert(AlertValue val) {
-        Alert alert;
-        
-        alert = getAlertDAO().findById(val.getId());
-
-        // Go through the AlertConditionLogs and create them
-        for (Iterator i = val.getAddedConditionLogs().iterator();
-             i.hasNext();)
-        {
-            AlertConditionLogValue aclv = (AlertConditionLogValue) i.next();
-            AlertCondition cond =
-                getAlertConDAO().findById(aclv.getCondition().getId());
-            
-            AlertConditionLog log =
-                alert.createConditionLog(aclv.getValue(), cond);
-            DAOFactory.getDAOFactory().getAlertConditionLogDAO().save(log);
-        }
-            
-        // Go through the AlertActionLogs and create them
-        Collection alogs = val.getAddedActionLogs();
-        for (Iterator i = alogs.iterator(); i.hasNext(); ) {
-            AlertActionLogValue aalv = (AlertActionLogValue) i.next();
-            Action action = getActionDAO().findById(aalv.getActionId());
-                
-            AlertActionLog log = alert.createActionLog(aalv.getDetail(),
-                                                       action, null);
-            DAOFactory.getDAOFactory().getAlertActionLogDAO().save(log);
-        }
-        return alert;
     }
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {

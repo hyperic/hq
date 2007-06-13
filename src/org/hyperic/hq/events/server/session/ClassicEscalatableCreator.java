@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.events.ext;
+package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,13 +44,6 @@ import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertCondition;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
-import org.hyperic.hq.events.server.session.ClassicEscalatable;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
@@ -66,13 +59,12 @@ public class ClassicEscalatableCreator
 {
     private static final Log _log =
         LogFactory.getLog(ClassicEscalatableCreator.class);
-    private static final EscalationManagerLocal _eMan =
-        EscalationManagerEJBImpl.getOne();
-
+    
     private AlertDefinition   _def;
     private TriggerFiredEvent _event;
     
-    ClassicEscalatableCreator(AlertDefinition def, TriggerFiredEvent event) { 
+    public ClassicEscalatableCreator(AlertDefinition def,
+                                     TriggerFiredEvent event) { 
         _def   = def;
         _event = event;
     }
@@ -96,7 +88,7 @@ public class ClassicEscalatableCreator
         AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
 
         // Now create the alert
-        AlertValue aVal = alertMan.createAlert(_def, _event.getTimestamp());
+        Alert alert = alertMan.createAlert(_def, _event.getTimestamp());
 
         // Create a alert condition logs for every condition
         Collection conds = _def.getConditions();
@@ -116,18 +108,14 @@ public class ClassicEscalatableCreator
             if (trigMap.containsKey(trigId)) {
                 clog.setValue(trigMap.get(trigId).toString());
             }
-            aVal.addConditionLog(clog);
+            alert.createConditionLog(clog.getValue(), cond);
         }
     
-        // Update the alert
-        // get alert pojo so retrieve array of AlertCondtionLogs
-        Alert alert = alertMan.updateAlert(aVal);
-        
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
         Messenger sender = new Messenger();
         sender.publishMessage(EventConstants.EVENTS_TOPIC,
-                              new AlertFiredEvent(_event, aVal.getId(), _def));
+                              new AlertFiredEvent(_event, alert.getId(), _def));
 
         String shortReason = alertMan.getShortReason(alert);
         String longReason  = alertMan.getLongReason(alert);
