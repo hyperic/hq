@@ -78,13 +78,8 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-<<<<<<< .mine
      * Find virtual platforms in a VM Process
-     * @param subject
-     * @param vmId
      * @return a list of virtual platform values
-     * @throws PlatformNotFoundException
-     * @throws PermissionException
      * @ejb:interface-method
      */
     public List findVirtualPlatformsByVM(AuthzSubjectValue subject, Integer vmId)
@@ -100,11 +95,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find virtual servers in a VM Process
-     * @param subject
-     * @param vmId
      * @return a list of virtual server values
-     * @throws ServerNotFoundException
-     * @throws PermissionException
      * @ejb:interface-method
      */
     public List findVirtualServersByVM(AuthzSubjectValue subject, Integer vmId)
@@ -121,11 +112,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find virtual services in a VM Process
-     * @param subject
-     * @param vmId
      * @return a list of virtual service values
-     * @throws ServiceNotFoundException
-     * @throws PermissionException
      * @ejb:interface-method
      */
     public List findVirtualServicesByVM(AuthzSubjectValue subject, Integer vmId)
@@ -141,11 +128,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find virtual resources whose parent is the given physical ID
-     * @param subject
-     * @param aeid
      * @return list of virtual resource values
-     * @throws AppdefEntityNotFoundException
-     * @throws PermissionException
      * @ejb:interface-method
      */
     public List findVirtualResourcesByPhysical(AuthzSubjectValue subject,
@@ -155,7 +138,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
         switch (aeid.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             appResources =
-                getPlatformDAO().findVirtualByPysicalId(aeid.getId());
+                getPlatformDAO().findVirtualByPhysicalId(aeid.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             appResources =
@@ -193,7 +176,6 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     
     /**
      * Associate an array of entities to a VM
-     * @throws FinderException 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
