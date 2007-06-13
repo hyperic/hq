@@ -2,5 +2,5 @@
 
 <%= dojoTable(id:'content',
               columns:['Date', 'Alert', 'Resource', 'State', 'Severity' ],
-              url:'data.hqu') %>
+              url:urlFor(action:'data')) %>
 </div> 

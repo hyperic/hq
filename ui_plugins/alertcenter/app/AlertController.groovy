@@ -18,8 +18,8 @@ class AlertController
     }
     
     def data(params) {
-        def alerts = alertHelper.findAlerts(10, 0, System.currentTimeMillis(),
-                                            System.currentTimeMillis())
+        def alerts = alertHelper.findAlerts(0, System.currentTimeMillis(),
+                                            System.currentTimeMillis(), 0, 10)
         def df = DateFormat.getDateTimeInstance(DateFormat.SHORT, 
                                                 DateFormat.SHORT, locale)                                            
         JSONArray arr = new JSONArray()
