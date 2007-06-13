@@ -70,6 +70,7 @@ public class DataCompressEJBImpl
 
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
+    private static final String OLD_MEAS_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
 
     // For purging alerts
     private AlertManagerLocal alertManager = null;
@@ -137,6 +138,64 @@ public class DataCompressEJBImpl
             throw new IllegalArgumentException("Invalid purge interval: " + e);
         }
     }
+
+    private void truncateRawMeasurements(long truncateBefore)
+        throws SQLException, NamingException
+    {
+        long currtime = System.currentTimeMillis();
+        String currTable = MeasTabManagerUtil.getMeasTabname(currtime);
+        String delTable = MeasTabManagerUtil.getMeasTabname(truncateBefore);
+        if (delTable.equals(currTable))
+        {
+            long prev = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
+            delTable = MeasTabManagerUtil.getMeasTabname(prev);
+        }
+        log.info("Purging data older than " +
+                 TimeUtil.toString(truncateBefore));
+        Connection conn = null;
+        Statement stmt = null;
+        try
+        {
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           DATASOURCE_NAME);
+            stmt = conn.createStatement();
+            StopWatch watch = new StopWatch();
+            long currTruncTime = truncateBefore;
+            while (!currTable.equals(delTable) &&
+                   truncateBefore > currTruncTime) {
+                stmt.executeUpdate("truncate table "+delTable);
+                currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(
+                                                              currTruncTime);
+                delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
+            }
+            // for backwards compatibility
+            truncateOldMeasTable(truncateBefore, stmt);
+            log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
+        }
+        finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }
+
+    private void truncateOldMeasTable(long truncateBefore, Statement stmt)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT max(timestamp) as maxtimestamp "+
+                         " FROM "+OLD_MEAS_TABLE;
+            rs = stmt.executeQuery(sql);
+            while (rs.next())
+            {
+                if (truncateBefore > rs.getLong("maxtimestamp"))
+                    stmt.executeUpdate("truncate table "+OLD_MEAS_TABLE);
+            }
+        }
+        finally {
+            if (rs != null) rs.close();
+        }
+    }
         
     /**
      * Entry point for data compression routines
@@ -156,8 +215,7 @@ public class DataCompressEJBImpl
         // Compress hourly data
         last = compressData(TAB_DATA, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        purgeMeasurements(TAB_DATA,
-                          Math.min(now - this.purgeRaw, last));
+        truncateRawMeasurements(Math.min(now - this.purgeRaw, last));
 
         // Purge metric problems as well
         purgeMeasurements(TAB_PROB,

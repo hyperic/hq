@@ -85,6 +85,10 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
+    private static final int NUMBER_OF_TABLES =
+                                    MeasTabManagerUtil.NUMBER_OF_TABLES,
+                             NUMBER_OF_TABLES_PER_DAY =
+                                    MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
     private static final BigDecimal MAX_DB_NUMBER = new BigDecimal("10000000000000000000000");
 
@@ -253,7 +257,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
-                left = insertData(conn, left, overwrite);
+                left = insertData(conn, left);
                 _log.debug("Num left = " + left.size());
                 
                 if (!overwrite || left.isEmpty())
@@ -309,42 +313,46 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         throws SQLException
     { 
         List left;
-        PreparedStatement stmt = null;
+        Statement stmt = null;
         
         try {
-            stmt = conn.prepareStatement("UPDATE " + TAB_DATA + 
-                                         " SET value = ? " +
-                                         " WHERE measurement_id = ? " + 
-                                         " AND timestamp = ?");
-            
-            for (Iterator i=data.iterator(); i.hasNext(); ) {
-                DataPoint pt = (DataPoint)i.next();
-                Integer metricId = pt.getMetricId();
-                MetricValue val = pt.getMetricValue();
-                BigDecimal bigDec;
+            DataPoint pt = (DataPoint)data.get(0);
+            Integer metricId = pt.getMetricId();
+            MetricValue val = pt.getMetricValue();
+            BigDecimal bigDec = null;
                 
-                try {
-                    bigDec = new BigDecimal(val.getValue());
-                } catch(NumberFormatException e) {  // infinite, or NaN
-                    _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
-                    continue;
-                }
-                int idx = 1;
-                stmt.setBigDecimal(idx++, getDecimalInRange(bigDec));
-                stmt.setInt(idx++, metricId.intValue());
-                stmt.setLong(idx++, val.getTimestamp());
-                stmt.addBatch();
+            try {
+                bigDec = new BigDecimal(val.getValue());
+            } catch(NumberFormatException e) {  // infinite, or NaN
+                _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
+                data.remove(0);
+                return data;
             }
+            long currtime      = System.currentTimeMillis();
+            String currTable   = MeasTabManagerUtil.getMeasTabname(currtime);
+            String updateTable = currTable;
+            int rowsaffected   = 0;
+            do
+            {
+                String sql;
+                sql = "UPDATE " + currTable +
+                      " SET value = " + getDecimalInRange(bigDec) +
+                      " WHERE measurement_id = " + metricId.intValue() +
+                      " AND timestamp = " + val.getTimestamp();
+                rowsaffected = stmt.executeUpdate(sql);
+                if (rowsaffected > 0)
+                    _log.debug("updated metric data with "+sql);
+                currtime     = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
+                updateTable  = MeasTabManagerUtil.getMeasTabname(currtime);
+            }
+            while (!updateTable.equals(currTable) && rowsaffected == 0);
             
-            int[] execInfo = stmt.executeBatch();
-            left = getRemainingDataPoints(data, execInfo);
-        } catch(BatchUpdateException e) {
-            left = getRemainingDataPointsAfterBatchFail(data, 
-                                                        e.getUpdateCounts());
+            data.remove(0);
+
         } finally {
             DBUtil.closeStatement(logCtx, stmt);
         }
-        return left;
+        return data;
     }
 
     private void sendMetricEvents(List data) {
@@ -441,26 +449,19 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
      * be returned in the result list.
-     * @param overwrite TODO
      */
-    private List insertData(Connection conn, List data, boolean overwrite) 
+    private List insertData(Connection conn, List data) 
         throws SQLException
     {
         PreparedStatement stmt = null;
         List left;
+        String table = MeasTabManagerUtil.getMeasTabname(System.currentTimeMillis());
         
         try {
-            // Use PostgreSQL function to facilitate inserts
-            if (overwrite && DBUtil.isPostgreSQL(conn)) {
-                stmt = conn.prepareStatement("SELECT add_data(?, ?, ?)");
-
-            }
-            else {
-                stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
-                                         TAB_DATA + 
+            stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
+                                         table + 
                                          " (measurement_id, timestamp, value)"+
                                          " VALUES (?, ?, ?)");
-            }
             
             for (Iterator i=data.iterator(); i.hasNext(); ) {
                 DataPoint pt = (DataPoint)i.next();
@@ -2078,8 +2079,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {
-                analyze = Boolean.valueOf(
-                    conf.getProperty(HQConstants.OOBEnabled)).booleanValue();
+                analyze = Boolean.getBoolean(
+                    conf.getProperty(HQConstants.OOBEnabled));
             }
         } catch (Exception e) {
             _log.debug("Error looking up server configs", e);
