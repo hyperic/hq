@@ -40,6 +40,7 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl;
 import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.rendit.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.DirWatcher;
@@ -72,18 +73,45 @@ public class RenditServlet
                                  HttpServletResponse resp)
         throws ServletException, IOException
     {
+        boolean useInclude = false;
         initPlugins();
 
-        // First try to get the secret attribute, in case of an internal
-        // redirect via the RequestDispatcher
+        // Since we may be processing via an internal RequestDispatcher 
+        // include(), we need to investigate the subrequest URIs, etc.
+        // and use those, as Tomcat won't set them up in subrequest objects
         String reqUri = (String)
             req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
-        if (reqUri == null)
+        if (reqUri != null)
+            useInclude = true;
+        if (reqUri == null && !useInclude)
             reqUri = req.getRequestURI();
+        
+        String ctxPath = (String)
+            req.getAttribute(Globals.INCLUDE_CONTEXT_PATH_ATTR);
+        if (ctxPath != null)
+            useInclude = true;
+        if (ctxPath == null && !useInclude)
+            ctxPath = req.getContextPath();
+        
+        String pathInfo = (String)
+            req.getAttribute(Globals.INCLUDE_PATH_INFO_ATTR);
+        if (pathInfo != null)
+            useInclude = true;
+        if (pathInfo == null && !useInclude) 
+            pathInfo = req.getPathInfo();
+        
+        String servletPath = (String)
+            req.getAttribute(Globals.INCLUDE_SERVLET_PATH_ATTR);
+        if (servletPath != null)
+            useInclude = true;
+        if (servletPath == null && !useInclude)
+            servletPath = req.getServletPath();
         
         String queryStr = (String)
             req.getAttribute(Globals.INCLUDE_QUERY_STRING_ATTR);
-        if (queryStr == null)
+        if (queryStr != null)
+            useInclude = true;
+        if (queryStr == null && !useInclude)
             queryStr = req.getQueryString();
 
         List fullPath = StringUtil.explode(reqUri, "/");
@@ -112,10 +140,12 @@ public class RenditServlet
             throw new ServletException(e);
         }
 
+        RequestInvocationBindings b = 
+            new RequestInvocationBindings(reqUri, ctxPath, pathInfo,
+                                          servletPath, queryStr, user,
+                                          req, resp, getServletContext());
         try {
-            RenditServer.getInstance().handleRequest(plugin, reqUri, req, 
-                                                     resp,
-                                                     getServletContext(), user);
+            RenditServer.getInstance().handleRequest(plugin, b); 
         } catch(Exception e) {
             throw new ServletException(e);
         }
