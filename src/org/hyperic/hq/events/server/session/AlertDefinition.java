@@ -33,6 +33,7 @@ import java.util.Iterator;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -69,7 +70,8 @@ public class AlertDefinition
     private Collection        _conditions = new ArrayList();
     private Collection        _triggers = new ArrayList();
     private Collection        _actions = new ArrayList();
-    private Escalation       _escalation;
+    private Escalation        _escalation;
+    private Resource          _resource;
 
     private AlertDefinitionValue      _value;
     private AlertDefinitionBasicValue _basicValue;
@@ -288,6 +290,14 @@ public class AlertDefinition
         _deleted = deleted;
     }
 
+    public Resource getResource() {
+        return _resource;
+    }
+    
+    void setResource(Resource resource) {
+        _resource = resource;
+    }
+
     public Collection getActions() {
         return Collections.unmodifiableCollection(_actions);
     }
@@ -414,83 +424,6 @@ public class AlertDefinition
         return _value;
     }
 
-    void setAlertDefinitionValueNoRels(AlertDefinitionValue val) {
-        AlertDefinitionDAO aDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
-        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
-        
-        setName(val.getName());
-        setCtime(val.getCtime());
-        setMtime(val.getMtime());
-        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
-            setParent(aDAO.findById(val.getParentId()));
-        }
-        setDescription(val.getDescription());
-        setEnabled(val.getEnabled());
-        setWillRecover(val.getWillRecover());
-        setNotifyFiltered(val.getNotifyFiltered() );
-        setControlFiltered(val.getControlFiltered() );
-        setPriority(val.getPriority());
-        setAppdefId(val.getAppdefId());
-        setAppdefType(val.getAppdefType());
-        setFrequencyType(val.getFrequencyType());
-        setCount(new Long(val.getCount()));
-        setRange(new Long(val.getRange()));
-        setDeleted(val.getDeleted());
-        if (val.actOnTriggerIdHasBeenSet()) {
-            setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
-        }
-    }
-
-    void setAlertDefinitionValue(AlertDefinitionValue val) {
-        AlertConditionDAO cDAO = DAOFactory.getDAOFactory().getAlertConditionDAO();
-        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
-        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
-        
-        setAlertDefinitionValueNoRels(val);
-
-        for (Iterator i=val.getAddedTriggers().iterator(); i.hasNext(); ) {
-            RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
-            RegisteredTrigger t = tDAO.findById(tVal.getId());
-            
-            addTrigger(t);
-        }
-        
-        for (Iterator i=val.getRemovedTriggers().iterator(); i.hasNext(); ) {
-            RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
-            RegisteredTrigger t = tDAO.findById(tVal.getId());
-            
-            removeTrigger(t);
-        }
-        
-        for (Iterator i=val.getAddedConditions().iterator(); i.hasNext(); ) {
-            AlertConditionValue cVal = (AlertConditionValue)i.next();
-            AlertCondition c = cDAO.findById(cVal.getId());
-            
-            addCondition(c);
-        }
-
-        for (Iterator i=val.getRemovedConditions().iterator(); i.hasNext(); ) {
-            AlertConditionValue cVal = (AlertConditionValue)i.next();
-            AlertCondition c = cDAO.findById(cVal.getId());
-            
-            removeCondition(c);
-        }
-
-        for (Iterator i=val.getAddedActions().iterator(); i.hasNext(); ) {
-            ActionValue aVal = (ActionValue)i.next();
-            Action a = actDAO.findById(aVal.getId());
-            
-            addAction(a);
-        }
-
-        for (Iterator i=val.getRemovedActions().iterator(); i.hasNext(); ) {
-            ActionValue aVal = (ActionValue)i.next();
-            Action a = actDAO.findById(aVal.getId());
-            
-            removeAction(a);
-        }
-    }
-    
     AlertDefinitionBasicValue getAlertDefinitionBasicValue() {
         if (_basicValue == null) {
             _basicValue = new AlertDefinitionBasicValue();

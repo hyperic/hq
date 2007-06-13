@@ -62,6 +62,7 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
@@ -355,11 +356,29 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * A more optimized look up which includes the permission checking
+     * @ejb:interface-method
+     */
+    public List findAlerts(Integer subj, int priority, long timeRange,
+                           long endTime, int page, int pageSize) 
+        throws PermissionException 
+    {
+        // Time voodoo the end time to the nearest minute so that we might
+        // be able to use cached results
+        endTime = TimingVoodoo.closestTime(endTime, 60000);
+        return getAlertDAO().findByCreateTimeAndPriority(subj,
+                                                         endTime- timeRange,
+                                                         endTime, priority,
+                                                         page * pageSize,
+                                                         pageSize);
+    }
+    
+    /**
      * Search alerts given a set of criteria
-     *
      * @param timeRange the amount of milliseconds prior to current that the
      *                  alerts will be contained in.  e.g. the beginning of the  
      *                  time range will be (current - timeRante)
+     * @param page TODO
      *
      * @ejb:interface-method
      */
@@ -367,30 +386,37 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                            long timeRange, long endTime, List includes) 
         throws PermissionException 
     {
-        AlertDAO aDao = getAlertDAO();
-        List alerts;
-            
-        if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = aDao.findByCreateTime(endTime- timeRange, endTime, count);
-        } else {
-            alerts = aDao.findByCreateTimeAndPriority(endTime- timeRange,
-                                                      endTime, priority, count);
-        }
-            
         List result = new ArrayList();
-        Iterator it = alerts.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            Alert alert = (Alert) it.next();
-            AlertDefinition alertdef = alert.getAlertDefinition();
+        
+        for (int index = 0; result.size() < count; index++) {
+            // Permission checking included
+            List alerts = findAlerts(subj.getId(), priority, endTime- timeRange,
+                                     endTime, index * count, count);
+            if (alerts.size() == 0)
+                break;
             
-            // Filter by appdef entity
-            AppdefEntityID aeid = alertdef.getAppdefEntityId();
-            if (includes != null && !includes.contains(aeid))
-                continue;
+            if (includes != null) {
+                Iterator it = alerts.iterator();
+                for (int i = 0; it.hasNext(); i++) {
+                    Alert alert = (Alert) it.next();
+                    AlertDefinition alertdef = alert.getAlertDefinition();
 
-            canManageAlerts(subj, aeid);
-            // Finally add it
-            result.add(alert);
+                    // Filter by appdef entity
+                    AppdefEntityID aeid = alertdef.getAppdefEntityId();
+                    if (!includes.contains(aeid))
+                        continue;
+
+                    // Add it
+                    result.add(alert);
+                    
+                    // Finished
+                    if (result.size() == count)
+                        break;
+                }
+            }
+            else {
+                return alerts;
+            }
         }
             
         return result;

@@ -1221,20 +1221,20 @@ public class EventsBossEJBImpl
         AuthzSubjectValue subject  = manager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
         
-        List appentResources;
+        List appentResources =
+            ids != null ? appentResources = Arrays.asList(ids) : null;
         
-        if (ids == null) {
-            // Assume if user can be alerted, then they can view resource,
-            // otherwise, it'll be filtered out later anyways
-            // find ALL alertable resources
-            appentResources = getPlatformManager().checkAlertingScope(subject);
-        } else {
-            appentResources = Arrays.asList(ids);
-        }
-        
+        // Assume if user can be alerted, then they can view resource,
+        // otherwise, it'll be filtered out later anyways
         List alerts = getAM().findEscalatables(subject, count, priority, 
                                                timeRange, cur, appentResources);
-    
+
+        // CheckAlertingScope now only used for galerts
+        if (ids == null) {
+            // find ALL alertable resources
+            appentResources = getPlatformManager().checkAlertingScope(subject);
+        }
+        
         GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
         List galerts = gMan.findEscalatables(subject, count, priority, 
                                              timeRange, cur, appentResources);   

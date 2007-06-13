@@ -198,7 +198,7 @@ public class AlertDefinitionManagerEJBImpl
         a.cleanAction();
         a.cleanCondition();
         a.cleanTrigger();
-        res.setAlertDefinitionValue(a);
+        adDAO.setAlertDefinitionValue(res, a);
         
         // Create new conditions
         AlertConditionValue[] conds = a.getConditions();
@@ -246,7 +246,7 @@ public class AlertDefinitionManagerEJBImpl
         if (esclId != null) {
             Escalation escalation = 
                 EscalationManagerEJBImpl.getOne().findById(esclId);
-            res.setAlertDefinitionValueNoRels(a);
+            adDAO.setAlertDefinitionValueNoRels(res, a);
             res.setEscalation(escalation);
         }
         // Alert definitions are the root of the cascade relationship, so
@@ -354,7 +354,7 @@ public class AlertDefinitionManagerEJBImpl
         adval.setMtime(System.currentTimeMillis());
 
         // Now set the alertdef
-        aldef.setAlertDefinitionValueNoRels(adval);
+        dao.setAlertDefinitionValueNoRels(aldef, adval);
         if (adval.isEscalationIdHasBeenSet()) {
             Integer esclId = adval.getEscalationId();
             Escalation escl = 

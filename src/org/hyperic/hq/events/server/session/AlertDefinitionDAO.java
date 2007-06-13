@@ -24,11 +24,18 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinitionDAO extends HibernateDAO {
     public AlertDefinitionDAO(DAOFactory f) {
@@ -123,5 +130,94 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .setInteger("appdefType", ent.getType())
             .setInteger("appdefId", ent.getID())
             .executeUpdate();
+    }
+
+    void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val)
+    {
+        AlertConditionDAO cDAO =
+            DAOFactory.getDAOFactory().getAlertConditionDAO();
+        ActionDAO actDAO = DAOFactory.getDAOFactory().getActionDAO();
+        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        
+        setAlertDefinitionValueNoRels(def, val);
+    
+        for (Iterator i=val.getAddedTriggers().iterator(); i.hasNext(); ) {
+            RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
+            RegisteredTrigger t = tDAO.findById(tVal.getId());
+            
+            def.addTrigger(t);
+        }
+        
+        for (Iterator i=val.getRemovedTriggers().iterator(); i.hasNext(); ) {
+            RegisteredTriggerValue tVal = (RegisteredTriggerValue)i.next();
+            RegisteredTrigger t = tDAO.findById(tVal.getId());
+            
+            def.removeTrigger(t);
+        }
+        
+        for (Iterator i=val.getAddedConditions().iterator(); i.hasNext(); ) {
+            AlertConditionValue cVal = (AlertConditionValue)i.next();
+            AlertCondition c = cDAO.findById(cVal.getId());
+            
+            def.addCondition(c);
+        }
+    
+        for (Iterator i=val.getRemovedConditions().iterator(); i.hasNext(); ) {
+            AlertConditionValue cVal = (AlertConditionValue)i.next();
+            AlertCondition c = cDAO.findById(cVal.getId());
+            
+            def.removeCondition(c);
+        }
+    
+        for (Iterator i=val.getAddedActions().iterator(); i.hasNext(); ) {
+            ActionValue aVal = (ActionValue)i.next();
+            Action a = actDAO.findById(aVal.getId());
+            
+            def.addAction(a);
+        }
+    
+        for (Iterator i=val.getRemovedActions().iterator(); i.hasNext(); ) {
+            ActionValue aVal = (ActionValue)i.next();
+            Action a = actDAO.findById(aVal.getId());
+            
+            def.removeAction(a);
+        }
+    }
+
+    void setAlertDefinitionValueNoRels(AlertDefinition def,
+                                       AlertDefinitionValue val) {
+        AlertDefinitionDAO aDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
+        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        
+        def.setName(val.getName());
+        def.setCtime(val.getCtime());
+        def.setMtime(val.getMtime());
+        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
+            def.setParent(aDAO.findById(val.getParentId()));
+        }
+        def.setDescription(val.getDescription());
+        def.setEnabled(val.getEnabled());
+        def.setWillRecover(val.getWillRecover());
+        def.setNotifyFiltered(val.getNotifyFiltered() );
+        def.setControlFiltered(val.getControlFiltered() );
+        def.setPriority(val.getPriority());
+        
+        // def.set the resource based on the entity ID
+        def.setAppdefId(val.getAppdefId());
+        def.setAppdefType(val.getAppdefType());
+        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
+            AppdefEntityID aeid = def.getAppdefEntityId();
+            ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+            def.setResource(rDao.findByInstanceId(aeid.getAuthzTypeId(),
+                                                  aeid.getId()));
+        }
+
+        def.setFrequencyType(val.getFrequencyType());
+        def.setCount(new Long(val.getCount()));
+        def.setRange(new Long(val.getRange()));
+        def.setDeleted(val.getDeleted());
+        if (val.actOnTriggerIdHasBeenSet()) {
+            def.setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
+        }
     }
 }
