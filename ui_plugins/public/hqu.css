@@ -1,0 +1,54 @@
+#alert	table {
+			font-family:Lucida Grande, Verdana;
+			font-size:0.8em;
+			width:100%;
+			border:1px solid #ccc;
+			border-collapse:collapse;
+			cursor:default;
+		}
+		#alert	table td,
+		#alert	table th{
+			padding:2px;
+			font-weight:normal;
+		}
+		#alert	table thead td, table thead th {
+			background-image:url("<html:rewrite page="/images/ft-head.gif"/>");
+			background-repeat:no-repeat;
+			background-position:top right;
+		}
+		#alert	table thead td.selectedUp, table thead th.selectedUp {
+			background-image:url("<html:rewrite page="/images/ft-headup.gif"/>");
+		}
+		#alert	table thead td.selectedDown, table thead th.selectedDown {
+			background-image:url(<html:rewrite page="/images/ft-headdown.gif"/>);
+		}
+
+		#alert	table tbody tr td{
+			border-bottom:1px solid #ddd;
+		}
+		#alert	table tbody tr.alt td{
+			background: #e3edfa;
+		}
+		#alert	table tbody tr.selected td{
+			background: yellow;
+		}
+		#alert	table tbody tr:hover td{
+			background: #a6c2e7;
+		}
+		#alert	table tbody tr.selected:hover td{
+			background:#ff9;
+		}
+
+		#inputArea{
+			margin:1em 0;
+			padding:1em;
+			background-color:#eef;
+		}
+		#updateTestInput{
+			border:1px solid #ccc;
+			width:100%;
+			height:80px;
+			font-family:serif;
+			font-size:0.9em;
+			overflow:auto;
+		}
