@@ -5233,6 +5233,26 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.26">
+        <schema-addColumn table="EAM_ALERT_DEFINITION" column="RESOURCE_ID" 
+                          columnType="INTEGER"/>
+        <schema-directSQL>
+          <statement desc="Update new resource_id column">
+            update eam_alert_definition set resource_id =
+              (select r.id from eam_resource r,
+                (select id, 1 as appdef_type from eam_resource_type where cid = 301
+                 union
+                 select id, 2 as appdef_type from eam_resource_type where cid = 303
+                 union
+                 select id, 3 as appdef_type from eam_resource_type where cid = 305)
+                 as m
+               where eam_alert_definition.appdef_id = r.instance_id and
+                     r.resource_type_id = m.id and
+                     eam_alert_definition.appdef_type = m.appdef_type)
+            where parent_id is null or not parent_id = 0;
+          </statement>
+        </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 
 </target>
