@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.Globals;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -71,21 +72,33 @@ public class RenditServlet
                                  HttpServletResponse resp)
         throws ServletException, IOException
     {
-        String reqUri = req.getRequestURI();
-        
         initPlugins();
 
+        // First try to get the secret attribute, in case of an internal
+        // redirect via the RequestDispatcher
+        String reqUri = (String)
+            req.getAttribute(Globals.INCLUDE_REQUEST_URI_ATTR);
+        if (reqUri == null)
+            reqUri = req.getRequestURI();
+        
+        String queryStr = (String)
+            req.getAttribute(Globals.INCLUDE_QUERY_STRING_ATTR);
+        if (queryStr == null)
+            queryStr = req.getQueryString();
+
         List fullPath = StringUtil.explode(reqUri, "/");
-        if (fullPath.size() < 2 || !fullPath.get(0).equals("hqu")) {
-            throw new ServletException("Illegal request path");
+        int pathSize = fullPath.size();
+        _log.info("Request path [" + fullPath + "]");
+        if (pathSize < 4 || !fullPath.get(pathSize - 4).equals("hqu")) {
+            throw new ServletException("Illegal request path [" + fullPath + 
+                                       "]");
         }
         
-        List subPath  = fullPath.subList(1, fullPath.size());
+        List subPath  = fullPath.subList(pathSize - 3, fullPath.size());
         
         String plugin = (String)subPath.get(0);
-        _log.info("Request for [" + plugin + "]: " + req.getRequestURI() + 
-                  (req.getQueryString() == null ? "" 
-                                               : ("?" + req.getQueryString())));
+        _log.info("Request for [" + plugin + "]: " + reqUri + 
+                  (queryStr == null ? "" : ("?" + queryStr)));
 
         int sessId = RequestUtils.getSessionIdInt(req);
         AuthzSubject user;
@@ -100,7 +113,8 @@ public class RenditServlet
         }
 
         try {
-            RenditServer.getInstance().handleRequest(plugin, req, resp,
+            RenditServer.getInstance().handleRequest(plugin, reqUri, req, 
+                                                     resp,
                                                      getServletContext(), user);
         } catch(Exception e) {
             throw new ServletException(e);

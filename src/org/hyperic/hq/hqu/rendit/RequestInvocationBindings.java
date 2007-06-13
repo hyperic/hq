@@ -37,23 +37,29 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
  */
 public class RequestInvocationBindings extends InvocationBindings {
     private AuthzSubject        _user;
+    private String              _requestURI;
     private HttpServletRequest  _request;
     private HttpServletResponse _response;
     private ServletContext      _context;
     
-    RequestInvocationBindings(File pluginDir, AuthzSubject user, 
-                              HttpServletRequest request,  
+    RequestInvocationBindings(File pluginDir, AuthzSubject user,
+                              String requestURI, HttpServletRequest request,  
                               HttpServletResponse response, ServletContext ctx)
     {
         super("request", pluginDir);
-        _user     = user;
-        _request  = request;
-        _response = response;
-        _context  = ctx;
+        _requestURI = requestURI;
+        _user       = user;
+        _request    = request;
+        _response   = response;
+        _context    = ctx;
     }
     
     public AuthzSubject getUser() {
         return _user;
+    }
+
+    public String getRequestURI() {
+        return _requestURI;
     }
     
     public HttpServletRequest getRequest() {

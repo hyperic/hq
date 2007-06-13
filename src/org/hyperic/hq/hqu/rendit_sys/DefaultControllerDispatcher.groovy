@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit
 
+import org.apache.catalina.Globals
 import org.hyperic.hq.hqu.rendit.i18n.BundleMapFacade
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -20,8 +21,7 @@ class DefaultControllerDispatcher {
     }
     
 	def invoke(pluginInfo, invokeArgs) {
-        def req  = invokeArgs.request
-        def path = req.requestURI.split('/')[-3..-1]
+        def path = invokeArgs.requestURI.split('/')[-3..-1]
 
         log.info "Request: ${path}"
         if (path.size() < 3)
@@ -44,7 +44,7 @@ class DefaultControllerDispatcher {
 
         try {
             def b = ResourceBundle.getBundle("${pluginInfo.name}_i18n", 
-                                             req.locale, loader)
+                                             invokeArgs.request.locale, loader)
             controller.setLocaleBundle(new BundleMapFacade(b))
         } catch(MissingResourceException e) {
             log.warn "Unable to find resource bundle for " + 
