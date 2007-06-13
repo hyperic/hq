@@ -374,8 +374,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
 
-            template.setMtime(current);
-
             List metrics =
                 getDerivedMeasurementDAO().findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
@@ -421,7 +419,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 getMeasurementTemplateDAO().findById(templIds[i]);
 
             template.setDefaultOn(on);
-            template.setMtime(current);
 
             List metrics =
                 getDerivedMeasurementDAO().findByTemplate(templIds[i]);
