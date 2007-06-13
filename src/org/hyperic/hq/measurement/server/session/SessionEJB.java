@@ -414,38 +414,26 @@ public abstract class SessionEJB {
                be deserialized, then mfg a new one and db store the
                serialized object.
             */
-            boolean dbStore = false;
-            if (!expMgr.isCached(measurement.getId())) {
-                dbStore = true;
-                if (log.isDebugEnabled())
-                    log.debug("SessionEJB- expression is not cached.");
-            }
-
             if (log.isDebugEnabled())
                 log.debug("SessionEJB- evaluating expression");
 
             long expmgrstart = System.currentTimeMillis();
+            byte[] expressionData =
+                measurement.getTemplate().getExpressionData();
             result =
                 ExpressionManager.getInstance().evaluate(
                     measurement.getId(),
                     measurement.getTemplate().getTemplate(),
                     expValues,
                     MeasurementConstants.EXPMGR_PACKAGE_IMPORTS,
-                    measurement.getTemplate().getExpressionData());
+                    expressionData);
             logTime("expressionEvaluate-expmgreval", expmgrstart);
 
-            if (dbStore) {
+            if (expressionData == null) {
                 if (log.isDebugEnabled())
                     log.debug("SessionEJB- caching expression");
 
-                // Store this expression's serialized class for future access.
-                DerivedMeasurement dm =
-                    getDerivedMeasurementDAO().findById(measurement.getId());
-
-                if (log.isDebugEnabled())
-                    log.debug("SessionEJB- Serialized Class Bytes:" +
-                        expMgr.getExpressionBytes(measurement.getId()));
-                dm.getTemplate().setExpressionData(
+                measurement.getTemplate().setExpressionData(
                     expMgr.getExpressionBytes(measurement.getId()));
             }
 
