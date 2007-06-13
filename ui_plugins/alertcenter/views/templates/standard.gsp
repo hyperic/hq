@@ -1,13 +1,4 @@
-<html>
-<head>
-	<title>HQ Alert Center</title>
-
-    <%= dojoInit %>
-    <%= dojoInclude(["dojo.widget.FilteringTable"]) %>
-
-</head>
-	
-<body>
-	<%= template.body %>
-</body>
-</html>
+<%= dojoInit %>
+<%= dojoInclude(["dojo.widget.FilteringTable"]) %>
+<link rel=stylesheet href="../hqu/public/hqu.css" type="text/css">
+<%= template.body %>
