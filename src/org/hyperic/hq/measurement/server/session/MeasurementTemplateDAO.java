@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,7 +56,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             MeasurementArg raw = (MeasurementArg)i.next();
             MeasurementTemplate derived = raw.getTemplate();
             // clear measurement arg collection for cascade delete
-            derived.getMeasurementArgs().clear();
+            derived.getMeasurementArgsBag().clear();
             dm.add(derived);
         }
         // clear collection to avoid ObjectDeletedException
