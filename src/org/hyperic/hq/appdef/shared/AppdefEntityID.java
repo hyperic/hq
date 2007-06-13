@@ -137,33 +137,47 @@ public class AppdefEntityID
      * authz resource type.
      */
     public String getAuthzTypeName() {
-        String name;
-
-        switch(this.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                name = AuthzConstants.platformResType;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                name = AuthzConstants.serverResType;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                name = AuthzConstants.serviceResType;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                name = AuthzConstants.applicationResType;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                name = AuthzConstants.groupResType;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type: " +
-                                                   this.getType()); 
+        switch(getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            return AuthzConstants.platformResType;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            return AuthzConstants.serverResType;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            return AuthzConstants.serviceResType;
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            return AuthzConstants.applicationResType;
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            return AuthzConstants.groupResType;
+        default:
+            throw new IllegalArgumentException("Unknown type: " + getType()); 
         }
-        return name;
     }
 
-    /** Convenience method to check if this is a platform
-     * @return true if this entity refers to a platform, false otherwise. */
+    /**
+     * Return the ID of this entity id object's authz resource type.
+     */
+    public Integer getAuthzTypeId() {
+        switch (getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            return AuthzConstants.authzPlatform;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            return AuthzConstants.authzServer;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            return AuthzConstants.authzService;
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            return AuthzConstants.authzApplication;
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            return AuthzConstants.authzGroup;
+        default:
+            throw new IllegalArgumentException("Unknown type: " + getType());
+        }
+    }
+
+    /**
+     * Convenience method to check if this is a platform
+     * 
+     * @return true if this entity refers to a platform, false otherwise.
+     */
     public boolean isPlatform () { 
         return this.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM; 
     }
