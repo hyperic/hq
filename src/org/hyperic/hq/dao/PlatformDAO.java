@@ -326,7 +326,7 @@ public class PlatformDAO extends HibernateDAO {
         return platforms;
     }
 
-    public Collection findVirtualByPysicalId(Integer id) {
+    public Collection findVirtualByPhysicalId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
         Collection resources =
             dao.findVirtualByPysicalId(id, AuthzConstants.platformResType);
