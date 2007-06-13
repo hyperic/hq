@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -58,9 +59,18 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.units.FormattedNumber;
 
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify
@@ -186,8 +196,49 @@ public class EmailAction extends EmailActionConfig
         if (alertdef.performsEscalations()) {
             String lastFix = EscalationManagerEJBImpl.getOne()
                 .getLastFix((PerformsEscalations) alertdef);
-            text.append("\n- Previous Fix: ")
-                .append(lastFix);
+            if (lastFix != null) {
+                text.append("\n- Previous Fix: ")
+                    .append(lastFix);
+            }
+        }
+        
+        // See if we can get the indicator metrics
+        if (aeid.isPlatform() || aeid.isServer() || aeid.isService()) {
+            DerivedMeasurementManagerLocal dmMan =
+                DerivedMeasurementManagerEJBImpl.getOne();
+            List designates = dmMan.findDesignatedMeasurements(aeid);
+            
+            // Gather the IDs to get the last data points
+            Integer[] mids = new Integer[designates.size()];
+            int i = 0;
+            for (Iterator it = designates.iterator(); it.hasNext(); i++) {
+                DerivedMeasurement m = (DerivedMeasurement) it.next();
+                mids[i] = m.getId();
+            }
+            
+            DataManagerLocal dMan = DataManagerEJBImpl.getOne();
+            Map values =
+                dMan.getLastDataPoints(mids,
+                                   MeasurementConstants.ACCEPTABLE_LIVE_MILLIS);
+            
+            // Now output the values
+            if (values.size() > 0) {
+                text.append("\n- Previous Indicator Metrics: ");
+                
+                for (Iterator it = designates.iterator(); it.hasNext(); ) {
+                    DerivedMeasurement m = (DerivedMeasurement) it.next();
+                    if (values.containsKey(m.getId())) {
+                        text.append("\n    ")
+                            .append(m.getTemplate().getName())
+                            .append(": ");
+                        MetricValue val = (MetricValue) values.get(m.getId());
+                        FormattedNumber th =
+                            UnitsConvert.convert(val.getValue(),
+                                                 m.getTemplate().getUnits());
+                        text.append(th);
+                    }
+                }
+            }
         }
 
         text.append(SEPARATOR);

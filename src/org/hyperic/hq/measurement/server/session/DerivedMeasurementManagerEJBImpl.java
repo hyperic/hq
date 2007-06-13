@@ -872,9 +872,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public List findDesignatedMeasurements(AuthzSubjectValue subject,
-                                           AppdefEntityID id) {
-
+    public List findDesignatedMeasurements(AppdefEntityID id) {
         return getDerivedMeasurementDAO().findDesignatedByInstance(id.getType(),
                                                                    id.getID());
     }

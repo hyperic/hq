@@ -183,8 +183,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else {
             metrics =
-                getDerivedMeasurementManager().findDesignatedMeasurements(
-                    subject, id);
+                getDerivedMeasurementManager().findDesignatedMeasurements(id);
             
             // Now iterate through and throw out the metrics we don't need
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
