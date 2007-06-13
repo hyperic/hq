@@ -84,7 +84,23 @@ class RenderFrame {
                    l       : controller.localeBundle]
 
         res += staticMethodsToMap(DojoUtil)        
-        res += staticMethodsToMap(HtmlUtil)        
+        res += staticMethodsToMap(HtmlUtil)
+        
+        // Override HtmlUtil.urlFor, so that we can re-write URLs
+        res.urlFor = { opts ->
+            def invokeArgs = controller.invokeArgs
+            def req = invokeArgs.request
+            def path = [invokeArgs.contextPath]
+            path += invokeArgs.servletPath.split('/') as List
+            // Trim off the last element
+            if (path[-1].endsWith('.hqu'))
+                path = path[0..-2]
+            path = path.findAll{it}.join('/')
+            if (!path.startsWith("/"))
+                path = "/" + path
+            def u = new URL(req.scheme, req.serverName, req.serverPort, path)
+            HtmlUtil.urlFor(opts + [absolute:u.toString()]
+        }
         res
     }
 

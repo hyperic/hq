@@ -10,9 +10,12 @@ class HtmlUtil {
     /**
      * Create a URL specified by some options (a map).  Opts can contain:
      *
-     * action:  The target action within the current controller to execute
-     * id:      Either an integer, or an object which answers to .getId(), which
-     *          will pass an id= query parameter
+     * action:   The target action within the current controller to execute
+     * id:       Either an integer, or an object which answers to .getId(), 
+     *           which will pass an id= query parameter
+     * absolute: If set, will re-write the URL with the value as the prefix
+     *           of the rest of the URL;  
+     *           E.g. absolute:'http://localhost:7080/web'
      *
      * Any additional values in the map will be passed as query parameters
      */
@@ -20,6 +23,12 @@ class HtmlUtil {
         opts = new HashMap(opts) 
         def res = ''
         def qparams = [:]
+                       
+        if (opts.absolute) {
+            res = "${opts.absolute}/"
+            opts.remove('absolute')
+        }
+        
         if (opts['action']) {
         	res += opts['action'] + '.hqu'
         	opts.remove('action')
