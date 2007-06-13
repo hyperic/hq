@@ -6,14 +6,350 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
-  <class name="MeasurementData" table="EAM_MEASUREMENT_DATA">
+  <class name="MeasurementData" table="METRIC_DATA_COMPAT" entity-name="MetricDataCompat">
     <!-- create an combined index -->
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" not-null="true" />
+        <column name="MEASUREMENT_ID" not-null="true" index="MEASUREMENT_DATA_TIME_IDX" />
       </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" not-null="true" index="MEASUREMENT_DATA_TIME_IDX" />
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_0D_0S" entity-name="MetricData_0D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_0D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_0D_1S" entity-name="MetricData_0D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_0D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_0D_2S" entity-name="MetricData_0D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_0D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_1D_0S" entity-name="MetricData_1D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_1D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_1D_1S" entity-name="MetricData_1D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_1D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_1D_2S" entity-name="MetricData_1D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_1D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_2D_0S" entity-name="MetricData_2D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_2D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_2D_1S" entity-name="MetricData_2D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_2D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_2D_2S" entity-name="MetricData_2D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_2D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_3D_0S" entity-name="MetricData_3D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_3D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_3D_1S" entity-name="MetricData_3D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_3D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_3D_2S" entity-name="MetricData_3D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_3D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_4D_0S" entity-name="MetricData_4D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_4D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_4D_1S" entity-name="MetricData_4D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_4D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_4D_2S" entity-name="MetricData_4D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_4D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_5D_0S" entity-name="MetricData_5D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_5D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_5D_1S" entity-name="MetricData_5D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_5D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_5D_2S" entity-name="MetricData_5D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_5D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_6D_0S" entity-name="MetricData_6D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_6D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_6D_1S" entity-name="MetricData_6D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_6D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_6D_2S" entity-name="MetricData_6D_2S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_6D_2S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
       </key-property>
     </composite-id>
 
