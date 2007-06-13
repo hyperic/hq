@@ -99,7 +99,7 @@ class RenderFrame {
             if (!path.startsWith("/"))
                 path = "/" + path
             def u = new URL(req.scheme, req.serverName, req.serverPort, path)
-            HtmlUtil.urlFor(opts + [absolute:u.toString()]
+            HtmlUtil.urlFor(opts + [absolute:u.toString()])
         }
         res
     }
