@@ -312,10 +312,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private List updateData(Connection conn, List data) 
         throws SQLException
     { 
-        List left;
         Statement stmt = null;
         
         try {
+            stmt = conn.createStatement();
             DataPoint pt = (DataPoint)data.get(0);
             Integer metricId = pt.getMetricId();
             MetricValue val = pt.getMetricValue();
