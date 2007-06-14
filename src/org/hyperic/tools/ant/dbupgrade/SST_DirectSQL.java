@@ -144,6 +144,11 @@ public class SST_DirectSQL extends SchemaSpecTask {
                         log("target was postgresql, but this is not pgsql, returning.");
                         return;
                     }
+                } else if (targetDB.equalsIgnoreCase("mysql")) {
+                    if (!DBUtil.isMySQL(dbType)) {
+                        log("target was mysql, but this is not mysql, returning.");
+                        return;
+                    }
                 } else {
                     throw new BuildException("dbtype attribute must be 'oracle'"
                                              + " or 'postgresql'");

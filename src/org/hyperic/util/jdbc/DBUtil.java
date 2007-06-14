@@ -357,6 +357,14 @@ public class DBUtil {
         return (type == DATABASE_ORACLE_8 || type == DATABASE_ORACLE_9
                 || type == DATABASE_ORACLE_10);
     }
+    
+    /**
+     * Is the database MySQL?
+     */
+    public static boolean isMySQL(int type) {
+        return type == DATABASE_MYSQL5;
+    }
+    
     /**
      * Returns the proper SQL syntax for invoking the AVG aggregate
      * function.  This is necessary because with cloudscape, computing
