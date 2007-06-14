@@ -29,7 +29,7 @@ import java.io.Serializable;
 
 import org.hyperic.hibernate.PersistedObject;
 
-public class Measurement extends PersistedObject 
+public abstract class Measurement extends PersistedObject 
     implements Serializable 
 {
     private Integer             _instanceId;
@@ -76,6 +76,8 @@ public class Measurement extends PersistedObject
     protected void setMtime(long mtime) {
         _mtime = mtime;
     }
+    
+    public abstract boolean isDerived();
 
     public boolean equals(Object obj) {
         if (!(obj instanceof Measurement) || !super.equals(obj)) {

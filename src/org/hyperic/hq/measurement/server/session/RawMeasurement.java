@@ -54,4 +54,8 @@ public class RawMeasurement
     public boolean equals(Object obj) {
         return (obj instanceof RawMeasurement) && super.equals(obj);
     }
+
+    public boolean isDerived() {
+        return false;
+    }
 }

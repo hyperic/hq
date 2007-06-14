@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.dao.DAOFactory;
 
 public class DerivedMeasurement extends Measurement
     implements Serializable 
@@ -132,5 +131,9 @@ public class DerivedMeasurement extends Measurement
 
     public boolean equals(Object obj) {
         return (obj instanceof DerivedMeasurement) && super.equals(obj);
+    }
+
+    public boolean isDerived() {
+        return true;
     }
 }
