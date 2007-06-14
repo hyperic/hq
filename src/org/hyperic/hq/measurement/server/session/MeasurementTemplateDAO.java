@@ -89,24 +89,18 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(0, mt.getId().intValue())
             .list();
 
-        DerivedMeasurementDAO dDao = null;
-        RawMeasurementDAO rDao = null;
-        
-        boolean derived = mt.getMeasurementArgs().size() > 0;
-        
-        if (derived) {
-            dDao = new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
-        }
-        else {
-            rDao = new RawMeasurementDAO(DAOFactory.getDAOFactory());
-        }
+        DerivedMeasurementDAO dDao =
+            new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
+        RawMeasurementDAO rDao =
+            new RawMeasurementDAO(DAOFactory.getDAOFactory());
 
         for (Iterator it = measurements.iterator(); it.hasNext();) {
-            if (derived) {
-                dDao.remove((DerivedMeasurement) it.next());
+            Measurement meas = (Measurement) it.next();
+            if (meas.isDerived()) {
+                dDao.remove((DerivedMeasurement) meas);
             }
             else {
-                rDao.remove((RawMeasurement) it.next());
+                rDao.remove((RawMeasurement) meas);
             }
         }
     }
@@ -263,7 +257,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     List findByMeasurementArg(Integer tId) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join fetch t.measurementArgs args " +
+            "join fetch t.measurementArgsBag args " +
             "where args.templateArg.id=?";
 
         return getSession().createQuery(sql)
@@ -274,7 +268,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
                                              String template) {
         String sql =
             "select t from MeasurementTemplate t " +
-            "join fetch t.measurementArgs args " +
+            "join fetch t.measurementArgsBag args " +
             "where args.templateArg.id=? and t.template=?";
         
         return (MeasurementTemplate)getSession().createQuery(sql)

@@ -66,8 +66,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             "select distinct m from RawMeasurement m " +
             "join m.template as t " +
             "join t.monitorableType as mt " +
-            "where mt.appdefType = ? and m.instanceId = ? " +
-            "and t.measurementArgs is empty";
+            "where mt.appdefType = ? and m.instanceId = ? ";
 
         return getSession().createQuery(sql)
             .setInteger(0, appdefType)
@@ -148,7 +147,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             "select distinct r from RawMeasurement r, " +
             "DerivedMeasurement m " +
             "join m.template t " +
-            "join t.measurementArgs a " +
+            "join t.measurementArgsBag a " +
             "where r.instanceId = m.instanceId and " +
             "a.templateArg.id = r.template.id and " +
             "m.id = ? ";

@@ -282,7 +282,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         String sql =
             "select distinct d from DerivedMeasurement d " +
             "join d.template t " +
-            "join t.measurementArgs a, " +
+            "join t.measurementArgsBag a, " +
             "RawMeasurement r " +
             "where d.interval is not null and " +
             "d.instanceId = r.instanceId and " +
