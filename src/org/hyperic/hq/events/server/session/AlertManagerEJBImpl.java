@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -59,6 +60,7 @@ import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -322,7 +324,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public List findAlerts(Integer subj, int priority, long timeRange,
-                           long endTime, int page, int pageSize) 
+                           long endTime, PageInfo pageInfo) 
         throws PermissionException 
     {
         // Time voodoo the end time to the nearest minute so that we might
@@ -331,8 +333,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return getAlertDAO().findByCreateTimeAndPriority(subj,
                                                          endTime- timeRange,
                                                          endTime, priority,
-                                                         page * pageSize,
-                                                         pageSize);
+                                                         pageInfo);
     }
     
     /**
@@ -352,8 +353,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         
         for (int index = 0; result.size() < count; index++) {
             // Permission checking included
+            PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
+                                             false);
             List alerts = findAlerts(subj.getId(), priority, endTime- timeRange,
-                                     endTime, index * count, count);
+                                     endTime, pInfo);
             if (alerts.size() == 0)
                 break;
             

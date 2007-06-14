@@ -26,10 +26,12 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -76,14 +78,16 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    public List findByCreateTimeAndPriority(Integer subj, long begin, long end,
-                                            int priority, int start, int count)
+    List findByCreateTimeAndPriority(Integer subj, long begin, long end,
+                                     int priority, PageInfo pageInfo)   
     {
         String[] ops =
             new String[] { AuthzConstants.platformOpManageAlerts,
                            AuthzConstants.serverOpManageAlerts,
                            AuthzConstants.serviceOpManageAlerts };
- 
+        AlertSortField sort = (AlertSortField)pageInfo.getSort();
+        Query q;
+        
         String sql = "select a from Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +
@@ -96,19 +100,18 @@ public class AlertDAO extends HibernateDAO {
                            "join rl.subjects s " +
                            "where s.id = :subj and o.name in (:ops) and " +
                                  "r.resourceType = o.resourceType) " +
-                ") " +
-          "order by a.ctime DESC";
-        return getSession().createQuery(sql)
+                ") order by " + sort.getSortString("a", "d", "r") +
+                (pageInfo.isAscending() ? "" : " DESC");
+            
+        q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("priority", priority)
             .setInteger("subj", subj.intValue())
             .setParameterList("ops", ops)
-            .setFirstResult(start)
-            .setMaxResults(count)
             .setCacheable(true)
-            .setCacheRegion("Alert.findByCreateTime")
-            .list();
+            .setCacheRegion("Alert.findByCreateTime");
+        return pageInfo.pageResults(q).list();
     }
     
     public List findByAppdefEntityInRange(AppdefEntityID id, long begin,

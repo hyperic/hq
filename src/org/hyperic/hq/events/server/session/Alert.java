@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
@@ -251,6 +252,14 @@ public class Alert
             
             removeActionLog(alDao.findById(lv.getId()));
         }
+    }
+
+    /**
+     * Get a list of the fields which can be used to sort various queries
+     * for alerts.
+     */
+    public static List getSortFields() {
+        return AlertSortField.getAll(AlertSortField.class);
     }
 
     public String toString() {
