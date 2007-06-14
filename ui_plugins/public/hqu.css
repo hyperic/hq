@@ -12,15 +12,15 @@
 			font-weight:normal;
 		}
 		#alert	table thead td, table thead th {
-			background-image:url("<html:rewrite page="/images/ft-head.gif"/>");
+			background-image:url("images/ft-head.gif");
 			background-repeat:no-repeat;
 			background-position:top right;
 		}
 		#alert	table thead td.selectedUp, table thead th.selectedUp {
-			background-image:url("<html:rewrite page="/images/ft-headup.gif"/>");
+			background-image:url("images/ft-headup.gif");
 		}
 		#alert	table thead td.selectedDown, table thead th.selectedDown {
-			background-image:url(<html:rewrite page="/images/ft-headdown.gif"/>);
+			background-image:url("images/ft-headdown.gif");
 		}
 
 		#alert	table tbody tr td{
