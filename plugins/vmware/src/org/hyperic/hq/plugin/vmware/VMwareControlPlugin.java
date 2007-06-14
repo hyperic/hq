@@ -167,7 +167,13 @@ public class VMwareControlPlugin
             disconnectVM();
         }
     }
-    
+
+    //VMware server
+    public void revertSnapshot() throws VMwareException {
+        revertToSnapshot();
+    }
+
+    //ESX
     public void revertToSnapshot() throws VMwareException {
         try {
             connectVM();
@@ -177,6 +183,12 @@ public class VMwareControlPlugin
         }
     }
 
+    //VMware server
+    public void deleteSnapshot() throws VMwareException {
+        removeAllSnapshots();
+    }
+
+    //ESX
     public void removeAllSnapshots() throws VMwareException {
         try {
             connectVM();
