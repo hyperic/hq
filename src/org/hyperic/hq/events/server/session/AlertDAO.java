@@ -104,7 +104,7 @@ public class AlertDAO extends HibernateDAO {
             .setInteger("priority", priority)
             .setInteger("subj", subj.intValue())
             .setParameterList("ops", ops)
-            .setFirstResult(0)
+            .setFirstResult(start)
             .setMaxResults(count)
             .setCacheable(true)
             .setCacheRegion("Alert.findByCreateTime")
