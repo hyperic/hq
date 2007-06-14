@@ -84,4 +84,16 @@ public abstract class AuthzNamedBean extends PersistedObject
 
         return result;
     }
+    
+    public class Comparator implements java.util.Comparator {
+
+        public int compare(Object arg0, Object arg1) {
+            if (!(arg0 instanceof AuthzNamedBean) ||
+                    !(arg1 instanceof AuthzNamedBean))
+                return 0;
+
+            return ((AuthzNamedBean) arg0).getName().compareTo(
+                   ((AuthzNamedBean) arg1).getName());
+        }
+    }
 }

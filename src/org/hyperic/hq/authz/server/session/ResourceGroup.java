@@ -25,10 +25,12 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
@@ -177,16 +179,17 @@ public class ResourceGroup extends AuthzNamedBean
 
     public Collection getResources()
     {
-        Collection resources = new HashSet();
+        TreeSet resources = new TreeSet(new AuthzNamedBean.Comparator());
         // Filter our the resource that is this group
         for (Iterator it = getResourceSet().iterator(); it.hasNext(); ) {
             Resource res = (Resource) it.next();
-            if (!res.getResourceType().getId().equals(AuthzConstants.authzGroup)
-                    || !res.getInstanceId().equals(getId())) {
+            if (!res.getInstanceId().equals(getId()) ||
+                !res.getResourceType().getId().equals(AuthzConstants.authzGroup)
+               ) {
                 resources.add(res);
             }
         }
-        return Collections.unmodifiableCollection(resources);
+        return resources;
     }
 
     protected void setResourceSet(Collection val) {
