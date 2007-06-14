@@ -57,34 +57,27 @@ class DojoUtil {
      */
     static String dojoTable(params) {
 	    def idVar   = "_hqu_${params.id}"
-	    def res     = new StringBuffer("""
-	        <script type="text/javascript">
-	        var ${idVar}_columns = [
-        """)
-        for (c in params.columns) {
-            res << "{ field: \"${c}\"},\n"
-        }
-        res << """
-            ];
+	    def res     = """
+	    <script type="text/javascript">
 
 	    dojo.addOnLoad(function() {
 	        ${idVar}_table = dojo.widget.createWidget("dojo:FilteringTable",
 	                                                  {valueField: "id"},
 	                                                  dojo.byId("${params.id}"));
 
-	        for (var x = 0; x<${idVar}_columns.length; x++) {
-	            ${idVar}_table.columns.push(${idVar}_table.createMetaData(${idVar}_columns[x]));
-	        }
-	        var bindArgs = {
+            dojo.io.bind({
 	            url: '${params.url}',
 	            method: "get",
 	            mimetype: "text/json-comment-filtered",
-	            handle: function(type,data,evt) {
+                load: function(type, data, evt) {
 	                AjaxReturn = data;
-	                ${idVar}_table.store.setData(data);
-	            }
-	        };
-	        dojo.io.bind (bindArgs);
+                    var cols = data.columns
+                    for (var x = 0; x<cols.length; x++) {
+                        ${idVar}_table.columns.push(${idVar}_table.createMetaData(cols[x]));
+                    }
+                    ${idVar}_table.store.setData(data.data);
+                }
+	        });
 	    });    
 	    </script>
 	    <table id="${params.id}"></table>

@@ -20,26 +20,30 @@ class AlertController
     }
     
     def data(params) {
-		def pageInfo = PageInfo.create(0, 20, AlertSortField.DATE, false)
+		def pageInfo = PageInfo.create(1, 20, AlertSortField.DATE, false)
         def alerts = alertHelper.findAlerts(0, System.currentTimeMillis(),
                                             System.currentTimeMillis(), 
                                             pageInfo)
         def df = DateFormat.getDateTimeInstance(DateFormat.SHORT, 
                                                 DateFormat.SHORT, locale)                                            
-        JSONArray arr = new JSONArray()
+        JSONArray data = new JSONArray()
         for (a in alerts) {
             def d = a.alertDefinition
             
-            JSONObject o = new JSONObject()
-            o.put("id", a.id)
-            o.put("Date", df.format(a.timestamp))
-            o.put("Alert", d.name)
-            o.put("Resource", d.resource.name)
-            o.put("Fixed", a.fixed ? "Yes" : "No")
-            o.put("Severity", EventConstants.getPriority(d.priority))
-            arr.put(o)
+            data.put([id       : a.id,
+                      Date     : df.format(a.timestamp),
+                      Alert    : d.name,
+                      Resource : d.resource.name,
+                      Fixed    : a.fixed ? "Yes" : "No",
+                      Severity : EventConstants.getPriority(d.priority)
+            ])
         }
         
-		render(inline:"/* ${arr} */", contentType:'text/json-comment-filtered')
+		JSONArray columns = new JSONArray()
+		for (f in ['Date', 'Alert', 'Resource', 'Fixed', 'Severity']) {
+			columns.put([field: f] as JSONObject)
+		}
+		JSONObject result = [data : data, columns : columns ] as JSONObject
+		render(inline:"/* ${result} */", contentType:'text/json-comment-filtered')
     }
 }
