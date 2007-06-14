@@ -13,14 +13,14 @@
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="26" alt="" border="0"/></td>
   </tr>
   <tr>
-  	<td rowspan="99" class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+  	<td rowspan="99" class="PageTitle">&nbsp;</td>
     <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
     <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
+  <tr valign="top">
+    <td>
+    <c:url var="attachUrl" context="/hqu/${attachment.plugin.name}" value="${attachment.path}"/>
+    <c:import url="${attachUrl}"/>
+    </td>
+  </tr>
 </table>
-
-<c:url var="attachUrl" context="/hqu/${attachment.plugin.name}" value="${attachment.path}"/>
-
-<div style="border-left: 4px solid #CCCCCC;">
-<c:import url="${attachUrl}"/>
-</div>
