@@ -5144,13 +5144,13 @@ has already been defined.
             version_col bigint DEFAULT 0 NOT NULL,
             code integer NOT NULL,
             description character varying(64) NOT NULL
-          );
+          )
         </statement>
         <statement desc="Add eam_error_code constraint" fail="false" targetDB="postgresql">
-          ALTER TABLE ONLY eam_error_code ADD CONSTRAINT eam_error_code_pkey PRIMARY KEY (id);
+          ALTER TABLE ONLY eam_error_code ADD CONSTRAINT eam_error_code_pkey PRIMARY KEY (id)
         </statement>
         <statement desc="Add eam_error_code index" fail="false" targetDB="postgresql">
-          CREATE INDEX error_code ON eam_error_code USING btree (code);
+          CREATE INDEX error_code ON eam_error_code USING btree (code)
         </statement>
         <statement desc="Add eam_service_request table" fail="false" targetDB="postgresql">
           CREATE TABLE eam_service_request (
@@ -5158,21 +5158,21 @@ has already been defined.
               version_col bigint DEFAULT 0 NOT NULL,
               serviceid integer NOT NULL,
               url character varying(767) NOT NULL
-          );
+          )
         </statement>
         <statement desc="Add eam_service_request primary key" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_service_request
-              ADD CONSTRAINT eam_service_request_pkey PRIMARY KEY (id);
+              ADD CONSTRAINT eam_service_request_pkey PRIMARY KEY (id)
         </statement>
         <statement desc="Add eam_service_request unique constraint" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_service_request
-              ADD CONSTRAINT eam_service_request_serviceid_key UNIQUE (serviceid, url);
+              ADD CONSTRAINT eam_service_request_serviceid_key UNIQUE (serviceid, url)
         </statement>
         <statement desc="Add eam_service_request index" fail="false" targetDB="postgresql">
-          CREATE INDEX service_request_svcid ON eam_service_request USING btree (serviceid);
+          CREATE INDEX service_request_svcid ON eam_service_request USING btree (serviceid)
         </statement>
         <statement desc="Add eam_service_request index" fail="false" targetDB="postgresql">
-          CREATE INDEX service_request_url ON eam_service_request USING btree (url);
+          CREATE INDEX service_request_url ON eam_service_request USING btree (url)
         </statement>
         <statement desc="Add eam_request_stat table" fail="false" targetDB="postgresql">
           CREATE TABLE eam_request_stat (
@@ -5187,24 +5187,24 @@ has already been defined.
               endtime bigint NOT NULL,
               svctype integer NOT NULL,
               svcreq_id integer
-          );
+          )
         </statement>
         <statement desc="Add eam_request_stat primary key" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_request_stat
-              ADD CONSTRAINT eam_request_stat_pkey PRIMARY KEY (id);
+              ADD CONSTRAINT eam_request_stat_pkey PRIMARY KEY (id)
         </statement>
         <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
-          CREATE INDEX reqstat_idx_begintime ON eam_request_stat USING btree (begintime);
+          CREATE INDEX reqstat_idx_begintime ON eam_request_stat USING btree (begintime)
         </statement>
         <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
-          CREATE INDEX reqstat_idx_endtime ON eam_request_stat USING btree (endtime);
+          CREATE INDEX reqstat_idx_endtime ON eam_request_stat USING btree (endtime)
         </statement>
         <statement desc="Add eam_request_stat index" fail="false" targetDB="postgresql">
-          CREATE INDEX service_id ON eam_request_stat USING btree (svcreq_id);
+          CREATE INDEX service_id ON eam_request_stat USING btree (svcreq_id)
         </statement>
         <statement desc="Add eam_request_stat foreign key" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_request_stat
-            ADD CONSTRAINT fke8ebbc72154d0f55 FOREIGN KEY (svcreq_id) REFERENCES eam_service_request(id) ON DELETE CASCADE;
+            ADD CONSTRAINT fke8ebbc72154d0f55 FOREIGN KEY (svcreq_id) REFERENCES eam_service_request(id) ON DELETE CASCADE
         </statement>
         <statement desc="Add eam_stat_errors table" fail="false" targetDB="postgresql">
           CREATE TABLE eam_stat_errors (
@@ -5213,22 +5213,22 @@ has already been defined.
             count integer NOT NULL,
             error_id integer,
             reqstat_id integer
-          );
+          )
         </statement>
         <statement desc="Add eam_stat_errors primary key" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_stat_errors
-            ADD CONSTRAINT eam_stat_errors_pkey PRIMARY KEY (id);
+            ADD CONSTRAINT eam_stat_errors_pkey PRIMARY KEY (id)
         </statement>
         <statement desc="Add eam_stat_errors index" fail="false" targetDB="postgresql">
-          CREATE INDEX stat_errors_reqstat ON eam_stat_errors USING btree (reqstat_id);
+          CREATE INDEX stat_errors_reqstat ON eam_stat_errors USING btree (reqstat_id)
         </statement>
         <statement desc="Add eam_stat_errors foreign key constraint" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_stat_errors
-            ADD CONSTRAINT fk6f2383a8237d366c FOREIGN KEY (error_id) REFERENCES eam_error_code(id) ON DELETE CASCADE;
+            ADD CONSTRAINT fk6f2383a8237d366c FOREIGN KEY (error_id) REFERENCES eam_error_code(id) ON DELETE CASCADE
         </statement>
         <statement desc="Add eam_stat_errors foreign key constraint" fail="false" targetDB="postgresql">
           ALTER TABLE ONLY eam_stat_errors
-            ADD CONSTRAINT fk6f2383a82de89070 FOREIGN KEY (reqstat_id) REFERENCES eam_request_stat(id) ON DELETE CASCADE;
+            ADD CONSTRAINT fk6f2383a82de89070 FOREIGN KEY (reqstat_id) REFERENCES eam_request_stat(id) ON DELETE CASCADE
         </statement>
       </schema-directSQL>
     </schemaSpec>
@@ -5249,8 +5249,607 @@ has already been defined.
                where eam_alert_definition.appdef_id = r.instance_id and
                      r.resource_type_id = m.id and
                      eam_alert_definition.appdef_type = m.appdef_type)
-            where parent_id is null or not parent_id = 0;
+            where parent_id is null or not parent_id = 0
           </statement>
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.27">
+        <schema-directSQL>
+          <statement desc="Change eam_measurement_data table name">
+            alter table eam_measurement_data rename to metric_data_compat
+          </statement>
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_0D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_0D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_0D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_1D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_1D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_1D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_2D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_2D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_2D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_3D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_3D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_3D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_4D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_4D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_4D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_5D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_5D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_5D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_6D_0S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_6D_1S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="postgresql">
+            create table METRIC_DATA_6D_2S (
+                MEASUREMENT_ID int4 not null,
+                TIMESTAMP int8 not null,
+                VALUE numeric(24, 5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <!-- TODO: Wait until I fix SST_DirectSQL 
+          <statement targetDB="mysql">
+            create table METRIC_DATA_0D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_0D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_0D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_1D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_1D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_1D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_2D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_2D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_2D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_3D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_3D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_3D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_4D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_4D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_4D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_5D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_5D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_5D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_6D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_6D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table METRIC_DATA_6D_2S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            ) ENGINE=InnoDB
+          </statement>
+
+          -->
+          <statement targetDB="oracle">
+            create table METRIC_DATA_0D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_0D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_0D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_1D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_1D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_1D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_2D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_2D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_2D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_3D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_3D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_3D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_4D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_4D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_4D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_5D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_5D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_5D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_6D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_6D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table METRIC_DATA_6D_2S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (MEASUREMENT_ID, TIMESTAMP)
+            )
+          </statement>
+
+          <statement>create index METRIC_DATA_0D_0S_MID_IDX on METRIC_DATA_0D_0S (MEASUREMENT_ID)</statement>
+
+          <statement>create index METRIC_DATA_0D_1S_MID_IDX on METRIC_DATA_0D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_0D_2S_MID_IDX on METRIC_DATA_0D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_1D_0S_MID_IDX on METRIC_DATA_1D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_1D_1S_MID_IDX on METRIC_DATA_1D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_1D_2S_MID_IDX on METRIC_DATA_1D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_2D_0S_MID_IDX on METRIC_DATA_2D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_2D_1S_MID_IDX on METRIC_DATA_2D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_2D_2S_MID_IDX on METRIC_DATA_2D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_3D_0S_MID_IDX on METRIC_DATA_3D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_3D_1S_MID_IDX on METRIC_DATA_3D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_3D_2S_MID_IDX on METRIC_DATA_3D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_4D_0S_MID_IDX on METRIC_DATA_4D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_4D_1S_MID_IDX on METRIC_DATA_4D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_4D_2S_MID_IDX on METRIC_DATA_4D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_5D_0S_MID_IDX on METRIC_DATA_5D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_5D_1S_MID_IDX on METRIC_DATA_5D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_5D_2S_MID_IDX on METRIC_DATA_5D_2S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_6D_0S_MID_IDX on METRIC_DATA_6D_0S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_6D_1S_MID_IDX on METRIC_DATA_6D_1S (MEASUREMENT_ID)</statement>
+          <statement>create index METRIC_DATA_6D_2S_MID_IDX on METRIC_DATA_6D_2S (MEASUREMENT_ID)</statement>
         </schema-directSQL>
     </schemaSpec>
 </dbupgrade>
