@@ -29,11 +29,16 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class MeasTabManagerUtil
 {
-    private static final boolean DEBUG = false;
     private static Calendar myBaseCal = Calendar.getInstance();
     private static final long MS_IN_A_DAY = 1000*60*60*24;
+    private static final String logCtx = 
+                                   MeasTabManagerUtil.class.getName();
+    private static final Log _log = LogFactory.getLog(logCtx);
     static final int NUMBER_OF_TABLES = 21,
                      NUMBER_OF_TABLES_PER_DAY = 3;
 
@@ -71,7 +76,7 @@ public class MeasTabManagerUtil
         Calendar cal = Calendar.getInstance();
         cal.setTime(new java.util.Date(timems));
         int dayofperiod = getDayOfPeriod(timems);
-        if (DEBUG) System.out.println("dayofperiod -> "+dayofperiod);
+        _log.debug("dayofperiod -> "+dayofperiod);
         int hourofday = cal.get(Calendar.HOUR_OF_DAY);
         int numdaytables = NUMBER_OF_TABLES / NUMBER_OF_TABLES_PER_DAY;
         int daytable = dayofperiod % numdaytables;
@@ -95,17 +100,17 @@ public class MeasTabManagerUtil
         // need to do this because of DST
         // add() and roll() don't work right
         String currTable = getMeasTabname(timems);
-        if (DEBUG) System.out.println("(getPrevMeasTabTime) before -> "+getDateStr(timems)+", "+currTable);
+        _log.debug("(getPrevMeasTabTime) before -> "+getDateStr(timems)+", "+currTable);
         String newTable = null;
         do
         {
             cal.add(Calendar.HOUR_OF_DAY, -1);
             rtn = cal.getTimeInMillis();
-            if (DEBUG) System.out.println(getDateStr(rtn));
+            _log.debug("subtracting 1 hour: "+getDateStr(rtn));
             newTable = getMeasTabname(rtn);
         }
         while (currTable.equals(newTable));
-        if (DEBUG) System.out.println("(getPrevMeasTabTime) after -> "+getDateStr(rtn)+", "+newTable);
+        _log.debug("(getPrevMeasTabTime) after -> "+getDateStr(rtn)+", "+newTable);
         return rtn;
     }
 
