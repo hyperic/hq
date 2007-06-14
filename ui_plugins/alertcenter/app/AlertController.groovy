@@ -5,7 +5,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.EventConstants
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertSortField
 
 class AlertController 
