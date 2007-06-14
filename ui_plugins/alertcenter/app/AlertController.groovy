@@ -30,7 +30,7 @@ class AlertController
             o.put("id", a.id)
             o.put("Date", df.format(a.timestamp))
             o.put("Alert", d.name)
-            o.put("Resource", d.appdefEntityId.toString())
+            o.put("Resource", d.resource.name)
             o.put("Fixed", a.fixed ? "Yes" : "No")
             o.put("Severity", EventConstants.getPriority(d.priority))
             arr.put(o)
