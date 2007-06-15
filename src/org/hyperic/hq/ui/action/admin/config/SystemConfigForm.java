@@ -49,7 +49,8 @@ public class SystemConfigForm extends BaseValidatorForm {
     private String alertPurge    = "";
     private boolean reindex = false;
     private int    updateMode = 0;
-    protected String elPurgeVal = "0";
+    private String elPurgeVal = "0";
+    private boolean externDocs = true;
 
     public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
@@ -60,6 +61,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         buf.append(" helpPassword=").append(helpPassword);
         buf.append(" deleteUnits=").append(deleteUnits);
         buf.append(" updateMode=").append(updateMode);
+        buf.append(" externDocs=").append(externDocs);
 
         return buf.toString();
     }
@@ -113,6 +115,11 @@ public class SystemConfigForm extends BaseValidatorForm {
         String elPurgeValStr = prop.getProperty(HQConstants.EventLogPurge);
         Long elPurgeLong = new Long(elPurgeValStr);
         elPurgeVal = calcTimeUnit(elPurgeLong.longValue());
+        
+        String externDocsStr = prop.getProperty(HQConstants.ExternalHelp);
+        if (externDocsStr != null) {
+            externDocs = Boolean.valueOf(externDocsStr).booleanValue();
+        }
     }
     
     /**
@@ -189,6 +196,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         
         prop.setProperty(HQConstants.EventLogPurge,
                          String.valueOf(elPurgeLong));
+        prop.setProperty(HQConstants.ExternalHelp, String.valueOf(externDocs));
 
         return prop;
     }
@@ -307,5 +315,13 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     public void setUpdateMode(int updateMode) {
         this.updateMode = updateMode;
+    }
+
+    public boolean isExternDocs() {
+        return externDocs;
+    }
+
+    public void setExternDocs(boolean externDocs) {
+        this.externDocs = externDocs;
     }
 }

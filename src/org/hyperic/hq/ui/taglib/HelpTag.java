@@ -26,11 +26,19 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.ConfigPropertyException;
 
 /**
  * return the link to the help system.
@@ -50,16 +58,43 @@ public class HelpTag extends VarSetterBaseTag {
     public int doStartTag() throws JspException{
         JspWriter output = pageContext.getOut();
         
-        // Retrieve the context and compose the help URL
-        String helpURL = (String) pageContext.getServletContext().getAttribute(
-            Constants.HELP_BASE_URL_KEY);
-        
+        // See if help is internal or external
+        boolean external = true;
+        ServletContext ctx = pageContext.getServletContext();
+        ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
+        Properties props;
+        try {
+            props = boss.getConfig();
+        } catch (RemoteException e) {
+            throw new JspException(e);
+        } catch (ConfigPropertyException e) {
+            throw new JspException(e);
+        }
+        String externStr = props.getProperty(HQConstants.ExternalHelp);
+        external = Boolean.parseBoolean(externStr);
+
+        String helpURL;
+        if (external) {
+            // Retrieve the context and compose the help URL
+            helpURL = (String) pageContext.getServletContext().getAttribute(
+                Constants.HELP_BASE_URL_KEY);
+        }
+        else {
+            helpURL =
+                ((HttpServletRequest) pageContext.getRequest()).getContextPath()
+                + "/ui_docs/";
+        }
+
         if (context) {
             String helpContext = (String)
                 pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
             
             if ( helpContext != null)
                 helpURL = helpURL + "ui-" + helpContext; 
+        }
+        
+        if (!external) {
+            helpURL += ".html";
         }
 
         try{

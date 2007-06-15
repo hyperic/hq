@@ -260,8 +260,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 left = insertData(conn, left);
                 _log.debug("Num left = " + left.size());
                 
-                if (!overwrite || left.isEmpty())
+                if (left.isEmpty())
                     break;
+                
+                if (!overwrite)
+                    return;
                 
                 // The insert couldn't insert everything, so attempt to update
                 // the things that are left

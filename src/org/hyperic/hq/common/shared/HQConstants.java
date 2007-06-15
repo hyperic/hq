@@ -73,27 +73,12 @@ public class HQConstants {
 
     // Syslog Actions enabled
     public static final String SyslogActionsEnabled = "CAM_SYSLOG_ACTIONS_ENABLED";
-
-    // SNMP configurations
-    public static final String SNMPAuthProtocol      = "SNMP_AUTH_PROTOCOL";
-    public static final String SNMPAuthPassphrase    = "SNMP_AUTH_PASSPHRASE";
-    public static final String SNMPPrivacyPassphrase = "SNMP_PRIV_PASSPHRASE";
-    public static final String SNMPCommunity         = "SNMP_COMMUNITY";
-    public static final String SNMPEngineID          = "SNMP_ENGINE_ID";
-    public static final String SNMPContextName       = "SNMP_CONTEXT_NAME";
-    public static final String SNMPSecurityName      = "SNMP_SECURITY_NAME";
-    public static final String SNMPTrapOID           = "SNMP_TRAP_OID";
-    public static final String SNMPEnterpriseOID     = "SNMP_ENTERPRISE_OID";
-    public static final String SNMPGenericID         = "SNMP_GENERIC_ID";
-    public static final String SNMPSpecificID        = "SNMP_SPECIFIC_ID";
-    public static final String SNMPAgentAddress      = "SNMP_AGENT_ADDRESS";
-    public static final String SNMPVersion           = "SNMP_VERSION";
-    public static final String SNMPPrivacyProtocol   = "SNMP_PRIVACY_PROTOCOL";
     
     public static final String DATASOURCE = "java:/HypericDS";
     public static final String EJB_MODULE_PATTERN = "hq-";
     
     public static final String JBOSSCACHE = "jboss.cache:service=hqTreeCache";
     public static final String EventLogPurge = "EVENT_LOG_PURGE";
+    public static final String ExternalHelp = "EXTERNAL_HELP";
     public static final String OOBEnabled = "OOB_ENABLED";
 }
