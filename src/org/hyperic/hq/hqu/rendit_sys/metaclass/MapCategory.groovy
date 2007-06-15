@@ -21,4 +21,15 @@ class MapCategory {
             return res[0]
         return null
     }
+     
+    /**
+     * Get the first element in an array of the value of a key, else use
+     * the passed default
+     */
+    static Object getOne(Map m, String key, String defalt) {
+        Object res = getOne(m, key)
+        if (res == null)
+            return defalt
+        return res
+    }
 }
