@@ -109,6 +109,14 @@ public class TriggerFiredEvent extends AbstractEvent
         this.message = message;
     }
     
+    public long getTimestamp() {
+        long timestamp = 0;
+        for (int i = 0; i < events.length; i++) {
+            timestamp = Math.max(timestamp, events[i].getTimestamp());
+        }
+        return timestamp;
+    }
+
     public String toString() {
         if (events.length == 1) {
             return events[0].toString();
