@@ -93,4 +93,9 @@ public abstract class AlertSortField
      * Returns HQL which can be used to tack onto an HQL query, to sort
      */
     abstract String getSortString(String alert, String def, String resource);
+    
+    public static AlertSortField findByCode(int code) {
+        return (AlertSortField)HypericEnum.findByCode(AlertSortField.class, 
+                                                      code);
+    }
 }
