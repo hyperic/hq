@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.hibernate.SortField;
 import org.hyperic.util.HypericEnum;
 
@@ -32,8 +34,10 @@ public abstract class AlertSortField
     extends HypericEnum
     implements SortField
 {
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+    
     public static final AlertSortField DATE = 
-        new AlertSortField(0, "Date") 
+        new AlertSortField(0, "Date", "alert.sortField.date") 
     {
         String getSortString(String alert, String def, String resource) {
             return alert + ".ctime";
@@ -41,7 +45,7 @@ public abstract class AlertSortField
     };
         
     public static final AlertSortField DEFINITION = 
-        new AlertSortField(1, "Definition") 
+        new AlertSortField(1, "Definition", "alert.sortField.def") 
     {
         String getSortString(String alert, String def, String resource) {
             return def + ".name";
@@ -49,7 +53,7 @@ public abstract class AlertSortField
     };
     
     public static final AlertSortField RESOURCE = 
-        new AlertSortField(2, "Resource")
+        new AlertSortField(2, "Resource", "alert.sortField.resource")
     {
         String getSortString(String alert, String def, String resource) {
             return resource + ".name";
@@ -57,7 +61,7 @@ public abstract class AlertSortField
     };
     
     public static final AlertSortField FIXED = 
-        new AlertSortField(3, "Fixed")
+        new AlertSortField(3, "Fixed", "alert.sortField.fixed")
     {
         String getSortString(String alert, String def, String resource) {
             return alert + ".fixed";
@@ -65,7 +69,7 @@ public abstract class AlertSortField
     };
     
     public static final AlertSortField ACKED_BY = 
-        new AlertSortField(4, "AckedBy") 
+        new AlertSortField(4, "AckedBy", "alert.sortField.ackedBy") 
     {
         String getSortString(String alert, String def, String resource) {
             return alert + ".ackedBy";
@@ -73,15 +77,16 @@ public abstract class AlertSortField
     };
     
     public static final AlertSortField SEVERITY = 
-        new AlertSortField(5, "Severity")
+        new AlertSortField(5, "Severity", "alert.sortField.severity")
     {
         String getSortString(String alert, String def, String resource) {
             return def + ".priority";
         }
     };
 
-    private AlertSortField(int code, String desc) {
-        super(AlertSortField.class, code, desc);
+    private AlertSortField(int code, String desc, String localeProp) {
+        super(AlertSortField.class, code, desc, localeProp,
+              ResourceBundle.getBundle(BUNDLE));
     }
     
     /**

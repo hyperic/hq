@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.galerts;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.hyperic.util.HypericEnum;
 
@@ -36,38 +37,40 @@ import org.hyperic.util.HypericEnum;
 public class ComparisonOperator 
     extends HypericEnum
 {
+    private static final String BUNDLE = "org.hyperic.hq.measurement.Resources";
+    
     public static final ComparisonOperator LT = 
-        new ComparisonOperator(0, "<", new BinaryComparison() {
+        new ComparisonOperator(0, "<", "compare.lt", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return one.doubleValue() < two.doubleValue();
             }
         });
     public static final ComparisonOperator LE = 
-        new ComparisonOperator(1, "<=", new BinaryComparison() {
+        new ComparisonOperator(1, "<=", "compare.le", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return one.doubleValue() <= two.doubleValue();
             }
         });
     public static final ComparisonOperator GT = 
-        new ComparisonOperator(2, ">", new BinaryComparison() {
+        new ComparisonOperator(2, ">", "compare.gt", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return one.doubleValue() > two.doubleValue();
             }
         });
     public static final ComparisonOperator GE = 
-        new ComparisonOperator(3, ">=", new BinaryComparison() {
+        new ComparisonOperator(3, ">=", "compare.ge", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return one.doubleValue() >= two.doubleValue();
             }
         });
     public static final ComparisonOperator EQ = 
-        new ComparisonOperator(4, "==", new BinaryComparison() {
+        new ComparisonOperator(4, "==", "compare.eq", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return one.equals(two);
             }
         });
     public static final ComparisonOperator NE = 
-        new ComparisonOperator(5, "!=", new BinaryComparison() {
+        new ComparisonOperator(5, "!=", "compare.ne", new BinaryComparison() {
             public boolean isTrue(Number one, Number two) {
                 return !one.equals(two);
             }
@@ -79,10 +82,10 @@ public class ComparisonOperator
         public boolean isTrue(Number one, Number two /* Hah! */);
     }
 
-    private ComparisonOperator(int code, String label,
+    private ComparisonOperator(int code, String label, String localeProp,
                                BinaryComparison compar) 
     {
-        super(code, label);
+        super(code, label, localeProp, ResourceBundle.getBundle(BUNDLE));
         _compar = compar;
     }
     

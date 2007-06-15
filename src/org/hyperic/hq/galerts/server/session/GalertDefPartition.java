@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.util.HypericEnum;
 
 /**
@@ -38,16 +40,18 @@ import org.hyperic.util.HypericEnum;
 public class GalertDefPartition 
     extends HypericEnum
 {
+    private static final String BUNDLE = "org.hyperic.hq.galerts.Resources"; 
+        
     // This is just a regular alert definition.  
     public static final GalertDefPartition NORMAL = 
-        new GalertDefPartition(0, "NORMAL");
+        new GalertDefPartition(0, "NORMAL", "galert.partition.normal");
     
     // This alert definition executed a recovery alert
     public static final GalertDefPartition RECOVERY = 
-        new GalertDefPartition(1, "RECOVERY");
+        new GalertDefPartition(1, "RECOVERY", "galert.partition.recovery");
     
-    private GalertDefPartition(int code, String desc) {
-        super(code, desc);
+    private GalertDefPartition(int code, String desc, String localeProp) {
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE)); 
     }
     
     public static GalertDefPartition findByCode(int code) {

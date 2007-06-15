@@ -26,24 +26,31 @@
 package org.hyperic.hq.events;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.hyperic.util.HypericEnum;
 
 public class AlertSeverity 
     extends HypericEnum
 {
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+    
     public static final AlertSeverity LOW = 
         new AlertSeverity(EventConstants.PRIORITY_LOW,
-                    EventConstants.getPriority(EventConstants.PRIORITY_LOW));
+                    EventConstants.getPriority(EventConstants.PRIORITY_LOW),
+                    "alert.severity.low");
     public static final AlertSeverity MEDIUM = 
         new AlertSeverity(EventConstants.PRIORITY_MEDIUM,
-                    EventConstants.getPriority(EventConstants.PRIORITY_MEDIUM));
+                    EventConstants.getPriority(EventConstants.PRIORITY_MEDIUM),
+                    "alert.severity.medium");
     public static final AlertSeverity HIGH =  
         new AlertSeverity(EventConstants.PRIORITY_HIGH,
-                    EventConstants.getPriority(EventConstants.PRIORITY_HIGH));
+                    EventConstants.getPriority(EventConstants.PRIORITY_HIGH),
+                    "alert.severity.high");
 
-    private AlertSeverity(int code, String desc) {
-        super(code, desc);
+    private AlertSeverity(int code, String desc, String localeProp) {
+        super(code, desc, localeProp, 
+              ResourceBundle.getBundle(BUNDLE)); 
     }
     
     public static List getAll() {

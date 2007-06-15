@@ -25,6 +25,7 @@
 package org.hyperic.hq.galerts.server.session;
 
 import java.util.Iterator;
+import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -38,8 +39,11 @@ import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 public final class GalertEscalationAlertType 
     extends EscalationAlertType
 {
+    private static final String BUNDLE = "org.hyperic.hq.galerts.Resources";
+    
     public static final GalertEscalationAlertType GALERT = 
-        new GalertEscalationAlertType(0xbadbabe, "Group Alert");
+        new GalertEscalationAlertType(0xbadbabe, "Group Alert",
+                                      "escalation.type.galert");
 
     private static Object INIT_LOCK = new Object();
     private static GalertManagerLocal _alertMan;
@@ -83,8 +87,8 @@ public final class GalertEscalationAlertType
         getGalertMan().createActionLog(alert, detail, action, subject);
     }
 
-    private GalertEscalationAlertType(int code, String desc) {
-        super(code, desc);
+    private GalertEscalationAlertType(int code, String desc, String localeProp){ 
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE));
     }
 
     protected String getLastFixedNote(PerformsEscalations def) {

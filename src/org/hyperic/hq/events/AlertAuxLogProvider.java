@@ -24,6 +24,9 @@
  */
 package org.hyperic.hq.events;
 
+import java.util.ResourceBundle;
+
+import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.util.HypericEnum;
 
 
@@ -33,8 +36,10 @@ import org.hyperic.util.HypericEnum;
 public abstract class AlertAuxLogProvider 
     extends HypericEnum 
 {
-    protected AlertAuxLogProvider(int code, String desc) {
-        super(AlertAuxLogProvider.class, code, desc);
+    protected AlertAuxLogProvider(int code, String desc, String propLocale, 
+                                  ResourceBundle bundle) 
+    {
+        super(AlertAuxLogProvider.class, code, desc, propLocale, bundle);
     }
     
     public static AlertAuxLogProvider findByCode(int code) {

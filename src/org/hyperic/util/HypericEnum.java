@@ -33,8 +33,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.json.JSON;
 import org.json.JSONException;
@@ -48,6 +51,9 @@ import org.json.JSONObject;
  * of a specific class.  This has great use in things like Web-UI where you
  * need a code representation as well as a string (rendering a listbox)
  * 
+ * Each enumeration also provides a resource bundle and locale property to
+ * look up the 'value' of the enumeration in that bundle.
+ * 
  * This class can also be used as a dynamic enumeration as long as all the
  * enumerations use a unique code.  
  * 
@@ -59,29 +65,55 @@ import org.json.JSONObject;
 public abstract class HypericEnum 
     implements JSON
 {
+    private static final Log _log = LogFactory.getLog(HypericEnum.class);
+    private static final boolean DEBUG_ENUMS = false;
+    
     /**
      * Hash of classes onto sets of instances.
      * TODO:  Change the sets into hashmaps so we can do quicker lookups.
      */
     private static final Map _enumsByClass = new HashMap();
     
-    private Class  _implClass;
-    private int    _code;
-    private String _desc;
+    private Class          _implClass;
+    private int            _code;
+    private String         _desc;
+    private String         _localeProp;
+    private ResourceBundle _bundle;
     
-    protected HypericEnum(int code, String desc) {
-        init(getClass(), code, desc);
+    protected HypericEnum(int code, String desc, String localeProp,
+                          ResourceBundle bundle) 
+    {
+        init(getClass(), code, desc, localeProp, bundle);
     }
     
-    protected HypericEnum(Class c, int code, String desc) {
-        init(c, code, desc);
+    protected HypericEnum(Class c, int code, String desc, String localeProp, 
+                          ResourceBundle bundle) 
+    {
+        init(c, code, desc, localeProp, bundle);
     }
     
-    private void init(Class c, int code, String desc) {
-        _implClass = c;
-        _code      = code;
-        _desc      = desc;
+    private void init(Class c, int code, String desc, String localeProp, 
+                      ResourceBundle bundle) 
+    {
+        _implClass  = c;
+        _code       = code;
+        _desc       = desc;
+        _localeProp = localeProp;
+        _bundle     = bundle;
+
+        if (_bundle == null) {
+            _log.warn("Unable to find bundle when creating enum for [" + 
+                      _implClass + "]");
+        }
         
+        if (DEBUG_ENUMS) {
+            if (_bundle != null && _bundle.getString(_localeProp) == null) {
+                _log.warn("Unable to find prop [" + _localeProp + "] in " +
+                          "bundle [" + _bundle + "]");
+            }
+            _log.info("[" + _bundle + "] (" + _localeProp + ") == " + 
+                      getValue());
+        }
         
         synchronized (_enumsByClass) {
             Set vals = (Set)_enumsByClass.get(_implClass);
@@ -101,6 +133,23 @@ public abstract class HypericEnum
     
     public int getCode() {
         return _code;
+    }
+    
+    /**
+     * Returns the localized value of this enumeration. 
+     */
+    public String getValue() {
+        String res;
+        
+        if (_bundle == null) {
+            return "** No bundle for class " + _implClass + " **";
+        }
+        res = _bundle.getString(_localeProp);
+        if (res == null) {
+            return "** Property [" + _localeProp + "] not found in bundle [" +
+                _bundle.toString() + "]";
+        }
+        return res;
     }
     
     public String getDescription() {

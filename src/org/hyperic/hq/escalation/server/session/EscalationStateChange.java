@@ -1,19 +1,26 @@
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.util.HypericEnum;
 
 public class EscalationStateChange 
     extends HypericEnum
 {
-    public static final EscalationStateChange CREATED =
-        new EscalationStateChange(0, "created");
-    public static final EscalationStateChange ACKNOWLEDGED =
-        new EscalationStateChange(1, "acknowledged");
-    public static final EscalationStateChange FIXED =
-        new EscalationStateChange(2, "fixed");
+    private static final String BUNDLE = "org.hyperic.hq.escalation.Resources";
     
-    private EscalationStateChange(int code, String desc) {
-        super(code, desc);
+    public static final EscalationStateChange CREATED =
+        new EscalationStateChange(0, "created",
+                                  "escalation.state.created");
+    public static final EscalationStateChange ACKNOWLEDGED =
+        new EscalationStateChange(1, "acknowledged",
+                                  "escalation.state.acked");
+    public static final EscalationStateChange FIXED =
+        new EscalationStateChange(2, "fixed",
+                                  "escalation.state.fixed");
+    
+    private EscalationStateChange(int code, String desc, String localeProp) {
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE)); 
     }
     
     public boolean isCreated() {

@@ -26,6 +26,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 
 import javax.ejb.FinderException;
 
@@ -42,8 +43,11 @@ import org.hyperic.hq.events.shared.AlertManagerLocal;
 public final class ClassicEscalationAlertType 
     extends EscalationAlertType
 {
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+    
     public static final ClassicEscalationAlertType CLASSIC = 
-        new ClassicEscalationAlertType(0xdeadbeef, "Classic");
+        new ClassicEscalationAlertType(0xdeadbeef, "Classic", 
+                                       "escalation.type.classic");
 
     private static Object INIT_LOCK = new Object();
     private static AlertManagerLocal           _alertMan;
@@ -122,8 +126,9 @@ public final class ClassicEscalationAlertType
         getAlertMan().logActionDetail(alert, action, detail, subject);
     }
 
-    private ClassicEscalationAlertType(int code, String desc) {
-        super(code, desc);
+    private ClassicEscalationAlertType(int code, String desc, String localeProp) 
+    {
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE));
     }
 
     protected String getLastFixedNote(PerformsEscalations def) {

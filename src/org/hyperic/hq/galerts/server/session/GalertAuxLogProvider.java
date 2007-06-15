@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
@@ -31,11 +33,14 @@ import org.hyperic.hq.events.SimpleAlertAuxLog;
 public class GalertAuxLogProvider
     extends AlertAuxLogProvider
 {
+    private static final String BUNDLE = "org.hyperic.hq.galerts.Resources";
+    
     public static final GalertAuxLogProvider INSTANCE =  
-        new GalertAuxLogProvider(0, "GAlert Auxillary Metric Data");
+        new GalertAuxLogProvider(0, "GAlert Auxillary Metric Data",
+                                 "auxlog.galert");
 
-    private GalertAuxLogProvider(int code, String desc) {
-        super(code, desc);
+    private GalertAuxLogProvider(int code, String desc, String localeProp) {
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE));
     }
 
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) { 

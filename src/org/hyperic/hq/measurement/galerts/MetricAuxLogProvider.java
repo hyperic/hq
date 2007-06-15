@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.measurement.galerts;
 
+import java.util.ResourceBundle;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AlertAuxLog;
@@ -39,14 +41,18 @@ import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 public class MetricAuxLogProvider
     extends AlertAuxLogProvider
 {
+    private static final String BUNDLE = 
+        "org.hyperic.hq.measurement.Resources";
+    
     private static final Log _log = 
         LogFactory.getLog(MetricAuxLogProvider.class);
 
     public static final MetricAuxLogProvider INSTANCE =  
-        new MetricAuxLogProvider(0xdecafbad, "Auxillary Metric Data");
+        new MetricAuxLogProvider(0xdecafbad, "Auxillary Metric Data",
+                                 "metric.auxLog");
 
-    private MetricAuxLogProvider(int code, String desc) {
-        super(code, desc);
+    private MetricAuxLogProvider(int code, String desc, String localeProp) {
+        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE)); 
     }
 
     private GalertAuxLog findGAuxLog(int id) {

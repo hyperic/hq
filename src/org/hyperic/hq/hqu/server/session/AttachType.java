@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.util.HypericEnum;
@@ -32,7 +34,11 @@ import org.hyperic.util.HypericEnum;
 public abstract class AttachType 
     extends HypericEnum
 {
-    public static AttachType ADMIN = new AttachType(0, "admin") {
+    private static final String BUNDLE = "org.hyperic.hq.hqu.Resources";
+    
+    public static AttachType ADMIN = new AttachType(0, "admin",
+                                                    "attachType.admin") 
+    {
         View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
             return new ViewAdmin(plugin, viewInfo);
         }
@@ -46,7 +52,9 @@ public abstract class AttachType
         }
     };
 
-    public static AttachType MASTHEAD = new AttachType(1, "masthead") {
+    public static AttachType MASTHEAD = new AttachType(1, "masthead",
+                                                       "attachType.masthead") 
+    {
         View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
             return new ViewMasthead(plugin, viewInfo);
         }
@@ -77,7 +85,8 @@ public abstract class AttachType
         return (AttachType)HypericEnum.findByCode(AttachType.class, code);
     }
     
-    private AttachType(int code, String desc) {
-        super(AttachType.class, code, desc);
+    private AttachType(int code, String desc, String localeProp) {
+        super(AttachType.class, code, desc, localeProp,
+              ResourceBundle.getBundle(BUNDLE));
     }
 }

@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.galerts;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.hyperic.util.HypericEnum;
 
@@ -37,15 +38,21 @@ import org.hyperic.util.HypericEnum;
 public class SizeComparator 
     extends HypericEnum
 {
+    private static final String BUNDLE = "org.hyperic.hq.measurement.Resources";
+    
     public static final SizeComparator LESS_THAN = 
-        new SizeComparator(0, "Less than", ComparisonOperator.LT);
+        new SizeComparator(0, "Less than", "compare.lessThan", 
+                           ComparisonOperator.LT);
     public static final SizeComparator MORE_THAN = 
-        new SizeComparator(1, "More than", ComparisonOperator.GT);
+        new SizeComparator(1, "More than", "compare.greaterThan",
+                           ComparisonOperator.GT);
     
     private final ComparisonOperator _op;
     
-    private SizeComparator(int code, String label, ComparisonOperator op) {
-        super(code, label);
+    private SizeComparator(int code, String label, String localeProp, 
+                           ComparisonOperator op) 
+    {
+        super(code, label, localeProp, ResourceBundle.getBundle(BUNDLE));
         _op = op;
     }
    

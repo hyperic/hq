@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.ResourceBundle;
+
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.HypericEnum;
@@ -36,8 +38,10 @@ import org.hyperic.util.HypericEnum;
 public abstract class EscalationAlertType 
     extends HypericEnum 
 {
-    protected EscalationAlertType(int code, String desc) {
-        super(EscalationAlertType.class, code, desc);
+    protected EscalationAlertType(int code, String desc, String localeProp,
+                                  ResourceBundle bundle) 
+    {
+        super(EscalationAlertType.class, code, desc, localeProp, bundle);
     }
     
     public static EscalationAlertType findByCode(int code) {
