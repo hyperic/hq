@@ -150,7 +150,7 @@ public class DataCompressEJBImpl
             long prev = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
             delTable = MeasTabManagerUtil.getMeasTabname(prev);
         }
-        log.info("Purging data older than " +
+        log.info("Purging Raw Measurement Data older than " +
                  TimeUtil.toString(truncateBefore));
         Connection conn = null;
         Statement stmt = null;
@@ -171,7 +171,7 @@ public class DataCompressEJBImpl
             }
             // for backwards compatibility
             truncateOldMeasTable(truncateBefore, stmt);
-            log.info("Done Purging Data (" + ((watch.getElapsed()) / 1000) + " seconds)");
+            log.info("Done Purging Raw Measurement Data (" + ((watch.getElapsed()) / 1000) + " seconds)");
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
