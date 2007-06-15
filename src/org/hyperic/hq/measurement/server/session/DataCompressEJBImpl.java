@@ -164,13 +164,14 @@ public class DataCompressEJBImpl
             while (!currTable.equals(delTable) &&
                    truncateBefore > currTruncTime) {
                 stmt.executeUpdate("truncate table "+delTable);
+                log.debug("Truncating table "+delTable);
                 currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
             }
             // for backwards compatibility
             truncateOldMeasTable(truncateBefore, stmt);
-            log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
+            log.info("Done Purging Data (" + ((watch.getElapsed()) / 1000) + " seconds)");
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
