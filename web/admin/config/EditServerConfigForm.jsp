@@ -90,7 +90,7 @@
 <!--  /  -->
 
 <!--  UPDATE CONFIG CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   <tr>
     <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.AnnouncementType"/></td>
     <td width="40%" class="BlockContent">
@@ -101,7 +101,11 @@
     <td width="30%" class="BlockContent" colspan="2"></td>
   </tr>
   <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+    <td class="BlockLabel"><fmt:message key="admin.settings.Help"/></td>
+    <td class="BlockContent" colspan="3">
+    <html:radio property="externDocs" value="true"/><fmt:message key="admin.settings.Help.External"/>
+    <html:radio property="externDocs" value="false"/><fmt:message key="admin.settings.Help.Internal"/>
+    </td>
   </tr>
 <!--  /  -->
 
