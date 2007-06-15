@@ -73,6 +73,8 @@ public class HQConstants {
 
     // Syslog Actions enabled
     public static final String SyslogActionsEnabled = "CAM_SYSLOG_ACTIONS_ENABLED";
+
+    public static final String SNMPVersion           = "SNMP_VERSION";
     
     public static final String DATASOURCE = "java:/HypericDS";
     public static final String EJB_MODULE_PATTERN = "hq-";
