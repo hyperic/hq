@@ -42,6 +42,8 @@ import javax.naming.Context;
 
 import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.Log4JLogTrackPlugin;
@@ -59,6 +61,9 @@ import org.hyperic.util.config.ConfigResponse;
 public class JBossDetector
     extends ServerDetector
     implements AutoServerDetector, FileServerDetector {
+
+    private static final Log log =
+        LogFactory.getLog(JBossDetector.class.getName()); 
 
     private static final String JBOSS_SERVICE_XML =
         "conf" + File.separator + "jboss-service.xml";
@@ -290,15 +295,33 @@ public class JBossDetector
         long[] pids = getPids(query);
 
         for (int i=0; i<pids.length; i++) {
-            String exe = getProcExe(pids[i]);
+            long pid = pids[i];
+            String exe = getProcExe(pid);
 
             if (exe == null) {
+                log.debug("Unable to determine exe for pid=" + pid);
                 continue;
             }
 
             //strip bin\jboss.exe
-            File root =
-                new File(exe).getParentFile().getParentFile();
+            File root = new File(exe).getParentFile();
+            //XXX could dig into the registry
+            //to get Parameters\Current Directory
+            if (root.getName().equals("bin")) {
+                root = root.getParentFile();
+                log.debug("installpath derived from exe=" + exe);
+            }
+            else {
+                String msg = exe + " outside installpath";
+                String cwd = getProcCwd(pids[i]);
+                if (cwd == null) {
+                    log.debug(msg +
+                              ", unable to determine cwd for pid=" + pid); 
+                    continue;
+                }
+                root = new File(cwd).getParentFile();
+                log.debug(msg + ", using cwd=" + cwd);
+            }
 
             //XXX should check:
             //HKLM\SYSTEM\CurrentControlSet\Services\$service_name\Parameters
