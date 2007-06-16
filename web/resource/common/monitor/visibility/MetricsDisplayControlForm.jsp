@@ -128,8 +128,9 @@
     <td width="80%">
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
-          <td width="100%"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message> <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link></td>
-          <td width="100%"><html:img page="/images/spacer.gif" width="1" height="21" alt="" border="0"/></td>
+          <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
+          <td nowrap><fmt:message key="resource.common.monitor.visibility.metricsToolbar.DateRange"><fmt:param value="${rb}"/><fmt:param value="${re}"/></fmt:message> <html:link href="javascript:showAdvanced()"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link></td>
+          <td width="100%" align="left"><html:image property="nextRange" page="/images/tbb_pageright.gif" border="0"/></td>
         </tr>
       </table>
     </td>
@@ -141,6 +142,7 @@
     <td width="80%">
       <table width="100%" cellpadding="0" cellspacing="3" border="0">
         <tr>
+          <td><html:image property="prevRange" page="/images/tbb_pageleft.gif" border="0"/></td>
           <td><fmt:message key="resource.common.monitor.visibility.metricsToolbar.Last"/></td>
           <td nowrap>
             <html:select styleClass="FilterFormText" property="rn" styleId="simpleRn">

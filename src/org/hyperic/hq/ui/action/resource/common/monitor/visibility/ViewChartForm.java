@@ -26,16 +26,17 @@
 package org.hyperic.hq.ui.action.resource.common.monitor.visibility;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.MonitorUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.util.ImageButtonBean;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.MonitorUtils;
 
 /**
  * Represents the controls on the metric chart page(s).
@@ -61,8 +62,6 @@ public class ViewChartForm extends MetricDisplayRangeForm {
     private boolean showBaseline;
     private boolean saveChart;
     private ImageButtonBean redraw;
-    private ImageButtonBean prevRange;
-    private ImageButtonBean nextRange;
     private ImageButtonBean changeBaseline;
     private ImageButtonBean saveBaseline;
     private ImageButtonBean cancelBaseline;
@@ -276,30 +275,6 @@ public class ViewChartForm extends MetricDisplayRangeForm {
 
     public boolean isRedrawClicked() {
         return getRedraw().isSelected();
-    }
-
-    public ImageButtonBean getPrevRange() {
-        return prevRange;
-    }
-
-    public void setPrevRange(ImageButtonBean prevRange) {
-        this.prevRange = prevRange;
-    }
-
-    public boolean isPrevRangeClicked() {
-        return getPrevRange().isSelected();
-    }
-
-    public ImageButtonBean getNextRange() {
-        return nextRange;
-    }
-
-    public void setNextRange(ImageButtonBean nextRange) {
-        this.nextRange = nextRange;
-    }
-
-    public boolean isNextRangeClicked() {
-        return getNextRange().isSelected();
     }
 
     public boolean isRangeNow() {
@@ -561,8 +536,9 @@ public class ViewChartForm extends MetricDisplayRangeForm {
                 int numPoints = getRn().intValue();
                 if (numPoints < 1 || numPoints > 60) {
                     errs.add( "rn",
-                              new ActionError( "errors.range",
-                                               getRn(), new Integer(1), new Integer(60) ) );
+                              new ActionMessage( "errors.range", getRn(),
+                                                 new Integer(1),
+                                                 new Integer(60) ) );
                 }
             }
         }

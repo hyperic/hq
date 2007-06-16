@@ -92,7 +92,35 @@ public class MetricsControlAction extends BaseAction {
             return returnEditRange(request, mapping, forwardParams);
         }
         else {
-            if (controlForm.isLastnSelected()) {
+            Date begin = controlForm.getStartDate();
+            Date end = controlForm.getEndDate();
+            long beginTime = begin.getTime();
+            long endTime = end.getTime();
+
+            if (controlForm.isPrevRangeClicked() ||
+                controlForm.isNextRangeClicked()) {
+                // Figure out what it's currently set to and go backwards/forwards
+                long diff = endTime - beginTime;
+                List range = new ArrayList();
+                if (controlForm.isPrevRangeClicked()) {
+                    range.add(new Long(beginTime - diff));
+                    range.add(new Long(beginTime));
+                }
+                else {
+                    range.add(new Long(endTime));
+                    range.add(new Long(endTime + diff));
+                }
+
+                log.trace("updating metric display date range [" + begin +  ":" +
+                          end + "]");
+                user.setPreference(WebUser.PREF_METRIC_RANGE, range);
+                user.setPreference(WebUser.PREF_METRIC_RANGE_LASTN, null);
+                user.setPreference(WebUser.PREF_METRIC_RANGE_UNIT, null);
+
+                // set advanced mode
+                user.setPreference(WebUser.PREF_METRIC_RANGE_RO, Boolean.TRUE);
+            }
+            else if (controlForm.isLastnSelected()) {
                 Integer lastN = controlForm.getRn();
                 Integer unit = controlForm.getRu();
 
@@ -117,12 +145,9 @@ public class MetricsControlAction extends BaseAction {
             
             if (controlForm.isAdvancedClicked()) {
                 if (controlForm.isDateRangeSelected()) {
-                    Date begin = controlForm.getStartDate();
-                    Date end = controlForm.getEndDate();
-
                     List range = new ArrayList();
-                    range.add(new Long(begin.getTime()));
-                    range.add(new Long(end.getTime()));
+                    range.add(new Long(beginTime));
+                    range.add(new Long(endTime));
 
                     log.trace("updating metric display date range [" +
                               begin +  ":" + end + "]");

@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionMessage;
+import org.apache.struts.util.ImageButtonBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.action.CalendarForm;
 
@@ -62,6 +63,8 @@ public class MetricDisplayRangeForm extends CalendarForm {
     private Integer rn;
     private Integer ru;
     private Integer type;
+    protected ImageButtonBean prevRange;
+    protected ImageButtonBean nextRange;
     
     //-------------------------------------constructors
 
@@ -196,6 +199,8 @@ public class MetricDisplayRangeForm extends CalendarForm {
         ctype = null;
         rid = null;
         type = null;
+        prevRange = new ImageButtonBean();
+        nextRange = new ImageButtonBean();
     }
     
     public ActionErrors validate(ActionMapping mapping,
@@ -212,5 +217,29 @@ public class MetricDisplayRangeForm extends CalendarForm {
             }
         }
         return errors;
+    }
+
+    public ImageButtonBean getPrevRange() {
+        return prevRange;
+    }
+
+    public void setPrevRange(ImageButtonBean prevRange) {
+        this.prevRange = prevRange;
+    }
+
+    public boolean isPrevRangeClicked() {
+        return getPrevRange().isSelected();
+    }
+
+    public ImageButtonBean getNextRange() {
+        return nextRange;
+    }
+
+    public void setNextRange(ImageButtonBean nextRange) {
+        this.nextRange = nextRange;
+    }
+
+    public boolean isNextRangeClicked() {
+        return getNextRange().isSelected();
     }
 }
