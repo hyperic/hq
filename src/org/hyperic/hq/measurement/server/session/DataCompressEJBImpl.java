@@ -161,6 +161,7 @@ public class DataCompressEJBImpl
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
             long currTruncTime = truncateBefore;
+            log.debug("Truncating tables, starting with -> "+delTable+" (currTable -> "+currTable+")");
             while (!currTable.equals(delTable) &&
                    truncateBefore > currTruncTime) {
                 stmt.executeUpdate("truncate table "+delTable);
@@ -185,7 +186,8 @@ public class DataCompressEJBImpl
         try
         {
             String sql = "SELECT max(timestamp) as maxtimestamp "+
-                         " FROM "+OLD_MEAS_TABLE;
+                         " FROM "+OLD_MEAS_TABLE+
+                         " HAVING max(timestamp) != null";
             rs = stmt.executeQuery(sql);
             while (rs.next())
             {
