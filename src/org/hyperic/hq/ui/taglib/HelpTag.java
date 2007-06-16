@@ -71,7 +71,7 @@ public class HelpTag extends VarSetterBaseTag {
             throw new JspException(e);
         }
         String externStr = props.getProperty(HQConstants.ExternalHelp);
-        external = Boolean.parseBoolean(externStr);
+        external = Boolean.valueOf(externStr).booleanValue();
 
         String helpURL;
         if (external) {
