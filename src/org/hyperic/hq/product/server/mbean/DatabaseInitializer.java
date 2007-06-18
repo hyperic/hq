@@ -102,25 +102,18 @@ public class DatabaseInitializer {
                 "CREATE VIEW eam_measurement_data AS " +
                 "SELECT * FROM metric_data_0d_0s UNION " +
                 "SELECT * FROM metric_data_0d_1s UNION " +
-                "SELECT * FROM metric_data_0d_2s UNION " +
                 "SELECT * FROM metric_data_1d_0s UNION " +
                 "SELECT * FROM metric_data_1d_1s UNION " +
-                "SELECT * FROM metric_data_1d_2s UNION " +
                 "SELECT * FROM metric_data_2d_0s UNION " +
                 "SELECT * FROM metric_data_2d_1s UNION " +
-                "SELECT * FROM metric_data_2d_2s UNION " +
                 "SELECT * FROM metric_data_3d_0s UNION " +
                 "SELECT * FROM metric_data_3d_1s UNION " +
-                "SELECT * FROM metric_data_3d_2s UNION " +
                 "SELECT * FROM metric_data_4d_0s UNION " +
                 "SELECT * FROM metric_data_4d_1s UNION " +
-                "SELECT * FROM metric_data_4d_2s UNION " +
                 "SELECT * FROM metric_data_5d_0s UNION " +
                 "SELECT * FROM metric_data_5d_1s UNION " +
-                "SELECT * FROM metric_data_5d_2s UNION " +
                 "SELECT * FROM metric_data_6d_0s UNION " +
                 "SELECT * FROM metric_data_6d_1s UNION " +
-                "SELECT * FROM metric_data_6d_2s UNION " +
                 "SELECT * FROM metric_data_compat";
 
             Statement stmt = null;
