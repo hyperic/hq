@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -172,7 +173,7 @@ public class ReportProcessorEJBImpl
             }
         }
         
-        _dataMan.addData(dataPoints, true);
+        sendDataToDB(dataPoints);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
@@ -198,6 +199,20 @@ public class ReportProcessorEJBImpl
                          single.getMeasurementValue(), true);
     }
 
+    /**
+     * Sends the actual data to the DB.
+     */
+    private void sendDataToDB(List dataPoints) {
+        DataInserter d = MeasurementStartupListener.getDataInserter();
+
+        try {
+            d.insertMetrics(dataPoints); 
+        } catch(InterruptedException e) {
+            throw new SystemException("Interrupted while attempting to " + 
+                                      "insert data");
+        }
+    }
+    
     public void ejbCreate(){
         try {
             _debugId = 

@@ -39,6 +39,7 @@ public class MeasurementStartupListener
     implements StartupListener
 {
     private static final Object LOCK = new Object();
+    private static DataInserter _dataInserter;
     private static DefaultMetricEnableCallback _defEnableCallback;
     
     public void hqStarted() {
@@ -62,6 +63,13 @@ public class MeasurementStartupListener
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)
                 app.registerCallbackCaller(DefaultMetricEnableCallback.class);
+            _dataInserter = new SynchronousDataInserter();
+        }
+    }
+    
+    static DataInserter getDataInserter() {
+        synchronized (LOCK) {
+            return _dataInserter;
         }
     }
     
