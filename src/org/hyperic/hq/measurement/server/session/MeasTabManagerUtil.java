@@ -39,8 +39,8 @@ public class MeasTabManagerUtil
     private static final String logCtx = 
                                    MeasTabManagerUtil.class.getName();
     private static final Log _log = LogFactory.getLog(logCtx);
-    static final int NUMBER_OF_TABLES = 21,
-                     NUMBER_OF_TABLES_PER_DAY = 3;
+    static final int NUMBER_OF_TABLES = 14,
+                     NUMBER_OF_TABLES_PER_DAY = 2;
 
     static final String OLD_MEAS_TABLE = "metric_data_compat";
 
