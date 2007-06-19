@@ -1,12 +1,14 @@
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.product.MetricValue;
 
 /**
  * This object encapsulates all the information needed to call 
  * {@link DataManagerEJBImpl#addData(java.util.List, boolean)
  */
-public class DataPoint {
+public class DataPoint implements Serializable {
     private Integer     _metricId;
     private MetricValue _val;
     
