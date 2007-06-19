@@ -28,6 +28,7 @@ package org.hyperic.hq.hqu.server.session;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
+import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
@@ -35,6 +36,7 @@ import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -88,9 +90,32 @@ public class UIPluginManagerEJBImpl
             _log.info("Updating plugin [" + pInfo.getName() + "]");
             updatePlugin(p, pInfo);
         }
+        
+        autoAttach(p, pInfo);
         return p;
     }
 
+    private void autoAttach(UIPlugin p, UIPluginDescriptor pInfo) {
+        for (Iterator i=p.getViews().iterator(); i.hasNext(); ) {
+            View v = (View)i.next();
+            
+            for (Iterator j=pInfo.getViews().iterator(); j.hasNext(); ) {
+                ViewDescriptor vd = (ViewDescriptor)j.next();
+                
+                if (!vd.getPath().equals(v.getPath()))
+                    continue;
+                
+                if (vd.isAutoAttached() && v.isAttachable() &&
+                    v.getAttachType().isAutoAttachable())
+                {
+                    _log.info("Auto attaching [" + v + "]");
+                    attachView(v, v.getPrototype());
+                }
+                break;
+            }
+        }
+    }
+    
     /**
      * @ejb:interface-method
      */

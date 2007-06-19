@@ -50,6 +50,10 @@ public abstract class AttachType
             view.addAttachment(a);
             return a;
         }
+
+        boolean isAutoAttachable() {
+            return true;
+        }
     };
 
     public static AttachType MASTHEAD = new AttachType(1, "masthead",
@@ -66,11 +70,17 @@ public abstract class AttachType
             view.addAttachment(a);
             return a;
         }
+
+        boolean isAutoAttachable() {
+            return true;
+        }
     };
 
     abstract View createView(UIPlugin plugin, ViewDescriptor viewInfo); 
     
-    abstract Attachment attach(View view, AttachmentDescriptor d); 
+    abstract Attachment attach(View view, AttachmentDescriptor d);
+    
+    abstract boolean isAutoAttachable();
     
     public static AttachType findByDescription(String desc) {
         if (desc.equals("admin")) 

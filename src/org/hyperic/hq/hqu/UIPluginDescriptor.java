@@ -89,9 +89,15 @@ public class UIPluginDescriptor {
         return _dumpScripts;
     }
     
-    public void addView(String path, String descr, String attachType) {
+    public void addView(String path, String descr, String attachType,
+                        boolean autoAttach) 
+    {
         AttachType t = AttachType.findByDescription(attachType);
-        _viewDescriptors.add(new ViewDescriptor(path, descr, t)); 
+        _viewDescriptors.add(new ViewDescriptor(path, descr, t, autoAttach)); 
+    }
+
+    public void addView(String path, String descr, String attachType) {
+        addView(path, descr, attachType, false);
     }
     
     public List getViews() {

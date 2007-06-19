@@ -44,9 +44,7 @@ public abstract class View
     
     protected View() {}
     
-    protected View(UIPlugin plugin, ViewDescriptor view,
-                           AttachType attach) 
-    {
+    protected View(UIPlugin plugin, ViewDescriptor view, AttachType attach) {
         _plugin     = plugin;
         _path       = view.getPath();
         _descr      = view.getDescription();

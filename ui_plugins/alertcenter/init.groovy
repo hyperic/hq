@@ -5,4 +5,4 @@ plugin.apiMajor = 0
 plugin.apiMinor = 1
 
 plugin.dumpScripts = false
-plugin.addView('/alert/index.hqu', 'Alert Center', "masthead")
+plugin.addView('/alert/index.hqu', 'Alert Center', "masthead", true)
