@@ -168,6 +168,14 @@
         <data ID="55" PROPKEY="HQ-GUID" PROPVALUE="" DEFAULT_PROPVALUE=""
               FREAD_ONLY="FALSE"/>
               
+        <!-- Metric batch aggregator -->
+        <data ID="56" PROPKEY="BATCH_AGGREGATE_WORKERS" PROPVALUE="0" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+        <data ID="57" PROPKEY="BATCH_AGGREGATE_BATCHSIZE" PROPVALUE="500" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+        <data ID="58" PROPKEY="BATCH_AGGREGATE_QUEUE" PROPVALUE="20000" 
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+              
     </table>
 
 </Covalent.DBSetup>

@@ -59,11 +59,16 @@ public class MeasurementStartupListener
                                           new MeasurementEnabler());
 
         HQApp app = HQApp.getInstance();
-
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)
                 app.registerCallbackCaller(DefaultMetricEnableCallback.class);
             _dataInserter = new SynchronousDataInserter();
+        }
+    }
+    
+    public static void setDataInserter(DataInserter d) {
+        synchronized (LOCK) {
+            _dataInserter = d;
         }
     }
     

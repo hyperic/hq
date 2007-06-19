@@ -5656,6 +5656,19 @@ has already been defined.
           <statement>create index METRIC_DATA_6D_1S_MID_IDX on METRIC_DATA_6D_1S (MEASUREMENT_ID)</statement>
         </schema-directSQL>
     </schemaSpec>
+    
+    <schemaSpec version="3.28">
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (56, 'BATCH_AGGREGATE_WORKERS', '', '0', '0')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (57, 'BATCH_AGGREGATE_BATCHSIZE', '', '500', '0')"/>
+      <schema-insert table="EAM_CONFIG_PROPS"
+                     dupFail="false"
+                     insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (58, 'BATCH_AGGREGATE_QUEUE', '', '20000', '0')"/>
+    </schemaSpec>
+    
 </dbupgrade>
 
 </target>
