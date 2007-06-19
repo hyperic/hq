@@ -23,6 +23,7 @@ class AlertController
     }
     
     def data(params) {
+        log.info "Params = ${params}"
         def sortField = params.getOne("sortField", 
                                       "${AlertSortField.DATE.code}")
         def sortOrder = params.getOne("sortOrder", "1") != '1'
@@ -52,8 +53,8 @@ class AlertController
         
 		JSONArray columns = new JSONArray()
 		for (f in COLUMNS) {
-			columns.put([field: f.description, label: f.value,
-			             noSort: true] as JSONObject)
+			columns.put([field: f.description, label: f.value] as JSONObject)
+			             
 		}
 		JSONObject result = [data : data, columns : columns ] as JSONObject
 		render(inline:"/* ${result} */", contentType:'text/json-comment-filtered')

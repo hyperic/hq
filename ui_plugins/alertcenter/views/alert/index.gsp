@@ -1,3 +1,4 @@
 <div id="alert" style="width:98%;padding-left:10px;">
-  <%= dojoTable(id:'content', url:urlFor(action:'data')) %>
+  <%= dojoTable(id:'content', url:urlFor(action:'data'),
+                columns:['Date', 'Alert', 'Resource']) %>
 </div> 

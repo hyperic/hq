@@ -56,32 +56,91 @@ class DojoUtil {
      *   url:      URL to contact to get data to populate the table
      */
     static String dojoTable(params) {
-	    def idVar   = "_hqu_${params.id}"
-	    def res     = """
+        def id          = "${params.id}"
+	    def idVar       = "_hqu_${params.id}"
+	    def tableVar    = "${idVar}_table" 
+	    def selClassVar = "${idVar}_selClass"
+	    def queryStrVar = "${idVar}_queryStr" 
+	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
-
+        
+        var ${selClassVar};
+        var ${queryStrVar};
 	    dojo.addOnLoad(function() {
-	        ${idVar}_table = dojo.widget.createWidget("dojo:FilteringTable",
-	                                                  {valueField: "id"},
-	                                                  dojo.byId("${params.id}"));
+	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
+	                                               {valueField: "id"},
+	                                               dojo.byId("${id}"));
 
             dojo.io.bind({
-	            url: '${params.url}',
-	            method: "get",
+	            url:      '${params.url}' + "?" + ${queryStrVar},
+	            method:   "get",
 	            mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
 	                AjaxReturn = data;
-                    var cols = data.columns
-                    for (var x = 0; x<cols.length; x++) {
-                        ${idVar}_table.columns.push(${idVar}_table.createMetaData(cols[x]));
-                    }
-                    ${idVar}_table.store.setData(data.data);
+                    ${tableVar}.store.setData(data.data);
                 }
-	        });
+            });
 	    });    
+
+        function ${idVar}_setColClass(el) {
+            ${selClassVar} = '';
+            var classN = el.className;
+            var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
+            var ths = thead.getElementsByTagName('th')
+            for (i = 0; i < ths.length; i++) {
+                var clrClass = ths[i].className;
+                if (clrClass=='selectedUp' || clrClass=='selectedDown') {
+                    ths[i].setAttribute((document.all ? 'className' : 'class'), " ");
+                }
+            }
+
+            if (classN) {
+                if (classN == '' || classN == 'selectedDown') {
+                    el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
+                    ${selClassVar} = el.className;
+                } else if (classN == 'selectedUp') {
+                    el.setAttribute((document.all ? 'className' : 'class'), "selectedDown");
+                    ${selClassVar} = el.className;
+                }
+            } else {
+                el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
+                ${selClassVar} = el.className;
+            }
+            ${idVar}_refreshTable(el);
+        }
+
+        function ${idVar}_refreshTable(el) {
+            var colHead = el.firstChild.nodeValue;
+            queryStr = colHead + '=' + ${selClassVar};
+
+            var requestData = dojo.io.bind({
+                url: '${params.url}' + "?" + ${queryStrVar},
+                method: "get",
+                mimetype: "text/json-comment-filtered",
+                load: function(type, data, evt) {
+                    AjaxReturn = data;
+                    ${tableVar}.store.update(data.data);
+                }
+            });
+        }
 	    </script>
-	    <table id="${params.id}"></table>
-	    """
-		res	    
+        """)
+	    
+	    res << """
+          <table id='${id}'>
+            <thead>
+              <tr>
+        """
+	    for (c in params.columns) {
+	        res << "<th field='${c}' dataType='String' align='left'"
+	        res << " noSort='true' onclick='${idVar}_setColClass(this);'>${c}</th>"
+	    }
+	    res << """
+              </tr>
+            </thead>
+          </table>
+        """
+	    
+		res.toString()	    
 	}
 }
