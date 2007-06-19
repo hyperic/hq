@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.application;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,10 +55,43 @@ public class HQApp {
     
     private ThreadLocal        _txListeners    = new ThreadLocal();
     private List               _startupClasses = new ArrayList();
-    private CallbackDispatcher _callbacks = new CallbackDispatcher();
-
+    private CallbackDispatcher _callbacks;
+    private ShutdownCallback   _shutdown;
+    private File               _restartStorage;
+    
     static {
         TxSnatch.setSnatcher(new Snatcher());
+    }
+    
+    private HQApp() {
+        _callbacks = new CallbackDispatcher();
+        _shutdown = (ShutdownCallback)
+            _callbacks.generateCaller(ShutdownCallback.class);
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                _log.info("Running shutdown hooks");
+                _shutdown.shutdown();
+                _log.info("Done running shutdown hooks");
+            }
+        });
+    }
+
+    public void setRestartStorageDir(File dir) {
+        synchronized (_startupClasses) {
+            _restartStorage = dir;
+        } 
+    }
+    
+    /**
+     * Get a directory which can have files placed into it which will carry
+     * over for a restart.  This should not be used to place files for
+     * extensive periods of time.
+     */
+    public File getRestartStorageDir() {
+        synchronized (_startupClasses) {
+            return _restartStorage;
+        } 
     }
     
     /**

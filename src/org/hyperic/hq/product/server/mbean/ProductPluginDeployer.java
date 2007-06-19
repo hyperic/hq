@@ -63,6 +63,8 @@ import org.hyperic.util.file.FileUtil;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.deployment.SubDeployerSupport;
+import org.jboss.system.server.ServerConfig;
+import org.jboss.system.server.ServerConfigLocator;
 
 /**
  * ProductPlugin deployer.
@@ -440,7 +442,9 @@ public class ProductPluginDeployer
         } catch(IOException e) {
             throw new SystemException(e);
         }
-        
+
+        ServerConfig sc = ServerConfigLocator.locate();
+        _app.setRestartStorageDir(sc.getHomeDir());
         for (Iterator i=lines.iterator(); i.hasNext(); ) {
             String className = (String)i.next();
             
