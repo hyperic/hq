@@ -50,6 +50,20 @@ public class DBUtil {
     // Constants for DB Errors that we want to catch in other classes
     public static final int ORACLE_ERROR_DIVIDE_BY_ZERO = 1476;
     public static final int ORACLE_ERROR_NOT_AVAILABLE  = 1034;
+
+    // Constants for PostgreSQL errors
+    // May be found at:
+    // http://www.postgresql.org/docs/8.0/static/errcodes-appendix.html
+    public static final int POSTGRES_ERROR_DIVIDE_BY_ZERO = 22012;
+    public static final int POSTGRES_CONNECTION_EXCEPTION = 8000;
+    public static final int POSTGRES_CONNECTION_FAILURE   = 8006;
+    public static final int POSTGRES_UNABLE_TO_CONNECT    = 8001;
+
+    // Constants for MySQL errors
+    // May be found at:
+    // http://dev.mysql.com/doc/refman/5.0/en/error-messages-client.html
+    public static final int MYSQL_LOCAL_CONN_ERROR = 2002;
+    public static final int MYSQL_REMOTE_CONN_ERROR = 2003;
     
     // Constants for supported databases.
     public static final int DATABASE_UNKNOWN      = 0;

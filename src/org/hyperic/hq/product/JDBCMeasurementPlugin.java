@@ -199,7 +199,6 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                 connectionCache.put(cacheKey, conn);
             }
         }
-
         return conn;
     }
 
@@ -279,9 +278,15 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
 
             //XXX these two are oracle specific.
             // Catch divide by 0 errors and return 0
-            if(e.getErrorCode() == DBUtil.ORACLE_ERROR_DIVIDE_BY_ZERO)
+            if(e.getErrorCode() == DBUtil.ORACLE_ERROR_DIVIDE_BY_ZERO ||
+               e.getErrorCode() == DBUtil.POSTGRES_ERROR_DIVIDE_BY_ZERO)
                 return 0;
-            if(e.getErrorCode() == DBUtil.ORACLE_ERROR_NOT_AVAILABLE)
+            if(e.getErrorCode() == DBUtil.ORACLE_ERROR_NOT_AVAILABLE    ||
+               e.getErrorCode() == DBUtil.POSTGRES_CONNECTION_EXCEPTION ||
+               e.getErrorCode() == DBUtil.POSTGRES_CONNECTION_FAILURE   ||
+               e.getErrorCode() == DBUtil.POSTGRES_UNABLE_TO_CONNECT    ||
+               e.getErrorCode() == DBUtil.MYSQL_LOCAL_CONN_ERROR        ||
+               e.getErrorCode() == DBUtil.MYSQL_REMOTE_CONN_ERROR)
                 throw new MetricUnreachableException(msg, e);
                 
             throw new MetricNotFoundException(msg, e);
