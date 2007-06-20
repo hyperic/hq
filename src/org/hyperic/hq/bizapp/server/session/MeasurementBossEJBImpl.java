@@ -118,7 +118,6 @@ import org.hyperic.hq.measurement.shared.BaselineValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
@@ -1458,37 +1457,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 log.debug("END findMeasurementData() - " + watch.getElapsed() +
                           " msec");
         }
-    }
-
-    /**
-     * Dumps a specific number of data points for a specific
-     * measurement template ID and resource id
-     * @return a List of MetricValue objects
-     * @ejb:interface-method
-     */
-    public List findMeasurementData(int sessionId, Integer tid, int iid,
-                                    int count)
-        throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        DerivedMeasurementValue dmv =
-            getDerivedMeasurementManager().findMeasurement(
-                subject, tid, new Integer(iid));
-    
-        return findMeasurementData(sessionId, dmv.getId(), count);
-    }
-
-    /**
-     * Dumps a specific number of data points for a specific measurement ID
-     * @return a List of MetricValue objects
-     * @ejb:interface-method
-     */
-    public List findMeasurementData(int sessionId, Integer mid, int count)
-        throws SessionNotFoundException, SessionTimeoutException,
-               DataNotAvailableException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-                
-        return getDataMan().getLastHistoricalData(mid, count);
     }
 
     /**
