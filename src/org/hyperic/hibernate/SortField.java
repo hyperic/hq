@@ -25,8 +25,7 @@
 
 package org.hyperic.hibernate;
 
-/**
- * Currently just a marker interface
- */
 public interface SortField {
+    String getDescription();
+    String getValue();
 }
