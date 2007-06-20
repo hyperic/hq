@@ -119,15 +119,38 @@ class DojoUtil {
 
         function ${idVar}_refreshTable(el) {
             var field = el.getAttribute('field')
-            var queryStr = 'sortField=' + field; 
+            var queryStr = 'sortField=' + field;
             dojo.io.bind({
                 url: '${params.url}' + "?" + queryStr,
                 method: "get",
                 mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
-                    AjaxReturn = data;
-                    ${tableVar}.store.update(data.data);
-                }
+                        AjaxReturn = data;
+                  filteringTable.store.setData(data.data);
+                  var sortColHead = data.sortField;
+                  var sortOrder = data.sortOrder;
+                  var strOrder = sortOrder.toString();
+                  var strColClass;
+                        if (strOrder == 'false') {
+                           strColClass = "selectedDown";
+                        } else {
+                           strColClass = "selectedUp";
+                        }
+                        if  (sortColHead) {
+                         var thead = dojo.byId("content").getElementsByTagName("thead")[0];
+                                var ths = thead.getElementsByTagName('th')
+                                 for (j = 0; j < ths.length; j++) {
+                                     var setClass = ths[j].className;
+                                     var getColStr = ths[j].firstChild.nodeValue;
+                                        if (getColStr==sortColHead) {
+                                          setClass=strColClass;
+                                            //alert(strColClass + " = column class")
+                                        //ths[j].setAttribute((document.all ? 'className' : 'class'), " ");
+                                       }
+                                 }
+                        }
+
+                    }
             });
         }
 	    </script>
