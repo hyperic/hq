@@ -1,5 +1,7 @@
 package org.hyperic.hq.hqu.rendit.html
 
+import org.hyperic.hibernate.SortField
+
 class DojoUtil {
     /**
      * Output a header which sets up the inclusion of the DOJO javascript
@@ -45,17 +47,22 @@ class DojoUtil {
             </script>	
         """
 	}
-	
+     
     /**
      * Spit out a table, and appropriate <script> tags to enable AJAXification.
      *
      * 'params' is a map of key/vals for configuration, which include:
      *    
      *   id:       The HTML ID for the table
-     *   columns:  An array of Strings, containing the column names
      *   url:      URL to contact to get data to populate the table
+     *   columns:  An array of maps, containing the column fields and their
+     *             labels.  e.g. columns: [[field:'date', label:'The Date'],]
+     *             Alternatively, if field: points at an implementation of
+     *             SortField, the description of the sortfield is used as 
+     *             the field name, and the value is used as the label.
      */
     static String dojoTable(params) {
+        def columns     = params.columns
         def id          = "${params.id}"
 	    def idVar       = "_hqu_${params.id}"
 	    def tableVar    = "${idVar}_table" 
@@ -68,7 +75,8 @@ class DojoUtil {
         var ${queryStrVar};
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
-	                                               {valueField: "id"},
+	                                               {alternateRows:true,
+                                                    valueField: "id"},
 	                                               dojo.byId("${id}"));
 
             dojo.io.bind({
@@ -110,10 +118,9 @@ class DojoUtil {
         }
 
         function ${idVar}_refreshTable(el) {
-            var colHead = el.firstChild.nodeValue;
-            queryStr = colHead + '=' + ${selClassVar};
-
-            var requestData = dojo.io.bind({
+            var field = el.getAttribute('field')
+            var queryStr = 'sortField=' + field; 
+            dojo.io.bind({
                 url: '${params.url}' + "?" + queryStr,
                 method: "get",
                 mimetype: "text/json-comment-filtered",
@@ -131,9 +138,21 @@ class DojoUtil {
             <thead>
               <tr>
         """
-	    for (c in params.columns) {
-	        res << "<th field='${c}' dataType='String' align='left'"
-	        res << " noSort='true' onclick='${idVar}_setColClass(this);'>${c}</th>"
+        
+	    for (c in columns) {
+	        def field = c.field
+	        def label
+	        
+	        if (field in SortField) {
+	            label = field.value
+	            field = field.description
+	        } else {
+	            label = c.label
+	        }
+	            
+	        res << "<th field='${field}' dataType='String' align='left'"
+	        res << " noSort='true' onclick='${idVar}_setColClass(this);'>"
+	        res << "${label}</th>"
 	    }
 	    res << """
               </tr>

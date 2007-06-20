@@ -11,52 +11,76 @@ import org.hyperic.hq.events.server.session.AlertSortField
 class AlertController 
 	extends BaseController
 {
-    private final COLUMNS = [AlertSortField.DATE, AlertSortField.DEFINITION,
-                             AlertSortField.RESOURCE, AlertSortField.FIXED,
-                             AlertSortField.ACKED_BY, AlertSortField.SEVERITY] 
+    private final DateFormat df = 
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+
+    private final TABLE_SCHEMA = [
+        getData: {pageInfo ->
+            alertHelper.findAlerts(0, System.currentTimeMillis(),
+                                   System.currentTimeMillis(), pageInfo)
+        },
+        defaultSort: AlertSortField.DATE,
+        defaultSortOrder: 1,  // ascending
+        rowId: {it.id},
+        columns: [
+            [field:AlertSortField.DATE, 
+             jsonFormat:{df.format(it.timestamp)}],
+            [field:AlertSortField.DEFINITION,
+             jsonFormat:{it.alertDefinition.name}],
+            [field:AlertSortField.RESOURCE,
+             jsonFormat:{it.alertDefinition.resource.name}],
+            [field:AlertSortField.FIXED,
+             jsonFormat:{it.fixed ? "Yes" : "No"}],
+            [field:AlertSortField.SEVERITY,
+             jsonFormat:{EventConstants.getPriority(it.alertDefinition.priority)}]
+        ]
+    ]
+    
     def AlertController() {
         setTemplate('standard')  // in views/templates/standard.gsp 
     }
     
     def index = { params ->
-    	render()
+    	render(locals:[alertSchema:TABLE_SCHEMA])
     }
     
     def data(params) {
         log.info "Params = ${params}"
-        def sortField = params.getOne("sortField", 
-                                      "${AlertSortField.DATE.code}")
-        def sortOrder = params.getOne("sortOrder", "1") != '1'
-        sortField = AlertSortField.findByCode(AlertSortField, 
-                                              new Integer(sortField))
-        def pageNum = new Integer(params.getOne("pageNum", "0"))
-        def pageSize = new Integer(params.getOne("pageSize", "20"))
-		def pageInfo = PageInfo.create(pageNum, pageSize, sortField, sortOrder)
-		
-        def alerts = alertHelper.findAlerts(0, System.currentTimeMillis(),
-                                            System.currentTimeMillis(), 
-                                            pageInfo)
-        def df = DateFormat.getDateTimeInstance(DateFormat.SHORT, 
-                                                DateFormat.SHORT, locale)                                            
-        JSONArray data = new JSONArray()
-        for (a in alerts) {
-            def d = a.alertDefinition
-            
-            data.put([id         : a.id,
-                      Date       : df.format(a.timestamp),
-                      Definition : d.name,
-                      Resource   : d.resource.name,
-                      Fixed      : a.fixed ? "Yes" : "No",
-                      Severity   : EventConstants.getPriority(d.priority)
-            ])
+        def schema = TABLE_SCHEMA
+        
+        def sortField = params.getOne("sortField")
+        def sortOrder = params.getOne("sortOrder", 
+                                      "${schema.defaultSortOrder}") != '1'
+                                      
+        def sortColumn                                      
+        for (c in schema.columns) {
+            if (c.field.description == sortField) {
+                sortColumn = c.field
+                break
+            }
         }
         
-		JSONArray columns = new JSONArray()
-		for (f in COLUMNS) {
-			columns.put([field: f.description, label: f.value] as JSONObject)
-			             
-		}
-		JSONObject result = [data : data, columns : columns ] as JSONObject
+        if (sortColumn == null) {
+            sortColumn = schema.defaultSort
+        }
+            
+        def pageNum  = new Integer(params.getOne("pageNum", "0"))
+        def pageSize = new Integer(params.getOne("pageSize", "20"))
+		def pageInfo = PageInfo.create(pageNum, pageSize, sortColumn, sortOrder)
+		def data     = schema.getData(pageInfo)
+		
+        JSONArray jsonData = new JSONArray()
+        for (d in data) {
+            def val = [:]
+            val.id = schema.rowId(d)
+            for (c in schema.columns) {
+                val[c.field.description] = c.jsonFormat(d)
+            }
+
+            jsonData.put(val)
+        }
+        
+		JSONObject result = [data : jsonData] as JSONObject
 		render(inline:"/* ${result} */", contentType:'text/json-comment-filtered')
     }
 }
