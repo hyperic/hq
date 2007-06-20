@@ -180,6 +180,23 @@
       </sequential>
     </macrodef>
 
+    <macrodef name="hqu-copy">
+      <attribute name="eardir"/>
+      <sequential>
+        <mkdir dir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit"/>
+        <copy todir="@{eardir}/rendit_sys/org/hyperic/hq/hqu/rendit">
+          <fileset dir="${rendit_sys.dir}"/>
+        </copy>
+        <mkdir dir="@{eardir}/hq.war/hqu"/>
+        <copy todir="@{eardir}/hq.war/hqu">
+          <fileset dir="${basedir}/ui_plugins">
+            <exclude name="scaffold/**"/>
+            <exclude name="old/**"/>
+          </fileset>
+        </copy>
+      </sequential>
+    </macrodef>
+    
     <property name="init-internal-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -287,7 +304,6 @@
     <mkdir dir="${ear.dir}/lib" />
     <mkdir dir="${ear.dir}/sigar_bin/lib" />
     <mkdir dir="${server.plugin.dir}" />
-    <mkdir dir="${ear.dir}/hq.war/hqu"/>
 
     <mkdir dir="${ear.dir}/hq-session.jar/META-INF" />
     <mkdir dir="${ear.dir}/hq-agent-session.jar/META-INF" />
@@ -548,6 +564,8 @@
     <copy tofile="${ROOT.war}/WEB-INF/web.xml"
           file="src/org/hyperic/util/notReady/web.xml"/>
 
+    <!-- Pack UI plugins -->
+    <hqu-copy eardir="${ear.dir}"/>
   </target>
   
   <target name="build-ear" description="Build and create the ear directory structure" 
@@ -558,17 +576,7 @@
   
   <!-- HQU == UI Plugins -->
   <target name="hqu-deploy" depends="init">
-    <mkdir dir="${hqu.deployed.rendit_sys.dir}/org/hyperic/hq/hqu/rendit"/>
-    <copy todir="${hqu.deployed.rendit_sys.dir}/org/hyperic/hq/hqu/rendit">
-	  <fileset dir="${rendit_sys.dir}"/>
-	</copy>
-	<mkdir dir="${hqu.deployed.dir}"/>
-	<copy todir="${hqu.deployed.dir}">
-	  <fileset dir="${basedir}/ui_plugins">
-	  	<exclude name="scaffold/**"/>
-	    <exclude name="old/**"/>
-	  </fileset>
-	</copy>
+    <hqu-copy eardir="${jboss.home}/server/default/deploy/hq.ear"/>
   </target>
 
   <target name="hqu-undeploy" depends="init">
