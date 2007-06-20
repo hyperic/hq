@@ -89,7 +89,9 @@
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
     <fileset dir="${xdoclet.lib}" includes="*.jar" />
     <fileset dir="${hibernate_lib}" includes="*.jar" />
-    <fileset dir="${jboss.home}/server/default/lib" includes="*.jar" />
+    <fileset dir="${jboss.home}/server/default/lib"
+             includes="*.jar"
+             excludes="antlr-*.jar" />
     <fileset dir="${jboss.home}/lib" includes="*.jar" />
     <fileset dir="${jboss.home}/client" includes="*.jar" />
     <fileset dir="${tomcat.home}" includes="*.jar" />
