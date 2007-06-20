@@ -1,6 +1,9 @@
 package org.hyperic.hq.hqu.rendit.html
 
+import org.json.JSONArray
+import org.json.JSONObject
 import org.hyperic.hibernate.SortField
+import org.hyperic.hibernate.PageInfo
 
 class DojoUtil {
     /**
@@ -125,32 +128,29 @@ class DojoUtil {
                 method: "get",
                 mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
-                        AjaxReturn = data;
-                  filteringTable.store.setData(data.data);
-                  var sortColHead = data.sortField;
-                  var sortOrder = data.sortOrder;
-                  var strOrder = sortOrder.toString();
-                  var strColClass;
-                        if (strOrder == 'false') {
-                           strColClass = "selectedDown";
-                        } else {
-                           strColClass = "selectedUp";
-                        }
-                        if  (sortColHead) {
-                         var thead = dojo.byId("content").getElementsByTagName("thead")[0];
-                                var ths = thead.getElementsByTagName('th')
-                                 for (j = 0; j < ths.length; j++) {
-                                     var setClass = ths[j].className;
-                                     var getColStr = ths[j].firstChild.nodeValue;
-                                        if (getColStr==sortColHead) {
-                                          setClass=strColClass;
-                                            //alert(strColClass + " = column class")
-                                        //ths[j].setAttribute((document.all ? 'className' : 'class'), " ");
-                                       }
-                                 }
-                        }
-
+                    AjaxReturn = data;
+                    ${tableVar}.store.setData(data.data);
+                    var sortColHead = data.sortField;
+                    var sortOrder   = data.sortOrder;
+                    var strOrder    = sortOrder.toString();
+                    var strColClass;
+                    if (strOrder == 'false') {
+                        strColClass = "selectedDown";
+                    } else {
+                        strColClass = "selectedUp";
                     }
+                    if (sortColHead) {
+                        var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
+                        var ths = thead.getElementsByTagName('th')
+                        for (j = 0; j < ths.length; j++) {
+                            var setClass = ths[j].className;
+                            var getColStr = ths[j].firstChild.nodeValue;
+                            if (getColStr==sortColHead) {
+                                setClass=strColClass;
+                            }
+                        }
+                    }
+                }
             });
         }
 	    </script>
@@ -172,7 +172,7 @@ class DojoUtil {
 	        } else {
 	            label = c.label
 	        }
-	            
+	        
 	        res << "<th field='${field}' dataType='String' align='left'"
 	        res << " noSort='true' onclick='${idVar}_setColClass(this);'>"
 	        res << "${label}</th>"
@@ -185,4 +185,42 @@ class DojoUtil {
 	    
 		res.toString()	    
 	}
+     
+    static JSONObject processTableRequest(schema, params) {
+        def sortField = params.getOne("sortField")
+        def sortOrder = params.getOne("sortOrder", 
+                                      "${schema.defaultSortOrder}") != '1'
+                                      
+        def sortColumn                                      
+        for (c in schema.columns) {
+            if (c.field.description == sortField) {
+                sortColumn = c.field
+                break
+            }
+        }
+        
+        if (sortColumn == null) {
+            sortColumn = schema.defaultSort
+        }
+            
+        def pageNum  = new Integer(params.getOne("pageNum", "0"))
+        def pageSize = new Integer(params.getOne("pageSize", "20"))
+		def pageInfo = PageInfo.create(pageNum, pageSize, sortColumn, sortOrder)
+		def data     = schema.getData(pageInfo)
+		
+        JSONArray jsonData = new JSONArray()
+        for (d in data) {
+            def val = [:]
+            val.id = schema.rowId(d)
+            for (c in schema.columns) {
+                val[c.field.description] = c.label(d)
+            }
+
+            jsonData.put(val)
+        }
+        
+		[data : jsonData, 
+		 sortField : sortColumn.description,
+		 sortOrder : sortOrder] as JSONObject
+    }
 }
