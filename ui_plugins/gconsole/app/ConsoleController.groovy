@@ -15,6 +15,13 @@ sess.createCriteria(persistedClass).
         
 	def ConsoleController() {
         setTemplate('standard')
+        addBeforeFilter({ 
+            if (!user.isSuperUser()) {
+                render(inline: "Unauthorized")
+                return true
+            }
+            return false
+        })
 	}
 	
     def index(params) {
