@@ -1125,8 +1125,8 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         throws FinderException, PermissionException {
         AuthzSubject subjectLocal = lookupSubject(subject);
         if (subjectLocal.isRoot()) {
-            throw new PermissionException("The super user is cannot " +
-                                          "belong to a Role.");
+            throw new PermissionException("The super user cannot " +
+                                          "belong to a role.");
         }
 
         toPojos(roles);
