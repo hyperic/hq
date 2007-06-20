@@ -39,10 +39,10 @@ public class MeasTabManagerUtil
     private static final String logCtx = 
                                    MeasTabManagerUtil.class.getName();
     private static final Log _log = LogFactory.getLog(logCtx);
-    static final int NUMBER_OF_TABLES = 14,
+    static final int NUMBER_OF_TABLES = 18,
                      NUMBER_OF_TABLES_PER_DAY = 2;
 
-    static final String OLD_MEAS_TABLE = "metric_data_compat";
+    static final String OLD_MEAS_TABLE = "hq_metric_data_compat";
 
     static {
         myBaseCal.set(2006, 0, 1, 0, 0);
@@ -88,7 +88,7 @@ public class MeasTabManagerUtil
                 break;
             dayslice++;
         }
-        return "metric_data_"+daytable+"d_"+dayslice+"s";
+        return "hq_metric_data_"+daytable+"d_"+dayslice+"s";
     }
 
     static long getPrevMeasTabTime(long timems)
