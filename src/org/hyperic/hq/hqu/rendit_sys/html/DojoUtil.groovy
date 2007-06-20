@@ -72,7 +72,7 @@ class DojoUtil {
 	                                               dojo.byId("${id}"));
 
             dojo.io.bind({
-	            url:      '${params.url}' + "?" + ${queryStrVar},
+	            url:      '${params.url}' + "?" + ${queryStrVar} + "=" + ${selClassVar},
 	            method:   "get",
 	            mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
@@ -114,7 +114,7 @@ class DojoUtil {
             queryStr = colHead + '=' + ${selClassVar};
 
             var requestData = dojo.io.bind({
-                url: '${params.url}' + "?" + ${queryStrVar},
+                url: '${params.url}' + "?" + queryStr,
                 method: "get",
                 mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
