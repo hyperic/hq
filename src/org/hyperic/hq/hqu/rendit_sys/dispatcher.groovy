@@ -4,6 +4,7 @@ import org.hyperic.hq.hqu.rendit.InvocationBindings
 import org.hyperic.hq.hqu.rendit.PluginLoadException
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
+import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 import org.hyperic.hq.hqu.UIPluginDescriptor
 
 import org.apache.commons.logging.Log
@@ -20,7 +21,8 @@ class Dispatcher {
     final int API_MAJOR = 0
     final int API_MINOR = 1
     
-    private final CATEGORIES = [AuthzSubjectCategory, MapCategory] 
+    private final CATEGORIES = [AuthzSubjectCategory, MapCategory, 
+                                StringCategory] 
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 

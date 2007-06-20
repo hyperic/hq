@@ -1,5 +1,6 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
+import org.hyperic.hq.common.YesOrNo
 import java.text.DateFormat
 import org.json.JSONArray
 import org.json.JSONObject
@@ -30,7 +31,8 @@ class AlertController
             [field:AlertSortField.RESOURCE,
              label:{it.alertDefinition.resource.name}],
             [field:AlertSortField.FIXED,
-             label:{it.fixed ? "Yes" : "No"}],
+             label:{it.fixed ? YesOrNo.YES.value.capitalize() : 
+                               YesOrNo.NO.value.capitalize()}],
             [field:AlertSortField.SEVERITY,
              label:{EventConstants.getPriority(it.alertDefinition.priority)}]
         ]

@@ -14,12 +14,6 @@ import org.apache.commons.logging.LogFactory
 class DefaultControllerDispatcher {
 	Log log = LogFactory.getLog(DefaultControllerDispatcher.class)
 	
-    private String capitalize(String s) {
-        if (s.length() == 0) 
-            return s;
-        return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
-    }
-    
 	def invoke(pluginInfo, invokeArgs) {
         def path = invokeArgs.requestURI.split('/')[-3..-1]
 
@@ -27,7 +21,7 @@ class DefaultControllerDispatcher {
         if (path.size() < 3)
             return false
         
-        def controllerName = capitalize(path[1]) + "Controller"
+        def controllerName = path[1].capitalize() + "Controller"
 
         def pluginDir = invokeArgs.pluginDir
         def appDir    = new File(pluginDir, "app")
