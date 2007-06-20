@@ -1,14 +1,18 @@
 package org.hyperic.hq.hqu.rendit
 
-import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import java.text.SimpleDateFormat
+
+import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.hqu.UIPluginDescriptor
-import org.hyperic.hq.hqu.rendit.render.RenderFrame
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
+import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
+import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+
+
 
 /**
  * The base controller is invoked by the dispatcher when it detects that
@@ -23,11 +27,16 @@ abstract class BaseController {
     UIPluginDescriptor pluginInfo      // The results of init.groovy
     String             template        // Default template when rendering
     
+    private beforeFilters = []         // Closures to run prior to any actions
     private invokeArgs                 // Info about the request
     private File    viewDir            // Path to plugin/app/views
     private boolean rendered           // Have we already performed a render?
     private         localeBundle = [:] // l10n bundle, must support getAt()
 
+    protected void addBeforeFilter(Closure filter) {
+        beforeFilters << filter
+    }
+    
     def getLocaleBundle() {
         localeBundle
     }
@@ -48,7 +57,7 @@ abstract class BaseController {
     
     void setPluginDir(File pluginDir) {
         this.pluginDir = pluginDir
-        this.viewDir = new File(pluginDir, "views")
+        this.viewDir   = new File(pluginDir, "views")
     }
     
     File getViewDir() {
@@ -69,6 +78,12 @@ abstract class BaseController {
 	    rendered = false
 	    
 	    try {
+	        
+	        for (f in beforeFilters) {
+	        	if (f(params))
+	        	    return;
+	        }
+	        
 			invokeMethod(action, params)
     		if (!rendered) {
     		    render([action : action])
@@ -134,8 +149,12 @@ abstract class BaseController {
                 
         new RenderFrame(opts, this).render()
     }
+
+    protected AuthzSubject getUser() {
+        invokeArgs.user 
+    }
     
     protected AlertHelper getAlertHelper() {
-        return new AlertHelper(invokeArgs.user)
+        new AlertHelper(user)
     }
 }

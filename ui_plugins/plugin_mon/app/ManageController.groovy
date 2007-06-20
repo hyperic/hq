@@ -6,6 +6,13 @@ class ManageController
 {
     def ManageController() {
         setTemplate('standard')  // in views/templates/standard.gsp 
+        addBeforeFilter({ 
+            if (!user.isSuperUser()) {
+                render(inline: "Unauthorized")
+                return true
+            }
+            return false
+        })
     }
     
     private def getPMan() {

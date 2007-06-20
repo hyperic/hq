@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit
 
 import org.hyperic.hq.hqu.rendit.InvocationBindings
 import org.hyperic.hq.hqu.rendit.PluginLoadException
+import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.UIPluginDescriptor
 
@@ -18,6 +19,8 @@ import org.apache.commons.logging.LogFactory
 class Dispatcher {
     final int API_MAJOR = 0
     final int API_MINOR = 1
+    
+    private final CATEGORIES = [AuthzSubjectCategory, MapCategory] 
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 
@@ -71,7 +74,7 @@ class Dispatcher {
         def dispatcher = new DefaultControllerDispatcher()
         def pluginInfo = loadPlugin()
 		
-		use (MapCategory) {
+		use (*CATEGORIES) {
         	return dispatcher.invoke(pluginInfo, invokeArgs)
         }
      }
