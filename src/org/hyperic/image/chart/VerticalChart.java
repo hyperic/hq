@@ -40,19 +40,8 @@ import org.hyperic.util.units.UnitsFormat;
 
 public class VerticalChart extends Chart
 {
-    protected static final Color[] DEFAULT_COLORS = {
-        new Color(0x00, 0x00, 0xFF),
-        new Color(0xFF, 0x00, 0x00), 
-        new Color(0xCC, 0x00, 0x99),
-        new Color(0x9B, 0xBA, 0x70),
-        new Color(0xFF, 0xFF, 0x33),
-        new Color(0x00, 0xFF, 0x00),
-        new Color(0x00, 0xFF, 0xFF),
-        new Color(0xA6, 0x78, 0x38),
-        new Color(0x99, 0x66, 0x99),
-        new Color(0x74, 0x90, 0xAA),
-    };
-
+    protected static final Color DEFAULT_COLOR = new Color(0x00, 0x00, 0xFF);
+    
     protected static final Color GOOD_COLOR    // Green
         = new Color(0x48, 0xB3, 0x68);
     protected static final Color DANGER_COLOR  // Red
@@ -127,7 +116,8 @@ public class VerticalChart extends Chart
     protected Rectangle adjustRectangle(Graphics2D g, Rectangle rect) {
         int cDataPts = this.getDataPoints().size();
         int spread   = this.getUnitSpread(g, rect);
-        rect.width   = (spread * (cDataPts - 1)) + (this.valueIndent * 2) + this.lineWidth;
+        rect.width   = (spread * (cDataPts - 1)) + (this.valueIndent * 2) +
+                       this.lineWidth;
                        
         this.m_rect = rect;
         return rect;
@@ -234,7 +224,7 @@ public class VerticalChart extends Chart
         int xAvgLabel      = x2 - m_metricsLabel.stringWidth(Chart.AVG) - 3;
         int yAvgLabel      = yAvgLine - 3;
         Rectangle avgLabel = new Rectangle();
-        if(this.showAverage == true)
+        if(this.showAverage)
             avgLabel.setRect(xAvgLabel, yAvgLabel,
                              m_metricsLabel.stringWidth(Chart.AVG),
                              m_metricsLabel.getHeight());
@@ -243,7 +233,7 @@ public class VerticalChart extends Chart
                              4;
         int yBaselineLabel      = yBaseLine - 3;
         Rectangle baselineLabel = new Rectangle();
-        if(this.showBaseline == true)
+        if(this.showBaseline)
             baselineLabel.setRect(xBaselineLabel, yBaselineLabel,
                                   m_metricsLabel.stringWidth(Chart.BASELINE),
                                   m_metricsLabel.getHeight());
@@ -251,7 +241,7 @@ public class VerticalChart extends Chart
         int xLowLabel      = x2 - m_metricsLabel.stringWidth(Chart.LOW) - 4;
         int yLowLabel      = yLowLine - 3;
         Rectangle lowLabel = new Rectangle();
-        if(this.showLow == true)
+        if(this.showLow)
             lowLabel.setRect(xLowLabel, yLowLabel,
                              m_metricsLabel.stringWidth(Chart.LOW),
                              m_metricsLabel.getHeight());
@@ -259,17 +249,12 @@ public class VerticalChart extends Chart
         int xPeakLabel      = x2 - m_metricsLabel.stringWidth(Chart.PEAK) - 4;
         int yPeakLabel      = yPeakLine - 3;
         Rectangle peakLabel = new Rectangle();
-        if(this.showPeak == true)        
+        if(this.showPeak)        
             peakLabel.setRect(xPeakLabel, yPeakLabel,
                               m_metricsLabel.stringWidth(Chart.PEAK),
                               m_metricsLabel.getHeight());                                          
 
-        int xHorzMarks = rect.x + this.valueIndent;
-
-        //////////////////////////////////////////////////////////
-        // Draw the Value (Y) Legend
-        
-        if(this.showTopLegend == true)
+        if(this.showTopLegend)
             g.drawYLegendString(this.getValueLegend());
 
         //////////////////////////////////////////////////////////
@@ -297,19 +282,21 @@ public class VerticalChart extends Chart
         int     cxGuide  = lineWidth * 3;
         int     xGuide   = rect.x - cxGuide;
         
-        if(this.showHighRange == true && Double.isNaN(this.highRange) == false
+        if(this.showHighRange && Double.isNaN(this.highRange) == false
            && (yHighBottom > (rect.y + lineWidth)))
         {
             graph.setColor(this.highRangeColor);
-            graph.fillRect(rect.x + lineWidth, rect.y + lineWidth, rect.width - lineWidth, yHighBottom - rect.y);
+            graph.fillRect(rect.x + lineWidth, rect.y + lineWidth,
+                           rect.width - lineWidth, yHighBottom - rect.y);
                            
             graph.setColor(DANGER_COLOR);
-            graph.fillRect(xGuide, rect.y + lineWidth, cxGuide, yHighBottom - rect.y);
+            graph.fillRect(xGuide, rect.y + lineWidth, cxGuide,
+                           yHighBottom - rect.y);
                            
             bHighLow = true;
         }
         
-        if(this.showLowRange == true && Double.isNaN(this.lowRange) == false
+        if(this.showLowRange && Double.isNaN(this.lowRange) == false
            && (yLowTop < (y2 - lineWidth)))
         {
             graph.setColor(this.lowRangeColor);
@@ -322,7 +309,7 @@ public class VerticalChart extends Chart
             bHighLow = true;
         }
 
-        if(bHighLow == true) {
+        if(bHighLow) {
             if(this.showHighRange == false)
                 yHighBottom = rect.y + lineWidth;
             else {
@@ -350,7 +337,7 @@ public class VerticalChart extends Chart
                 if(collEvts.size() > 0){
                     int[] evtDataPts = getDataPointEventIndexes(0);
                 
-                    g.graphics.setColor(DEFAULT_COLORS[0]);
+                    g.graphics.setColor(DEFAULT_COLOR);
                 
                     for(int i = 0;i < evtDataPts.length;i ++) {
                         if(evtDataPts[i] == -1)
@@ -368,7 +355,7 @@ public class VerticalChart extends Chart
         ////////////////////////////////////////////////////////////
         // Draw the Bottom Legend
 
-        if(this.showBottomLegend == true)
+        if(this.showBottomLegend)
             g.drawXLegendString(this.getUnitLegend());        
 
         //////////////////////////////////////////////////////////
@@ -376,10 +363,9 @@ public class VerticalChart extends Chart
 
         graph.setFont(this.font);
         
-        Rectangle hit   = new Rectangle();
-        int       xLast = 0;
+        int xLast = 0;
         
-        if(this.showLow == true) {
+        if(this.showLow) {
             graph.setColor(this.lowLineColor);
             graph.drawLine(this.xVertMarks, yLowLine, this.x2VertMarks,
                                 yLowLine);
@@ -388,8 +374,8 @@ public class VerticalChart extends Chart
             xLast = xLowLabel;
         }
 
-        if(this.showAverage == true) {
-            if(avgLabel.intersects(lowLabel) == true)
+        if(this.showAverage) {
+            if(avgLabel.intersects(lowLabel))
               xAvgLabel = xLast - this.m_metricsLabel.stringWidth(Chart.AVG) -
                           this.m_metricsLabel.charWidth('W'); 
             
@@ -400,9 +386,9 @@ public class VerticalChart extends Chart
             xLast = Math.min(xLast, xAvgLabel);
         }
         
-        if(this.showPeak == true) {
-            if(peakLabel.intersects(lowLabel) == true
-            || peakLabel.intersects(avgLabel) == true)
+        if(this.showPeak) {
+            if(peakLabel.intersects(lowLabel)
+            || peakLabel.intersects(avgLabel))
                 xPeakLabel = xLast -
                              this.m_metricsLabel.stringWidth(Chart.PEAK) -
                              this.m_metricsLabel.charWidth('W'); 
@@ -414,10 +400,10 @@ public class VerticalChart extends Chart
             xLast = Math.min(xLast, xPeakLabel);
         }
 
-        if(this.showBaseline == true && yBaseLine > rect.y && yBaseLine < y2) {
-            if(baselineLabel.intersects(lowLabel) == true
-            || baselineLabel.intersects(avgLabel) == true
-            || baselineLabel.intersects(peakLabel) == true)
+        if(this.showBaseline && yBaseLine > rect.y && yBaseLine < y2) {
+            if(baselineLabel.intersects(lowLabel)
+            || baselineLabel.intersects(avgLabel)
+            || baselineLabel.intersects(peakLabel))
                 xBaselineLabel = xLast -
                                this.m_metricsLabel.stringWidth(Chart.BASELINE) -
                                this.m_metricsLabel.charWidth('W'); 
@@ -427,11 +413,10 @@ public class VerticalChart extends Chart
             graph.drawString(Chart.BASELINE, xBaselineLabel, yBaselineLabel);
         }
 
-
         ///////////////////////////////////////////////////////////
         // Paint the chart interior
         
-        if(this.showValues == true) this.paint(g, rect);
+        if(this.showValues) this.paint(g, rect);
 
         return rect;
     }
@@ -447,7 +432,7 @@ public class VerticalChart extends Chart
         int[]                tmp      = new int[collEvts.size()];
         int                  cActual  = 0;
                     
-        for(int i = 0;iterEvts.hasNext() == true;i++) {
+        for(int i = 0;iterEvts.hasNext();i++) {
             IEventPoint evt = (IEventPoint)iterEvts.next();
                 
             int index = this.findDataPointIndex(evt.getTimestamp(), datapts);

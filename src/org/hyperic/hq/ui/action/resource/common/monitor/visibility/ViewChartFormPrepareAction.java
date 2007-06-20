@@ -297,24 +297,27 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         String[] resourceIds = request.getParameterValues("resourceIds");
         if (null == resourceIds || resourceIds.length == 0) {
             int maxResources = _getMaxResources(request, resources.length);
-            log.debug("maxResources="+maxResources);
-            AppdefResourceValue[] checkedResources = new AppdefResourceValue[maxResources];
+            log.debug("maxResources=" + maxResources);
+            AppdefResourceValue[] checkedResources =
+                new AppdefResourceValue[maxResources];
             System.arraycopy(resources, 0, checkedResources, 0, maxResources);
             Integer[] rids = new Integer[checkedResources.length];
-            for (int i=0; i<rids.length; ++i) {
+            for (int i = 0; i < rids.length; ++i) {
                 rids[i] = checkedResources[i].getId();
             }
             chartForm.setResourceIds(rids);
-            if ( log.isDebugEnabled() ) {
-                log.debug( "no resourceIds specified: " +
-                           org.hyperic.util.StringUtil.arrayToString(rids) );
+            if (log.isDebugEnabled()) {
+                log.debug("no resourceIds specified: " +
+                          StringUtil.arrayToString(rids));
             }
             request.setAttribute("checkedResources", checkedResources);
-            request.setAttribute( "checkedResourcesSize", new Integer(checkedResources.length) );
-            return new AppdefResourceValue[][] {resources, checkedResources};
+            request.setAttribute("checkedResourcesSize",
+                                 new Integer(checkedResources.length));
+            return new AppdefResourceValue[][] { resources, checkedResources };
         } else {
             Integer[] rids = chartForm.getResourceIds();
-            AppdefResourceValue[] checkedResources = new AppdefResourceValue[rids.length];
+            AppdefResourceValue[] checkedResources =
+                new AppdefResourceValue[rids.length];
             for (int i=0; i<rids.length; ++i) {
                 for (int j=0; j<resources.length; ++j) {
                     if ( resources[j].getId().equals(rids[i]) ) {
@@ -327,7 +330,8 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                            org.hyperic.util.StringUtil.arrayToString(rids) );
             }
             request.setAttribute("checkedResources", checkedResources);
-            request.setAttribute( "checkedResourcesSize", new Integer(checkedResources.length) );
+            request.setAttribute("checkedResourcesSize",
+                                 new Integer(checkedResources.length) );
             return new AppdefResourceValue[][] {resources, checkedResources};
         }
     }
@@ -383,8 +387,9 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                         // We need to make sure that the event IDs get set
                         // for the legend.
                         int k = 0;
-                        for (Iterator it=controlActions.iterator(); it.hasNext();) {
-                            EventLog event = (EventLog)it.next();
+                        for (Iterator it = controlActions.iterator();
+                             it.hasNext(); ) {
+                            EventLog event = (EventLog) it.next();
                             event.setEventID(++k);
                         }
                         eventPointsList.add(controlActions);
@@ -425,18 +430,20 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         List mtids = (List)Arrays.asList( chartForm.getOrigM() );
         ArrayList metricSummaries = new ArrayList();
         for (int i=0; i<resources.length; ++i) {
-            Map metrics = mb.findMetrics( sessionId, resources[i].getEntityId(),
-                                          mtids, chartForm.getStartDate().getTime(),
-                                          chartForm.getEndDate().getTime() );
-            MonitorUtils.formatMetrics( metrics, request.getLocale(), getResources(request) );
-            for (Iterator it=metrics.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry)it.next();
-                metricSummaries.addAll( (Collection)entry.getValue() );
+            Map metrics =
+                mb.findMetrics(sessionId, resources[i].getEntityId(),
+                               mtids, chartForm.getStartDate().getTime(),
+                               chartForm.getEndDate().getTime() );
+            MonitorUtils.formatMetrics( metrics, request.getLocale(),
+                                        getResources(request) );
+            for (Iterator it = metrics.values().iterator(); it.hasNext();) {
+                metricSummaries.addAll( (Collection) it.next() );
             }
         }
         Collections.sort(metricSummaries, comp);
         request.setAttribute("metricSummaries", metricSummaries);
-        request.setAttribute( "metricSummariesSize", new Integer( metricSummaries.size() ) );
+        request.setAttribute( "metricSummariesSize",
+                              new Integer( metricSummaries.size() ) );
 
         // pick out the charted metrics from the metric summaries
         ChartedMetricBean[] chartedMetrics =
@@ -517,13 +524,17 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
     private int _getMaxResources(HttpServletRequest request,
                                  int allResourcesLength) {
         int maxResources = 10;
-        String maxResourcesS = RequestUtils.message(request, "resource.common.monitor.visibility.chart.MaxResources");
+        String maxResourcesS =
+            RequestUtils.message(request,
+                                 "resource.common.monitor.visibility.chart" +
+                                 ".MaxResources");
         if ( null != maxResourcesS && !maxResourcesS.startsWith("???") ) {
             try {
                 maxResources = Integer.parseInt(maxResourcesS);
             } catch (NumberFormatException e) {
                 // just use 10
-                log.trace("invalid resource.common.monitor.visibility.chart.MaxResources resource: " + maxResourcesS);
+                log.trace("invalid resource.common.monitor.visibility.chart" +
+                          ".MaxResources resource: " + maxResourcesS);
             }
         }
         if (maxResources > allResourcesLength) {

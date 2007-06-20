@@ -27,19 +27,12 @@ package org.hyperic.image.chart;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
-import org.hyperic.util.data.IDataPoint;
+
 import org.hyperic.util.data.IEventPoint;
-import org.hyperic.util.units.UnitsConstants;
-import org.hyperic.util.units.UnitsFormat;
-import org.hyperic.util.units.UnitNumber;
 
 /**
  * LineChart draws a horizontal chart with a line that represents data point
@@ -50,8 +43,30 @@ import org.hyperic.util.units.UnitNumber;
  */
 public class LineChart extends VerticalChart
 {
-    private Color[] m_clrDataLines = VerticalChart.DEFAULT_COLORS;
-    private boolean m_showLineEvents; 
+    private boolean m_showLineEvents;
+    
+    private static final Color[] DEFAULT_COLORS = {
+        DEFAULT_COLOR,
+        new Color(0xFF, 0x00, 0x00), 
+        new Color(0xCC, 0x00, 0x99),
+        new Color(0x9B, 0xBA, 0x70),
+        new Color(0xFF, 0xFF, 0x33),
+        new Color(0x00, 0xFF, 0x00),
+        new Color(0x00, 0xFF, 0xFF),
+        new Color(0xA6, 0x78, 0x38),
+        new Color(0x99, 0x66, 0x99),
+        new Color(0x74, 0x90, 0xAA),
+        new Color(0xE7, 0x5A, 0x00),
+        new Color(0xB3, 0xA6, 0x36),
+        new Color(0x11, 0xA6, 0x60),
+        new Color(0x08, 0x99, 0x94),
+        new Color(0x12, 0xB3, 0xB3),
+        new Color(0x13, 0x7D, 0xBF),
+        new Color(0x4A, 0x36, 0xB3),
+        new Color(0x80, 0x00, 0xE8),
+    };
+
+
     
     /**
      * Specified whether the data to be charted is cumulative data.
@@ -75,17 +90,17 @@ public class LineChart extends VerticalChart
     }
     
     protected Rectangle draw(ChartGraphics g) {
-        m_showLineEvents = this.showEvents;
+        m_showLineEvents = showEvents;
         super.showEvents = false;
         Rectangle result = super.draw(g);
-        this.showEvents  = m_showLineEvents;
+        showEvents  = m_showLineEvents;
         
         return result;
     }
     
     protected void paint(ChartGraphics g, Rectangle rect) {
         int yLabelEvtDot = rect.y + rect.height +
-                           ChartGraphics.HALF_EVENT_HEIGHT + this.lineWidth;
+                           ChartGraphics.HALF_EVENT_HEIGHT + lineWidth;
 
         // Backup the current stroke and set the line width to 2 pixels
         Stroke origStroke = g.graphics.getStroke();
@@ -93,8 +108,8 @@ public class LineChart extends VerticalChart
         g.graphics.setStroke(stroke);
 
         // Iterator through each data set
-        Iterator iterLines = this.getDataSetIterator();
-        for(int line = 0;iterLines.hasNext() == true;line++) {
+        Iterator iterLines = getDataSetIterator();
+        for (int line = 0; iterLines.hasNext(); line++) {
             // Draw the Line
             DataPointCollection collDataPoints = 
                 (DataPointCollection)iterLines.next();
@@ -105,40 +120,38 @@ public class LineChart extends VerticalChart
             int[]   aiX        = new int[cDataPts];
             int[]   aiY        = new int[cDataPts];
             int[]   yDataPt    = new int[cDataPts];
-            long[]  timestamp  = new long[cDataPts];
-            
             for(int index = 0;index < cDataPts;index ++) {
-                ptData = this.getDataPoint(rect, index, collDataPoints);
-                
-                if(ptData != null) {
+                ptData = getDataPoint(rect, index, collDataPoints);
+
+                if (ptData != null) {
                     aiX[cActualPts] = ptData.x;
                     aiY[cActualPts] = ptData.y;
-                    yDataPt[index]    = ptData.y;
-                    cActualPts ++;
+                    yDataPt[index] = ptData.y;
+                    cActualPts++;
                 } else {
                     yDataPt[index] = yLabelEvtDot;
                 }
             }
 
-            g.graphics.setColor(this.m_clrDataLines[line]);
+            g.graphics.setColor(getDataLineColor(line));
             g.graphics.drawPolyline(aiX, aiY, cActualPts);
             
             // Draw Events
-            if(m_showLineEvents == true) {
-                EventPointCollection collEvts = this.getEventPoints(line);
-                if(collEvts.size() > 0) {
-                    int[] evtDataPts = this.getDataPointEventIndexes(line);
-                    int[] x    = this.getXPoints(g, rect);
+            if(m_showLineEvents) {
+                EventPointCollection collEvts = getEventPoints(line);
+                if (collEvts.size() > 0) {
+                    int[] evtDataPts = getDataPointEventIndexes(line);
+                    int[] x = getXPoints(g, rect);
 
-                    g.graphics.setColor(this.m_clrDataLines[line]);
+                    g.graphics.setColor(getDataLineColor(line));
 
-                    for(int i = 0;i < evtDataPts.length;i ++) {
-                        if(evtDataPts[i] == -1)
+                    for (int i = 0; i < evtDataPts.length; i++) {
+                        if (evtDataPts[i] == -1)
                             continue;
-                    
-                        IEventPoint evt   = (IEventPoint)collEvts.get(i);
-                        int         index = evtDataPts[i];
-                                    
+
+                        IEventPoint evt = (IEventPoint) collEvts.get(i);
+                        int index = evtDataPts[i];
+
                         g.drawEvent(evt.getEventID(), x[index], yDataPt[index]);
                     }
                 }
@@ -150,10 +163,6 @@ public class LineChart extends VerticalChart
     }
     
     public Color getDataLineColor(int index) {
-        return this.m_clrDataLines[index];
-    }
-    
-    public void setDataLineColor(int index, Color color) {
-        this.m_clrDataLines[index] = color;
+        return DEFAULT_COLORS[index];
     }
 }

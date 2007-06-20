@@ -83,24 +83,4 @@ public class ColumnLineChart extends ColumnChart
     public Color getDataLineColor() {
         return this.m_lineChart.getDataLineColor(0);
     }
-
-    /**
-     * Sets the color of the chart's datum line. This is the line that
-     * represents the chart's data points.
-     *
-     * @param value
-     *      A java.awt.Color object that contains the datum line color.
-     *
-     * @exception IllegalArgumentException
-     *      If the value parameter is null.
-     *
-     * @see java.awt.Color
-     */
-    public Color setDataLineColor(Color value) {
-        if(value == null)
-            throw new IllegalArgumentException();
-            
-        this.m_lineChart.setDataLineColor(0, value);
-        return value;
-    }
 }
