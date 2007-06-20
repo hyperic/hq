@@ -24,15 +24,15 @@ class AlertController
         rowId: {it.id},
         columns: [
             [field:AlertSortField.DATE, 
-             jsonFormat:{df.format(it.timestamp)}],
+             label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION,
-             jsonFormat:{it.alertDefinition.name}],
+             label:{it.alertDefinition.name}],
             [field:AlertSortField.RESOURCE,
-             jsonFormat:{it.alertDefinition.resource.name}],
+             label:{it.alertDefinition.resource.name}],
             [field:AlertSortField.FIXED,
-             jsonFormat:{it.fixed ? "Yes" : "No"}],
+             label:{it.fixed ? "Yes" : "No"}],
             [field:AlertSortField.SEVERITY,
-             jsonFormat:{EventConstants.getPriority(it.alertDefinition.priority)}]
+             label:{EventConstants.getPriority(it.alertDefinition.priority)}]
         ]
     ]
     
@@ -74,13 +74,16 @@ class AlertController
             def val = [:]
             val.id = schema.rowId(d)
             for (c in schema.columns) {
-                val[c.field.description] = c.jsonFormat(d)
+                val[c.field.description] = c.label(d)
             }
 
             jsonData.put(val)
         }
         
-		JSONObject result = [data : jsonData] as JSONObject
+		JSONObject result = [data : jsonData, 
+		                     sortField : sortColumn.description,
+		                     sortOrder : sortOrder] as JSONObject
+		log.info "Result: ${result}"                     
 		render(inline:"/* ${result} */", contentType:'text/json-comment-filtered')
     }
 }
