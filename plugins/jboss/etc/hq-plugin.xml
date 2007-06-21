@@ -788,4 +788,10 @@
       <actions include="stop,start"/>
     </service>
   </server>
+
+  <server name="JBoss"
+          version="4.2"
+          include="4.0">
+
+  </server>
 </plugin>
