@@ -748,6 +748,7 @@
     <actions include="start,stop,restart"/>
 
     <property name="mssql.version" value="8"/>
+    <property name="mssql.version.file" value="sqlctr80.dll"/>
 
     <metrics>
       <include name="mssql-avail"/>
@@ -791,6 +792,7 @@
           include="2000">
 
     <property name="mssql.version" value="9"/>
+    <property name="mssql.version.file" value="sqlsvc90.dll"/>
 
   </server>
 </plugin>

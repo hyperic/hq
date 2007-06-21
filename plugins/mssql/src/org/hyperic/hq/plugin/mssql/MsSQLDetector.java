@@ -45,6 +45,8 @@ import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class MsSQLDetector
@@ -94,7 +96,76 @@ public class MsSQLDetector
             log.debug(MSSQL_DEFAULT + " regkey does not exist");
         }
 
+        found = findWindowsServices();
+        if (found != null){
+            servers.addAll(found);
+        }
+
         return servers;
+    }
+
+    //XXX introduced for detection of 64-bit SQL server by 32-bit process,
+    //but could do this by default.
+    private List findWindowsServices() {
+        String versionFile =
+            getTypeProperty("mssql.version.file");
+
+        List configs;
+        try {
+            configs =
+                Service.getServiceConfigs("sqlservr.exe");
+        } catch (Win32Exception e) {
+            return null;
+        }
+        if (configs.size() == 0) {
+            return null;
+        }
+
+        List servers = new ArrayList();
+        for (int i=0; i<configs.size(); i++) {
+            ServiceConfig serviceConfig =
+                (ServiceConfig)configs.get(i);
+            String name = serviceConfig.getName();
+            File dir = new File(serviceConfig.getExe()).getParentFile();
+            File dll = new File(dir, versionFile);
+            if (!dll.exists()) {
+                continue;
+            }
+            dir = dir.getParentFile(); //strip "Binn"
+
+            ServerResource server =
+                createServerResource(dir.getAbsolutePath(),
+                                     name, false);
+            servers.add(server);
+        }
+
+        return servers;
+    }
+
+    private ServerResource createServerResource(String installpath,
+                                                String name,
+                                                boolean isDefault) {
+        ServerResource server =
+            createServerResource(installpath);
+
+        if (!isDefault) {
+            String instance;
+            if (name.startsWith("MSSQL$")) {
+                instance = name.substring(6);
+            }
+            else {
+                instance = name;
+            }
+            server.setName(server.getName() + " " + instance);
+        }
+
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
+        server.setProductConfig(config);
+        server.setMeasurementConfig();
+        server.setControlConfig();
+
+        return server;
     }
 
     private ServerResource detectServer(RegistryKey key,
@@ -160,24 +231,8 @@ public class MsSQLDetector
         }
 
         ServerResource server =
-            createServerResource(dir.getAbsolutePath());
-
-        if (!isDefault) {
-            String instance;
-            if (name.startsWith("MSSQL$")) {
-                instance = name.substring(6);
-            }
-            else {
-                instance = name;
-            }
-            server.setName(server.getName() + " " + instance);
-        }
-
-        ConfigResponse config = new ConfigResponse();
-        config.setValue(Win32ControlPlugin.PROP_SERVICENAME, name);
-        server.setProductConfig(config);
-        server.setMeasurementConfig();
-        server.setControlConfig();
+            createServerResource(dir.getAbsolutePath(),
+                                 name, isDefault);
 
         ConfigResponse cprops = new ConfigResponse();
         cprops.setValue("version", productVersion);
