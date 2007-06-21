@@ -174,7 +174,7 @@ class DojoUtil {
 	        }
 	        
 	        res << "<th field='${field}' dataType='String' align='left'"
-	        res << " noSort='true' onclick='${idVar}_setColClass(this);'>"
+	        res << " onclick='${idVar}_setColClass(this);'>"
 	        res << "${label}</th>"
 	    }
 	    res << """
