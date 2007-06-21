@@ -67,13 +67,11 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.action.WorkflowPrepareAction#workflow(org.apache.struts.tiles.ComponentContext, org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public ActionForward workflow(
-                ComponentContext context,
-                ActionMapping mapping,
-                ActionForm form,
-                HttpServletRequest request,
-                HttpServletResponse response)
-                throws Exception {
+    public ActionForward workflow(ComponentContext context,
+                                  ActionMapping mapping, ActionForm form,
+                                  HttpServletRequest request,
+                                  HttpServletResponse response)
+        throws Exception {
         CompareMetricsForm cform = (CompareMetricsForm) form;
         int sessionId = RequestUtils.getSessionId(request).intValue();
         WebUser user = SessionUtils.getWebUser(request.getSession());
@@ -86,7 +84,7 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         Integer[] raw = cform.getR();
         ArrayList cooked = new ArrayList();
         HashMap idx = new HashMap();
-        for (int i=0; i<raw.length; i++) {
+        for (int i = 0; i < raw.length; i++) {
             Integer val = raw[i];
             if (idx.get(val) == null) {
                 cooked.add(val);
@@ -97,7 +95,8 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
 
         AppdefEntityID[] entIds = new AppdefEntityID[rids.length];        
         for (int i = 0; i < rids.length; i++) {
-            entIds[i] = new AppdefEntityID(cform.getAppdefType().intValue(), rids[i].intValue());
+            entIds[i] = new AppdefEntityID(cform.getAppdefType().intValue(),
+                                           rids[i].intValue());
             if (log.isTraceEnabled())
                 log.trace("will compare metrics for " + entIds[i]);
         }
@@ -105,10 +104,12 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
         try {
             long start = 0;
             long finish = 0;
-            MeasurementBoss boss = ContextUtils.getMeasurementBoss(getServlet().getServletContext());
+            MeasurementBoss boss =
+                ContextUtils.getMeasurementBoss(getServlet().getServletContext());
             if (log.isDebugEnabled())
                 start = System.currentTimeMillis();
-            Map metrics = boss.findResourceMetricSummary(sessionId, entIds, begin, end);
+            Map metrics = boss.findResourceMetricSummary(sessionId, entIds,
+                                                         begin, end);
             if (log.isDebugEnabled()) {
                 finish = System.currentTimeMillis();
                 long elapsed = finish - start;
@@ -170,9 +171,12 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
     private static Map mapCategorizedMetrics(Map metrics) {
         Map returnMap = new LinkedHashMap();
         for (int i = 0; i < MeasurementConstants.VALID_CATEGORIES.length; i++) {
-            Map categoryMetrics = getMetricsByCategory(metrics, MeasurementConstants.VALID_CATEGORIES[i]);
+            Map categoryMetrics =
+                getMetricsByCategory(metrics,
+                                     MeasurementConstants.VALID_CATEGORIES[i]);
             if (categoryMetrics.size() > 0)
-                returnMap.put(MeasurementConstants.VALID_CATEGORIES[i], categoryMetrics);            
+                returnMap.put(MeasurementConstants.VALID_CATEGORIES[i],
+                              categoryMetrics);            
         }
         return returnMap;
     }
@@ -180,41 +184,48 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
     // returns a "sub map" with entries that match the category
     private static Map getMetricsByCategory(Map metrics, String category) {
         Map returnMap = new HashMap();
-        for (Iterator iter = metrics.entrySet().iterator();    iter.hasNext();) {
+        for (Iterator iter = metrics.entrySet().iterator(); iter.hasNext();) {
             Map.Entry entry = (Map.Entry) iter.next();
-            MeasurementTemplateValue mt = (MeasurementTemplateValue) entry.getKey();  
+            MeasurementTemplateValue mt =
+                (MeasurementTemplateValue) entry.getKey();
             if (mt.getCategory().getName().equals(category)) {
-                List metricList = (List)entry.getValue();
-                returnMap.put(mt,metricList);
+                List metricList = (List) entry.getValue();
+                returnMap.put(mt, metricList);
             }
         } 
         return sortMetricMap(returnMap);               
     }
 
-    private static void formatComparisonMetrics(Map metrics, Locale userLocale) {
-        for (Iterator categoryIter = metrics.entrySet().iterator(); categoryIter.hasNext();) {
+    private static void formatComparisonMetrics(Map metrics, Locale userLocale)
+    {
+        for (Iterator categoryIter = metrics.entrySet().iterator();
+             categoryIter.hasNext(); ) {
             Map.Entry entry = (Map.Entry) categoryIter.next();
-            MeasurementTemplateValue mt = (MeasurementTemplateValue) entry.getKey();  
-            
-            List metricList = (List)entry.getValue();
+            MeasurementTemplateValue mt =
+                (MeasurementTemplateValue) entry.getKey();  
+            List metricList = (List) entry.getValue();
             //List metricList = (List)metrics.get(mt);
             if (metricList == null) {
-                // apparently, there may be meaurement templates populated but none of
-                // the included resources are config'd for it, so instead of being a zero
-                // length list, it's null
+                // apparently, there may be meaurement templates populated but
+                // none of the included resources are config'd for it, so 
+                // instead of being a zero length list, it's null
                 if (log.isTraceEnabled())
-                    log.trace(mt.getAlias() + " had no resources configured for it in the included map of metrics");   
+                    log.trace(mt.getAlias() + " had no resources configured " +
+                              "for it in the included map of metrics");   
                 continue;
             }
             for (Iterator iter = metricList.iterator(); iter.hasNext();) {
-                ResourceMetricDisplaySummary mds = (ResourceMetricDisplaySummary) iter.next();
+                ResourceMetricDisplaySummary mds =
+                    (ResourceMetricDisplaySummary) iter.next();
                 // the formatting subsystem doesn't interpret
                 // units set to empty strings as "no units" so
                 // we'll explicity set it so
                 if (mds.getUnits().length() < 1) {
                     mds.setUnits(MeasurementConstants.UNITS_NONE);
                 }
-                FormattedNumber[] fs = UnitsConvert.convertSame(mds.getMetricValueDoubles(), mds.getUnits(), userLocale);
+                FormattedNumber[] fs =
+                    UnitsConvert.convertSame(mds.getMetricValueDoubles(),
+                                             mds.getUnits(), userLocale);
                 String[] keys = mds.getMetricKeys();
                 for (int i = 0; i < keys.length; i++) {         
                     mds.getMetric(keys[i]).setValueFmt(fs[i]);
@@ -229,11 +240,14 @@ public class CompareMetricsFormPrepareAction extends WorkflowPrepareAction {
      */
     private static Map sortMetricMap(Map metrics) {
         Map returnMap = new TreeMap();
-        for (Iterator mtvIter = metrics.entrySet().iterator(); mtvIter.hasNext();) {
+        for (Iterator mtvIter = metrics.entrySet().iterator();
+             mtvIter.hasNext();) {
             Map.Entry entry = (Map.Entry) mtvIter.next();
-            MeasurementTemplateValue mt = (MeasurementTemplateValue) entry.getKey();
-            ComparableMeasurementTemplateValue cmtv = new ComparableMeasurementTemplateValue(mt);
-            List metricList = (List)entry.getValue();
+            MeasurementTemplateValue mt =
+                (MeasurementTemplateValue) entry.getKey();
+            ComparableMeasurementTemplateValue cmtv =
+                new ComparableMeasurementTemplateValue(mt);
+            List metricList = (List) entry.getValue();
             returnMap.put(cmtv, metricList);
         }
         return returnMap;
