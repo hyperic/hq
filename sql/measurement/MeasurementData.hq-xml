@@ -246,4 +246,68 @@
     </property>
   </class>
 
+  <class name="MeasurementData" table="METRIC_DATA_7D_0S" entity-name="MetricData_7D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_7D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_7D_1S" entity-name="MetricData_7D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_7D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_8D_0S" entity-name="MetricData_8D_0S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_8D_0S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
+  <class name="MeasurementData" table="METRIC_DATA_8D_1S" entity-name="MetricData_8D_1S">
+    <!-- create an combined index -->
+    <composite-id name="id" class="MeasurementDataId">
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_DATA_8D_1S_MID_IDX" />
+      </key-property>
+      <key-property name="timestamp" type="long">
+        <column name="TIMESTAMP" not-null="true" />
+      </key-property>
+    </composite-id>
+
+    <property name="value" type="big_decimal">
+      <column name="VALUE" precision="24" scale="5" />
+    </property>
+  </class>
+
 </hibernate-mapping>

@@ -114,6 +114,10 @@ public class DatabaseInitializer {
                 "SELECT * FROM hq_metric_data_5d_1s UNION " +
                 "SELECT * FROM hq_metric_data_6d_0s UNION " +
                 "SELECT * FROM hq_metric_data_6d_1s UNION " +
+                "SELECT * FROM hq_metric_data_7d_0s UNION " +
+                "SELECT * FROM hq_metric_data_7d_1s UNION " +
+                "SELECT * FROM hq_metric_data_8d_0s UNION " +
+                "SELECT * FROM hq_metric_data_8d_1s UNION " +
                 "SELECT * FROM hq_metric_data_compat";
 
             Statement stmt = null;
