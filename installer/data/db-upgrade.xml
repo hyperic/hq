@@ -5548,6 +5548,42 @@ has already been defined.
             ) ENGINE=InnoDB
           </statement>
 
+          <statement targetDB="mysql">
+            create table HQ_METRIC_DATA_7D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table HQ_METRIC_DATA_7D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table HQ_METRIC_DATA_8D_0S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            ) ENGINE=InnoDB
+          </statement>
+
+          <statement targetDB="mysql">
+            create table HQ_METRIC_DATA_8D_1S (
+                MEASUREMENT_ID integer not null,
+                TIMESTAMP bigint not null,
+                VALUE numeric(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            ) ENGINE=InnoDB
+          </statement>
+
           -->
           <statement targetDB="oracle">
             create table HQ_METRIC_DATA_0D_0S (
@@ -5668,6 +5704,42 @@ has already been defined.
 
           <statement targetDB="oracle">
             create table HQ_METRIC_DATA_6D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table HQ_METRIC_DATA_7D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table HQ_METRIC_DATA_7D_1S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table HQ_METRIC_DATA_8D_0S (
+                MEASUREMENT_ID number(10,0) not null,
+                TIMESTAMP number(19,0) not null,
+                VALUE number(24,5),
+                primary key (TIMESTAMP, MEASUREMENT_ID)
+            )
+          </statement>
+
+          <statement targetDB="oracle">
+            create table HQ_METRIC_DATA_8D_1S (
                 MEASUREMENT_ID number(10,0) not null,
                 TIMESTAMP number(19,0) not null,
                 VALUE number(24,5),
