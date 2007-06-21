@@ -119,53 +119,61 @@ public class AgentConfig {
         }
     }
 
+    private static boolean loadProps(Properties props, File file) {
+        FileInputStream fin = null;
+
+        if (!file.exists()) {
+            return false;
+        }
+        if (!file.canRead()) {
+            return false;
+        }
+
+        try {
+            fin = new FileInputStream(file);
+            props.load(fin);
+            return true;
+        } catch (IOException e) {
+            return false;
+        } finally {
+            if (fin != null) {
+                try { fin.close(); } catch (IOException e) {}
+            }
+        }
+    }
+
     public static AgentConfig newInstance(String propsFile)
         throws IOException, AgentConfigException
     {
-        FileInputStream fin = null;
-        Properties useProps;
+        Properties useProps = new Properties();
+        File file = new File(propsFile);
 
-        try {
-            fin      = new FileInputStream(propsFile);
-            useProps = new Properties();
-            useProps.putAll(AgentConfig.getDefaultProperties());
-            useProps.load(fin);
-        } finally {
-            try {if(fin != null) fin.close(); } catch(Exception exc){}
+        useProps.putAll(AgentConfig.getDefaultProperties());
+
+        if (!loadProps(useProps, file)) {
+            throw new AgentConfigException("Failed to load: " + propsFile);
         }
 
-        fin = null;
-        try {
-            File userFile;
+        final String home = System.getProperty("user.home");
+        String[] userFiles = {
+            //XXX Backwards compat, remove for 3.1 or 4.0?
+            home + File.separator + ".cam" + File.separator + DEFAULT_PROPFILE,
+            //User overrides
+            home + File.separator + ".hq" + File.separator + DEFAULT_PROPFILE,
+            //XXX considering yet another for windows where only cygwin can 'mkdir .hq'?
+            //"../" + File.separator + "hq-" + DEFAULT_PROPFILE,
+            //Check if the deployer has generated setup properties
+            "deployer.properties"
+        };
 
-            userFile = new File(new File(System.getProperty("user.home"),
-                                         ".hq"), DEFAULT_PROPFILE);
-            if (!userFile.exists()) {
-                // Backwards compat
-                userFile = new File(new File(System.getProperty("user.home"),
-                                             ".cam"), DEFAULT_PROPFILE);
+        for (int i=0; i<userFiles.length; i++) {
+            file = new File(userFiles[i]);
+            if (loadProps(useProps, file)) {
+                //XXX logging not configured yet
+                //System.out.println("Loaded properties from: " + file);
             }
-
-            fin = new FileInputStream(userFile);
-            useProps.load(fin);
-        } catch(Exception exc){
-            // Ignore failures here -- it's ok
-        } finally {
-            try {if(fin != null) fin.close(); } catch(Exception exc){}
         }
         
-        // Check if the deployer has generated setup properties
-        File deployerProps = new File("deployer.properties");
-        if (deployerProps.exists()) {
-            try {
-                fin = null;
-                fin = new FileInputStream(deployerProps);
-                useProps.load(fin);
-            } finally {
-                try {if(fin != null) fin.close(); } catch(Exception exc){}
-            }
-        }
-
         PropertyUtil.expandVariables(useProps);
         
         // More backwards compatibility.  Strip all net.covalent prefixes
