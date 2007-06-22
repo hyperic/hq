@@ -54,7 +54,8 @@ public class DataPurgeJob implements Job {
     private static final Object RUNNING_LOCK = new Object();
     private static boolean running = false;
 
-    private static long HOUR = 60 * 60 * 1000;
+    private static long HOUR = MeasurementConstants.HOUR;
+    private static long MINUTE = MeasurementConstants.MINUTE;
 
     /**
      * Public interface for quartz 
@@ -107,8 +108,21 @@ public class DataPurgeJob implements Job {
             }
         }
 
-        // Announce
         long time_start = System.currentTimeMillis();
+        
+        // First purge backfilled data
+        try {
+            dataCompress.purgeBackfilled();
+        } catch (SQLException e) {
+            _log.error("Unable to clear out duplicated backfilled data");
+        }
+
+        // We'll only do the rest of the maintenance if it's 10 past the hour
+        if (TimingVoodoo.roundDownTime(time_start, MINUTE) == 10) {
+            return;
+        }
+
+        // Announce
         _log.info("Data compression starting at " +
                   TimeUtil.toString(time_start));
         
