@@ -1080,6 +1080,11 @@ border-left:1px solid #D5D8DE;
  white-space:nowrap;
 }
 
+#navigationTbl  .mainNavText {
+ font-family: arial,sans-serif;
+ font-size: 11px;
+}
+
 .mainNavText a, .mainNavText td a{
  color: #062b7a;
  text-decoration:none;

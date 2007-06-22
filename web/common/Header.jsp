@@ -56,7 +56,7 @@
 <td rowspan="2">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
-            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
+            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:px solid #aeaeae;background-color:#aeaeae;">
                 <html:link action="/Dashboard">
                     <c:choose>
                         <c:when test="${applicationScope.largeLogo}">
@@ -66,16 +66,13 @@
                             <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
                         </c:when>
                         <c:otherwise>
-                            <html:img page="/images/logo_large2.gif" width="223" height="54" alt="" border="0"/>
+                            <html:img page="/images/logo_large3.gif" width="223" height="54" alt="" border="0"/>
                         </c:otherwise>
                     </c:choose>
                 </html:link>
             </td>
-            <td width="100%" class="logo">
-                <html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>
-            </td>
-            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
-                <html:img page="/images/logo_Image_large2.jpg" width="225" height="54" alt="" border="0"/>
+            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:1px solid #60a5ea;">
+                <html:img page="/images/logo_Image_large5.gif" width="175" height="54" alt="" border="0"/>
             </td>
         </tr>
     </table>
@@ -119,35 +116,43 @@
        </td>
     </tr>
     <tr>
-            <td class="MastheadBgBottom" style="padding-left:10px;padding-top:2px" align="left" height="22" colspan="5">
-                <table border="0" cellspacing="0" cellpadding="0">
+            <td class="MastheadBgBottom" style="padding-top:0px" align="left" colspan="5">
+                <table border="0" cellspacing="0" cellpadding="0" id="navigationTbl" height="100%">
                     <tr>
-                        <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
+                        <td style="padding-left:10px;" class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link page="/Dashboard.do"><span
                                     style="padding-right:10px;"><fmt:message key="dash.home.PageTitle"/></span></html:link>
                         </td>
-                        <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
+                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link page="/ResourceHub.do"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="resource.hub.ResourceHubPageTitle"/></span></html:link>
                         </td>
+                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+
                     <c:if test="${not empty mastheadAttachments}">
                       <c:forEach var="attachment" items="${mastheadAttachments}">
-                        <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
+                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><span style="padding-right:10px;padding-left:10px;"><c:out value="${attachment.view.description}"/></span></html:link>
                         </td>
+                          <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+
                       </c:forEach>
                     </c:if>
-                        <td style="border-right:2px solid #ffffff" class="mainNavText" nowrap>
+                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link action="/Admin"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="admin.admin.AdministrationTitle"/></span></html:link>
                         </td>
-                        <td style="border-right:2px solid #ffffff" class="mainNavText">
+                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+
+                        <td class="mainNavText" onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                         <a href="." onclick="toggleMenu('recent');return false;"><span
                                 id="recentImg" style="padding-right:10px;padding-left:10px;"><fmt:message key=".dashContent.recentResources"/></span></a>
                             <div style="clear: all;"></div>
                             <tiles:insert definition=".toolbar.recentResources"/>
                         </td>
-                        <td class="mainNavText" nowrap>
+                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+                         <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link href=""
-                                       onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');return false;">
+                                       onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();">
                                 <span style="padding-right:10px;padding-left:10px;"><fmt:message key="common.label.Help"/></span></html:link>
                         </td>
                     </tr>

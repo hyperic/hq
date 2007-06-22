@@ -32,7 +32,7 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <tiles:importAttribute name="resources"/>
 
-<div id="recent" class="DropDown" style="position:absolute; z-index: 300; margin-top: 2px;display:none;">
+<div id="recent" class="DropDown" style="background-color:#ffffff;position:absolute; z-index: 300; margin-top: 2px;display:none;">
   <ul style="list-style-type: none;">
 <c:choose>
 <c:when test="${not empty resources}">
