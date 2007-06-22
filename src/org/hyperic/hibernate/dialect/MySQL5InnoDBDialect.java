@@ -57,7 +57,7 @@ public class MySQL5InnoDBDialect extends
         |
     
      */
-    private final static String SEQUENCE_TABLE = "hq_sequence";
+    private final static String SEQUENCE_TABLE = "HQ_SEQUENCE";
     private final static String SEQUENCE_NAME  = "seq_name";
     private final static String SEQUENCE_VALUE = "seq_val";
     
