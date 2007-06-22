@@ -892,7 +892,18 @@
 
   <!-- Build the plugins -->
   <target name="pack-plugins" depends="init-taskdefs,pack-pdk-lib">
+    <mkdir dir="${pdk.plugins}"/>
     <mkdir dir="${plugin.dir}"/>
+
+    <copy todir="${pdk.plugins}">
+      <!-- copy shared xml pieces but leave *-plugin.xml
+           to plugincopy below for validation -->
+      <fileset dir="${hq.home}/plugins/xml/"
+               excludes="${plugins.exclude}">
+        <include name="*.xml"/>
+        <exclude name="*-plugin.xml"/>
+      </fileset>
+    </copy>
 
     <hqplugin name="apache"/>
 
@@ -970,13 +981,6 @@
       <fileset dir="${plugin.dir}"
                excludes="${plugins.exclude}">
         <include name="*-plugin.jar"/>
-      </fileset>
-      <!-- copy shared xml pieces but leave *-plugin.xml
-           to plugincopy below for validation -->
-      <fileset dir="${hq.home}/plugins/xml/"
-               excludes="${plugins.exclude}">
-        <include name="*.xml"/>
-        <exclude name="*-plugin.xml"/>
       </fileset>
     </copy>
 
