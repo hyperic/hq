@@ -70,7 +70,8 @@ public class DataCompressEJBImpl
 
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
-    private static final String OLD_MEAS_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
+    private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
+    private static final String METRIC_DATA_VIEW = "hq_metric_data";
 
     // For purging alerts
     private AlertManagerLocal alertManager = null;
@@ -186,22 +187,44 @@ public class DataCompressEJBImpl
         try
         {
             String sql = "SELECT max(timestamp) as maxtimestamp "+
-                         " FROM "+OLD_MEAS_TABLE+
+                         " FROM "+BF_TABLE+
                          " HAVING max(timestamp) != null";
             rs = stmt.executeQuery(sql);
             while (rs.next())
             {
                 if (truncateBefore > rs.getLong("maxtimestamp"))
-                    stmt.executeUpdate("truncate table "+OLD_MEAS_TABLE);
+                    stmt.executeUpdate("truncate table "+BF_TABLE);
             }
         }
         finally {
             if (rs != null) rs.close();
         }
     }
+    
+    /**
+     * Clean backfilled data
+     * @ejb:interface-method
+     */
+    public void purgeBackfilled() throws SQLException, NamingException {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = DBUtil
+                    .getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            stmt = conn.createStatement();
+            String sql = "delete from " + BF_TABLE + " using " +
+                         BF_TABLE + " b, " + METRIC_DATA_VIEW + " m " +
+                         "where m.measurement_id = b.measurement_id and " +
+                               "m.timestamp = b.timestamp";
+            stmt.execute(sql);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }
         
     /**
      * Entry point for data compression routines
+     * 
      * @ejb:interface-method
      */
     public void compressData() 
