@@ -25,10 +25,11 @@
 
 package org.hyperic.hq.plugin.vmware;
 
+import java.io.File;
 import java.util.Properties;
 
-import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerControlPlugin;
 
 import org.hyperic.util.config.ConfigResponse;
 
@@ -36,12 +37,18 @@ import org.hyperic.sigar.vmware.VM;
 import org.hyperic.sigar.vmware.VMwareException;
 
 public class VMwareControlPlugin
-    extends ControlPlugin {
+    extends ServerControlPlugin {
 
     private Properties props;
 
     private VMwareConnectParams params;
     private VM vm;
+    private boolean hasVIX;
+    private String vmx;
+
+    private boolean useVIX() {
+        return this.hasVIX;
+    }
 
     public void configure(ConfigResponse config)
         throws PluginException
@@ -50,6 +57,23 @@ public class VMwareControlPlugin
 
         super.configure(config);
         this.props = config.toProperties();
+        String vmrun;
+        if (isWin32()) {
+            vmrun = "C:/Program Files/VMware/VMware VIX/vmrun.exe";
+        }
+        else {
+            vmrun = "/usr/bin/vmrun";
+        }
+        this.hasVIX = new File(vmrun).exists();
+
+        this.vmx =
+            this.props.getProperty(VMwareDetector.PROP_VM_CONFIG);
+        if (this.vmx == null) {
+            throw new PluginException(VMwareDetector.PROP_VM_CONFIG + "=null");
+        }
+
+        setControlProgram(vmrun);
+        setTimeout(10 * 60 * 1000); //10 minutes
     }
 
     private void checkState(int state) throws VMwareException {
@@ -64,14 +88,10 @@ public class VMwareControlPlugin
         if (this.params != null) {
             return;
         }
-        String config =
-            this.props.getProperty(VMwareDetector.PROP_VM_CONFIG);
-        if (config == null) {
-            throw new VMwareException(VMwareDetector.PROP_VM_CONFIG + "=null");
-        }
+
         this.params = new VMwareConnectParams(this.props);
         this.vm = new VM();
-        this.vm.connect(params, config, true);
+        this.vm.connect(params, this.vmx, true);
     }
 
     private void disconnectVM() {
@@ -86,7 +106,21 @@ public class VMwareControlPlugin
         }
     }
 
+    private boolean vmRun(String cmd) {
+        if (useVIX()) {
+            String[] args = { cmd, this.vmx };      
+            doCommand(args);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public void start() throws VMwareException {
+        if (vmRun("start")) {
+            return;
+        }
         try {
             connectVM();
             checkState(VM.EXECUTION_STATE_OFF);
@@ -97,6 +131,9 @@ public class VMwareControlPlugin
     }
 
     public void stop() throws VMwareException {
+        if (vmRun("stop")) {
+            return;
+        }
         try {
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
@@ -107,6 +144,9 @@ public class VMwareControlPlugin
     }
 
     public void reset() throws VMwareException {
+        if (vmRun("reset")) {
+            return;
+        }
         try {
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
@@ -117,6 +157,9 @@ public class VMwareControlPlugin
     }
 
     public void suspend() throws VMwareException {
+        if (vmRun("suspend")) {
+            return;
+        }
         try {
             connectVM();
             checkState(VM.EXECUTION_STATE_ON);
@@ -127,6 +170,9 @@ public class VMwareControlPlugin
     }
 
     public void resume() throws VMwareException {
+        if (vmRun("start")) {
+            return;
+        }
         try {
             connectVM();
             checkState(VM.EXECUTION_STATE_SUSPENDED);
@@ -143,6 +189,9 @@ public class VMwareControlPlugin
         }
         if (args.length >= 2) {
             description = args[1];
+        }
+        if (vmRun("snapshot")) {
+            return;
         }
         try {
             connectVM();
@@ -175,6 +224,9 @@ public class VMwareControlPlugin
 
     //ESX
     public void revertToSnapshot() throws VMwareException {
+        if (vmRun("revertToSnapshot")) {
+            return;
+        }
         try {
             connectVM();
             this.vm.revertToSnapshot();
@@ -190,6 +242,9 @@ public class VMwareControlPlugin
 
     //ESX
     public void removeAllSnapshots() throws VMwareException {
+        if (vmRun("deleteSnapshot")) {
+            return;
+        }
         try {
             connectVM();
             this.vm.removeAllSnapshots();
