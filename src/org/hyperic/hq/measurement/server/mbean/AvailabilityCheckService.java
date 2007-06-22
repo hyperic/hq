@@ -126,6 +126,8 @@ public class AvailabilityCheckService
         HashMap availMap = new HashMap();
         ArrayList downPlatforms = new ArrayList();
         
+        // List of DataPoints to add at the end of all this mayhem
+        List addData = new ArrayList();
         // Let's be safe and reset the time to current
         current = System.currentTimeMillis();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
@@ -179,7 +181,7 @@ public class AvailabilityCheckService
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
                                        theMissing[i]);
-                getDataMan().addData(dm.getId(), mval, false);
+                addData.add(new DataPoint(dm.getId(), mval));
             }
             
             // Check SRN to see if somehow the agent lost the schedule
@@ -287,9 +289,13 @@ public class AvailabilityCheckService
                 // Insert the missing data point
                 mval = new MetricValue(MeasurementConstants.AVAIL_DOWN, 
                                        theMissing[i]);
-                getDataMan().addData(dm.getId(), mval, false);
+                addData.add(new DataPoint(dm.getId(), mval));
             }
         }
+        watch.markTimeBegin("addData");
+        getDataMan().addData(addData, false);
+        watch.markTimeEnd("addData");
+
         log.debug(watch);
     }
 
