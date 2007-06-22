@@ -166,7 +166,7 @@ class DojoUtil {
                         var fixedSibs = rowTDs[k].parentNode.childNodes;
 
 
-                        rowTDs[k].parentNode.style.backgroundColor = "#d21e1e";
+                        rowTDs[k].parentNode.style.backgroundColor = "red";
 
                     }
                 }
