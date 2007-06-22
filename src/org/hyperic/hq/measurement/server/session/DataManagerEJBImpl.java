@@ -85,12 +85,9 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    private static final int NUMBER_OF_TABLES =
-                                    MeasTabManagerUtil.NUMBER_OF_TABLES,
-                             NUMBER_OF_TABLES_PER_DAY =
-                                    MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
-
-    private static final BigDecimal MAX_DB_NUMBER = new BigDecimal("10000000000000000000000");
+    
+    private static final BigDecimal MAX_DB_NUMBER =
+        new BigDecimal("10000000000000000000000");
 
     private static final long MINUTE = 60 * 1000;
     
@@ -206,7 +203,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         checkTimeArguments(begin, end);
         
         if(interval > (end - begin) )
-            throw new IllegalArgumentException(this.ERR_INTERVAL);
+            throw new IllegalArgumentException(ERR_INTERVAL);
     }
     
     /**
@@ -257,7 +254,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
-                left = insertData(conn, left);
+                left = insertData(conn, left, overwrite);
                 _log.debug("Num left = " + left.size());
                 
                 if (left.isEmpty())
@@ -452,13 +449,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
      * be returned in the result list.
+     * @param overwrite TODO
      */
-    private List insertData(Connection conn, List data) 
+    private List insertData(Connection conn, List data, boolean overwrite) 
         throws SQLException
     {
         PreparedStatement stmt = null;
         List left;
-        String table = MeasTabManagerUtil.getMeasTabname(System.currentTimeMillis());
+        String table = overwrite ?
+            MeasTabManagerUtil.getMeasTabname(System.currentTimeMillis()) :
+            MeasTabManagerUtil.OLD_MEAS_TABLE;
         
         try {
             stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
@@ -475,7 +475,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 try {
                     bigDec = new BigDecimal(val.getValue());
                 } catch(NumberFormatException e) {  // infinite, or NaN
-                    _log.warn("Unable to insert infinite or NaN for metric id=" + metricId);
+                    _log.warn("Unable to insert infinite or NaN for metric id="
+                              + metricId);
                     continue;
                 }
                 stmt.setInt(1, metricId.intValue());
@@ -698,7 +699,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
             }
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't open connection", e);
@@ -957,7 +958,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return new PageList(history,
                                 pc.getPageEntityIndex() + history.size());
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't lookup historical data for " +
@@ -1038,7 +1039,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Now return a PageList
             return history;
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't lookup historical data for " + id, e);
@@ -1107,7 +1108,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     
             return missing;
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             throw new DataNotAvailableException(
                 "Can't lookup historical data for " + id, e);
@@ -1202,7 +1203,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if(rs.next())
                 return getMetricValue(rs);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
             // Allow the DataNotAvailableException to be thrown
         } finally {
@@ -1280,7 +1281,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new DataNotAvailableException(
                 "Can't get timed data for: " + StringUtil.arrayToString(ids),e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -1467,7 +1468,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new MeasurementDataSourceException
                 ("Can't get baseline data for: " + id, e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -1565,19 +1566,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 while (rs.next()) {
                     Integer tid = new Integer(rs.getInt("template_id"));
                     
-                    double[] data = new double[this.IND_LAST_TIME + 1];
+                    double[] data =
+                        new double[DataManagerEJBImpl.IND_LAST_TIME + 1];
 
                     // data[0] = min, data[1] = avg, data[2] = max,
                     // data[3] = last, data[4] = count of measurement ID's
-                    data[this.IND_CFG_COUNT] = rs.getInt(1);
+                    data[DataManagerEJBImpl.IND_CFG_COUNT] = rs.getInt(1);
 
                     // If there are no metrics, then forget it
-                    if (data[this.IND_CFG_COUNT] == 0)
+                    if (data[DataManagerEJBImpl.IND_CFG_COUNT] == 0)
                         continue;
 
-                    data[this.IND_MIN] = rs.getDouble(2);
-                    data[this.IND_AVG] = rs.getDouble(3);
-                    data[this.IND_MAX] = rs.getDouble(4);
+                    data[DataManagerEJBImpl.IND_MIN] = rs.getDouble(2);
+                    data[DataManagerEJBImpl.IND_AVG] = rs.getDouble(3);
+                    data[DataManagerEJBImpl.IND_MAX] = rs.getDouble(4);
     
                     // Put it into the result map
                     resMap.put(tid, data);
@@ -1646,7 +1648,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             _log.warn("getAggregateData()", e);
             throw new SystemException(e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeStatement(logCtx, astmt);
             DBUtil.closeStatement(logCtx, lstmt);
@@ -1670,7 +1672,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
-        double[] result = new double[this.IND_CFG_COUNT + 1];
+        double[] result = new double[DataManagerEJBImpl.IND_CFG_COUNT + 1];
         if (mids.length == 0)
             return result;
         
@@ -1723,10 +1725,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             rs = stmt.executeQuery();
             
             if (rs.next()) {
-                result[this.IND_MIN] = rs.getDouble(1);
-                result[this.IND_AVG] = rs.getDouble(2);
-                result[this.IND_MAX] = rs.getDouble(3);
-                result[this.IND_CFG_COUNT] = rs.getDouble(4);
+                result[DataManagerEJBImpl.IND_MIN] = rs.getDouble(1);
+                result[DataManagerEJBImpl.IND_AVG] = rs.getDouble(2);
+                result[DataManagerEJBImpl.IND_MAX] = rs.getDouble(3);
+                result[DataManagerEJBImpl.IND_CFG_COUNT] = rs.getDouble(4);
             }
             else {
                 return result;    
@@ -1736,7 +1738,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException("Can't get aggregate data for "+ 
                                       StringUtil.arrayToString(mids), e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             if (_log.isTraceEnabled()) {
                 _log.trace("double[] getAggregateData(): query elapsed time: " +
@@ -1824,9 +1826,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     double[] data = new double[IND_MAX + 1];
     
                     Integer mid = new Integer(rs.getInt(1));
-                    data[this.IND_MIN] = rs.getDouble(2);
-                    data[this.IND_AVG] = rs.getDouble(3);
-                    data[this.IND_MAX] = rs.getDouble(4);
+                    data[DataManagerEJBImpl.IND_MIN] = rs.getDouble(2);
+                    data[DataManagerEJBImpl.IND_AVG] = rs.getDouble(3);
+                    data[DataManagerEJBImpl.IND_MAX] = rs.getDouble(4);
     
                     // Put it into the result map
                     resMap.put(mid, data);
@@ -1844,7 +1846,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             _log.debug("getAggregateDataByMetric()", e);
             throw new DataNotAvailableException(e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
@@ -1921,10 +1923,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     double[] data = new double[IND_CFG_COUNT + 1];
     
                     Integer mid = new Integer(rs.getInt(1));
-                    data[this.IND_MIN] = rs.getDouble(2);
-                    data[this.IND_AVG] = rs.getDouble(3);
-                    data[this.IND_MAX] = rs.getDouble(4);
-                    data[this.IND_CFG_COUNT] = rs.getDouble(5);
+                    data[DataManagerEJBImpl.IND_MIN] = rs.getDouble(2);
+                    data[DataManagerEJBImpl.IND_AVG] = rs.getDouble(3);
+                    data[DataManagerEJBImpl.IND_MAX] = rs.getDouble(4);
+                    data[DataManagerEJBImpl.IND_CFG_COUNT] = rs.getDouble(5);
     
                     // Put it into the result map
                     resMap.put(mid, data);
@@ -1942,7 +1944,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             _log.debug("getAggregateDataByMetric()", e);
             throw new DataNotAvailableException(e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
@@ -2008,7 +2010,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 "Can't get time data for " + StringUtil.arrayToString(tids) +
                 " between " + begin + " " + end, e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -2060,7 +2062,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new DataNotAvailableException(
                 "Can't look up missing data", e);
         } catch (NamingException e) {
-            throw new SystemException(this.ERR_DB, e);
+            throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
