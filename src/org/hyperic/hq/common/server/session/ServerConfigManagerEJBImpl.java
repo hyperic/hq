@@ -81,7 +81,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     private final String[] DATA_TABLES 
         = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
-            "EAM_MEASUREMENT_DATA_1H", "EAM_MEASUREMENT_DATA",
+            "EAM_MEASUREMENT_DATA_1H", "HQ_METRIC_DATA_COMPAT",
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
             "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP" };
