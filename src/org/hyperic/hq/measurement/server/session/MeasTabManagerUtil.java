@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,14 +34,13 @@ import org.apache.commons.logging.LogFactory;
 public class MeasTabManagerUtil
 {
     private static Calendar myBaseCal = Calendar.getInstance();
-    private static final long MS_IN_A_DAY = 1000*60*60*24;
-    private static final String logCtx = 
-                                   MeasTabManagerUtil.class.getName();
+    private static final String logCtx = MeasTabManagerUtil.class.getName();
     private static final Log _log = LogFactory.getLog(logCtx);
     static final int NUMBER_OF_TABLES = 18,
                      NUMBER_OF_TABLES_PER_DAY = 2;
 
-    static final String OLD_MEAS_TABLE = "hq_metric_data_compat";
+    static final String MEAS_TABLE = "hq_metric_data";
+    static final String OLD_MEAS_TABLE = MEAS_TABLE + "_compat";
 
     static {
         myBaseCal.set(2006, 0, 1, 0, 0);
@@ -88,7 +86,7 @@ public class MeasTabManagerUtil
                 break;
             dayslice++;
         }
-        return "hq_metric_data_"+daytable+"d_"+dayslice+"s";
+        return MEAS_TABLE + "_" + daytable + "d_" + dayslice + "s";
     }
 
     static long getPrevMeasTabTime(long timems)
@@ -100,17 +98,19 @@ public class MeasTabManagerUtil
         // need to do this because of DST
         // add() and roll() don't work right
         String currTable = getMeasTabname(timems);
-        _log.debug("(getPrevMeasTabTime) before -> "+getDateStr(timems)+", "+currTable);
+        _log.debug("(getPrevMeasTabTime) before -> " + getDateStr(timems) +
+                   ", " + currTable);
         String newTable = null;
         do
         {
             cal.add(Calendar.HOUR_OF_DAY, -1);
             rtn = cal.getTimeInMillis();
-            _log.debug("subtracting 1 hour: "+getDateStr(rtn));
+            _log.debug("subtracting 1 hour: " + getDateStr(rtn));
             newTable = getMeasTabname(rtn);
         }
         while (currTable.equals(newTable));
-        _log.debug("(getPrevMeasTabTime) after -> "+getDateStr(rtn)+", "+newTable);
+        _log.debug("(getPrevMeasTabTime) after -> " + getDateStr(rtn) + ", " +
+                   newTable);
         return rtn;
     }
 
