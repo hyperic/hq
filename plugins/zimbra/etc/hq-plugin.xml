@@ -1,3 +1,9 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -50,31 +56,31 @@
             template="sigar:Type=ProcState,Arg=%zimbra-ptql%:State"
             indicator="true"/>
 
-    <metric name="Number of LMTP Msgs Received"
+    <metric name="LMTP Messages Received"
             category="THROUGHPUT"
             alias="lmtp_rcvd_msgs"
             indicator="false"
             collectionType="trendsup"
             units="none"/>
-    <metric name="Number of LMTP Bytes Received"
+    <metric name="LMTP Bytes Received"
             category="THROUGHPUT"
             alias="lmtp_rcvd_bytes"
             indicator="false"
             collectionType="trendsup"
             units="none"/>
-    <metric name="Number of LMTP Recipients"
+    <metric name="LMTP Recipients"
             category="THROUGHPUT"
             alias="lmtp_rcvd_rcpt"
             indicator="false"
             collectionType="trendsup"
             units="none"/>
-    <metric name="Number of LMTP Msgs Delivered"
+    <metric name="LMTP Messages Delivered"
             category="THROUGHPUT"
             alias="lmtp_dlvd_msgs"
             indicator="false"
             collectionType="trendsup"
             units="none"/>
-    <metric name="Number of LMTP Bytes Delivered"
+    <metric name="LMTP Bytes Delivered"
             category="THROUGHPUT"
             alias="lmtp_dlvd_bytes"
             indicator="false"
@@ -176,7 +182,7 @@
             indicator="true"
             collectionType="trendsup"
             units="none"/>
-    <metric name="Java VM Heap Memory (MB)"
+    <metric name="JVM Total Memory"
             category="THROUGHPUT"
             alias="java_heap_MB"
             indicator="true"
@@ -204,13 +210,13 @@
             category="THROUGHPUT"
             alias="innodb_pages_read"
             indicator="false"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
     <metric name="MySQL InnoDB Pages Written"
             category="THROUGHPUT"
             alias="innodb_pages_written"
             indicator="false"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
     <metric name="MySQL Thread Connected"
             category="THROUGHPUT"
@@ -251,122 +257,175 @@
 
     <service name="Logger MySQL">
       <config>
-        <option name="mysql-logger-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/logger/db/mysql.pid"
                 description="PTQL for Zimbra Logger MySQLd"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%mysql-logger-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="MySQL">
       <config>
-        <option name="mysql-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/db/mysql.pid"
                 description="PTQL for Zimbra MySQLd"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%mysql-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="OpenLDAP">
       <config>
-        <option name="openldap-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/openldap/var/run/slapd.pid"
                 description="PTQL for Zimbra OpenLDAP"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%openldap-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="Cyrus SASL">
       <config>
-        <option name="sasl-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/cyrus-sasl/state/saslauthd.pid"
                 description="PTQL for Zimbra Cyrus SASL"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%sasl-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="ClamAV">
       <config>
-        <option name="clamd-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/clamd.pid"
                 description="PTQL for Zimbra Clam Anti-Virus Daemon"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%clamd-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="Apache Httpd">
       <config>
-        <option name="httpd-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/httpd.pid"
                 description="PTQL for Zimbra Apache Httpd"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%httpd-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="Postfix">
       <config>
-        <option name="postfix-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/postfix/spool/pid/master.pid"
                 description="PTQL for Zimbra Apache Httpd"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%postfix-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="AMaViS">
       <config>
-        <option name="amavis-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/amavisd.pid"
                 description="PTQL for Zimbra AMaViS"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%amavis-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="Log Watch">
       <config>
-        <option name="logswatch-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/logswatch.pid"
                 description="PTQL for Zimbra logswatch"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%logswatch-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="Swatch">
       <config>
-        <option name="swatch-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/swatch.pid"
                 description="PTQL for Zimbra Swatch"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%swatch-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
               indicator="true"/>
+      &process-metrics;
     </service>
 
     <service name="MTA Config">
       <config>
-        <option name="mtaconfig-ptql"
+        <option name="process.query"
                 default="Pid.PidFile.eq=%installpath%/log/zmmtaconfig.pid"
                 description="PTQL for Zimbra MTA Config"/>
       </config>
       <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%mtaconfig-ptql%:State"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="SMTP">
+      <filter name="template"
+              value="SMTP:hostname=localhost:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
+    <service name="POP3">
+      <filter name="template"
+              value="POP3:hostname=localhost:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
+    <service name="IMAP">
+      <filter name="template"
+              value="IMAP:hostname=localhost:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
               indicator="true"/>
     </service>
 
