@@ -78,7 +78,7 @@ class DojoUtil {
         var ${queryStrVar};
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
-	                                               {alternateRows:true,
+	                                               {alternateRows:false,
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
 
@@ -89,6 +89,7 @@ class DojoUtil {
                 load: function(type, data, evt) {
 	                AjaxReturn = data;
                     ${tableVar}.store.setData(data.data);
+                     ${idVar}_highlightFixed();
                 }
             });
 	    });    
@@ -130,6 +131,7 @@ class DojoUtil {
                 load: function(type, data, evt) {
                     AjaxReturn = data;
                     ${tableVar}.store.setData(data.data);
+                    ${idVar}_highlightFixed();
                     var sortColHead = data.sortField;
                     var sortOrder   = data.sortOrder;
                     var strOrder    = sortOrder.toString();
@@ -153,6 +155,24 @@ class DojoUtil {
                 }
             });
         }
+        function ${idVar}_highlightFixed() {
+                var w = dojo.byId("${id}");
+                var rowTDs = w.getElementsByTagName('td');
+
+                for (k = 0; k < rowTDs.length; k++) {
+                    var fixedValue = rowTDs[k].firstChild.nodeValue;
+
+                    if (fixedValue == "No") {
+                        var fixedSibs = rowTDs[k].parentNode.childNodes;
+
+
+                        rowTDs[k].parentNode.style.backgroundColor = "#ff9999";
+
+                    }
+                }
+
+            }
+
 	    </script>
         """)
 	    
