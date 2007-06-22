@@ -98,8 +98,7 @@ public class DatabaseInitializer {
     
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
-            final String METRIC_DATA_VIEW =
-                "CREATE VIEW eam_measurement_data AS " +
+            final String UNION_BODY =
                 "SELECT * FROM hq_metric_data_0d_0s UNION " +
                 "SELECT * FROM hq_metric_data_0d_1s UNION " +
                 "SELECT * FROM hq_metric_data_1d_0s UNION " +
@@ -117,15 +116,25 @@ public class DatabaseInitializer {
                 "SELECT * FROM hq_metric_data_7d_0s UNION " +
                 "SELECT * FROM hq_metric_data_7d_1s UNION " +
                 "SELECT * FROM hq_metric_data_8d_0s UNION " +
-                "SELECT * FROM hq_metric_data_8d_1s UNION " +
-                "SELECT * FROM hq_metric_data_compat";
+                "SELECT * FROM hq_metric_data_8d_1s";
+            
+            final String HQ_METRIC_DATA_VIEW =
+                "CREATE VIEW hq_metric_data AS " + UNION_BODY;
+                        
+            final String EAM_METRIC_DATA_VIEW =
+                "CREATE VIEW eam_measurement_data AS " + UNION_BODY +
+                " UNION SELECT * FROM hq_metric_data_compat";
 
             Statement stmt = null;
             try {
                 stmt = conn.createStatement();
-                stmt.execute(METRIC_DATA_VIEW);
+                stmt.execute(HQ_METRIC_DATA_VIEW);
+                stmt.execute(EAM_METRIC_DATA_VIEW);
             } catch (SQLException e) {
-                // View was pre-existing, contine
+                // View was pre-existing, continue
+                if (log.isDebugEnabled()) {
+                    log.debug("Common Routines SQLException", e);
+                }
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }
@@ -198,7 +207,10 @@ public class DatabaseInitializer {
                 stmt = conn.createStatement();
                 stmt.execute(function);
             } catch (SQLException e) {
-                // Function already exists, contine
+                // Function already exists, continue
+                if (log.isDebugEnabled()) {
+                    log.debug("MySQLRoutines SQLException", e);
+                }
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }
