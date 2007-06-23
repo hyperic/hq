@@ -872,7 +872,7 @@
     <copy toDir="${pdk.lib}/jdbc">
        <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="oracle12.jar" />
        <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
-       <fileset dir="${thirdparty.lib}/sybase_jdbc" includes="sybase*.jar" />
+       <fileset dir="${thirdparty.lib}/sybase_jdbc" includes="jconn3.jar" />
        <fileset dir="${thirdparty.lib}/informix_jdbc" includes="ifxjdbc.jar" />
        <!-- Postgres plugin uses the 7.4.3 driver -->
        <fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar"/>
@@ -919,7 +919,13 @@
 
     <hqplugin name="mysql"/>
 
+    <hqplugin name="generic"/>
+
     <hqplugin name="sybase"/>
+
+    <hqplugin name="zimbra"/>
+
+    <hqplugin name="openldap"/>
 
     <hqplugin name="servlet"/>
 
