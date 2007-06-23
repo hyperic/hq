@@ -919,8 +919,6 @@
 
     <hqplugin name="mysql"/>
 
-    <hqplugin name="generic"/>
-
     <hqplugin name="sybase"/>
 
     <hqplugin name="zimbra"/>
