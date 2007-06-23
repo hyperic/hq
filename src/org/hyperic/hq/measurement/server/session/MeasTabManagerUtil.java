@@ -39,8 +39,8 @@ public class MeasTabManagerUtil
     static final int NUMBER_OF_TABLES = 18,
                      NUMBER_OF_TABLES_PER_DAY = 2;
 
-    static final String MEAS_TABLE = "hq_metric_data";
-    static final String OLD_MEAS_TABLE = MEAS_TABLE + "_compat";
+    public static final String MEAS_TABLE = "hq_metric_data";
+    public static final String OLD_MEAS_TABLE = MEAS_TABLE + "_compat";
 
     static {
         myBaseCal.set(2006, 0, 1, 0, 0);
@@ -69,7 +69,7 @@ public class MeasTabManagerUtil
         return rtn;
     }
 
-    static String getMeasTabname(long timems)
+    public static String getMeasTabname(long timems)
     {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new java.util.Date(timems));
@@ -89,7 +89,7 @@ public class MeasTabManagerUtil
         return MEAS_TABLE + "_" + daytable + "d_" + dayslice + "s";
     }
 
-    static long getPrevMeasTabTime(long timems)
+    public static long getPrevMeasTabTime(long timems)
     {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new java.util.Date(timems));
