@@ -56,7 +56,7 @@
 <td rowspan="2">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
-            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:px solid #aeaeae;background-color:#aeaeae;">
+            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
                 <html:link action="/Dashboard">
                     <c:choose>
                         <c:when test="${applicationScope.largeLogo}">
@@ -66,13 +66,13 @@
                             <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
                         </c:when>
                         <c:otherwise>
-                            <html:img page="/images/logo_large3.gif" width="223" height="54" alt="" border="0"/>
+                            <html:img page="/images/logo_large2.gif" width="223" height="54" alt="" border="0"/>
                         </c:otherwise>
                     </c:choose>
                 </html:link>
             </td>
             <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:1px solid #60a5ea;">
-                <html:img page="/images/logo_Image_large5.gif" width="175" height="54" alt="" border="0"/>
+                <html:img page="/images/logo_Image_large4.jpg" width="175" height="54" alt="" border="0"/>
             </td>
         </tr>
     </table>
