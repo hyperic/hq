@@ -100,7 +100,7 @@ public class AvailabilityCheckService
 
         StopWatch watch = new StopWatch();
         long current = lDate.getTime();
-
+        
         // Don't start backfilling immediately
         if (startTime == 0) {
             startTime = current;
@@ -147,7 +147,8 @@ public class AvailabilityCheckService
                 current - dm.getInterval(), dm.getInterval());
 
             // We have to get at least the measurement interval
-            long maxInterval = Math.max(this.interval, dm.getInterval());
+            long maxInterval =
+                Math.max(Math.max(interval, wait), dm.getInterval());
             
             // Begin is maximum of mbean interval or measurement create time
             long begin = Math.max(end - maxInterval,
@@ -255,7 +256,8 @@ public class AvailabilityCheckService
                 current - dm.getInterval(), dm.getInterval());
 
             // We have to get at least the measurement interval
-            long maxInterval = Math.max(this.interval, dm.getInterval());
+            long maxInterval =
+                Math.max(Math.max(interval, wait), dm.getInterval());
 
             // Begin is maximum of mbean interval or measurement create time
             long begin = Math.max(end - maxInterval,
@@ -296,6 +298,7 @@ public class AvailabilityCheckService
         getDataMan().addData(addData, false);
         watch.markTimeEnd("addData");
 
+        wait = 0;
         log.debug(watch);
     }
 
@@ -305,7 +308,7 @@ public class AvailabilityCheckService
      * @jmx:managed-attribute
      */
     public long getInterval() {
-        return this.interval;
+        return interval;
     }
 
     /**
