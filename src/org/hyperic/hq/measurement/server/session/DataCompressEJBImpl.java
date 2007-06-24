@@ -145,11 +145,14 @@ public class DataCompressEJBImpl
     {
         long currtime = System.currentTimeMillis();
         String currTable = MeasTabManagerUtil.getMeasTabname(currtime);
-        String delTable = MeasTabManagerUtil.getMeasTabname(truncateBefore);
+        long currTruncTime = truncateBefore;
+        //just in case truncateBefore is in the middle of a table
+        currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
+        String delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
         if (delTable.equals(currTable))
         {
-            long prev = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
-            delTable = MeasTabManagerUtil.getMeasTabname(prev);
+            currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
+            delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
         }
         log.info("Purging Raw Measurement Data older than " +
                  TimeUtil.toString(truncateBefore));
@@ -161,7 +164,6 @@ public class DataCompressEJBImpl
                                            DATASOURCE_NAME);
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
-            long currTruncTime = truncateBefore;
             log.debug("Truncating tables, starting with -> "+delTable+" (currTable -> "+currTable+")");
             while (!currTable.equals(delTable) &&
                    truncateBefore > currTruncTime) {
