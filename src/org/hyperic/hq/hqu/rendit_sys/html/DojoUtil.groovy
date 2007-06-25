@@ -58,14 +58,9 @@ class DojoUtil {
      *    
      *   id:       The HTML ID for the table
      *   url:      URL to contact to get data to populate the table
-     *   columns:  An array of maps, containing the column fields and their
-     *             labels.  e.g. columns: [[field:'date', label:'The Date'],]
-     *             Alternatively, if field: points at an implementation of
-     *             SortField, the description of the sortfield is used as 
-     *             the field name, and the value is used as the label.
+     *   schema:   ** TODO ** Document me
      */
     static String dojoTable(params) {
-        def columns     = params.columns
         def id          = "${params.id}"
 	    def idVar       = "_hqu_${params.id}"
 	    def tableVar    = "${idVar}_table" 
@@ -155,23 +150,20 @@ class DojoUtil {
                 }
             });
         }
+
         function ${idVar}_highlightFixed() {
-                var w = dojo.byId("${id}");
-                var rowTDs = w.getElementsByTagName('td');
+            var w = dojo.byId("${id}");
+            var rowTDs = w.getElementsByTagName('td');
 
-                for (k = 0; k < rowTDs.length; k++) {
-                    var fixedValue = rowTDs[k].firstChild.nodeValue;
+            for (k = 0; k < rowTDs.length; k++) {
+                var fixedValue = rowTDs[k].firstChild.nodeValue;
 
-                    if (fixedValue == "No") {
-                        var fixedSibs = rowTDs[k].parentNode.childNodes;
-
-
-                        rowTDs[k].parentNode.style.backgroundColor = "#fa8672";
-
-                    }
+                if (fixedValue == "No") {
+                    var fixedSibs = rowTDs[k].parentNode.childNodes;
+                    rowTDs[k].parentNode.style.backgroundColor = "#fa8672";
                 }
-
             }
+        }
 
 	    </script>
         """)
@@ -182,16 +174,11 @@ class DojoUtil {
               <tr>
         """
         
-	    for (c in columns) {
+	    for (c in params.schema.columns) {
 	        def field = c.field
-	        def label
+	        def label = field.value
 	        
-	        if (field in SortField) {
-	            label = field.value
-	            field = field.description
-	        } else {
-	            label = c.label
-	        }
+	        field = field.description
 	        
 	        res << "<th field='${field}' dataType='String' align='left'"
 	        res << " onclick='${idVar}_setColClass(this);'>"
@@ -236,6 +223,13 @@ class DojoUtil {
                 val[c.field.description] = c.label(d)
             }
 
+            // Optionally define a styleClass attribute if the schema defines
+            // the method, and it returns non-null
+            if (schema.styleClass) {
+                def sc = schema.styleClass(d)
+                if (sc)
+                	val.styleClass = sc
+            }
             jsonData.put(val)
         }
         

@@ -21,6 +21,9 @@ class AlertController
         defaultSort: AlertSortField.DATE,
         defaultSortOrder: 1,  // ascending
         rowId: {it.id},
+        styleClass: {
+            it.fixed ? null : "#fa8672"
+        },
         columns: [
             [field:AlertSortField.DATE, 
              label:{df.format(it.timestamp)}],
