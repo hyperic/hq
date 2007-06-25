@@ -28,7 +28,9 @@ class AlertController
             [field:AlertSortField.DATE, 
              label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION,
-             label:{"<a href='foo'>${it.alertDefinition.name}</a>"}],
+             label:{
+                linkTo(it.alertDefinition.name, [resource:it])
+            }],
             [field:AlertSortField.RESOURCE,
              label:{it.alertDefinition.resource.name}],
             [field:AlertSortField.FIXED,
@@ -44,7 +46,7 @@ class AlertController
     }
     
     def index = { params ->
-    	render(locals:[alertSchema:TABLE_SCHEMA])
+    	render(locals:[user:user,alertSchema:TABLE_SCHEMA])
     }
     
     def data(params) {

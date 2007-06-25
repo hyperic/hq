@@ -16,11 +16,13 @@ class HtmlUtil {
      * absolute: If set, will re-write the URL with the value as the prefix
      *           of the rest of the URL;  
      *           E.g. absolute:'http://localhost:7080/web'
+     * resource: If set, will call resource.urlFor to tack on the link to
+     *           the resource
      *
      * Any additional values in the map will be passed as query parameters
      */
     static String urlFor(opts) {
-        opts = new HashMap(opts) 
+        opts = opts + [:]
         def res = ''
         def qparams = [:]
                        
@@ -43,6 +45,11 @@ class HtmlUtil {
             opts.remove('id')
         }
         
+        if (opts['resource']) {
+            res += opts['resource'].urlFor()
+            opts.remove('resource')
+        }
+        
         qparams += opts
         def addedParam = false
         for (o in qparams) {
@@ -61,7 +68,13 @@ class HtmlUtil {
      * opts:  Options for the link (see urlFor)
      */
     static String linkTo(text, opts) {
-        "<a href='${urlFor(opts)}'>${escapeHtml(text)}</a>"
+        def passOpts  = opts + [:]
+        def useUrlFor = HtmlUtil.&urlFor
+        if (passOpts.urlFor) {
+            useUrlFor = passOpts.urlFor
+            passOpts.remove('urlFor')
+        }
+        "<a href='${useUrlFor(passOpts)}'>${escapeHtml(text)}</a>"
     }
         
 	/**
@@ -75,14 +88,22 @@ class HtmlUtil {
 	 *        confirmation dialog with the value of the confirm.
 	 */
 	static String buttonTo(text, opts) {
+	    def passOpts = opts + [:]
 	    def confirmOpt = ""
 	    
-	    if (opts.confirm) {
+	    if (passOpts.confirm) {
 	        def eMsg = escapeHtml(opts.confirm)
 			confirmOpt = "onclick=\"return confirm('${eMsg}')\""
+			passOpts.remove('confirm')
 	    }
 	    
-		"<form method='post' action='${urlFor(opts)}'>" + 
+	    def useUrlFor = HtmlUtil.&urlFor
+	    if (passOpts.urlFor) {
+	        useUrlFor = passOpts.urlFor
+	        passOpts.remove('urlFor')
+	    }
+	    
+		"<form method='post' action='${useUrlFor(passOpts)}'>" + 
 		"  <div>" + 
 		"    <input ${confirmOpt} value='${escapeHtml(text)}' type='submit'/>" + 
 		"  </div>" +

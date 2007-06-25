@@ -12,8 +12,6 @@ import org.hyperic.hq.hqu.rendit.render.RenderFrame
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
-
-
 /**
  * The base controller is invoked by the dispatcher when it detects that
  * a controller method is being requested.
@@ -100,7 +98,7 @@ abstract class BaseController {
      * commands (but will likely also want to merge it with the results
      * from this base method)
      */
-    def getAddIns() {
+    def getBaseRenderLocals() {
 		[h           : HtmlUtil.&escapeHtml,
 		 format_date : this.&formatDate]
     }
@@ -138,7 +136,7 @@ abstract class BaseController {
             invokeArgs.response.setContentType(contentType)
         }
         def locals    = opts.get('locals', [:])
-        def newLocals = new HashMap(addIns)
+        def newLocals = new HashMap(baseRenderLocals)
         newLocals.putAll(locals)
         opts = new HashMap(opts) // Clone
         opts['locals'] = newLocals
@@ -150,6 +148,36 @@ abstract class BaseController {
         new RenderFrame(opts, this).render()
     }
 
+    /**
+     * This urlFor can be used to take the current request context into 
+     * account when rendering URLs relative to the current request.
+     */
+    public String urlFor(opts) {
+        def req = invokeArgs.request
+        def path = [invokeArgs.contextPath]
+
+        if (!opts.resource) {
+            path += invokeArgs.servletPath.split('/') as List
+            // Trim off the last element
+            if (path[-1].endsWith('.hqu'))
+                path = path[0..-2]
+        }
+        
+        path = path.findAll{it}.join('/')
+        if (!path.startsWith("/"))
+            path = "/" + path
+        def u = new URL(req.scheme, req.serverName, req.serverPort, path)
+        HtmlUtil.urlFor(opts + [absolute:u.toString()])
+    }
+    
+    public String buttonTo(text, opts) {
+        HtmlUtil.buttonTo(text, opts + [urlFor:this.&urlFor])
+    }
+    
+    public String linkTo(text, opts) {
+        HtmlUtil.linkTo(text, opts + [urlFor:this.&urlFor])
+    }
+    
     protected AuthzSubject getUser() {
         invokeArgs.user 
     }
