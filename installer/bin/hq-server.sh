@@ -228,7 +228,7 @@ infoOut "Booting the HQ server..."
 cd ${SERVER_HOME}/hq-engine/bin
 JBOSSUS=RUNASIS \
 JBOSSHOME=${ENGINE_HOME} \
-  ${JAVA} -Xmx512m -server \
+  ${JAVA} -XX:MaxPermSize=128m -Xmx512m -server \
     -Dprogram.name=hq-server \
     -Dserver.home=${SERVER_HOME} \
     -Dengine.home=${ENGINE_HOME} \
