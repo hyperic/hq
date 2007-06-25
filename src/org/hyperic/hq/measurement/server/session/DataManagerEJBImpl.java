@@ -213,7 +213,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue dp, boolean overwrite) {
-        addData(mid, new MetricValue[] { dp }, overwrite);
+        List pts = new ArrayList(1);
+        pts.add(new DataPoint(mid, dp));
+
+        addData(pts, overwrite);
     }
 
     /**
@@ -225,6 +228,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                   XXX:  Why would you ever not want to overwrite?
      *
      * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
      */
     public void addData(List data, boolean overwrite) {
         Connection conn = null;
@@ -432,20 +436,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return left;
     }
     
-    /**
-     * Save the new MetricValue to the database
-     * @ejb:interface-method
-     */
-    public void addData(Integer mid, MetricValue[] dpts, boolean overwrite) {
-        List pts = new ArrayList(dpts.length);
-        
-        for (int i=0; i<dpts.length; i++) {
-            pts.add(new DataPoint(mid, dpts[i]));
-        }
-
-        addData(pts, overwrite);
-    }
-
     /**
      * Get the server purge configuration and storage option, loaded on startup.
      */
