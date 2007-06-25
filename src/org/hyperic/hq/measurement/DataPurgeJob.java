@@ -110,23 +110,24 @@ public class DataPurgeJob implements Job {
 
         long time_start = System.currentTimeMillis();
         
-        // First purge backfilled data
         try {
-            dataCompress.purgeBackfilled();
-        } catch (SQLException e) {
-            _log.error("Unable to clear out duplicated backfilled data");
-        }
-
-        // We'll only do the rest of the maintenance if it's 10 past the hour
-        if (TimingVoodoo.roundDownTime(time_start, MINUTE) == 10) {
-            return;
-        }
-
-        // Announce
-        _log.info("Data compression starting at " +
-                  TimeUtil.toString(time_start));
-        
-        try {
+            // First purge backfilled data
+            try {
+                dataCompress.purgeBackfilled();
+            } catch (SQLException e) {
+                _log.error("Unable to clear out duplicated backfilled data");
+            }
+    
+            // We'll only do the rest of the maintenance if it's 10 past the
+            // hour
+            if (TimingVoodoo.roundDownTime(time_start, MINUTE) == 10) {
+                return;
+            }
+    
+            // Announce
+            _log.info("Data compression starting at " +
+                      TimeUtil.toString(time_start));
+            
             dataCompress.compressData();
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
