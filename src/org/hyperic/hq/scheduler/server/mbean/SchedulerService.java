@@ -56,23 +56,18 @@ import org.quartz.spi.JobFactory;
  *
  * @jmx:mbean name="hyperic.jmx:type=Service,name=Scheduler"
  *            extends="org.quartz.Scheduler"
- *
  */
 public class SchedulerService implements SchedulerServiceMBean, MBeanRegistration {
-    // attributes
+
     protected Log log = LogFactory.getLog( SchedulerService.class.getName() );
     private Properties quartzProps;
 
-    // quartz stuff
     private StdSchedulerFactory schedFact = new StdSchedulerFactory();
     private Scheduler sched;
 
     public SchedulerService() {
     }
 
-    //---------------------------------------------------------------------
-    //-- managed attributes
-    //---------------------------------------------------------------------
     /**
      * Get the properties for Quartz.
      *
@@ -95,13 +90,9 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
         schedFact.initialize(quartzProps);
     }
 
-    //---------------------------------------------------------------------
-    //-- MBean service methods (init, start, stop, destroy)
-    //---------------------------------------------------------------------
-
-    //**********************************************************************
-    // start() is also part of the Scheduler interface, so it is found below
-    //**********************************************************************
+    /**
+     * start() is also part of the Scheduler interface, so it is found below
+     */
 
     public void stop() throws SchedulerException {
         log.info("Stopping " + sched );
@@ -109,9 +100,6 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
         sched = null;
     }
 
-    //---------------------------------------------------------------------
-    //-- Scheduler interface methods
-    //---------------------------------------------------------------------
     /**
      * @jmx:managed-attribute
      */
@@ -676,4 +664,3 @@ public class SchedulerService implements SchedulerServiceMBean, MBeanRegistratio
     }
 }
 
-// EOF
