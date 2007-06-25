@@ -213,6 +213,7 @@ class DojoUtil {
         def pageNum  = new Integer(params.getOne("pageNum", "0"))
         def pageSize = new Integer(params.getOne("pageSize", "20"))
 		def pageInfo = PageInfo.create(pageNum, pageSize, sortColumn, sortOrder)
+		def lastPage = false
 		def data     = schema.getData(pageInfo)
 		
         JSONArray jsonData = new JSONArray()
@@ -233,8 +234,10 @@ class DojoUtil {
             jsonData.put(val)
         }
         
-		[data : jsonData, 
+		[data      : jsonData, 
 		 sortField : sortColumn.description,
-		 sortOrder : sortOrder] as JSONObject
+		 sortOrder : sortOrder,
+		 pageNum   : pageNum,
+		 lastPage  : lastPage] as JSONObject
     }
 }
