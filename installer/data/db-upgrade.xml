@@ -5780,6 +5780,23 @@ has already been defined.
                      insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (58, 'BATCH_AGGREGATE_QUEUE', '', '20000', '0')"/>
     </schemaSpec>
     
+    <schemaSpec version="3.29">
+      <schema-directSQL>
+        <statement>alter table eam_qrtz_blob_triggers rename to qrtz_blob_triggers</statement>
+        <statement>alter table eam_qrtz_calendars rename to qrtz_calendars</statement>
+        <statement>alter table eam_qrtz_cron_triggers rename to qrtz_cron_triggers</statement>
+        <statement>alter table eam_qrtz_fired_triggers rename to qrtz_fired_triggers</statement>
+        <statement>alter table eam_qrtz_job_details rename to qrtz_job_details</statement>
+        <statement>alter table eam_qrtz_job_listeners rename to qrtz_job_listeners</statement>
+        <statement>alter table eam_qrtz_locks rename to qrtz_locks</statement>
+        <statement>alter table eam_qrtz_paused_trigger_grps rename to qrtz_paused_trigger_grps</statement>
+        <statement>alter table eam_qrtz_scheduler_state rename to qrtz_scheduler_state</statement>
+        <statement>alter table eam_qrtz_simple_triggers rename to qrtz_simple_triggers</statement>
+        <statement>alter table eam_qrtz_trigger_listeners rename to qrtz_trigger_listeners</statement>
+        <statement>alter table eam_qrtz_triggers rename to qrtz_triggers</statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 
 </target>

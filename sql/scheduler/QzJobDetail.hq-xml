@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzJobDetail" table="EAM_QRTZ_JOB_DETAILS">
+  <class name="QzJobDetail" table="QRTZ_JOB_DETAILS">
     <composite-id name="id" class="QzJobDetailId">
       <meta attribute="use-in-equals">true</meta>
       <key-property name="jobName" type="string">
@@ -69,7 +69,7 @@
 
   </class>
 
-  <class name="QzJobListener" table="EAM_QRTZ_JOB_LISTENERS">
+  <class name="QzJobListener" table="QRTZ_JOB_LISTENERS">
     <composite-id name="id" class="QzJobListenerId">
       <meta attribute="use-in-equals">true</meta>
       <key-property name="jobName" type="string">
@@ -98,7 +98,7 @@
     </many-to-one>
   </class>
 
-  <class name="QzTrigger" table="EAM_QRTZ_TRIGGERS">
+  <class name="QzTrigger" table="QRTZ_TRIGGERS">
     <composite-id name="id" class="QzTriggerId">
       <meta attribute="use-in-equals">true</meta>
       <key-property name="triggerName" type="string">
@@ -181,7 +181,7 @@
       <one-to-many class="QzTriggerListener" />
     </bag>
 
-    <joined-subclass name="QzSimpleTrigger" table="EAM_QRTZ_SIMPLE_TRIGGERS">
+    <joined-subclass name="QzSimpleTrigger" table="QRTZ_SIMPLE_TRIGGERS">
       <key foreign-key="EAM_FK_QST_QT">
         <column name="TRIGGER_NAME" not-null="true" length="80" />
         <column name="TRIGGER_GROUP" not-null="true" length="80" />
@@ -200,7 +200,7 @@
       </property>
     </joined-subclass>
 
-    <joined-subclass name="QzCronTrigger" table="EAM_QRTZ_CRON_TRIGGERS">
+    <joined-subclass name="QzCronTrigger" table="QRTZ_CRON_TRIGGERS">
       <key foreign-key="EAM_FK_QCT_QT">
         <column name="TRIGGER_NAME" not-null="true" length="80" />
         <column name="TRIGGER_GROUP" not-null="true" length="80" />
@@ -215,7 +215,7 @@
       </property>
     </joined-subclass>
 
-    <joined-subclass name="QzBlobTrigger" table="EAM_QRTZ_BLOB_TRIGGERS">
+    <joined-subclass name="QzBlobTrigger" table="QRTZ_BLOB_TRIGGERS">
       <key foreign-key="EAM_FK_QBT_QT">
         <column name="TRIGGER_NAME" not-null="true" length="80" />
         <column name="TRIGGER_GROUP" not-null="true" length="80" />
@@ -228,7 +228,7 @@
 
   </class>
 
-  <class name="QzTriggerListener" table="EAM_QRTZ_TRIGGER_LISTENERS">
+  <class name="QzTriggerListener" table="QRTZ_TRIGGER_LISTENERS">
     <composite-id name="id" class="QzTriggerListenerId">
       <meta attribute="use-in-equals">true</meta>
       <key-property name="triggerName" type="string">

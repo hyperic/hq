@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzFiredTrigger" table="EAM_QRTZ_FIRED_TRIGGERS">
+  <class name="QzFiredTrigger" table="QRTZ_FIRED_TRIGGERS">
     <id name="entryId" type="string">
       <meta attribute="use-in-equals">true</meta>
       <column name="ENTRY_ID" length="95" not-null="true" />

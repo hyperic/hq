@@ -2,7 +2,7 @@
 <Covalent.DBSetup name="scheduler-schema.xml"
                   notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
 
-  <table name="EAM_QRTZ_LOCKS">
+  <table name="QRTZ_LOCKS">
     <data LOCK_NAME="TRIGGER_ACCESS" />
     <data LOCK_NAME="JOB_ACCESS" />
     <data LOCK_NAME="CALENDAR_ACCESS" />

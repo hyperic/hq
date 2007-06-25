@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzCalendar" table="EAM_QRTZ_CALENDARS">
+  <class name="QzCalendar" table="QRTZ_CALENDARS">
     <id name="calendarName" type="string">
       <meta attribute="use-in-equals">true</meta>
       <column name="CALENDAR_NAME" length="80" not-null="true" />

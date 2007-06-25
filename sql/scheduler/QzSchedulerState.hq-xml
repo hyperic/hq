@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzSchedulerState" table="EAM_QRTZ_SCHEDULER_STATE">
+  <class name="QzSchedulerState" table="QRTZ_SCHEDULER_STATE">
     <id name="instanceName" type="string">
       <meta attribute="use-in-equals">true</meta>
       <column name="INSTANCE_NAME" length="80" not-null="true" />

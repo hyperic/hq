@@ -24,7 +24,6 @@ org.quartz.jobStore.driverDelegateClass = @@@server.quartzDelegate@@@
 org.quartz.jobStore.useProperties = true
 org.quartz.jobStore.dataSource = HypericDS
 org.quartz.jobStore.nonManagedTXDataSource = HypericDS
-org.quartz.jobStore.tablePrefix = EAM_QRTZ_
 org.quartz.jobStore.instanceId = org.hyperic.hq.scheduler.server.mbean.SchedulerService
 org.quartz.dataSource.HypericDS.jndiURL = java:/HypericDS
     </attribute>

@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzLock" table="EAM_QRTZ_LOCKS">
+  <class name="QzLock" table="QRTZ_LOCKS">
     <id name="lockName" type="string">
       <meta attribute="use-in-equals">true</meta>
       <column name="LOCK_NAME" length="40" not-null="true" />

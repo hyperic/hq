@@ -7,7 +7,7 @@
 <hibernate-mapping
   package="org.hyperic.hq.scheduler">
 
-  <class name="QzPausedTriggerGrp" table="EAM_QRTZ_PAUSED_TRIGGER_GRPS">
+  <class name="QzPausedTriggerGrp" table="QRTZ_PAUSED_TRIGGER_GRPS">
     <id name="triggerGroup" type="string">
       <meta attribute="use-in-equals">true</meta>
       <column name="TRIGGER_GROUP" length="80" not-null="true" />
