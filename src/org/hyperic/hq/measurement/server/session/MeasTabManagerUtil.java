@@ -46,6 +46,11 @@ public class MeasTabManagerUtil
         myBaseCal.set(2006, 0, 1, 0, 0);
     }
 
+    public static long getBaseTime()
+    {
+        return myBaseCal.getTimeInMillis();
+    }
+
     private static int getDayOfPeriod(long timems)
     {
         int rtn = 0;

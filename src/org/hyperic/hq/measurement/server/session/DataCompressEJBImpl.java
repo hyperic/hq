@@ -143,6 +143,11 @@ public class DataCompressEJBImpl
     private void truncateRawMeasurements(long truncateBefore)
         throws SQLException, NamingException
     {
+        // we can't get any accurate metric tablenames if truncateBefore
+        // is less than the base point in time which is used for the
+        // tablename calculations
+        if (truncateBefore < MeasTabManagerUtil.getBaseTime())
+            return;
         long currtime = System.currentTimeMillis();
         String currTable = MeasTabManagerUtil.getMeasTabname(currtime);
         long currTruncTime = truncateBefore;
