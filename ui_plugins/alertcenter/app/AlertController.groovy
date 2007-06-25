@@ -46,7 +46,7 @@ class AlertController
     }
     
     def index = { params ->
-    	render(locals:[user:user,alertSchema:TABLE_SCHEMA])
+    	render(locals:[alertSchema:TABLE_SCHEMA])
     }
     
     def data(params) {
