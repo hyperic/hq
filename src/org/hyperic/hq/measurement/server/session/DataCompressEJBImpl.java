@@ -69,7 +69,7 @@ public class DataCompressEJBImpl
     implements SessionBean {
 
     // !!!NEEDS TO BE CHANGED WHEN WE CONVERT DB FROM long to int
-    private static final long ONE_HOUR = 3600000;
+    private static final long FIVE_MINS = 300000;
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
@@ -243,9 +243,9 @@ public class DataCompressEJBImpl
                       "where m.measurement_id = b.measurement_id and " +
                       "m.timestamp = b.timestamp "+
                       "and b.timestamp between "+min_time+" and "+
-                      (min_time+=ONE_HOUR);
+                      (min_time+=FIVE_MINS);
                 log.debug("Purging Backfilled data between "+
-                          TimeUtil.toString(min_time-ONE_HOUR)+" and "+
+                          TimeUtil.toString(min_time-FIVE_MINS)+" and "+
                           TimeUtil.toString(min_time));
                 stmt.execute(sql);
             }
