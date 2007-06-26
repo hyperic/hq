@@ -56,10 +56,34 @@ class DojoUtil {
      *
      * 'params' is a map of key/vals for configuration, which include:
      *    
-     *   id:       The HTML ID for the table
+     *   id:       The HTML ID for the table.   
      *   url:      URL to contact to get data to populate the table
      *   numRows:  Number of rows to display
-     *   schema:   ** TODO ** Document me
+     *   schema:   The schema is a map which contains information on how to
+     *             retrieve data for the rows, how to format them, etc.  The
+     *             following keys for the schema are used:
+     *
+     *       getData:  A closure which takes a PageInfo object, which should
+     *                 return the rows which are used to fill out the table
+     *       defaultSort:  A class implementing SortField, which is the 
+     *                     default column to sort on
+     *       defaultSortOrder: 0 to sort by descending, 1 by ascending
+     *       rowId:  A closure which takes a single object (an element as
+     *               returned from the getData() call), and must return an
+     *               ID for the row.  This ID is used to map the row to the
+     *               object.
+     *       styleClass (optional):  A closure which takes an element returned
+     *                               from getData and returns a String to use
+     *                               as the styleclass for that row.  If it 
+     *                               returns null, no styleclass will be 
+     *                               specified
+     *       columns:  An array containing information about the columns.  Each
+     *                 element of the array is a map, specifying:
+     *
+     *           field:  a class implementing SortField which will provide
+     *                   information about sortability, column header,
+     *           label:  a closure which takes an element returned by getData
+     *                   and returns a string which will be the cell text
      */
     static String dojoTable(params) {
         def id           = "${params.id}"
@@ -82,6 +106,7 @@ class DojoUtil {
 	                                               {alternateRows:false,
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
+            ${tableVar}.createSorter = function(a) { return null; };
             ${idVar}_refreshTable();
 	    });    
 
@@ -92,41 +117,27 @@ class DojoUtil {
 
             if (${sortFieldVar})
                 res += '&sortField=' + ${sortFieldVar};
-            if (${sortOrderVar})
+            if (${sortOrderVar} != null)
                 res += '&sortOrder=' + ${sortOrderVar};
 
             return res;
         }
 
         function ${idVar}_setSortField(el) {
-            var selClass = '';
-            var classN = el.className;
-            var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
-            var ths = thead.getElementsByTagName('th')
-            for (i = 0; i < ths.length; i++) {
-                var clrClass = ths[i].className;
-                if (clrClass=='selectedUp' || clrClass=='selectedDown') {
-                    ths[i].setAttribute((document.all ? 'className' : 'class'), " ");
-                }
-            }
+            if (el.getAttribute('sortable') == 'false')
+                return;
 
-            if (classN) {
-                if (classN == '' || classN == 'selectedDown') {
-                    el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
-                    selClass  = el.className;
-                    ${sortOrderVar} = 1; 
-                } else if (classN == 'selectedUp') {
-                    el.setAttribute((document.all ? 'className' : 'class'), "selectedDown");
-                    selClass = el.className;
-                    ${sortOrderVar} = -1;
-                }
+            var curSortIdx  = ${tableVar}.sortInformation[0].index;
+            ${sortOrderVar} = ${tableVar}.sortInformation[0].direction;
+
+            if (curSortIdx == el.getAttribute('colIdx')) {
+                ${sortOrderVar} = ~${sortOrderVar} & 1;
             } else {
-                el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
-                selClass = el.className;
-                ${sortOrderVar} = 1;
-            }
-
-            ${sortFieldVar} = el.getAttribute('field')
+                ${sortOrderVar} = 0;
+            } 
+            ${sortFieldVar} = el.getAttribute('field');
+            ${tableVar}.sortInformation[0] = {index:el.getAttribute('colidx'),
+                                              direction:${sortOrderVar}};
             ${pageNumVar}   = 0;
             ${idVar}_refreshTable();
         }
@@ -139,47 +150,26 @@ class DojoUtil {
                 mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
                     AjaxReturn = data;
-                    ${tableVar}.store.setData(data.data);
-                    ${idVar}_highlightFixed();
                     ${sortFieldVar} = data.sortField;
                     ${sortOrderVar} = data.sortOrder;
-                    var strOrder    = ${sortOrderVar}.toString();
-                    var strColClass;
-                    if (strOrder == '1') {
-                        strColClass = "selectedUp";
-                    } else {
-                        strColClass = "selectedDown";
-                    }
-                    if (${sortFieldVar}) {
-                        var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
-                        var ths = thead.getElementsByTagName('th')
-                        for (j = 0; j < ths.length; j++) {
-                            var setClass = ths[j].className;
-                            var getColStr = ths[j].firstChild.nodeValue;
-                            if (getColStr==${sortFieldVar}) {
-                                setClass=strColClass;
-                            }
+                    var sortColIdx = 0;
+                    var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
+                    var ths = thead.getElementsByTagName('th')
+                    for (j = 0; j < ths.length; j++) {
+                        if (ths[j].getAttribute('field') == ${sortFieldVar}) {
+                            sortColIdx = j;
+                            break;
                         }
                     }
+
+                    ${tableVar}.sortInformation = [{index:sortColIdx, 
+                                                    direction:${sortOrderVar}}]
+                    ${tableVar}.store.setData(data.data);
                     ${pageNumVar}  = data.pageNum;
                     ${lastPageVar} = data.lastPage;
                     ${idVar}_setupPager();
                 }
             });
-        }
-
-        function ${idVar}_highlightFixed() {
-            var w = dojo.byId("${id}");
-            var rowTDs = w.getElementsByTagName('td');
-
-            for (k = 0; k < rowTDs.length; k++) {
-                var fixedValue = rowTDs[k].firstChild.nodeValue;
-
-                if (fixedValue == "No") {
-                    var fixedSibs = rowTDs[k].parentNode.childNodes;
-                    rowTDs[k].parentNode.style.backgroundColor = "#fa8672";
-                }
-            }
         }
 
         function ${idVar}_setupPager() {
@@ -219,15 +209,22 @@ class DojoUtil {
               <tr>
         """
         
+        def colIdx = 0;
 	    for (c in params.schema.columns) {
-	        def field = c.field
-	        def label = field.value
-	        
-	        field = field.description
-	        
-	        res << "<th field='${field}' dataType='String' align='left'"
-	        res << " onclick='${idVar}_setSortField(this);'>"
-	        res << "${label}</th>"
+	        def field     = c.field
+	        def label     = field.value
+	        def fieldName = field.description 
+
+	        res << """<th field='${fieldName}' align='left' nosort='true'
+	                      onclick='${idVar}_setSortField(this);'
+                          colidx="${colIdx}" """
+            if (!field.sortable) {
+                res << " sortable='false'"
+            }
+            res << """>
+	                    ${label}
+                      </th>"""
+            colIdx++
 	    }
 	    res << """
               </tr>
@@ -236,9 +233,11 @@ class DojoUtil {
 
          <div class="pageCont">
              <div class="pageButtonCont">
-                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:16px;float: left;" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:16px;float: left;" 
+                      class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
                  <div id="pageNumbers">&nbsp;</div>
-                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:16px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:16px;float: left;" 
+                      class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
              <div style="clear: both;"></div>
          </div>
@@ -246,7 +245,18 @@ class DojoUtil {
 	    
 		res.toString()	    
 	}
-     
+    
+    /**
+     * Processes an incoming web request from a DOJO table (as created via
+     * dojoTable), which examines the query parameters, creates the correct 
+     * paging objects, passes them to the schema's getData() method and
+     * formulates the JSON result to pass back to DOJO.
+     *
+     * @param schema  A schema, as passed to dojoTable()
+     * @param params  Query parameters from the web request
+     *
+     * @return a JSON result which can be written to the client via */
+     //   render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     static JSONObject processTableRequest(schema, params) {
         def sortField = params.getOne("sortField")
         def sortOrder = params.getOne("sortOrder", 
@@ -298,7 +308,7 @@ class DojoUtil {
         
 		[data      : jsonData, 
 		 sortField : sortColumn.description,
-		 sortOrder : sortOrder ? 1 : -1,
+		 sortOrder : sortOrder ? 1 : 0,
 		 pageNum   : pageNum,
 		 lastPage  : lastPage] as JSONObject
     }
