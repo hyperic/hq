@@ -94,8 +94,6 @@ public class SybaseMeasurementPlugin
     {
         String pass = (password == null) ? "" : password;
         pass = (pass.matches("^\\s*$")) ? "" : pass;
-        log.debug("user -> "+user+
-                  "\npass -> |"+pass+"|");
         return DriverManager.getConnection(url, user, pass);
     }
 
@@ -247,7 +245,7 @@ public class SybaseMeasurementPlugin
             return builder.getSchema();
         }
 
-        return super.getConfigSchema(info, config);
+        return new ConfigSchema();
     }
 
     protected String getQuery(Metric metric)

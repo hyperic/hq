@@ -146,7 +146,6 @@ public class SybaseServerDetector
     public List getServerList(String path) throws PluginException
     {
         ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue(PROP_URL, DEFAULT_URL);
         productConfig.setValue(PROP_USER, "sa");
         productConfig.setValue(PROP_PASSWORD, "");
 
@@ -166,7 +165,6 @@ public class SybaseServerDetector
 
         String installdir = getParentDir(path, 3);
         ServerResource server = createServerResource(installdir);
-//        String version = getTypeInfo().getVersion();
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
@@ -185,6 +183,9 @@ public class SybaseServerDetector
         String url  = config.getValue(PROP_URL);
         String user = config.getValue(PROP_USER);
         String pass = config.getValue(PROP_PASSWORD);
+
+        pass = (pass == null) ? "" : pass;
+        pass = (pass.matches("^\\s*$")) ? "" : pass;
 
         try {
             Class.forName(JDBC_DRIVER);

@@ -190,7 +190,7 @@
     <config>
       <option name="jdbcUrl"
               description="JDBC Url (NOTE: localhost may not work)"
-              default="jdbc:sybase:Tds:localhost:4100/master"/>
+              default="jdbc:sybase:Tds:&lt;hostname&gt;:4100/master"/>
       <option name="jdbcUser"
               description="JDBC User"
               default="sa"/>
@@ -342,6 +342,10 @@
       Please run the HQ agent on the local Sybase server as the sybase user.
       This is neccessary to get the proper ENV vars setup in order to execute
       the sp_sysmon procedure.
+    </p>
+    <p>
+      NOTE:  The jdbcUrl may not work using localhost.  Please specify the actual
+             hostname.
     </p>
     ]]>
   </help>
