@@ -42,6 +42,10 @@ public abstract class AlertSortField
         String getSortString(String alert, String def, String resource) {
             return alert + ".ctime";
         }
+
+        public boolean isSortable() {
+            return true;
+        }
     };
         
     public static final AlertSortField DEFINITION = 
@@ -49,6 +53,10 @@ public abstract class AlertSortField
     {
         String getSortString(String alert, String def, String resource) {
             return def + ".name";
+        }
+
+        public boolean isSortable() {
+            return true;
         }
     };
     
@@ -58,6 +66,10 @@ public abstract class AlertSortField
         String getSortString(String alert, String def, String resource) {
             return resource + ".name";
         }
+
+        public boolean isSortable() {
+            return true;
+        }
     };
     
     public static final AlertSortField FIXED = 
@@ -65,6 +77,10 @@ public abstract class AlertSortField
     {
         String getSortString(String alert, String def, String resource) {
             return alert + ".fixed";
+        }
+
+        public boolean isSortable() {
+            return true;
         }
     };
     
@@ -74,6 +90,10 @@ public abstract class AlertSortField
         String getSortString(String alert, String def, String resource) {
             return alert + ".ackedBy";
         }
+
+        public boolean isSortable() {
+            return false;
+        }
     };
     
     public static final AlertSortField SEVERITY = 
@@ -81,6 +101,10 @@ public abstract class AlertSortField
     {
         String getSortString(String alert, String def, String resource) {
             return def + ".priority";
+        }
+
+        public boolean isSortable() {
+            return true;
         }
     };
 
