@@ -58,6 +58,7 @@ class DojoUtil {
      *    
      *   id:       The HTML ID for the table
      *   url:      URL to contact to get data to populate the table
+     *   numRows:  Number of rows to display
      *   schema:   ** TODO ** Document me
      */
     static String dojoTable(params) {
@@ -89,7 +90,7 @@ class DojoUtil {
         function ${idVar}_makeQueryStr() {
             var res = '?pageNum=' + ${pageNumVar};
 
-            res += '&pageSize=20';
+            res += '&pageSize=${params.numRows}';
 
             if (${sortFieldVar})
                 res += '&sortField=' + ${sortFieldVar};
