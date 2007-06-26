@@ -134,7 +134,6 @@ class DojoUtil {
 
         function ${idVar}_refreshTable() {
             var queryStr = ${idVar}_makeQueryStr();
-            alert(queryStr);
             dojo.io.bind({
                 url: '${params.url}' + queryStr,
                 method: "get",
