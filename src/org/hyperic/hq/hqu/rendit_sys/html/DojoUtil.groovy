@@ -93,7 +93,9 @@ class DojoUtil {
 
             if (${sortFieldVar})
                 res += '&sortField=' + ${sortFieldVar};
-          
+            if (${sortOrderVar})
+                res += '&sortOrder=' + ${sortOrderVar};
+
             return res;
         }
 
@@ -112,23 +114,27 @@ class DojoUtil {
             if (classN) {
                 if (classN == '' || classN == 'selectedDown') {
                     el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
-                    ${selClassVar} = el.className;
+                    ${selClassVar}  = el.className;
+                    ${sortOrderVar} = 1; 
                 } else if (classN == 'selectedUp') {
                     el.setAttribute((document.all ? 'className' : 'class'), "selectedDown");
                     ${selClassVar} = el.className;
+                    ${sortOrderVar} = -1;
                 }
             } else {
                 el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
                 ${selClassVar} = el.className;
+                ${sortOrderVar} = 1;
             }
 
             ${sortFieldVar} = el.getAttribute('field')
+            ${pageNumVar}   = 0;
             ${idVar}_refreshTable();
         }
 
         function ${idVar}_refreshTable() {
             var queryStr = ${idVar}_makeQueryStr();
-            
+            alert(queryStr);
             dojo.io.bind({
                 url: '${params.url}' + queryStr,
                 method: "get",
@@ -137,22 +143,22 @@ class DojoUtil {
                     AjaxReturn = data;
                     ${tableVar}.store.setData(data.data);
                     ${idVar}_highlightFixed();
-                    var sortColHead = data.sortField;
-                    var sortOrder   = data.sortOrder;
-                    var strOrder    = sortOrder.toString();
+                    ${sortFieldVar} = data.sortField;
+                    ${sortOrderVar} = data.sortOrder;
+                    var strOrder    = ${sortOrderVar}.toString();
                     var strColClass;
-                    if (strOrder == 'false') {
-                        strColClass = "selectedDown";
-                    } else {
+                    if (strOrder == '1') {
                         strColClass = "selectedUp";
+                    } else {
+                        strColClass = "selectedDown";
                     }
-                    if (sortColHead) {
+                    if (${sortFieldVar}) {
                         var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
                         var ths = thead.getElementsByTagName('th')
                         for (j = 0; j < ths.length; j++) {
                             var setClass = ths[j].className;
                             var getColStr = ths[j].firstChild.nodeValue;
-                            if (getColStr==sortColHead) {
+                            if (getColStr==${sortFieldVar}) {
                                 setClass=strColClass;
                             }
                         }
@@ -179,17 +185,18 @@ class DojoUtil {
         }
 
         function ${idVar}_setupPager() {
-            if (${pageNumVar} == 0) {
-                dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), "noprevious")
-            } else {
-                dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), "previousLeft")
+            var leftClazz = "noprevious";
+            
+            if (${pageNumVar} != 0) {
+                leftClazz = 'previousLeft';
             }
+            dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), leftClazz);
 
-            if (${lastPageVar} == true) {
-                dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), "nonext")
-            } else {
-                dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), "nextRight")
+            var rightClazz = "nonext";
+            if (${lastPageVar} == false) {
+                rightClazz = "nextRight";
             }
+            dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), rightClazz);
         }
 
         function ${idVar}_nextPage() {
@@ -245,7 +252,7 @@ class DojoUtil {
     static JSONObject processTableRequest(schema, params) {
         def sortField = params.getOne("sortField")
         def sortOrder = params.getOne("sortOrder", 
-                                      "${schema.defaultSortOrder}") != '1'
+                                      "${schema.defaultSortOrder}") == '1'
                                       
         def sortColumn                                      
         for (c in schema.columns) {
@@ -293,7 +300,7 @@ class DojoUtil {
         
 		[data      : jsonData, 
 		 sortField : sortColumn.description,
-		 sortOrder : sortOrder,
+		 sortOrder : sortOrder ? 1 : -1,
 		 pageNum   : pageNum,
 		 lastPage  : lastPage] as JSONObject
     }
