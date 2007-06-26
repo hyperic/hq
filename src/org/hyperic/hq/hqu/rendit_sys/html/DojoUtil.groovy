@@ -65,7 +65,6 @@ class DojoUtil {
         def id           = "${params.id}"
 	    def idVar        = "_hqu_${params.id}"
 	    def tableVar     = "${idVar}_table" 
-	    def selClassVar  = "${idVar}_selClass"
 	    def sortFieldVar = "${idVar}_sortField"
 	    def pageNumVar   = "${idVar}_pageNum"
 	    def lastPageVar  = "${idVar}_lastPage"
@@ -73,7 +72,6 @@ class DojoUtil {
 	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
         
-        var ${selClassVar};
         var ${sortFieldVar};
         var ${pageNumVar}  = 0;
         var ${lastPageVar} = false;
@@ -101,7 +99,7 @@ class DojoUtil {
         }
 
         function ${idVar}_setSortField(el) {
-            ${selClassVar} = '';
+            var selClass = '';
             var classN = el.className;
             var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
             var ths = thead.getElementsByTagName('th')
@@ -115,16 +113,16 @@ class DojoUtil {
             if (classN) {
                 if (classN == '' || classN == 'selectedDown') {
                     el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
-                    ${selClassVar}  = el.className;
+                    selClass  = el.className;
                     ${sortOrderVar} = 1; 
                 } else if (classN == 'selectedUp') {
                     el.setAttribute((document.all ? 'className' : 'class'), "selectedDown");
-                    ${selClassVar} = el.className;
+                    selClass = el.className;
                     ${sortOrderVar} = -1;
                 }
             } else {
                 el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
-                ${selClassVar} = el.className;
+                selClass = el.className;
                 ${sortOrderVar} = 1;
             }
 
