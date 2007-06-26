@@ -40,4 +40,8 @@ public class YesOrNo
     private YesOrNo(int code, String desc, String localeProp) {
         super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE));
     }
+    
+    public static YesOrNo valueFor(boolean isYes) {
+        return isYes ? YES : NO;
+    }
 }
