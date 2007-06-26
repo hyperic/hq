@@ -39,5 +39,10 @@ public class SybasePluginUtil
                         PROP_CONFIG_OPTION = "configoption",
                         TYPE_SP_SYSMON     = "sp_sysmon",
                         TYPE_STORAGE       = "storage",
-                        TYPE_SP_MONITOR_CONFIG = "sp_monitorconfig";
+                        TYPE_SP_MONITOR_CONFIG = "sp_monitorconfig",
+                        NUM_ACTIVE = "active",
+                        MAX_USED = "maxused",
+                        NUM_FREE = "free",
+                        NUM_REUSED = "reuse",
+                        PERCENT_ACTIVE = "utilizationratio";
 }

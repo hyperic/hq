@@ -75,7 +75,7 @@ public class SybaseServerDetector
                         PROP_USER     = SybaseMeasurementPlugin.PROP_USER,
                         PROP_PASSWORD = SybaseMeasurementPlugin.PROP_PASSWORD;
 
-    private Log log = LogFactory.getLog("SybaseServerDetector");
+    private static Log log = LogFactory.getLog("SybaseServerDetector");
 
     private static final String SYBASE_VERSION = "(Sybase)";
     private static final String PTQL_QUERY =
@@ -171,7 +171,7 @@ public class SybaseServerDetector
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
-        server.setProductConfig(productConfig);
+        setProductConfig(server, productConfig);
         server.setMeasurementConfig();
         server.setName(SERVER_NAME+" "+version);
         servers.add(server);

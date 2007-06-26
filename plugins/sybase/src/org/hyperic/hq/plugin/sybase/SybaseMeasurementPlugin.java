@@ -48,6 +48,9 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class SybaseMeasurementPlugin 
     extends JDBCMeasurementPlugin
 {
@@ -55,6 +58,7 @@ public class SybaseMeasurementPlugin
         "com.sybase.jdbc3.jdbc.SybDriver";
 
     private static final String DEFAULT_URL = SybasePluginUtil.DEFAULT_URL;
+    private static Log log = LogFactory.getLog(SybaseMeasurementPlugin.class.getName());
 
     private static final String PROP_INSTANCE = "instance",
                                 TYPE_SP_MONITOR_CONFIG =
@@ -63,7 +67,12 @@ public class SybaseMeasurementPlugin
                                 PROP_DATABASE = SybasePluginUtil.PROP_DATABASE,
                                 PROP_SEGMENT  = SybasePluginUtil.PROP_SEGMENT,
                                 PROP_PAGESIZE = SybasePluginUtil.PROP_PAGESIZE,
-                                PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION;
+                                PROP_CONFIG_OPTION = SybasePluginUtil.PROP_CONFIG_OPTION,
+                                PERCENT_ACTIVE     = SybasePluginUtil.PERCENT_ACTIVE,
+                                NUM_ACTIVE = SybasePluginUtil.NUM_ACTIVE,
+                                MAX_USED   = SybasePluginUtil.MAX_USED,
+                                NUM_FREE   = SybasePluginUtil.NUM_FREE,
+                                NUM_REUSED = SybasePluginUtil.NUM_REUSED;
 
     private static HashMap syb12Queries    = null;  // Sybase 12.5 only
     private static HashMap genericQueries  = null;  // Any
@@ -81,8 +90,12 @@ public class SybaseMeasurementPlugin
     protected Connection getConnection(String url,
                                        String user,
                                        String password)
-        throws SQLException {
-            String pass = (password == null) ? "" : password;
+        throws SQLException
+    {
+        String pass = (password == null) ? "" : password;
+        pass = (pass.matches("^\\s*$")) ? "" : pass;
+        log.debug("user -> "+user+
+                  "\npass -> |"+pass+"|");
         return DriverManager.getConnection(url, user, pass);
     }
 
@@ -266,7 +279,7 @@ public class SybaseMeasurementPlugin
                MetricNotFoundException
     {
         String objectName = metric.getObjectName(),
-               attr       = metric.getAttributeName();
+               alias      = metric.getAttributeName();
         if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
             && objectName.indexOf(TYPE_STORAGE) == -1)
             return super.getValue(metric);
@@ -275,12 +288,12 @@ public class SybaseMeasurementPlugin
         {
             Connection conn = getCachedConnection(metric);
             if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1)
-                return getSP_MonitorConfigValue(metric, attr, conn);
+                return getSP_MonitorConfigValue(metric, alias, conn);
             else // objectName.indexOf(TYPE_STORAGE) != -1
-                return getStorageValue(metric, attr, conn);
+                return getStorageValue(metric, alias, conn);
         }
         catch (SQLException e) {
-            String msg = "Query failed for "+attr+": "+e.getMessage();
+            String msg = "Query failed for "+alias+": "+e.getMessage();
             throw new MetricNotFoundException(msg, e);
         }
     }
@@ -360,13 +373,103 @@ public class SybaseMeasurementPlugin
     }
 
     private MetricValue getSP_MonitorConfigValue(Metric metric,
-                                                 String attr,
+                                                 String alias,
                                                  Connection conn)
         throws SQLException
     {
         String configOpt = metric.getObjectProperty(PROP_CONFIG_OPTION);
-        float value = getPercentActive(conn, configOpt);
+        float value = -1;
+        if (alias.equalsIgnoreCase(MAX_USED))
+            value = getMaxUsed(conn, configOpt);
+        else if (alias.equalsIgnoreCase(NUM_REUSED))
+            value = getNumReuse(conn, configOpt);
+        else if (alias.equalsIgnoreCase(NUM_FREE))
+            value = getNumFree(conn, configOpt);
+        else if (alias.equalsIgnoreCase(NUM_ACTIVE))
+            value = getNumActive(conn, configOpt);
+        else //if (alias.equalsIgnoreCase(PERCENT_ACTIVE))
+            value = getPercentActive(conn, configOpt);
         return new MetricValue(value, System.currentTimeMillis());
+    }
+
+    private float getNumActive(Connection conn, String configOpt)
+        throws SQLException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
+            if (rs.next())
+                return rs.getFloat("Num_active");
+        }
+        finally
+        {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+        }
+        throw new SQLException();
+    }
+
+    private float getNumFree(Connection conn, String configOpt)
+        throws SQLException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
+            if (rs.next())
+                return rs.getFloat("Num_free");
+        }
+        finally
+        {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+        }
+        throw new SQLException();
+    }
+
+    private float getNumReuse(Connection conn, String configOpt)
+        throws SQLException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
+            if (rs.next())
+                return rs.getFloat("Num_Reuse");
+        }
+        finally
+        {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+        }
+        throw new SQLException();
+    }
+
+    private float getMaxUsed(Connection conn, String configOpt)
+        throws SQLException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
+            if (rs.next())
+                return rs.getFloat("Max_Used");
+        }
+        finally
+        {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+        }
+        throw new SQLException();
     }
 
     private float getPercentActive(Connection conn, String configOpt)
@@ -379,7 +482,7 @@ public class SybaseMeasurementPlugin
             stmt = conn.createStatement();
             rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
             if (rs.next())
-                return rs.getFloat("Pct_act")/100;
+                return rs.getFloat("Pct_act");
         }
         finally
         {

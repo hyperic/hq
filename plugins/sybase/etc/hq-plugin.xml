@@ -189,7 +189,7 @@
 
     <config>
       <option name="jdbcUrl"
-              description="JDBC Url"
+              description="JDBC Url (localhost will not work!!)"
               default="jdbc:sybase:Tds:localhost:4100/master"/>
       <option name="jdbcUser"
               description="JDBC User"
@@ -298,7 +298,27 @@
         ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
       </filter>
       <metrics>
-        <metric name="Resource Utilization Ratio"
+        <metric name="Active"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Max Used"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="static"/>
+        <metric name="Free"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Reuse"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Utilization Ratio"
                 category="UTILIZATION"
                 indicator="true"
                 units="percentage"
