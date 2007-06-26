@@ -234,11 +234,11 @@ class DojoUtil {
             </thead>
           </table>
 
-         <div style="padding-bottom:5px;padding-top:5px;background:#eeeeee;border:0px solid #D5D8DE;width:100%;">
-             <div style="float:right;padding-right:20px;">
-                 <div id="${idVar}_pageLeft" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+         <div class="pageCont">
+             <div class="pageButtonCont">
+                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:16px;float: left;" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
                  <div id="pageNumbers">&nbsp;</div>
-                 <div id="${idVar}_pageRight" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:16px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
              <div style="clear: both;"></div>
          </div>

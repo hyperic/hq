@@ -58,6 +58,19 @@
 			overflow:auto;
 		}
 
+#alert .pageCont {
+ padding-bottom:5px;
+ padding-top:5px;
+ background:#eeeeee;
+ border:0px solid #D5D8DE;
+ width:100%;
+}
+
+#alert .pageButtonCont {
+ float:right;
+ padding-right:20px;
+}
+
 #alert #pageLeft {
     position: relative;
     width: 19px;
@@ -67,6 +80,7 @@
 #alert .previousLeft {
     background-position: top left;
     background-image: url( "/images/tbb_pageleft.gif" );
+    cursor:pointer;
 }
 
 #alert .noprevious {
@@ -83,6 +97,7 @@
 #alert .nextRight {
     background-position: top left;
     background-image: url( "/images/tbb_pageright.gif" );
+    cursor:pointer;
 }
 
 #alert .nonext {
