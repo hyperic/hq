@@ -68,6 +68,8 @@ public class DataCompressEJBImpl
     extends SessionEJB 
     implements SessionBean {
 
+    // !!!NEEDS TO BE CHANGED WHEN WE CONVERT DB FROM long to int
+    private static final long ONE_HOUR = 3600000;
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
@@ -215,17 +217,41 @@ public class DataCompressEJBImpl
     public void purgeBackfilled() throws SQLException, NamingException {
         Connection conn = null;
         Statement stmt = null;
+        ResultSet rs = null;
         try {
+            long min_time = 0;
+            long max_time = 0;
             conn = DBUtil
                     .getConnByContext(getInitialContext(), DATASOURCE_NAME);
             stmt = conn.createStatement();
-            String sql = "delete from " + BF_TABLE + " using " +
-                         BF_TABLE + " b, " + METRIC_DATA_VIEW + " m " +
-                         "where m.measurement_id = b.measurement_id and " +
-                               "m.timestamp = b.timestamp";
-            stmt.execute(sql);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            String sql = "SELECT min(timestamp) FROM "+BF_TABLE+
+                         " HAVING min(timestamp) != null";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                min_time = rs.getLong(1);
+
+            sql = "SELECT max(timestamp) FROM "+BF_TABLE+
+                  " HAVING max(timestamp) != null";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                max_time = rs.getLong(1);
+
+            while (min_time < max_time)
+            {
+                sql = "delete from " + BF_TABLE + " using " +
+                      BF_TABLE + " b, " + METRIC_DATA_VIEW + " m " +
+                      "where m.measurement_id = b.measurement_id and " +
+                      "m.timestamp = b.timestamp "+
+                      "and b.timestamp between "+min_time+" and "+
+                      (min_time+=ONE_HOUR);
+                log.debug("Purging Backfilled data between "+
+                          TimeUtil.toString(min_time-ONE_HOUR)+" and "+
+                          TimeUtil.toString(min_time));
+                stmt.execute(sql);
+            }
+        }
+        finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
         
