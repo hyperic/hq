@@ -91,6 +91,13 @@ public abstract class AlertSortField
             return alert + ".ackedBy";
         }
 
+        /**
+         * AckedBy is unsortable, since it would just sort by the integer
+         * of the user who acknowledged it.  Instead, we'd like to sort on
+         * their name or something textual which makes sense.  Until we have
+         * a real relationship between alerts and authzsubjects, this will
+         * need to remain unsortable.
+         */
         public boolean isSortable() {
             return false;
         }
