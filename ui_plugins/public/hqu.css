@@ -112,3 +112,7 @@
     padding-right: 5px;
     float: left;
 }
+
+.alertHighlight {
+    background-color: #fa8672;
+}
