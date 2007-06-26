@@ -57,3 +57,43 @@
 			font-size:0.9em;
 			overflow:auto;
 		}
+
+#alert #pageLeft {
+    position: relative;
+    width: 19px;
+    float: left;
+}
+
+#alert .previousLeft {
+    background-position: top left;
+    background-image: url( "/images/tbb_pageleft.gif" );
+}
+
+#alert .noprevious {
+    background-position: top left;
+    background-image: url( "/images/tbb_pageleft_gray.gif" );
+}
+
+#alert #pageRight {
+    position: relative;
+    width: 19px;
+    float: left;
+}
+
+#alert .nextRight {
+    background-position: top left;
+    background-image: url( "/images/tbb_pageright.gif" );
+}
+
+#alert .nonext {
+    background-position: top left;
+    background-image: url( "/images/tbb_pageright_gray.gif" );
+}
+
+#alert #pageNumbers {
+    position: relative;
+    display: block;
+    padding-left: 5px;
+    padding-right: 5px;
+    float: left;
+}
