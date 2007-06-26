@@ -100,8 +100,15 @@ public class AlertDAO extends HibernateDAO {
                            "join rl.subjects s " +
                            "where s.id = :subj and o.name in (:ops) and " +
                                  "r.resourceType = o.resourceType) " +
-                ") order by " + sort.getSortString("a", "d", "r") +
+                ") order by " + sort.getSortString("a", "d", "r") + 
                 (pageInfo.isAscending() ? "" : " DESC");
+        
+        // If sorting by something other than date, do a secondary sort by
+        // date, descending
+        if (!sort.equals(AlertSortField.DATE)) {
+            sql += ", " + AlertSortField.DATE.getSortString("a", "d", "r") +
+                   " DESC";
+        }
             
         q = getSession().createQuery(sql)
             .setLong("begin", begin)
