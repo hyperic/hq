@@ -430,4 +430,13 @@
     </service>
 
   </server>
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Zimbra">
+    <![CDATA[
+    <p>
+      Here is the link to the Zimbra wiki that describes a lot of the plugin metrics:
+      http://wiki.zimbra.com/index.php?title=Log_Files
+    </p>
+    ]]>
+  </help>
 </plugin>
