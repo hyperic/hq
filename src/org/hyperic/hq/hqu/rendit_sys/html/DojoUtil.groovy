@@ -61,35 +61,43 @@ class DojoUtil {
      *   schema:   ** TODO ** Document me
      */
     static String dojoTable(params) {
-        def id          = "${params.id}"
-	    def idVar       = "_hqu_${params.id}"
-	    def tableVar    = "${idVar}_table" 
-	    def selClassVar = "${idVar}_selClass"
-	    def queryStrVar = "${idVar}_queryStr" 
+        def id           = "${params.id}"
+	    def idVar        = "_hqu_${params.id}"
+	    def tableVar     = "${idVar}_table" 
+	    def selClassVar  = "${idVar}_selClass"
+	    def sortFieldVar = "${idVar}_sortField"
+	    def pageNumVar   = "${idVar}_pageNum"
+	    def lastPageVar  = "${idVar}_lastPage"
+	    def sortOrderVar = "${idVar}_sortOrder"
 	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
         
         var ${selClassVar};
-        var ${queryStrVar};
+        var ${sortFieldVar};
+        var ${pageNumVar}  = 0;
+        var ${lastPageVar} = false;
+        var ${sortOrderVar};
+
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
 	                                               {alternateRows:false,
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
-
-            dojo.io.bind({
-	            url:      '${params.url}' + "?" + ${queryStrVar} + "=" + ${selClassVar},
-	            method:   "get",
-	            mimetype: "text/json-comment-filtered",
-                load: function(type, data, evt) {
-	                AjaxReturn = data;
-                    ${tableVar}.store.setData(data.data);
-                     ${idVar}_highlightFixed();
-                }
-            });
+            ${idVar}_refreshTable();
 	    });    
 
-        function ${idVar}_setColClass(el) {
+        function ${idVar}_makeQueryStr() {
+            var res = '?pageNum=' + ${pageNumVar};
+
+            res += '&pageSize=20';
+
+            if (${sortFieldVar})
+                res += '&sortField=' + ${sortFieldVar};
+          
+            return res;
+        }
+
+        function ${idVar}_setSortField(el) {
             ${selClassVar} = '';
             var classN = el.className;
             var thead = dojo.byId("${id}").getElementsByTagName("thead")[0];
@@ -113,14 +121,16 @@ class DojoUtil {
                 el.setAttribute((document.all ? 'className' : 'class'), "selectedUp");
                 ${selClassVar} = el.className;
             }
-            ${idVar}_refreshTable(el);
+
+            ${sortFieldVar} = el.getAttribute('field')
+            ${idVar}_refreshTable();
         }
 
-        function ${idVar}_refreshTable(el) {
-            var field = el.getAttribute('field')
-            var queryStr = 'sortField=' + field;
+        function ${idVar}_refreshTable() {
+            var queryStr = ${idVar}_makeQueryStr();
+            
             dojo.io.bind({
-                url: '${params.url}' + "?" + queryStr,
+                url: '${params.url}' + queryStr,
                 method: "get",
                 mimetype: "text/json-comment-filtered",
                 load: function(type, data, evt) {
@@ -147,6 +157,9 @@ class DojoUtil {
                             }
                         }
                     }
+                    ${pageNumVar}  = data.pageNum;
+                    ${lastPageVar} = data.lastPage;
+                    ${idVar}_setupPager();
                 }
             });
         }
@@ -165,6 +178,33 @@ class DojoUtil {
             }
         }
 
+        function ${idVar}_setupPager() {
+            if (${pageNumVar} == 0) {
+                dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), "noprevious")
+            } else {
+                dojo.byId("${idVar}_pageLeft").setAttribute((document.all ? 'className' : 'class'), "previousLeft")
+            }
+
+            if (${lastPageVar} == true) {
+                dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), "nonext")
+            } else {
+                dojo.byId("${idVar}_pageRight").setAttribute((document.all ? 'className' : 'class'), "nextRight")
+            }
+        }
+
+        function ${idVar}_nextPage() {
+            if (${lastPageVar} == false)  {
+                ${pageNumVar}++;
+                ${idVar}_refreshTable();
+            }
+        }
+
+        function ${idVar}_previousPage() {
+            if (${pageNumVar} != 0) {
+                ${pageNumVar}--;
+                ${idVar}_refreshTable();
+            }
+        }
 	    </script>
         """)
 	    
@@ -181,13 +221,22 @@ class DojoUtil {
 	        field = field.description
 	        
 	        res << "<th field='${field}' dataType='String' align='left'"
-	        res << " onclick='${idVar}_setColClass(this);'>"
+	        res << " onclick='${idVar}_setSortField(this);'>"
 	        res << "${label}</th>"
 	    }
 	    res << """
               </tr>
             </thead>
           </table>
+
+         <div style="padding-bottom:5px;padding-top:5px;background:#eeeeee;border:0px solid #D5D8DE;width:100%;">
+             <div style="float:right;padding-right:20px;">
+                 <div id="${idVar}_pageLeft" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+                 <div id="pageNumbers">&nbsp;</div>
+                 <div id="${idVar}_pageRight" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+             </div>
+             <div style="clear: both;"></div>
+         </div>
         """
 	    
 		res.toString()	    
