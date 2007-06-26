@@ -189,7 +189,7 @@
 
     <config>
       <option name="jdbcUrl"
-              description="JDBC Url (localhost will not work!!)"
+              description="JDBC Url (NOTE: localhost may not work)"
               default="jdbc:sybase:Tds:localhost:4100/master"/>
       <option name="jdbcUser"
               description="JDBC User"
