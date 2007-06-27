@@ -4,8 +4,16 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.hyperic.hibernate.SortField
 import org.hyperic.hibernate.PageInfo
+import org.hyperic.hq.hqu.rendit.i18n.BundleMapFacade
 
 class DojoUtil {
+    private static ResourceBundle RSRC_BUNDLE = 
+        ResourceBundle.getBundle("org.hyperic.hq.hqu.rendit.Resources",
+                                 Locale.getDefault(), 
+                                 Thread.currentThread().contextClassLoader)
+    private static BundleMapFacade BUNDLE = 
+        new BundleMapFacade(RSRC_BUNDLE)
+
     /**
      * Output a header which sets up the inclusion of the DOJO javascript
      * framework.  This must be called before using any other DOJO methods.
@@ -198,7 +206,8 @@ class DojoUtil {
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
             var pageNumDisplay = dojo.byId("pageNumbers");
-            pageNumDisplay.innerHTML = 'Page ' + (${pageNumVar} + 1);
+            pageNumDisplay.innerHTML = "${BUNDLE['dojoutil.PageNum']} " + 
+                                       (${pageNumVar} + 1); 
 
             if (${pageNumVar} != 0) {
                 leftClazz = 'previousLeft';
@@ -230,7 +239,7 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	     <div class="text"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">Next</div>
+	     <div class="text"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	         <div class="pageButtonCont">
                  <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:20px;float: left;"
                       class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
@@ -238,7 +247,8 @@ class DojoUtil {
                  <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
                       class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
-              <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;"><span class="boldText">Click column name to sort (not all columns are sortable)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Previous</div>
+             <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;">
+                 <span class="boldText">${BUNDLE['dojoutil.ColumnSortInstructions']}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BUNDLE['dojoutil.Previous']}</div>
                                  
              <div style="clear: both;"></div>
          </div>
