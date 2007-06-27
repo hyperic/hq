@@ -58,54 +58,57 @@
 			overflow:auto;
 		}
 
-#alert .pageCont {
+.pageCont {
  padding-bottom:5px;
  padding-top:5px;
- background:#eeeeee;
- border:0px solid #D5D8DE;
- width:100%;
+ background:#eff0f2;
+ border-top:1px solid #D5D8DE;
+     border-right:1px solid #D5D8DE;
+     border-left:1px solid #D5D8DE;
+ 
 }
 
-#alert .pageButtonCont {
- float:right;
- padding-right:20px;
+.pageButtonCont {
+    display:block;
+    position:relative;
+    float:right;
 }
 
-#alert #pageLeft {
+#pageLeft {
     position: relative;
     width: 19px;
     float: left;
 }
 
-#alert .previousLeft {
+ .previousLeft {
     background-position: top left;
-    background-image: url( "/images/tbb_pageleft.gif" );
+    background-image: url( "/images/page_left.gif" );
     cursor:pointer;
 }
 
-#alert .noprevious {
+.noprevious {
     background-position: top left;
-    background-image: url( "/images/tbb_pageleft_gray.gif" );
+    background-image: url( "/images/page_left_gray.gif" );
 }
 
-#alert #pageRight {
+#pageRight {
     position: relative;
     width: 19px;
     float: left;
 }
 
-#alert .nextRight {
+.nextRight {
     background-position: top left;
-    background-image: url( "/images/tbb_pageright.gif" );
+    background-image: url( "/images/page_right.gif" );
     cursor:pointer;
 }
 
-#alert .nonext {
+.nonext {
     background-position: top left;
-    background-image: url( "/images/tbb_pageright_gray.gif" );
+    background-image: url( "/images/page_right_gray.gif" );
 }
 
-#alert #pageNumbers {
+#pageNumbers {
     position: relative;
     display: block;
     padding-left: 5px;
@@ -115,4 +118,8 @@
 
 .alertHighlight {
     background-color: #fa8672;
+}
+
+.boldText {
+   font-weight:bold;
 }

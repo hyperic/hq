@@ -204,6 +204,20 @@ class DojoUtil {
         """)
 	    
 	    res << """
+	    <div class="pageCont">
+	     <div class="text"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">Next</div>
+	         <div class="pageButtonCont">
+                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:20px;float: left;"
+                      class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+                 <div id="pageNumbers">&nbsp;</div>
+                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
+                      class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+             </div>
+              <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;"><span class="boldText">Click column name to sort</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Previous</div>
+                                 
+             <div style="clear: both;"></div>
+         </div>
+         <div style="clear: both;"></div>
           <table id='${id}'>
             <thead>
               <tr>
@@ -230,17 +244,6 @@ class DojoUtil {
               </tr>
             </thead>
           </table>
-
-         <div class="pageCont">
-             <div class="pageButtonCont">
-                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:16px;float: left;" 
-                      class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-                 <div id="pageNumbers">&nbsp;</div>
-                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:16px;float: left;" 
-                      class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
-             </div>
-             <div style="clear: both;"></div>
-         </div>
         """
 	    
 		res.toString()	    
