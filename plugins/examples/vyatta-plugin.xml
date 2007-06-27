@@ -162,11 +162,6 @@
     <filter name="template"
             value="${snmp.template}:${alias}:${index}"/>
 
-    <!-- note 'if-' prefix on several templates is to bypass the
-         snmp: proxy and use NetworkInterfaceMeasurementPlugin to
-         conditionally handle 64 bit counters -->
-    <filter name="64bit-template" value="if-${template}"/>
-
     <server>
       <plugin type="autoinventory"
               class="org.hyperic.hq.plugin.netdevice.NetworkDeviceDetector"/>
@@ -182,30 +177,24 @@
 
         <plugin type="autoinventory"/>
 
-        <plugin type="measurement"
-                class="org.hyperic.hq.plugin.netdevice.NetworkInterfaceMeasurementPlugin"/>
-
         <metric name="Availability"
                 template="${snmp.template},Avail=true:ifOperStatus:${index}"
                 indicator="true"/>
 
         <metric name="Bytes Received"
-                alias="ifInOctets"
-                template="${64bit-template}"
+                alias="ifHCInOctets"
                 category="THROUGHPUT"
                 indicator="true"
                 units="B"
                 collectionType="trendsup"/>
 
         <metric name="Inbound Packets"
-                alias="ifInUcastPkts"
-                template="${64bit-template}"
+                alias="ifHCInUcastPkts"
                 category="THROUGHPUT"
                 collectionType="trendsup"/>
 
         <metric name="Inbound Multicast Packets"
                 alias="ifInNUcastPkts"
-                template="${64bit-template}"
                 category="THROUGHPUT"
                 collectionType="trendsup"/>
 
@@ -221,8 +210,7 @@
                 collectionType="trendsup"/>
 
         <metric name="Bytes Sent"
-                alias="ifOutOctets"
-                template="${64bit-template}"
+                alias="ifHCOutOctets"
                 category="THROUGHPUT"
                 indicator="true"
                 units="B"
@@ -235,14 +223,12 @@
 
         <metric name="Outbound Multicast Packets"
                 alias="ifOutNUcastPkts"
-                template="${64bit-template}"
                 category="THROUGHPUT"
                 indicator="true"
                 collectionType="trendsup"/>
 
         <metric name="Outbound Packet Discards"
                 alias="ifOutDiscards"
-                template="${64bit-template}"
                 category="THROUGHPUT"
                 collectionType="trendsup"/>
 
