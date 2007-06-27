@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -38,12 +37,12 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinition 
     extends PersistedObject 
@@ -182,6 +181,13 @@ public class AlertDefinition
         _description = description;
     }
 
+    /**
+     * Returns the same thing as getPriority(), though a typesafe enum
+     */
+    public AlertSeverity getSeverity() {
+        return AlertSeverity.findByCode(getPriority());
+    }
+    
     public int getPriority() {
         return _priority;
     }
