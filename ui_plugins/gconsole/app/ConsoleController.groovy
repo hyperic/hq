@@ -51,7 +51,8 @@ sess.createCriteria(persistedClass).
 			writer.write(code)
 		}
 		
-		def eng = new GroovyScriptEngine('.')
+		def eng = new GroovyScriptEngine('.', 
+		                                 Thread.currentThread().contextClassLoader)
 		def res
 		try {
 			res = eng.run(tmp.absolutePath, new Binding())
