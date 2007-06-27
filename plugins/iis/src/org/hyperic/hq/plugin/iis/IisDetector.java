@@ -52,15 +52,7 @@ public class IisDetector
     extends ServerDetector
     implements RegistryServerDetector {
 
-    static final String SERVER_NAME = "IIS";
-
     static final String VHOST_NAME = "VHost";
-
-    static final String VERSION_6X  = "6.x";
-
-    // Binaries that are checked during registry scans
-    private static final String INETINFO = "inetinfo.exe";
-    private static final String SVCHOST  = "svchost.exe -k iissvc";
 
     // Registry path's and keys
     private static final String REG_INET = "SOFTWARE\\Microsoft\\InetStp";
@@ -81,17 +73,7 @@ public class IisDetector
     {
         String pluginVersion = getTypeInfo().getVersion();
         
-        if ((path.indexOf(INETINFO) != -1 && 
-             !pluginVersion.equals(VERSION_6X)) || 
-            (path.indexOf(SVCHOST) != -1 && 
-             pluginVersion.equals(VERSION_6X))) {
-
-            // Found one.  The installpath is one directory up.
-            path = getParentDir(path);
-        }
-        else {
-            return null;
-        }
+        path = getParentDir(path);
 
         try {
             RegistryKey versionInfo = 
@@ -102,7 +84,7 @@ public class IisDetector
                 versionInfo.getIntValue(REG_INET_MINORVER);
 
             String version = majorVersion + ".x";
-            
+
             if (!pluginVersion.equals(version)) {
                 // IIS version does not match the detector version.  Bypass
                 // for now, the other detector will pick it up.
@@ -192,30 +174,34 @@ public class IisDetector
 
             IisMetaBase info = (IisMetaBase)websites.get(siteName);
 
-            if (info == null) {
-                continue;
-            }
-
             ConfigResponse cprops = new ConfigResponse();
-            ConfigResponse metricProps = getMeasurementConfig(info);
+            ConfigResponse metricProps;
             Properties rtProps = new Properties();
+            if (info != null) {
+                metricProps = getMeasurementConfig(info);
+                if (info.path != null) {
+                    cprops.setValue("docroot", info.path);
+                }
+            }
+            else {
+                //XXX vista
+                metricProps = new ConfigResponse();
+            }
 
             // Auto-configure measurement properties.
             metricProps.setValue(IisMeasurementPlugin.PROP_IISHOST,
                                  siteName);
             
-            if (info.path != null) {
-                cprops.setValue("docroot", info.path);
-            }
-
             // Auto-configure response-time properties.  IIS 5.x and 6.x put
             // logs by default in system32.  (Even though IIS 5.x installs
             // into C:\Windows\System32\inetsrv).  Should try to get this
             // info from either metabase or the registry, though this will
             // cover most cases.
-            rtProps.setProperty(IisRtPlugin.CONFIG_LOGDIR,
-                                "C:\\Windows\\System32\\LogFiles\\W3SVC" +
-                                info.id);
+            if (info != null) {
+                rtProps.setProperty(IisRtPlugin.CONFIG_LOGDIR,
+                                    "C:\\Windows\\System32\\LogFiles\\W3SVC" +
+                                    info.id);
+            }
             rtProps.setProperty(IisRtPlugin.CONFIG_INTERVAL, "60");
             rtProps.setProperty(IisRtPlugin.CONFIG_LOGMASK, "*.log");
 

@@ -759,4 +759,8 @@
   <server name="IIS"
           version="6.x"
           include="5.x"/>
+
+  <server name="IIS"
+          version="7.x"
+          include="6.x"/>
 </plugin>
