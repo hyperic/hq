@@ -135,6 +135,9 @@ public class AlertDefinitionManagerEJBImpl
             watch.markTimeEnd("delete children");
         }
         
+        // Disassociate from Resource
+        alertdef.setResource(null);
+        
         // Disassociate from parent, too
         alertdef.setParent(null);
         
