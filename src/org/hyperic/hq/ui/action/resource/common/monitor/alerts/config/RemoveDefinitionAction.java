@@ -114,8 +114,7 @@ public class RemoveDefinitionAction extends BaseAction {
         
         if (rdForm.isDeleteClicked()) {
             if (rdForm.getAetid() != null) {
-                boss.deleteResourceTypeAlertDefinitions(sessionId.intValue(),
-                                                        defs);
+                boss.deleteAlertDefinitions(sessionId.intValue(), defs);
                 params.put(Constants.APPDEF_RES_TYPE_ID, rdForm.getAetid());
             }
             else {

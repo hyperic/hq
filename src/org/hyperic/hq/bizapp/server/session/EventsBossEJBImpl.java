@@ -860,19 +860,6 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * Delete a collection of alert definitions for a type
-     *
-     * @ejb:interface-method
-     */
-    public void deleteResourceTypeAlertDefinitions(int sessionID, Integer[] ids)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               RemoveException, PermissionException 
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        getADM().deleteAlertDefinitions(subject, ids);
-    }
-
-    /**
      * Delete list of alerts
      *
      * @ejb:interface-method
