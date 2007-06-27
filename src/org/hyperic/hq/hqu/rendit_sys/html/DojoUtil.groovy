@@ -103,7 +103,7 @@ class DojoUtil {
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
-	                                               {alternateRows:false,
+	                                               {alternateRows:true,
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
             ${tableVar}.createSorter = function(a) { return null; };
