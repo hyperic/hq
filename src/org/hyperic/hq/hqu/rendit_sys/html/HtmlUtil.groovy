@@ -17,7 +17,13 @@ class HtmlUtil {
      *           of the rest of the URL;  
      *           E.g. absolute:'http://localhost:7080/web'
      * resource: If set, will call resource.urlFor to tack on the link to
-     *           the resource
+     *           the resource.  Some resource urls have additional context
+     *           which point at different pages (for instance, an appdef
+     *           resource can have a resourceContext of 'alert' which will
+     *           link to that resource's alert tab.  See the documentation for
+     *           the resource's urlFor for more information.
+     * resourceContext:  If specified, will be passed to the resource's urlFor  
+     *                   to provide a finer-grained control of the link.   
      *
      * Any additional values in the map will be passed as query parameters
      */
@@ -46,7 +52,12 @@ class HtmlUtil {
         }
         
         if (opts['resource']) {
-            res += opts['resource'].urlFor()
+            def resourceContext
+            if (opts.containsKey('resourceContext')) {
+                resourceContext = opts.resourceContext
+                opts.remove('resourceContext')
+            }
+            res += opts['resource'].urlFor(resourceContext)
             opts.remove('resource')
         }
         
