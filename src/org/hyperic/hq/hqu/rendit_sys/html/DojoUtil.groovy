@@ -103,7 +103,7 @@ class DojoUtil {
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
-	                                               {alternateRows:true,
+	                                               {alternateRows:false,
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
             ${tableVar}.createSorter = function(a) { return null; };
@@ -167,11 +167,34 @@ class DojoUtil {
                     ${tableVar}.store.setData(data.data);
                     ${pageNumVar}  = data.pageNum;
                     ${lastPageVar} = data.lastPage;
-                    ${idVar}_setupPager();
+                    ${idVar}_setupPager(data.data);
+                    highlightRow(data.data);
                 }
             });
         }
 
+       function highlightRow(el) {
+        for (i = 0; i < el.length; i++) {
+            var id = el[i].id;
+            var body = document.getElementById("${id}");
+            var trs = body.getElementsByTagName('tr');
+            var styleClassVal = el[i].styleClass;
+            if (id && (styleClassVal && styleClassVal != '')) {
+                for (b = 0; b < trs.length; b++) {
+                    var vals = trs[b].getAttribute("value");
+                    var trClass =  trs[b].class;
+                    if (id == vals) {
+                        var rowTDs = trs[b].getElementsByTagName('td');
+                            for (k = 0; k < rowTDs.length; k++) {
+                            rowTDs[k].setAttribute((document.all ? 'className' : 'class'), styleClassVal);
+                            }
+                    }
+
+                }
+            }
+        }
+    }
+         
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
             var pageNumDisplay = dojo.byId("pageNumbers");
