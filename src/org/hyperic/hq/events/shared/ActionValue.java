@@ -28,12 +28,6 @@
  */
 package org.hyperic.hq.events.shared;
 
-import java.rmi.RemoteException;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.EntityContext;
-import javax.ejb.RemoveException;
-
 /**
  * Value object for Action.
  *
