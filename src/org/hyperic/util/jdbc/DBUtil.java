@@ -375,6 +375,10 @@ public class DBUtil {
     /**
      * Is the database MySQL?
      */
+    public static boolean isMySQL (Connection c) throws SQLException {
+        int type = getDBType(c);
+        return isMySQL(type);
+    }
     public static boolean isMySQL(int type) {
         return type == DATABASE_MYSQL5;
     }
