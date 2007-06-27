@@ -36,6 +36,8 @@ import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentCommandsAPI;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -244,10 +246,11 @@ class ImportHelper
 
         try {
             try {
-                Integer pk  = _platMan.createPlatform(_subject,
-                                                      pType.getId(),
-                                                      aPlatform, agentPk);
-                aPlatform = _platMan.getPlatformValueById(_subject, pk);
+                Platform plat  = _platMan.createPlatform(_subject,
+                                                         pType.getId(),
+                                                         aPlatform, agentPk);
+                aPlatform =
+                    _platMan.getPlatformValueById(_subject, plat.getId());
             } catch (PlatformNotFoundException e) {
                 throw new BatchImportException("Unable to find the platform " +
                                                " we just created");
@@ -372,16 +375,8 @@ class ImportHelper
         aServer.setLocation(server.getLocation());
 
         try {
-            Integer pk  = _servMan.createServer(_subject,
-                                                plat.getId(),
-                                                sType.getId(),
-                                                aServer);
-            try {
-                aServer = _servMan.getServerById(_subject, pk);
-            } catch (ServerNotFoundException e) {
-                throw new BatchImportException("Could not find server we " +
-                                               " just created");
-            }
+            _servMan.createServer(_subject, plat.getId(), sType.getId(),
+                                  aServer);
         } catch(PlatformNotFoundException exc){
             throw new BatchImportException("Error creating server '" + name +
                                            "': It depends on platform " +
