@@ -175,7 +175,7 @@ class DojoUtil {
                     ${tableVar}.store.setData(data.data);
                     ${pageNumVar}  = data.pageNum;
                     ${lastPageVar} = data.lastPage;
-                    ${idVar}_setupPager(data.data);
+                    ${idVar}_setupPager();
                     highlightRow(data.data);
                 }
             });
@@ -239,7 +239,7 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	     <div class="text"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+	     <div class="boldText"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	         <div class="pageButtonCont">
                  <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:20px;float: left;"
                       class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
@@ -247,8 +247,7 @@ class DojoUtil {
                  <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
                       class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
-             <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;">
-                 <span class="boldText">${BUNDLE['dojoutil.ColumnSortInstructions']}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${BUNDLE['dojoutil.Previous']}</div>
+             <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
                                  
              <div style="clear: both;"></div>
          </div>
