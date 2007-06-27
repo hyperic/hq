@@ -241,15 +241,9 @@ public class RuntimeReportProcessor {
         if (appdefPlatform == null) {
             // Add the platform
             log.info("Creating new platform: " + aiplatform);
-            try {
-                Integer pk = platformMgr.createPlatform(subject, aiplatform);
-                appdefPlatform = platformMgr.getPlatformValueById(subject, pk);
-            } catch (PlatformNotFoundException e) {
-                // should never happen
-                log.fatal("Failed to find platform we just created!", e);
-                throw new SystemException("Unable to find the platform " + 
-                                          " we just created", e);
-            }
+            Platform platform =
+                platformMgr.createPlatform(subject, aiplatform);
+            appdefPlatform = platform.getPlatformValue();
         } else {
             // Platform already exists, don't update it, only update servers
             // that are within it.
@@ -396,23 +390,13 @@ public class RuntimeReportProcessor {
                 AuthzSubjectValue serverOwner
                     = subjectMgr.findSubjectByName(subject, serverOwnerName);
                 Integer platformPK = platform.getId();
-                Integer pk = serverMgr.createServer(serverOwner,
-                                                    platformPK,
-                                                    serverTypePK,
-                                                    foundAppdefServer);
-                try {
-                    foundAppdefServer = serverMgr.getServerById(serverOwner, pk);
-                } catch (ServerNotFoundException e) {
-                    log.fatal("Could not find server we just created", e);
-                    throw new SystemException("Could not find server we"
-                                                 + " just created", e);
-                }
-
-
+                Server server = serverMgr.createServer(serverOwner,
+                                                       platformPK,
+                                                       serverTypePK,
+                                                       foundAppdefServer);
 
                 log.info("New server created: " + foundAppdefServer.getName() +
-                         " (id=" + foundAppdefServer.getId() + ")");
-
+                         " (id=" + server.getId() + ")");
             } else {
                 update = true;
                 // UPDATE SERVER
