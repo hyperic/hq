@@ -5,7 +5,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
 import org.hyperic.hq.events.server.session.Alert
 
 class AlertCategory {
-    static String urlFor(Alert a) {
+    static String urlFor(Alert a, String context) {
         def d = a.alertDefinition
         "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}"
     }
