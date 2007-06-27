@@ -187,30 +187,24 @@ public class ApacheSNMP {
             new BufferedReader(new FileReader(file));
 
         final String portToken = "agentaddress";
-        final String listenToken = "com2sec";
 
-        while ((line = reader.readLine()) != null) {
-            line = line.trim();
+        try {
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
 
-            if (line.startsWith(portToken)) {
-                config.port = line.substring(portToken.length()).trim();
-            }
-            else if (line.startsWith(listenToken)) {
-                StringTokenizer tok = new StringTokenizer(line.trim());
-                if (tok.countTokens() == 4) {
-                    tok.nextToken(); //com2sec
-                    if (!"local".equals(tok.nextToken())) {
-                        continue;
-                    }
-                    config.listen = tok.nextToken();
-                    if ("localhost".equals(config.listen)) {
-                        config.listen = SNMPClient.DEFAULT_IP;
+                if (line.startsWith(portToken)) {
+                    config.port =
+                        line.substring(portToken.length()).trim();
+                    int ix = config.port.indexOf('@');
+                    if (ix != -1) {
+                        config.listen = config.port.substring(ix+1);
+                        config.port = config.port.substring(0, ix);
                     }
                 }
             }
+        } finally {
+            reader.close();
         }
-
-        reader.close();
     }
 
     /**
