@@ -10,6 +10,7 @@
            font-weight:bold;
             padding:3px;
             padding-left:5px;
+            border-right:1px solid #7bafff;
         }
         #alert	table td {
 			padding:3px;
@@ -113,11 +114,13 @@
     display: block;
     padding-left: 5px;
     padding-right: 5px;
+    padding-top:5px;
     float: left;
 }
 
 .alertHighlight {
-    background-color: #fa8672;
+    color: #fa8672;
+    font-weight:bold;
 }
 
 .boldText {
