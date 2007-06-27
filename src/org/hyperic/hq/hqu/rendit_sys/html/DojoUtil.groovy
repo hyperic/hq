@@ -238,7 +238,7 @@ class DojoUtil {
                  <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
                       class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
-              <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;"><span class="boldText">Click column name to sort</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Previous</div>
+              <div class="text" style="position: relative;float: right;padding-right:5px;padding-top:5px;"><span class="boldText">Click column name to sort (not all columns are sortable)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Previous</div>
                                  
              <div style="clear: both;"></div>
          </div>
