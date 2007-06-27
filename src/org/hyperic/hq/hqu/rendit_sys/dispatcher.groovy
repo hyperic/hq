@@ -1,5 +1,8 @@
 package org.hyperic.hq.hqu.rendit
 
+import org.codehaus.groovy.runtime.InvokerHelper
+import groovy.lang.Script
+
 import org.hyperic.hq.hqu.rendit.InvocationBindings
 import org.hyperic.hq.hqu.rendit.PluginLoadException
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
@@ -54,11 +57,16 @@ class Dispatcher {
     }
     
     def loadPlugin() {
-        def eng     = new GroovyScriptEngine(invokeArgs.pluginDir.absolutePath)
+        def parentLoader = Thread.currentThread().contextClassLoader
+        def cl           = new GroovyClassLoader(parentLoader) 
+
         def binding = new Binding()
         def pinfo   = new UIPluginDescriptor()
         binding.setVariable("plugin", pinfo)
-        eng.run('init.groovy', binding)
+            
+        Class c = cl.parseClass(new File(invokeArgs.pluginDir, 'init.groovy'))
+        Script s = InvokerHelper.createScript(c, binding)
+        s.run()
         
         if (pinfo.apiMajor != API_MAJOR) {
             throw new PluginLoadException("Plugin API version " +  
