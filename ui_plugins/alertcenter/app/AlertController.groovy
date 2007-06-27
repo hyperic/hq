@@ -33,7 +33,7 @@ class AlertController
             [field:AlertSortField.ACKED_BY,
              label:{it.acknowledgedBy?.fullName}],
             [field:AlertSortField.SEVERITY,
-             label:{EventConstants.getPriority(it.alertDefinition.priority)}]
+             label:{it.alertDefinition.severity.value}],
         ]
     ]
     
