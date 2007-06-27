@@ -40,7 +40,6 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
@@ -73,7 +72,6 @@ public class AlertDefinition
     private Resource          _resource;
 
     private AlertDefinitionValue      _value;
-    private AlertDefinitionBasicValue _basicValue;
     
     AlertDefinition() {
     }
@@ -428,54 +426,6 @@ public class AlertDefinition
         }
         _value.cleanAction();
         return _value;
-    }
-
-    AlertDefinitionBasicValue getAlertDefinitionBasicValue() {
-        if (_basicValue == null) {
-            _basicValue = new AlertDefinitionBasicValue();
-        }
-
-        _basicValue.setId(getId());
-        _basicValue.setName(getName() == null ? "" : getName());
-        _basicValue.setCtime(getCtime());
-        _basicValue.setMtime(getMtime());        
-        _basicValue.setParentId(getParent() == null ? null : 
-                                getParent().getId());
-        _basicValue.setDescription(getDescription());
-        _basicValue.setEnabled(isEnabled());
-        _basicValue.setWillRecover(isWillRecover());
-        _basicValue.setNotifyFiltered(isNotifyFiltered());
-        _basicValue.setControlFiltered(isControlFiltered());
-        _basicValue.setPriority(getPriority());
-        _basicValue.setAppdefId(getAppdefId());
-        _basicValue.setAppdefType(getAppdefType());
-        _basicValue.setFrequencyType(getFrequencyType());
-        _basicValue.setCount(getCount());
-        _basicValue.setRange(getRange());
-        _basicValue.setActOnTriggerId(getActOnTrigger().getId().intValue());
-        _basicValue.setDeleted(isDeleted());
-
-        _basicValue.removeAllTriggers();
-        for (Iterator i=getTriggers().iterator(); i.hasNext(); ) {
-            RegisteredTrigger t = (RegisteredTrigger)i.next();
-            _basicValue.addTrigger(t.getRegisteredTriggerValue());
-        }
-        _basicValue.cleanTrigger();
-
-        _basicValue.removeAllConditions();
-        for (Iterator i=getConditions().iterator(); i.hasNext(); ) {
-            AlertCondition c = (AlertCondition)i.next();
-            _basicValue.addCondition(c.getAlertConditionValue());
-        }
-        _basicValue.cleanCondition();
-        
-        _basicValue.removeAllActions();
-        for (Iterator i=getActions().iterator(); i.hasNext(); ) {
-            Action a = (Action)i.next();
-            _basicValue.addAction(a.getActionValue());
-        }
-        _basicValue.cleanAction();
-        return _basicValue;
     }
 
     public EscalationAlertType getAlertType() {
