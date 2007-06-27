@@ -99,11 +99,6 @@ public class DataPurgeJob implements Job {
             DataCompressUtil.getLocalHome().create();
 
         // First check if we are already running
-        // No need to obtain a lock if it is running
-        if (running) {
-            _log.info("Not starting data compression. (Already running)");
-            return;
-        }
         synchronized (RUNNING_LOCK)
         {
             if (running) {
