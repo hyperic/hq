@@ -82,13 +82,13 @@
 
  .previousLeft {
     background-position: top left;
-    background-image: url( "/images/page_left.gif" );
+    background-image: url( "images/page_left.gif" );
     cursor:pointer;
 }
 
 .noprevious {
     background-position: top left;
-    background-image: url( "/images/page_left_gray.gif" );
+    background-image: url( "images/page_left_gray.gif" );
 }
 
 #pageRight {
@@ -99,13 +99,13 @@
 
 .nextRight {
     background-position: top left;
-    background-image: url( "/images/page_right.gif" );
+    background-image: url( "images/page_right.gif" );
     cursor:pointer;
 }
 
 .nonext {
     background-position: top left;
-    background-image: url( "/images/page_right_gray.gif" );
+    background-image: url( "images/page_right_gray.gif" );
 }
 
 #pageNumbers {
