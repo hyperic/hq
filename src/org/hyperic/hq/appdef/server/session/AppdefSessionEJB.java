@@ -56,6 +56,7 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
@@ -66,20 +67,15 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 
 /**
  * Parent abstract class of all appdef session ejbs
@@ -267,11 +263,21 @@ public abstract class AppdefSessionEJB
     /**
      * remove the authz resource entry
      */
-    protected void removeAuthzResource(AppdefEntityID aeid)
-        throws RemoveException, FinderException {
+    protected void removeAuthzResource(AuthzSubjectValue subject,
+                                       AppdefEntityID aeid)
+        throws RemoveException, PermissionException {
+        // Need to tell alert definitions to disassociate the Resource
+        AlertDefinitionManagerEJBImpl.getOne()
+            .deleteAlertDefinitions(subject, aeid);
+
         log.debug("Removing authz resource: " + aeid);
         ResourceManagerLocal rm = getResourceManager();
         rm.removeResources(new AppdefEntityID[] { aeid });
+        
+        // Send resource delete event
+        ResourceDeletedZevent zevent =
+            new ResourceDeletedZevent(subject, aeid);
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
     /**
@@ -311,41 +317,6 @@ public abstract class AppdefSessionEJB
         } catch (CreateException e) {
             throw new SystemException(e);
         }
-    }
-
-    /**
-     * Find the primary key of the platform by the pk of a server
-     * @param serverPK
-     * @return PlatformPK
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public Integer getPlatformPkByServerPk(Integer serverPK)
-    {
-        // TODO refactor this using finder
-        // find the Server and get its platform
-        Server server = getServerDAO().findById(serverPK);
-        // return the parent server's pk
-        return (server.getPlatform().getId());
-    }
-
-    /**
-     * Find the primary key of the platform by the pk of a service
-     * @param servicePK the primary key of the service to find
-     * @return The PlatformPK of the service
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public Integer getPlatformPkByServicePk(Integer servicePK)
-        throws NamingException, FinderException
-    {
-        // TODO refactor this using finder
-        // find the installed service
-        Service isvc = getServiceDAO().findById(servicePK);
-        // find the Server and get its platform
-        Server server = isvc.getServer();
-        // return the parent server's pk
-        return (server.getPlatform().getId());
     }
 
     /**
@@ -1252,9 +1223,9 @@ public abstract class AppdefSessionEJB
         }
     }
 
-    protected void deleteCustomProperties(int appdefType, int appdefId) {
+    protected void deleteCustomProperties(AppdefEntityID aeid) {
         CPropManagerLocal cpropMan = getCPropMgrLocal();
-        cpropMan.deleteValues(appdefType, appdefId);
+        cpropMan.deleteValues(aeid.getType(), aeid.getID());
     }
 
     public void setSessionContext(SessionContext ctx) {
