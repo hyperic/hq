@@ -99,7 +99,13 @@ public class DataPurgeJob implements Job {
             DataCompressUtil.getLocalHome().create();
 
         // First check if we are already running
-        synchronized (RUNNING_LOCK) {
+        // No need to obtain a lock if it is running
+        if (running) {
+            _log.info("Not starting data compression. (Already running)");
+            return;
+        }
+        synchronized (RUNNING_LOCK)
+        {
             if (running) {
                 _log.info("Not starting data compression. (Already running)");
                 return;
@@ -137,10 +143,16 @@ public class DataPurgeJob implements Job {
             }
         }
         
+
         long time_end = System.currentTimeMillis();
         _log.info("Data compression completed in " +
                   ((time_end - time_start)/1000) +
                   " seconds.");
+
+        // We want to analyze the current and previous hq_metric_data 
+        // tables every hour
+        _log.info("Performing database maintenance (ANALYZE)");
+        serverConfig.analyze();
 
         // Once compression finishes, we check to see if databae maintaince
         // should be performed.  This is defaulted to 1 hour, so it should
@@ -171,11 +183,12 @@ public class DataPurgeJob implements Job {
                        dataMaintenance + "] -- which is invalid");
             return;
         }
-        
+
         // At midnight we always perform a VACUUM, otherwise we
         // check to see if it is time to perform normal database
         // maintenance. (On postgres we just rebuild indicies
         // using an ANALYZE)
+        long vacuumStart = System.currentTimeMillis();
         Calendar cal = Calendar.getInstance();
         if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
             TimingVoodoo.roundDownTime(time_start, maintInterval)) {
@@ -190,7 +203,7 @@ public class DataPurgeJob implements Job {
             }
 
             _log.info("Database maintenance completed in " +
-                      ((System.currentTimeMillis() - time_end)/1000) +
+                      ((System.currentTimeMillis() - vacuumStart)/1000) +
                       " seconds.");
         } else {
             _log.info("Not performing database maintenance");

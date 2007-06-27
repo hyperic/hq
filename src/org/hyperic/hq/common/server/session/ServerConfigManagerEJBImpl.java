@@ -26,8 +26,10 @@
 package org.hyperic.hq.common.server.session;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -49,6 +51,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
+import org.hyperic.hq.measurement.server.session.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -231,6 +234,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public long analyze() {
+        long duration = 0;
         Connection conn = null;
         try {
             conn = DBUtil.getConnByContext(getInitialContext(),
@@ -238,7 +242,24 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             if (!DBUtil.isPostgreSQL(conn))
                 return -1;
 
-            long duration = doCommand(conn, SQL_ANALYZE, null);
+            long systime = System.currentTimeMillis();
+            String currMetricDataTable =
+                        MeasTabManagerUtil.getMeasTabname(systime);
+            long prevtime =
+                        MeasTabManagerUtil.getPrevMeasTabTime(systime);
+            String prevMetricDataTable =
+                        MeasTabManagerUtil.getMeasTabname(prevtime);
+
+            String measTable = MeasTabManagerUtil.MEAS_TABLE.toUpperCase();
+            String oldMeasTable =
+                            MeasTabManagerUtil.OLD_MEAS_TABLE.toUpperCase();
+
+            duration += doCommand(conn, SQL_ANALYZE, currMetricDataTable);
+            duration += doCommand(conn, SQL_ANALYZE, prevMetricDataTable);
+            for (int i = 0; i < DATA_TABLES.length; i++) {
+                duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
+            }
+
             return duration;
         } catch (NamingException e) {
             throw new SystemException(e);
@@ -294,6 +315,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     /**
      * Run database-specific cleanup routines -- on PostgreSQL we
      * do a VACUUM ANALYZE.  On other databases we just return -1.
+     * Since 3.1 we do not want to vacuum the hq_metric_data tables,
+     * only hq_metric_data_compat
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
      * @ejb:transaction type="NOTSUPPORTED"
@@ -308,7 +331,10 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             if (!DBUtil.isPostgreSQL(conn))
                 return -1;
 
-            duration = doCommand(conn, SQL_VACUUM, null);
+            for (int i = 0; i < DATA_TABLES.length; i++) {
+                duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
+            }
+
             return duration;
         } catch (NamingException e) {
             throw new SystemException(e);

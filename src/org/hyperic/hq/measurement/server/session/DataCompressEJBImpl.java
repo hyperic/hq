@@ -73,7 +73,7 @@ public class DataCompressEJBImpl
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
-    private static final String METRIC_DATA_VIEW = "hq_metric_data";
+    private static final String METRIC_DATA_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
     // For purging alerts
     private AlertManagerLocal alertManager = null;
@@ -171,21 +171,41 @@ public class DataCompressEJBImpl
                                            DATASOURCE_NAME);
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
-            log.debug("Truncating tables, starting with -> "+delTable+" (currTable -> "+currTable+")");
+            log.debug("Truncating tables, starting with -> "+delTable+
+                      " (currTable -> "+currTable+")\n");
             while (!currTable.equals(delTable) &&
-                   truncateBefore > currTruncTime) {
-                stmt.executeUpdate("truncate table "+delTable);
+                   truncateBefore > currTruncTime)
+            {
                 log.debug("Truncating table "+delTable);
+                stmt.executeUpdate("truncate table "+delTable);
+                analyzeTable(delTable, conn, stmt);
                 currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
             }
             // for backwards compatibility
             truncateOldMeasTable(truncateBefore, stmt);
-            log.info("Done Purging Raw Measurement Data (" + ((watch.getElapsed()) / 1000) + " seconds)");
+            log.info("Done Purging Raw Measurement Data (" +
+                     ((watch.getElapsed()) / 1000) + " seconds)");
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+        }
+    }
+
+    private void analyzeTable(String tablename, Connection conn, Statement stmt)
+        throws SQLException
+    {
+        if (DBUtil.isPostgreSQL(conn))
+        {
+            log.debug("Analyzing table "+tablename);
+            stmt.execute("analyze "+tablename);
+        }
+        else if (DBUtil.isOracle(conn))
+        {
+        }
+        else if (DBUtil.isMySQL(conn))
+        {
         }
     }
 

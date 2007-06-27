@@ -40,6 +40,7 @@ public class MeasTabManagerUtil
                      NUMBER_OF_TABLES_PER_DAY = 2;
 
     public static final String MEAS_TABLE = "hq_metric_data";
+    public static final String MEAS_VIEW  = MEAS_TABLE;
     public static final String OLD_MEAS_TABLE = MEAS_TABLE + "_compat";
 
     static {
