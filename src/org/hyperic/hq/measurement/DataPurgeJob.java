@@ -121,7 +121,7 @@ public class DataPurgeJob implements Job {
     
             // We'll only do the rest of the maintenance if it's 10 past the
             // hour
-            if (TimingVoodoo.roundDownTime(time_start, MINUTE) == 10) {
+            if (TimingVoodoo.roundDownTime(time_start, MINUTE) != 10) {
                 return;
             }
     
