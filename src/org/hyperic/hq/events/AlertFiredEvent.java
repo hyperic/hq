@@ -26,7 +26,6 @@
 package org.hyperic.hq.events;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 
 /**
