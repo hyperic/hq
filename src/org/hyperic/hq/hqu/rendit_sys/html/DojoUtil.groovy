@@ -175,7 +175,7 @@ class DojoUtil {
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
             var pageNumDisplay = dojo.byId("pageNumbers");
-            pageNumDisplay.appendChild(document.createTextNode('Page ' + (${pageNumVar} + 1)));
+            pageNumDisplay.innerHTML = 'Page ' + (${pageNumVar} + 1);
 
             if (${pageNumVar} != 0) {
                 leftClazz = 'previousLeft';
