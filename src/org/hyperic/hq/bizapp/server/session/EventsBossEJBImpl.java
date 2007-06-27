@@ -68,6 +68,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceChangeCallback;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
@@ -80,7 +81,6 @@ import org.hyperic.hq.bizapp.shared.EventsBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.control.server.session.ControlEventListener;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -102,8 +102,6 @@ import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
@@ -1723,6 +1721,19 @@ public class EventsBossEJBImpl
                         eb.inheritResourceTypeAlertDefinition(overlord, ent);
                     } catch(Exception e) {
                         throw new SystemException(e);
+                    }
+                }
+            }
+        );
+        
+        app.registerCallbackListener(ResourceChangeCallback.class,
+            new ResourceChangeCallback() {
+                public void preAppdefResourcesDelete(AppdefEntityID[] ids) {
+                    // Need to tell alert definitions to disassociate the
+                    // Resources
+                    AlertDefinitionManagerLocal adm = getADM();
+                    for (int i = 0; i < ids.length; i++) {
+                        adm.disassociateResource(ids[i]);
                     }
                 }
             }

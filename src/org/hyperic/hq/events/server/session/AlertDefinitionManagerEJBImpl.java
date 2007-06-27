@@ -476,6 +476,20 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
     
+    /**
+     * Set Resource to null on appdef entity's alert definitions
+     * @ejb:interface-method
+     */
+    public void disassociateResource(AppdefEntityID aeid) {
+        AlertDefinitionDAO aDao = getAlertDefDAO();
+        List adefs = aDao.findAllByEntity(aeid);
+
+        for (Iterator i = adefs.iterator(); i.hasNext(); ) {
+            AlertDefinition alertdef = (AlertDefinition) i.next();
+            alertdef.setResource(null);
+        }
+    }
+    
     /** Clean up alert definitions and alerts for removed resources
      * 
      * @ejb:interface-method
