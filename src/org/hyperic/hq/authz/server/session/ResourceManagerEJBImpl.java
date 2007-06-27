@@ -298,22 +298,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:interface-method
      */
     public void saveResource(ResourceValue res) {
-        Resource resource = lookupResourcePojo(res);
+        lookupResourcePojo(res);
 
         // XXX:  Fill this in -- what info can be changed, exactly?
         //resource.setResourceValue(res);
-    }
-
-    /**
-     * Delete the specified resource.
-     * @param whoami The current running user.
-     * @param res The resource to delete.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
-    public void removeResource(AuthzSubjectValue whoami, ResourceValue res) {
-        Resource reso = getResourceDAO().findById(res.getId());
-        getResourceDAO().remove(reso);
     }
 
     /**
