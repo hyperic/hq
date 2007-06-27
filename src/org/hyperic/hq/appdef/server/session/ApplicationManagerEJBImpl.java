@@ -69,7 +69,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
-import org.hyperic.hq.zevents.ZeventManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -236,19 +235,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public void removeApplication(AuthzSubjectValue subject, Integer id)
         throws ApplicationNotFoundException,
                PermissionException, RemoveException {
-        try {
-            Application app = getApplicationDAO().findById(id);
-            checkRemovePermission(subject, app.getEntityId());
-            removeAuthzResource(app.getEntityId());
-            getApplicationDAO().remove(app);
-
-            // Send resource delete event
-            ResourceDeletedZevent zevent =
-                new ResourceDeletedZevent(subject, app.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
-        } catch (FinderException e) {
-            throw new ApplicationNotFoundException(id);
-        }
+        Application app = getApplicationDAO().findById(id);
+        checkRemovePermission(subject, app.getEntityId());
+        removeAuthzResource(subject, app.getEntityId());
+        getApplicationDAO().remove(app);
     }
 
     /**

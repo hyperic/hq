@@ -48,10 +48,8 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -200,7 +198,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * such as "Apache 2.0 Linux". It is used as to look up plugins
      * via a generic plugin manager.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getPlatformPluginName(AppdefEntityID id) 
         throws AppdefEntityNotFoundException 
@@ -226,11 +223,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             pv = server.getPlatform().getPlatformLightValue();
             typeName = server.getServerType().getName();
         } else if (id.isPlatform()) {
-            Platform platform = getPlatformById(id.getId());                
-
-            if (platform == null)
-                throw new PlatformNotFoundException(id);
-                
+            Platform platform = findPlatformById(id.getId());
             pv = platform.getPlatformLightValue();    
             typeName = pv.getPlatformType().getName();
         } else if(id.isGroup()) {
@@ -255,22 +248,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Create a platform type
-     * @ejb:interface-method
-     */
-    public Integer createPlatformType(AuthzSubjectValue subject,
-                                      PlatformTypeValue pType)
-        throws CreateException, ValidationException 
-    {
-        return getPlatformTypeDAO().create(pType).getId();
-    }
-
-    /**
      * Delete a platform
      * @param subject The user performing the delete operation.
      * @param id - The id of the Platform
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removePlatform(AuthzSubjectValue subject, Integer id)
         throws RemoveException, PlatformNotFoundException, PermissionException 
@@ -278,8 +259,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         removePlatform(subject, findPlatformById(id));
     }
     
-    private void removePlatform(AuthzSubjectValue subject,
-                                Platform platform)
+    private void removePlatform(AuthzSubjectValue subject, Platform platform)
         throws RemoveException, PermissionException, PlatformNotFoundException
     {
         try {
@@ -287,6 +267,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // keep the configresponseId so we can remove it later
             Integer cid = platform.getConfigResponseId();
+            AppdefEntityID aeid = platform.getEntityId();
 
             ServerManagerLocal srvMgr = getServerMgrLocal();
             // Server manager will update the collection, so we need to copy
@@ -302,7 +283,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
 
             // now remove the resource for the platform
-            removeAuthzResource(platform.getEntityId());
+            removeAuthzResource(subject, aeid);
 
             getPlatformDAO().remove(platform);
 
@@ -320,13 +301,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
 
             // remove custom properties
-            deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
-                                   platform.getId().intValue());
-
-            // Send resource delete event
-            ResourceDeletedZevent zevent =
-                new ResourceDeletedZevent(subject, platform.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+            deleteCustomProperties(aeid);
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
             rollback();
@@ -335,17 +310,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             _log.debug("Error while removing Platform");
             rollback();
             throw e;
-        } catch (FinderException e) {
-            throw new PlatformNotFoundException(platform.getId());
         }
     } 
 
     /**
      * Create a Platform of a specified type
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
-    public Integer createPlatform(AuthzSubjectValue subject,
+    public Platform createPlatform(AuthzSubjectValue subject,
                                   Integer platformTypeId,
                                   PlatformValue pValue, Integer agentPK)
         throws CreateException, ValidationException, PermissionException,
@@ -417,7 +389,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 new ResourceCreatedZevent(subject, platform.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
-            return platform.getId();
+            return platform;
         } catch (FinderException e) {
             throw new CreateException("Unable to find PlatformType: " +
                                       platformTypeId + " : " + e.getMessage());
@@ -437,7 +409,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      * @ejb:interface-method
      */
-    public Integer createPlatform(AuthzSubjectValue subject,
+    public Platform createPlatform(AuthzSubjectValue subject,
                                   AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
@@ -483,7 +455,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             new ResourceCreatedZevent(subject, platform.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         
-        return platform.getId();
+        return platform;
     }
 
     /**
@@ -573,22 +545,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Platform findPlatformById(Integer id)
         throws PlatformNotFoundException
     {
-        Platform res = getPlatformById(id);
+        Platform res = getPlatformDAO().get(id);
         
         if (res == null)
             throw new PlatformNotFoundException(id);
         return res;
-    }
-
-    /**
-     * Get a Platform by id.
-     * @param id The id to look up.
-     * @return The Platform object with the given id, or null if it does not
-     * exist.
-     * @ejb:interface-method 
-     */
-    public Platform getPlatformById(Integer id) {
-        return getPlatformDAO().get(id);
     }
 
     /**
@@ -677,7 +638,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the Platform that has the specified Fqdn
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Platform findPlatformByFqdn(AuthzSubjectValue subject,
                                        String fqdn)
@@ -701,7 +661,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the Collection of platforms that have the specified Ip address
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Collection getPlatformByIpAddr(AuthzSubjectValue subject,
                                           String address)
@@ -713,7 +672,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform by agent token
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Collection getPlatformPksByAgentToken(AuthzSubjectValue subject,
                                                 String agentToken)
@@ -737,7 +695,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the platform that hosts the server that provides the 
      * specified service.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serviceId service ID.
      * @return the Platform
@@ -760,7 +717,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the platform ID that hosts the server that provides the 
      * specified service.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param serviceId service ID.
      * @return the Platform
      */
@@ -778,7 +734,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform for a server.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      * @param serverId Server ID.
      */
@@ -821,7 +776,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platforms for a list of servers.
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @param subject The subject trying to list services.
      */
     public PageList getPlatformsByServers(AuthzSubjectValue subject,
@@ -1024,10 +978,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Update an existing Platform. Requires all Ip's to have been 
      * re-added via the platformValue.addIpValue(IpValue) method due
      * to bug 4924
-     * @param existing - the value object for the platform you want to
-     * save
+     * @param existing - the value object for the platform you want to save
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean updatePlatformImpl(AuthzSubjectValue subject,
                                       PlatformValue existing)

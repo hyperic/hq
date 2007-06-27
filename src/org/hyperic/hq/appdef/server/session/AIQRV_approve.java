@@ -105,19 +105,12 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
             // Add the AI platform to appdef
             try {
-                Integer pk =
+                Platform platform =
                     pmLocal.createPlatform(subject,
                                            aiplatform.getAIPlatformValue());
-                Platform newPlatform;
-                try {
-                    newPlatform = pmLocal.findPlatformById(pk);
-                } catch (PlatformNotFoundException e) {
-                    throw new SystemException("Could not find the Platform " +
-                                              "we just created id=" + pk);
-                }
 
-                setCustomProperties(aiplatform, newPlatform, cpropMgr);
-                createdResources.add(newPlatform.getEntityId());
+                setCustomProperties(aiplatform, platform, cpropMgr);
+                createdResources.add(platform.getEntityId());
             } catch (PermissionException e) {
                 throw e;
             }
@@ -351,25 +344,15 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     convertAIServerToServer(aiserver.getAIServerValue(),
                                             smLocal);
                 serverTypePK = serverValue.getServerType().getId();
-                Integer pk = smLocal.createServer(subject,
-                                                  existingPlatform.getId(),
-                                                  serverTypePK,
-                                                  serverValue);
-                try {
-                    serverValue = smLocal.getServerById(subject, pk);
-                } catch (ServerNotFoundException e) {
-                    throw new SystemException("Could not find the server we" +
-                                              " just created");
-                }
-
-                AppdefEntityID aID =
-                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                       pk);
+                Server server = smLocal.createServer(subject,
+                                                     existingPlatform.getId(),
+                                                     serverTypePK,
+                                                     serverValue);
 
                 try {
                     configMgr.
                         configureResource(subject,
-                                          serverValue.getEntityId(),
+                                          server.getEntityId(),
                                           aiserver.getProductConfig(),
                                           aiserver.getMeasurementConfig(),
                                           aiserver.getControlConfig(),
@@ -382,7 +365,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 setCustomProperties(aiserver, serverValue, cpropMgr);
                 
-                createdResources.add(aID);
+                createdResources.add(server.getEntityId());
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {

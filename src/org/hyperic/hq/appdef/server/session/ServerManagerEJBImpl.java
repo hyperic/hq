@@ -44,7 +44,6 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -145,12 +144,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @exception CreateException - if it fails to add the server
      * @ejb:interface-method
      */
-    public Integer createServer(AuthzSubjectValue subject,
-                                Integer platformId, Integer serverTypeId,
-                                ServerValue sValue)
+    public Server createServer(AuthzSubjectValue subject, Integer platformId,
+                               Integer serverTypeId, ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
                PlatformNotFoundException, AppdefDuplicateNameException {
-
         try {
             trimStrings(sValue);
 
@@ -185,8 +182,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 new ResourceCreatedZevent(subject, server.getEntityId());
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
-            return server.getId();
-
+            return server;
         } catch (CreateException e) {
             throw e;
         } catch (PermissionException e) {
@@ -268,11 +264,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * PlatformManager.removePlatform when cascading removal to servers.
      * @ejb:interface-method
      */
-    public void removeServer(AuthzSubjectValue subject,
-                             Server server)
+    public void removeServer(AuthzSubjectValue subject, Server server)
         throws ServerNotFoundException, RemoveException, PermissionException
     {
-        Integer id = server.getId();
+        AppdefEntityID aeid = server.getEntityId();
         try {
             checkRemovePermission(subject, server.getEntityId());
 
@@ -287,7 +282,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Integer cid = server.getConfigResponseId();
 
             // Remove authz resource
-            removeAuthzResource(server.getEntityId());
+            removeAuthzResource(subject, aeid);
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
@@ -314,15 +309,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 }
             }
 
-            deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
-                                   id.intValue());
-
-            // Send resource delete event
-            ResourceDeletedZevent zevent =
-                new ResourceDeletedZevent(subject, server.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+            deleteCustomProperties(aeid);
         } catch (FinderException e) {
-            throw new ServerNotFoundException(id, e);
+            throw new ServerNotFoundException(aeid.getId(), e);
         }
     }
 

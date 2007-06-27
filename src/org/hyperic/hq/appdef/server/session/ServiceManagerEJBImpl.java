@@ -90,7 +90,6 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.jboss.ejb.plugins.cmp.jdbc2.FindByPrimaryKeyCommand;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -1529,13 +1528,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public void removeService(AuthzSubjectValue subject, Service service)
         throws RemoveException, FinderException, PermissionException {
 
-        Integer serviceId = service.getId();
+        AppdefEntityID aeid = service.getEntityId();
 
         checkRemovePermission(subject, service.getEntityId());
         Integer cid = service.getConfigResponseId();
 
         // Remove authz resource.
-        removeAuthzResource(service.getEntityId());
+        removeAuthzResource(subject, aeid);
 
         // Remove service from parent Server's Services collection
         Server server = service.getServer();
@@ -1563,13 +1562,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
 
         // remove custom properties
-        deleteCustomProperties(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                               serviceId.intValue());
-
-        // Send resource delete event
-        ResourceDeletedZevent zevent =
-            new ResourceDeletedZevent(subject, service.getEntityId());
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        deleteCustomProperties(aeid);
     }
 
     /**
