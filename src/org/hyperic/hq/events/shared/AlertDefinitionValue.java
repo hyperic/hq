@@ -28,13 +28,6 @@
  */
 package org.hyperic.hq.events.shared;
 
-import java.rmi.RemoteException;
-import java.util.List;
-import javax.ejb.CreateException;
-import javax.ejb.EntityBean;
-import javax.ejb.RemoveException;
-import org.hyperic.hq.events.shared.AlertDefinitionBasicValue;
-
 /**
  * Value object for AlertDefinition.
  *
