@@ -137,7 +137,6 @@ import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -145,7 +144,6 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -979,10 +977,8 @@ public class AppdefBossEJBImpl
         
         switch (entityId.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            Platform platform = getPlatformManager().getPlatformById(entityId.getId());
-            if (platform == null) {
-                throw new PlatformNotFoundException(entityId);
-            }
+            Platform platform =
+                getPlatformManager().findPlatformById(entityId.getId());
             retVal = platform.getPlatformValue();
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
@@ -1235,12 +1231,10 @@ public class AppdefBossEJBImpl
         try {
             // Get the AuthzSubject for the user's session
             AuthzSubjectValue subject = manager.getSubject(sessionID);
-            Integer pk =
+            Platform platform =
                 getPlatformManager().createPlatform(subject, platTypePK,
                                                     platformVal, agent);
-            PlatformValue savedPlatform = 
-                getPlatformManager().getPlatformValueById(subject, pk);
-            return savedPlatform;
+            return platform.getPlatformValue();
         } catch (CreateException e) {
             log.error("Unable to create platform. Rolling back", e);
             throw e;
@@ -1435,16 +1429,14 @@ public class AppdefBossEJBImpl
 
             // Call into appdef to create the platform.
             ServerManagerLocal serverMan = getServerManager();
-            Integer pk = serverMan.createServer(subject, platformPK,
+            Server server = serverMan.createServer(subject, platformPK,
                                                  serverTypePK, serverVal);
-            ServerValue savedServer = serverMan.getServerById(subject, 
-                                                              pk);
             if (cProps != null) {
-                AppdefEntityID entityId = savedServer.getEntityId();
+                AppdefEntityID entityId = server.getEntityId();
                 setCPropValues(subject, entityId, cProps);
             }
 
-            return savedServer;
+            return server.getServerValue();
         } catch (AppdefEntityNotFoundException e) {
             log.error("Unable to create server.", e);
             throw new SystemException("Unable to find new server");
@@ -1600,7 +1592,7 @@ public class AppdefBossEJBImpl
 
         try {
             // Lookup the platform (make sure someone else hasn't deleted it)
-            Platform plat = getPlatformManager().getPlatformById(platformId);
+            Platform plat = getPlatformManager().findPlatformById(platformId);
 
             // Add it to the list
             List unscheduleList = new ArrayList();
@@ -1634,9 +1626,6 @@ public class AppdefBossEJBImpl
                     continue;
                 }
 
-                // now remove the alerts
-                AlertDefinitionManagerEJBImpl.getOne()
-                    .deleteAlertDefinitions(subject, thisId);
                 toDeleteIdsList.add(thisId);
                 toDeleteResourceIds[i] = thisId;
             }
@@ -1679,11 +1668,6 @@ public class AppdefBossEJBImpl
             log.error("Caught PermissionException while removing "+
                       "platform: " + platformId,e);
             throw e;
-        } catch (AppdefEntityNotFoundException e) {
-            String msg = "Not Found Error while removing platform: " +
-                platformId;
-            log.error(msg, e);
-            throw new PlatformNotFoundException(msg, e);
         }
     }
 
@@ -1992,9 +1976,6 @@ public class AppdefBossEJBImpl
             for (Iterator i=unscheduleList.iterator();i.hasNext();) {
                 AppdefEntityID thisId =
                     ((AppdefResourceValue)i.next()).getEntityId();
-                // now remove the alerts
-                AlertDefinitionManagerEJBImpl.getOne()
-                    .deleteAlertDefinitions(subject, thisId);
 
                 // now remove the measurements
                 measBoss.removeMeasurements(sessionId, thisId);
@@ -2044,10 +2025,6 @@ public class AppdefBossEJBImpl
 
             AppdefEntityID id = 
                 AppdefEntityID.newServiceID(serviceId.intValue());
-
-            // first remove the alerts
-            AlertDefinitionManagerEJBImpl.getOne()
-                .deleteAlertDefinitions(subject, id);
 
             // now remove any measurements associated with the service
             MeasurementBossLocal measBoss = getMeasurementBoss();
