@@ -73,7 +73,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     private Log _log = LogFactory.getLog(ServerConfigManagerEJBImpl.class);
 
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
-    private final String SQL_ANALYZE = "ANALYZE";
+    private final String SQL_ANALYZE = "ANALYZE {0}";
     private final String SQL_REINDEX = "REINDEX TABLE {0}";
     private final String SQL_REBUILD = "ALTER INDEX {0} REBUILD UNRECOVERABLE";
 
@@ -257,7 +257,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             duration += doCommand(conn, SQL_ANALYZE, currMetricDataTable);
             duration += doCommand(conn, SQL_ANALYZE, prevMetricDataTable);
             for (int i = 0; i < DATA_TABLES.length; i++) {
-                duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
+                duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
             }
 
             return duration;
