@@ -439,4 +439,8 @@ public class AlertDefinition
     public boolean performsEscalations() {
         return true;
     }
+    
+    public String toString() {
+        return "alertDef [" + this.getName() + "]";
+    }
 }
