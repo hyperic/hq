@@ -74,6 +74,12 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
     private final String SQL_ANALYZE = "ANALYZE {0}";
+    private final String ORACLE_ANALYZE =
+                                    "ANALYZE TABLE {0} COMPUTE STATISTICS";
+    //only for the metric data tables
+    private final String ORACLE_SAMPLE_ANALYZE =
+                    "ANALYZE TABLE {0} ESTIMATE STATISTICS SAMPLE 15 PERCENT";
+    private final String MYSQL_ANALYZE = "ANALYZE TABLE {0}";
     private final String SQL_REINDEX = "REINDEX TABLE {0}";
     private final String SQL_REBUILD = "ALTER INDEX {0} REBUILD UNRECOVERABLE";
 
@@ -233,15 +239,13 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
-    public long analyze() {
-        long duration = 0;
+    public long analyze()
+    {
         Connection conn = null;
-        try {
+        try
+        {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                                       HQConstants.DATASOURCE);
-            if (!DBUtil.isPostgreSQL(conn))
-                return -1;
-
             long systime = System.currentTimeMillis();
             String currMetricDataTable =
                         MeasTabManagerUtil.getMeasTabname(systime);
@@ -250,25 +254,78 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             String prevMetricDataTable =
                         MeasTabManagerUtil.getMeasTabname(prevtime);
 
-            String measTable = MeasTabManagerUtil.MEAS_TABLE.toUpperCase();
-            String oldMeasTable =
-                            MeasTabManagerUtil.OLD_MEAS_TABLE.toUpperCase();
-
-            duration += doCommand(conn, SQL_ANALYZE, currMetricDataTable);
-            duration += doCommand(conn, SQL_ANALYZE, prevMetricDataTable);
-            for (int i = 0; i < DATA_TABLES.length; i++) {
-                duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
+            if (DBUtil.isPostgreSQL(conn)) {
+                return runPostgresAnalyze(conn,
+                                          currMetricDataTable,
+                                          prevMetricDataTable);
             }
-
-            return duration;
-        } catch (NamingException e) {
+            else if (DBUtil.isOracle(conn)) {
+                return runOracleAnalyze(conn,
+                                        currMetricDataTable,
+                                        prevMetricDataTable);
+            }
+            else if (DBUtil.isMySQL(conn)) {
+                return runMySQLAnalyze(conn,
+                                       currMetricDataTable,
+                                       prevMetricDataTable);
+            }
+            else
+                return -1l;
+        }
+        catch (NamingException e) {
             throw new SystemException(e);
-        } catch (SQLException e) {
+        }
+        catch (SQLException e) {
             log.error("Error creating database connection", e);
             throw new SystemException("Error analyzing database", e);
-        } finally {
+        }
+        finally {
             DBUtil.closeConnection(logCtx, conn);
         }
+    }
+
+    private long runMySQLAnalyze(Connection conn,
+                                 String currTable,
+                                 String prevTable)
+    {
+        long duration = 0;
+        log.info("Done Running MySQL Analyze");
+        duration += doCommand(conn, MYSQL_ANALYZE, currTable);
+        duration += doCommand(conn, MYSQL_ANALYZE, prevTable);
+        for (int i = 0; i < DATA_TABLES.length; i++) {
+            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
+        }
+        return duration;
+    }
+
+    private long runOracleAnalyze(Connection conn,
+                                  String currTable,
+                                  String prevTable)
+    {
+        long duration = 0;
+        log.info("Running Oracle Analyze");
+        duration += doCommand(conn, ORACLE_SAMPLE_ANALYZE, currTable);
+        duration += doCommand(conn, ORACLE_SAMPLE_ANALYZE, prevTable);
+        for (int i = 0; i < DATA_TABLES.length; i++) {
+            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
+        }
+        log.info("Done Running Oracle Analyze");
+        return duration;
+    }
+
+    private long runPostgresAnalyze(Connection conn,
+                                    String currTable,
+                                    String prevTable)
+    {
+        long duration = 0;
+        log.info("Running MySQL Analyze");
+        duration += doCommand(conn, SQL_ANALYZE, currTable);
+        duration += doCommand(conn, SQL_ANALYZE, prevTable);
+        for (int i = 0; i < DATA_TABLES.length; i++) {
+            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
+        }
+        log.info("Done Running Postgres Analyze");
+        return duration;
     }
 
     /**

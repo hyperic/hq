@@ -121,7 +121,11 @@ public class DataPurgeJob implements Job {
     
             // We'll only do the rest of the maintenance if it's 10 past the
             // hour
-            if (TimingVoodoo.roundDownTime(time_start, MINUTE) != 10) {
+
+            Calendar cal = Calendar.getInstance();
+            long voodooTime = TimingVoodoo.roundDownTime(time_start, MINUTE);
+            cal.setTime(new java.util.Date(voodooTime));
+            if (cal.get(Calendar.MINUTE) != 10) {
                 return;
             }
     
@@ -146,6 +150,7 @@ public class DataPurgeJob implements Job {
 
         // We want to analyze the current and previous hq_metric_data 
         // tables every hour
+        long analyzeStart = System.currentTimeMillis();
         _log.info("Performing database maintenance (ANALYZE)");
         serverConfig.analyze();
 
