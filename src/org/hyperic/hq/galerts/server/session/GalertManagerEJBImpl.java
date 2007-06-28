@@ -171,7 +171,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method
      */
     public void enable(GalertDef def, boolean enable) {
-        def.setEnabled(enable);
+        update(def, null, null, null, Boolean.valueOf(enable));
     }
     
     /**
