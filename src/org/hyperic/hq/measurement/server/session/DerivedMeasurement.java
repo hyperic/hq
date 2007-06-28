@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 
 public class DerivedMeasurement extends Measurement
@@ -74,6 +75,10 @@ public class DerivedMeasurement extends Measurement
         _formula = formula;
     }
 
+    public AppdefEntityID getEntityId() {
+        return new AppdefEntityID(getAppdefType(), getInstanceId());
+    }
+    
     public int getAppdefType() {
         return getTemplate().getMonitorableType().getAppdefType();
     }
