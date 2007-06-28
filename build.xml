@@ -969,8 +969,6 @@
 
     <hqplugin name="informix"/>
 
-    <hqplugin name="mule"/>
-
     <hqplugin name="vmware"/>
   </target>
   
