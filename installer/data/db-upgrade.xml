@@ -5256,8 +5256,18 @@ has already been defined.
 
     <schemaSpec version="3.27">
         <schema-directSQL>
+          <statement desc="Drop index from eam_measurement_data">
+            drop index measurement_data_time_idx
+          </statement>
+          <statement desc="Drop primary key from eam_measurement_data">
+            alter table hq_metric_data_compat drop constraint eam_measurement_data_pkey
+          </statement>
           <statement desc="Change eam_measurement_data table name">
             alter table eam_measurement_data rename to hq_metric_data_compat
+          </statement>
+          <statement desc="Add new primary key to eam_measurement_data">
+            alter table hq_metric_data_compat add
+            primary key (TIMESTAMP, MEASUREMENT_ID)
           </statement>
           <statement targetDB="postgresql">
             create table HQ_METRIC_DATA_0D_0S (
@@ -5746,25 +5756,6 @@ has already been defined.
                 primary key (TIMESTAMP, MEASUREMENT_ID)
             )
           </statement>
-
-          <statement>create index HQ_METRIC_DATA_0D_0S_MID_IDX on HQ_METRIC_DATA_0D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_0D_1S_MID_IDX on HQ_METRIC_DATA_0D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_1D_0S_MID_IDX on HQ_METRIC_DATA_1D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_1D_1S_MID_IDX on HQ_METRIC_DATA_1D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_2D_0S_MID_IDX on HQ_METRIC_DATA_2D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_2D_1S_MID_IDX on HQ_METRIC_DATA_2D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_3D_0S_MID_IDX on HQ_METRIC_DATA_3D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_3D_1S_MID_IDX on HQ_METRIC_DATA_3D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_4D_0S_MID_IDX on HQ_METRIC_DATA_4D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_4D_1S_MID_IDX on HQ_METRIC_DATA_4D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_5D_0S_MID_IDX on HQ_METRIC_DATA_5D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_5D_1S_MID_IDX on HQ_METRIC_DATA_5D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_6D_0S_MID_IDX on HQ_METRIC_DATA_6D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_6D_1S_MID_IDX on HQ_METRIC_DATA_6D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_7D_0S_MID_IDX on HQ_METRIC_DATA_7D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_7D_1S_MID_IDX on HQ_METRIC_DATA_7D_1S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_8D_0S_MID_IDX on HQ_METRIC_DATA_8D_0S (MEASUREMENT_ID)</statement>
-          <statement>create index HQ_METRIC_DATA_8D_1S_MID_IDX on HQ_METRIC_DATA_8D_1S (MEASUREMENT_ID)</statement>
         </schema-directSQL>
     </schemaSpec>
     
