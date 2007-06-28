@@ -69,7 +69,7 @@ public class DataCompressEJBImpl
     implements SessionBean {
 
     // !!!NEEDS TO BE CHANGED WHEN WE CONVERT DB FROM long to int
-    private static final long FIVE_MINS = 300000;
+    private static final long BF_PURGE_INCR = 1200000;
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
@@ -217,7 +217,7 @@ public class DataCompressEJBImpl
         {
             String sql = "SELECT max(timestamp) as maxtimestamp "+
                          " FROM "+BF_TABLE+
-                         " HAVING max(timestamp) != null";
+                         " HAVING max(timestamp) is not null";
             rs = stmt.executeQuery(sql);
             while (rs.next())
             {
@@ -245,13 +245,13 @@ public class DataCompressEJBImpl
                     .getConnByContext(getInitialContext(), DATASOURCE_NAME);
             stmt = conn.createStatement();
             String sql = "SELECT min(timestamp) FROM "+BF_TABLE+
-                         " HAVING min(timestamp) != null";
+                         " HAVING min(timestamp) is not null";
             rs = stmt.executeQuery(sql);
             if (rs.next())
                 min_time = rs.getLong(1);
 
             sql = "SELECT max(timestamp) FROM "+BF_TABLE+
-                  " HAVING max(timestamp) != null";
+                  " HAVING max(timestamp) is not null";
             rs = stmt.executeQuery(sql);
             if (rs.next())
                 max_time = rs.getLong(1);
@@ -262,12 +262,13 @@ public class DataCompressEJBImpl
                       BF_TABLE + " b, " + METRIC_DATA_VIEW + " m " +
                       "where m.measurement_id = b.measurement_id and " +
                       "m.timestamp = b.timestamp "+
-                      "and b.timestamp between "+min_time+" and "+
-                      (min_time+=FIVE_MINS);
-                log.debug("Purging Backfilled data between "+
-                          TimeUtil.toString(min_time-FIVE_MINS)+" and "+
-                          TimeUtil.toString(min_time));
-                stmt.execute(sql);
+                      "and b.timestamp between "+
+                      (max_time-=BF_PURGE_INCR)+" and "+(max_time+BF_PURGE_INCR);
+                int rows = stmt.executeUpdate(sql);
+                if (rows > 0)
+                    log.debug("Purged "+rows+" rows of backfilled data between"+
+                              " "+TimeUtil.toString(max_time)+" and "+
+                              TimeUtil.toString(max_time+BF_PURGE_INCR));
             }
         }
         finally {
