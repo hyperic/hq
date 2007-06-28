@@ -879,8 +879,6 @@
 
     <hqplugin name="memcached"/>
 
-    <hqplugin name="mule"/>
-
     <hqplugin name="vmware"/>
   </target>
   
