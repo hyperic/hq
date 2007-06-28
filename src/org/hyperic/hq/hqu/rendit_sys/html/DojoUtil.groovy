@@ -176,32 +176,31 @@ class DojoUtil {
                     ${pageNumVar}  = data.pageNum;
                     ${lastPageVar} = data.lastPage;
                     ${idVar}_setupPager();
-                    highlightRow(data.data);
+                    ${idVar}_highlightRow(data.data);
                 }
             });
         }
 
-       function highlightRow(el) {
-        for (i = 0; i < el.length; i++) {
-            var id = el[i].id;
-            var body = document.getElementById("${id}");
-            var trs = body.getElementsByTagName('tr');
-            var styleClassVal = el[i].styleClass;
-            if (id && (styleClassVal && styleClassVal != '')) {
-                for (b = 0; b < trs.length; b++) {
-                    var vals = trs[b].getAttribute("value");
-                    var trClass =  trs[b].class;
-                    if (id == vals) {
-                        var rowTDs = trs[b].getElementsByTagName('td');
+        function ${idVar}_highlightRow(el) {
+            for (i = 0; i < el.length; i++) {
+                var id = el[i].id;
+                var body = document.getElementById("${id}");
+                var trs = body.getElementsByTagName('tr');
+                var styleClassVal = el[i].styleClass;
+                if (id && (styleClassVal && styleClassVal != '')) {
+                    for (b = 0; b < trs.length; b++) {
+                        var vals = trs[b].getAttribute("value");
+                        var trClass =  trs[b].class;
+                        if (id == vals) {
+                            var rowTDs = trs[b].getElementsByTagName('td');
                             for (k = 0; k < rowTDs.length; k++) {
-                            rowTDs[k].setAttribute((document.all ? 'className' : 'class'), styleClassVal);
+                                rowTDs[k].setAttribute((document.all ? 'className' : 'class'), styleClassVal);
                             }
+                        }
                     }
-
                 }
             }
         }
-    }
          
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
