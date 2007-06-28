@@ -5797,12 +5797,6 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
-    <schemaSpec version="3.30">
-      <schema-directSQL>
-        <statement>insert into eam_role_resource_group_map (role_id, resource_group_id) values (1, 1)</statement>
-        <statement>insert into eam_role_operation_map (role_id, operation_id) select 1, id from eam_operation where not id = 0</statement>
-      </schema-directSQL>
-    </schemaSpec>
 </dbupgrade>
 
 </target>
