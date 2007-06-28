@@ -190,7 +190,6 @@ class DojoUtil {
                 if (id && (styleClassVal && styleClassVal != '')) {
                     for (b = 0; b < trs.length; b++) {
                         var vals = trs[b].getAttribute("value");
-                        var trClass =  trs[b].class;
                         if (id == vals) {
                             var rowTDs = trs[b].getElementsByTagName('td');
                             for (k = 0; k < rowTDs.length; k++) {
