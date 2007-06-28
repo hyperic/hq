@@ -260,16 +260,34 @@ public class EmailAction extends EmailActionConfig
         } catch (ArrayIndexOutOfBoundsException e) { // Retarded ... XXX
             _log.error("Error finding event id.  Can't add link to email.", e);
         }
+        
         return text.toString();
     }
     
     private void addAuxLogs(String prefix, List logs, StringBuffer text) {
+        String baseUrl;
+        
+        try {
+            baseUrl = getBaseURL();
+        } catch(ConfigPropertyException e) {
+            _log.warn("Unable to get base url");
+            return;
+        }
+        
         for (Iterator i=logs.iterator(); i.hasNext(); ) { 
             AlertAuxLog a = (AlertAuxLog)i.next();
             
             text.append(prefix)
                 .append(a.getDescription())
                 .append("\n");
+            
+            if (a.getURL() != null) {
+                text.append(prefix)
+                    .append("  - ")
+                    .append(baseUrl)
+                    .append(a.getURL())
+                    .append("\n");
+            }
             
             addAuxLogs(prefix + "  ", a.getChildren(), text);
         }

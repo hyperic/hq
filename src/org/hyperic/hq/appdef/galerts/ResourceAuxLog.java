@@ -1,7 +1,5 @@
 package org.hyperic.hq.appdef.galerts;
 
-import java.net.URL;
-
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AlertAuxLogProvider;
@@ -31,7 +29,7 @@ public class ResourceAuxLog
         return ResourceAuxLogProvider.INSTANCE;
     }
 
-    public URL getURL() {
-        return null;
+    public String getURL() {
+        return "/Resource.do?rid=" + _ent.getId() + "&type=" + _ent.getType();
     }
 }

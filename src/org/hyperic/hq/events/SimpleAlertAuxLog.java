@@ -1,6 +1,5 @@
 package org.hyperic.hq.events;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +36,7 @@ public class SimpleAlertAuxLog
         return null;
     }
 
-    public URL getURL() {
+    public String getURL() {
         return null;
     }
 }

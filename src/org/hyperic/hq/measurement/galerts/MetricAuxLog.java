@@ -1,7 +1,5 @@
 package org.hyperic.hq.measurement.galerts;
 
-import java.net.URL;
-
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
@@ -32,8 +30,10 @@ public class MetricAuxLog
         return _metric;
     }
 
-    public URL getURL() {
-        return null;
+    public String getURL() {
+        return "/resource/common/monitor/Visibility.do?m=" + _metric.getId() +
+               "&eid=" + _metric.getEntityId().toString() + 
+               "&mode=chartSingleMetricSingleResource";
     }
 
     public AlertAuxLogProvider getProvider() {

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events;
 
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -40,8 +39,12 @@ public interface AlertAuxLog {
     /**
      * Provide an optional URL which can be used to see more information
      * about the log.
+     * 
+     * This method should return a path after the regular web prefix 
+     * (i.e. it will be prepended with http://localhost:7080/ or whatever
+     * the context is)
      */
-    URL getURL();
+    String getURL();
     
     /**
      * Returns a list of {@link AlertAuxLog}s which are children of this
