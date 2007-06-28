@@ -73,7 +73,7 @@ function handleEnter (field, event) {
     <td width="35%" class="PageTitle" nowrap><fmt:message key="dash.home.AvailSummary.Title"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
     <td width="32%"><html:img page="/images/spacer.gif" width="202" height="32" alt="" border="0"/></td>
-    <td width="1%"><html:link href="" onclick="window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes'); return false;"><html:img page="/images/title_pagehelp.gif" width="20" height="20" alt="" border="0" hspace="10"/></html:link></td>
+    <td width="1%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
   <tr>
     <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
