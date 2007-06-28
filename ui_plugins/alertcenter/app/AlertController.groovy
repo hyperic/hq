@@ -31,7 +31,10 @@ class AlertController
             [field:AlertSortField.FIXED,
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
             [field:AlertSortField.ACKED_BY,
-             label:{it.acknowledgedBy?.fullName}],
+             label:{
+                 def by = it.acknowledgedBy
+                 by == null ? "" : by.fullName
+            }],
             [field:AlertSortField.SEVERITY,
              label:{it.alertDefinition.severity.value}],
         ]
