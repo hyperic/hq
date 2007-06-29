@@ -12,7 +12,10 @@ class AlertController
 {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-
+    private final SEVERITY_MAP = [(AlertSeverity.LOW)    : 'low',
+                                  (AlertSeverity.MEDIUM) : 'med',
+                                  (AlertSeverity.HIGH)   : 'high']
+        
     private final TABLE_SCHEMA = [
         getData: {pageInfo -> alertHelper.findAlerts(AlertSeverity.LOW, pageInfo)},
         defaultSort: AlertSortField.DATE,
@@ -36,7 +39,13 @@ class AlertController
                  by == null ? "" : by.fullName
             }],
             [field:AlertSortField.SEVERITY,
-             label:{it.alertDefinition.severity.value}],
+             label:{
+                def s = it.alertDefinition.severity
+                """<img src="/hqu/public/images/${SEVERITY_MAP[s]}-severity.gif" 
+                        title="Low Severity" width="16" height="16" border="0">""" +
+                it.alertDefinition.severity.value
+             }
+            ],
         ]
     ]
     
