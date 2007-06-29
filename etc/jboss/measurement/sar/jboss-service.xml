@@ -53,4 +53,8 @@
     <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
   </mbean>
 
+  <mbean code="org.hyperic.hq.measurement.server.mbean.DataPopulatorService"
+         name="hyperic.jmx:type=Service,name=DataPopulator">
+  </mbean>
+
 </server>
