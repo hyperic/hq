@@ -99,23 +99,23 @@ public class DatabaseInitializer {
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
             final String UNION_BODY =
-                "SELECT * FROM hq_metric_data_0d_0s UNION " +
-                "SELECT * FROM hq_metric_data_0d_1s UNION " +
-                "SELECT * FROM hq_metric_data_1d_0s UNION " +
-                "SELECT * FROM hq_metric_data_1d_1s UNION " +
-                "SELECT * FROM hq_metric_data_2d_0s UNION " +
-                "SELECT * FROM hq_metric_data_2d_1s UNION " +
-                "SELECT * FROM hq_metric_data_3d_0s UNION " +
-                "SELECT * FROM hq_metric_data_3d_1s UNION " +
-                "SELECT * FROM hq_metric_data_4d_0s UNION " +
-                "SELECT * FROM hq_metric_data_4d_1s UNION " +
-                "SELECT * FROM hq_metric_data_5d_0s UNION " +
-                "SELECT * FROM hq_metric_data_5d_1s UNION " +
-                "SELECT * FROM hq_metric_data_6d_0s UNION " +
-                "SELECT * FROM hq_metric_data_6d_1s UNION " +
-                "SELECT * FROM hq_metric_data_7d_0s UNION " +
-                "SELECT * FROM hq_metric_data_7d_1s UNION " +
-                "SELECT * FROM hq_metric_data_8d_0s UNION " +
+                "SELECT * FROM hq_metric_data_0d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_0d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_1d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_1d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_2d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_2d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_3d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_3d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_4d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_4d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_5d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_5d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_6d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_6d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_7d_0s UNION ALL " +
+                "SELECT * FROM hq_metric_data_7d_1s UNION ALL " +
+                "SELECT * FROM hq_metric_data_8d_0s UNION ALL " +
                 "SELECT * FROM hq_metric_data_8d_1s";
             
             final String HQ_METRIC_DATA_VIEW =
@@ -123,7 +123,7 @@ public class DatabaseInitializer {
                         
             final String EAM_METRIC_DATA_VIEW =
                 "CREATE VIEW eam_measurement_data AS " + UNION_BODY +
-                " UNION SELECT * FROM hq_metric_data_compat";
+                " UNION ALL SELECT * FROM hq_metric_data_compat";
 
             Statement stmt = null;
             try {
