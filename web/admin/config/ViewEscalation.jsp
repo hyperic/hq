@@ -1096,7 +1096,7 @@ function saveAddEscalation() {
         }
     }
 
-    if (selActionTypeEsc == "SMNP") {
+    if (selActionTypeEsc == "SNMP") {
         if (!checkIP()) {
             return false;
         }
