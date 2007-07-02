@@ -830,7 +830,7 @@ function configureUsers(el) {
 
                 <c:forEach var="user" items="${AvailableUsers}" varStatus="status">
                     if (checkedValues == <c:out value="${user.id}"/>) {
-                        writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
+                        writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />, '));
                     }
                 </c:forEach>
 
@@ -872,7 +872,7 @@ function configureRoles(el) {
                     var checkedValues = rolesInputList[i].value;
                 <c:forEach var="user" items="${AvailableRoles}" varStatus="status">
                     if (checkedValues == <c:out value="${user.id}"/>) {
-                        writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" /> '));
+                        writeListUsers.appendChild(document.createTextNode('<c:out value="${user.name}" />, '));
                     }
                 </c:forEach>
 
