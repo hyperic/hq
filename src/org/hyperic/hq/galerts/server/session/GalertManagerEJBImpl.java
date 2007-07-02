@@ -208,8 +208,7 @@ public class GalertManagerEJBImpl
      * @ejb:interface-method  
      */
     public GalertDef findById(Integer id) {
-        GalertDef def = _defDAO.findById(id);
-        return def.getGalertDefValue();
+        return _defDAO.findById(id);
     }
     
     /**
@@ -602,9 +601,7 @@ public class GalertManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void startEscalation(Integer id, ExecutionReason reason) {
-        GalertDef def = findById(id);
-
+    public void startEscalation(GalertDef def, ExecutionReason reason) {
         _escMan.startEscalation(def, new GalertEscalatableCreator(def, reason));
     }
 
