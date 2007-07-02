@@ -219,22 +219,22 @@ public class DataPurgeJob implements Job {
      * Purge Event Log data
      */
     private static void purgeEventLogs(Properties conf, long now)
-        throws CreateException, NamingException {
-            String purgeEventString =
-                conf.getProperty(HQConstants.EventLogPurge);
-            long purgeEventLog = Long.parseLong(purgeEventString);
-        
-            // Purge event logs
-            EventLogManagerLocal eventLogManager =
-                EventLogManagerUtil.getLocalHome().create();
-            
-            _log.info("Purging events older than " +
-                     TimeUtil.toString(now - purgeEventLog));
-            try {
-                eventLogManager.deleteLogs(0, now - purgeEventLog);
-                _log.info("Done (Deleting events)");
-            } catch (RemoveException e) {
-                _log.error("Unable to delete events: " + e.getMessage(), e);
-            }
+        throws CreateException, NamingException
+    {
+        String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
+        long purgeEventLog = Long.parseLong(purgeEventString);
+
+        // Purge event logs
+        EventLogManagerLocal eventLogManager =
+            EventLogManagerUtil.getLocalHome().create();
+
+        _log.info("Purging events older than " +
+            TimeUtil.toString(now - purgeEventLog));
+        try {
+            eventLogManager.deleteLogs(0, now - purgeEventLog);
+            _log.info("Done (Deleting events)");
+        } catch (RemoveException e) {
+            _log.error("Unable to delete events: " + e.getMessage(), e);
         }
+    }
 }
