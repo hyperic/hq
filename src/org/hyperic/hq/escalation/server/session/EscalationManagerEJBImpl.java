@@ -453,8 +453,7 @@ public class EscalationManagerEJBImpl
     public boolean isAlertAcknowledgeable(Integer alertId,
                                           PerformsEscalations def) {
         if (def.getEscalation() != null) {
-            EscalationState escState =
-                new EscalationStateDAO(DAOFactory.getDAOFactory()).find(def);
+            EscalationState escState = _stateDAO.find(def);
             
             if (escState != null) {
                 if (escState.getAlertId() == alertId.intValue() &&
@@ -465,7 +464,40 @@ public class EscalationManagerEJBImpl
         }
         return false;
     }
-
+    
+    /**
+     * Fix an alert for a an escalation if there is one currently running.
+     *
+     * @return true if there was an alert to be fixed.
+     * 
+     * @ejb:interface-method
+     */
+    public boolean fixAlert(AuthzSubject subject, PerformsEscalations def,
+                            String moreInfo) 
+    {
+        EscalationState state = _stateDAO.find(def);
+        Escalatable e;
+        
+        if (state == null)
+            return false;
+        
+        // Find the alert, to see if it's been fixed.
+        Integer alertId = new Integer(state.getAlertId());
+        e = state.getAlertType().findEscalatable(alertId);
+        
+        // Strange condition, since we shouldn't have an escalation state if
+        // it has been fixed.
+        if (e.getAlertInfo().isFixed()) {
+            _log.warn("Found a fixed alert inside an escalation.  alert=" + 
+                      alertId + " defid=" + def.getDefinitionInfo().getId() + 
+                      " alertType=" + state.getAlertType().getCode());
+            return false;
+        }
+        
+        fixOrNotify(subject, e, state, true, moreInfo);
+        return true;
+    }
+    
     /**
      * Fix an alert, potentially sending out notifications.  The state of
      * the escalation will be terminated and the alert will be marked fixed.
@@ -485,6 +517,15 @@ public class EscalationManagerEJBImpl
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
+        fixOrNotify(subject, esc, state, fixed, moreInfo);
+    } 
+
+    private void fixOrNotify(AuthzSubject subject, Escalatable esc,
+                             EscalationState state, boolean fixed, 
+                             String moreInfo)
+    {
+        EscalationAlertType type = state.getAlertType();
+        Integer alertId = esc.getAlertInfo().getId();
         boolean acknowledged = !fixed;
         
         if (esc.getAlertInfo().isFixed()) {
