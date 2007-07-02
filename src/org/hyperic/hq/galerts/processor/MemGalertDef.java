@@ -41,7 +41,6 @@ import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.server.session.GtriggerInfo;
 
 
@@ -150,8 +149,7 @@ class MemGalertDef {
         _log.debug("Alert def [" + _name + " firing");
         _log.debug(execReason);
 
-        // Dispatch to alert escalation
-        GalertManagerEJBImpl.getOne().startEscalation(_id, execReason);
+        strat.getPartition().execute(_id, execReason);
         strat.reset();
     }
 }
