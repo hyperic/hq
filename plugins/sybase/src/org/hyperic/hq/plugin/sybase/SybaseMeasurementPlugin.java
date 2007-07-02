@@ -78,10 +78,6 @@ public class SybaseMeasurementPlugin
     private static HashMap genericQueries  = null;  // Any
     private static HashMap connectionCache = new HashMap();
 
-    public SybaseMeasurementPlugin() {
-        setName("sybase");
-    }
-
     protected void getDriver()
         throws ClassNotFoundException {
         Class.forName(JDBC_DRIVER);
