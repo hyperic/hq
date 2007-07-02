@@ -29,8 +29,7 @@ class AlertController
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
             [field:AlertSortField.RESOURCE,
              label:{linkTo(it.alertDefinition.resource.name,
-                           [resource:it.alertDefinition.resource,
-                            resourceContext:'alert'])}],
+                           [resource:it.alertDefinition.resource])}],
             [field:AlertSortField.FIXED,
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
             [field:AlertSortField.ACKED_BY,
@@ -42,8 +41,8 @@ class AlertController
              label:{
                 def s = it.alertDefinition.severity
                 """<img src="/hqu/public/images/${SEVERITY_MAP[s]}-severity.gif" 
-                        title="${SEVERITY_MAP[s]} severity" width="16" height="16" border="0" class="severityIcon">""" +
-                it.alertDefinition.severity.value
+                        width="16" height="16" border="0" class="severityIcon">""" +
+                    it.alertDefinition.severity.value
              }
             ],
         ]
