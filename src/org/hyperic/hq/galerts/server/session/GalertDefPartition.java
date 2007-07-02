@@ -25,8 +25,18 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.util.HypericEnum;
 
 /**
@@ -37,21 +47,46 @@ import org.hyperic.util.HypericEnum;
  *  Recovery - A partition indicating that an alertable condition is no longer
  *             valid
  */
-public class GalertDefPartition 
+public abstract class GalertDefPartition 
     extends HypericEnum
 {
+    private static final String GALERT_FIXED_PROP = "galert.fixed";
     private static final String BUNDLE = "org.hyperic.hq.galerts.Resources"; 
         
+    public abstract void execute(Integer id, ExecutionReason execReason);
+    
     // This is just a regular alert definition.  
     public static final GalertDefPartition NORMAL = 
-        new GalertDefPartition(0, "NORMAL", "galert.partition.normal");
+        new GalertDefPartition(0, "NORMAL", "galert.partition.normal") 
+    {
+        public void execute(Integer id, ExecutionReason execReason) {
+            GalertManagerLocal gman = GalertManagerEJBImpl.getOne();
+            GalertDef def = gman.findById(id);
+
+            GalertManagerEJBImpl.getOne().startEscalation(def, execReason);
+        }
+    };
     
     // This alert definition executed a recovery alert
     public static final GalertDefPartition RECOVERY = 
-        new GalertDefPartition(1, "RECOVERY", "galert.partition.recovery");
+        new GalertDefPartition(1, "RECOVERY", "galert.partition.recovery") 
+    {
+        public void execute(Integer id, ExecutionReason execReason) {
+            EscalationManagerLocal eman = EscalationManagerEJBImpl.getOne();
+            GalertManagerLocal gman = GalertManagerEJBImpl.getOne();
+            AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
+            AuthzSubjectValue overlordValue = aman.findOverlord(); 
+            AuthzSubject overlord = aman.findSubjectById(overlordValue.getId());
+            GalertDef def = gman.findById(id);
+            String fixedMessage = ResourceBundle.getBundle(BUNDLE)
+                                                .getString(GALERT_FIXED_PROP);
+            eman.fixAlert(overlord, def, fixedMessage);
+        }
+    };
     
     private GalertDefPartition(int code, String desc, String localeProp) {
-        super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE)); 
+        super(GalertDefPartition.class, code, desc, localeProp, 
+              ResourceBundle.getBundle(BUNDLE)); 
     }
     
     public static GalertDefPartition findByCode(int code) {
