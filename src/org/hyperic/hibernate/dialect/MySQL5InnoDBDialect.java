@@ -37,7 +37,7 @@ public class MySQL5InnoDBDialect extends
      * Database table and function to support sequences.  It is assumed that
      * the database has already been prepped by running the following SQL.
 
-        CREATE TABLE `hq_sequence` (
+        CREATE TABLE `HQ_SEQUENCE` (
             `seq_name` char(50) NOT NULL PRIMARY KEY,
             `seq_val` int(11) DEFAULT NULL
         );
@@ -49,7 +49,7 @@ public class MySQL5InnoDBDialect extends
          DETERMINISTIC
          BEGIN
           SET @new_seq_val = 0;
-          UPDATE hq_sequence set seq_val = @new_seq_val:=seq_val+1
+          UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1
            WHERE seq_name=iname;
           RETURN @new_seq_val;
          END;

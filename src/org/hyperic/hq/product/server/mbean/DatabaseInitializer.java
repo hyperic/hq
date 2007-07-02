@@ -197,7 +197,7 @@ public class DatabaseInitializer {
                 "DETERMINISTIC " +
                 "BEGIN " +
                   "SET @new_seq_val = 0;" +
-                  "UPDATE hq_sequence set seq_val = @new_seq_val:=seq_val+1 " +
+                  "UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1 " +
                     "WHERE seq_name=iname; " +
                   "RETURN @new_seq_val;" +
                 "END;" +
