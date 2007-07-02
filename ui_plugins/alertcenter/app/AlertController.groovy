@@ -42,7 +42,7 @@ class AlertController
              label:{
                 def s = it.alertDefinition.severity
                 """<img src="/hqu/public/images/${SEVERITY_MAP[s]}-severity.gif" 
-                        title="Low Severity" width="16" height="16" border="0">""" +
+                        title="${SEVERITY_MAP[s]} severity" width="16" height="16" border="0" class="severityIcon">""" +
                 it.alertDefinition.severity.value
              }
             ],

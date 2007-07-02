@@ -261,7 +261,7 @@ class DojoUtil {
 	        def label     = field.value
 	        def fieldName = field.description 
 
-	        res << """<th field='${fieldName}' align='left' nosort='true'
+	        res << """<th field='${fieldName}' align='left' nosort='true'  nowrap='true'
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
@@ -276,6 +276,7 @@ class DojoUtil {
               </tr>
             </thead>
           </table>
+
         """
 	    
 		res.toString()	    

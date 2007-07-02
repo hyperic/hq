@@ -1,3 +1,7 @@
+#alert {
+    width:100%;
+}
+
 #alert	table {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
@@ -130,6 +134,10 @@
 
 .alertHighlight {
     background-color: #fad0c9;
+}
+
+.severityIcon {
+   padding-right:5px;vertical-align:top;
 }
 
 .boldText {

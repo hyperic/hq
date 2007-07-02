@@ -18,7 +18,7 @@
     <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
   <tr valign="top">
-    <td width="100%" style="padding-top:10px;">
+    <td width="100%" style="padding-top:10px;padding-right:10px;" colspan="4">
     <c:url var="attachUrl" context="/hqu/${attachment.plugin.name}" value="${attachment.path}"/>
     <c:import url="${attachUrl}"/>
     </td>
