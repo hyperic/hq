@@ -1068,7 +1068,8 @@ function ActionTypeNull() {
 }
 
 function selUserEscNull() {
-    if ((selUserEsc == undefined || selUserEsc == 'Select') && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
+    var  userList = $('userListDisplay').innerHTML;
+    if ((selUserEsc == undefined || selUserEsc == 'Select' || userList=='') && (selActionTypeEsc != "Syslog" && selActionTypeEsc != "SNMP" && selActionTypeEsc != "NoOp")) {
         showErrorDisplay();
         $('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
         return false;
@@ -1076,14 +1077,16 @@ function selUserEscNull() {
         return true;
     }
 }
-
+        
 function saveAddEscalation() {
     if (!ActionTypeNull()) {
         return false;
     }
+
     if (!selUserEscNull()) {
         return false;
     }
+
     if (selUserEsc == 'Others') {
         if (!checkEmail()) {
             return false;
