@@ -50,11 +50,11 @@
          use only 1 subquery if we used a fancy 'case' statement.  
          The Alert Type magic number comes from ClassicEscalationAlertType -->
     <property name="stateId" 
-              formula="(select e.id from eam_escalation_state e where 
+              formula="(select e.id from EAM_ESCALATION_STATE e where 
                         e.alert_id = id and e.alert_def_id = alert_definition_id
                         and e.alert_type = -559038737)"/>
     <property name="ackedBy" 
-              formula="(select e.acknowledged_by from eam_escalation_state e where 
+              formula="(select e.acknowledged_by from EAM_ESCALATION_STATE e where 
                         e.alert_id = id and e.alert_def_id = alert_definition_id
                         and e.alert_type = -559038737)"/>
   </class>
