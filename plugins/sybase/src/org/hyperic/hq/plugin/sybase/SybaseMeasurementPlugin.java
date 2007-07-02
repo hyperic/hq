@@ -79,7 +79,7 @@ public class SybaseMeasurementPlugin
     private static HashMap connectionCache = new HashMap();
 
     public SybaseMeasurementPlugin() {
-        setName(SybaseMeasurementPlugin.NAME);
+        setName("sybase");
     }
 
     protected void getDriver()
