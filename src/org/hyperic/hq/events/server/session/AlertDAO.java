@@ -34,6 +34,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class AlertDAO extends HibernateDAO {
@@ -88,20 +89,9 @@ public class AlertDAO extends HibernateDAO {
         AlertSortField sort = (AlertSortField)pageInfo.getSort();
         Query q;
         
-        String sql = "select a from Alert a " +
-                "join a.alertDefinition d " +
-                "join d.resource r " +
-          "where a.ctime between :begin and :end and " +
-                "d.priority >= :priority and " +
-                "( r.owner.id = :subj " +
-                "or exists (select rg from r.resourceGroups rg " +
-                           "join rg.roles rl " +
-                           "join rl.operations o " +
-                           "join rl.subjects s " +
-                           "where s.id = :subj and o.name in (:ops) and " +
-                                 "r.resourceType = o.resourceType) " +
-                ") order by " + sort.getSortString("a", "d", "r") + 
-                (pageInfo.isAscending() ? "" : " DESC");
+        String sql = PermissionManagerFactory.getInstance().getAlertsHQL() +
+                     " order by " + sort.getSortString("a", "d", "r") + 
+                     (pageInfo.isAscending() ? "" : " DESC");
         
         // If sorting by something other than date, do a secondary sort by
         // date, descending
@@ -114,10 +104,14 @@ public class AlertDAO extends HibernateDAO {
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("priority", priority)
-            .setInteger("subj", subj.intValue())
-            .setParameterList("ops", ops)
             .setCacheable(true)
             .setCacheRegion("Alert.findByCreateTime");
+
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subj.intValue())
+             .setParameterList("ops", ops);
+        }
+
         return pageInfo.pageResults(q).list();
     }
     
