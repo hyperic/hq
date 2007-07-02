@@ -35,6 +35,10 @@ import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 
+/**
+ * This strategy will fire when any of the triggers has fired -- an OR 
+ * operation.
+ */
 public class SimpleStrategy 
     implements ExecutionStrategy
 {
@@ -52,6 +56,10 @@ public class SimpleStrategy
         
         _log.debug("Configure called: partition=" + partition + 
                    " defName=" + defName + " triggers=" + triggers);
+    }
+    
+    public GalertDefPartition getPartition() {
+        return _partition;
     }
 
     public void setDefinitionName(String name) {

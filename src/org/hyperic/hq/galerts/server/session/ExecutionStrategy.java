@@ -71,4 +71,6 @@ public interface ExecutionStrategy {
      * longer met)
      */
     void triggerNotFired(Gtrigger trigger);
+    
+    GalertDefPartition getPartition();
 }
