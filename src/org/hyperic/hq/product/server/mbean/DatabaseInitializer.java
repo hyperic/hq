@@ -99,31 +99,31 @@ public class DatabaseInitializer {
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
             final String UNION_BODY =
-                "SELECT * FROM hq_metric_data_0d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_0d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_1d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_1d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_2d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_2d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_3d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_3d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_4d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_4d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_5d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_5d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_6d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_6d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_7d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_7d_1s UNION ALL " +
-                "SELECT * FROM hq_metric_data_8d_0s UNION ALL " +
-                "SELECT * FROM hq_metric_data_8d_1s";
+                "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_8D_1S";
             
             final String HQ_METRIC_DATA_VIEW =
-                "CREATE VIEW hq_metric_data AS " + UNION_BODY;
+                "CREATE VIEW HQ_METRIC_DATA AS " + UNION_BODY;
                         
             final String EAM_METRIC_DATA_VIEW =
-                "CREATE VIEW eam_measurement_data AS " + UNION_BODY +
-                " UNION ALL SELECT * FROM hq_metric_data_compat";
+                "CREATE VIEW EAM_MEASUREMENT_DATA AS " + UNION_BODY +
+                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
 
             Statement stmt = null;
             try {
@@ -138,8 +138,7 @@ public class DatabaseInitializer {
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }
-        }
-        
+        } 
     }
     
     class PostgresRoutines implements DatabaseRoutines {
