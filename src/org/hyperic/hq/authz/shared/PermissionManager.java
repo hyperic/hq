@@ -219,4 +219,6 @@ public interface PermissionManager {
                                         Integer groupId, Boolean fsystem);
 
     public Collection findServiceResources(AuthzSubject subj, Boolean fsystem);
+    
+    public String getAlertsHQL();
 }

@@ -331,4 +331,12 @@ public class PermissionManagerImpl
     public Collection findServiceResources(AuthzSubject subj, Boolean fsystem) {
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
+
+    public String getAlertsHQL() {
+        return "select a from Alert a " +
+                "join a.alertDefinition d " +
+                "join d.resource r " +
+          "where a.ctime between :begin and :end and " +
+                "d.priority >= :priority ";
+    }
 }
