@@ -116,7 +116,7 @@ public class DataPurgeJob implements Job {
             try {
                 dataCompress.purgeBackfilled();
             } catch (SQLException e) {
-                _log.error("Unable to clear out duplicated backfilled data");
+                _log.error("Unable to clear out duplicated backfilled data", e);
             }
     
             // We'll only do the rest of the maintenance if it's 10 past the
