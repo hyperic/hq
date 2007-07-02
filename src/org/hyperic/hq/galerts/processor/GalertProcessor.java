@@ -37,10 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.zevents.Zevent;
@@ -65,7 +62,8 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  */
 public class GalertProcessor {
     private static final GalertProcessor INSTANCE = new GalertProcessor();
-    private static final Object CFG_LOCK = new Object();
+    private static final Object CFG_LOCK     = new Object();
+    private static final Object TRIGGER_LOCK = new Object();
     private static final Log _log = LogFactory.getLog(GalertProcessor.class);
 
     private static boolean _initialized = false;
@@ -125,7 +123,11 @@ public class GalertProcessor {
         for (Iterator i=listenerDupe.iterator(); i.hasNext(); ) {
             Gtrigger t = (Gtrigger)i.next();
             
-            t.processEvent(event);
+            // Synchronize around all event processing for a trigger, since
+            // they keep state and will need to be flushed
+            synchronized(t) {
+                t.processEvent(event);
+            }
         }
     }
     
