@@ -293,8 +293,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         duration += doCommand(conn, MYSQL_ANALYZE, currTable);
         duration += doCommand(conn, MYSQL_ANALYZE, prevTable);
         for (int i = 0; i < DATA_TABLES.length; i++) {
-            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
+            duration += doCommand(conn, MYSQL_ANALYZE, DATA_TABLES[i]);
         }
+        log.info("Done Running MySQL Analyze");
         return duration;
     }
 
@@ -318,7 +319,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                                     String prevTable)
     {
         long duration = 0;
-        log.info("Running MySQL Analyze");
+        log.info("Running Postgres Analyze");
         duration += doCommand(conn, SQL_ANALYZE, currTable);
         duration += doCommand(conn, SQL_ANALYZE, prevTable);
         for (int i = 0; i < DATA_TABLES.length; i++) {
