@@ -86,9 +86,9 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
         final String SQL =
-            "SELECT timestamp, value FROM eam_measurement_data " +
+            "SELECT timestamp, value FROM EAM_MEASUREMENT_DATA " +
             "WHERE measurement_id = ? AND timestamp = " +
-            "(SELECT min(timestamp) FROM eam_measurement_data " +
+            "(SELECT min(timestamp) FROM EAM_MEASUREMENT_DATA " +
             " WHERE measurement_id = ?)";
 
         Connection conn = null;
