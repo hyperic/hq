@@ -93,6 +93,9 @@ public class DatabaseInitializer {
         if (DBUtil.isPostgreSQL(conn))
             routines.add(new PostgresRoutines());
         
+        if (DBUtil.isMySQL(conn))
+            routines.add(new MySQLRoutines());
+        
         return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
     }
     
