@@ -921,6 +921,8 @@
 
     <hqplugin name="sybase"/>
 
+    <hqplugin name="alfresco"/>
+
     <hqplugin name="zimbra"/>
 
     <hqplugin name="openldap"/>
