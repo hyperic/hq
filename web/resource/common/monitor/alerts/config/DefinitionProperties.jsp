@@ -33,7 +33,7 @@
 
 
 <!-- Properties Content -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="tableBottomLine">
   <tr>
     <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
@@ -121,9 +121,6 @@
   </tr>
   <tr>
     <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>
 &nbsp;<br>

@@ -70,16 +70,16 @@ public class EditDefinitionPropertiesFormPrepareAction extends TilesAction {
 
         log.debug("in edit definition properties form prepare ...");
 
-        Integer alertDefId = new Integer( request.getParameter("ad") );
-        log.trace("alertDefId=" + alertDefId);
+        DefinitionForm defForm = (DefinitionForm) form;
+        log.trace("alertDefId=" + defForm.getId());
 
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
-        AlertDefinitionValue adv = eb.getAlertDefinition(sessionID, alertDefId);
+        AlertDefinitionValue adv =
+            eb.getAlertDefinition(sessionID, defForm.getId());
         request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
-        DefinitionForm defForm = (DefinitionForm)form;
         defForm.importProperties(adv);
 
         return null;

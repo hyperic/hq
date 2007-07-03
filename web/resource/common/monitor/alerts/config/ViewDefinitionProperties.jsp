@@ -97,10 +97,10 @@
 <tiles:insert definition=".toolbar.edit">
 <c:choose>
   <c:when test="${not empty Resource}">
-    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&type=<c:out value="${Resource.entityId.type}"/>&rid=<c:out value="${Resource.id}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
+    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&type=<c:out value="${Resource.entityId.type}"/>&rid=<c:out value="${Resource.id}"/>&id=<c:out value="${alertDef.id}"/></tiles:put>
   </c:when>
   <c:otherwise>
-    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&aetid=<c:out value="${ResourceType.appdefTypeKey}"/>&ad=<c:out value="${alertDef.id}"/></tiles:put>
+    <tiles:put name="editUrl">/alerts/Config.do?mode=<c:out value="${mode}"/>&aetid=<c:out value="${ResourceType.appdefTypeKey}"/>&id=<c:out value="${alertDef.id}"/></tiles:put>
   </c:otherwise>
 </c:choose>
 </tiles:insert>

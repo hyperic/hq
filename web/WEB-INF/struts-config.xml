@@ -1953,6 +1953,7 @@
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionAction"
               name="NewAlertDefinitionForm"
               scope="request"
+              validate="true"
               input="/alerts/Config.do?mode=new">
         <forward name="cancel" path="/alerts/Config.do?mode=list"
                  redirect="true"/>
@@ -2053,6 +2054,7 @@
       <action path="/alerts/EditPropertiesFormPrepare"
               name="EditAlertDefinitionPropertiesForm"
               scope="request"
+              validate="true"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesFormPrepareAction">
         <set-property property="title" value="Alert.Properties"/>
       </action>
