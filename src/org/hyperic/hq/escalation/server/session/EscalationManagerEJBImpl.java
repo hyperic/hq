@@ -494,7 +494,7 @@ public class EscalationManagerEJBImpl
             return false;
         }
         
-        fixOrNotify(subject, e, state, true, moreInfo);
+        fixOrNotify(subject, e, state, state.getAlertType(), true, moreInfo);
         return true;
     }
     
@@ -517,14 +517,13 @@ public class EscalationManagerEJBImpl
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        fixOrNotify(subject, esc, state, fixed, moreInfo);
+        fixOrNotify(subject, esc, state, type, fixed, moreInfo);
     } 
 
     private void fixOrNotify(AuthzSubject subject, Escalatable esc,
-                             EscalationState state, boolean fixed, 
-                             String moreInfo)
+                             EscalationState state, EscalationAlertType type,
+                             boolean fixed, String moreInfo) 
     {
-        EscalationAlertType type = state.getAlertType();
         Integer alertId = esc.getAlertInfo().getId();
         boolean acknowledged = !fixed;
         
