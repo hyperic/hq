@@ -397,6 +397,8 @@ public class RuntimeReportProcessor {
 
                 log.info("New server created: " + foundAppdefServer.getName() +
                          " (id=" + server.getId() + ")");
+                // Refresh the light value to include all attributes
+                foundAppdefServer = server.getServerValue();
             } else {
                 update = true;
                 // UPDATE SERVER
