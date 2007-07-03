@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import java.util.HashMap;
@@ -45,6 +46,11 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricInvalidException;
+import org.hyperic.hq.product.MetricNotFoundException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
 
 public class MySQLMeasurementPlugin
     extends JDBCMeasurementPlugin {
@@ -57,6 +63,7 @@ public class MySQLMeasurementPlugin
     private static final String TABLEQUERY  = "SHOW TABLE STATUS LIKE %table%";
     private static final String INDEXQUERY  = "SHOW INDEX FROM %table%";
     private static final String DBQUERY     = "SHOW TABLE STATUS";
+    private static final String NUMDATABASES = "SHOW DATABASES";
     private static HashMap columnMap = null;
 
     protected void getDriver()
@@ -123,6 +130,46 @@ public class MySQLMeasurementPlugin
         return 
             attr.equals("NumIndicies") ||
             attr.equals("AvgCardinality");
+    }
+
+    public MetricValue getValue(Metric metric)
+        throws PluginException,
+               MetricUnreachableException,
+               MetricInvalidException,
+               MetricNotFoundException
+    {
+        String objectName = metric.getObjectName(),
+               attr       = metric.getAttributeName();
+        if (attr.indexOf("NumberOfDatabases") == -1)
+            return super.getValue(metric);
+
+        int value = 0;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            Connection conn = getCachedConnection(metric);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(NUMDATABASES);
+            while (rs.next())
+                value++;
+            return new MetricValue(value, System.currentTimeMillis());
+        }
+        catch (SQLException e)
+        {
+            String msg = "Query failed for "+attr+": "+e.getMessage();
+            throw new MetricNotFoundException(msg, e);
+        }
+        finally
+        {
+            try
+            {
+                if (rs != null) rs.close();
+                if (stmt != null) rs.close();
+            }
+            catch (SQLException e) {
+            }
+        }
     }
 
     protected String getQuery(Metric metric)
