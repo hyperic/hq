@@ -73,10 +73,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:hidden property="type"/>
 <html:hidden property="aiPid"/>
 
+<c:set var="resourceParam" value=""/>
+
 <c:if test="${not empty param.rid}">
-    <c:set var="resourceParam" value="rid=${param.rid}&type=${param.type}"/>
+    <c:set var="resourceParam" value="eid=${param.type}:${param.rid}"/>
 </c:if>
-<c:set var="resourceParam" value="${resourceParam}&aiPid=${param.aiPid}"/>
 
 <c:set var="fullSelfAction" 
     value="${selfAction}&${resourceParam}"/>

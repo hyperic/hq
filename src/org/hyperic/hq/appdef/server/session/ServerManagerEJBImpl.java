@@ -1097,7 +1097,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param existing 
      * @ejb:interface-method
      */
-    public ServerValue updateServer(AuthzSubjectValue subject,
+    public Server updateServer(AuthzSubjectValue subject,
                                     ServerValue existing)
         throws PermissionException, UpdateException,
                AppdefDuplicateNameException, ServerNotFoundException {
@@ -1116,11 +1116,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
             if(server.matchesValueObject(existing)) {
                 log.debug("No changes found between value object and entity");
-                return existing;
             } else {
                 server.updateServer(existing);
-                return getServerById(subject, existing.getId());
             }
+            return server;
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {

@@ -309,10 +309,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         ConfigManagerLocal cman = ConfigManagerEJBImpl.getOne();
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
         try {
-            ServerValue serverValue =
-                serverManager.findServerValueById(subject, id.getId());
-            serverValue.setRuntimeAutodiscovery(true);
-            serverManager.updateServer(subject, serverValue);
+            Server server = serverManager.findServerById(id.getId());
+            server.setRuntimeAutodiscovery(true);
 
             ConfigResponse metricConfig =
                 cman.getMergedConfigResponse(subject,

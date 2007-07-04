@@ -1706,14 +1706,13 @@ public class AppdefBossEJBImpl
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-            ServerValue updated
-                = getServerManager().updateServer(subject, aServer);
+            Server updated = getServerManager().updateServer(subject, aServer);
 
             if(cProps != null ) {
                 AppdefEntityID entityId = aServer.getEntityId();
                 setCPropValues(subject, entityId, cProps);
             }
-            return updated;
+            return updated.getServerValue();
         } catch (Exception e) {
             log.error("Error updating server: " + aServer.getId());
             this.rollback();

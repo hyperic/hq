@@ -86,7 +86,7 @@ public class ImportAIResourcesAction extends BaseAction {
                 return returnFailure(request, mapping, params);
             }
 
-            return returnSuccess(request, mapping, params);
+            return returnSuccess(request, mapping, params, NO_RETURN_PATH);
             
         }
         catch (AIQApprovalException ae) {

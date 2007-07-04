@@ -86,13 +86,13 @@ public class NewAutoDiscoveryPrepAction extends WorkflowPrepareAction {
 
             PlatformValue pValue =
                 (PlatformValue) RequestUtils.getResource(request);
+            String platType = pValue.getPlatformType().getName();
             newForm.setServerTypes(BizappUtils
-                    .buildSupportedAIServerTypes(ctx, request, pValue));
+                    .buildSupportedAIServerTypes(ctx, request, platType));
 
-            loadScanConfig(newForm, request, pValue.getPlatformType().getName());
+            loadScanConfig(newForm, request, platType);
             request.setAttribute("platformSpecificScanMsg",
-                                 getPSScanMessage(false, pValue
-                                         .getPlatformType().getName()));
+                                 getPSScanMessage(false, platType));
         } catch (AgentConnectionException e) {
             RequestUtils
                     .setError(request,

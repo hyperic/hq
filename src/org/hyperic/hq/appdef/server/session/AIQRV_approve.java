@@ -363,7 +363,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     _log.warn("Error configuring server: " + e, e);
                 }
 
-                setCustomProperties(aiserver, serverValue, cpropMgr);
+                setCustomProperties(aiserver, server, cpropMgr);
                 
                 createdResources.add(server.getEntityId());
             } catch (PermissionException e) {
@@ -432,8 +432,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                                        ERR_REMOVED_FROM_APPDEF);
                 }
 
-                serverValue = smLocal.updateServer(subject,
-                                                   serverValue);
+                Server updated = smLocal.updateServer(subject, serverValue);
                 try {
                     configMgr.
                         configureResource(subject,
@@ -446,7 +445,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     _log.warn("Error configuring server: " + configE, configE);
                 }
 
-                setCustomProperties(aiserver, serverValue, cpropMgr);
+                setCustomProperties(aiserver, updated, cpropMgr);
             } catch (PermissionException e) {
                 throw e;
             } catch (Exception e) {
@@ -530,13 +529,11 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private static void setCustomProperties(AIServer aiserver,
-                                            ServerValue server,
+                                            Server server,
                                             CPropManagerLocal cpropMgr) {
         try {
-            int typeId =
-                server.getServerType().getId().intValue();
-            cpropMgr.setConfigResponse(server.getEntityId(),
-                                       typeId,
+            int typeId = server.getServerType().getId().intValue();
+            cpropMgr.setConfigResponse(server.getEntityId(), typeId,
                                        aiserver.getCustomProperties());
         } catch (Exception e) {
             _log.warn("Error setting server custom properties: " + e, e);

@@ -546,23 +546,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     }
 
     /**
-     * Find an appdef platform from an AI Platform ID
-     * @ejb:interface-method
-     */
-    public PlatformValue findPlatformByID(int sessionId, int aiPlatformID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException,PlatformNotFoundException
-    {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
-
-        try {
-            return getAIManager().getPlatformByAI(subject, aiPlatformID);
-        } catch(Exception exc){
-            throw new SystemException(exc);
-        }
-    }
-
-    /**
      * Find an AI Platform from an appdef platform 
      * @ejb:interface-method
      */

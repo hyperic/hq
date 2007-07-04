@@ -82,24 +82,22 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         
-        PlatformValue pValue =
-            (PlatformValue) RequestUtils.getResource(request);
-        if (pValue == null) {
-            AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
-            pValue = aiBoss.findPlatformByID(sessionId.intValue(),
-                                             aiVal.getId().intValue());
-        }
-        
         AppdefResourceTypeValue[] supportedSTypeFilter;
         supportedSTypeFilter =
-                BizappUtils.buildSupportedAIServerTypes(ctx, request, pValue);
+            BizappUtils.buildSupportedAIServerTypes(ctx, request,
+                                                    aiVal.getPlatformTypeName());
         
         AppdefResourceTypeValue[] serverTypeFilter = 
                     BizappUtils.buildfilteredAIServerTypes(supportedSTypeFilter, 
                                         aiVal.getAIServerValues());
                                         
         aForm.setServerTypeFilterList(serverTypeFilter);
-        aForm.setEid(pValue.getEntityId().getAppdefKey());
+        
+        PlatformValue pValue =
+            (PlatformValue) RequestUtils.getResource(request);
+        if (pValue != null) {
+            aForm.setEid(pValue.getEntityId().getAppdefKey());
+        }
 
         aForm.setAiRid(aiVal.getId());
 

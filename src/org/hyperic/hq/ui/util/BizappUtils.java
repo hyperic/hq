@@ -312,18 +312,18 @@ public class BizappUtils {
     public static AppdefResourceTypeValue[] buildSupportedAIServerTypes
         (ServletContext ctx,
          HttpServletRequest request,
-         PlatformValue pValue) throws Exception {
-
-        PlatformTypeValue ptValue = pValue.getPlatformType();
+         String platType) throws Exception {
 
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AIBoss aiBoss = ContextUtils.getAIBoss(ctx);
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
+        PlatformTypeValue ptv =
+            appdefBoss.findPlatformTypeByName(sessionId, platType);
         List serverTypes =
             appdefBoss.findServerTypesByPlatformType(sessionId,
-                                                     pValue.getPlatformType().getId(),
+                                                     ptv.getId(),
                                                      PageControl.PAGE_ALL);
         List serverTypeVals = new ArrayList();
         for (Iterator i = serverTypes.iterator(); i.hasNext(); ) {
