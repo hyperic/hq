@@ -41,9 +41,12 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
@@ -242,10 +245,12 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     public long analyze()
     {
         Connection conn = null;
+        Statement stmt = null;
         try
         {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                                       HQConstants.DATASOURCE);
+            stmt = conn.createStatement();
             long systime = System.currentTimeMillis();
             String currMetricDataTable =
                         MeasTabManagerUtil.getMeasTabname(systime);
@@ -254,23 +259,13 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             String prevMetricDataTable =
                         MeasTabManagerUtil.getMeasTabname(prevtime);
 
-            if (DBUtil.isPostgreSQL(conn)) {
-                return runPostgresAnalyze(conn,
-                                          currMetricDataTable,
-                                          prevMetricDataTable);
-            }
-            else if (DBUtil.isOracle(conn)) {
-                return runOracleAnalyze(conn,
-                                        currMetricDataTable,
-                                        prevMetricDataTable);
-            }
-            else if (DBUtil.isMySQL(conn)) {
-                return runMySQLAnalyze(conn,
-                                       currMetricDataTable,
-                                       prevMetricDataTable);
-            }
-            else
-                return -1l;
+            HQDialect dialect = Util.getHQDialect();
+            long start = System.currentTimeMillis();
+            String sql = dialect.getOptimizeStmt(currMetricDataTable, 15);
+            stmt.execute(sql);
+            sql = dialect.getOptimizeStmt(prevMetricDataTable, 15);
+            stmt.execute(sql);
+            return System.currentTimeMillis() - start;
         }
         catch (NamingException e) {
             throw new SystemException(e);
@@ -280,53 +275,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             throw new SystemException("Error analyzing database", e);
         }
         finally {
-            DBUtil.closeConnection(logCtx, conn);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
-    }
-
-    private long runMySQLAnalyze(Connection conn,
-                                 String currTable,
-                                 String prevTable)
-    {
-        long duration = 0;
-        log.info("Done Running MySQL Analyze");
-        duration += doCommand(conn, MYSQL_ANALYZE, currTable);
-        duration += doCommand(conn, MYSQL_ANALYZE, prevTable);
-        for (int i = 0; i < DATA_TABLES.length; i++) {
-            duration += doCommand(conn, MYSQL_ANALYZE, DATA_TABLES[i]);
-        }
-        log.info("Done Running MySQL Analyze");
-        return duration;
-    }
-
-    private long runOracleAnalyze(Connection conn,
-                                  String currTable,
-                                  String prevTable)
-    {
-        long duration = 0;
-        log.info("Running Oracle Analyze");
-        duration += doCommand(conn, ORACLE_SAMPLE_ANALYZE, currTable);
-        duration += doCommand(conn, ORACLE_SAMPLE_ANALYZE, prevTable);
-        for (int i = 0; i < DATA_TABLES.length; i++) {
-            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
-        }
-        log.info("Done Running Oracle Analyze");
-        return duration;
-    }
-
-    private long runPostgresAnalyze(Connection conn,
-                                    String currTable,
-                                    String prevTable)
-    {
-        long duration = 0;
-        log.info("Running Postgres Analyze");
-        duration += doCommand(conn, SQL_ANALYZE, currTable);
-        duration += doCommand(conn, SQL_ANALYZE, prevTable);
-        for (int i = 0; i < DATA_TABLES.length; i++) {
-            duration += doCommand(conn, SQL_ANALYZE, DATA_TABLES[i]);
-        }
-        log.info("Done Running Postgres Analyze");
-        return duration;
     }
 
     /**

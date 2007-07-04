@@ -37,6 +37,8 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -173,12 +175,14 @@ public class DataCompressEJBImpl
             StopWatch watch = new StopWatch();
             log.debug("Truncating tables, starting with -> "+delTable+
                       " (currTable -> "+currTable+")\n");
+            HQDialect dialect = Util.getHQDialect();
             while (!currTable.equals(delTable) &&
                    truncateBefore > currTruncTime)
             {
                 log.debug("Truncating table "+delTable);
                 stmt.executeUpdate("truncate table "+delTable);
-                analyzeTable(delTable, conn, stmt);
+                String sql = dialect.getOptimizeStmt(delTable, 0);
+                stmt.execute(sql);
                 currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
@@ -190,22 +194,6 @@ public class DataCompressEJBImpl
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-        }
-    }
-
-    private void analyzeTable(String tablename, Connection conn, Statement stmt)
-        throws SQLException
-    {
-        if (DBUtil.isPostgreSQL(conn))
-        {
-            log.debug("Analyzing table "+tablename);
-            stmt.execute("analyze "+tablename);
-        }
-        else if (DBUtil.isOracle(conn))
-        {
-        }
-        else if (DBUtil.isMySQL(conn))
-        {
         }
     }
 
@@ -256,14 +244,20 @@ public class DataCompressEJBImpl
             if (rs.next())
                 max_time = rs.getLong(1);
 
+            HQDialect dialect = Util.getHQDialect();
             while (min_time < max_time)
             {
-                sql = "delete from " + BF_TABLE + " using " +
-                      BF_TABLE + " b, " + METRIC_DATA_VIEW + " m " +
-                      "where m.measurement_id = b.measurement_id and " +
-                      "m.timestamp = b.timestamp "+
-                      "and b.timestamp between "+
-                      (max_time-=BF_PURGE_INCR)+" and "+(max_time+BF_PURGE_INCR);
+                String delTable   = BF_TABLE,
+                       joinTables = BF_TABLE+" b, "+METRIC_DATA_VIEW+" m",
+                       joinKeys   = "m.measurement_id = b.measurement_id and "+
+                                    "m.timestamp = b.timestamp",
+                       condition  = "b.timestamp between "+
+                                    (max_time-=BF_PURGE_INCR)+
+                                    " and "+(max_time+BF_PURGE_INCR);
+                sql = dialect.getDeleteJoinStmt(delTable,
+                                                joinTables,
+                                                joinKeys,
+                                                condition);
                 int rows = stmt.executeUpdate(sql);
                 if (rows > 0)
                     log.debug("Purged "+rows+" rows of backfilled data between"+
