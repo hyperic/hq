@@ -34,6 +34,7 @@ import java.sql.Types;
  */
 public class Oracle9Dialect 
     extends org.hibernate.dialect.Oracle9Dialect
+    implements HQDialect
 {
     public Oracle9Dialect() {
         registerColumnType(Types.VARBINARY, 2000, "blob");
@@ -47,5 +48,22 @@ public class Oracle9Dialect
             .append(HypericDialectConstants.SEQUENCE_START)
             .append(" increment by 1 ")
             .toString();
+    }
+
+    public String getOptimizeStmt(String table, int tablePercent)
+    {
+        return "ANALYZE TABLE "+table+
+               ((tablePercent <= 0 || tablePercent > 100) ? 
+                   " COMPUTE STATISTICS" :
+                   " ESTIMATE STATISTICS SAMPLE "+tablePercent+" PERCENT");
+    }
+
+    public String getDeleteJoinStmt(String deleteTables,
+                                    String joinTables,
+                                    String joinKeys,
+                                    String condition)
+    {
+        return "DELETE "+deleteTables+" from "+joinTables+
+               " WHERE "+joinKeys+" and "+condition;
     }
 }

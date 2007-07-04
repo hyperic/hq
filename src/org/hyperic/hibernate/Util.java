@@ -49,6 +49,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 
 import org.hibernate.dialect.Dialect;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hibernate.dialect.function.ClassicAvgFunction;
 import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
@@ -346,6 +347,10 @@ public class Util {
         } else {
             configuration.setInterceptor(EmptyInterceptor.INSTANCE);
         }
+    }
+
+    public static HQDialect getHQDialect() {
+        return (HQDialect)((SessionFactoryImplementor)getSessionFactory()).getDialect();
     }
 
     public static Dialect getDialect() {

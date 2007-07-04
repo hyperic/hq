@@ -30,8 +30,10 @@ import org.hibernate.MappingException;
 /**
  * HQ's version of MySQL5InnoDBDialect to create pseudo sequences
  */
-public class MySQL5InnoDBDialect extends
-        org.hibernate.dialect.MySQL5InnoDBDialect {
+public class MySQL5InnoDBDialect
+    extends org.hibernate.dialect.MySQL5InnoDBDialect
+    implements HQDialect
+{
 
     /*
      * Database table and function to support sequences.  It is assumed that
@@ -57,13 +59,27 @@ public class MySQL5InnoDBDialect extends
         |
     
      */
-    private final static String SEQUENCE_TABLE = "HQ_SEQUENCE";
-    private final static String SEQUENCE_NAME  = "seq_name";
-    private final static String SEQUENCE_VALUE = "seq_val";
+
+    public String getOptimizeStmt(String table, int cost)
+    {
+        return "ANALYZE TABLE "+table;
+    }
+
+    public String getDeleteJoinStmt(String deleteTables,
+                                    String joinTables,
+                                    String joinKeys,
+                                    String condition)
+    {
+        return "DELETE "+deleteTables+" from "+joinTables+
+               " WHERE "+joinKeys+" and "+condition;
+    }
     
     public boolean supportsSequences() {
         return true;
     }
+    private final static String SEQUENCE_TABLE = "HQ_SEQUENCE";
+    private final static String SEQUENCE_NAME  = "seq_name";
+    private final static String SEQUENCE_VALUE = "seq_val";
 
     protected String getCreateSequenceString(String sequenceName)
         throws MappingException {
@@ -92,5 +108,4 @@ public class MySQL5InnoDBDialect extends
     public String getQuerySequencesString() {
         return "SELECT " + SEQUENCE_TABLE + " FROM " + SEQUENCE_TABLE;
     }
-
 }

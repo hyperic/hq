@@ -25,39 +25,29 @@
 
 package org.hyperic.hibernate.dialect;
 
-public class PostgreSQLDialect 
-    extends org.hibernate.dialect.PostgreSQLDialect
-    implements HQDialect
+import java.util.List;
+
+/**
+ *
+ */
+public interface HQDialect
 {
-    public String getCascadeConstraintsString() {
-        return " cascade ";
-    }
-
-    public boolean dropConstraints() {
-        return false;
-    }
-
-	public String getCreateSequenceString(String sequenceName) {
-        return new StringBuffer()
-            .append("create sequence ")
-            .append(sequenceName)
-            .append(" start ")
-            .append(HypericDialectConstants.SEQUENCE_START)
-            .append(" increment 1 ")
-            .toString();
-    }
-
-    public String getOptimizeStmt(String table, int cost)
-    {
-        return "ANALYZE "+table;
-    }
-
+    /*
+     * Returns the delete statement with joins for
+     * a particular database
+     */
     public String getDeleteJoinStmt(String deleteTables,
                                     String joinTables,
                                     String joinKeys,
-                                    String condition)
-    {
-        return "DELETE FROM "+deleteTables+" USING "+joinTables+
-               " WHERE "+joinKeys+" and "+condition;
-    }
+                                    String condition);
+
+    /*
+     * Returns the table optimize statement for
+     * a particular database
+     *
+     * @param table - name of table
+     * @param cost - based on the database,
+     *               may be table percentage or random number
+     */
+    public String getOptimizeStmt(String table, int cost);
 }
