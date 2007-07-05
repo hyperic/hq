@@ -51,8 +51,6 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
@@ -69,15 +67,14 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -310,14 +307,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
         try {
             Server server = serverManager.findServerById(id.getId());
-            server.setRuntimeAutodiscovery(true);
+            server.setRuntimeAutodiscovery(enable);
 
             ConfigResponse metricConfig =
                 cman.getMergedConfigResponse(subject,
                                              ProductPlugin.TYPE_MEASUREMENT,
                                              id, true);
 
-            pushRuntimeDiscoveryConfig(subject, id, metricConfig);
+            pushRuntimeDiscoveryConfig(subject, server, metricConfig);
         } catch (ConfigFetchException e) {
             // No config, no need to turn off auto-discovery.
         } catch (Exception e) {
@@ -329,60 +326,43 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Push the metric ConfigResponse out to an agent so it can perform 
      * runtime-autodiscovery
-     * @param id The appdef entity ID of the server.
+     * @param res The appdef entity ID of the server.
      * @param response The configuration info.
      */
     private void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
-                                            AppdefEntityID id,
+                                            AppdefResource res,
                                             ConfigResponse response)
         throws PermissionException
     {
-        if (!isRuntimeDiscoverySupported(subject, id)) {
+        AppdefEntityID aeid = res.getEntityId();
+        if (!isRuntimeDiscoverySupported(subject, aeid)) {
             return;
         }
 
         AICommandsClient client;
-        AppdefEntityValue aval = new AppdefEntityValue(id, subject);
 
-        try {
-            if (id.isServer()) {
-                ServerValue server = (ServerValue) aval.getResourceValue();
-                // Setting the response to null will disable runtime
-                // autodiscovery at the agent.
-                if (!AppdefUtil.areRuntimeScansEnabled(server)) {
-                    response = null;
-                }
+        if (aeid.isServer()) {
+            // Setting the response to null will disable runtime
+            // autodiscovery at the agent.
+            if (!AppdefUtil.areRuntimeScansEnabled((Server) res)) {
+                response = null;
             }
-            else if (id.isService()) {
-                aval.getResourceValue();
-            }
-        } catch (AppdefEntityNotFoundException e) {
-            throw new SystemException("Error looking up resource " +
-                                      "(" + id + "): " + e);
         }
 
         try {
-            client = AIUtil.getClient(id);
+            client = AIUtil.getClient(aeid);
         } catch ( AgentNotFoundException e ) {
             throw new SystemException("Error looking up agent for server " +
-                                      "(" + id + "): " + e);
+                                      "(" + res + "): " + e);
         }
-        String typeName = null, name = null;
-        try {
-            typeName = aval.getTypeName();
-            if (!id.isServer()) {
-                name = aval.getName();
-            }
-        } catch (AppdefEntityNotFoundException e) {
-            throw new SystemException("Error looking up type name for " +
-                                      "resource (" + id + "): " + e);
+        String typeName = res.getAppdefResourceType().getName();
+        String name = null;
+        if (!aeid.isServer()) {
+            name = res.getName();
         }
         
-        client.pushRuntimeDiscoveryConfig(id.getType(), 
-                                          id.getID(),
-                                          typeName,
-                                          name,
-                                          response);
+        client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(),
+                                          typeName, name, response);
     }
 
     // XXX hack, see usage in startScan method below.

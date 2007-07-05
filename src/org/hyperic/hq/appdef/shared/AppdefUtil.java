@@ -25,12 +25,12 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceValue;
 
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 /** AppdefUtil - utility methods for appdef entities and
@@ -48,7 +48,8 @@ public class AppdefUtil {
      * @throws InvalidAppdefTypeException
      */
     public static String appdefTypeIdToAuthzTypeStr (int adTypeId)
-                                  throws InvalidAppdefTypeException {
+        throws InvalidAppdefTypeException {
+        
         if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_PLATFORM)
             return AuthzConstants.platformResType;
         if (adTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER)
@@ -69,7 +70,7 @@ public class AppdefUtil {
      * @throws InvalidAppdefTypeException
      */
     public static int resNameToAppdefTypeId (String resName)
-                                  throws InvalidAppdefTypeException {
+        throws InvalidAppdefTypeException {
 
         if ( resName.equals(AuthzConstants.platformResType))
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
@@ -93,8 +94,7 @@ public class AppdefUtil {
      * @throws InvalidAppdefTypeException
      */
     public static AppdefEntityID resValToAppdefEntityId (ResourceValue rv)
-                                  throws InvalidAppdefTypeException {
-
+        throws InvalidAppdefTypeException {
 
         if ( rv.getResourceTypeValue().getName().equals(
             AuthzConstants.platformResType))
@@ -135,23 +135,18 @@ public class AppdefUtil {
      * @return true if runtime scans could possibly be enabled for the
      * server, false otherwise.
      */
-    public static boolean areRuntimeScansSupported ( ServerValue server ) {
-        return ( !server.getWasAutodiscovered() 
-                 || ( server.getWasAutodiscovered()
-                      && !server.getServicesAutomanaged()) );
+    public static boolean areRuntimeScansEnabled ( Server server ) {
+        return ( server.getRuntimeAutodiscovery() &&
+                 ( !server.getWasAutodiscovered() ||
+                   ( server.getWasAutodiscovered() &&
+                     !server.getServicesAutomanaged()) ));
     }
 
-    public static boolean areRuntimeScansEnabled ( ServerValue server ) {
-        return ( areRuntimeScansSupported(server) 
-                 && server.getRuntimeAutodiscovery() );
-    }
-
-    public static Map groupByAppdefType(AppdefEntityID[] ids)
-    {
+    public static Map groupByAppdefType(AppdefEntityID[] ids) {
         HashMap m = new HashMap();
         for (int i = 0; i < ids.length; i++) {
             Integer type = new Integer(ids[i].getType());
-            ArrayList idList = (ArrayList)m.get(type);
+            ArrayList idList = (ArrayList) m.get(type);
             if (idList == null) {
                 idList = new ArrayList();
                 m.put(type, idList);
