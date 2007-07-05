@@ -117,7 +117,7 @@
     </c:if> 
     </c:choose> -->
 </logic:iterate>
-<c:if test="${resourceType == SERVICE}">
+<c:if test="${resourceType == SERVICE && rtSupported}">
 </tr><tr>
 <td colspan="4" class="BlockBottomLine"><html:img page="images/spacer.gif" width="1" height="1" border="0"/></td>
 <td></td>
@@ -154,8 +154,8 @@
 </td>
 </tr>
 </c:if>
+<c:if test="${not empty rtConfigOptions}">
 <tr>
-</c:if>
 <logic:iterate id="rtConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
     collection="${rtConfigOptions}" >
 		<td width="25%" class="BlockLabel"><c:out value="${rtConfigOption.option}"/></td>
@@ -171,6 +171,8 @@
     </c:choose> -->
 </logic:iterate>
 </tr>
+</c:if>
+</c:if>
 </c:if>
 <c:if test="${serverBasedAutoInventory == 1  && resourceType == SERVER}">
 <c:if test="${resource.wasAutodiscovered == false}">
