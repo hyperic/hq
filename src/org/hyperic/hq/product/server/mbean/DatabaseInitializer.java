@@ -193,7 +193,6 @@ public class DatabaseInitializer {
             Statement stmt = null;
             
             String function =
-                "DELIMITER |" +
                 "CREATE FUNCTION nextseqval (iname CHAR(50)) " +
                 "RETURNS INT " +
                 "DETERMINISTIC " +
@@ -202,8 +201,7 @@ public class DatabaseInitializer {
                   "UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1 " +
                     "WHERE seq_name=iname; " +
                   "RETURN @new_seq_val;" +
-                "END;" +
-                "|";
+                "END;";
     
             try {
                 stmt = conn.createStatement();
