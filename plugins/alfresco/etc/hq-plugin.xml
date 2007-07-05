@@ -31,31 +31,47 @@
 
 <plugin package="org.hyperic.hq.plugin.alfresco">
 
+  <classpath>
+    <include name="pdk/lib/jdbc/jconn3.jar"/>
+    <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+  </classpath>
+
+  <!-- appended to each template by MeasurementInfoXML -->
+  <property name="template-config"
+            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+
   <server name="Alfresco"
-          version="4.5.x">
+          version="2.0.x">
 
     <plugin type="autoinventory"
             class="AlfrescoServerDetector"/>
     <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-    <plugin type="collector"
-            class="org.hyperic.hq.plugin.alfresco.AlfrescoCollector"/>
-
-    <filter name="template"
-            value="alfresco-stats:installpath=%installpath%:${alias}"/>
+            class="org.hyperic.hq.plugin.alfresco.AlfrescoMeasurementPlugin"/>
 
     <config>
+      <option name="jdbcUrl"
+              description="JDBC Url (NOTE: localhost may not work)"
+              default="jdbc:mysql://localhost:3306/alfresco"/>
+      <option name="jdbcUser"
+              description="JDBC User"
+              default="alfresco"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
       <option name="installpath"
               default="/opt/alfresco"
               description="Alfresco Install Path"/>
       <option name="alfresco-ptql"
-              default="State.name.eq=java,args.re='.*alfresco.*'"
+              default="State.Name.eq=java,Args.*.re=/alfresco/"
               description="Sigar PTQL Process Query"/>
     </config>
 
     <metric name="Availability"
             template="sigar:Type=ProcState,Arg=%alfresco-ptql%:State"
             indicator="true"/>
+
+    <filter name="template"
+            value="alfresco-stats:installpath=%installpath%:${alias}"/>
 
     <metric name="Transactions"
             category="THROUGHPUT"
@@ -69,7 +85,7 @@
             collectionType="static"
             units="none"/>
 
-    <service name="Lucene Indexes">
+    <service name="Lucene Index">
       <plugin type="autoinventory"
               class="AlfrescoServerDetector"/>
       <config>
@@ -79,13 +95,16 @@
                 description="Index Identifier"/>
       </config>
       <filter name="template">
-        alfresco:Type=luceneindex,protocol=%protocol%,identifier=%identifier%:${alias}
+        sigar:Type=DirUsage,Arg=%installpath%/alf_data/lucene-indexes/%protocol%/%identifier%/:DiskUsage
       </filter>
-      <metric name="Index Size"
+      <metric name="Disk Usage"
               category="UTILIZATION"
               indicator="true"
-              collectionType="dynamic"
-              units="KB"/>
+              units="B"
+              collectionType="dynamic"/>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%alfresco-ptql%:State"
+              indicator="true"/>
     </service>
 
     <service name="Database Backend">
@@ -93,7 +112,7 @@
               class="AlfrescoServerDetector"/>
       <config>
         <option name="process.query"
-                default="State.name.eq=mysql"
+                default="State.Name.eq=mysqld"
                 description="PTQL for Alfresco Database Backend"/>
       </config>
       <metric name="Availability"
@@ -105,7 +124,7 @@
     <service name="Tomcat">
       <config>
         <option name="process.query"
-                default="State.name.eq=java,Args='.*alfresco.*'"
+                default="State.Name.eq=java,Args.*.re=/alfresco/"
                 description="PTQL for Alfresco Tomcat"/>
       </config>
       <metric name="Availability"
