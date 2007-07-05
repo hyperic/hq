@@ -488,6 +488,7 @@ public class AlertDefinitionManagerEJBImpl
             AlertDefinition alertdef = (AlertDefinition) i.next();
             alertdef.setResource(null);
         }
+        aDao.getSession().flush();
     }
     
     /** Clean up alert definitions and alerts for removed resources
