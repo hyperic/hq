@@ -1,8 +1,20 @@
-#alert {
-    width:100%;
+.BlockTitle {
+    font-family: arial, sans-serif;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #6ab457;
+    }
+
+#alertsTable {
+    padding-bottom:15px;
 }
 
-#alert	table {
+#groupalertsTable {
+    padding-bottom:15px;
+}
+
+#alertsTable table {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
     width: 100%;
@@ -11,7 +23,7 @@
     cursor: default;
 }
 
-#alert table th {
+#alertsTable table th {
     font-weight: bold;
     padding: 3px;
     padding-left: 5px;
@@ -19,43 +31,99 @@
     border-top: 1px solid #7bafff;
 }
 
-#alert	table td {
+#alertsTable	table td {
     padding: 3px;
     font-weight: normal;
     padding-left: 5px;
 }
 
-#alert	table thead td, table thead th {
+#alertsTable	table thead td, table thead th {
     background-image: url( "images/ft-head.gif" );
     background-repeat: no-repeat;
     background-position: top right;
 }
 
-#alert	table thead td.selectedUp, table thead th.selectedUp {
+#alertsTable	table thead td.selectedUp, table thead th.selectedUp {
     background-image: url( "images/ft-headup.gif" );
 }
 
-#alert	table thead td.selectedDown, table thead th.selectedDown {
+#alertsTable	table thead td.selectedDown, table thead th.selectedDown {
     background-image: url( "images/ft-headdown.gif" );
 }
 
-#alert	table tbody tr td {
+#alertsTable	table tbody tr td {
     border-bottom: 1px solid #ddd;
 }
 
-#alert	table tbody tr.alt td {
+#alertsTable	table tbody tr.alt td {
     background: #eef4fc;
 }
 
-#alert	table tbody tr.selected td {
+#alertsTable	table tbody tr.selected td {
 
 }
 
-#alert	table tbody tr:hover td {
+#alertsTable	table tbody tr:hover td {
     background: #a6c2e7;
 }
 
-#alert	table tbody tr.selected:hover td {
+#alertsTable	table tbody tr.selected:hover td {
+
+}
+
+#groupalertsTable	table {
+    font-family: Lucida Grande, Verdana;
+    font-size: 11px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    cursor: default;
+}
+
+#groupalertsTable table th {
+    font-weight: bold;
+    padding: 3px;
+    padding-left: 5px;
+    border-right: 1px solid #7bafff;
+    border-top: 1px solid #7bafff;
+}
+
+#groupalertsTable	table td {
+    padding: 3px;
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+#groupalertsTable	table thead td, table thead th {
+    background-image: url( "images/ft-head.gif" );
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+
+#groupalertsTable	table thead td.selectedUp, table thead th.selectedUp {
+    background-image: url( "images/ft-headup.gif" );
+}
+
+#groupalertsTable	table thead td.selectedDown, table thead th.selectedDown {
+    background-image: url( "images/ft-headdown.gif" );
+}
+
+#groupalertsTable	table tbody tr td {
+    border-bottom: 1px solid #ddd;
+}
+
+#groupalertsTable	table tbody tr.alt td {
+    background: #eef4fc;
+}
+
+#groupalertsTable	table tbody tr.selected td {
+}
+
+#groupalertsTable	table tbody tr:hover td {
+    background: #a6c2e7;
+}
+
+#groupalertsTable	table tbody tr.selected:hover td {
 
 }
 
