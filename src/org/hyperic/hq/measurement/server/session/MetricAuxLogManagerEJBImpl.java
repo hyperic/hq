@@ -74,7 +74,9 @@ public class MetricAuxLogManagerEJBImpl
      * @ejb:interface-method
      */
     public void remove(GalertAuxLog log) { 
-        getDAO().remove(getDAO().find(log));
+        MetricAuxLogPojo p = find(log);
+        
+        getDAO().remove(p);
     }
 
     /**
