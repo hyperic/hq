@@ -51,12 +51,18 @@ import org.quartz.JobExecutionException;
 public class DataPurgeJob implements Job {
 
     private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
-    private static final Object RUNNING_LOCK = new Object();
-    private static boolean running = false;
 
     private static long HOUR = MeasurementConstants.HOUR;
     private static long MINUTE = MeasurementConstants.MINUTE;
 
+    // We create a private static class, in case the DataPurgeJob is 
+    // dynamically proxied (which would result in multiple instances of
+    // static variables
+    private static class DataPurgeLockHolder {
+        private static final Object RUNNING_LOCK = new Object();
+        private static boolean running = false;
+    }
+    
     /**
      * Public interface for quartz 
      */
@@ -99,13 +105,12 @@ public class DataPurgeJob implements Job {
             DataCompressUtil.getLocalHome().create();
 
         // First check if we are already running
-        synchronized (RUNNING_LOCK)
-        {
-            if (running) {
+        synchronized (DataPurgeLockHolder.RUNNING_LOCK) {
+            if (DataPurgeLockHolder.running) {
                 _log.info("Not starting data compression. (Already running)");
                 return;
             } else {
-                running = true;
+                DataPurgeLockHolder.running = true;
             }
         }
 
@@ -137,8 +142,8 @@ public class DataPurgeJob implements Job {
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
         } finally {
-            synchronized (RUNNING_LOCK) {
-                running = false;
+            synchronized (DataPurgeLockHolder.RUNNING_LOCK) {
+                DataPurgeLockHolder.running = false;
             }
         }
         
