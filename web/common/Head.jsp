@@ -31,7 +31,7 @@
 <script type="text/javascript">
   var imagePath = "<html:rewrite page="/images/"/>";
 </script>
-
+<link rel="shortcut icon" href="<html:rewrite page="/images/favicon.ico"/>"/>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 
