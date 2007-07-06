@@ -106,7 +106,7 @@
 
     function initControlStatusUpdate() {
       controlStatusUpdater = new ControlStatusUpdater();
-      ajaxEngine.registerRequest( 'getUpdatedControlStatus', '<html:rewrite page="/resource/common/control/UpdatedStatus.do"/>');
+      ajaxEngine.registerRequest( 'getUpdatedControlStatus', '<html:rewrite page="/resource/common/control/UpdateStatus.do"/>');
       ajaxEngine.registerAjaxObject( 'controlStatusUpdater', controlStatusUpdater  );
       updateControlStatus();
     }
