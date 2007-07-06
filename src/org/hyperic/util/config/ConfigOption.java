@@ -30,11 +30,12 @@ import java.io.Serializable;
 public abstract class ConfigOption 
     implements Serializable, Cloneable {
 
-    private String     optName;    // Option name
-    private String     optDesc;    // Option description
-    private String     optCat;     // Option category     
-    private String     defValue;   // Default value 
-    private Boolean    optional;   // Is the option, optional?
+    private String     optName;           // Option name
+    private String     optDesc;           // Option description
+    private String     optCat;            // Option category     
+    private String     defValue;          // Default value 
+    private String     confirm = null;    // The value to double check on
+    private Boolean    optional;          // Is the option, optional?
 
     public ConfigOption() {
     }
@@ -99,6 +100,14 @@ public abstract class ConfigOption
     
     public String getCategory(){
         return this.optCat;
+    }
+
+    public String getConfirm() {
+        return confirm;
+    }
+
+    public void setConfirm(String confirm) {
+        this.confirm = confirm;
     }
 
     public int hashCode() {

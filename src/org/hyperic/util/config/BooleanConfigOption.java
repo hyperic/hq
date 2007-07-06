@@ -33,8 +33,10 @@ public class BooleanConfigOption extends EnumerationConfigOption
     public BooleanConfigOption(String optName, String optDesc, 
                                boolean defValue)
     {
-        super(optName, optDesc, String.valueOf(defValue));
-        super.addValue(String.valueOf(true));
-        super.addValue(String.valueOf(false));
+        super(optName, optDesc, String.valueOf(defValue),
+              new String[] {
+                  Boolean.TRUE.toString(),
+                  Boolean.FALSE.toString()
+              });
     }
 }

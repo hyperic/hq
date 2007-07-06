@@ -34,8 +34,10 @@ public class YesNoConfigOption extends EnumerationConfigOption
     
     public YesNoConfigOption(String optName, String optDesc, String defValue)
     {
-        super(optName, optDesc, defValue);
-        super.addValue(YesNoConfigOption.YES);
-        super.addValue(YesNoConfigOption.NO);
+        super(optName, optDesc, defValue,
+              new String[] {
+                  YesNoConfigOption.YES,
+                  YesNoConfigOption.NO
+              });
     }
 }

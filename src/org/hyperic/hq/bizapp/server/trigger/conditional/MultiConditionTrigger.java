@@ -60,6 +60,7 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -124,12 +125,8 @@ public class MultiConditionTrigger
                                  new Long(0));
         res.addOption(range);
 
-        EnumerationConfigOption durable =
-            new EnumerationConfigOption(CFG_DURABLE,
-                                        "Send NotFired Events",
-                                        String.valueOf(Boolean.FALSE));
-        durable.addValue(String.valueOf(Boolean.FALSE));
-        durable.addValue(String.valueOf(Boolean.TRUE));
+        BooleanConfigOption durable =
+            new BooleanConfigOption(CFG_DURABLE, "Send NotFired Events", false);
         res.addOption(durable);
 
         return res;

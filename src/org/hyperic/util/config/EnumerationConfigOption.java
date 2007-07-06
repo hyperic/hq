@@ -33,12 +33,6 @@ public class EnumerationConfigOption extends ConfigOption
     implements Serializable {
     private ArrayList _values = new ArrayList(); // Values the enum holds
 
-    public EnumerationConfigOption(String optName, String optDesc, 
-                                   String defValue)
-    {
-        super(optName, optDesc, defValue);
-    }
-
     /**
      * This constructor allows you to create an EnumConfigOption
      * and supply the valid enum values at construction time.
@@ -52,6 +46,13 @@ public class EnumerationConfigOption extends ConfigOption
                 _values.add(enumValues[i]);
             }
         }
+    }
+    
+    public EnumerationConfigOption(String optName, String optDesc,
+                                   String defValue, String[] enumValues,
+                                   String confirm) {
+        this(optName, optDesc, defValue, enumValues);
+        setConfirm(confirm);
     }
 
     public void checkOptionIsValid(String value) 

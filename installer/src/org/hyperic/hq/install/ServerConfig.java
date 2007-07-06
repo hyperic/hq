@@ -133,6 +133,9 @@ public class ServerConfig extends BaseConfig {
     public static final String Q_ADMIN_EMAIL
         = "What should the email address be for the initial admin user?";
 
+    private static final String SERVER_DATABASE_UPGRADE_CHOICE
+        = "server.database.upgrade.choice";
+
     // convenience constants
     private static final String nl = System.getProperty("line.separator");
     
@@ -475,23 +478,24 @@ public class ServerConfig extends BaseConfig {
                 if (databaseExists(previous)) {
                     // Bug 9722 only check for db upgrade if this isnt an HA node
                     schema.addOption
-                        (new EnumerationConfigOption("server.database.upgrade.choice",
+                        (new EnumerationConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
                                                      Q_OVERWRITE_DB,
                                                      DB_CHOICE_CANCEL,
-                                                     DB_CHOICES));
+                                                     DB_CHOICES,
+                                                     DB_CHOICE_OVERWRITE));
                 } else {
-                    schema.addOption(new HiddenConfigOption("server.database.upgrade.choice",
+                    schema.addOption(new HiddenConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
                                                             DB_CHOICE_OVERWRITE));
                 }
             } else {
                 //Built-in DB, overwrite the db
-                schema.addOption(new HiddenConfigOption("server.database.upgrade.choice",
+                schema.addOption(new HiddenConfigOption(SERVER_DATABASE_UPGRADE_CHOICE,
                                                         DB_CHOICE_OVERWRITE));
             }
             break;
 
         case 9:
-            String dbUpgradeChoice = previous.getValue("server.database.upgrade.choice");
+            String dbUpgradeChoice = previous.getValue(SERVER_DATABASE_UPGRADE_CHOICE);
             if (dbUpgradeChoice.equals(DB_CHOICE_OVERWRITE)) {
                 schema.addOption
                     (new HiddenConfigOption("server.database.create",

@@ -204,10 +204,12 @@ public class ConditionalTriggerSchema {
     private static EnumerationConfigOption buildBaselineValOption() {
     	EnumerationConfigOption baselineVal;
         baselineVal = new EnumerationConfigOption(CFG_OPTION, "Baseline Value",
-            MeasurementConstants.BASELINE_OPT_MEAN);
-    	baselineVal.addValue(MeasurementConstants.BASELINE_OPT_MEAN);
-    	baselineVal.addValue(MeasurementConstants.BASELINE_OPT_MIN);
-    	baselineVal.addValue(MeasurementConstants.BASELINE_OPT_MAX);
+            MeasurementConstants.BASELINE_OPT_MEAN,
+            new String[] {
+    	        MeasurementConstants.BASELINE_OPT_MEAN,
+                MeasurementConstants.BASELINE_OPT_MIN,
+                MeasurementConstants.BASELINE_OPT_MAX
+            });
     	return baselineVal;
     }
 
@@ -217,13 +219,8 @@ public class ConditionalTriggerSchema {
      * @return EnumerationConfigOption
      */
     private static EnumerationConfigOption buildComparatorOption() {
-    	EnumerationConfigOption oper;
-    	oper = new EnumerationConfigOption(CFG_COMPARATOR,
-    	                                   "Comparison operator", ">");
-        for (int i = 1; i < OPER_STRS.length; i++) {
-    		oper.addValue(OPER_STRS[i]);
-        }
-    
-    	return oper;
+    	return new EnumerationConfigOption(CFG_COMPARATOR,
+    	                                   "Comparison operator", ">",
+                                           OPER_STRS);    
     }
 }

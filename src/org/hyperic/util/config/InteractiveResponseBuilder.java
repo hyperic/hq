@@ -108,51 +108,41 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                                                         +" value, cannot "
                                                         + "continue: " + exc);
                     }
-                    i++; continue;
+                    i++;
+                    continue;
                 }
                 isSecret = ((StringConfigOption)opt).isSecret();
             }
 
             if(isSecret){
-                inputStr = getInputString(opt, def == null?null:"*hidden*");
-                val = this.handleHiddenInput(inputStr + ": ");
+                inputStr = getInputString(opt, def == null ? null : "*hidden*");
+                val = handleHiddenInput(inputStr + ": ");
             } else {
                 inputStr = getInputString(opt, def);
-                val = this.handleInput(inputStr + ": ");
+                val = handleInput(inputStr + ": ");
             }
 
             // Normalize backend input results
-            if(val != null && val.equals("")){
-                val = null;
-            }
-
-            if(val == null){
-                if(opt.isOptional()){
-                    if(def == null){
+            if(val == null || "".equals(val)){
+                if (def == null) {
+                    if (opt.isOptional())
                         i++;
-                        continue;
-                    } else {
-                        val = def;
-                    }
-                } else {
-                    // Option is required.  
-                    if(def == null){
-                        // If there is no default, ask the question again
-                        continue; 
-                    } else {
-                        // If there's a default, use it
-                        val = def;
-                    }
+
+                    // If there is no default, ask the question again
+                    continue;
+                }
+                else {
+                    val = def;
                 }
             } else {
                 /* If they entered an actual value, and it was a secret
                    input, ask for it again, just to make sure */
-                if(isSecret){
+                if (isSecret) {
                     String verifyVal;
 
-                    verifyVal = this.handleHiddenInput("(again): ");
+                    verifyVal = handleHiddenInput("(again): ");
                     if(!verifyVal.equals(val)){
-                        this.sendToErrStream("Values do not match");
+                        sendToErrStream("Values do not match");
                         continue;
                     }
                 }
@@ -174,6 +164,24 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                         continue;
                     }
                     val = values.get(index).toString();
+                }
+                
+                if (val.equals(opt.getConfirm())) {
+                sendToErrStream(val + " compare with " + opt.getConfirm() + " "
+                                + val.equals(opt.getConfirm()));
+                
+                    // Double check with user
+                    YesNoConfigOption confirmOpt =
+                        new YesNoConfigOption("confirmation",
+                                              "Are you sure (" + val + ")?",
+                                              YesNoConfigOption.YES);
+                    String confirm =
+                        handleInput(getInputString(confirmOpt,
+                                                   confirmOpt.getDefault()) +
+                                                   ": ");
+                    
+                    if (!"1".equals(confirm))
+                        continue;
                 }
             }
             
