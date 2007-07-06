@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
@@ -37,6 +41,7 @@ public class GalertAuxLog
     private int          _auxType;
     private String       _description;
     private GalertAuxLog _parent;
+    private Collection   _children;
     
     protected GalertAuxLog() {}
     
@@ -49,6 +54,11 @@ public class GalertAuxLog
             _auxType = log.getProvider().getCode();
         _description = log.getDescription();
         _parent      = parent;
+        _children    = new ArrayList();
+        
+        if (_parent != null) {
+            _parent.getChildrenBag().add(this);
+        }
     }
     
     public long getTimestamp() {
@@ -93,6 +103,18 @@ public class GalertAuxLog
     
     protected void setParent(GalertAuxLog parent) {
         _parent = parent;
+    }
+    
+    protected Collection getChildrenBag() {
+        return _children;
+    }
+    
+    protected void setChildrenBag(Collection c) {
+        _children = c;
+    }
+    
+    public Collection getChildren() {
+        return Collections.unmodifiableCollection(_children);
     }
     
     public int hashCode() {

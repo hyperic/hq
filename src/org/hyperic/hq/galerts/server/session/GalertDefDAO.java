@@ -63,6 +63,14 @@ class GalertDefDAO
         return super.findAll(); 
     }
     
+    Collection findAbsolutelyAllGalertDefs(ResourceGroup g) {
+        String sql = "from GalertDef d where d.group = :group"; 
+
+        return getSession().createQuery(sql)
+            .setParameter("group", g)
+            .list();
+    }
+
     /**
      * Finds all the galert defs which have not been marked for deletion.
      * Typically this is what people want to use.

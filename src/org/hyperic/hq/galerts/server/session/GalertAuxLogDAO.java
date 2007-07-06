@@ -28,16 +28,12 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 class GalertAuxLogDAO
     extends HibernateDAO
 {
-    private static final Log _log = LogFactory.getLog(GalertAuxLogDAO.class);
-    
     GalertAuxLogDAO(DAOFactory f) {
         super(GalertAuxLog.class, f);
     }
@@ -58,6 +54,9 @@ class GalertAuxLogDAO
         for (Iterator i = findAll(def).iterator(); i.hasNext(); ) {
             GalertAuxLog log = (GalertAuxLog)i.next();
             
+            log.getAlert().getAuxLogBag().clear();
+            log.getChildrenBag().clear();
+            log.setParent(null);
             super.remove(log);
         }
     }

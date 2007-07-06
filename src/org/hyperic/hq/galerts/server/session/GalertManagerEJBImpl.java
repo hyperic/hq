@@ -606,6 +606,22 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * Start an escalation for a group alert definition.
+     *
+     * @ejb:interface-method
+     */
+    public void processGroupDeletion(ResourceGroup g) { 
+        Collection defs = _defDAO.findAbsolutelyAllGalertDefs(g);
+        
+        for (Iterator i=defs.iterator(); i.hasNext(); ) {
+            GalertDef def = (GalertDef)i.next();
+            
+            _log.debug("Cascade deleting GalertDef[" + def.getName() + "]"); 
+            nukeAlertDef(def);
+        }
+    }
+    
+    /**
      * @ejb:interface-method
      */
     public void startup() {
@@ -621,17 +637,7 @@ public class GalertManagerEJBImpl
              * Delete the GalertDefs that depend on the deleted group
              */
             public void preGroupDelete(ResourceGroup g) {
-                DAOFactory f = DAOFactory.getDAOFactory();
-                GalertDefDAO defDao = new GalertDefDAO(f);
-                Collection defs = defDao.findAbsolutelyAllGalertDefs();
-                
-                for (Iterator i=defs.iterator(); i.hasNext(); ) {
-                    GalertDef def = (GalertDef)i.next();
-                    
-                    _log.debug("Cascade deleting GalertDef[" + 
-                               def.getName() + "]");
-                    nukeAlertDef(def);
-                }
+                GalertManagerEJBImpl.getOne().processGroupDeletion(g);
             }
 
             /**
