@@ -15,13 +15,13 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 12, 2007 by <font color="#0050B2">mbartelt</font>.
+					    This page last changed on Jun 28, 2007 by <font color="#0050B2">mbartelt</font>.
 				    </div>
 
 				    <h1><a name="ui-Inventory.Platform.New-AddingaPlatformtotheHQInventory"></a>Adding a Platform to the HQ Inventory</h1>
 <p><b>Available in Open Source</b></p>
 
-<p>This screen allows users to create (&quot;add&quot;) a new <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform" title="platform on Hyperic Glossary">platform</a> to the HQ inventory. Users might manually add a platform (or <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-service" title="service on Hyperic Glossary">service</a> or <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-server" title="server on Hyperic Glossary">server</a>) under the following circumstances:</p>
+<p>This screen allows users to create (&quot;add&quot;) a new <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a> to the HQ inventory. Users might manually add a platform (or <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-service">service</a> or <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-server">server</a>) under the following circumstances:</p>
 <ul>
 	<li>It is a technology that is not monitored by default by HQ.</li>
 	<li>It is a custom plugin.</li>
@@ -30,15 +30,15 @@
 </ul>
 
 
-<table cellpadding='5' width='85%' cellspacing='8px' class='infoMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="/confluence/images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Platforms That Cannot be Manually Created</b><br />
-<p>Users cannot create platforms of a type that HQ can <a href="http://support.hyperic.com/confluence/display/DOC/Auto-Discovery" title="Auto-Discovery">auto-discover</a>. These types include Linux, Windows, Solaris, HPUX, Darwin, FreeBSD, and AIX.  Platforms of these types are added to the HQ inventory by importing them in the Auto-discovery portlet on the <a href="ui-Dashboard.html#ui-Dashboard-AutoDiscovery" title="Auto-Discovery on ui-Dashboard">Dashboard</a>.</p></td></tr></table>
+<table cellpadding='5' width='85%' cellspacing='8px' class='infoMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Platforms That Cannot be Manually Created</b><br />
+<p>Users cannot create platforms of a type that HQ can <a href="http://support.hyperic.com/confluence/display/DOC/Auto-Discovery" title="Auto-Discovery">auto-discover</a>. These types include Linux, Windows, Solaris, HPUX, Darwin, FreeBSD, and AIX.  Platforms of these types are added to the HQ inventory by importing them in the Auto-discovery portlet on the <a href="ui-Dashboard.html#ui-Dashboard-AutoDiscovery">Dashboard</a>.</p></td></tr></table>
 
 <p>Users <em>can</em> manually create platforms of the following types:</p>
 <ul>
 	<li>Google AdWords (<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Google+AdWords" title="Google AdWords">instructions</a>)</li>
 	<li>Cisco IOS (<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Cisco+IOS" title="Cisco IOS">instructions</a>)</li>
-	<li><a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkdevice" title="network device on Hyperic Glossary">Network Device</a> (<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Network+Device" title="Network Device">instructions</a>)</li>
-	<li><a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkhost" title="network host on Hyperic Glossary">Network Host</a>(<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Network+Host" title="Network Host">instructions</a>)</li>
+	<li><a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkdevice">Network Device</a> (<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Network+Device" title="Network Device">instructions</a>)</li>
+	<li><a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkhost">Network Host</a>(<a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Network+Host" title="Network Host">instructions</a>)</li>
 </ul>
 
 
@@ -50,16 +50,16 @@
 <ol>
 	<li>Fill in the following fields:
 	<ul>
-		<li><u>Name</u>: The name of the platform</li>
-		<li><u>Description</u>: (optional) A description of the platform</li>
-		<li><u>Location</u>: (optional) The physical location of the platform hardware</li>
-		<li><u>Platform Type</u>: The <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform" title="platform on Hyperic Glossary">type</a> of platform (This value cannot be changed.)</li>
-		<li><u>Fully Qualified Domain Name</u>: The platform's FQDN</li>
-		<li><u>Agent Connection</u>: The IP address:port pair of the Agent the proxied connection to this platform should go through. When a platform is created manually (on this screen), the platform cannot or does not run an Agent itself, and therefore the Agent must connect to the platform via proxy. The list contains the IP address:port pairs from all the currently deployed Agents.</li>
-		<li><u>IP Address</u>, (optional) <u>MAC Address</u>, (optional) <u>Netmask</u>: At a minimum specify values for the loopback (local) IP address, and then additional sets of values for each network interface on the device.</li>
+		<li><ins>Name</ins>: The name of the platform</li>
+		<li><ins>Description</ins>: (optional) A description of the platform</li>
+		<li><ins>Location</ins>: (optional) The physical location of the platform hardware</li>
+		<li><ins>Platform Type</ins>: The <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">type</a> of platform (This value cannot be changed.)</li>
+		<li><ins>Fully Qualified Domain Name</ins>: The platform's FQDN</li>
+		<li><ins>Agent Connection</ins>: The IP address:port pair of the Agent the proxied connection to this platform should go through. When a platform is created manually (on this screen), the platform cannot or does not run an Agent itself, and therefore the Agent must connect to the platform via proxy. The list contains the IP address:port pairs from all the currently deployed Agents.</li>
+		<li><ins>IP Address</ins>, (optional) <ins>MAC Address</ins>, (optional) <ins>Netmask</ins>: At a minimum specify values for the loopback (local) IP address, and then additional sets of values for each network interface on the device.</li>
 	</ul>
 	</li>
-	<li>Click <b>OK</b>.</li>
+	<li>Click <img src="../16129/fb_ok.gif" align="absmiddle" border="0" />.</li>
 	<li>Follow the platform-type specific instructions here:
 	<ul>
 		<li><a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Google+AdWords" title="Google AdWords">Google AdWords</a></li>
@@ -71,7 +71,7 @@
 </ol>
 
 
-<p>The platform's <u>Owner</u> defaults to the account that created the platform.</p>
+<p>The platform's <ins>Owner</ins> defaults to the account that created the platform.</p>
 
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
 
@@ -79,13 +79,23 @@
 <p>View the <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">platform's inventory</a></p>
 </div></div>
 <div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
-<p>An explanation of <a href="http://support.hyperic.com/confluence/display/DOC/Inventory+Model#InventoryModel-platforms" title="platforms on Inventory Model">platforms</a> as part of the HQ Inventory Model<br/>
+<p>An explanation of <a href="http://support.hyperic.com/confluence/display/DOC/Inventory+Model#InventoryModel-platforms">platforms</a> as part of the HQ Inventory Model<br/>
 Importing platforms through the <a href="ui-Dashboard.html" title="ui-Dashboard">dashboard</a></p>
 </div></div>
 </tr></tbody></table>
 
 <h5><a name="ui-Inventory.Platform.New-ReturntoUIReference."></a>Return to <a href="UI Reference.html" title="UI Reference">UI Reference</a>.</h5>
 
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16129/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
 				    
                     			    </td>
 		    </tr>
@@ -95,7 +105,7 @@ Importing platforms through the <a href="ui-Dashboard.html" title="ui-Dashboard"
 				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 13, 2007 12:46</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 06, 2007 13:03</font></td>
 		    </tr>
 	    </table>
     </body>

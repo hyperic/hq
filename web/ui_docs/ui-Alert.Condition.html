@@ -15,16 +15,110 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 25, 2007 by <font color="#0050B2">mbartelt</font>.
+					    This page last changed on Jul 01, 2007 by <font color="#0050B2">mbartelt</font>.
 				    </div>
 
-				    
-<h3><a name="ui-Alert.Condition-EditAlertConditionSet"></a>Edit Alert Condition Set</h3>
+				    <h1><a name="ui-Alert.Condition-EditAlertConditionSet"></a>Edit Alert Condition Set</h1>
+<p><b>Available in Open Source unless marked by</b> <font color="red"><b>&#42;</b></font> <b>(available in Enterprise Edition)</b></p>
 
-<p>This page allows you to edit the conditions that cause the alert to fire. Additionally, the alert actions and filters can be edited from this page. </p>
+<p>This screen allows users to view, edit, and add new (multiple) conditions that will trigger the alert. Alerts can be triggered by metric values, changes to inventory property, the status of a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-controlaction">control action</a> being performed on a resource (if the resource supports control actions), and log-tracking data. Additionally, users can configure <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Defining+Recovery+Alerts" title="Defining Recovery Alerts">recovery alerts</a> and can control how the alert behaves after it has been triggered (referred to as "alert filters"). </p>
 
-<p>More detail on <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Defining+Alerts" title="Defining Alerts">how to configure alert conditions, filters and actions</a>.</p>
+<h3><a name="ui-Alert.Condition-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
 
+<p>On this screen, users can do the following tasks:</p>
+
+<p><a name="ui-Alert.Condition-editcondition"></a> <b>To edit an existing alert condition:</b></p>
+<ol>
+	<li>Select the kind of condition that will be alerted on:
+	<ul>
+		<li><ins>Metrics</ins>: Select the metric from the droplist.
+		<ul>
+			<li>To compare the metric value against an absolute value, select the comparison operator (<em>&gt;</em>, <em>&lt;</em> or <em>=</em>) from the first droplist. Type the absolute value (for percentages, use a decimal value less than 1) against which the metric value will be compared using the comparison operator.</li>
+			<li>To compare the metric value against a baseline <font color="red">*</font>, select the comparison operator (<em>&gt;</em>, <em>&lt;</em> or <em>=</em>) from the second droplist. Type a percent value (up to 100) and select the baseline against which the metric value will be compared using the comparison operator.</li>
+			<li>To monitor the metric simply for a change in value, select <ins>value changes</ins>. The alert will be triggered if the value for the metric ever changes.</li>
+		</ul>
+		</li>
+		<li><ins>Inventory Property</ins>: Select the resource's property that HQ should monitor for a change. If a change is detected in results of an auto-discovery scan, the alert will be triggered. <font color="red">*</font></li>
+		<li><ins>Control Action</ins>: <font color="red">*</font> Select the control action and then the status to look for: In Progress, Completed, or Failed. (available only if the resource supports control actions)</li>
+		<li><ins>Event/Logs Level</ins>: <font color="red">*</font> Select a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-loglevel">log level</a> that, when HQ detects it in a resource's logs, will trigger the alert. (optional) Users can also type a substring that must match in the log string. (available only if the resource supports event and log tracking).</li>
+	</ul>
+	</li>
+	<li>Specify when and how often the alert will be triggered when the defined condition(s) is met in <ins>Enable Action(s)</ins>:
+	<ul>
+		<li>"Each time the condition is met": (most common selection) This means "perform the specified notification immediately when the conditions for this alert have been met." <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-eachtime">More information</a></li>
+		<li>"When conditions are exceeded for x within a time period of y": <font color="red">*</font> Knowledge of the metric's collection interval helps make this setting more useful. <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-exceeded">More information</a></li>
+		<li>"Once every X times conditions are exceeded within a time period of Y": <font color="red">*</font> Exact knowledge of the metric's collection interval is necessary. <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-exceededsometimes">More information</a></li>
+	</ul>
+	</li>
+	<li>Click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.</li>
+</ol>
+
+
+<p><b>To delete an existing alert condition:</b></p>
+<ul>
+	<li>Click <b>Delete This Condition</b> under the specific condition and click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.</li>
+</ul>
+
+
+<p><b>To create a new alert condition:</b></p>
+<ol>
+	<li>Click <b>Add Another Condition</b>.</li>
+	<li>Specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfed ("OR").</li>
+	<li>Follow the instructions for <a href="#ui-Alert.Condition-editcondition">editing a condition</a>.</li>
+</ol>
+
+
+<p><a name="ui-Alert.Condition-recovery"></a> <b>To assign this alert as a <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Defining+Recovery+Alerts" title="Defining Recovery Alerts">recovery alert</a> for another alert definition:</b> <font color="red">*</font></p>
+<ol>
+	<li>Select the other alert definition in <ins>Recovery Alert</ins> and click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.<br/>
+Now when the "primary" alert is triggered, instead of receiving continual notification of the alert being triggered as the condition persists, users can receive only the notification that the opposite condition has occurred (that is, when this recovery alert is triggered). This setup requires that the alert is disabled after being triggered, as described just below. The primary alert must already be defined on this resource (or resource type) before a recovery alert can be assigned to it.</li>
+</ol>
+
+
+<p><a name="ui-Alert.Condition-filter"></a> <b>To prevent the alert from triggering repeatedly:</b> <font color="red">*</font></p>
+<ul>
+	<li>Under "Enable Action Filters," select "Disable alert until marked fixed or by recovery alert" and click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.<br/>
+The alert will be triggered only once. After that, it must be reenabled manually or via a recovery alert, as described just above. <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-disable">More information</a>.</li>
+</ul>
+
+
+<p><b>To prevent the same control action, defined in related alerts, from being performed multiple times on the same resource:</b> <font color="red">*</font></p>
+<ul>
+	<li>Under "Enable Action Filters," select "Disregard control actions that are defined for related alerts" and click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.<br/>
+This option is available only when the resource on which this alert is defined both supports control actions and is part of an application that has other resources with similar alert control actions.  <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-disregard">More information</a>.</li>
+</ul>
+
+
+<p><b>To consolidate notification for all alerts on resources in the same application:</b> <font color="red">*</font></p>
+<ul>
+	<li>Under "Enable Action Filters," select "Filter notification actions that are defined for related alerts" and click <img src="../16123/fb_ok.gif" align="absmiddle" border="0" />.<br/>
+This option is very useful for cutting down on the number of alerts from a single application. <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts#DefiningAlerts-consolidate">More information</a>.</li>
+</ul>
+
+
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p>Resume <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the rest of the alert definition</a></p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>More detail on <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts" title="Defining Alerts">how to configure alert conditions, filters and actions</a>.<br/>
+More information about <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Defining+Recovery+Alerts" title="Defining Recovery Alerts">recovery alerts</a> </p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Alert.Condition-ReturntoeditingthealertuiAlert.Edit."></a>Return to <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the alert</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16123/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
 				    
                     			    </td>
 		    </tr>
@@ -34,7 +128,7 @@
 				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 13, 2007 12:46</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 06, 2007 13:03</font></td>
 		    </tr>
 	    </table>
     </body>
