@@ -103,9 +103,6 @@ public class PrepareAction extends TilesAction {
         pForm.setTitle(user.getPreference(titleKey, ""));
 
         pForm.setNumberToShow(numberToShow);
-        if (resourceType != null && resourceType.length() != 0) {
-            pForm.setResourceType(resourceType);
-        }
         pForm.setMetric(metric);
         pForm.setDescending(descending);
         
@@ -131,19 +128,37 @@ public class PrepareAction extends TilesAction {
                                                 PageControl.PAGE_ALL);
         request.setAttribute("serviceTypes", viewableServiceTypes);
 
-        PageList metrics = new PageList();
-        if (resourceType != null && resourceType.length() != 0) {
+        AppdefResourceTypeValue typeVal = null;
+        if (resourceType == null || resourceType.length() == 0) {
+            if (viewablePlatformTypes.size() > 0) {
+                // Take the first platform type
+                typeVal =
+                    (AppdefResourceTypeValue) viewablePlatformTypes.get(0);
+            }
+            else if (viewableServerTypes.size() > 0) {
+                // Take the first server type
+                typeVal =
+                    (AppdefResourceTypeValue) viewableServerTypes.get(0);
+            }
+            else if (viewableServiceTypes.size() > 0) {
+                // Take the first service type
+                typeVal =
+                    (AppdefResourceTypeValue) viewableServiceTypes.get(0);
+            }
+        }
+        else {
             AppdefEntityTypeID typeId = new AppdefEntityTypeID(resourceType);
-            AppdefResourceTypeValue typeVal =
-                appdefBoss.findResourceTypeById(sessionId, typeId);
-
-            metrics = measBoss.findMeasurementTemplates(sessionId,
+            typeVal = appdefBoss.findResourceTypeById(sessionId, typeId);
+        }
+        
+        if (typeVal != null) {
+            pForm.setResourceType(typeVal.getAppdefTypeKey());
+            PageList metrics = measBoss.findMeasurementTemplates(sessionId,
                                                         typeVal.getName(),
                                                         PageControl.PAGE_ALL);
+            request.setAttribute("metrics", metrics);
         }
 
-        request.setAttribute("metrics", metrics);
-        
         return null;
     }
 }
