@@ -72,13 +72,17 @@ public class SessionManager {
         throws Exception
     {
         boolean setup = false;
+        boolean flush = true;
         
         try {
             setup = setupSessionInternal(r.getName());
-            r.run();
+            r.run(); 
+        } catch(Exception e) {
+            flush = false;
+            throw e;
         } finally {
             if (setup)
-                cleanupSessionInternal();
+                cleanupSessionInternal(flush);
         }
     }
     
@@ -131,7 +135,7 @@ public class SessionManager {
         return INSTANCE.setupSessionInternal(dbgTxt);
     }
     
-    private void cleanupSessionInternal() {
+    private void cleanupSessionInternal(boolean flush) {
         Session s = (Session)_sessions.get();
         
         try {
@@ -146,7 +150,8 @@ public class SessionManager {
                 _log.debug("Completed read-only session for " +
                            Thread.currentThread().getName() + "]");
             } else {
-                s.flush();
+                if (flush)
+                    s.flush();
             }
             s.close();
         } catch(HibernateException e) {
@@ -157,8 +162,8 @@ public class SessionManager {
     /**
      * Close the current session.
      */
-    public static void cleanupSession() {
-        INSTANCE.cleanupSessionInternal();
+    public static void cleanupSession(boolean flush) {
+        INSTANCE.cleanupSessionInternal(flush);
     }
     
     public static Session currentSession() {
