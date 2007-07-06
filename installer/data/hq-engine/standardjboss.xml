@@ -23,24 +23,24 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.EntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
           <list-entity>
             <interceptor>org.jboss.proxy.ejb.ListEntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </list-entity>
@@ -57,24 +57,24 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.EntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
           <list-entity>
             <interceptor>org.jboss.proxy.ejb.ListEntityInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </list-entity>
@@ -91,16 +91,16 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.StatelessSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -117,16 +117,16 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.StatelessSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -143,16 +143,16 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.StatefulSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -169,16 +169,16 @@
           <home>
             <interceptor>org.jboss.proxy.ejb.HomeInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </home>
           <bean>
             <interceptor>org.jboss.proxy.ejb.StatefulSessionInterceptor</interceptor>
             <interceptor>org.jboss.proxy.SecurityInterceptor</interceptor>
-            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+            <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
             <interceptor call-by-value="false">org.jboss.invocation.InvokerInterceptor</interceptor>
             <interceptor call-by-value="true">org.jboss.invocation.MarshallingInvokerInterceptor</interceptor>
           </bean>
@@ -261,6 +261,7 @@
         <endpoint-interceptors>
           <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
           <interceptor>org.jboss.ejb.plugins.inflow.MessageEndpointInterceptor</interceptor>
+          <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
           <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
           <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
         </endpoint-interceptors>
@@ -300,8 +301,8 @@
         <endpoint-interceptors>
           <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
           <interceptor>org.jboss.ejb.plugins.inflow.MessageEndpointInterceptor</interceptor>
+          <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
           <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
-            <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
           <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
         </endpoint-interceptors>
       </proxy-factory-config>
@@ -370,8 +371,8 @@
         <endpoint-interceptors>
           <interceptor>org.jboss.proxy.ClientMethodInterceptor</interceptor>
           <interceptor>org.jboss.ejb.plugins.inflow.MessageEndpointInterceptor</interceptor>
-          <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
           <interceptor>org.hyperic.txsnatch.ProxySnatch</interceptor>
+          <interceptor>org.jboss.proxy.TransactionInterceptor</interceptor>
           <interceptor>org.jboss.invocation.InvokerInterceptor</interceptor>
         </endpoint-interceptors>
       </proxy-factory-config>
@@ -390,8 +391,8 @@
                 <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-                <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
                 <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+                <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
                 <interceptor metricsEnabled="true">org.jboss.ejb.plugins.MetricsInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
                 <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>                <interceptor>org.jboss.ejb.plugins.EntityInstanceInterceptor</interceptor>
@@ -434,8 +435,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -483,8 +484,8 @@
          <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
          <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+         <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityInstanceInterceptor</interceptor>
          <interceptor>org.jboss.ejb.plugins.EntityReentranceInterceptor</interceptor>
@@ -525,8 +526,8 @@
         <interceptor>org.jboss.ejb.plugins.CleanShutdownInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -570,8 +571,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -615,8 +616,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -647,8 +648,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -691,8 +692,8 @@
         <interceptor>org.jboss.ejb.plugins.CleanShutdownInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -737,8 +738,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -767,8 +768,8 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.webservice.server.ServiceEndpointInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatelessSessionInstanceInterceptor</interceptor>
@@ -797,8 +798,8 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.webservice.server.ServiceEndpointInterceptor </interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatelessSessionInstanceInterceptor</interceptor>
@@ -829,8 +830,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatefulSessionInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -871,8 +872,8 @@
         <interceptor>org.jboss.ejb.plugins.CleanShutdownInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.StatefulSessionInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -918,8 +919,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -962,8 +963,8 @@
         <interceptor>org.jboss.ejb.plugins.CleanShutdownInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -1008,8 +1009,8 @@
         <interceptor>org.jboss.ejb.plugins.ProxyFactoryFinderInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.SecurityInterceptor</interceptor>
-        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor>org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor>org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityCreationInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.EntityLockInterceptor</interceptor>
@@ -1038,8 +1039,8 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -1065,8 +1066,8 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->
@@ -1092,8 +1093,8 @@
         <interceptor>org.jboss.ejb.plugins.LogInterceptor</interceptor>
         <interceptor>org.jboss.ejb.plugins.RunAsSecurityInterceptor</interceptor>
         <!-- CMT -->
-        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.hyperic.txsnatch.TxSnatch</interceptor>
+        <interceptor transaction="Container">org.jboss.ejb.plugins.TxInterceptorCMT</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.CallValidationInterceptor</interceptor>
         <interceptor transaction="Container">org.jboss.ejb.plugins.MessageDrivenInstanceInterceptor</interceptor>
         <!-- BMT -->
