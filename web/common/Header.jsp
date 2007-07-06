@@ -152,7 +152,7 @@
                         <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
                          <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
                             <html:link href=""
-                                       onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();">
+                                       onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                                 <span style="padding-right:10px;padding-left:10px;"><fmt:message key="common.label.Help"/></span></html:link>
                         </td>
                     </tr>
