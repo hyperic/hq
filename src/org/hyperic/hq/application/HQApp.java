@@ -119,9 +119,10 @@ public class HQApp {
     }
     
     private static class Snatcher implements TxSnatch.Snatcher  {
-        private Object invokeNextBoth(Interceptor next, Invocation v,
-                                      boolean isHome) 
-            throws Exception 
+        private Object invokeNextBoth(Interceptor next, 
+                                      org.jboss.proxy.Interceptor proxyNext,                                      
+                                      Invocation v, boolean isHome) 
+            throws Throwable
         {
             Method meth       = v.getMethod();
             String methName   = meth.getName();
@@ -129,16 +130,11 @@ public class HQApp {
             String className  = c.getName();
             boolean created   = false;
             boolean readWrite = false;
-            
+            boolean flush     = true;
             created = SessionManager.setupSession(methName);
                                                   
             try {
-                if (!(methName.startsWith("get") ||
-                      methName.startsWith("find") ||
-                      methName.startsWith("is") ||
-                      methName.startsWith("check") ||
-                      methName.equals("create")))
-                {
+                if (!methIsReadOnly(methName)) {
                     if (_log.isDebugEnabled()) {
                         _log.debug("Upgrading session, due to [" + methName + 
                                    "] on [" + className + "]");
@@ -146,10 +142,16 @@ public class HQApp {
                     readWrite = true;
                     SessionManager.setSessionReadWrite();
                 }
+                
+                if (proxyNext != null) 
+                    return proxyNext.invoke(v);
                 if (isHome)
                     return next.invokeHome(v);
                 else
                     return next.invoke(v);
+            } catch(Throwable e) { 
+                flush = false;
+                throw e;
             } finally { 
                 if (created) {
                     if (!readWrite && _log.isDebugEnabled()) {
@@ -157,28 +159,50 @@ public class HQApp {
                                    "for [" + methName + "] on [" + 
                                    className + "]");
                     }
-                    SessionManager.cleanupSession();
+                    SessionManager.cleanupSession(flush);
                 }
             }
+        }
+        
+        private boolean methIsReadOnly(String methName) {
+            return methName.startsWith("get") ||
+                   methName.startsWith("find") ||
+                   methName.startsWith("is") ||
+                   methName.startsWith("check") ||
+                   methName.equals("create"); /* 'create' is part of EJB session
+                                                 bean creation */
         }
 
         public Object invokeProxyNext(org.jboss.proxy.Interceptor next, 
                                       Invocation v) 
             throws Throwable 
         {
-            return next.invoke(v);
+            return invokeNextBoth(null, next, v, false);
         }
 
         public Object invokeNext(Interceptor next, Invocation v) 
             throws Exception 
         {
-            return invokeNextBoth(next, v, false);
+            try {
+                return invokeNextBoth(next, null, v, false);
+            } catch(Exception e) {
+                throw e;
+            } catch(Throwable t) {
+                throw new RuntimeException(t);
+            }
+            
         }
         
         public Object invokeHomeNext(Interceptor next, Invocation v) 
-            throws Exception 
+            throws Exception
         {
-            return invokeNextBoth(next, v, true);
+            try {
+                return invokeNextBoth(next, null, v, true);
+            } catch(Exception e) {
+                throw e;
+            } catch(Throwable t) {
+                throw new RuntimeException(t);
+            }
         }
     }
     
