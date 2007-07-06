@@ -73,7 +73,7 @@
               name="MetricsDisplayForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceMetricsFormPrepareAction">
-        <set-property property="title" value="2.5.2.1.2"/>
+        <set-property property="title" value=" ui-Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/CurrentMetricValues"
@@ -98,7 +98,7 @@
       <action path="/alerts/ViewAlert"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ViewAlertAction">
-        <set-property property="title" value="2.2.3.1"/>
+        <set-property property="title" value="ui-Alert.Detail"/>
               <exception key="exception.AlertNotFoundException"
                          type="org.hyperic.hq.events.AlertNotFoundException"
                          path="/common/GenericError.jsp"/>
@@ -108,14 +108,14 @@
               name="NewAlertDefinitionForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionFormPrepareAction">
-        <set-property property="title" value="2.2.3.0"/>
+        <set-property property="title" value="ui-Alert.New"/>
       </action>
 
       <action path="/alerts/EditConditionsFormPrepare"
               name="EditAlertDefinitionConditionsForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionConditionsFormPrepareAction">
-        <set-property property="title" value="2.2.3.4"/>
+        <set-property property="title" value="ui-Alert.Edit"/>
       </action>
 
       <action path="/alerts/ConfigPortal"
@@ -128,12 +128,12 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartFormPrepareAction">
         <set-property property="workflow" value="visibility/ViewChart"/>
-        <set-property property="title" value="0.4.1"/>
+        <set-property property="title" value="ui-Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/service/inventory/ViewService"
               type="org.hyperic.hq.ui.action.resource.service.inventory.ViewServiceAction">
-        <set-property property="title" value="2.5.6.0"/>
+        <set-property property="title" value="ui-Inventory.Service"/>
       </action>
           
       <action path="/resource/hub/MiniChart"
@@ -165,7 +165,7 @@
               name="CommonConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
+        <set-property property="title" value="ui-Inventory.Platform.Properties"/>
       </action>
       
       <action path="/resource/server/monitor/visibility/ServerMetrics"
@@ -205,7 +205,7 @@
               name="CommonConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
+        <set-property property="title" value="ui-Inventory.Server.Properties"/>
       </action>
 
       <action path="/resource/application/monitor/visibility/ApplicationDeployedServices"
@@ -245,7 +245,7 @@
              name="CommonConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
-        <set-property property="title" value="2.2.6.3"/>
+        <set-property property="title" value="ui-Inventory.Service"/>
       </action>
 
       <action path="/resource/group/monitor/visibility/GroupMetrics"
@@ -269,7 +269,7 @@
               name="MetricsDisplayForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupMetricsFormPrepareAction">
-        <set-property property="title" value="2.5.2.1.2"/>
+        <set-property property="title" value="ui-Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/autogroup/monitor/visibility/AutoGroupMetrics"
