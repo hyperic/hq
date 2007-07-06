@@ -93,10 +93,12 @@
                     tr.appendChild(td3);
                     td3.setAttribute((document.all ? 'className' : 'class'), "alerts");
 
-                    if (mList[i].alerts) {
+                    if (mList[i].alerts != '') {
                         td3.appendChild(document.createTextNode(mList[i].alerts));
+                    } else {
+                        td3.appendChild(document.createTextNode("0"));
                     }
-
+                    
                     tr.appendChild(td4);
                     td4.setAttribute((document.all ? 'className' : 'class'), "oob");
                     td4.appendChild(document.createTextNode(mList[i].oob));
