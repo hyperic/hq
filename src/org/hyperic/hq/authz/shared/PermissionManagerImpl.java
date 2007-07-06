@@ -187,7 +187,7 @@ public class PermissionManagerImpl
             Connection conn = getConnection();
             String sql = VIEWABLE_SELECT;
             if (appdefTypeStr != null && typeId != null) {
-                sql += ", eam_" + appdefTypeStr +
+                sql += ", EAM_" + appdefTypeStr.toUpperCase() +
                 " appdef WHERE EAM_RESOURCE.instance_id = appdef.id AND " +
                 " appdef." + appdefTypeStr + "_type_id = ? AND ";
             }
