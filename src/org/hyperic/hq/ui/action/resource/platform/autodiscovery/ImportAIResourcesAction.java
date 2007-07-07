@@ -71,7 +71,7 @@ public class ImportAIResourcesAction extends BaseAction {
         
         try {
             ActionForward forward = checkSubmit(request, mapping, form,
-                                                YES_RETURN_PATH);
+                                                NO_RETURN_PATH);
             
             if (forward != null) { 
                 return forward;
