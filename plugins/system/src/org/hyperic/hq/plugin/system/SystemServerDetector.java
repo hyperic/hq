@@ -154,7 +154,25 @@ public abstract class SystemServerDetector
             services[i].setServerId(serverId);
         }
 
-        server.setAIServiceValues(services);
+        String prop = "system.services.discover";
+        boolean reportServices = 
+            !"false".equals(getManagerProperty(prop));
+
+        if (services.length != 0) {
+            //system.CPU.discover=false
+            String type = services[0].getServiceTypeName();
+            prop = "system." + type + ".discover";
+            if ("false".equals(getManagerProperty(prop))) {
+                reportServices = false;
+            }
+            if (!reportServices) {
+                log.info("Ignoring " + type + " services.");
+            }
+        }
+
+        if (reportServices) {
+            server.setAIServiceValues(services);
+        }
 
         aiplatform.addAIServerValue(server);
 
