@@ -33,6 +33,7 @@
 
   <classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
+    <include name="pdk/lib/jdbc/oracle12.jar"/>
     <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
   </classpath>
 
@@ -122,6 +123,10 @@
     </service>
 
     <service name="Tomcat">
+      <property name="DEFAULT_LOG_FILE"
+                value="tomcat/logs/tomcat.log"/>
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
       <config>
         <option name="process.query"
                 default="State.Name.eq=java,Args.*.re=/alfresco/"
@@ -137,22 +142,79 @@
       <filter name="template"
               value="HTTP:hostname=localhost:${alias}"/>
 
-      <metric name="Availability"
-              indicator="true"/>
-
       <metric name="Inbound Connections"
               indicator="true"/>
 
       <metric name="Outbound Connections"
               indicator="true"/>
     </service>
-
   </server>
+
   <!-- ==================== Plugin Help =========================== -->
-  <help name="Alfresco">
-    <![CDATA[
-    <p>
-    </p>
-    ]]>
+  <help name="Database Backend">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for Alfresco Backend Database</h3>
+  </p>
+  <p>
+  Unfortunately for Alfresco's default hsql deployment, DB statistics cannot be tracked.
+  If you decide to use any Alfresco supported DB backends here are samples of the jdbcUrl
+  which allow the plugin to gather metrics from Alfresco's internal tables:
+  <br>
+  MySQL:  jdbc:mysql://&lt;hostname&gt;:&lt;port&gt;/alfresco
+  Oracle: jdbc:oracle:thin:@&lt;hostname&gt;:&lt;port&gt;:alfresco
+  Sybase: jdbc:sybase:Tds:&lt;hostname&gt;:&lt;port&gt;/alfresco
+  </p>
+  <p>
+  To monitor process metrics from the Alfresco DB backend here are samples of
+  ptql queries to match the database processes:
+  <br>
+  MySQL:  State.Name.eq=mysqld
+  Oracle: State.Name.eq=oracle
+  Sybase: State.Name.eq=dataserver
+  </p>
+  ]]>
+  </help>
+
+  <help name="Tomcat">
+  <![CDATA[
+  <p>
+  <h3>Configure Alfresco Tomcat for Log Tracking</h3>
+  </p>
+
+  <p>
+  To enable Log Tracking in HQ, Tomcat must be configured with log4j.
+  These steps are based on the standard
+  <a href="http://tomcat.apache.org/tomcat-5.5-doc/logging.html">
+  Tomcat documentation</a>.
+  </p>
+
+  <p>
+  If the file
+  ${installpath}${FILE.sep}common${FILE.sep}classes${FILE.sep}log4j.properties
+  does not exist, create one with the following example contents:
+  </p>
+
+  <pre>
+#These properties can be modified.  The only requirement is that the
+#ConversionPattern includes the priority (%p)
+log4j.rootLogger=INFO, R
+log4j.appender.R.File=${catalina.home}/logs/tomcat.log
+log4j.appender.R.MaxBackupIndex=1
+log4j.appender.R.MaxFileSize=5000KB
+log4j.appender.R.layout.ConversionPattern=%d %-5p [%c{1}] %m%n
+log4j.appender.R.layout=org.apache.log4j.PatternLayout
+log4j.appender.R=org.apache.log4j.RollingFileAppender
+  </pre>
+
+  <p>Next, copy the following jars unless they have already been installed:</p>
+
+  <pre>
+  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}log4j.jar ${installpath}${FILE.sep}common${FILE.sep}lib
+  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}commons-logging.jar ${installpath}${FILE.sep}common${FILE.sep}lib
+  </pre>
+
+  <p>Restart Tomcat for the changes to take effect.</p>
+  ]]>
   </help>
 </plugin>
