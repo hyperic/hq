@@ -57,6 +57,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.AggregateObjectMeasurementValue;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
+import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
@@ -1346,6 +1347,57 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     
         return data;
+    }
+
+    /**
+     * Get a Baseline data.
+     *
+     * @ejb:interface-method
+     */
+    public double[] getBaselineData(Integer id, long begin, long end) {
+        // Check the begin and end times
+        super.checkTimeArguments(begin, end);
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        // The table to query from
+        String table = getDataTable(begin);
+    
+        try {
+            conn =
+                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+
+            StringBuffer sqlBuf = new StringBuffer(
+                "SELECT MIN(value), AVG(value), MAX(value) FROM ")
+                .append(table)
+                .append(" WHERE measurement_id = ?")
+                .append(" AND timestamp BETWEEN ? AND ?");
+
+            stmt = conn.prepareStatement( sqlBuf.toString() );
+    
+            int i = 1;
+            stmt.setInt (i++, id.intValue());
+            stmt.setLong(i++, begin);
+            stmt.setLong(i++, end);
+            rs = stmt.executeQuery();
+
+            rs.next();          // Better have some result
+            double[] data = new double[MeasurementConstants.IND_MAX + 1];
+            data[MeasurementConstants.IND_MIN] = rs.getDouble(1);
+            data[MeasurementConstants.IND_AVG] = rs.getDouble(2);
+            data[MeasurementConstants.IND_MAX] = rs.getDouble(3);
+                
+            return data;
+        } catch (SQLException e) {
+            throw new MeasurementDataSourceException
+                ("Can't get baseline data for: " + id, e);
+        } catch (NamingException e) {
+            throw new SystemException(ERR_DB, e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+        }
     }
 
     /**
