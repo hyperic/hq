@@ -51,7 +51,7 @@
 
     <config>
       <option name="jdbcUrl"
-              description="JDBC Url (NOTE: localhost may not work)"
+              description="JDBC Url"
               default="jdbc:mysql://localhost:3306/alfresco"/>
       <option name="jdbcUser"
               description="JDBC User"
@@ -63,7 +63,7 @@
               default="/opt/alfresco"
               description="Alfresco Install Path"/>
       <option name="alfresco-ptql"
-              default="State.Name.eq=java,Args.*.re=/alfresco/"
+              default="State.Name.eq=java,Args.*.ct=/alfresco/"
               description="Sigar PTQL Process Query"/>
     </config>
 
@@ -124,12 +124,12 @@
 
     <service name="Tomcat">
       <property name="DEFAULT_LOG_FILE"
-                value="tomcat/logs/tomcat.log"/>
+                value="tomcat/logs/catalina.out"/>
       <plugin type="log_track"
               class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
       <config>
         <option name="process.query"
-                default="State.Name.eq=java,Args.*.re=/alfresco/"
+                default="State.Name.eq=java,Args.*.ct=/alfresco/"
                 description="PTQL for Alfresco Tomcat"/>
       </config>
       <metric name="Availability"
@@ -139,8 +139,12 @@
     </service>
 
     <service name="HTTP">
+      <config include="http"/>
       <filter name="template"
-              value="HTTP:hostname=localhost:${alias}"/>
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
 
       <metric name="Inbound Connections"
               indicator="true"/>
@@ -173,48 +177,6 @@
   Oracle: State.Name.eq=oracle
   Sybase: State.Name.eq=dataserver
   </p>
-  ]]>
-  </help>
-
-  <help name="Tomcat">
-  <![CDATA[
-  <p>
-  <h3>Configure Alfresco Tomcat for Log Tracking</h3>
-  </p>
-
-  <p>
-  To enable Log Tracking in HQ, Tomcat must be configured with log4j.
-  These steps are based on the standard
-  <a href="http://tomcat.apache.org/tomcat-5.5-doc/logging.html">
-  Tomcat documentation</a>.
-  </p>
-
-  <p>
-  If the file
-  ${installpath}${FILE.sep}common${FILE.sep}classes${FILE.sep}log4j.properties
-  does not exist, create one with the following example contents:
-  </p>
-
-  <pre>
-#These properties can be modified.  The only requirement is that the
-#ConversionPattern includes the priority (%p)
-log4j.rootLogger=INFO, R
-log4j.appender.R.File=${catalina.home}/logs/tomcat.log
-log4j.appender.R.MaxBackupIndex=1
-log4j.appender.R.MaxFileSize=5000KB
-log4j.appender.R.layout.ConversionPattern=%d %-5p [%c{1}] %m%n
-log4j.appender.R.layout=org.apache.log4j.PatternLayout
-log4j.appender.R=org.apache.log4j.RollingFileAppender
-  </pre>
-
-  <p>Next, copy the following jars unless they have already been installed:</p>
-
-  <pre>
-  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}log4j.jar ${installpath}${FILE.sep}common${FILE.sep}lib
-  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}commons-logging.jar ${installpath}${FILE.sep}common${FILE.sep}lib
-  </pre>
-
-  <p>Restart Tomcat for the changes to take effect.</p>
   ]]>
   </help>
 </plugin>
