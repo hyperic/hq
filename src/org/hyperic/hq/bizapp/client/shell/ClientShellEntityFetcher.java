@@ -39,7 +39,6 @@ import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -93,6 +92,7 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.LiveDataBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
@@ -117,6 +117,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
+import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
@@ -130,6 +131,9 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.schedule.ScheduleException;
+
+import org.hyperic.hq.bizapp.client.pageFetcher.FindControlJobFetcher;
+import org.hyperic.hq.bizapp.client.pageFetcher.FindControlScheduleFetcher;
 
 public class ClientShellEntityFetcher {
     protected ClientShellBossManager   bossManager;
@@ -1241,6 +1245,104 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getProductBoss();
 
         boss.clearCaches(auth.getAuthToken());
+    }
+
+    public FindControlJobFetcher findControlJobFetcher(AppdefEntityID id)
+        throws NamingException, ClientShellAuthenticationException
+    {
+        return new FindControlJobFetcher(bossManager.getControlBoss(),
+                                         auth.getAuthToken(),
+                                         id);
+    }
+
+    public FindControlScheduleFetcher
+        findControlScheduleFetcher(AppdefEntityID id)
+        throws NamingException, ClientShellAuthenticationException
+    {
+        return new
+            FindControlScheduleFetcher(bossManager.getControlBoss(),
+                                       auth.getAuthToken(),
+                                       id);
+    }
+
+    public void deleteControlJob(Integer[] ids)
+        throws PluginException, ApplicationException,
+               SessionNotFoundException, SessionTimeoutException,
+               PermissionException, ClientShellAuthenticationException
+    {
+        try {
+            ControlBoss boss = bossManager.getControlBoss();
+            boss.deleteControlJob(auth.getAuthToken(), ids);
+        } catch (RemoteException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public void doAction(AppdefEntityID id, String action, int[] orderSpec)
+        throws PluginException, ApplicationException,
+               SessionNotFoundException, SessionTimeoutException,
+               ClientShellAuthenticationException, AppdefEntityNotFoundException,
+               PermissionException, RemoteException, GroupNotCompatibleException
+    {
+        ControlBoss boss;
+
+        try {
+            boss = bossManager.getControlBoss();
+            if (id.getType()==AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                boss.doGroupAction(auth.getAuthToken(),id,
+                                   action, (String)null, orderSpec);
+            else
+                boss.doAction(auth.getAuthToken(), id, action, (String)null);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (RemoteException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public void doAction(AppdefEntityID id, String action,
+                         ScheduleValue schedule, int[] orderSpec)
+        throws PluginException, ScheduleWillNeverFireException,
+               ApplicationException, SessionNotFoundException,
+               SessionTimeoutException, PermissionException,
+               ClientShellAuthenticationException, GroupNotCompatibleException,
+               AppdefEntityNotFoundException
+    {
+        ControlBoss boss;
+
+        try {
+            boss = bossManager.getControlBoss();
+
+            if (id.getType()==AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                boss.doGroupAction(auth.getAuthToken(),id,action,
+                                   orderSpec,schedule);
+            else
+                boss.doAction(auth.getAuthToken(), id, action, schedule);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (RemoteException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public List getActions(AppdefEntityID id)
+        throws ApplicationException,
+               PluginNotFoundException, ClientShellAuthenticationException,
+               SessionNotFoundException, SessionTimeoutException,
+               NamingException, RemoteException, AppdefEntityNotFoundException
+    {
+        ControlBoss boss;
+
+        try {
+            boss = bossManager.getControlBoss();
+            return boss.getActions(auth.getAuthToken(), id);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (RemoteException e) {
+            throw new SystemException(e);
+        }
     }
 }
 

@@ -127,6 +127,7 @@ public class ClientShell
         registerCommandHandler("alertdef",     new ClientShell_alertdef(this));
         registerCommandHandler("autoinventory",new ClientShell_autoinventory(this));
         registerCommandHandler("cache",        new ClientShell_cache(this));
+        registerCommandHandler("control",      new ClientShell_control(this));
         registerCommandHandler("get",          new ClientShell_get(this));
         registerCommandHandler("login",        loginCommand);
         registerCommandHandler("metric",       new ClientShell_metric(this));

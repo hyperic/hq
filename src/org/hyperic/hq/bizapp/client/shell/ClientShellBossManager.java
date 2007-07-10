@@ -44,6 +44,8 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.bizapp.shared.LiveDataBoss;
 import org.hyperic.hq.bizapp.shared.LiveDataBossUtil;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
+import org.hyperic.hq.bizapp.shared.ControlBossUtil;
 
 import java.util.Hashtable;
 import javax.naming.NamingException;
@@ -58,6 +60,7 @@ public class ClientShellBossManager {
     private EventsBoss      eventsBoss;
     private AIBoss          aiBoss;
     private LiveDataBoss    liveDataBoss;
+    private ControlBoss     controlBoss;
 
     protected ClientShellAuthenticator auth;
     
@@ -79,6 +82,7 @@ public class ClientShellBossManager {
         this.eventsBoss      = null;
         this.aiBoss          = null;
         this.liveDataBoss    = null;
+        this.controlBoss     = null;
     }
 
     public AppdefBoss getAppdefBoss()
@@ -238,4 +242,23 @@ public class ClientShellBossManager {
 
         return this.liveDataBoss;
     }
+
+    public ControlBoss getControlBoss()
+        throws NamingException, ClientShellAuthenticationException
+    {
+        if(this.controlBoss == null) {
+            try {
+                Hashtable env = this.auth.getNamingEnv();
+
+                this.controlBoss =
+                    ControlBossUtil.getHome(env).create();
+            } catch(ClientShellAuthenticationException exc){
+                throw exc;
+            } catch(Exception exc) {
+                throw new NamingException("Could not get ControlBoss: " +
+                                          exc);
+            }
+        }
+        return this.controlBoss;
+    }    
 }
