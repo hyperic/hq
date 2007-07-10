@@ -31,9 +31,12 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.server.session.CalendarEntry;
 import org.hyperic.hq.common.server.session.WeekEntry;
+import org.hyperic.hq.common.shared.CalendarManagerLocal;
+import org.hyperic.hq.common.shared.CalendarManagerUtil;
 
 
 /**
@@ -126,6 +129,14 @@ public class CalendarManagerEJBImpl implements SessionBean {
      */
     public CalendarEntry findEntryById(int id) {
         return _entryDAO.findById(new Integer(id));
+    }
+    
+    public static CalendarManagerLocal getOne() {
+        try {
+            return CalendarManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void ejbCreate() { }
