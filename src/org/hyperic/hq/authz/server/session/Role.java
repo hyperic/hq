@@ -27,11 +27,13 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.common.server.session.Calendar;
 
 public class Role extends AuthzNamedBean {
     private Integer    _cid;
@@ -41,6 +43,7 @@ public class Role extends AuthzNamedBean {
     private Collection _resourceGroups = new ArrayList();
     private Collection _operations = new HashSet();
     private Collection _subjects = new ArrayList();
+    private Collection _calendars = new ArrayList();
     private RoleValue  _roleValue = new RoleValue();
 
     public Role() {
@@ -119,6 +122,30 @@ public class Role extends AuthzNamedBean {
     
     protected void setSubjects(Collection val) {
         _subjects = val;
+    }
+    
+    protected Collection getCalendarBag() {
+        return _calendars;
+    }
+    
+    protected void setCalendarBag(Collection c) {
+        _calendars = c;
+    }
+    
+    public Collection getCalendars() {
+        return Collections.unmodifiableCollection(_calendars);
+    }
+    
+    void addCalendar(RoleCalendar c) {
+        getCalendarBag().add(c);
+    }
+    
+    void clearCalendars() {
+        getCalendarBag().clear();
+    }
+    
+    boolean removeCalendar(RoleCalendar c) {
+        return getCalendarBag().remove(c);
     }
 
     void clearSubjects() {

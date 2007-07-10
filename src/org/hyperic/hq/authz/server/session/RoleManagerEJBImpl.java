@@ -54,6 +54,8 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleCalendar;
+import org.hyperic.hq.authz.server.session.RoleCalendarType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -65,6 +67,8 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.common.server.session.Calendar;
+import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -361,15 +365,22 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             throw new RemoveException("Superuser role cannot be removed");
         }
 
-        Role roleLocal = getRoleDAO().findById(rolePk);
+        Role role = getRoleDAO().findById(rolePk);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(whoami.getId(), 
-                 roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(),
+                 role.getResource().getResourceType(),
+                 role.getId(),
                  AuthzConstants.roleOpRemoveRole);
 
-        getRoleDAO().remove(roleLocal);
+        for (Iterator i=new ArrayList(role.getCalendars()).iterator();
+             i.hasNext(); ) 
+        {
+            RoleCalendar c = (RoleCalendar)i.next();
+            
+            removeCalendar(c);
+        }
+        getRoleDAO().remove(role);
     }
 
     /**
@@ -780,6 +791,39 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return value;
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public Role findRoleById(int id){
+        return getRoleDAO().findById(new Integer(id));
+    }
+    
+    /**
+     * Create a calendar under a role for a specific type.  Calendars created
+     * in this manner are tied directly to the role and should not be used
+     * by other roles.
+     * @ejb:interface-method
+     */
+    public RoleCalendar createCalendar(Role r, String calendarName, 
+                                       RoleCalendarType type) 
+    {
+        Calendar cal = 
+            CalendarManagerEJBImpl.getOne().createCalendar(calendarName);
+        RoleCalendar res = new RoleCalendar(r, cal, type);
+        r.addCalendar(res);
+        return res;
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public boolean removeCalendar(RoleCalendar c) {
+        boolean res = c.getRole().removeCalendar(c);
+        new RoleCalendarDAO(DAOFactory.getDAOFactory()).remove(c);
+        CalendarManagerEJBImpl.getOne().remove(c.getCalendar());
+        return res; 
+    }
+    
     /**
      * Find the role that has the given ID.
      * @param id The ID of the role you're looking for.

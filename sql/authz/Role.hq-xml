@@ -55,6 +55,13 @@
       <many-to-many class="Operation" column="OPERATION_ID" />
     </set>
 
+    <bag name="calendarBag" table="EAM_ROLE_CALENDARS" 
+         cascade="all-delete-orphan" inverse="true">
+      <cache usage="read-write"/>
+      <key column="ROLE_ID" />
+      <one-to-many class="RoleCalendar"/>
+    </bag>
+
     <bag name="subjects" table="EAM_SUBJECT_ROLE_MAP"
         inverse="true">
       <key column="ROLE_ID" />
@@ -93,5 +100,4 @@
       <column name="CID" index="EAM_ROLE_OPER_MAP_CID_IDX" />
     </property>
   </class>
-
 </hibernate-mapping>
