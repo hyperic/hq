@@ -134,6 +134,12 @@
     <property name="DEFAULT_LOG_FILE"
               value="logs/catalina.out"/>
 
+    <property name="DEFAULT_LOG_FILE"
+              value="tomcat/logs/catalina.out"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
     <config>
       <option name="jmx.url"
               description="JMX URL to MBeanServer"
@@ -147,6 +153,9 @@
               optional="true"
               default="manager"
               type="secret"/>
+      <option name="ptql"
+              description="PTQL for Tomcat Process"
+              default="State.Name.eq=java,Args.*.ct=catalina.home"/>
     </config>
 
     <plugin type="autoinventory"
@@ -156,6 +165,7 @@
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
     <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%ptql%:State"
             indicator="true"/>
 
     <service name="Web Module Stats">
@@ -396,4 +406,31 @@
               units="none"/>
     </service>
   </server>
+
+  <server name="Apache Tomcat"
+          version="6.0"
+          include="5.5">
+    <property name="VERSION_FILE"
+              value="lib/catalina-ha.jar"/>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="JMX" include="Apache Tomcat">
+  <![CDATA[
+  <p>
+  <h3>Configure Apache Tomcat for JMX</h3>
+  </p>
+  To configure Tomcat for JMX monitoring see http://tomcat.apache.org/tomcat-${product.version}-doc/monitoring.html.
+  <br>
+  For a quick down and dirty method follow these instructions,
+  in <installpath>/bin/catalina.sh add:
+  JAVA_OPTS="-Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.port=6969 \
+  -Dcom.sun.management.jmxremote.ssl=false \
+  -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTS"
+  export JAVA_OPTS
+  From there restart Tomcat and that is it.
+  </p>
+  ]]>
+  </help>
 </plugin>
