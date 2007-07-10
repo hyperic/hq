@@ -194,6 +194,32 @@ public class WindowsDetector
         }
     }
 
+    private void discoverPluginServices(List services) {
+        //auto-discovery of services (plugin defined types)
+        Map plugins = getServiceInventoryPlugins();
+        if (plugins == null) {
+            return;
+        }
+
+        for (Iterator it = plugins.keySet().iterator(); it.hasNext();) {
+            String type = (String)it.next();
+            String name = getTypeProperty(type, SystemPlugin.PROP_SVC);
+            if (name == null) {
+                log.warn("Service type '" + type +
+                         "' has autoinventory plugin " +
+                         "without '" + SystemPlugin.PROP_SVC +
+                         "' property defined.");
+                continue;
+            }
+            log.debug("Looking for " + type + " service=" + name);
+
+            AIServiceValue svc = findWindowsService(type, name);
+            if (svc != null) {
+                services.add(svc);
+            }
+        }
+    }
+
     protected ArrayList getSystemServiceValues(Sigar sigar,
                                                ConfigResponse serverConfig)
         throws SigarException {
@@ -220,25 +246,7 @@ public class WindowsDetector
             services.add(svc);
         }
 
-        //auto-discovery of services (plugin defined types)
-        Map plugins = getServiceInventoryPlugins();
-        for (Iterator it = plugins.keySet().iterator(); it.hasNext();) {
-            type = (String)it.next();
-            String name = getTypeProperty(type, SystemPlugin.PROP_SVC);
-            if (name == null) {
-                log.warn("Service type '" + type +
-                         "' has autoinventory plugin " +
-                         "without '" + SystemPlugin.PROP_SVC +
-                         "' property defined.");
-                continue;
-            }
-            log.debug("Looking for " + type + " service=" + name);
-
-            AIServiceValue svc = findWindowsService(type, name);
-            if (svc != null) {
-                services.add(svc);
-            }
-        }
+        discoverPluginServices(services);
 
         //auto-discover of any generic windows service
         String windowsServices =
