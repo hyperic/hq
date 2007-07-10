@@ -464,8 +464,34 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @return The UNION SQL statement.
+     */
+    private String getUnionStatement(long begin) {
+        // We always include the _COMPAT table, it contains the backfilled
+        // data
+        StringBuffer sql = new StringBuffer();
+        sql.append("(SELECT * FROM ").
+            append(MeasTabManagerUtil.OLD_MEAS_TABLE);
+        long ts = System.currentTimeMillis();
+        while (ts > begin) {
+            String table = MeasTabManagerUtil.getMeasTabname(ts);
+            sql.append(" UNION ALL SELECT * FROM ").
+                append(table);
+            ts = MeasTabManagerUtil.getPrevMeasTabTime(ts);
+        }
+
+        sql.append(") AS ").append(TAB_DATA);
+        return sql.toString();
+    }
+
+    /**
      * Based on the given start time, determine which measurement 
-     * table we should query for measurement data.
+     * table we should query for measurement data.  If the slice is for the
+     * detailed data segment, we return the UNION view of the required time
+     * slices.
      */
     private String getDataTable(long begin)
     {
@@ -475,7 +501,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             loadConfigDefaults();
 
         if (now - this.purgeRaw < begin) {
-            return TAB_DATA;
+            return getUnionStatement(begin);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -702,7 +728,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             
             switch(type) {
             case MeasurementConstants.COLL_TYPE_DYNAMIC:
-                if (table.equals(TAB_DATA))
+                if (table.endsWith(TAB_DATA))
                     selectType = "AVG(value) AS value, " +
                                  "MAX(value) AS peak, MIN(value) AS low";
                 else
@@ -1450,7 +1476,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // Use the already calculated min, max and average on
         // compressed tables.
         String minMax;
-        if (table.equals(TAB_DATA)) {
+        if (table.endsWith(TAB_DATA)) {
             minMax = " MIN(value), AVG(value), MAX(value), ";
         } else {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
@@ -1623,7 +1649,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Use the already calculated min, max and average on
             // compressed tables.
             String minMax;
-            if (table.equals(TAB_DATA)) {
+            if (table.endsWith(TAB_DATA)) {
                 minMax = " MIN(value), AVG(value), MAX(value), ";
             } else {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
@@ -1718,7 +1744,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // Use the already calculated min, max and average on
         // compressed tables.
         String minMax;
-        if (table.equals(TAB_DATA)) {
+        if (table.endsWith(TAB_DATA)) {
             minMax = " MIN(value), AVG(value), MAX(value) ";
         } else {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue) ";
@@ -1817,7 +1843,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // Use the already calculated min, max and average on
         // compressed tables.
         String minMax;
-        if (table.equals(TAB_DATA)) {
+        if (table.endsWith(TAB_DATA)) {
             minMax = " MIN(value), AVG(value), MAX(value), ";
         } else {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
