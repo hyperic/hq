@@ -33,7 +33,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -54,6 +59,7 @@ public class AIStartupListener
          */
         Set events = new HashSet();
         events.add(ResourceCreatedZevent.class);
+        events.add(ResourceUpdatedZevent.class);
         ZeventManager.getInstance().
             addBufferedListener(events, new RuntimeAIEnabler());
     }
@@ -65,24 +71,40 @@ public class AIStartupListener
 
         public void processEvents(List events) {
             for (Iterator i = events.iterator(); i.hasNext();) {
-                ResourceCreatedZevent zevent = (ResourceCreatedZevent) i.next();
+                ResourceZevent zevent = (ResourceZevent) i.next();
                 AuthzSubjectValue subject = zevent.getAuthzSubjectValue();
                 AppdefEntityID id = zevent.getAppdefEntityID();
+                AutoinventoryManagerLocal aiManager =
+                        AutoinventoryManagerEJBImpl.getOne();
+                ServerManagerLocal serverMgr =
+                    ServerManagerEJBImpl.getOne();
+                boolean isUpdate = zevent instanceof ResourceUpdatedZevent;
 
                 // Only servers have runtime AI.
                 if (!id.isServer()) {
                     return;
                 }
 
-                _log.info("Enabling Runtime-AI for " + id);
-
-                AutoinventoryManagerLocal aiManager =
-                    AutoinventoryManagerEJBImpl.getOne();
-                try {
-                    aiManager.toggleRuntimeScan(subject, id, true);
-                } catch (Exception e) {
-                    throw new SystemException("Error enabling Runtime-AI for " +
-                                              "server [" + id + "]", e);
+                if (isUpdate) {
+                   Server s = serverMgr.getServerById(id.getId());
+                    _log.info("Toggling Runtime-AI for " + id);
+                    try {
+                        aiManager.toggleRuntimeScan(subject, id,
+                                                    s.isRuntimeAutodiscovery());
+                    } catch (Exception e) {
+                        throw new SystemException("Error toggling " +
+                                                  "Runtime-AI for " +
+                                                  "server [" + id + "]", e);    
+                    }
+                } else {
+                    _log.info("Enabling Runtime-AI for " + id);
+                    try {
+                        aiManager.toggleRuntimeScan(subject, id, true);
+                    } catch (Exception e) {
+                        throw new SystemException("Error enabling " +
+                                                  "Runtime-AI for " +
+                                                  "server [" + id + "]", e);
+                    }
                 }
             }
         }
