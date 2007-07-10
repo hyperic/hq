@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.coldfusion">
+
+  <server name="Coldfusion"
+          version="7.x">
+
+    <plugin type="autoinventory"
+            class="ColdfusionServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.plugin.coldfusion.ColdfusionMeasurementPlugin"/>
+
+    <config>
+      <option name="installpath"
+              default="/opt/coldfusionmx7"
+              description="Coldfusion Install Path"/>
+      <option name="coldfusion-ptql"
+              default="State.Name.re=cfmx7|java,Args.*.ct=coldfusion,State.Name.Pne=$1"
+              description="Sigar PTQL Process Query"/>
+    </config>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%coldfusion-ptql%:State"
+            indicator="true"/>
+
+    <filter name="template"
+            value="coldfusion-stats:installpath=%installpath%:${alias}"/>
+
+    <metric name="Threads listening for a new connection"
+            alias="listenTh"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Threads waiting for a new request"
+            alias="idleTh"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Threads waiting to run"
+            alias="delayTh"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Threads currently running"
+            alias="busyTh"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Total worker thread count"
+            alias="totalTh"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Requests delayed due to high concurrency"
+            alias="delayRq"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Requests dropped"
+            alias="droppedRq"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Requests handled"
+            alias="handledRq"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Milliseconds spent servicing requests not including any delay time (delayMs)"
+            alias="handledMs"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="Milliseconds spent in delay state"
+            alias="delayMs"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="ms"/>
+    <metric name="Bytes read from request"
+            alias="bytesIn"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Bytes written to response"
+            alias="bytesOut"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Kilobytes of free memory in the heap"
+            alias="freeMemory"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="KB"/>
+    <metric name="Total Kilobytes in the heap (in use and free)"
+            alias="totalMemory"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="KB"/>
+    <metric name="Current number of active J2EE sessions"
+            alias="sessions"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Number of J2EE sessions in memory"
+            alias="sessionsInMem"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <service name="HTTP">
+      <config include="http"/>
+      <filter name="template"
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Coldfusion">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for monitoring Coldfusion</h3>
+  </p>
+  <p>
+  To enable Coldfusion metric logging follow these instructions:
+  http://kb.adobe.com/selfservice/viewContent.do?externalId=tn_19120&sliceId=2
+  </p>
+  ]]>
+  </help>
+</plugin>
