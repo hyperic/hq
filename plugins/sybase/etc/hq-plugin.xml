@@ -333,7 +333,7 @@
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
-  <help name="Sybase">
+  <help name="Sybase" include="Sybase">
     <![CDATA[
     <p>
     <h3>Configure Sybase ${product.version} for Monitoring</h3>
