@@ -155,7 +155,7 @@
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
-  <help name="Database Backend">
+  <help name="Database Backend" include="Database Backend">
   <![CDATA[
   <p>
   <h3>Configure HQ for Alfresco Backend Database</h3>
