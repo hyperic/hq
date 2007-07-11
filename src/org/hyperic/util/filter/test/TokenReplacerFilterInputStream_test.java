@@ -73,6 +73,11 @@ public class TokenReplacerFilterInputStream_test extends TestCase {
         assertEquals(result.trim(),
                      "user id is 10001, username is rmorgan");
     }
+    
+    public void testFails() throws Exception
+    {
+        fail("This test always fails.");
+    }
 
     public static void main ( String[] args ) {
         try {

@@ -235,7 +235,7 @@
             <include name="*/src"/>
           </dirset>
         </src>
-        <exclude name="**/*_test.java" />
+        <!--exclude name="**/*_test.java" /-->
       </hq-javac>
   </target>
     
