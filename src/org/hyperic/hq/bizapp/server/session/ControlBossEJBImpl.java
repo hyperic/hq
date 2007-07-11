@@ -54,6 +54,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
@@ -408,7 +409,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @return currently running ControlJob.
      */
-     public ControlHistoryValue getCurrentJob(int sessionId, AppdefEntityID id)
+     public ControlHistory getCurrentJob(int sessionId, AppdefEntityID id)
          throws ApplicationException, PermissionException,
                 SessionNotFoundException, SessionTimeoutException                
     {
@@ -426,7 +427,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @return last ControlJob that ran
      */
-    public ControlHistoryValue getJobByJobId(int sessionId, Integer id)
+    public ControlHistory getJobByJobId(int sessionId, Integer id)
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
@@ -444,7 +445,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @return last ControlJob that ran
      */
-    public ControlHistoryValue getLastJob(int sessionId, AppdefEntityID id)
+    public ControlHistory getLastJob(int sessionId, AppdefEntityID id)
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {

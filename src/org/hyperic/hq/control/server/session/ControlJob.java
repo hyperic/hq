@@ -83,7 +83,7 @@ public abstract class ControlJob extends BaseJob {
         throws PluginException
     {
         long startTime = System.currentTimeMillis();
-        ControlHistoryValue commandHistory = null;
+        ControlHistory commandHistory = null;
         String errorMsg = null;
         Integer groupId = (gid != null) ? gid.getId() : null;
         

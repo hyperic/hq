@@ -45,7 +45,6 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.control.shared.ControlManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
@@ -110,7 +109,7 @@ public class ControlActionGroupJob extends ControlJob {
             // create group entry in the history
             ControlScheduleManagerLocal cLocal =
                 ControlScheduleManagerUtil.getLocalHome().create();
-            ControlHistoryValue historyValue =
+            ControlHistory historyValue =
                 cLocal.createHistory(id, null, null, subject.getName(), 
                                      action, args, scheduled, startTime,
                                      startTime, dateScheduled.getTime(),
@@ -196,8 +195,7 @@ public class ControlActionGroupJob extends ControlJob {
                     cLocal.updateHistory(groupId, System.currentTimeMillis(),
                                          status, errMsg);
                 
-                    ControlHistoryValue cv = 
-                        cLocal.getJobHistoryValue(groupId);
+                    ControlHistory cv = cLocal.getJobHistoryValue(groupId);
                     
                     // Send a control event
                     ControlEvent event = 
@@ -238,9 +236,7 @@ public class ControlActionGroupJob extends ControlJob {
         long start = System.currentTimeMillis();
         
         while (System.currentTimeMillis() < start + timeout) {
-
-            ControlHistoryValue cValue = 
-                cLocal.getJobHistoryValue(jobId);
+            ControlHistory cValue = cLocal.getJobHistoryValue(jobId);
             String status = cValue.getStatus();
             if (status.equals(ControlConstants.STATUS_COMPLETED))
                 return;
@@ -289,8 +285,7 @@ public class ControlActionGroupJob extends ControlJob {
             for (Iterator i = ids.iterator(); i.hasNext(); ) {
                 Integer jobId = (Integer)i.next();
                 
-                ControlHistoryValue cValue = 
-                    cLocal.getJobHistoryValue(jobId);
+                ControlHistory cValue = cLocal.getJobHistoryValue(jobId);
                 String status = cValue.getStatus();
                     
                 if (status.equals(ControlConstants.STATUS_COMPLETED)) {

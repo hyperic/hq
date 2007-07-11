@@ -35,10 +35,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.naming.InitialContext;
@@ -53,16 +51,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
@@ -126,8 +121,6 @@ public class ControlScheduleManagerEJBImpl
     private ControlHistoryDAO getControlHistoryDAO() {
         return DAOFactory.getDAOFactory().getControlHistoryDAO();
     }
-
-    private Map viewableResources = null;
 
     public static ControlScheduleManagerLocal getOne() {
         try {
@@ -220,9 +213,6 @@ public class ControlScheduleManagerEJBImpl
                 histLH.findByStartTime(System.currentTimeMillis() - window,
                                        false);
 
-            // Reset viewable resources before checking in loop
-            viewableResources = null;
-
             // Run through the list only returning entities the user
             // has the ability to see
             int count = 0;
@@ -275,9 +265,6 @@ public class ControlScheduleManagerEJBImpl
             ControlScheduleDAO scheduleLH = getControlScheduleDAO();
 
             pending = scheduleLH.findByFireTime(false);
-            // Reset viewable resources before checking in loop
-            viewableResources = null;
-
             // Run through the list only returning entities the user
             // has the ability to see
             int count = 0;
@@ -340,9 +327,6 @@ public class ControlScheduleManagerEJBImpl
             stmt = conn.prepareStatement(sqlStr);
             rs = stmt.executeQuery();
 
-            // Reset viewable resources before checking in loop
-            viewableResources = null;
-            
             int i = 0;
             while (rs.next() && i++ < numToReturn) {
                 
@@ -610,7 +594,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-     public ControlHistoryValue getCurrentJob(AuthzSubjectValue subject, 
+     public ControlHistory getCurrentJob(AuthzSubjectValue subject, 
                                               AppdefEntityID id)      
          throws ApplicationException
     {
@@ -626,9 +610,13 @@ public class ControlScheduleManagerEJBImpl
             return null;
 
         while (i.hasNext()) {
-            ControlHistory history = (ControlHistory)i.next();
-            if (history.getStatus().equals(ControlConstants.STATUS_INPROGRESS))
-                return history.getControlHistoryValue();
+            ControlHistory history = (ControlHistory) i.next();
+            if (history.getStatus().equals(ControlConstants.STATUS_INPROGRESS)){
+                history.setDuration(System.currentTimeMillis() -
+                                   history.getStartTime());
+
+                return history;
+            }
         }
 
         return null;
@@ -640,8 +628,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistoryValue getJobByJobId(AuthzSubjectValue subject,
-                                             Integer id)
+    public ControlHistory getJobByJobId(AuthzSubjectValue subject, Integer id)
         throws ApplicationException
     {
         ControlHistoryDAO hLocalHome;
@@ -653,8 +640,13 @@ public class ControlScheduleManagerEJBImpl
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
+        
+        if (local.getStatus().equals(ControlConstants.STATUS_INPROGRESS)) {
+            local.setDuration(System.currentTimeMillis() -
+                              local.getStartTime());
+        }
 
-        return local.getControlHistoryValue();
+        return local;
     }
 
     /**
@@ -664,22 +656,21 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistoryValue getLastJob(AuthzSubjectValue subject, 
-                                          AppdefEntityID id)
+    public ControlHistory getLastJob(AuthzSubjectValue subject,
+                                     AppdefEntityID id)
         throws ApplicationException
     {
         ControlHistoryDAO hLocalHome;
         Collection historyLocals;
 
         hLocalHome = getControlHistoryDAO();
-        historyLocals =
-            hLocalHome.findByEntityStartTime(id.getType(),
-                                             id.getID(), false);
+        historyLocals = hLocalHome.findByEntityStartTime(id.getType(),
+                                                         id.getID(), false);
         Iterator i = historyLocals.iterator();
         while (i.hasNext()) {
             ControlHistory cLocal = (ControlHistory)i.next();
             if (!cLocal.getStatus().equals(ControlConstants.STATUS_INPROGRESS))
-                return cLocal.getControlHistoryValue();
+                return cLocal;
         }
 
         return null;
@@ -918,7 +909,7 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistoryValue createHistory(AppdefEntityID id,
+    public ControlHistory createHistory(AppdefEntityID id,
                                              Integer groupId,
                                              Integer batchId,
                                              String subjectName,
@@ -932,14 +923,12 @@ public class ControlScheduleManagerEJBImpl
                                              String description,
                                              String errorMessage)
     {
-        ControlHistory cLocal =
+        return
             getHistoryDAO().create(id, groupId, batchId, subjectName,
                                    action, args, scheduled,
                                    startTime, stopTime, scheduleTime,
                                    status, description,
-                                   errorMessage);
-    
-        return cLocal.getControlHistoryValue();
+                                   errorMessage);    
     }
 
     /**
@@ -972,14 +961,12 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public ControlHistoryValue getJobHistoryValue(Integer jobId)
+    public ControlHistory getJobHistoryValue(Integer jobId)
         throws ApplicationException
     {
         try {
             ControlHistoryDAO home = getHistoryDAO();
-            ControlHistory local = home.findById(jobId);
-
-            return local.getControlHistoryValue();
+            return home.findById(jobId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
