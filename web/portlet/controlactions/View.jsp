@@ -72,19 +72,26 @@
             </c:when>
             <c:otherwise>     
               <tr>
-                <td width="37%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
-                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Type"/></td>
-                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ControlAction"/></td>
-                <td width="21%" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.DateTime"/><html:img page="/images/tb_sortdown.gif" width="9" height="9" border="0"/></td>
-                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Status"/></td>
+                <td width="40%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
+                <td width="15%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ControlAction"/></td>
+                <td width="20%" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.DateTime"/><html:img page="/images/tb_sortdown.gif" width="9" height="9" border="0"/></td>
+                <td width="25%" class="ListHeaderInactive"><fmt:message key="resource.server.ControlHistory.ListHeader.Message"/></td>
               </tr>  
               <c:forEach items="${lastCompleted}" var="resource">
                 <tr class="ListRow">                                                   
                   <td class="ListCell"><html:link page="/ResourceControlHistory.do?eid=${resource.entityType}:${resource.entityId}"><c:out value="${resource.entityName}"/></html:link></td>
-                  <td class="ListCell"><hq:resourceTypeName typeId="${resource.entityType}"/></td>
                   <td class="ListCell"><c:out value="${resource.action}"/></td>
                   <td class="ListCell"><hq:dateFormatter value="${resource.startTime}"/></td>
-                  <td class="ListCell"><c:out value="${resource.status}"/></td>
+                  <td class="ListCell">
+                  <c:choose>
+                    <c:when test="${not empty resource.message}">
+                      <c:out value="${resource.message}"/>
+                    </c:when>
+                    <c:otherwise>
+                      <fmt:message key="resource.common.control.NoErrors"/>
+                    </c:otherwise>
+                  </c:choose>
+                  </td>
                 </tr>    
               </c:forEach>
             </c:otherwise>
