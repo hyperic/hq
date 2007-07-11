@@ -38,6 +38,8 @@ public abstract class MxServiceQuery extends MxQuery {
 
     public abstract String getMBeanClass();
 
+    public abstract String getObjectNameFilter();
+
     public boolean apply(ObjectName name) {
         return true;
     }

@@ -41,6 +41,7 @@ import javax.management.ObjectName;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.StringMatcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,6 +116,18 @@ public class MxServerQuery extends MxQuery {
         ObjectName name;
         String mbeanClass = query.getMBeanClass();
 
+        String filter = query.getObjectNameFilter();
+        StringMatcher matcher = null;
+        if (filter != null) {
+            matcher = new StringMatcher();
+            if (filter.charAt(0) == '!') {
+                matcher.setExcludes(filter.substring(1));
+            }
+            else {
+                matcher.setIncludes(filter);
+            }
+        }
+
         try {
             name = new ObjectName(query.getQueryName());
             services = mServer.queryNames(name, null);
@@ -129,6 +142,16 @@ public class MxServerQuery extends MxQuery {
 
         for (Iterator it=services.iterator(); it.hasNext();) {
             name = (ObjectName)it.next();
+
+            if ((matcher != null) &&
+                !matcher.matches(name.toString()))
+            {
+                if (isDebug) {
+                    log.debug("[" + name + "] !matches(" + matcher + ")");
+                }
+                continue;
+            }
+
             if (!query.apply(name)) {
                 continue;
             }
