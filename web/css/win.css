@@ -90,7 +90,8 @@ A.ListHeaderLink:hover {color: #004680; text-decoration: underline;}
 .ListRow, .tableRowEven, .lineitem {background-color: #F2F4F7;}
 .ListRowSelected, .tableRowAction, .tableRowOdd {text-align: left; background-color: #EBEDF2;}
 tr.tableRowEven:hover, tr.tableRowOdd:hover {background-color: #d9dfe7;}
-tr.ListRow:hover  {background-color: #d9dfe7;}
+#narrowList_true tr.ListRow:hover  {background-color: #d9dfe7;}
+#narrowList_false  tr.ListRow:hover  {background-color: #d9dfe7;}
 
 .ListCell, .ListCellSelected, .tableCell, .redTableCell {padding: 3px; border-bottom: solid #D5D8DE; border-width: 1px; vertical-align: middle; }
 .ListCellSmall8 {font-size: 8px; border-bottom: 1px solid #D5D8DE; padding: 3px;}
