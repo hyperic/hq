@@ -51,6 +51,7 @@ public abstract class MxQuery {
     public static final String PROP_OBJECT_NAME    = "OBJECT_NAME";
     public static final String PROP_ATTRIBUTE_NAME = "ATTRIBUTE_NAME";
     public static final String PROP_MBEAN_CLASS    = "MBEAN_CLASS";
+    public static final String PROP_OBJECT_NAME_FILTER = "OBJECT_NAME_FILTER";
 
     protected static final Properties EMPTY_PROPERTIES = new Properties();
     protected static final Log log = LogFactory.getLog(MxQuery.class);
