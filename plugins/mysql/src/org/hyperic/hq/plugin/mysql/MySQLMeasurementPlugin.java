@@ -158,17 +158,10 @@ public class MySQLMeasurementPlugin
         catch (SQLException e)
         {
             String msg = "Query failed for "+attr+": "+e.getMessage();
-            throw new MetricNotFoundException(msg, e);
+            throw new MetricUnreachableException(msg, e);
         }
-        finally
-        {
-            try
-            {
-                if (rs != null) rs.close();
-                if (stmt != null) rs.close();
-            }
-            catch (SQLException e) {
-            }
+        finally {
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
     }
 
