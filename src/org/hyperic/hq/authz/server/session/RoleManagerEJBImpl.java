@@ -47,12 +47,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.server.session.AuthzSession;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
@@ -69,6 +63,7 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
+import org.hyperic.hq.common.server.session.WeekEntry;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -196,94 +191,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
             }
         }
         return roles;
-    }
-
-    /**
-     * Create a role.
-     * @param whoami The current running user.
-     * @param role The to be created.
-     * @param operations Operations to associate with the new role. Use null
-     * if you want to associate operations later.
-     * @param subjects Subject to add to the new role. Use null to add subjects
-     * later.
-     * @return RoleValue for the role.
-     * @throws CreateException Unable to create the specified entity.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami may not perform createResource on 
-     * the covalentAuthzRole ResourceType.
-     * @ejb:interface-method
-     */
-    public RoleValue createRole(AuthzSubjectValue whoami, RoleValue role,
-                                OperationValue[] operations,
-                                AuthzSubjectValue[] subjects)
-        throws AuthzDuplicateNameException, PermissionException 
-    {
-        validateRole(role);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.roleOpCreateRole);
-
-        AuthzSubject whoamiLocal =
-            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
-                                                           whoami.getAuthDsn());
-        Role rolePojo = getRoleDAO().create(whoamiLocal, role);
-
-        // Associated operations
-        rolePojo.setOperations(toPojos(operations));
-
-        // Associated subject
-        rolePojo.setSubjects(toPojos(subjects));
-
-        return rolePojo.getRoleValue();
-    }
-
-    /**
-     * Create a role.
-     * @param whoami The current running user.
-     * @param role The to be created.
-     * @param operations Operations to associate with the new role. Use null
-     * if you want to associate operations later.
-     * @param subjects Subjects to add to the new role. Use null to add 
-     * subjects later.
-     * @param groups Resource groups to add to the new role. Use null to add
-     * subjects later.
-     * @return OwnedRoleValue for the role.
-     * @throws PermissionException whoami may not perform createResource 
-     * on the covalentAuthzRole ResourceType.
-     * @ejb:interface-method
-     */
-    public Integer createOwnedRole(AuthzSubjectValue whoami,
-                                  RoleValue role,
-                                  OperationValue[] operations,
-                                  AuthzSubjectValue[] subjects,
-                                  ResourceGroupValue[] groups)
-        throws AuthzDuplicateNameException, PermissionException {
-        RoleDAO roleLome = getRoleDAO();
-        validateRole(role);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(),
-                 getRootResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.roleOpCreateRole);
-
-        AuthzSubject whoamiLocal =
-            AuthzSubjectManagerEJBImpl.getOne().findByAuth(whoami.getName(),
-                                                           whoami.getAuthDsn());
-        Role roleLocal = roleLome.create(whoamiLocal, role);
-
-        // Associated operations
-        roleLocal.setOperations(toPojos(operations));
-
-        // Associated subjects
-        roleLocal.setSubjects(toPojos(subjects));
-
-        // Associated resource groups
-        roleLocal.setResourceGroups(toPojos(groups));
-
-        return roleLocal.getId();
     }
 
     /**
@@ -743,59 +650,33 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      }
      
     /**
-     * Find the role that has the given name.
-     * @param name The name of the role you're looking for.
-     * @return The value-object of the role of the given name.
-     * @throws PermissionException whoami does not have viewRole
-     * for the selected role
-     * @ejb:interface-method
-     */
-    public RoleValue findRoleByName(AuthzSubjectValue whoami, String name)
-        throws PermissionException {
-        RoleDAO roleHome = getRoleDAO();
-        Role roleLocal = roleHome.findByName(name);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpViewRole);
-
-        return roleLocal.getRoleValue();
-    }
-
-    /**
-     * Find the owned role that has the given name.
-     * @param name The name of the role you're looking for.
-     * @return The owned value-object of the role of the given name.
-     * @throws PermissionException whoami does not have viewRole
-     * for the selected role
-     * @ejb:interface-method
-     */
-    public OwnedRoleValue findOwnedRoleByName(AuthzSubjectValue whoami,
-                                              String name)
-        throws PermissionException {
-        RoleDAO roleHome = getRoleDAO();
-        Role local = roleHome.findByName(name);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), local.getResource().getResourceType(),
-                 local.getId(), AuthzConstants.roleOpViewRole);
-
-        int numSubjects = roleHome.size(local.getSubjects());
-
-        OwnedRoleValue value =
-            new OwnedRoleValue(local.getRoleValue(), 
-                               local.getResource().getOwner()
-                               .getAuthzSubjectValue());
-        value.setMemberCount(numSubjects);
-
-        return value;
-    }
-
-    /**
      * @ejb:interface-method
      */
     public Role findRoleById(int id){
         return getRoleDAO().findById(new Integer(id));
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public boolean isRoleOnCall(Role role, RoleCalendarType type) {
+        Collection calendars = role.getCalendars();
+        if (calendars.size() == 0)
+            return true;
+        
+        long current = System.currentTimeMillis();
+        for (Iterator it = calendars.iterator(); it.hasNext(); ) {
+            RoleCalendar rc = (RoleCalendar) it.next();
+            if (rc.getType().equals(type)) {
+                Collection entries = rc.getCalendar().getEntries();
+                for (Iterator eit = entries.iterator(); it.hasNext(); ) {
+                    WeekEntry we = (WeekEntry) eit.next();
+                    if (we.containsTime(current))
+                        return true;
+                }
+            }
+        }
+        return false;
     }
     
     /**
@@ -824,25 +705,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         return res; 
     }
     
-    /**
-     * Find the role that has the given ID.
-     * @param id The ID of the role you're looking for.
-     * @return The value-object of the role of the given ID.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @ejb:interface-method
-     */
-    public RoleValue findRoleById(AuthzSubjectValue whoami, Integer id)
-        throws PermissionException {
-        RoleDAO roleHome = getRoleDAO();
-        Role roleLocal = roleHome.findById(id);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-                 roleLocal.getId(), AuthzConstants.roleOpViewRole);
-
-        return roleLocal.getRoleValue();
-    }
-
     /**
      * Find the owned role that has the given ID.
      * @param id The ID of the role you're looking for.
@@ -1066,28 +928,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         plist.setTotalSize(roles.size());
 
         return plist;
-    }
-
-    /**
-     * Find the role that has the given name.
-     * @param name The name of the role you're looking for.
-     * @return The value-object of the role of the given name.
-     * @ejb:interface-method
-     */
-    public Map getUserEmailsById(Integer id) {
-        RoleDAO roleHome = getRoleDAO();
-        Role roleLocal = roleHome.findById(id);
-
-        HashMap emails = new HashMap();
-        
-        // TODO: determine where the user wants to be contacted, pager or email
-        Collection subjects = roleLocal.getSubjects();
-        for (Iterator i = subjects.iterator(); i.hasNext(); ) {
-            AuthzSubject subject = (AuthzSubject) i.next();
-            // TODO: Figure out if subject wants e-mail or pager
-            emails.put(subject.getId(), subject.getEmailAddress());
-        }
-        return emails;
     }
 
     /**
