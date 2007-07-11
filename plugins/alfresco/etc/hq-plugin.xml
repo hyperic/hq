@@ -155,7 +155,7 @@
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
-  <help name="Database Backend" include="Database Backend">
+  <help name="Alfresco">
   <![CDATA[
   <p>
   <h3>Configure HQ for Alfresco Backend Database</h3>
@@ -179,4 +179,5 @@
   </p>
   ]]>
   </help>
+  <help name="Alfresco 2.0.x" include="Alfresco"/>
 </plugin>
