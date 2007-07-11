@@ -4981,7 +4981,7 @@ has already been defined.
           update EAM_MEASUREMENT_DATA set VALUE=VALUE_TMP
         </statement>
         <statement targetDB="oracle">
-          alter table eam_measurement_data drop column VALUE_TMP
+          alter table EAM_MEASUREMENT_DATA drop column VALUE_TMP
         </statement>
 
         <statement targetDB="oracle">
@@ -5256,19 +5256,45 @@ has already been defined.
 
     <schemaSpec version="3.27">
         <schema-directSQL>
-          <statement desc="Drop index from eam_measurement_data">
+          <statement desc="Drop index from eam_measurement_data"
+                     targetDB="oracle">
             drop index measurement_data_time_idx
           </statement>
-          <statement desc="Drop primary key from eam_measurement_data">
-            alter table hq_metric_data_compat drop constraint eam_measurement_data_pkey
+          <statement desc="Drop index from eam_measurement_data"
+                     targetDB="postgresql">
+            drop index measurement_data_time_idx
           </statement>
-          <statement desc="Change eam_measurement_data table name">
-            alter table eam_measurement_data rename to hq_metric_data_compat
+
+          <statement desc="Drop primary key from eam_measurement_data"
+                     targetDB="oracle">
+            alter table EAM_MEASUREMENT_DATA drop primary key
           </statement>
-          <statement desc="Add new primary key to eam_measurement_data">
-            alter table hq_metric_data_compat add
+          <statement desc="Drop primary key from eam_measurement_data"
+                     targetDB="postgresql">
+            alter table EAM_MEASUREMENT_DATA drop constraint eam_measurement_data_pkey
+          </statement>
+
+          <statement desc="Change eam_measurement_data table name"
+                     targetDB="oracle">
+            alter table EAM_MEASUREMENT_DATA rename to HQ_METRIC_DATA_COMPAT
+          </statement>
+          <statement desc="Change eam_measurement_data table name"
+                     targetDB="postgresql">
+            alter table EAM_MEASUREMENT_DATA rename to HQ_METRIC_DATA_COMPAT
+          </statement>
+
+          <statement desc="Add new primary key to eam_measurement_data"
+                     targetDB="oracle">
+            alter table HQ_METRIC_DATA_COMPAT add
+            constraint HQ_METRIC_DATA_COMPAT_PKEY
             primary key (TIMESTAMP, MEASUREMENT_ID)
           </statement>
+          <statement desc="Add new primary key to eam_measurement_data"
+                     targetDB="postgresql">
+            alter table HQ_METRIC_DATA_COMPAT add
+            primary key (TIMESTAMP, MEASUREMENT_ID)
+          </statement>
+
           <statement targetDB="postgresql">
             create table HQ_METRIC_DATA_0D_0S (
                 MEASUREMENT_ID int4 not null,
