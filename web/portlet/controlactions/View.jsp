@@ -73,9 +73,10 @@
             <c:otherwise>     
               <tr>
                 <td width="37%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ResourceName"/></td>
-                <td width="21%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Type"/></td>
-                <td width="21%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ControlAction"/></td>
+                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Type"/></td>
+                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.ControlAction"/></td>
                 <td width="21%" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.DateTime"/><html:img page="/images/tb_sortdown.gif" width="9" height="9" border="0"/></td>
+                <td width="13%" class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Status"/></td>
               </tr>  
               <c:forEach items="${lastCompleted}" var="resource">
                 <tr class="ListRow">                                                   
@@ -83,6 +84,7 @@
                   <td class="ListCell"><hq:resourceTypeName typeId="${resource.entityType}"/></td>
                   <td class="ListCell"><c:out value="${resource.action}"/></td>
                   <td class="ListCell"><hq:dateFormatter value="${resource.startTime}"/></td>
+                  <td class="ListCell"><c:out value="${resource.status}"/></td>
                 </tr>    
               </c:forEach>
             </c:otherwise>
