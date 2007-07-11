@@ -6341,6 +6341,21 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+
+    <!-- Remove the on delete cascade from monitorable type to templates -->
+    <schemaSpec version="3.43">
+      <schema-directSQL>
+        <statement>
+          ALTER TABLE eam_measurement_templ DROP CONSTRAINT fk253d707ef33c225 CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE eam_measurement_templ
+            ADD CONSTRAINT fk253d707ef33c225 FOREIGN KEY (monitorable_type_id) 
+            REFERENCES eam_monitorable_type(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 
