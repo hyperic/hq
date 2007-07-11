@@ -62,7 +62,7 @@ public class MySQL5InnoDBDialect
 
     public String getOptimizeStmt(String table, int cost)
     {
-        return "ANALYZE TABLE "+table;
+        return "ANALYZE TABLE "+table.toUpperCase();
     }
 
     public String getDeleteJoinStmt(String deleteTables,
@@ -70,8 +70,8 @@ public class MySQL5InnoDBDialect
                                     String joinKeys,
                                     String condition)
     {
-        return "DELETE "+deleteTables+" from "+joinTables+
-               " WHERE "+joinKeys+" and "+condition;
+        return "DELETE "+deleteTables.toUpperCase()+" from "+joinTables.toUpperCase()+
+               " WHERE "+joinKeys.toUpperCase()+" and "+condition.toUpperCase();
     }
     
     public boolean supportsSequences() {
