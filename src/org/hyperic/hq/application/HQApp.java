@@ -58,6 +58,7 @@ public class HQApp {
     private CallbackDispatcher _callbacks;
     private ShutdownCallback   _shutdown;
     private File               _restartStorage;
+    private File               _resourceDir;
     
     static {
         TxSnatch.setSnatcher(new Snatcher());
@@ -92,6 +93,22 @@ public class HQApp {
         synchronized (_startupClasses) {
             return _restartStorage;
         } 
+    }
+    
+    public void setResourceDir(File dir) {
+        synchronized (_startupClasses) {
+            _resourceDir = dir;
+        }
+    }
+    
+    /**
+     * Get a directory which contains resources that various parts of the
+     * application may need (templates, reports, license files, etc.)
+     */
+    public File getResourceDir() {
+        synchronized (_startupClasses) {
+            return _resourceDir;
+        }
     }
     
     /**

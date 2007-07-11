@@ -445,6 +445,9 @@ public class ProductPluginDeployer
 
         ServerConfig sc = ServerConfigLocator.locate();
         _app.setRestartStorageDir(sc.getHomeDir());
+        File deployDir = new File(sc.getServerHomeDir(), "deploy");
+        File earDir    = new File(deployDir, "hq.ear");
+        _app.setResourceDir(earDir);
         for (Iterator i=lines.iterator(); i.hasNext(); ) {
             String className = (String)i.next();
             
