@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.control.server.session">
+
+  <class name="ControlHistory" table="EAM_CONTROL_HISTORY">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_CONTROL_HISTORY_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="groupId" type="integer">
+      <column name="GROUP_ID"/>
+    </property>
+
+    <property name="batchId" type="integer">
+      <column name="BATCH_ID"/>
+    </property>
+
+    <property name="entityType" type="integer">
+      <column name="ENTITY_TYPE" not-null="true"/>
+    </property>
+
+    <property name="entityId" type="integer">
+      <column name="ENTITY_ID" not-null="true"/>
+    </property>
+
+    <property name="subject" type="string">
+      <column name="SUBJECT" not-null="true" length="32"/>
+    </property>
+
+    <property name="scheduled" type="boolean">
+      <column name="SCHEDULED" not-null="true"/>
+    </property>
+
+    <property name="dateScheduled" type="long">
+      <column name="DATE_SCHEDULED" not-null="true"/>
+    </property>
+
+    <property name="startTime" type="long">
+      <column name="STARTTIME" not-null="true" index="CTL_HISTORY_STARTTIME_IDX"/>
+    </property>
+
+    <property name="status" type="string">
+      <column name="STATUS" not-null="true" length="64"/>
+    </property>
+
+    <property name="endTime" type="long">
+      <column name="ENDTIME" not-null="true"/>
+    </property>
+
+    <property name="duration" type="long">
+      <column name="DURATION" not-null="true"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" length="500"/>
+    </property>
+
+    <property name="message" type="string">
+      <column name="MESSAGE" length="500"/>
+    </property>
+
+    <property name="action" type="string">
+      <column name="ACTION" not-null="true" length="32"/>
+    </property>
+
+    <property name="args" type="string">
+      <column name="ARGS" length="500"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

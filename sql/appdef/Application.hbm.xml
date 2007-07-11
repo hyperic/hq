@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
+  <class name="Application" table="EAM_APPLICATION">
+
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_APPLICATION_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="200" unique="true"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="500"/>
+    </property>
+
+    <property name="creationTime" type="long">
+      <column name="CTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" not-null="false" length="100"/>
+    </property>
+
+    <property name="owner" type="string">
+      <column name="OWNER" not-null="false" length="100"/>
+    </property>
+
+    <property name="location" type="string">
+      <column name="LOCATION" not-null="false" length="100"/>
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="200"/>
+    </property>
+
+    <property name="engContact" type="string">
+      <column name="ENG_CONTACT" not-null="false" length="100"/>
+    </property>
+
+    <property name="opsContact" type="string">
+      <column name="OPS_CONTACT" not-null="false" length="100"/>
+    </property>
+
+    <property name="businessContact" type="string">
+      <column name="BUS_CONTACT" not-null="false" length="100"/>
+    </property>
+
+    <many-to-one name="applicationType" class="ApplicationType">
+      <column name="APPLICATION_TYPE_ID" not-null="true"/>
+    </many-to-one>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="appServices" table="EAM_APP_SERVICE">
+      <key on-delete="cascade" column="APPLICATION_ID"/>
+      <one-to-many class="org.hyperic.hq.appdef.AppService"/>
+    </bag>
+
+  </class>
+
+</hibernate-mapping>

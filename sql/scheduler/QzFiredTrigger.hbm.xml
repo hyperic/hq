@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.scheduler">
+
+  <class name="QzFiredTrigger" table="QRTZ_FIRED_TRIGGERS">
+    <id name="entryId" type="string">
+      <meta attribute="use-in-equals"><![CDATA[true]]></meta>
+      <column name="ENTRY_ID" length="95" not-null="true"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="triggerName" type="string">
+      <column name="TRIGGER_NAME" not-null="true" length="80"/>
+    </property>
+
+    <property name="triggerGroup" type="string">
+      <column name="TRIGGER_GROUP" not-null="true" length="80"/>
+    </property>
+
+    <property name="instanceName" type="string">
+      <column name="INSTANCE_NAME" not-null="true" length="80"/>
+    </property>
+
+    <property name="firedTime" type="long">
+      <column name="FIRED_TIME" not-null="true"/>
+    </property>
+
+    <property name="state" type="string">
+      <column name="STATE" not-null="true" length="16"/>
+    </property>
+
+    <property name="isVolatile" type="boolean">
+      <column name="IS_VOLATILE" not-null="true"/>
+    </property>
+
+    <property name="jobName" type="string">
+      <column name="JOB_NAME" not-null="false" length="80"/>
+    </property>
+
+    <property name="jobGroup" type="string">
+      <column name="JOB_GROUP" not-null="false" length="80"/>
+    </property>
+
+    <property name="isStateful" type="boolean">
+      <column name="IS_STATEFUL" not-null="false"/>
+    </property>
+
+    <property name="requestsRecovery" type="boolean">
+      <column name="REQUESTS_RECOVERY" not-null="false"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

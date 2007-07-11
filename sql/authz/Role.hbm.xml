@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+
+  <class name="Role" table="EAM_ROLE">
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_ROLE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_ROLE_CID_IDX" not-null="false"/>
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="100"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="100"/>
+    </property>
+
+    <property name="system" type="boolean">
+      <column name="FSYSTEM" not-null="false"/>
+    </property>
+
+    <many-to-one name="resource" class="Resource">
+      <column name="RESOURCE_ID"/>
+    </many-to-one>
+
+    <bag inverse="true" name="resourceGroups" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+      <key column="ROLE_ID"/>
+      <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID"/>
+    </bag>
+
+    <set name="operations" table="EAM_ROLE_OPERATION_MAP">
+      <key column="ROLE_ID"/>
+      <many-to-many class="Operation" column="OPERATION_ID"/>
+    </set>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="calendarBag" table="EAM_ROLE_CALENDARS">
+      <cache usage="read-write"/>
+      <key on-delete="cascade" column="ROLE_ID"/>
+      <one-to-many class="RoleCalendar"/>
+    </bag>
+
+    <bag inverse="true" name="subjects" table="EAM_SUBJECT_ROLE_MAP">
+      <key column="ROLE_ID"/>
+      <many-to-many class="AuthzSubject" column="SUBJECT_ID"/>
+    </bag>
+  </class>
+
+  <class name="RoleResourceGroupMap" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+    <composite-id name="id" class="RoleResourceGroupMapId">
+      <key-many-to-one name="role" class="Role">
+        <column name="ROLE_ID" not-null="true"/>
+      </key-many-to-one>
+
+      <key-many-to-one name="resourceGroup" class="ResourceGroup">
+        <column name="RESOURCE_GROUP_ID" not-null="true"/>
+      </key-many-to-one>
+    </composite-id>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_ROLE_RES_GRP_MAP_CID_IDX"/>
+    </property>
+  </class>
+
+  <class name="RoleOperMap" table="EAM_ROLE_OPERATION_MAP">
+    <composite-id name="id" class="RoleOperationMapId">
+      <key-many-to-one name="roleId" class="Role">
+        <column name="ROLE_ID" not-null="true"/>
+      </key-many-to-one>
+
+      <key-many-to-one name="operationId" class="Operation">
+        <column name="OPERATION_ID" not-null="true"/>
+      </key-many-to-one>
+    </composite-id>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_ROLE_OPER_MAP_CID_IDX"/>
+    </property>
+  </class>
+</hibernate-mapping>

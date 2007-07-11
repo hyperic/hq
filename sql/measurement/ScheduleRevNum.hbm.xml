@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
+
+  <class name="ScheduleRevNum" table="EAM_SRN">
+    <composite-id name="id" class="SrnId">
+      <key-property name="appdefType" type="integer">
+        <column name="APPDEF_TYPE" not-null="true"/>
+      </key-property>
+
+      <key-property name="instanceId" type="integer">
+        <column name="INSTANCE_ID" not-null="true"/>
+      </key-property>
+    </composite-id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="srn" type="integer">
+      <column name="SRN" not-null="true"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

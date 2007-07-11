@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
+
+  <class name="EventLog" table="EAM_EVENT_LOG">
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_EVENT_LOG_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <property name="detail" type="string">
+      <column name="DETAIL" not-null="true" length="500"/>
+    </property>
+
+    <property name="type" type="string">
+      <column name="TYPE" not-null="true" length="100"/>
+    </property>
+
+    <property name="entityType" type="integer">
+      <column name="ENTITY_TYPE" index="EVENT_LOG_IDX"/>
+    </property>
+
+    <property name="entityId" type="integer">
+      <column name="ENTITY_ID" index="EVENT_LOG_IDX"/>
+    </property>
+
+    <property name="timestamp" type="long">
+      <column name="TIMESTAMP" not-null="true" index="EVENT_LOG_IDX"/>
+    </property>
+
+    <property name="subject" type="string">
+      <column name="SUBJECT" length="100"/>
+    </property>
+
+    <property name="status" type="string">
+      <column name="STATUS" length="100"/>
+    </property>
+  </class>
+
+</hibernate-mapping>

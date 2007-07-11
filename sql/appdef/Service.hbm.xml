@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
+  <class name="Service" table="EAM_SERVICE">
+
+    <cache usage="read-write"/>
+
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true" unique-key="EAM_SERVICE_PARENT_IDX"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_SERVICE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="200"/>
+    </property>
+
+    <property name="creationTime" type="long">
+      <column name="CTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" not-null="false" length="100"/>
+    </property>
+
+    <property name="owner" type="string">
+      <column name="OWNER" not-null="false" length="100"/>
+    </property>
+
+    <property name="location" type="string">
+      <column name="LOCATION" not-null="false" length="100"/>
+    </property>
+
+    <property name="name" type="string">
+      <column name="NAME" length="200" index="EAM_SERVICE_NAME_IDX"/>
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="200"/>
+    </property>
+
+    <property name="autodiscoveryZombie" type="boolean">
+      <column name="AUTODISCOVERY_ZOMBIE" not-null="false"/>
+    </property>
+
+    <property name="serviceRt" type="boolean">
+      <column name="SERVICE_RT" not-null="false"/>
+    </property>
+
+    <property name="endUserRt" type="boolean">
+      <column name="ENDUSER_RT" not-null="false"/>
+    </property>
+
+    <many-to-one name="parentService" class="Service">
+      <column name="PARENT_SERVICE_ID" not-null="false" unique-key="EAM_SERVICE_PARENT_IDX"/>
+    </many-to-one>
+
+    <many-to-one name="server" class="Server">
+      <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_SERVER_IDX"/>
+    </many-to-one>
+
+    <many-to-one name="serviceType" class="ServiceType">
+      <column name="SERVICE_TYPE_ID" not-null="true"/>
+    </many-to-one>
+
+    <many-to-one name="serviceCluster" class="org.hyperic.hq.appdef.ServiceCluster">
+      <column name="SVC_CLUSTER_ID" not-null="false"/>
+    </many-to-one>
+
+    <many-to-one name="configResponse" unique="true" class="org.hyperic.hq.appdef.ConfigResponseDB">
+      <column name="CONFIG_RESPONSE_ID" not-null="false"/>
+    </many-to-one>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="appServices" table="EAM_APP_SERVICE">
+      <key on-delete="cascade" column="SERVICE_ID"/>
+      <one-to-many class="org.hyperic.hq.appdef.AppService"/>
+    </bag>
+
+  </class>
+
+</hibernate-mapping>

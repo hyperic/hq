@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
+  <class name="PlatformType" table="EAM_PLATFORM_TYPE">
+
+    <cache usage="read-write"/>
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_PLATFORM_TYPE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="80"/>
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="80"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="256"/>
+    </property>
+
+    <property name="creationTime" type="long">
+      <column name="CTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="false"/>
+    </property>
+
+    <property name="os" type="string">
+      <column name="OS" length="80"/>
+    </property>
+
+    <property name="osVersion" type="string">
+      <column name="OSVERSION" length="80"/>
+    </property>
+
+    <property name="arch" type="string">
+      <column name="ARCH" length="80"/>
+    </property>
+
+    <property name="plugin" type="string">
+      <column name="PLUGIN" length="250"/>
+    </property>
+
+    <bag inverse="true" name="serverTypesBag" table="EAM_PLATFORM_SERVER_TYPE_MAP">
+      <cache usage="read-write"/>
+      <key column="PLATFORM_TYPE_ID" not-null="false"/>
+      <many-to-many class="ServerType" column="SERVER_TYPE_ID"/>
+    </bag>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="platformBag" table="EAM_PLATFORM">
+      <key on-delete="cascade" column="PLATFORM_TYPE_ID"/>
+      <one-to-many class="Platform"/>
+    </bag>
+
+  </class>
+
+</hibernate-mapping>

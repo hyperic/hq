@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.rt">
+
+  <class name="RtRequestStat" table="EAM_REQUEST_STAT">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_REQUEST_STAT_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="ipaddr" type="string">
+      <column name="IPADDR" not-null="true" length="20"/>
+    </property>
+
+    <property name="min" type="double">
+      <column name="MIN" not-null="true"/>
+    </property>
+
+    <property name="max" type="double">
+      <column name="MAX" not-null="true"/>
+    </property>
+
+    <property name="total" type="double">
+      <column name="TOTAL" not-null="true"/>
+    </property>
+
+    <property name="count" type="integer">
+      <column name="COUNT" not-null="true"/>
+    </property>
+
+    <property name="beginTime" type="long">
+      <column name="BEGINTIME" index="REQSTAT_IDX_BEGINTIME" not-null="true"/>
+    </property>
+
+    <property name="endTime" type="long">
+      <column name="ENDTIME" index="REQSTAT_IDX_ENDTIME" not-null="true"/>
+    </property>
+
+    <property name="svcType" type="integer">
+      <column name="SVCTYPE" not-null="true"/>
+    </property>
+
+    <many-to-one name="rtSvcReq" class="RtSvcReq">
+      <column name="SVCREQ_ID" index="SERVICE_ID"/>
+    </many-to-one>
+
+    <set inverse="true" cascade="save-update,delete,evict,persist,merge" name="rtStatErrors" table="EAM_STAT_ERRORS">
+      <key on-delete="cascade" column="REQSTAT_ID"/>
+      <one-to-many class="RtStatError"/>
+    </set>
+  </class>
+
+</hibernate-mapping>
