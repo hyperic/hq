@@ -34,10 +34,17 @@
   <server name="Coldfusion"
           version="7.x">
 
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/server.log"/>
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
     <plugin type="autoinventory"
             class="ColdfusionServerDetector"/>
     <plugin type="measurement"
-            class="org.hyperic.hq.plugin.coldfusion.ColdfusionMeasurementPlugin"/>
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.coldfusion.ColdfusionCollector"/>
 
     <config>
       <option name="installpath"
@@ -57,98 +64,98 @@
 
     <metric name="Threads listening for a new connection"
             alias="listenTh"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
     <metric name="Threads waiting for a new request"
             alias="idleTh"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
     <metric name="Threads waiting to run"
             alias="delayTh"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="none"/>
     <metric name="Threads currently running"
             alias="busyTh"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="none"/>
     <metric name="Total worker thread count"
             alias="totalTh"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
     <metric name="Requests delayed due to high concurrency"
             alias="delayRq"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="none"/>
     <metric name="Requests dropped"
             alias="droppedRq"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="none"/>
     <metric name="Requests handled"
             alias="handledRq"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
     <metric name="Milliseconds spent servicing requests not including any delay time (delayMs)"
             alias="handledMs"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="ms"/>
     <metric name="Milliseconds spent in delay state"
             alias="delayMs"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="ms"/>
     <metric name="Bytes read from request"
             alias="bytesIn"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="B"/>
     <metric name="Bytes written to response"
             alias="bytesOut"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="B"/>
     <metric name="Kilobytes of free memory in the heap"
             alias="freeMemory"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="KB"/>
     <metric name="Total Kilobytes in the heap (in use and free)"
             alias="totalMemory"
-            category="UTILIZATION"
+            category="THROUGHPUT"
             indicator="true"
             collectionType="dynamic"
             units="KB"/>
     <metric name="Current number of active J2EE sessions"
             alias="sessions"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
     <metric name="Number of J2EE sessions in memory"
             alias="sessionsInMem"
-            category="UTILIZATION"
-            indicator="true"
+            category="THROUGHPUT"
+            indicator="false"
             collectionType="dynamic"
             units="none"/>
 
@@ -166,6 +173,18 @@
       <metric name="Outbound Connections"
               indicator="true"/>
     </service>
+
+    <service name="Java Process Metrics">
+      <config>
+        <option name="process.query"
+                default="%coldfusion-ptql%"
+                description="PTQL for Coldfusion Java Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
@@ -177,7 +196,64 @@
   <p>
   To enable Coldfusion metric logging follow these instructions:
   http://kb.adobe.com/selfservice/viewContent.do?externalId=tn_19120&sliceId=2
+  <br>
+  Here is sample of what the log file should look like (all the important
+  <br>
+  attributes are listed).
+  <br>
+  For HQ metric collection to work properly, the name/value pair must be specified
+  <br>
+  as follows (may span multiple lines or not).
+  <br>
+  Look for:
+  <br>
+  &lt;!-- ================================================================== --&gt;
+  <br>
+  &lt;!-- This Service represents JRun's logging facility                    --&gt;
+  <br>
+  &lt;!-- ================================================================== --&gt;
+  <br>
+  Then change:
+  <br>
+    &lt;attribute name="metricsEnabled"&gt;true&lt;/attribute&gt;
+  <br>
+    &lt;attribute name="metricsLogFrequency"&gt;300&lt;/attribute&gt;
+  <br>
+    &lt;attribute name="metricsFormat"&gt;
+  <br>
+      listenTh={listenTh}
+  <br>
+      idleTh={idleTh}
+  <br>
+      delayTh={delayTh}
+  <br>
+      busyTh={busyTh}
+  <br>
+      totalTh={totalTh}
+  <br>
+      delayRq={delayTh}
+  <br>
+      droppedRq={droppedRq}
+  <br>
+      handledRq={handledRq}
+  <br>
+      handledMs={handledMs}
+  <br>
+      delayMs={delayMs}
+  <br>
+      bytesIn={bytesIn}
+  <br>
+      bytesOut={bytesOut}
+  <br>
+      freeMemory={freeMemory}
+  <br>
+      totalMemory={totalMemory}
+  <br>
+      sessions={sessions}
+  <br>
+    &lt;/attribute&gt;
   </p>
   ]]>
   </help>
+  <help name="Coldfusion 7.x" include="Coldfusion"/>
 </plugin>
