@@ -40,8 +40,10 @@ class AlertController
             [field:AlertSortField.SEVERITY,
              label:{
                 def s = it.alertDefinition.severity
-                """<img src="/hqu/public/images/${SEVERITY_MAP[s]}-severity.gif" 
-                        width="16" height="16" border="0" class="severityIcon">""" +
+                def imgUrl = urlFor(asset:'images') + 
+                    "/${SEVERITY_MAP[s]}-severity.gif"
+                """<img src="${imgUrl}" width="16" height="16" border="0" 
+                        class="severityIcon">""" +
                     it.alertDefinition.severity.value
              }
             ],
