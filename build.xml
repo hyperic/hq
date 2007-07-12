@@ -931,6 +931,8 @@
 
     <hqplugin name="sybase"/>
 
+    <hqplugin name="coldfusion"/>
+
     <hqplugin name="alfresco"/>
 
     <hqplugin name="zimbra"/>
