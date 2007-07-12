@@ -61,6 +61,12 @@
         <plugin type="measurement"
                 class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
+        <plugin type="log_track"
+                class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+    
+        <plugin type="config_track"
+                class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
         <config>
             <option name="jmx.url"
                     description="JMX URL to MBeanServer"
