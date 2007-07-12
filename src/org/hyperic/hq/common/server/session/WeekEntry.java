@@ -52,11 +52,11 @@ public class WeekEntry
         if (weekDay < 0 || weekDay > 6)
             throw new IllegalArgumentException("Weekday must be 0 <= x <= 6");
 
-        if (startTime < 0 || startTime >= MINUTES_IN_DAY) 
+        if (startTime < 0 || startTime > MINUTES_IN_DAY) 
             throw new IllegalArgumentException("startTime must be 0 <= x <=  + "
                                                + MINUTES_IN_DAY);
         
-        if (endTime < 0 || endTime >= MINUTES_IN_DAY) 
+        if (endTime < 0 || endTime > MINUTES_IN_DAY) 
             throw new IllegalArgumentException("endTime must be 0 <= x <=  + "
                                                + MINUTES_IN_DAY);
         
