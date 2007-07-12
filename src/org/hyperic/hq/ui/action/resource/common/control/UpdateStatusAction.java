@@ -87,12 +87,6 @@ public class UpdateStatusAction extends BaseAction {
         if (cValue == null /* no current job */) {
             cValue = cBoss.getLastJob(sessionId, appId);
         }
-        else {
-            // Check for valid duration
-            if (cValue.getDuration() == 0) {
-                cValue.setDurationFromNow();
-            }
-        }
         
         request.setAttribute(Constants.CONTROL_CURRENT_STATUS_ATTR, cValue);
         
