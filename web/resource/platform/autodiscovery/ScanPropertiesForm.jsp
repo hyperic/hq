@@ -49,7 +49,7 @@
 
 <!--  GENERAL PROPERTIES CONTENTS -->
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   <tr valign="top">
     <td width="20%" class="BlockLabel">
         <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
@@ -93,27 +93,27 @@
 
     <c:if test="${PlatformAutoDiscoveryForm.configOptionsCount == 0}">
         <tr valign="top">
-            <td width="20%" colspan="1" class="BlockContent">
+            <td colspan="1" class="BlockContent">
             </td>
-            <td width="20%" colspan="3" class="BlockContent">
+            <td colspan="3" class="BlockContent">
                 <fmt:message key="resource.autodiscovery.scan.NoScanConfig"/>
             </td>
         </tr>
     </c:if>
 <logic:iterate id="configOption" indexId="ctr" collection="${PlatformAutoDiscoveryForm.configOptions}" >
 	<tr valign="top">
-		<td width="20%" class="BlockLabel">
+		<td class="BlockLabel" colspan="2">
         <c:if test="${configOption.isBoolean == false }">
             <c:if test="${monitorConfigOption.optional == false}">
                 <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
             </c:if>
-            <c:out value="${configOption.option}"/>:
+            <c:out value="${configOption.description}"/><fmt:message key="common.label.Colon"/>
         </c:if>            
         </td>
 
 <c:choose>
     <c:when test="${configOption.isBoolean == true }">
-        <td width="25%" class="BlockContent" colspan="3">
+        <td class="BlockContent" colspan="2">
 			<table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockContent">
 				<tr>
 					<td><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -137,21 +137,17 @@
     </c:when>
     <c:when test="${configOption.isEnumeration == true }">
 <logic:messagesNotPresent property="${configOption.option}">
-        <td width="25%" class="BlockContent" colspan="3">
+        <td class="BlockContent" colspan="2">
           <html:select property="${configOption.option}" value="${configOption.value}">
             <html:optionsCollection name="configOption" property="enumValues"/>
           </html:select>
-          <br>
-          <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
         </td>
 </logic:messagesNotPresent>        
 <logic:messagesPresent property="${configOption.option}">
-        <td width="25%" class="ErrorField" colspan="3">
+        <td class="ErrorField" colspan="2">
           <html:select property="${configOption.option}" value="${configOption.value}">
             <html:optionsCollection name="configOption" property="enumValues"/>
           </html:select>
-          <br>
-          <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
           <br>
           <span class="ErrorFieldContent">- <html:errors property="${configOption.option}"/></span>       
         </td>
@@ -159,19 +155,15 @@
     </c:when>
     <c:when test="${configOption.isDir == true }">
 <logic:messagesNotPresent property="${configOption.option}">
-        <td width="25%" class="BlockContent" colspan="3">
+        <td class="BlockContent" colspan="2">
           <textarea cols="105" rows="3" 
                 name="<c:out value='${configOption.option}'/>" ><c:out value='${configOption.value}'/></textarea>
-          <br>  
-          <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
         </td>
 </logic:messagesNotPresent>        
 <logic:messagesPresent property="${configOption.option}">
-        <td width="25%" class="ErrorField" colspan="3">
+        <td class="ErrorField" colspan="2">
           <textarea cols="105" rows="3" 
                 name="<c:out value='${configOption.option}'/>" ><c:out value='${configOption.value}'/></textarea>
-          <br>  
-          <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
           <br>
           <span class="ErrorFieldContent">- <html:errors property="${configOption.option}"/></span>       
         </td>
@@ -179,25 +171,17 @@
     </c:when>
     <c:otherwise>
 <logic:messagesNotPresent property="${configOption.option}">
- 	  <td width="25%" class="BlockContent" colspan="3">
+ 	  <td class="BlockContent" colspan="2">
         <input type="text" 
             name="<c:out value='${configOption.option}'/>" 
             value="<c:out value='${configOption.value}'/>">
-        <c:if test="${configOption.option == 'depth'}">
-            <br>
-            <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
-        </c:if>
       </td>
 </logic:messagesNotPresent>      
 <logic:messagesPresent property="${configOption.option}">
- 	  <td width="25%" class="ErrorField" colspan="3">
+ 	  <td class="ErrorField" colspan="2">
         <input type="text" 
             name="<c:out value='${configOption.option}'/>" 
             value="<c:out value='${configOption.value}'/>">
-        <c:if test="${configOption.option == 'depth'}">
-            <br>
-            <span class="CaptionText"> <c:out value="${configOption.description}"/></span>
-        </c:if>
         <br>
       <span class="ErrorFieldContent">- <html:errors property="${configOption.option}"/></span>       
       </td>
@@ -208,12 +192,5 @@
 	</tr>
 </logic:iterate>    
 
-	<tr>
-		<td width="20%" colspan="4" class="BlockLabel">&nbsp;</td>
-	</tr>
-	
-	<tr>
-      <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-    </tr>
 </table>
 <!--  /  -->
