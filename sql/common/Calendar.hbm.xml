@@ -25,7 +25,7 @@
     </property>
 
     <bag name="entriesBag" table="EAM_CALENDAR_ENT" cascade="all-delete-orphan"
-         inverse="true" lazy="false">
+         inverse="true">
       <cache usage="read-write"/>
       <key column="CALENDAR_ID" />
       <one-to-many class="CalendarEntry"/>
