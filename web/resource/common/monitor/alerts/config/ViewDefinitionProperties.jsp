@@ -41,13 +41,26 @@
 </tiles:insert>
 
 <!-- Properties Content -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
+  <c:if test="${alertDef.parentId > 0}">
+  <tr>
+    <td colspan="4" class="BlockContent"><span class="red" style="padding-left: 15px;"><fmt:message key="alerts.config.service.DefinitionList.isResourceAlert.false"/></span> <fmt:message key="alert.config.props.PB.IsTypeAlert"/>
+</td>
+  </tr>
+  </c:if>
   <tr>
     <td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
   </tr>
   <tr valign="top">
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
-    <td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/></td>
+    <td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
+  <c:if test="${alertDef.parentId > 0}">
+    <br/>
+        <html:link page="/alerts/Config.do?mode=viewDefinition&aetid=${Resource.appdefResourceTypeValue.appdefTypeKey}&ad=${alertDef.parentId}">
+          <fmt:message key="alert.config.props.PB.ViewTypeDef"/>
+        </html:link>
+  </c:if>
+    </td>
     <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.Priority"/></td>
     <td width="30%" class="BlockContent">
       <fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}"/>
@@ -71,20 +84,8 @@
     <td class="BlockContent"><hq:dateFormatter time="false" value="${alertDef.mtime}"/></td>
   </tr>
   </c:if>
-  <c:if test="${alertDef.parentId > 0}">
-  <tr>
-    <td colspan="4" class="BlockContent"><span style="height: 3px;"></span></td>
-  </tr>
-  <tr>
-    <td colspan="4" class="BlockContent"><span class="red" style="padding-left: 15px;"><fmt:message key="alerts.config.service.DefinitionList.isResourceAlert.false"/></span> <fmt:message key="alert.config.props.PB.IsTypeAlert"/>
-</td>
-  </tr>
-  </c:if>
   <tr>
     <td colspan="4" class="BlockContent"><span style="height: 1px;"></span></td>
-  </tr>
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><span style="height: 1px;"></span></td>
   </tr>
 </table>
 
