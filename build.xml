@@ -452,6 +452,14 @@
        </fileset>
     </copy>
 
+    <copy todir="${ear.dir}/alertTemplates">
+       <fileset dir="${basedir}/etc/alertTemplates"/>
+    </copy>
+
+    <copy todir="${ear.dir}/gconsoleTemplates">
+       <fileset dir="${basedir}/etc/gconsoleTemplates"/>
+    </copy>
+
     <copy tofile="${ear.dir}/lib/jakarta-oro.jar" 
           file="${thirdparty.lib}/jakarta-oro-2.0.7.jar" />
       
