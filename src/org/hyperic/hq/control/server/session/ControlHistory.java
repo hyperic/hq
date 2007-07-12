@@ -173,6 +173,12 @@ public class ControlHistory extends PersistedObject
     {
         return this.duration;
     }
+    
+    public void setDurationFromNow()
+    {
+        this.setDuration(System.currentTimeMillis() -
+                this.getStartTime());
+    }
 
     protected void setDuration(long duration)
     {

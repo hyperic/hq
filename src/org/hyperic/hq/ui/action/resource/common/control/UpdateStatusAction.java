@@ -36,7 +36,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
+import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -77,7 +77,7 @@ public class UpdateStatusAction extends BaseAction {
         catch (ParameterNotFoundException pnfe) {}
         catch (NumberFormatException nfe) {}
 
-        ControlHistoryValue cValue = null;
+        ControlHistory cValue = null;
         if (null == batchId) {
             cValue = cBoss.getCurrentJob(sessionId, appId);
         } else {
@@ -90,8 +90,7 @@ public class UpdateStatusAction extends BaseAction {
         else {
             // Check for valid duration
             if (cValue.getDuration() == 0) {
-                cValue.setDuration(System.currentTimeMillis() -
-                                   cValue.getStartTime());
+                cValue.setDurationFromNow();
             }
         }
         
