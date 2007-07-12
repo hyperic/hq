@@ -105,8 +105,8 @@
                         <td class="MastheadContent" nowrap style="font-weight:bold;padding-left:9px;">
                             <fmt:message key="header.RecentAlerts"/>:
                         </td>
-                        <td style="font-weight:bold;">
-                            <div id="recentAlerts" style="font-weight:bold;color:#ffffff;"></div>
+                        <td>
+                            <div id="recentAlerts" style="font-weight:bold;color:#ffffff;overflow:hidden;width:100%"></div>
                         </td>
                        </tr>
                     </table>
