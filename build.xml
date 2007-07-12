@@ -461,7 +461,9 @@
     <touch file="${ear.dir}/META-INF/application.xml" />
   </target>
 
-  <target name="pack-ear" depends="pack-ear-files" unless="generate-manifest.notrequired">
+  <target name="pack-ear" depends="pack-ear-files,write-ear-manifest"/>
+
+  <target name="write-ear-manifest" unless="generate-manifest.notrequired">
     <!-- generate EAR MANIFEST file -->
     <pathconvert targetos="unix" pathSep="," property="Class-Path">
       <path>
