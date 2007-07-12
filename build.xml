@@ -460,6 +460,10 @@
        <fileset dir="${basedir}/etc/gconsoleTemplates"/>
     </copy>
 
+    <copy todir="${ear.dir}/gconsoleTemplates" failonerror="false">
+       <fileset dir="${user.home}/.hq/gconsoleTemplates"/>
+    </copy>
+
     <copy tofile="${ear.dir}/lib/jakarta-oro.jar" 
           file="${thirdparty.lib}/jakarta-oro-2.0.7.jar" />
       
