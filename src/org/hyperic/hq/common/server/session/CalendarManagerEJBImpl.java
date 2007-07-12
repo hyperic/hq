@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ejb.SessionBean;
@@ -115,6 +116,15 @@ public class CalendarManagerEJBImpl implements SessionBean {
             throw new IllegalArgumentException("Entry was not a part of the " +
                                                "calendar");
         }
+    }
+
+    /**
+     * Remove calendar entries from a calendar
+     *  
+     * @ejb:interface-method
+     */
+    public void removeEntries(Calendar c) {
+        _calDAO.removeEntries(c);
     }
 
     /** 

@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.common.server.session;
 
+import java.util.Iterator;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -43,4 +45,13 @@ public class CalendarDAO extends HibernateDAO {
     void save(Calendar c) { 
         super.save(c);
     }
+    
+    void removeEntries(Calendar c) {
+        for (Iterator it = c.getEntriesBag().iterator(); it.hasNext(); ) {
+            super.remove(it.next());
+        }
+        c.getEntriesBag().clear();
+    }
+    
+
 }
