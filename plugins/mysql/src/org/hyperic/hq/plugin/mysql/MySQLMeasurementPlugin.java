@@ -139,25 +139,32 @@ public class MySQLMeasurementPlugin
                MetricNotFoundException
     {
         String objectName = metric.getObjectName(),
-               attr       = metric.getAttributeName();
-        if (attr.indexOf("NumberOfDatabases") == -1)
+               alias      = metric.getAttributeName();
+        if (alias.indexOf("NumberOfDatabases") == -1 &&
+            !alias.equalsIgnoreCase(AVAIL_ATTR))
             return super.getValue(metric);
 
         int value = 0;
         Statement stmt = null;
-        ResultSet rs = null;
+        ResultSet rs   = null;
         try
         {
             Connection conn = getCachedConnection(metric);
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(NUMDATABASES);
+            rs   = stmt.executeQuery(NUMDATABASES);
+
+            if (alias.equalsIgnoreCase(AVAIL_ATTR))
+                return new MetricValue(Metric.AVAIL_UP,
+                                       System.currentTimeMillis());
+
             while (rs.next())
                 value++;
+
             return new MetricValue(value, System.currentTimeMillis());
         }
         catch (SQLException e)
         {
-            String msg = "Query failed for "+attr+": "+e.getMessage();
+            String msg = "Query failed for "+alias+": "+e.getMessage();
             throw new MetricUnreachableException(msg, e);
         }
         finally {
@@ -189,10 +196,6 @@ public class MySQLMeasurementPlugin
             }
             return StringUtil.replace(TABLEQUERY, "%table%", "'" + table + "'");
         }
-
-        // Only servers have uptime metrics
-        if (queryVal.equals(AVAIL_ATTR))
-            return STATUSQUERY + "'" + "Uptime" + "'";
 
         // Cumulative metrics
         if (isCumulativeMetric(queryVal)) {
