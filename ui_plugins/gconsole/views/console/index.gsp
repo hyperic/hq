@@ -1,7 +1,8 @@
 Templates: 
 <% for(t in templates) { %>
-  <%= linkTo t.key, [action:'chooseTemplate', template:t.key] %><br/>
+  <%= linkTo t, [action:'chooseTemplate', template:t] %> | 
 <% } %>
+<br/>
 <% formFor([action:'index']) { f -> %>
 <p>
   <%= f.text_area(name:'code_input', value:r['last_code']) %>

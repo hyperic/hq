@@ -1,18 +1,7 @@
 import org.hyperic.hq.hqu.rendit.BaseController
+import org.hyperic.hq.application.HQApp
 
 class ConsoleController extends BaseController { 
-    final HIBERNATE_PREMADE = """
-import org.hibernate.criterion.Restrictions
-
-def persistedClass = org.hyperic.hq.appdef.server.session.Platform
-def sess  = org.hyperic.hibernate.Util.sessionFactory.currentSession
-
-sess.createCriteria(persistedClass).
-  setMaxResults(10).
-  list()
-"""
-    final TEMPLATES = ['Hibernate Query' : HIBERNATE_PREMADE]
-        
 	def ConsoleController() {
         setTemplate('standard')
         addBeforeFilter({ 
@@ -22,6 +11,22 @@ sess.createCriteria(persistedClass).
             }
             return false
         })
+	}
+	
+	private def getTemplateDir() {
+		new File(HQApp.instance.resourceDir, "gconsoleTemplates")    
+	}
+	
+	private def getTemplates() {
+	    def res = []
+	    for (f in templateDir.listFiles()) {
+	        if (!f.name.endsWith('.groovy'))
+	            continue
+	           
+	        def fname = f.name[0..-8]
+	        res << fname
+	    }
+	    res
 	}
 	
     def index(params) {
@@ -35,12 +40,20 @@ sess.createCriteria(persistedClass).
 			r['last_result'] = '3'
 		}
     	
-    	render(action:'index', locals:[r:r, templates:TEMPLATES])
+    	render(action:'index', locals:[r:r, templates:templates])
     }
     
     def chooseTemplate(params) {
-        def tmpl = TEMPLATES[params.getOne('template')]
-        index(['code_input' : [tmpl]])
+        def template = params.getOne('template')
+        def tmplCode = ""
+        
+        if (templates.contains(template)) {
+            new File(templateDir, "${template}.groovy").withReader { r ->
+				tmplCode = r.text
+            }
+        }
+            
+        index(['code_input' : [tmplCode]])
     }
     
     private def executeCode(code) {
