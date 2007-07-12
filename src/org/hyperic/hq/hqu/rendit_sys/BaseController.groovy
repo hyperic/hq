@@ -151,17 +151,22 @@ abstract class BaseController {
     /**
      * This urlFor can be used to take the current request context into 
      * account when rendering URLs relative to the current request.
+     *
+     * See also:  HtmlUtil.urlFor
      */
     public String urlFor(opts) {
         def req = invokeArgs.request
         def path = [invokeArgs.contextPath]
-
-        if (!opts.resource) {
+        if (!opts.resource && !opts.asset) {
             path += invokeArgs.servletPath.split('/') as List
             // Trim off the last element
             if (path[-1].endsWith('.hqu'))
                 path = path[0..-2]
-        }
+        } else if(opts.asset) {
+            path += invokeArgs.servletPath.split('/') as List
+            if (path[-1].endsWith('.hqu'))
+                path = path[0..-3]
+        }        
         
         path = path.findAll{it}.join('/')
         if (!path.startsWith("/"))

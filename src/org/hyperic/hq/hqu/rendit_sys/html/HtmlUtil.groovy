@@ -36,6 +36,11 @@ class HtmlUtil {
             res = "${opts.absolute}/"
             opts.remove('absolute')
         }
+
+        if (opts.asset) {
+            res += "public/${opts['asset']}"
+            opts.remove('asset')
+        }
         
         if (opts['action']) {
         	res += opts['action'] + '.hqu'
