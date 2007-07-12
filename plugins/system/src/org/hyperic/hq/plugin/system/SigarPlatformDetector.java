@@ -135,7 +135,7 @@ public class SigarPlatformDetector extends PlatformDetector {
 
     /**
      * Performs all the actual platform detection.
-     * @param platformConfig ConfigResponse for the existing platform, if any.
+     * @param config ConfigResponse for the existing platform, if any.
      */
     public PlatformResource getPlatformResource(ConfigResponse config) 
         throws PluginException {
@@ -156,12 +156,14 @@ public class SigarPlatformDetector extends PlatformDetector {
         ips.putAll(this.ipIgnore);
 
         try {
-            if (fqdn == null) {
-                fqdn = sigar.getFQDN();
-            }
-            platform.setFqdn(fqdn);
-            if (HostIP.isValidIP(platform.getFqdn())) {
-                platform.setName(getPlatformName());
+            if (fqdn != null) {
+                platform.setFqdn(fqdn);
+                platform.setName(fqdn);
+            } else {
+                platform.setFqdn(sigar.getFQDN());
+                if (HostIP.isValidIP(platform.getFqdn())) {
+                    platform.setName(getPlatformName());
+                }
             }
 
             // Detect IP addresses
