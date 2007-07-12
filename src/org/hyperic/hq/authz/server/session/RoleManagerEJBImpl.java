@@ -683,11 +683,18 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * Create a calendar under a role for a specific type.  Calendars created
      * in this manner are tied directly to the role and should not be used
      * by other roles.
+     * @throws PermissionException if user is not allowed to modify role
      * @ejb:interface-method
      */
-    public RoleCalendar createCalendar(Role r, String calendarName, 
-                                       RoleCalendarType type) 
+    public RoleCalendar createCalendar(AuthzSubjectValue whoami, Role r,
+                                       String calendarName, 
+                                       RoleCalendarType type)
+        throws PermissionException 
     {
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        pm.check(whoami.getId(), r.getResource().getResourceType(),
+                 r.getId(), AuthzConstants.roleOpModifyRole);
+
         Calendar cal = 
             CalendarManagerEJBImpl.getOne().createCalendar(calendarName);
         RoleCalendar res = new RoleCalendar(r, cal, type);
