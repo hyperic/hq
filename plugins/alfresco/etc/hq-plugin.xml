@@ -162,20 +162,30 @@
   </p>
   <p>
   Unfortunately for Alfresco's default hsql deployment, DB statistics cannot be tracked.
+  <br>
   If you decide to use any Alfresco supported DB backends here are samples of the jdbcUrl
+  <br>
   which allow the plugin to gather metrics from Alfresco's internal tables:
   <br>
+  <br>
   MySQL:  jdbc:mysql://&lt;hostname&gt;:&lt;port&gt;/alfresco
+  <br>
   Oracle: jdbc:oracle:thin:@&lt;hostname&gt;:&lt;port&gt;:alfresco
+  <br>
   Sybase: jdbc:sybase:Tds:&lt;hostname&gt;:&lt;port&gt;/alfresco
   </p>
   <p>
   To monitor process metrics from the Alfresco DB backend here are samples of
+  <br>
   ptql queries to match the database processes:
   <br>
+  <br>
   MySQL:  State.Name.eq=mysqld
+  <br>
   Oracle: State.Name.eq=oracle
+  <br>
   Sybase: State.Name.eq=dataserver
+  <br>
   </p>
   ]]>
   </help>
