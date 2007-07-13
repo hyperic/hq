@@ -31,7 +31,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.units.FormattedNumber;
 
 public class MeasurementTemplate 
     extends PersistedObject
@@ -199,6 +202,15 @@ public class MeasurementTemplate
         _rawMeasurementArgs = measurementArgs;
     }
 
+    /**
+     * Format a metric value, based on the units specified by this template
+     */
+    public String formatValue(MetricValue val) {
+        FormattedNumber th = UnitsConvert.convert(val.getValue(), getUnits());
+                                                  
+        return th.toString();
+    }
+    
     /**
      * Legacy EJB DTO pattern
      * @deprecated Use (this) MeasurementTemplate object instead
