@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
 
 class ResourceCategory {
     /**
@@ -34,5 +35,15 @@ class ResourceCategory {
         } else {
             throw RuntimeException("Resource [${r}] is not an appdef object")
         }
+    }
+    
+    static boolean getSupportsMonitoring(Resource r) {
+        def ent = getEntityID(r)
+        ent.isPlatform() || ent.isServer() || ent.isService()
+    }
+    
+    static Collection getDesignatedMetrics(Resource r) {
+        def aeid = getEntityID(r)
+		DerivedMeasurementManagerEJBImpl.one.findDesignatedMeasurements(aeid)
     }
 }
