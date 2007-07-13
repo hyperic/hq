@@ -23,22 +23,29 @@
  * USA.
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.events.server.session;
 
 import java.util.ResourceBundle;
 
-import org.hyperic.util.HypericEnum;
+import org.hyperic.hq.authz.server.session.RoleCalendarType;
 
-public abstract class RoleCalendarType
-    extends HypericEnum 
+public class AlertableRoleCalendarType
+    extends RoleCalendarType
 {
-    protected RoleCalendarType(int code, String desc, String localeProp,
-                               ResourceBundle bundle) 
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
+        
+    public static final AlertableRoleCalendarType ALERTABLE =
+        new AlertableRoleCalendarType(1001, "alertable", 
+                                      "roleCalendar.alertable", 
+                                      ResourceBundle.getBundle(BUNDLE));
+    public static final AlertableRoleCalendarType NOT_ALERTABLE =
+        new AlertableRoleCalendarType(1002, "notAlertable", 
+                                      "roleCalendar.notAlertable", 
+                                      ResourceBundle.getBundle(BUNDLE));
+        
+    private AlertableRoleCalendarType(int code, String desc, String localeProp,
+                                      ResourceBundle bundle) 
     {
-        super(RoleCalendarType.class, code, desc, localeProp, bundle); 
-    }
-    
-    public static RoleCalendarType findByCode(int code) {
-        return (RoleCalendarType)findByCode(RoleCalendarType.class, code);
+        super(code, desc, localeProp, bundle); 
     }
 }

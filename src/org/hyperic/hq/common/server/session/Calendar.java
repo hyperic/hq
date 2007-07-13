@@ -28,8 +28,10 @@ package org.hyperic.hq.common.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.RoleCalendar;
 
 public class Calendar
     extends PersistedObject
@@ -72,6 +74,15 @@ public class Calendar
         
         getEntriesBag().add(res);
         return res;
+    }
+
+    public boolean containsTime(long time) {
+        for (Iterator i = getEntries().iterator(); i.hasNext(); ) {
+            CalendarEntry ent = (CalendarEntry)i.next();
+            if (ent.containsTime(time))
+                return true;
+        }
+        return false;
     }
 
     public String toString() {

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
@@ -130,6 +131,22 @@ public class Role extends AuthzNamedBean {
     
     protected void setCalendarBag(Collection c) {
         _calendars = c;
+    }
+    
+    /**
+     * Get a collection of {@link Calendar}s of the specified type for the
+     * role.  
+     */
+    public Collection getCalendars(RoleCalendarType type) {
+        List res = new ArrayList();
+        
+        for (Iterator i=getCalendars().iterator(); i.hasNext(); ) {
+            RoleCalendar c = (RoleCalendar)i.next();
+            
+            if (c.getType().equals(type))
+                res.add(c.getCalendar());
+        }
+        return res;
     }
     
     public Collection getCalendars() {

@@ -49,7 +49,8 @@ public class EventsStartupListener
         // Make sure the escalation enumeration is loaded and registered so 
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
-
+        AlertableRoleCalendarType.class.getClass();
+        
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {

@@ -657,29 +657,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     }
     
     /**
-     * @ejb:interface-method
-     */
-    public boolean isRoleOnCall(Role role, RoleCalendarType type) {
-        Collection calendars = role.getCalendars();
-        if (calendars.size() == 0)
-            return true;
-        
-        long current = System.currentTimeMillis();
-        for (Iterator it = calendars.iterator(); it.hasNext(); ) {
-            RoleCalendar rc = (RoleCalendar) it.next();
-            if (rc.getType().equals(type)) {
-                Collection entries = rc.getCalendar().getEntries();
-                for (Iterator eit = entries.iterator(); it.hasNext(); ) {
-                    WeekEntry we = (WeekEntry) eit.next();
-                    if (we.containsTime(current))
-                        return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    /**
      * Create a calendar under a role for a specific type.  Calendars created
      * in this manner are tied directly to the role and should not be used
      * by other roles.
