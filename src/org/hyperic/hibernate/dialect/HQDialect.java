@@ -25,7 +25,6 @@
 
 package org.hyperic.hibernate.dialect;
 
-import java.util.List;
 
 /**
  *
