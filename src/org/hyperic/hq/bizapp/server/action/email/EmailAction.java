@@ -124,7 +124,9 @@ public class EmailAction extends EmailActionConfig
         try {
             RenditServer.getInstance().renderTemplate(templateFile, params, 
                                                       output);
-            _log.info("Template rendered\n" + output.toString() + "\n");
+            
+            if (_log.isDebugEnabled())
+                _log.debug("Template rendered\n" + output.toString());
         } catch(Exception e) {
             _log.warn("Unable to render template", e);
         }
