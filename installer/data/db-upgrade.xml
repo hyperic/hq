@@ -6355,6 +6355,16 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+    
+    <schemaSpec version="3.35">
+        <schema-addColumn table="EAM_SUBJECT" column="HTML_EMAIL" 
+                          columnType="BOOLEAN"/>
+        <schema-update table="EAM_SUBJECT" column="HTML_EMAIL"
+                       columnType="BOOLEAN" value="FALSE" />
+        <schema-alterColumn table="EAM_SUBJECT" column="HTML_EMAIL" 
+                            nullable="NOT NULL"/>
+    </schemaSpec>
+    
 
 </dbupgrade>
 </target>

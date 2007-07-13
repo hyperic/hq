@@ -43,6 +43,7 @@ public class AuthzSubject extends AuthzNamedBean {
     private String     _department;
     private boolean    _active = true;
     private boolean    _system = false;
+    private boolean    _htmlEmail = false;
     private Resource   _resource;
     private Collection _roles = new HashSet();
     private Collection _userConfigs = new ArrayList();
@@ -142,6 +143,14 @@ public class AuthzSubject extends AuthzNamedBean {
 
     public boolean getSystem() {
         return isSystem();
+    }
+    
+    public boolean isHtmlEmail() {
+        return _htmlEmail;
+    }
+    
+    protected void setHtmlEmail(boolean useHtml) {
+        _htmlEmail = useHtml;
     }
 
     protected void setSystem(boolean val) {

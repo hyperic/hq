@@ -105,7 +105,6 @@ public class AuthzSubjectManagerEJBImpl
         return subjectPojo;
     }
 
-
     /** 
      * Write the specified entity out to permanent storage.
      * @param whoami The current running user.
@@ -131,6 +130,33 @@ public class AuthzSubjectManagerEJBImpl
             subject.setActive(true);
         }
         subjectPojo.setAuthzSubjectValue(subject);
+    }
+
+    /** 
+     * Update user settings for the target
+     * 
+     * @param whoami The current running user.
+     * @param subject The subject to save.
+     * 
+     * The rest of the parameters specify settings to update.  If they are 
+     * null, then no change will be made to them.
+     * @ejb:interface-method
+     */
+    public void updateSubject(AuthzSubject whoami, AuthzSubject target,
+                              Boolean useHtmlEmail)
+        throws PermissionException 
+    {
+        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+
+        if(!whoami.getId().equals(target.getId())) {
+            pm.check(whoami.getId(), getRootResourceType().getId(),
+                     AuthzConstants.rootResourceId,
+                     AuthzConstants.perm_viewSubject);
+        }
+        
+        if (useHtmlEmail != null) {
+            target.setHtmlEmail(useHtmlEmail.booleanValue());
+        }
     }
 
     /**
