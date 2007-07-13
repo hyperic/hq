@@ -52,12 +52,14 @@ public class PostgreSQLDialect
         return "ANALYZE "+table;
     }
 
-    public String getDeleteJoinStmt(String deleteTables,
+    public String getDeleteJoinStmt(String deleteTable,
                                     String joinTables,
                                     String joinKeys,
                                     String condition)
     {
-        return "DELETE FROM "+deleteTables+" USING "+joinTables+
+        //doesn't map well btwn databases, so I need to do this
+        String join = joinTables.replaceAll(deleteTable+"\\s*,?", "");
+        return "DELETE FROM "+deleteTable+" USING "+join+
                " WHERE "+joinKeys+" and "+condition;
     }
 }

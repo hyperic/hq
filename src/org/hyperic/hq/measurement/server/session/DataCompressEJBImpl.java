@@ -245,34 +245,26 @@ public class DataCompressEJBImpl
                 max_time = rs.getLong(1);
 
             HQDialect dialect = Util.getHQDialect();
-//these are only for QA debugging on mysql
-//will remove tomorrow (7/12)
-boolean debug = true;
             while (min_time < max_time)
             {
-                String delTable   = BF_TABLE,
+                String delTable   = BF_TABLE+" b",
                        joinTables = BF_TABLE+" b, "+METRIC_DATA_VIEW+" m",
-                       joinKeys   = "m.measurement_id = b.measurement_id and "+
-                                    "m.timestamp = b.timestamp",
+                       joinKeys   = "m.measurement_id = b.measurement_id"+
+                                    " and m.timestamp = b.timestamp",
                        condition  = "b.timestamp between "+
                                     (max_time-=BF_PURGE_INCR)+
                                     " and "+(max_time+BF_PURGE_INCR);
+
                 sql = dialect.getDeleteJoinStmt(delTable,
                                                 joinTables,
                                                 joinKeys,
                                                 condition);
-if (debug)
-{
-    System.out.println(sql);
-    debug = false;
-}
                 int rows = stmt.executeUpdate(sql);
                 if (rows > 0)
                     log.debug("Purged "+rows+" rows of backfilled data between"+
                               " "+TimeUtil.toString(max_time)+" and "+
                               TimeUtil.toString(max_time+BF_PURGE_INCR));
             }
-debug = true;
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
