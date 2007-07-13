@@ -103,13 +103,13 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String createText(AlertDefinitionInterface alertdef,
-                              ActionExecutionInfo info,
-                              AppdefEntityID aeid, AlertInterface alert)
+                              ActionExecutionInfo info, AppdefEntityID aeid, 
+                              AlertInterface alert, String templateName)
         throws MeasurementNotFoundException
     {
         File templateDir = new File(HQApp.getInstance().getResourceDir(),
                                     "alertTemplates");
-        File templateFile = new File(templateDir, "text_email.gsp");
+        File templateFile = new File(templateDir, templateName);
         StringWriter output = new StringWriter();
         Map params = new HashMap();
         
@@ -151,8 +151,15 @@ public class EmailAction extends EmailActionConfig
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
 
-            String body = isSms() ? info.getShortReason() :
-                                    createText(alertDef, info, appEnt, alert);
+            String body;
+            
+            if (isSms()) {
+                body = createText(alertDef, info, appEnt, alert, 
+                                  "sms_email.gsp");
+            } else {
+                body = createText(alertDef, info, appEnt, alert, 
+                                  "text_email.gsp");
+            }
 
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
                              alertDef.isNotifyFiltered());
