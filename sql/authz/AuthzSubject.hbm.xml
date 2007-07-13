@@ -66,6 +66,10 @@
       <column name="FSYSTEM" not-null="true"/>
     </property>
 
+    <property name="htmlEmail" type="boolean">
+      <column name="HTML_EMAIL" not-null="true"/>
+    </property>
+
     <many-to-one name="resource" class="Resource">
       <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_IDX"/>
     </many-to-one>

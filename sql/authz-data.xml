@@ -43,7 +43,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_SUBJECT">
         <data ID="0" CID="0" NAME="admin" DSN="covalentAuthzInternalDsn"
               FIRST_NAME="System" LAST_NAME="User" DEPARTMENT="Administration" 
-              FSYSTEM="TRUE" FACTIVE="TRUE"/>
+              FSYSTEM="TRUE" FACTIVE="TRUE" HTML_EMAIL="FALSE"/>
     </table>
 
     <table name="EAM_RESOURCE_GROUP">
@@ -312,7 +312,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_SUBJECT">
         <data ID="1" CID="1" NAME="@@@ADMINUSERNAME@@@" FIRST_NAME="HQ"
               LAST_NAME="Administrator" EMAIL_ADDRESS="@@@ADMINEMAIL@@@"
-              DSN="CAM" FSYSTEM="TRUE" FACTIVE="TRUE" />
+              DSN="CAM" FSYSTEM="TRUE" FACTIVE="TRUE" HTML_EMAIL="FALSE"/>
     </table>
 
     <!-- add a resource for the root subject -->
