@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 
@@ -176,6 +177,11 @@ public class RenditServer {
     {
         PluginWrapper plugin = getPlugin("tmpl_render");
         List args = new ArrayList();
+        
+        if (plugin == null) {
+            throw new SystemException("Required plugin [tmpl_render] not " + 
+                                      "found");
+        }
         
         args.add(template);
         args.add(params);
