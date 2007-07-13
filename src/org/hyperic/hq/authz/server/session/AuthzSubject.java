@@ -149,6 +149,10 @@ public class AuthzSubject extends AuthzNamedBean {
         return _htmlEmail;
     }
     
+    public boolean getHtmlEmail() {
+        return isHtmlEmail();
+    }
+
     protected void setHtmlEmail(boolean useHtml) {
         _htmlEmail = useHtml;
     }

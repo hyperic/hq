@@ -35,7 +35,6 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
