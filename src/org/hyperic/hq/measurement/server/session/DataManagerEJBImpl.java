@@ -483,7 +483,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             ts = MeasTabManagerUtil.getPrevMeasTabTime(ts);
         }
 
-        sql.append(") AS ").append(TAB_DATA);
+        sql.append(") ").append(TAB_DATA);
         return sql.toString();
     }
 
