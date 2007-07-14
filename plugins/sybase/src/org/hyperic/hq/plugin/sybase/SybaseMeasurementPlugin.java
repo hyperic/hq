@@ -42,6 +42,7 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -275,7 +276,8 @@ public class SybaseMeasurementPlugin
         String objectName = metric.getObjectName(),
                alias      = metric.getAttributeName();
         if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
-            && objectName.indexOf(TYPE_STORAGE) == -1)
+            && objectName.indexOf(TYPE_STORAGE) == -1
+            && !alias.equalsIgnoreCase(AVAIL_ATTR))
             return super.getValue(metric);
 
         try
@@ -283,12 +285,37 @@ public class SybaseMeasurementPlugin
             Connection conn = getCachedConnection(metric);
             if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1)
                 return getSP_MonitorConfigValue(metric, alias, conn);
-            else // objectName.indexOf(TYPE_STORAGE) != -1
+            else if (objectName.indexOf(TYPE_STORAGE) != -1)
                 return getStorageValue(metric, alias, conn);
+            else //if (alias.equalsIgnoreCase(AVAIL_ATTR))
+                return getAvailability(metric, alias, conn);
         }
         catch (SQLException e) {
             String msg = "Query failed for "+alias+": "+e.getMessage();
             throw new MetricNotFoundException(msg, e);
+        }
+    }
+
+    private MetricValue getAvailability(Metric metric,
+                                        String attr,
+                                        Connection conn)
+        throws MetricUnreachableException
+    {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            stmt = conn.createStatement();
+            String sql = (String)genericQueries.get("NumServers");
+            rs = stmt.executeQuery(sql);
+            return new MetricValue(Metric.AVAIL_UP, System.currentTimeMillis());
+        }
+        catch (SQLException e) {
+            String msg = "Query failed for Availability "+e.getMessage();
+            throw new MetricUnreachableException(msg, e);
+        }
+        finally {
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
     }
 
@@ -327,8 +354,7 @@ public class SybaseMeasurementPlugin
         finally
         {
             stmt.execute("use master");
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
+            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
     }
 
