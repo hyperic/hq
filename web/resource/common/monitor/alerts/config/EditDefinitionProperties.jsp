@@ -39,11 +39,10 @@
 <tiles:put name="tabKey" value="alert.config.props.PropertiesBox"/>
 </tiles:insert>
 
-<html:hidden property="id"/>
+<html:hidden property="ad"/>
 <c:choose>
   <c:when test="${not empty Resource}">
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
+<html:hidden property="eid" value="${Resource.entityId}"/>
   </c:when>
   <c:otherwise>
 <html:hidden property="type" value="${ResourceType.appdefType}"/>

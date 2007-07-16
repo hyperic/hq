@@ -66,7 +66,7 @@ public class EditDefinitionConditionsAction extends BaseAction {
     throws Exception {
     
         DefinitionForm defForm = (DefinitionForm)form;
-        log.trace("defForm.id=" + defForm.getId());
+        log.trace("defForm.id=" + defForm.getAd());
 
         Map params = new HashMap();
         AppdefEntityID adeId;
@@ -80,7 +80,7 @@ public class EditDefinitionConditionsAction extends BaseAction {
                                            defForm.getResourceType());
             params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
         }
-        params.put( "ad", defForm.getId() );
+        params.put( "ad", defForm.getAd() );
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -94,13 +94,12 @@ public class EditDefinitionConditionsAction extends BaseAction {
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
 
         AlertDefinitionValue adv =
-            eb.getAlertDefinition( sessionID, defForm.getId() );
+            eb.getAlertDefinition( sessionID, defForm.getAd() );
         defForm.exportConditionsEnablement(adv, request, sessionID, mb,
                 EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
         eb.updateAlertDefinition(sessionID, adv);
 
         return returnSuccess(request, mapping, params);
-    
     }
 }
 

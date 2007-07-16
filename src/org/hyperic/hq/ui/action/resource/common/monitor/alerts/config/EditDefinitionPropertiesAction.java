@@ -63,7 +63,7 @@ public class EditDefinitionPropertiesAction extends BaseAction {
         throws Exception {
             
         DefinitionForm defForm = (DefinitionForm)form;
-        log.trace("defForm.id=" + defForm.getId());
+        log.trace("defForm.id=" + defForm.getAd());
 
         Map params = new HashMap();
         AppdefEntityID adeId;
@@ -77,7 +77,7 @@ public class EditDefinitionPropertiesAction extends BaseAction {
                                            defForm.getResourceType());
             params.put(Constants.APPDEF_RES_TYPE_ID, adeId.getAppdefKey());
         }
-        params.put( "ad", defForm.getId() );
+        params.put( "ad", defForm.getAd() );
 
         ActionForward forward = checkSubmit(request, mapping, form, params);
         if (forward != null) {
@@ -89,7 +89,7 @@ public class EditDefinitionPropertiesAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-        eb.updateAlertDefinitionBasic( sessionID, defForm.getId(), defForm.getName(),
+        eb.updateAlertDefinitionBasic( sessionID, defForm.getAd(), defForm.getName(),
                                        defForm.getDescription(), defForm.getPriority(),
                                        defForm.isActive() );
 

@@ -35,11 +35,10 @@
   <tiles:put name="titleKey" value="alert.config.edit.page.Cond.PageTitle"/>
 </tiles:insert>
 
-<html:hidden property="id"/>
+<html:hidden property="ad"/>
 <c:choose>
   <c:when test="${not empty Resource}">
-<html:hidden property="rid" value="${Resource.id}"/>
-<html:hidden property="type" value="${Resource.entityId.type}"/>
+<html:hidden property="eid" value="${Resource.entityId}"/>
   </c:when>
   <c:otherwise>
 <html:hidden property="aetid" value="${ResourceType.appdefTypeKey}"/>

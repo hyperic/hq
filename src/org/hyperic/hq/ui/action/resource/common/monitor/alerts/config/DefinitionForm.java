@@ -117,11 +117,11 @@ public class DefinitionForm extends ResourceForm  {
         // do nothing
     }
 
-    public Integer getId() {
+    public Integer getAd() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setAd(Integer id) {
         this.id = id;
     }
 
@@ -188,7 +188,7 @@ public class DefinitionForm extends ResourceForm  {
                 
         // Select default metric
         if (metricId > 0)
-            this.getCondition(0).setMetricId(new Integer(metricId));
+            getCondition(0).setMetricId(new Integer(metricId));
     }
 
     public String getMetricName() {
@@ -462,23 +462,23 @@ public class DefinitionForm extends ResourceForm  {
      * form.
      */
     public void importProperties(AlertDefinitionValue adv) {
-        this.setId( adv.getId() );
-        this.setName( adv.getName() );
-        this.setDescription( adv.getDescription() );
-        this.setPriority( adv.getPriority() );
-        this.setActive( adv.getEnabled() );
+        setAd( adv.getId() );
+        setName( adv.getName() );
+        setDescription( adv.getDescription() );
+        setPriority( adv.getPriority() );
+        setActive( adv.getEnabled() );
     }
 
     /**
      * Export basic properties from this form to the
      * AlertDefinitionValue.
      */
-    public void exportProperties(AlertDefinitionValue adv) {
-        adv.setId( this.getId() );
-        adv.setName( this.getName() );
-        adv.setDescription( this.getDescription() );
+    void exportProperties(AlertDefinitionValue adv) {
+        adv.setId( getAd() );
+        adv.setName( getName() );
+        adv.setDescription( getDescription() );
         adv.setEnabled( this.isActive() );
-        adv.setPriority( this.getPriority() );
+        adv.setPriority( getPriority() );
     }
 
     /**
@@ -491,7 +491,7 @@ public class DefinitionForm extends ResourceForm  {
                SessionTimeoutException, TemplateNotFoundException,
                RemoteException {
         // we import the id here, too, so that the update will work
-        this.setId( adv.getId() );
+        setAd( adv.getId() );
 
         boolean isTypeAlert =
             EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId());
@@ -545,10 +545,10 @@ public class DefinitionForm extends ResourceForm  {
         //------------------------------------------------------------
         //-- conditions
         //------------------------------------------------------------
-        log.debug("numConditions=" + this.getNumConditions());
+        log.debug("numConditions=" + getNumConditions());
         adv.removeAllConditions();
-        for (int i = 0; i < this.getNumConditions(); ++i) {
-            ConditionBean cond = this.getCondition(i);
+        for (int i = 0; i < getNumConditions(); ++i) {
+            ConditionBean cond = getCondition(i);
             // make sure first condition is ALWAYS required
             if (i == 0) {
                 cond.setRequired(true);
@@ -563,7 +563,7 @@ public class DefinitionForm extends ResourceForm  {
         //-- enablement
         //------------------------------------------------------------
         adv.setWillRecover( this.isDisableForRecovery() );
-        adv.setFrequencyType( this.getWhenEnabled() );
+        adv.setFrequencyType( getWhenEnabled() );
 
         // Count is either a number of times *or* a duration,
         // depending on which frequency type we're using.  If we're
@@ -572,10 +572,10 @@ public class DefinitionForm extends ResourceForm  {
         if (getWhenEnabled() != EventConstants.FREQ_EVERYTIME) {
             long count = 1;
             try {
-                if (this.getWhenEnabled() == EventConstants.FREQ_DURATION) {
+                if (getWhenEnabled() == EventConstants.FREQ_DURATION) {
                     count = AlertDefUtil.getSecondsConsideringUnits
                         ( getMeetTimeTP().longValue(), getMeetTimeUnitsTP() );
-                } else if (this.getWhenEnabled() == EventConstants.FREQ_COUNTER)
+                } else if (getWhenEnabled() == EventConstants.FREQ_COUNTER)
                 {
                     count = getNumTimesNT().intValue();
                 }
@@ -591,7 +591,7 @@ public class DefinitionForm extends ResourceForm  {
             // EventsBoss expects range in seconds
             long numSeconds = 1;
             try {
-                if (this.getHowLong() != null) {
+                if (getHowLong() != null) {
                     numSeconds = AlertDefUtil.getSecondsConsideringUnits
                         ( getHowLong().longValue(), getHowLongUnits() );
                 }
