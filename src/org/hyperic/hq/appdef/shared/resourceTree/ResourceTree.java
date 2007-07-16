@@ -25,14 +25,12 @@
 
 package org.hyperic.hq.appdef.shared.resourceTree;
 
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceValue;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 
 /**
  * A tree which represents portions of a hierarchy.  The tree
