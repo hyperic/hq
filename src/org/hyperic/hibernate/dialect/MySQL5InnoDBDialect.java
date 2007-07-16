@@ -65,15 +65,22 @@ public class MySQL5InnoDBDialect
         return "ANALYZE TABLE "+table.toUpperCase();
     }
 
-    public String getDeleteJoinStmt(String deleteTables,
+    public String getDeleteJoinStmt(String deleteTable,
+                                    String commonKey,
                                     String joinTables,
                                     String joinKeys,
-                                    String condition)
+                                    String condition,
+                                    int limit)
     {
-        return "DELETE "+deleteTables.toUpperCase()+" from "+joinTables.toUpperCase()+
-               " WHERE "+joinKeys.toUpperCase()+" and "+condition.toUpperCase();
+        String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
+        String limitCond = (limit <= 0) ? "" : " LIMIT "+limit;
+        return ("DELETE FROM "+deleteTable+
+               " WHERE "+commonKey+
+               " IN (SELECT "+commonKey+
+               " FROM "+joinTables+
+               " WHERE "+joinKeys+cond+limitCond+")").toUpperCase();
     }
-    
+
     public boolean supportsSequences() {
         return true;
     }

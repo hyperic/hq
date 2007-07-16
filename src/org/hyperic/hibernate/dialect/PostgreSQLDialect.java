@@ -53,13 +53,18 @@ public class PostgreSQLDialect
     }
 
     public String getDeleteJoinStmt(String deleteTable,
+                                    String commonKey,
                                     String joinTables,
                                     String joinKeys,
-                                    String condition)
+                                    String condition,
+                                    int limit)
     {
-        //doesn't map well btwn databases, so I need to do this
-        String join = joinTables.replaceAll(deleteTable+"\\s*,?", "");
-        return "DELETE FROM "+deleteTable+" USING "+join+
-               " WHERE "+joinKeys+" and "+condition;
+        String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
+        String limitCond = (limit <= 0) ? "" : " LIMIT "+limit;
+        return "DELETE FROM "+deleteTable+
+               " WHERE "+commonKey+
+               " IN (SELECT "+commonKey+
+               " FROM "+joinTables+
+               " WHERE "+joinKeys+cond+limitCond+")";
     }
 }

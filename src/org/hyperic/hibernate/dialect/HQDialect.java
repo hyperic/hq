@@ -25,6 +25,7 @@
 
 package org.hyperic.hibernate.dialect;
 
+import java.util.List;
 
 /**
  *
@@ -35,11 +36,12 @@ public interface HQDialect
      * Returns the delete statement with joins for
      * a particular database
      */
-    public String getDeleteJoinStmt(String deleteTables,
+    public String getDeleteJoinStmt(String deleteTable,
+                                    String commonKey,
                                     String joinTables,
                                     String joinKeys,
-                                    String condition);
-
+                                    String condition,
+                                    int limit);
     /*
      * Returns the table optimize statement for
      * a particular database

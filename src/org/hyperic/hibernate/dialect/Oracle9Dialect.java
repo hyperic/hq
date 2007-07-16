@@ -58,12 +58,19 @@ public class Oracle9Dialect
                    " ESTIMATE STATISTICS SAMPLE "+tablePercent+" PERCENT");
     }
 
-    public String getDeleteJoinStmt(String deleteTables,
+    public String getDeleteJoinStmt(String deleteTable,
+                                    String commonKey,
                                     String joinTables,
                                     String joinKeys,
-                                    String condition)
+                                    String condition,
+                                    int limit)
     {
-        return "DELETE "+deleteTables+" from "+joinTables+
-               " WHERE "+joinKeys+" and "+condition;
+        String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
+        String limitCond = (limit <= 0) ? "" : " AND rownum <= "+limit;
+        return "DELETE FROM "+deleteTable+
+               " WHERE "+commonKey+
+               " IN (select "+commonKey+
+               " FROM "+joinTables+
+               " WHERE "+joinKeys+cond+limitCond+")";
     }
 }

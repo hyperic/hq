@@ -92,6 +92,10 @@ public class DataCompressEJBImpl
     private final long SIX_HOUR = MeasurementConstants.SIX_HOUR;
     private final long DAY      = MeasurementConstants.DAY;
 
+    // Max delete rows per statement
+    // on backfill table
+    private final int MAX_BF_DEL_ROWS = 1000;
+
     // Purge intervals, loaded once on first invocation.
     private boolean purgeDefaultsLoaded = false;
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
@@ -245,25 +249,30 @@ public class DataCompressEJBImpl
                 max_time = rs.getLong(1);
 
             HQDialect dialect = Util.getHQDialect();
-            while (min_time < max_time)
+            int totalrows = 0;
+            int rows = 0;
+            while (rows > 0)
             {
                 String delTable   = BF_TABLE+" b",
+                       commonKey  = "b.measurement_id",
                        joinTables = BF_TABLE+" b, "+METRIC_DATA_VIEW+" m",
                        joinKeys   = "m.measurement_id = b.measurement_id"+
                                     " and m.timestamp = b.timestamp",
-                       condition  = "b.timestamp between "+
-                                    (max_time-=BF_PURGE_INCR)+
-                                    " and "+(max_time+BF_PURGE_INCR);
+                       condition  = "";
 
                 sql = dialect.getDeleteJoinStmt(delTable,
+                                                commonKey,
                                                 joinTables,
                                                 joinKeys,
-                                                condition);
-                int rows = stmt.executeUpdate(sql);
-                if (rows > 0)
-                    log.debug("Purged "+rows+" rows of backfilled data between"+
-                              " "+TimeUtil.toString(max_time)+" and "+
-                              TimeUtil.toString(max_time+BF_PURGE_INCR));
+                                                condition,
+                                                MAX_BF_DEL_ROWS);
+                rows = stmt.executeUpdate(sql);
+                totalrows += rows;
+            }
+            if (totalrows > 0) {
+                log.debug("Purged "+rows+" rows of backfilled data between"+
+                          " "+TimeUtil.toString(max_time)+" and "+
+                          TimeUtil.toString(max_time+BF_PURGE_INCR));
             }
         }
         finally {
