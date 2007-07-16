@@ -59,6 +59,7 @@ public class HQApp {
     private ShutdownCallback   _shutdown;
     private File               _restartStorage;
     private File               _resourceDir;
+    private File               _webAccessibleDir;
     
     static {
         TxSnatch.setSnatcher(new Snatcher());
@@ -110,7 +111,22 @@ public class HQApp {
             return _resourceDir;
         }
     }
-    
+
+    public void setWebAccessibleDir(File dir) {
+        synchronized(_startupClasses) {
+            _webAccessibleDir = dir;
+        }
+    }
+
+    /**
+     * Get the directory which represents the URL root for the application
+     */
+    public File getWebAccessibleDir() {
+        synchronized(_startupClasses) {
+            return _webAccessibleDir;
+        }
+    }
+
     /**
      * @see CallbackDispatcher#generateCaller(Class)
      */

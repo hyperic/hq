@@ -448,6 +448,8 @@ public class ProductPluginDeployer
         File deployDir = new File(sc.getServerHomeDir(), "deploy");
         File earDir    = new File(deployDir, "hq.ear");
         _app.setResourceDir(earDir);
+        File warDir    = new File(earDir, "hq.war");
+        _app.setWebAccessibleDir(warDir);
         for (Iterator i=lines.iterator(); i.hasNext(); ) {
             String className = (String)i.next();
             
