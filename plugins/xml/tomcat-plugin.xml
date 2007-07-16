@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -138,7 +143,7 @@
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
     <plugin type="control"
-            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+            class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
 
     <config>
       <option name="jmx.url"
@@ -446,6 +451,33 @@
               indicator="true"
               template="${OBJECT_NAME}:${alias}"
               units="none"/>
+    </service>
+
+    <service name="Java Process Metrics">
+      <config>
+        <option name="process.query"
+                default="%ptql%"
+                description="PTQL for Tomcat Java Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="HTTP">
+      <config include="http"/>
+      <filter name="template"
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
     </service>
   </server>
 
