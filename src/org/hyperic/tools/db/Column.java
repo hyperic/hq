@@ -31,8 +31,8 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import org.hyperic.util.StrongList;
-import org.hyperic.util.jdbc.JDBC;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
