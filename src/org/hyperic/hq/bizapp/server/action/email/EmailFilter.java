@@ -47,21 +47,21 @@ import javax.rmi.PortableRemoteObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.ConfigPropertyException;
@@ -72,28 +72,14 @@ import org.quartz.SimpleTrigger;
 
 public class EmailFilter {
     protected Log log = LogFactory.getLog(EmailFilter.class);
-    private static final String JOB_GROUP = "EmailFilterGroup";
+    private static final String     JOB_GROUP  = "EmailFilterGroup";
+    private static final IntHashMap alertBuffer = new IntHashMap();
 
-    private static EmailFilter singleton = new EmailFilter();
-
-    /** Holds value of property alertBuffer. */
-    private IntHashMap alertBuffer = new IntHashMap();
+    private PlatformManagerLocal     pltMan;
+    private ServerConfigManagerLocal configMan;
+    private AuthzSubjectValue        overlord;
+    private SchedulerLocal           scheduler;
     
-    /** Holds value of property platform manager. */
-    private PlatformManagerLocal pltMan = null;
-
-    /** Holds value of property server config manager. */
-    private ServerConfigManagerLocal configMan = null;
-    
-    /** Holds value of property overlord. */
-    AuthzSubjectValue overlord = null;
-    
-    /** Holds value of property appMan. */
-    private SchedulerLocal scheduler = null;
-    
-    public static EmailFilter getInstance() { return singleton; }
-
-    /** Creates a new instance of EmailFilter */
     public EmailFilter() {}
 
     private boolean init() {
@@ -101,15 +87,11 @@ public class EmailFilter {
             return true;
             
         try {
-            pltMan = PlatformManagerUtil.getLocalHome().create();
+            pltMan = PlatformManagerEJBImpl.getOne();
             AuthzSubjectManagerLocal authzSubjectManager =
-                AuthzSubjectManagerUtil.getLocalHome().create();
+                AuthzSubjectManagerEJBImpl.getOne();
             overlord = authzSubjectManager.getOverlord();
             return true;
-        } catch (CreateException e) {
-            // Then we'll keep those values null
-        } catch (NamingException e) {
-            // Then we'll keep those values null
         } catch (ObjectNotFoundException e) {
             // Then we'll keep those values null
         }
@@ -163,65 +145,63 @@ public class EmailFilter {
     public void sendAlert(AppdefEntityID appEnt, InternetAddress[] addresses,
                           String subject, String body, boolean filter)
     {
-        if (appEnt != null) {
-            // Replace the resource name
-            String[] replStrs = new String[] { subject, body };
-            replaceAppdefEntityHolders(appEnt, replStrs);
-            subject = replStrs[0];
-            body = replStrs[1];
+        if (appEnt == null) {
+            // Go ahead and just send the alert
+            sendEmail(addresses, subject, body);
+            return;
+        }
+
+        // Replace the resource name
+        String[] replStrs = new String[] { subject, body };
+        replaceAppdefEntityHolders(appEnt, replStrs);
+        subject = replStrs[0];
+        body = replStrs[1];
             
-            // See if alert needs to be filtered
-            if (filter && init()) {
-                try {
-                    // Now let's look up the platform ID
-                    Integer platId = null;
+        // See if alert needs to be filtered
+        if (filter && init()) {
+            try {
+                // Now let's look up the platform ID
+                Integer platId;
                     
-                    switch (appEnt.getType()) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                        platId = appEnt.getId();
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        platId = pltMan.getPlatformIdByServer(appEnt.getId());
-                        break;
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        platId = pltMan.getPlatformIdByService(appEnt.getId());
-                        break;
-                    default:
-                        break;
-                    }
+                switch (appEnt.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    platId = appEnt.getId();
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    platId = pltMan.getPlatformIdByServer(appEnt.getId());
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    platId = pltMan.getPlatformIdByService(appEnt.getId());
+                    break;
+                default:
+                    platId = null;
+                    break;
+                }
 
-                    filter = false;
-
-                    // Let's see if we are adding or sending
-                    if (platId != null) {
+                filter = false;
+                boolean scheduleJob = false;
+                
+                // Let's see if we are adding or sending
+                if (platId != null) {
+                    synchronized (alertBuffer) {
                         if (alertBuffer.containsKey(platId.intValue())) {
                             // Queue it up
-                            Map cache =
-                                (Map) alertBuffer.get(platId.intValue());
+                            Map cache = (Map)alertBuffer.get(platId.intValue());
                             
                             if (cache == null) {
                                 // Make sure we check again in 5 minutes
-                                try {
-                                    cache = new Hashtable();
-                                    alertBuffer.put(platId.intValue(), cache);
-                                    scheduleJob(platId);
-                                } catch (SchedulerException e) {
-                                    // Job probably already exists
-                                    log.error("Unable to reschedule job " +
-                                               platId + ": " + e);
-                                }
-
+                                cache = new Hashtable();
+                                alertBuffer.put(platId.intValue(), cache);
+                                scheduleJob = true;
                             }
 
                             for (int i = 0; i < addresses.length; i++) {
-                                StringBuffer msg = null;
+                                StringBuffer msg;
                                 if (cache.containsKey(addresses[i])) {
                                     // Create new buffer with previous body
-                                    msg =
-                                        (StringBuffer) cache.get(addresses[i]);
+                                    msg = (StringBuffer)cache.get(addresses[i]); 
                                     msg.append("\n");
-                                }
-                                else {
+                                } else {
                                     msg = new StringBuffer();
                                 }
     
@@ -233,32 +213,37 @@ public class EmailFilter {
                             filter = true;
                         } else {
                             // Add new job to send filtered e-mail in 5 minutes
-                            scheduleJob(platId);
+                            scheduleJob = true;
     
                             // Add a new queue
                             alertBuffer.put(platId.intValue(), new Hashtable());
                         }
                     }
-    
-                    if (filter)
-                        return;
-                } catch (PlatformNotFoundException e) {
-                    log.error("Entity ID invalid: " + e);
-                } catch (SchedulerException e) {
-                    log.error("Can't schedule the filtered alert: " + e);
                 }
+                
+                if (scheduleJob) {
+                    try {
+                        scheduleJob(platId);
+                    } catch (SchedulerException e) {
+                        //  Job probably already exists
+                        log.error("Unable to reschedule job " + platId, e);
+                    }
+                }
+    
+                if (filter)
+                    return;
+            } catch (PlatformNotFoundException e) {
+                log.error("Entity ID invalid: " + e);
             }
         }
-
-        // Go ahead and just send the alert
+            
         sendEmail(addresses, subject, body);
-        return;
     }
     
     private InternetAddress getFromAddress() {
         try {
             if (this.configMan == null) {
-                this.configMan = ServerConfigManagerUtil.getLocalHome().create();                
+                this.configMan = ServerConfigManagerEJBImpl.getOne();
             }
             
             Properties props = this.configMan.getConfig();
@@ -268,10 +253,6 @@ public class EmailFilter {
             }
         } catch (ConfigPropertyException e) {
             log.error("ConfigPropertyException fetch FROM address", e);
-        } catch (CreateException e) {
-            log.error("System error", e);
-        } catch (NamingException e) {
-            log.error("System error", e);
         } catch (AddressException e) {
             log.error("Bad FROM address", e);
         }
@@ -279,7 +260,7 @@ public class EmailFilter {
     }
     
     private void sendEmail(InternetAddress[] addresses,
-                          String subject, String body)
+                           String subject, String body)
     {
         Session session;
         try {
@@ -297,8 +278,7 @@ public class EmailFilter {
             InternetAddress from = this.getFromAddress();
             if (from == null) {
                 m.setFrom();
-            }
-            else {
+            } else {
                 m.setFrom(from);
             }
 
@@ -320,24 +300,25 @@ public class EmailFilter {
         }
     }
     
-    public void sendFiltered(int platId)
-        throws NamingException {
-        if (!alertBuffer.containsKey(platId))
-            return;
+    public void sendFiltered(int platId) {
+        Hashtable cache;
+        
+        synchronized (alertBuffer) {
+            if (!alertBuffer.containsKey(platId))
+                return;
 
-        AppdefEntityID platEntId = new AppdefEntityID(
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platId);
-
+            cache = (Hashtable) alertBuffer.remove(platId);
+        
+            if (cache == null || cache.size() == 0)
+                return;
+        
+            // Insert key again so that we continue filtering
+            alertBuffer.put(platId, null);
+        }
+        
+        AppdefEntityID platEntId = AppdefEntityID.newPlatformID(platId); 
         String platName = getAppdefEntityName(platEntId);
-        
-        Hashtable cache = (Hashtable) alertBuffer.remove(platId);
-        
-        if (cache == null || cache.size() == 0)
-            return;
-        
-        // Insert key again so that we continue filtering
-        alertBuffer.put(platId, null);
-        
+    
         // The cache is organized by addresses
         Collection addrs = cache.keySet();
         for (Iterator i = addrs.iterator(); i.hasNext(); ) {
@@ -354,8 +335,8 @@ public class EmailFilter {
             String name = EmailFilterJob.class.getName() + platId;
             
             // Create job detail
-            JobDetail jd =
-                new JobDetail(name + "Job", JOB_GROUP, EmailFilterJob.class);
+            JobDetail jd = new JobDetail(name + "Job", JOB_GROUP, 
+                                         EmailFilterJob.class);
             
             String appIdStr = platId.toString();
             

@@ -25,11 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.action.email;
 
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -53,13 +50,8 @@ public class EmailFilterJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
         int appId = new Integer(dataMap.getString(APP_ID)).intValue();
 
-        EmailFilter ef = EmailFilter.getInstance();
+        EmailFilter ef = new EmailFilter();
 
-        try {
-            ef.sendFiltered(appId);
-        } catch (NamingException e) {
-            throw new JobExecutionException(e, false);        }
+        ef.sendFiltered(appId);
     }
 }
-
-// EOF

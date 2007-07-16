@@ -89,7 +89,7 @@ public class SyslogAction extends SyslogActionConfig
     public String execute(AlertInterface alert, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
-        EmailFilter filter = EmailFilter.getInstance();
+        EmailFilter filter = new EmailFilter();
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
         AppdefEntityID aeid = new AppdefEntityID(alertDef.getAppdefType(),

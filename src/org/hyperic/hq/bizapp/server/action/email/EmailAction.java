@@ -147,7 +147,7 @@ public class EmailAction extends EmailActionConfig
                 return "No valid users or emails found to send alert";
             }
 
-            EmailFilter filter = EmailFilter.getInstance();
+            EmailFilter filter = new EmailFilter();
 
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
@@ -263,7 +263,7 @@ public class EmailAction extends EmailActionConfig
         
         InternetAddress[] to = lookupEmailAddr();
 
-        EmailFilter filter = EmailFilter.getInstance();
+        EmailFilter filter = new EmailFilter();
 
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
         filter.sendAlert(getResource(defInfo), to, 
