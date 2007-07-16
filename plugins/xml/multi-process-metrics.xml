@@ -1,0 +1,83 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<!-- Multi process metrics, see activemq-plugin.xml for example usage -->
+<metric name="Availability"
+        alias="Availability"
+        template="system.avail:Type=MultiProcCpu,Arg=%process.query%:Processes"
+        category="AVAILABILITY"
+        indicator="true"
+        units="percentage"
+        collectionType="dynamic"/>
+
+<metric name="Number of Processes"
+        alias="NumProcesses"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+        category="UTILIZATION"
+        units="none"
+        collectionType="dynamic"/>
+
+<metric name="Memory Size"
+        alias="MemSize"
+        template="sigar:Type=MultiProcMem,Arg=%process.query%:Size"
+        category="UTILIZATION"
+        units="B"
+        collectionType="dynamic"/>
+
+<metric name="Resident Memory Size"
+        alias="ResidentMemSize"
+        template="sigar:Type=MultiProcMem,Arg=%process.query%:Resident"
+        category="UTILIZATION"
+        units="B"
+        collectionType="dynamic"/>
+
+<metric name="Cpu System Time"
+        alias="SystemTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Sys"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+<metric name="Cpu User Time"
+        alias="UserTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:User"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+<metric name="Cpu Total Time"
+        alias="TotalTime"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Total"
+        category="UTILIZATION"
+        units="ms"
+        collectionType="trendsup"/>
+
+<metric name="Cpu Usage"
+        alias="Usage"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Percent"
+        category="UTILIZATION"
+        indicator="true"
+        units="percentage"
+        collectionType="dynamic"/>

@@ -95,7 +95,8 @@ public class SybaseServerDetector
                         TABLE       = "Table",
                         INDEX       = "Index",
                         VERSION_15  = "15.x",
-                        VERSION_12_5 = "12.5.x";
+                        VERSION_12_5 = "12.5.x",
+                        VERSION_12_0 = "12.x";
 
     private static List getServerProcessList()
     {
@@ -156,7 +157,9 @@ public class SybaseServerDetector
         if (path.indexOf("dataserver") == -1)
             return servers;
 
-        if (path.indexOf("12_5") != -1)
+        if (path.indexOf("12_0") != -1)
+            version = VERSION_12_0;
+        else if (path.indexOf("12_5") != -1)
             version = VERSION_12_5;
         else if (path.indexOf("15_0") != -1)
             version = VERSION_15;

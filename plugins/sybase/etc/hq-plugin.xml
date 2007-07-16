@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 
+<!DOCTYPE plugin [
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -55,83 +59,99 @@
           value="${domain}:Type=Service,instance=%instance%:${alias}"/>
   <metrics name="Sybase 12.x Instance">
     <metric name="Availability"
+            alias="Availability"
             category="AVAILABILITY"
             indicator="true"
             units="percentage"
             collectionType="dynamic"/>
 
     <metric name="Number of Transactions"
+            alias="NumTx"
             category="THROUGHPUT"
             indicator="true"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of User Tables"
+            alias="NumUserTables"
             category="UTILIZATION"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of Active Locks"
+            alias="NumActiveLocks"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Page Locks"
+            alias="NumActivePageLocks"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Table Locks"
+            alias="NumActiveTableLocks"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Servers"
+            alias="NumServers"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Active Users"
+            alias="ActiveUsers"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Local Transactions"
+            alias="NumLocalTransactions"
             category="THROUGHPUT"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Number of External Transactions"
+            alias="NumExternalTransactions"
             category="THROUGHPUT"
             units="none"
             collectionType="trendsup"/>
 
     <metric name="Instance Used Space"
+            alias="InstanceUsedSpace"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Instance Free Space"
+            alias="InstanceFreeSpace"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Instance Total Space"
+            alias="InstanceTotalSpace"
             category="UTILIZATION"
             units="B"
             collectionType="dynamic"/>
 
     <metric name="Up Time"
+            alias="UpTime"
             category="AVAILABILITY"
             units="ms"
             collectionType="static"/>
 
     <metric name="Number of Indexes"
+            alias="NumIndexes"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
 
     <metric name="Number of Tx Logs"
+            alias="NumTxLogs"
             category="UTILIZATION"
             units="none"
             collectionType="dynamic"/>
@@ -176,6 +196,15 @@
             units="percentage"
             collectionType="dynamic"/>
   </metrics>
+
+  <server name="Sybase"
+          version="12.x">
+    <plugin type="measurement"
+            class="SybaseMeasurementPlugin"/>
+    <plugin type="autoinventory"
+            class="SybaseServerDetector"/>
+    <metrics include="Sybase 12.x Instance"/>
+  </server>
 
   <server name="Sybase"
           version="12.5.x">
@@ -325,6 +354,15 @@
                 collectionType="dynamic"/>
       </metrics>
     </service>
+
+    <service name="DataServer Process Metrics">
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=dataserver"
+                description="PTQL for Sybase DataServer Process"/>
+      </config>
+      &multi-process-metrics;
+    </service>
   </server>
 
   <server name="Sybase"
@@ -340,15 +378,18 @@
     </p>
     <p>
       Please run the HQ agent on the local Sybase server as the sybase user.
+      <br>
       This is neccessary to get the proper ENV vars setup in order to execute
+      <br>
       the sp_sysmon procedure.
     </p>
     <p>
-      NOTE:  The jdbcUrl may not work using localhost.  Please specify the actual
-             hostname.
+      <b>NOTE:</b>  The jdbcUrl may not work using localhost.  Please 
+      specify the actual hostname.
     </p>
     ]]>
   </help>
+  <help name="Sybase 12.x" include="Sybase"/>
   <help name="Sybase 12.5.x" include="Sybase"/>
   <help name="Sybase 15.x" include="Sybase"/>
 </plugin>
