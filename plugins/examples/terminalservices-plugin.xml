@@ -31,9 +31,18 @@
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
 
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.DaemonDetector"/>
+
+    <filter name="service_name" value="TermService"/>
+
+    <!-- PROC_QUERY used by DaemonDetector -->
+    <property name="PROC_QUERY"
+              value="Pid.Service.eq=${service_name}"/>
+
     <!-- Checks that Windows 'TermService' service is running -->
     <metric name="Availability"
-            template="win32:Service=TermService:Availability"
+            template="win32:Service=${service_name}:Availability"
             indicator="true"/>
 
     <filter name="object" value="Terminal Services"/>
