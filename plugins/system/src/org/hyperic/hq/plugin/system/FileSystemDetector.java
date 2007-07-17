@@ -129,7 +129,6 @@ public class FileSystemDetector
         throws SigarException {
 
         boolean isDebug = log.isDebugEnabled();
-        boolean isWin32 = isWin32();
 
         List serviceConfigs = getServiceConfigs(type);
         
@@ -144,49 +143,54 @@ public class FileSystemDetector
             String file =
                 serviceConfig.getValue(SystemPlugin.PROP_PATH);
             
+            AIServiceValue svc = createSystemService(type, name);
+
             if (isDebug) {
                 log.debug("Getting cprops for " +
                           name + " " + type + "=" + file);
             }
-
-            AIServiceValue svc = createSystemService(type, name);
             
-            ConfigResponse cprops = new ConfigResponse();
-            boolean isDirectory = new File(file).isDirectory();
-
-            if (!isDirectory) {
-                try {
-                    cprops.setValue("md5",
-                                    MD5.getDigestString(new File(file)));
-                } catch (IOException e) {
-                    getLog().debug("Error getting md5 for " + file + ": " + e);
-                }
-            }
-
-            if (!isWin32) { //XXX not quite right on win32
-                try {
-                    FileInfo info = sigar.getFileInfo(file);
-                    cprops.setValue("permissions", info.getPermissionsString());
-                } catch (SigarException e) {
-                
-                }
-            }
-
-            FileSystemMap mounts = sigar.getFileSystemMap();
-            FileSystem fs = mounts.getMountPoint(file);
-            if (fs != null) {
-                cprops.setValue("fs", fs.getDirName());
-            }
-
-            try {
-                svc.setCustomProperties(cprops.encode());
-            } catch (EncodingException e) {
-                getLog().error("Error encoding cprops: " + e.getMessage());
-            }
-            
+            setFileProperties(sigar, svc, file);
             services.add(svc);
         }
         
         return services;
      }
+
+    private void setFileProperties(Sigar sigar, AIServiceValue svc, String file)
+        throws SigarException {
+
+        ConfigResponse cprops = new ConfigResponse();
+        boolean isDirectory = new File(file).isDirectory();
+
+        if (!isDirectory) {
+            try {
+                cprops.setValue("md5",
+                                MD5.getDigestString(new File(file)));
+            } catch (IOException e) {
+                getLog().debug("Error getting md5 for " + file + ": " + e);
+            }
+        }
+
+        if (!isWin32()) { //XXX not quite right on win32
+            try {
+                FileInfo info = sigar.getFileInfo(file);
+                cprops.setValue("permissions", info.getPermissionsString());
+            } catch (SigarException e) {
+            
+            }
+        }
+
+        FileSystemMap mounts = sigar.getFileSystemMap();
+        FileSystem fs = mounts.getMountPoint(file);
+        if (fs != null) {
+            cprops.setValue("fs", fs.getDirName());
+        }
+
+        try {
+            svc.setCustomProperties(cprops.encode());
+        } catch (EncodingException e) {
+            getLog().error("Error encoding cprops: " + e.getMessage());
+        }
+    }
 }
