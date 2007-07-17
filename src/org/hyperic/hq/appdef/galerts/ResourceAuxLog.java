@@ -30,6 +30,6 @@ public class ResourceAuxLog
     }
 
     public String getURL() {
-        return "/Resource.do?rid=" + _ent.getId() + "&type=" + _ent.getType();
+        return "/Resource.do?eid=" + _ent.getId();
     }
 }
