@@ -475,7 +475,6 @@ public interface ParamConstants {
      * Constants for indicator views
      */
     public static final String PARAM_VIEW = "view";
-    public static final String PARAM_VAL_DELIMITOR = ",";
 
     public static final String APPDEF_RES_TYPE_ID = "aetid";
     

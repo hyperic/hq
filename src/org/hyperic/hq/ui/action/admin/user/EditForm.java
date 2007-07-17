@@ -25,11 +25,6 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
-
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
@@ -55,6 +50,8 @@ public class EditForm extends BaseValidatorForm  {
     
     /** Holds value of property emailAddress. */
     private String emailAddress;
+    
+    private boolean htmlEmail;
     
     private String smsAddress;
     
@@ -159,6 +156,14 @@ public class EditForm extends BaseValidatorForm  {
         this.emailAddress = emailAddress;
     }
     
+    public boolean isHtmlEmail() {
+        return htmlEmail;
+    }
+
+    public void setHtmlEmail(boolean htmlEmail) {
+        this.htmlEmail = htmlEmail;
+    }
+
     /** Getter for property phoneNumber.
      * @return Value of property phoneNumber.
      *

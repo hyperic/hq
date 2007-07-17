@@ -27,10 +27,8 @@ package org.hyperic.hq.ui.action.admin.user;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**
  * A subclass of <code>EditForm</code> representing the

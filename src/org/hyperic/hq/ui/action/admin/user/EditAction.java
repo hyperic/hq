@@ -86,13 +86,10 @@ public class EditAction extends BaseAction {
         user.setDepartment  ( userForm.getDepartment() );
         user.setName        ( userForm.getName() );
         user.setEmailAddress( userForm.getEmailAddress() );
+        user.setHtmlEmail   ( userForm.isHtmlEmail() );
         user.setPhoneNumber ( userForm.getPhoneNumber() );
         user.setSMSAddress  ( userForm.getSmsAddress() );
-        if ( userForm.getEnableLogin().equals("yes") ) {
-            user.setActive(true);
-        } else {
-            user.setActive(false);
-        }
+        user.setActive      ( userForm.getEnableLogin().equals("yes") );
 
         log.trace("Saving user." + user);            
         authzBoss.saveSubject(sessionId, user);

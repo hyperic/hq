@@ -35,10 +35,8 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * An Action that retrieves a specific user from the BizApp to
@@ -76,8 +74,9 @@ public class EditUserFormPrepareAction extends TilesAction {
         if(userForm.getPhoneNumber() == null)
             userForm.setPhoneNumber( user.getPhoneNumber() );
         if(userForm.getSmsAddress() == null)
-                    userForm.setSmsAddress( user.getSmsaddress());    
+            userForm.setSmsAddress( user.getSmsaddress());    
 
+        userForm.setHtmlEmail(user.isHtmlEmail());
         if ( user.getActive() ) {
             userForm.setEnableLogin("yes");
         } else {

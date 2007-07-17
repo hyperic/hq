@@ -86,15 +86,11 @@ public class NewAction extends BaseAction {
         user.setLastName    ( userForm.getLastName() );
         user.setDepartment  ( userForm.getDepartment() );
         user.setEmailAddress( userForm.getEmailAddress() );
+        user.setHtmlEmail   ( userForm.isHtmlEmail() );
         user.setSMSAddress  ( userForm.getSmsAddress() );
         user.setPhoneNumber ( userForm.getPhoneNumber() );
         user.setAuthDsn     ( HQConstants.ApplicationName );
-
-        if (userForm.getEnableLogin().equals("no")) {
-            user.setActive(false);
-        } else {
-            user.setActive(true);
-        }
+        user.setActive      ( userForm.getEnableLogin().equals("yes") );
 
         // add both a subject and a principal as normal
         log.trace("creating subject [" + user.getName() + "]");

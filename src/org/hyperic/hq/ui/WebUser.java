@@ -181,6 +181,17 @@ public class WebUser {
     public void setEmailAddress(String emailAddress) {
         _subject.setEmailAddress(emailAddress);
     }
+    
+    public boolean isHtmlEmail() {
+        if (_subject == null) {
+            return false;
+        }
+        return _subject.isHtmlEmail();
+    }
+    
+    public void setHtmlEmail(boolean htmlEmail) {
+        _subject.setHtmlEmail(htmlEmail);
+    }
 
     public String getAuthDsn() {
         if (_subject == null) {
