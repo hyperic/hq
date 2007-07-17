@@ -112,6 +112,10 @@ public class SystemPlugin extends ProductPlugin {
         TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
                                            DIR_NAME);
 
+    public static final String DIR_TREE_SERVICE =
+        TypeBuilder.composeServiceTypeName(FILE_SERVER_NAME,
+                                           DIR_TREE_NAME);
+
     public static final String PROP_FS    = "mount";
 
     public static final String PROP_PATH  = "path";

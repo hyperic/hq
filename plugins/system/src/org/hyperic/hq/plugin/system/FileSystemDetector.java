@@ -112,6 +112,7 @@ public class FileSystemDetector
         String[] fileTypes = {
             SystemPlugin.FILE_SERVICE,
             SystemPlugin.DIR_SERVICE,
+            SystemPlugin.DIR_TREE_SERVICE,
             SystemPlugin.SCRIPT_SERVICE,
         };
 
