@@ -49,12 +49,17 @@
 
   <!--  /  -->
   <c:set var="tmpu" value="${param.u}" />
+  <table width="100%" cellspacing="0" class="TableBottomLine">
+    <tr>
+    <td width="50%" class="BlockContent" style="padding-bottom: 10px;">
   <tiles:insert page="/admin/user/UserPasswordForm.jsp">
     <tiles:put name="userId" beanName="tmpu"/>    
     <tiles:put name="administrator" beanName="administrator"/>    
   </tiles:insert>
-
-  <tiles:insert definition=".toolbar.empty"/>  
+    </td>
+    <td width="50%" class="BlockContent">&nbsp;</td>
+    </tr>
+  </table>
 
   <tiles:insert definition=".form.buttons"/>
 

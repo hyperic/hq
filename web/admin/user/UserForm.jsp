@@ -149,56 +149,61 @@
       <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="phoneNumber" tabindex="9"/></td>
      </logic:messagesNotPresent>	    
     </tr>
+
     <tr>
-     <td width="20%" class="BlockLabel"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="admin.user.generalProperties.Email"/></td>
-      <logic:messagesPresent property="emailAddress">
-        <td width="30%" class="ErrorField">
-         <html:text size="31" property="emailAddress" tabindex="3"/><br>
-         <span class="ErrorFieldContent">- <html:errors property="emailAddress"/></span>
-        </td>
-       </logic:messagesPresent>
-       <logic:messagesNotPresent property="emailAddress">
-        <td width="30%" class="BlockContent"><html:text size="31" property="emailAddress" tabindex="3"/></td>
-       </logic:messagesNotPresent>
-      <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.Department"/></td>
-      <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="department" tabindex="10"/></td>
-    </tr>  
   <c:choose>
    <c:when test="${mode eq MODE_NEW}">
-    <tr>
-     <td colspan="4">
+     <td colspan="2">
       <c:set var="tmpu" value="${param.u}" />
       <tiles:insert page="/admin/user/UserPasswordForm.jsp">
        <tiles:put name="userId" beanName="tmpu"/>  
       </tiles:insert>
      </td>
-    </tr>
    </c:when>
    <c:when test="${mode eq MODE_EDIT and User.hasPrincipal}">
-   <tr>
-     <td width="20%" class="BlockLabel"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="common.label.Password"/></td>
-      <td width="30%" class="BlockContent"><span class="CaptionText">
+     <td class="BlockLabel"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="common.label.Password"/></td>
+      <td class="BlockContent"><span class="CaptionText">
 	<fmt:message key="admin.user.generalProperties.ReturnTo"/>
 	<html:link page="/admin/user/UserAdmin.do?mode=${MODE_VIEW}&u=${param.u}">
 	 <fmt:message key="admin.user.generalProperties.ViewUser"/>
 	</html:link>
 	<fmt:message key="admin.user.generalProperties.ToAccess"/></span>
       </td>
-      <td width="20%" class="BlockLabel">&nbsp;</td>
-      <td width="30%" class="BlockContent">&nbsp;</td>
-	</tr>	 
     </c:when>
   </c:choose>
+      <td class="BlockLabel" valign="top"><fmt:message key="admin.user.generalProperties.Department"/></td>
+      <td class="BlockContent" valign="top"><html:text size="31" maxlength="50" property="department" tabindex="10"/></td>
+	</tr>	 
 
-  <c:choose>
+    <tr>
+     <td class="BlockLabel"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="admin.user.generalProperties.Email"/></td>
+      <logic:messagesPresent property="emailAddress">
+        <td class="ErrorField">
+         <html:text size="31" property="emailAddress" tabindex="5"/><br>
+         <span class="ErrorFieldContent">- <html:errors property="emailAddress"/></span>
+        </td>
+       </logic:messagesPresent>
+       <logic:messagesNotPresent property="emailAddress">
+        <td class="BlockContent"><html:text size="31" property="emailAddress" tabindex="5"/></td>
+       </logic:messagesNotPresent>
+    <td class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
+    <td class="BlockContent"><html:text size="31" maxlength="50" property="smsAddress" tabindex="10"/></td>
+    </tr>  
    <tr valign="top">
-  <c:when test="${mode eq MODE_REGISTER}">
-    <td width="20%" class="BlockLabel">&nbsp;</td>
-    <td width="30%" class="BlockContent">&nbsp;</td>
+    <td class="BlockLabel"><fmt:message key="admin.user.generalProperties.Format"/></td>
+    <td class="BlockContent">
+       <html:radio property="htmlEmail" value="true"/>
+       <fmt:message key="admin.user.generalProperties.format.HTML"/><br/>
+       <html:radio property="htmlEmail" value="false"/>
+       <fmt:message key="admin.user.generalProperties.format.TEXT"/>
+    </td>
+  <c:choose>
+  <c:when test="${mode eq MODE_REGISTER}"> 
+    <td class="BlockContent colspan="2">&nbsp;</td>
   </c:when>
   <c:otherwise>
-    <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
-    <td width="30%" class="BlockContent">
+    <td class="BlockLabel"><fmt:message key="admin.user.generalProperties.EnableLogin"/></td>
+    <td class="BlockContent">
      <c:choose>
       <c:when test="${empty param.enableLogin}">
 	<input type="radio" name="enableLogin" value="yes" checked="checked" tabindex="6"/>
@@ -207,15 +212,14 @@
        <html:radio property="enableLogin" value="yes" tabindex="6"/>
       </c:otherwise>
      </c:choose>
-     <fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br>
+     <fmt:message key="admin.user.generalProperties.enableLogin.Yes"/><br/>
      <html:radio property="enableLogin" value="no" tabindex="7"/>
      <fmt:message key="admin.user.generalProperties.enableLogin.No"/>
     </td>
   </c:otherwise>
   </c:choose>
-    <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
-    <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="smsAddress" tabindex="10"/></td>
-   </tr>
+   </tr>  
+
 </table>
 
 <c:if test="${mode eq MODE_EDIT}">         

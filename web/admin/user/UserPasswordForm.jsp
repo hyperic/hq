@@ -36,11 +36,11 @@
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
  <tr valign="top">
-  <td width="20%" class="BlockLabel">
+  <td width="40%" class="BlockLabel">
    <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
    <fmt:message key="common.label.Password"/>
    </td>
-   <td width="30%" class="BlockContent">
+   <td width="60%" class="BlockContent">
     <c:if test="${not empty userId}">  
       <tiles:importAttribute name="administrator"/>
       <html:hidden property="id" value="${param.u}"/>
@@ -64,9 +64,6 @@
     <fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
     <input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5">
    </td>
-
-   <td width="20%" class="BlockLabel">&nbsp;</td>
-   <td width="30%" class="BlockLabel">&nbsp;</td>    
   </tr>
 
   <%-- we need to display the yellow box below if there are password
@@ -84,8 +81,8 @@
 
   <c:if test="${passwordMessagesPresent}">
    <tr valign="top"> 
-    <td width="20%" class="BlockLabel">&nbsp;</td>
-    <td width="30%" class="ErrorField">
+    <td class="BlockLabel">&nbsp;</td>
+    <td class="ErrorField">
      <span class="ErrorFieldContent">
       <logic:messagesPresent property="currentPassword">
        -<html:errors property="currentPassword"/><br>
@@ -98,8 +95,6 @@
       </logic:messagesPresent>
      </span>
     </td>
-    <td width="20%" class="BlockLabel">&nbsp;</td>
-    <td width="30%" class="BlockLabel">&nbsp;</td>    
    </tr> 
   </c:if>
 
