@@ -935,8 +935,6 @@
 
     <hqplugin name="sybase"/>
 
-    <hqplugin name="jetty"/>
-
     <hqplugin name="coldfusion"/>
 
     <hqplugin name="alfresco"/>
