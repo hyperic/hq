@@ -107,10 +107,20 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return (AlertDefinition)super.findById(id);
     }
     
-    public List findByAppdefEntityType(AppdefEntityID id) {
+    public List findByAppdefEntityTypeSortByCtime(AppdefEntityID id,
+                                                  boolean asc) {
+        return findByAppdefEntityType(id, "ctime", asc);
+    }
+    
+    public List findByAppdefEntityType(AppdefEntityID id, boolean asc) {
+        return findByAppdefEntityType(id, "name", asc);
+    }
+        
+    private List findByAppdefEntityType(AppdefEntityID id, String sort,
+                                        boolean asc) {
         String sql = "from AlertDefinition a where a.appdefType = :aType " +
             "and a.appdefId = :aId and a.deleted = false and " +
-            "a.parent.id = 0 order by a.name";
+            "a.parent.id = 0 order by a." + sort + (asc ? " ASC" : " DESC");
         
         return getSession().createQuery(sql)
             .setInteger("aType", id.getType())

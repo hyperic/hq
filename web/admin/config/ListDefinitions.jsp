@@ -120,14 +120,14 @@ function setActiveInactive() {
     <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
   </display:column>
   <display:column width="20%" property="name" sort="true" sortAttr="1"
-                  defaultSort="false" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&aetid=${param.aetid}" paramId="ad" paramProperty="id"/>
+                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.AlertDefinition" href="/alerts/Config.do?mode=viewDefinition&aetid=${param.aetid}" paramId="ad" paramProperty="id"/>
     
   <display:column width="20%" property="description"
                   title="common.header.Description" >
 </display:column>
 
   <display:column width="20%" property="ctime" sort="true" sortAttr="2"
-                  defaultSort="true" title="alerts.config.DefinitionList.ListHeader.DateCreated" >
+                  title="alerts.config.DefinitionList.ListHeader.DateCreated" >
 <display:datedecorator/>
 </display:column>
                   

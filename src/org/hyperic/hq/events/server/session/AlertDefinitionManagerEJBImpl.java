@@ -745,10 +745,14 @@ public class AlertDefinitionManagerEJBImpl
 
         Collection adefs;
         if (parentId.equals(EventConstants.TYPE_ALERT_DEF_ID)) {
-            adefs = aDao.findByAppdefEntityType(id);
-            
-            if (pc.getSortorder() == PageControl.SORT_DESC)
-                Collections.reverse((List) adefs);
+            if (pc.getSortattribute() == SortAttribute.CTIME) {
+                adefs =
+                    aDao.findByAppdefEntityTypeSortByCtime(id,
+                                                           pc.isAscending());
+            }
+            else {
+                adefs = aDao.findByAppdefEntityType(id, pc.isAscending());
+            }
         } else {
             canManageAlerts(subj, id);
             AlertDefinition def = getAlertDefDAO().findById(parentId);
@@ -796,7 +800,7 @@ public class AlertDefinitionManagerEJBImpl
             
         if (parentId != null) {
             if (EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
-                adefs = aDao.findByAppdefEntityType(id);
+                adefs = aDao.findByAppdefEntityType(id, true);
             }
             else  {
                 AlertDefinition def = getAlertDefDAO().findById(parentId);
