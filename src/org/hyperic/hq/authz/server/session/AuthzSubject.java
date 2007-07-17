@@ -214,6 +214,7 @@ public class AuthzSubject extends AuthzNamedBean {
         _valueObj.setAuthDsn((getAuthDsn() == null) ? "" : getAuthDsn());
         _valueObj.setEmailAddress((getEmailAddress() == null) ? "" : 
                                   getEmailAddress());
+        _valueObj.setHtmlEmail(getHtmlEmail());
         _valueObj.setSMSAddress((getSMSAddress() == null) ? "" : 
                                 getSMSAddress());
         _valueObj.setFirstName((getFirstName() == null) ? "" : getFirstName());
@@ -232,6 +233,7 @@ public class AuthzSubject extends AuthzNamedBean {
         setAuthDsn(authzSubjectValue.getAuthDsn());
         setDepartment(authzSubjectValue.getDepartment());
         setEmailAddress(authzSubjectValue.getEmailAddress());
+        setHtmlEmail(authzSubjectValue.isHtmlEmail());
         setFirstName(authzSubjectValue.getFirstName());
         setLastName(authzSubjectValue.getLastName());
         setName(authzSubjectValue.getName());

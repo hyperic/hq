@@ -34,89 +34,22 @@ public class AuthzSubjectValue
    implements java.io.Serializable
 {
    private java.lang.String sortName;
-   private boolean sortNameHasBeenSet = false;
    private boolean active;
-   private boolean activeHasBeenSet = false;
    private boolean system;
-   private boolean systemHasBeenSet = false;
    private String authDsn;
-   private boolean authDsnHasBeenSet = false;
    private String emailAddress;
-   private boolean emailAddressHasBeenSet = false;
+   private boolean htmlEmail;
    private String sMSAddress;
-   private boolean sMSAddressHasBeenSet = false;
    private String firstName;
-   private boolean firstNameHasBeenSet = false;
    private String lastName;
-   private boolean lastNameHasBeenSet = false;
    private String phoneNumber;
-   private boolean phoneNumberHasBeenSet = false;
    private String department;
-   private boolean departmentHasBeenSet = false;
    private String name;
-   private boolean nameHasBeenSet = false;
    private Integer id;
-   private boolean idHasBeenSet = false;
+   private boolean idHasBeenSet;
 
    public AuthzSubjectValue() {
     }
-
-   public AuthzSubjectValue( java.lang.String sortName,boolean active,boolean system,String authDsn,String emailAddress,String sMSAddress,String firstName,String lastName,String phoneNumber,String department,String name,Integer id )
-   {
-	  this.sortName = sortName;
-	  sortNameHasBeenSet = true;
-	  this.active = active;
-	  activeHasBeenSet = true;
-	  this.system = system;
-	  systemHasBeenSet = true;
-	  this.authDsn = authDsn;
-	  authDsnHasBeenSet = true;
-	  this.emailAddress = emailAddress;
-	  emailAddressHasBeenSet = true;
-	  this.sMSAddress = sMSAddress;
-	  sMSAddressHasBeenSet = true;
-	  this.firstName = firstName;
-	  firstNameHasBeenSet = true;
-	  this.lastName = lastName;
-	  lastNameHasBeenSet = true;
-	  this.phoneNumber = phoneNumber;
-	  phoneNumberHasBeenSet = true;
-	  this.department = department;
-	  departmentHasBeenSet = true;
-	  this.name = name;
-	  nameHasBeenSet = true;
-	  this.id = id;
-	  idHasBeenSet = true;
-   }
-
-   //TODO Cloneable is better than this !
-   public AuthzSubjectValue( AuthzSubjectValue otherValue )
-   {
-	  this.sortName = otherValue.sortName;
-	  sortNameHasBeenSet = true;
-	  this.active = otherValue.active;
-	  activeHasBeenSet = true;
-	  this.system = otherValue.system;
-	  systemHasBeenSet = true;
-	  this.authDsn = otherValue.authDsn;
-	  authDsnHasBeenSet = true;
-	  this.emailAddress = otherValue.emailAddress;
-	  emailAddressHasBeenSet = true;
-	  this.sMSAddress = otherValue.sMSAddress;
-	  sMSAddressHasBeenSet = true;
-	  this.firstName = otherValue.firstName;
-	  firstNameHasBeenSet = true;
-	  this.lastName = otherValue.lastName;
-	  lastNameHasBeenSet = true;
-	  this.phoneNumber = otherValue.phoneNumber;
-	  phoneNumberHasBeenSet = true;
-	  this.department = otherValue.department;
-	  departmentHasBeenSet = true;
-	  this.name = otherValue.name;
-	  nameHasBeenSet = true;
-	  this.id = otherValue.id;
-	  idHasBeenSet = true;
-   }
 
    public java.lang.String getSortName()
    {
@@ -126,13 +59,9 @@ public class AuthzSubjectValue
    public void setSortName( java.lang.String sortName )
    {
 	  this.sortName = sortName;
-	  sortNameHasBeenSet = true;
 
    }
 
-   public boolean sortNameHasBeenSet(){
-	  return sortNameHasBeenSet;
-   }
    public boolean getActive()
    {
 	  return this.active;
@@ -141,14 +70,10 @@ public class AuthzSubjectValue
    public void setActive( boolean active )
    {
 	  this.active = active;
-	  activeHasBeenSet = true;
 
    }
 
-   public boolean activeHasBeenSet(){
-	  return activeHasBeenSet;
-   }
-   public boolean getSystem()
+    public boolean getSystem()
    {
 	  return this.system;
    }
@@ -156,13 +81,8 @@ public class AuthzSubjectValue
    public void setSystem( boolean system )
    {
 	  this.system = system;
-	  systemHasBeenSet = true;
-
    }
 
-   public boolean systemHasBeenSet(){
-	  return systemHasBeenSet;
-   }
    public String getAuthDsn()
    {
 	  return this.authDsn;
@@ -171,13 +91,8 @@ public class AuthzSubjectValue
    public void setAuthDsn( String authDsn )
    {
 	  this.authDsn = authDsn;
-	  authDsnHasBeenSet = true;
-
    }
 
-   public boolean authDsnHasBeenSet(){
-	  return authDsnHasBeenSet;
-   }
    public String getEmailAddress()
    {
 	  return this.emailAddress;
@@ -186,14 +101,17 @@ public class AuthzSubjectValue
    public void setEmailAddress( String emailAddress )
    {
 	  this.emailAddress = emailAddress;
-	  emailAddressHasBeenSet = true;
-
    }
 
-   public boolean emailAddressHasBeenSet(){
-	  return emailAddressHasBeenSet;
-   }
-   public String getSMSAddress()
+   public boolean isHtmlEmail() {
+    return htmlEmail;
+}
+
+public void setHtmlEmail(boolean htmlEmail) {
+    this.htmlEmail = htmlEmail;
+}
+
+public String getSMSAddress()
    {
 	  return this.sMSAddress;
    }
@@ -201,13 +119,8 @@ public class AuthzSubjectValue
    public void setSMSAddress( String sMSAddress )
    {
 	  this.sMSAddress = sMSAddress;
-	  sMSAddressHasBeenSet = true;
-
    }
 
-   public boolean sMSAddressHasBeenSet(){
-	  return sMSAddressHasBeenSet;
-   }
    public String getFirstName()
    {
 	  return this.firstName;
@@ -216,13 +129,8 @@ public class AuthzSubjectValue
    public void setFirstName( String firstName )
    {
 	  this.firstName = firstName;
-	  firstNameHasBeenSet = true;
-
    }
 
-   public boolean firstNameHasBeenSet(){
-	  return firstNameHasBeenSet;
-   }
    public String getLastName()
    {
 	  return this.lastName;
@@ -231,13 +139,8 @@ public class AuthzSubjectValue
    public void setLastName( String lastName )
    {
 	  this.lastName = lastName;
-	  lastNameHasBeenSet = true;
-
    }
 
-   public boolean lastNameHasBeenSet(){
-	  return lastNameHasBeenSet;
-   }
    public String getPhoneNumber()
    {
 	  return this.phoneNumber;
@@ -246,13 +149,8 @@ public class AuthzSubjectValue
    public void setPhoneNumber( String phoneNumber )
    {
 	  this.phoneNumber = phoneNumber;
-	  phoneNumberHasBeenSet = true;
-
    }
 
-   public boolean phoneNumberHasBeenSet(){
-	  return phoneNumberHasBeenSet;
-   }
    public String getDepartment()
    {
 	  return this.department;
@@ -261,13 +159,8 @@ public class AuthzSubjectValue
    public void setDepartment( String department )
    {
 	  this.department = department;
-	  departmentHasBeenSet = true;
-
    }
 
-   public boolean departmentHasBeenSet(){
-	  return departmentHasBeenSet;
-   }
    public String getName()
    {
 	  return this.name;
@@ -276,13 +169,8 @@ public class AuthzSubjectValue
    public void setName( String name )
    {
 	  this.name = name;
-	  nameHasBeenSet = true;
-
    }
 
-   public boolean nameHasBeenSet(){
-	  return nameHasBeenSet;
-   }
    public Integer getId()
    {
 	  return this.id;
@@ -291,11 +179,7 @@ public class AuthzSubjectValue
    public void setId( Integer id )
    {
 	  this.id = id;
-	  idHasBeenSet = true;
-   }
-
-   public boolean idHasBeenSet(){
-	  return idHasBeenSet;
+      idHasBeenSet = true;
    }
 
    public String toString()
