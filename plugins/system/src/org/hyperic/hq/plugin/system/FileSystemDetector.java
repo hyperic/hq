@@ -35,6 +35,7 @@ import org.hyperic.sigar.FileSystem;
 import org.hyperic.sigar.FileSystemMap;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.security.MD5;
@@ -117,23 +118,117 @@ public class FileSystemDetector
         };
 
         for (int i=0; i<fileTypes.length; i++) {
-            services.addAll(getFileServices(sigar, fileTypes[i]));
+            String type = fileTypes[i];
+            services.addAll(getFileServices(sigar, type));
+            services.addAll(getFileServiceImports(sigar, type));
         }
 
         return services;
     }
-    
+
+    private boolean canRead(File file) {
+        if (!file.exists()) {
+            log.warn(file + ": does not exist");
+            return false;
+        }
+        if (!file.canRead()) {
+            log.warn(file + ": cannot read");
+            return false;
+        }        
+        return true;
+    }
+
+    private List getFileServiceImports(Sigar sigar, String type) {
+
+        List services = new ArrayList();
+        String prop = "system." + type + ".import";
+        String val = getManagerProperty(prop);
+        if (val == null) {
+            return services;
+        }
+
+        log.debug("Importing " + prop + "=" + val);
+        List files = StringUtil.explode(val, ",");
+        boolean isDirType = 
+            type.indexOf(SystemPlugin.DIR_NAME) != -1;
+
+        for (int i=0; i<files.size(); i++) {
+            String path = (String)files.get(i);
+            boolean recurse = path.charAt(0) == '+';
+            if (recurse) {
+                path = path.substring(1);
+            }
+
+            File file = new File(path);
+            if (!canRead(file)) {
+                continue;
+            }
+
+            boolean isDir = file.isDirectory();
+            if (isDirType && !isDir) {
+                log.warn(file + ": not a directory");
+                continue;
+            }
+            //as-is
+            if ((isDirType && isDir) || !isDir) {
+                AIServiceValue svc =
+                    createSystemService(type, path,
+                                        SystemPlugin.PROP_PATH, path);
+                setFileProperties(sigar, svc, path);
+                services.add(svc);
+                continue;
+            }
+
+            //import a directory of files or scripts
+            addFileServices(services, recurse, file, sigar, type);
+        }        
+
+        return services;
+    }
+
+    private void addFileServices(List services, boolean recurse,
+                                 File dir, Sigar sigar, String type) {
+        String[] dents = dir.list();
+        if (dents == null) {
+            log.warn(dir + ": failed to list");
+            return;
+        }
+
+        for (int i=0; i<dents.length; i++) {
+            File ent = new File(dir, dents[i]);
+            String path = ent.getPath();
+            if (!canRead(ent)) {
+                continue;
+            }
+
+            if (ent.isDirectory()) {
+                if (recurse) {
+                    addFileServices(services, recurse,
+                                    ent, sigar, type);
+                    return;
+                }
+                else {
+                    continue;
+                }
+            }
+            AIServiceValue svc =
+                createSystemService(type, path,
+                                    SystemPlugin.PROP_PATH, path);
+            setFileProperties(sigar, svc, path);
+            services.add(svc);
+        }
+    }
+
     //File services are created by hand, the FileControlPlugin
     //registers these services w/ SystemServerDetector so we
     //can auto-discovery inventory properties here
-    private ArrayList getFileServices(Sigar sigar, String type)
-        throws SigarException {
+    private List getFileServices(Sigar sigar, String type) {
 
         boolean isDebug = log.isDebugEnabled();
 
         List serviceConfigs = getServiceConfigs(type);
         
-        ArrayList services = new ArrayList();
+        List services = new ArrayList();
 
         for (int i=0; i<serviceConfigs.size(); i++) {
             ConfigResponse serviceConfig = 
@@ -158,8 +253,7 @@ public class FileSystemDetector
         return services;
      }
 
-    private void setFileProperties(Sigar sigar, AIServiceValue svc, String file)
-        throws SigarException {
+    private void setFileProperties(Sigar sigar, AIServiceValue svc, String file) {
 
         ConfigResponse cprops = new ConfigResponse();
         boolean isDirectory = new File(file).isDirectory();
@@ -178,14 +272,16 @@ public class FileSystemDetector
                 FileInfo info = sigar.getFileInfo(file);
                 cprops.setValue("permissions", info.getPermissionsString());
             } catch (SigarException e) {
-            
             }
         }
 
-        FileSystemMap mounts = sigar.getFileSystemMap();
-        FileSystem fs = mounts.getMountPoint(file);
-        if (fs != null) {
-            cprops.setValue("fs", fs.getDirName());
+        try {
+            FileSystemMap mounts = sigar.getFileSystemMap();
+            FileSystem fs = mounts.getMountPoint(file);
+            if (fs != null) {
+                cprops.setValue("fs", fs.getDirName());
+            }
+        } catch (SigarException e) {
         }
 
         try {
