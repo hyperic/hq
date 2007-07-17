@@ -50,11 +50,13 @@
           </td>
           <td class="FooterRegular" width="30">&nbsp;</td>
           <td class="FooterRegular" nowrap>
-          <div id="aboutAnchor" style="position:relative;">
-          <a name="aboutLink" href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ"/>
-          <fmt:message key="footer.version"/> <c:out value="${HQVersion}"/></a> <c:out value="${HQBuild}"/></td>
-          <td class="FooterRegular" width="30"></div></td>
-          <td class="FooterSmall" nowrap><fmt:message key="footer.pageVersionPrefix"/><c:out value="${camTitle}"/><fmt:message key="footer.pageVersionSuffix"/>
+	          <div id="aboutAnchor" style="position:relative;">
+		          <a name="aboutLink" href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ"/>
+		          <fmt:message key="footer.version"/> <c:out value="${HQVersion}"/></a> <c:out value="${HQBuild}"/>
+	          </div>
+          </td>
+          <td class="FooterRegular" width="30"></td>
+          <td class="FooterSmall" nowrap><fmt:message key="footer.pageVersionPrefix"/><c:out value="${camTitle}"/><fmt:message key="footer.pageVersionSuffix"/></td>
           <td class="FooterRegular" width="100%" align="right"><fmt:message key="footer.Copyright"/></td>
           <td class="FooterBold" nowrap><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
           <td class="FooterBold" width="15">&nbsp;</td>
@@ -73,18 +75,18 @@
   </tr>
   <tr>
     <td class="DisplayLabel" rowspan="3">&nbsp;</td>
-    <td valign="top" class="DisplaySubhead" colspan="2"><html:img page="/images/spacer.gif" width="1" height="5" border="0"/><br>
+    <td valign="top" class="DisplaySubhead" colspan="2"><html:img page="/images/spacer.gif" width="1" height="5" border="0"/><br/>
     <fmt:message key="footer.version"/>
-    <c:out value="${HQVersion}"/><br>&nbsp;</td>
+    <c:out value="${HQVersion}"/><br/>&nbsp;</td>
   </tr>
   <tr>
-    <td valign="top" class="DisplayContent" colspan="2"><span class="DisplayLabel"><fmt:message key="footer.Copyright"/></span><fmt:message key="about.Copyright.Content"/><br>
-    <br>&nbsp;<br></td>
+    <td valign="top" class="DisplayContent" colspan="2"><span class="DisplayLabel"><fmt:message key="footer.Copyright"/></span><fmt:message key="about.Copyright.Content"/><br/>
+    <br/>&nbsp;<br/></td>
   </tr>
   <tr>
-    <td valign="top" class="DisplayContent" colspan="2"><fmt:message key="about.MoreInfo.Label"/><br>
-    <html:link href="#" onclick="window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br>
-    <html:link href="#"  onclick="window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br>
+    <td valign="top" class="DisplayContent" colspan="2"><fmt:message key="about.MoreInfo.Label"/><br/>
+    <html:link href="#" onclick="window.open('http://support.hyperic.com');"><fmt:message key="about.MoreInfo.LinkSupport"/></html:link><br/>
+    <html:link href="#"  onclick="window.open('http://forums.hyperic.org');"><fmt:message key="about.MoreInfo.LinkForums"/></html:link><br/>
     &nbsp;</td>
   </tr>
   <tr>
