@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.jetty">
+
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <metrics name="Class Loading Metrics">
+    <metric name="Loaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+    <metric name="Total Loaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+    <metric name="Unloaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+  </metrics>
+
+  <metrics name="Compilation">
+    <metric name="Total Compilation Time"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="Garbage Collector">
+    <metric name="Collection Count"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Collection Time"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="Memory">
+    <metric name="Object Pending Finalization Count"
+            category="THROUGHPUT"
+            indicator="false"/>
+  </metrics>
+
+  <metrics name="Threading">
+    <metric name="Thread Count"
+            category="UTILIZATION"
+            indicator="false"/>
+    <metric name="Daemon Thread Count"
+            category="UTILIZATION"
+            indicator="false"/>
+  </metrics>
+
+  <metrics name="Jetty IO">
+    <metric name="Connections"
+            category="THROUGHPUT"
+            indicator="true"/>
+    <metric name="Connections Duration Ave"
+            category="THROUGHPUT"
+            indicator="true"/>
+    <metric name="Connections Open"
+            category="THROUGHPUT"
+            indicator="true"/>
+    <metric name="Connections Requests Ave"
+            category="THROUGHPUT"
+            indicator="true"/>
+    <metric name="Requests"
+            category="THROUGHPUT"
+            indicator="true"/>
+  </metrics>
+
+  <server name="Jetty"
+          version="6.x">
+
+    <config>
+      <option name="installpath"
+              default="/home/scottmf/pkgs/jetty"
+              description="Jetty Install Path"/>
+      <option name="jetty-ptql"
+              default="State.Name.re=java,Args.*.ct=start.jar"
+              description="Sigar PTQL Process Query"/>
+    </config>
+
+    <property name="VERSION_FILE"
+              value="lib/jetty-6.*.jar"/>
+
+    <property name="domain"
+              value="Jetty"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%jetty-ptql%:State"
+            indicator="true"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=ClassLoading"/>
+    <metrics include="Class Loading Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Compilation"/>
+    <metrics include="Compilation"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=GarbageCollector"/>
+    <metrics include="Garbage Collector"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Memory"/>
+    <metrics include="Memory"/>
+    <!-- listen for JMX notifications -->
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Threading"/>
+    <metrics include="Threading"/>
+
+<!--
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/server.log"/>
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+-->
+
+    <plugin type="autoinventory"
+            class="JettyServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.jetty.JettyCollector"/>
+
+    <service name="Jetty IO">
+      <plugin type="autoinventory"/>
+      <property name="domain"
+                value="org.mortbay.jetty.nio"/>
+      <property name="OBJECT_NAME"
+                value="${domain}:type=selectchannelconnector,id=*"/>
+      <metrics include="Jetty IO"/>
+    </service>
+
+    <service name="HTTP">
+      <config include="http"/>
+      <filter name="template"
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
+    <service name="Java Process Metrics">
+      <config>
+        <option name="process.query"
+                default="%jetty-ptql%"
+                description="PTQL for Jetty Java Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Jetty">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for monitoring Jetty</h3>
+  </p>
+  <p>
+  To configure Jetty's JMX statistics follow the instructions on:<br>
+  <a href="http://docs.codehaus.org/display/JETTY/Statistics">Jetty JMX Stats configuration</a>
+  </p>
+  ]]>
+  </help>
+  <help name="Jetty 6.x" include="Jetty"/>
+</plugin>
