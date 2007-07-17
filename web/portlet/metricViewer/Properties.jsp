@@ -64,32 +64,7 @@ function handleEnter (field, event) {
 		else
 		return true;
 	}
-function disableSelectOptions(){
-    var sels = document.getElementsByTagName('select');
-    for(var i=0; i < sels.length; i++){
-        sels[i].onchange= function(){
-            if(this.options[this.selectedIndex].disabled){
-                if(this.options.length<=1){
-                    this.selectedIndex = -1;
-                }else if(this.selectedIndex < this.options.length - 1){
-                    this.selectedIndex++;
-                }else{
-                    this.selectedIndex--;
-                }
-            }
-        }
-        if(sels[i].options[sels[i].selectedIndex].disabled){
-
-            sels[i].onchange();
-        }
-        for(var j=0; j < sels[i].options.length; j++){
-            if(sels[i].options[j].disabled){
-                sels[i].options[j].style.color = '#CCC';
-            }
-        }
-    }
-}
-  onloads.push( disableSelectOptions );
+<!--[if lte IE 7]><scriptsrc="<html:rewrite page="/js/optiondisabledsupport.js"/>" type="text/javascript"></script><![endif]-->
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle">
