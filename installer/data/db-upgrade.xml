@@ -5245,7 +5245,7 @@ has already been defined.
                  select id, 2 as appdef_type from eam_resource_type where cid = 303
                  union
                  select id, 3 as appdef_type from eam_resource_type where cid = 305)
-                 as m
+                 m
                where eam_alert_definition.appdef_id = r.instance_id and
                      r.resource_type_id = m.id and
                      eam_alert_definition.appdef_type = m.appdef_type)
@@ -5858,7 +5858,7 @@ has already been defined.
         <statement>          
                 ALTER TABLE eam_galert_aux_logs
                     ADD CONSTRAINT fke2089906c7d09794 FOREIGN KEY (galert_id) 
-                    REFERENCES eam_galert_logs(id);
+                    REFERENCES eam_galert_logs(id)
         </statement>
       </schema-directSQL>
     </schemaSpec>
@@ -5890,7 +5890,7 @@ has already been defined.
                 CACHE 1
         </statement>
         <statement targetDB="oracle">
-             CREATE SEQUENCE eam_galert_aux_logs_id_seq
+             CREATE SEQUENCE eam_metric_aux_logs_id_seq
                 START WITH 10001
                 INCREMENT BY 1
                 NOMAXVALUE
@@ -5961,7 +5961,7 @@ has already been defined.
             CREATE INDEX metric_aux_log_id_idx ON eam_resource_aux_logs (aux_log_id)
         </statement>
         <statement>          
-            ALTER TABLE ONLY eam_resource_aux_logs
+            ALTER TABLE eam_resource_aux_logs
                 ADD CONSTRAINT fk859d15ed997cfc6 FOREIGN KEY (aux_log_id) 
                 REFERENCES eam_galert_aux_logs(id)
         </statement>
@@ -5983,7 +5983,7 @@ has already been defined.
             CREATE TABLE eam_ui_plugin (
                 id integer NOT NULL,
                 version_col NUMBER(19, 0) NOT NULL,
-                name VHARCHAR2(100) NOT NULL,
+                name VARCHAR2(100) NOT NULL,
                 description VARCHAR2(255) NOT NULL,
                 plugin_version VARCHAR2(30) NOT NULL
             )            
@@ -6146,7 +6146,7 @@ has already been defined.
               ADD CONSTRAINT eam_ui_view_masthead_pkey PRIMARY KEY (view_id)
         </statement>
         <statement>
-          ALTER TABLE ONLY eam_ui_view_masthead
+          ALTER TABLE eam_ui_view_masthead
               ADD CONSTRAINT fkc9583392f6253048 FOREIGN KEY (view_id) 
               REFERENCES eam_ui_view(id) ON DELETE CASCADE
         </statement>
