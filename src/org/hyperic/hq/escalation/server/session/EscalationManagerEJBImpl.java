@@ -38,6 +38,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.escalation.shared.EscalationManagerUtil;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -47,6 +49,7 @@ import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
@@ -278,51 +281,6 @@ public class EscalationManagerEJBImpl
      */
     public Escalatable getEscalatable(EscalationState s) {
         return s.getAlertType().findEscalatable(new Integer(s.getAlertId())); 
-    }
-    
-    /**
-     * @ejb:interface-method  
-     */
-    public void pauseEscalation(Escalatable alert, long pauseTime) {
-        PerformsEscalations def = alert.getDefinition();
-        EscalationState state = _stateDAO.find(def);
-        Escalation escalation = state.getEscalation();
-        
-        if (state == null) /* Deleted from underneath someone? */
-            throw new IllegalStateException("Cannot pause -- no state");
-        
-        if (state.isPaused()) {
-            // We could throw an exception here, but maybe someone mashes the
-            // pause button & we get here.  Let's be nice.
-            _log.debug("Double-Pause on state[" + state.getId() + "]");
-            return;
-        }
-        
-        if (!escalation.isPauseAllowed()) 
-            throw new IllegalStateException("Pause not allowed");
-
-        state.setPaused(true);
-        
-        long nextExecTime = state.getNextActionTime();
-        long curTime = System.currentTimeMillis();
-
-        if (pauseTime > escalation.getMaxPauseTime()) {
-            _log.warn("Atempted to pause state[" + state.getId() + "] for " +
-                      pauseTime + " ms., but was trimmed to " + 
-                      escalation.getMaxPauseTime() + " due to the escalation");
-            pauseTime = escalation.getMaxPauseTime();
-        }
-        
-        _log.debug("Pausing state[" + state.getId() + "]");
-        if (curTime + pauseTime < nextExecTime) {
-            // They paused, but it wasn't scheduled to run during that time 
-            // anyway.  This is a no-op.
-        } else {
-            nextExecTime = curTime + pauseTime;
-        }
-         
-        state.setNextActionTime(nextExecTime);
-        EscalationRuntime.getInstance().scheduleEscalation(state);
     }
     
     /**
@@ -615,6 +573,11 @@ public class EscalationManagerEJBImpl
                 _log.warn("Unable to send notification alert", e);
             }
         }
+        
+        // Send event to be logged
+        Messenger sender = new Messenger();
+        sender.publishMessage(EventConstants.EVENTS_TOPIC,
+                              new EscalationEvent(alert, msg));
     }
     
     /**
