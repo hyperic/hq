@@ -1,3 +1,4 @@
+<% if (isEE) { %>
 <script type="text/javascript">
 function swapTables(sel) {
     if (sel=="0")  {
@@ -18,11 +19,13 @@ function swapTables(sel) {
   </select>
 </div>
 
-<div id="alertsTable">
-  <%= dojoTable(id:'Alerts', url:urlFor(action:'data'),
-                schema:alertSchema, numRows:15) %>
-</div>
 <div id="groupalertsTable" style="display:none;">
   <%= dojoTable(id:'GroupAlerts', url:urlFor(action:'groupData'),
                 schema:galertSchema, numRows:15) %>
 </div>                
+<% } %>
+
+<div id="alertsTable">
+  <%= dojoTable(id:'Alerts', url:urlFor(action:'data'),
+                schema:alertSchema, numRows:15) %>
+</div>

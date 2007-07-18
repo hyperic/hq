@@ -7,6 +7,7 @@ import org.hyperic.hq.events.EventConstants
 import org.hyperic.hq.events.server.session.AlertSortField
 import org.hyperic.hq.galerts.server.session.GalertLogSortField
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
+import org.hyperic.hq.hqu.rendit.util.HQUtil
 
 class AlertController 
 	extends BaseController
@@ -90,7 +91,8 @@ class AlertController
     
     def index = { params ->
     	render(locals:[alertSchema:TABLE_SCHEMA, 
-    	               galertSchema:GALERT_TABLE_SCHEMA])
+    	               galertSchema:GALERT_TABLE_SCHEMA,
+    	               isEE:HQUtil.isEnterpriseEdition()])
     }
     
     def data(params) {
