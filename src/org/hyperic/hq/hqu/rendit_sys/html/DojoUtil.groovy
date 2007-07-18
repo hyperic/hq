@@ -203,7 +203,7 @@ class DojoUtil {
          
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
-            var pageNumDisplay = dojo.byId("pageNumbers");
+            var pageNumDisplay = dojo.byId("${idVar}_pageNumbers");
             pageNumDisplay.innerHTML = "${BUNDLE['dojoutil.PageNum']} " + 
                                        (${pageNumVar} + 1); 
 
@@ -241,7 +241,7 @@ class DojoUtil {
 	         <div class="pageButtonCont">
                  <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:20px;float: left;"
                       class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-                 <div id="pageNumbers">&nbsp;</div>
+                 <div id="${idVar}_pageNumbers">&nbsp;</div>
                  <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
                       class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
              </div>
