@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,14 +27,16 @@ package org.hyperic.hq.measurement.shared;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.TrackEvent;
 
 /**
  * This event type represents a change in the resource configuration
  */
 public class ConfigChangedEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface {
+    implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
     private AppdefEntityID resource;
     private String message;
     private String source;
@@ -42,13 +44,13 @@ public class ConfigChangedEvent extends AbstractEvent
     public ConfigChangedEvent(TrackEvent te) {
         super.setTimestamp(te.getTime());
         super.setInstanceId(te.getAppdefId().getId());
-        this.setResource(te.getAppdefId());
-        this.setMessage(te.getMessage());
-        this.setSource(te.getSource());
+        setResource(te.getAppdefId());
+        setMessage(te.getMessage());
+        setSource(te.getSource());
     }
 
     public AppdefEntityID getResource() {
-        return this.resource;
+        return resource;
     }
     
     public void setResource(AppdefEntityID aid) {
@@ -56,7 +58,7 @@ public class ConfigChangedEvent extends AbstractEvent
     }
     
     public String getMessage() {
-        return this.message;
+        return message;
     }
     
     public void setMessage(String msg) {
@@ -64,7 +66,7 @@ public class ConfigChangedEvent extends AbstractEvent
     }
 
     public String getSource() {
-        return this.source;
+        return source;
     }
     
     public void setSource(String src) {
@@ -79,5 +81,13 @@ public class ConfigChangedEvent extends AbstractEvent
         } else {
             return super.toString();
         }
+    }
+
+    public String getLevelString() {
+        return ResourceLogEvent.getLevelString(LogTrackPlugin.LOGLEVEL_INFO);
+    }
+
+    public String getSubject() {
+        return getSource();
     }
 }

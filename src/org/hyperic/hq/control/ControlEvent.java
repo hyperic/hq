@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -27,10 +27,11 @@ package org.hyperic.hq.control;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
 
 public class ControlEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface {
+    implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
     
     /** Holds value of property action. */
     private String action;
@@ -172,5 +173,9 @@ public class ControlEvent extends AbstractEvent
      */
     public String toString() {
         return getAction();
+    }
+
+    public String getLevelString() {
+        return getStatus();
     }    
 }

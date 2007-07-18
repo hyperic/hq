@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.TrackEvent;
@@ -38,7 +39,7 @@ import org.hyperic.hq.product.TrackEvent;
  * This event type represents an entry in the resource log
  */
 public class ResourceLogEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface {
+    implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
     private static Map levelStrs = new HashMap();
     
     static {
@@ -111,5 +112,9 @@ public class ResourceLogEvent extends AbstractEvent
     public static final String getLevelString(int level) {
         Integer key = new Integer(level);
         return (String) levelStrs.get(key);
+    }
+
+    public String getSubject() {
+        return getSource();
     }
 }
