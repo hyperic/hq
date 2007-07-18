@@ -25,14 +25,12 @@
 
 package org.hyperic.hq.bizapp.server.action.email;
 
-import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -62,8 +60,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
 import org.quartz.JobDetail;
@@ -134,20 +132,21 @@ public class EmailFilter {
                                                  desc);
                 }
             } catch (AppdefEntityNotFoundException e) {
-                log.error("Entity ID invalid: " + e);
+                log.error("Entity ID invalid", e);
             } catch (PermissionException e) {
                 // Should never happen, because we are overlord
-                log.error("Overlord not allowed to lookup resource: " + e);
+                log.error("Overlord not allowed to lookup resource", e);
             }
         }
     }
     
-    public void sendAlert(AppdefEntityID appEnt, InternetAddress[] addresses,
-                          String subject, String body, boolean filter)
+    public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
+                          String subject, String body, String htmlBody, 
+                          boolean filter)
     {
         if (appEnt == null) {
             // Go ahead and just send the alert
-            sendEmail(addresses, subject, body);
+            sendEmail(addresses, subject, body, htmlBody);
             return;
         }
 
@@ -196,17 +195,17 @@ public class EmailFilter {
                             }
 
                             for (int i = 0; i < addresses.length; i++) {
-                                StringBuffer msg;
+                                FilterBuffer msg;
                                 if (cache.containsKey(addresses[i])) {
                                     // Create new buffer with previous body
-                                    msg = (StringBuffer)cache.get(addresses[i]); 
-                                    msg.append("\n");
+                                    msg = (FilterBuffer)cache.get(addresses[i]); 
+                                    msg.append("\n", "\n");
                                 } else {
-                                    msg = new StringBuffer();
+                                    msg = new FilterBuffer();
                                 }
     
-                                // Append the current e-mail body
-                                msg.append(body);
+                                msg.incrementEntries();
+                                msg.append(body, htmlBody);
                                 cache.put(addresses[i], msg);
                             }
     
@@ -237,7 +236,7 @@ public class EmailFilter {
             }
         }
             
-        sendEmail(addresses, subject, body);
+        sendEmail(addresses, subject, body, htmlBody);
     }
     
     private InternetAddress getFromAddress() {
@@ -259,13 +258,13 @@ public class EmailFilter {
         return null;
     }
     
-    private void sendEmail(InternetAddress[] addresses,
-                           String subject, String body)
+    private void sendEmail(EmailRecipient[] addresses, String subject, 
+                           String body, String htmlBody)
     {
         Session session;
         try {
             session = (Session) 
-                PortableRemoteObject.narrow(
+            PortableRemoteObject.narrow(
                                new InitialContext().lookup("java:/SpiderMail"),
                                Session.class);
         } catch(NamingException e) {
@@ -283,15 +282,23 @@ public class EmailFilter {
             }
 
             m.setSubject(subject);
-            m.setContent(body, "text/plain");
             
             if (log.isDebugEnabled()) {
                 log.debug("Sending Alert Email: " + body);
+                log.debug("Sending HTML Alert Email: " + htmlBody);
             }
 
             // Send to each recipient individually (for D.B. SMS)
             for (int i = 0; i < addresses.length; i++) {
-                m.setRecipient(Message.RecipientType.TO, addresses[i]);
+                m.setRecipient(Message.RecipientType.TO, 
+                               addresses[i].getAddress());
+                
+                if (addresses[i].useHtml()) {
+                    m.setContent(htmlBody, "text/html");
+                } else {
+                    m.setContent(body, "text/plain");
+                }
+                
                 Transport.send(m);
             }
         } catch (MessagingException e) {
@@ -300,7 +307,7 @@ public class EmailFilter {
         }
     }
     
-    public void sendFiltered(int platId) {
+    void sendFiltered(int platId) {
         Hashtable cache;
         
         synchronized (alertBuffer) {
@@ -320,44 +327,47 @@ public class EmailFilter {
         String platName = getAppdefEntityName(platEntId);
     
         // The cache is organized by addresses
-        Collection addrs = cache.keySet();
-        for (Iterator i = addrs.iterator(); i.hasNext(); ) {
-            InternetAddress addr = (InternetAddress) i.next();
-            sendEmail(new InternetAddress[] { addr },
-                      "[HQ] Filtered Notifications for " + platName,
-                      cache.get(addr).toString());
+        for (Iterator i = cache.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            EmailRecipient addr = (EmailRecipient)ent.getKey();
+            FilterBuffer msg = (FilterBuffer)ent.getValue();
+            
+            if (msg.getNumEnts() == 1 && addr.useHtml()) {
+                sendEmail(new EmailRecipient[] { addr },
+                          "[HQ] Filtered Notifications for " + platName,
+                          "", msg.getHtml());
+            } else {
+                addr.setHtml(false);
+                sendEmail(new EmailRecipient[] { addr },
+                          "[HQ] Filtered Notifications for " + platName,
+                          msg.getText(), "");
+            }
         }
     }
 
     private void scheduleJob(Integer platId) throws SchedulerException {
-        try {
-            // Create new job name with the appId
-            String name = EmailFilterJob.class.getName() + platId;
+        // Create new job name with the appId
+        String name = EmailFilterJob.class.getName() + platId;
             
-            // Create job detail
-            JobDetail jd = new JobDetail(name + "Job", JOB_GROUP, 
-                                         EmailFilterJob.class);
+        // Create job detail
+        JobDetail jd = new JobDetail(name + "Job", JOB_GROUP, 
+                                     EmailFilterJob.class);
             
-            String appIdStr = platId.toString();
+        String appIdStr = platId.toString();
             
-            jd.getJobDataMap().put(EmailFilterJob.APP_ID, appIdStr);
+        jd.getJobDataMap().put(EmailFilterJob.APP_ID, appIdStr);
             
-            // Create trigger
-            GregorianCalendar next = new GregorianCalendar();
-            next.add(GregorianCalendar.MINUTE, 5);
-            SimpleTrigger t =
-                new SimpleTrigger(name + "Trigger", JOB_GROUP, next.getTime());
-            
-            // Now schedule with EJB
-            if (scheduler == null) {
-                scheduler = SchedulerUtil.getLocalHome().create();
-            }
-            
-            scheduler.scheduleJob(jd, t);
-        } catch (CreateException e) {
-            throw new SchedulerException("Can't create scheduler: " + e);
-        } catch (NamingException e) {
-            throw new SchedulerException("Can't lookup scheduler: " + e);
+        // Create trigger
+        GregorianCalendar next = new GregorianCalendar();
+        next.add(GregorianCalendar.MINUTE, 5);
+        SimpleTrigger t = new SimpleTrigger(name + "Trigger", JOB_GROUP,
+                                            next.getTime());
+        
+        // Now schedule with EJB
+        if (scheduler == null) {
+            scheduler = SchedulerEJBImpl.getOne();
         }
+            
+        scheduler.scheduleJob(jd, t);
     }
 }

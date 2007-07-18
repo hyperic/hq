@@ -141,7 +141,7 @@ public class EmailAction extends EmailActionConfig
         throws ActionExecuteException 
     {
         try {
-            InternetAddress[] to = lookupEmailAddr();
+            EmailRecipient[] to = lookupEmailAddr();
             
             if (to.length == 0) {
                 return "No valid users or emails found to send alert";
@@ -153,18 +153,24 @@ public class EmailAction extends EmailActionConfig
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
 
-            String body;
+            String body, htmlBody;
             
             if (isSms()) {
                 body = createText(alertDef, info, appEnt, alert, 
                                   "sms_email.gsp");
+                htmlBody = "";
+                for (int i=0; i<to.length; i++) {
+                    to[i].setHtml(false);
+                }
             } else {
                 body = createText(alertDef, info, appEnt, alert, 
                                   "text_email.gsp");
+                htmlBody = createText(alertDef, info, appEnt, alert,
+                                      "html_email.gsp");
             }
 
-            filter.sendAlert(appEnt, to, createSubject(alertDef), body,
-                             alertDef.isNotifyFiltered());
+            filter.sendAlert(appEnt, to, createSubject(alertDef), body, 
+                             htmlBody, alertDef.isNotifyFiltered());
 
             StringBuffer result = getLog(to);
             return result.toString();
@@ -173,7 +179,7 @@ public class EmailAction extends EmailActionConfig
         }
     }
 
-    protected StringBuffer getLog(InternetAddress[] to) {
+    protected StringBuffer getLog(EmailRecipient[] to) {
         StringBuffer result = new StringBuffer(isSms() ? "SMS" : "Notified");
         // XXX: Should get this strings into a resource file
         switch (getType()) {
@@ -187,7 +193,7 @@ public class EmailAction extends EmailActionConfig
         }
         
         for (int i = 0; i < to.length; i++) {
-            result.append(to[i].getPersonal());
+            result.append(to[i].getAddress().getPersonal());
             if (i < to.length - 1) {
                 result.append(", ");
             }
@@ -196,16 +202,18 @@ public class EmailAction extends EmailActionConfig
         return result;
     }
 
-    protected InternetAddress[] lookupEmailAddr()
+    protected EmailRecipient[] lookupEmailAddr()
         throws ActionExecuteException
     {
         // First, look up the addresses
         Integer uid;
         int i = 0;
-        List validAddresses = new ArrayList();
+        List validRecipients = new ArrayList();
         for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
                 InternetAddress addr;
+                boolean useHtml = false;
+                
                 switch (getType()) {
                 case TYPE_USERS:
                     uid = (Integer) it.next();
@@ -222,6 +230,7 @@ public class EmailAction extends EmailActionConfig
                         addr = new InternetAddress(who.getEmailAddress());
                     }
                     addr.setPersonal(who.getName());
+                    useHtml = who.isHtmlEmail();
                     break;
                 default:
                 case TYPE_EMAILS:
@@ -229,7 +238,7 @@ public class EmailAction extends EmailActionConfig
                     addr.setPersonal(addr.getAddress());
                     break;
                 }
-                validAddresses.add(addr);
+                validRecipients.add(new EmailRecipient(addr, useHtml));
             } catch (AddressException e) {
                 _log.warn("Mail address invalid", e);
                 continue;
@@ -244,8 +253,8 @@ public class EmailAction extends EmailActionConfig
         }
 
         // Convert the valid addresses
-        InternetAddress[] to = (InternetAddress[])
-            validAddresses.toArray(new InternetAddress[0]);
+        EmailRecipient[] to = (EmailRecipient[])
+            validRecipients.toArray(new EmailRecipient[validRecipients.size()]);
         return to;
     }
 
@@ -256,18 +265,21 @@ public class EmailAction extends EmailActionConfig
     }
 
     public void send(Escalatable alert, EscalationStateChange change, 
-                     String message) 
+                     String message)
         throws ActionExecuteException 
     {
         PerformsEscalations def = alert.getDefinition();
         
-        InternetAddress[] to = lookupEmailAddr();
+        EmailRecipient[] to = lookupEmailAddr();
 
         EmailFilter filter = new EmailFilter();
 
+        for (int i=0; i<to.length; i++) {
+            to[i].setHtml(false);
+        }
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
         filter.sendAlert(getResource(defInfo), to, 
                          createSubject(defInfo) + " " + change.getDescription(), 
-                         message, false);
+                         message, message, false);
     }
 }
