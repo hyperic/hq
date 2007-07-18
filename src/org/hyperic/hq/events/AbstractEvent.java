@@ -65,4 +65,8 @@ public abstract class AbstractEvent implements Serializable {
     public void setTimestamp(long timestamp) {
         _timestamp = timestamp;
     }
+    
+    public boolean isLoggingSupported() {
+        return this instanceof LoggableInterface;
+    }
 }
