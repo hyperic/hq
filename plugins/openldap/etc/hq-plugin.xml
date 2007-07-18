@@ -1,3 +1,9 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -228,6 +234,9 @@
     <plugin type="measurement"
             class="OpenLDAPMeasurementPlugin"/>
 
+    <property name="HAS_BUILTIN_SERVICES"
+              value="true"/>
+
     <config>
       <option name="ldapDriver"
               description="LDAP Driver Class"
@@ -254,7 +263,6 @@
 
     <metric name="Availability"
             indicator="true"/>
-<!--            query="availability" -->
 
     <metric name="Connection Time"
             alias="ConnectionTimeMS"
@@ -264,6 +272,38 @@
             units="ms"/>
 
     <metrics include="Ldap Monitoring Metrics"/>
+
+    <service name="Slapd Process Metrics">
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=slapd"
+                description="PTQL for Jetty Java Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="LDAP">
+      <config>
+        <option name="hostname"
+                description="LDAP Hostname"
+                default="localhost"/>
+      </config>
+
+      <filter name="template"
+              value="LDAP:hostname=%hostname%:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
   </server>
   <!-- ==================== Plugin Help =========================== -->
   <help name="OpenLDAP">
@@ -273,22 +313,28 @@
     </p>
     <p>
         In order to obtain the OpenLDAP statistics from the slapd daemon,
+        <br>
         openldap must be built with configure --enable-monitor.
-
+        <br>
+        <br>
         After this is done, and OpenLDAP is deployed, to configure monitoring
+        <br>
         this line needs to be added to slapd.conf:
-
+        <br>
+        <br>
             database monitor
-
+        <br>
+        <br>
         It must be added before or after all databases are defined.
-
+        <br>
         For more information on monitoring slapd see:
-
-        http://www.openldap.org/devel/admin/monitoringslapd.html
-
+        <br>
+        <a href='http://www.openldap.org/devel/admin/monitoringslapd.html'>Monitoring Slapd</a>
+        <br>
         Without this, Hyperic HQ will still monitor OpenLDAP but the statistics
         are very limited.
     </p>
     ]]>
   </help>
+  <help name="OpenLDAP 2.3.x" include="OpenLDAP"/>
 </plugin>
