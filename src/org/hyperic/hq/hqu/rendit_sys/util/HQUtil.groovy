@@ -5,7 +5,8 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl
 
 class HQUtil {
     private static final Object LOCK = new Object()
-    private static String BASE_URL
+    private static String  BASE_URL
+    private static Boolean IS_EE = null
 
     /**
      * Get the base URL which can be used to contact HQ
@@ -20,5 +21,22 @@ class HQUtil {
             }
         }
         BASE_URL
+    }
+    
+    static boolean isEnterpriseEdition() {
+        synchronized (LOCK) {
+            println "IS_EE is ${IS_EE}"
+            if (IS_EE != null) 
+                return IS_EE
+                
+            try {
+                Class.forName("com.hyperic.hq.authz.shared.PermissionManagerImpl")
+                IS_EE = true
+            } catch(Exception e) {
+                IS_EE = false
+            }
+            
+            return IS_EE
+        }
     }
 }
