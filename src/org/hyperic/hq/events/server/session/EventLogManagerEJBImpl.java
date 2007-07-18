@@ -32,18 +32,22 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.naming.NamingException;
 
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLog;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.pager.PageControl;
 
 /**
  * <p> Stores Events to and deletes Events from storage</p>
@@ -109,32 +113,6 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         }
 
         return getEventLogDAO().create(eval);
-    }
-
-    /** 
-     * Get a list of log records based on subject
-     *
-     * @ejb:interface-method
-     */
-    public List findLogs(String subject, int page, int size, int order) {
-        return getEventLogDAO().findBySubject(subject);
-    }
-    
-    /** 
-     * Get a list of log records based on entity type
-     * 
-     * @ejb:interface-method
-     */
-    public List findLogs(int entityType, int entityId, PageControl pc) {
-        AppdefEntityID entId = new AppdefEntityID(entityType, entityId);
-        
-        // Currently we only support sorting by the Timestamp attribute
-        if (pc.isAscending()) {
-            return getEventLogDAO().findByEntityOrderTSAsc(entId);
-        } else {
-            // Natural order is descending
-            return getEventLogDAO().findByEntity(entId);
-        }
     }
 
     /** 
@@ -236,4 +214,14 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     public void ejbPassivate() {}
     public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx) {}
+
+    public static EventLogManagerLocal getOne() {
+        try {
+            return EventLogManagerUtil.getLocalHome().create();
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        }
+    }
 }
