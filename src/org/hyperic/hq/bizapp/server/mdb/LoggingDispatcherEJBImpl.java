@@ -25,23 +25,19 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
-import javax.ejb.CreateException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.control.ControlEvent;
-import org.hyperic.hq.events.AlertFiredEvent;
+import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.LoggableInterface;
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
-import org.hyperic.hq.events.shared.EventLogManagerUtil;
-import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
-import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 
 /** 
  * The LoggingDispatcher Message-Drive Bean is intended to be used
@@ -73,36 +69,30 @@ public class LoggingDispatcherEJBImpl
             return;
         }
 
+        ObjectMessage om = (ObjectMessage) inMessage;
+            
         try {
-            ObjectMessage om = (ObjectMessage) inMessage;
             Object obj = om.getObject();
-
-            if (elMan == null)
-                elMan = EventLogManagerUtil.getLocalHome().create();
-
-            // Do logging
-            if (obj instanceof ControlEvent) {
-                ControlEvent ce = (ControlEvent) obj;
-                elMan.createLog(ce, ce.getSubject(), ce.getStatus());
+            
+            if (!(obj instanceof AbstractEvent)) {
+                return;
             }
-            else if (obj instanceof ResourceLogEvent) {
-                ResourceLogEvent re = (ResourceLogEvent) obj;
-                elMan.createLog(re, re.getSource(), re.getLevelString());
-            } else if (obj instanceof ConfigChangedEvent) {
-                ConfigChangedEvent ce = (ConfigChangedEvent) obj;
-                elMan.createLog(ce, ce.getSource(), "INF");
-            } else if (obj instanceof AlertFiredEvent) {
-                AlertFiredEvent ae = (AlertFiredEvent) obj;
-                elMan.createLog(ae, ae.getAlertDefName(), "ALR");
+
+            // Assume that only AbstractEvents get pumped through the topic
+            AbstractEvent event = (AbstractEvent) obj;
+            
+            // Do logging
+            if (event.isLoggingSupported()) {
+                LoggableInterface le = (LoggableInterface) event;
+                
+                if (elMan == null)
+                    elMan = EventLogManagerEJBImpl.getOne();
+                
+                elMan.createLog(event, le.getSubject(), le.getLevelString());
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
             e.printStackTrace();
-        } catch (NamingException e) {
-            // Change to warning so that it won't show up in startup log
-            log.warn("Cannot lookup EventLogManager", e);
-        } catch (CreateException e) {
-            log.error("Cannot create EventLogManager", e);
         }
     }
 
