@@ -54,7 +54,8 @@
     <metric name="Total Compilation Time"
             indicator="false"
             category="THROUGHPUT"
-            collectionType="trendsup"/>
+            collectionType="trendsup"
+            units="ms"/>
   </metrics>
 
   <metrics name="Garbage Collector">
@@ -85,33 +86,29 @@
 
   <metrics name="Jetty IO">
     <metric name="Connections"
+            alias="connections"
             category="THROUGHPUT"
             indicator="true"/>
     <metric name="Connections Duration Ave"
+            alias="connectionsDurationAve"
             category="THROUGHPUT"
             indicator="true"/>
     <metric name="Connections Open"
+            alias="connectionsOpen"
             category="THROUGHPUT"
             indicator="true"/>
     <metric name="Connections Requests Ave"
+            alias="connectionsRequestsAve"
             category="THROUGHPUT"
             indicator="true"/>
     <metric name="Requests"
+            alias="requests"
             category="THROUGHPUT"
             indicator="true"/>
   </metrics>
 
   <server name="Jetty"
           version="6.x">
-
-    <config>
-      <option name="installpath"
-              default="/home/scottmf/pkgs/jetty"
-              description="Jetty Install Path"/>
-      <option name="jetty-ptql"
-              default="State.Name.re=java,Args.*.ct=start.jar"
-              description="Sigar PTQL Process Query"/>
-    </config>
 
     <property name="VERSION_FILE"
               value="lib/jetty-6.*.jar"/>
@@ -120,7 +117,7 @@
               value="Jetty"/>
 
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%jetty-ptql%:State"
+            template="sigar:Type=ProcState,Arg=%ptql%:State"
             indicator="true"/>
 
     <property name="OBJECT_NAME"
@@ -130,10 +127,6 @@
     <property name="OBJECT_NAME"
               value="java.lang:type=Compilation"/>
     <metrics include="Compilation"/>
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=GarbageCollector"/>
-    <metrics include="Garbage Collector"/>
 
     <property name="OBJECT_NAME"
               value="java.lang:type=Memory"/>
@@ -146,22 +139,60 @@
               value="java.lang:type=Threading"/>
     <metrics include="Threading"/>
 
-<!--
     <property name="DEFAULT_LOG_FILE"
-              value="logs/server.log"/>
+              value="%logpath%"/>
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
--->
+
+    <config>
+      <option name="logpath"
+              description="Jetty Log File (Full Path)"
+              default="%installpath%/logs/jetty.log"/>
+      <option name="jmx.url"
+              description="JMX URL to MBeanServer"
+              default="service:jmx:rmi:///jndi/rmi://localhost:6968/jmxrmi"/>
+      <option name="jmx.username"
+              description="JMX username"
+              optional="true"
+              default=""/>
+      <option name="jmx.password"
+              description="JMX password"
+              optional="true"
+              default=""
+              type="secret"/>
+      <option name="ptql"
+              description="PTQL for Tomcat Process"
+              default="State.Name.eq=java,Args.*.ct=start.jar"/>
+    </config>
+
+    <!-- derive installpath from -Djetty.home=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="jetty.home"/>
 
     <plugin type="autoinventory"
-            class="JettyServerDetector"/>
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
     <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-    <plugin type="collector"
-            class="org.hyperic.hq.plugin.jetty.JettyCollector"/>
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <service name="Garbage Collector">
+      <plugin type="autoinventory"/>
+      <config>
+        <option name="name"
+                description="GC Type"
+                default=""/>
+      </config>
+      <property name="OBJECT_NAME"
+                value="java.lang:type=GarbageCollector,name=*"/>
+      <metrics include="Garbage Collector"/>
+    </service>
 
     <service name="Jetty IO">
       <plugin type="autoinventory"/>
+      <config>
+        <option name="id"
+                description="Channel Connector ID"
+                default=""/>
+      </config>
       <property name="domain"
                 value="org.mortbay.jetty.nio"/>
       <property name="OBJECT_NAME"
@@ -187,7 +218,7 @@
     <service name="Java Process Metrics">
       <config>
         <option name="process.query"
-                default="%jetty-ptql%"
+                default="%ptql%"
                 description="PTQL for Jetty Java Process"/>
       </config>
       <metric name="Availability"
@@ -204,8 +235,21 @@
   <h3>Configure HQ for monitoring Jetty</h3>
   </p>
   <p>
-  To configure Jetty's JMX statistics follow the instructions on:<br>
+  1) Configure Jetty's JMX statistics collection follow the instructions on:<br>
   <a href="http://docs.codehaus.org/display/JETTY/Statistics">Jetty JMX Stats configuration</a>
+  </p>
+  <p>
+  2) Add this line to the top of the &lt;jetty_home&gt;/bin/jetty.sh file
+  <br>
+  JAVA_OPTIONS="-Dcom.sun.management.jmxremote \
+  <br>
+  -Dcom.sun.management.jmxremote.port=6969 \
+  <br>
+  -Dcom.sun.management.jmxremote.ssl=false \
+  <br>
+  -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTIONS"
+  <br>
+  export JAVA_OPTIONS
   </p>
   ]]>
   </help>
