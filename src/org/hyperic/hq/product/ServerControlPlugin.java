@@ -96,7 +96,13 @@ public abstract class ServerControlPlugin extends ControlPlugin {
     }
 
     public String getControlProgram() {
-        return this.controlProgram;
+        if (this.controlProgram == null) {
+            //UI default for xml-only plugin
+            return getTypeProperty("DEFAULT_PROGRAM");
+        }
+        else {
+            return this.controlProgram;
+        }
     }
 
     public void setControlProgram(String val) {
