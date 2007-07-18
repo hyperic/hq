@@ -64,7 +64,22 @@ function handleEnter (field, event) {
 		else
 		return true;
 	}
-<!--[if lte IE 7]><scriptsrc="<html:rewrite page="/js/optiondisabledsupport.js"/>" type="text/javascript"></script><![endif]-->
+
+function selectValidOption() {
+    var sels = document.getElementsByTagName('select');
+    for(var i=0; i < sels.length; i++) {
+      while(sels[i].options[sels[i].selectedIndex].value == "-1") {
+        sels[i].selectedIndex++;
+      }
+    }
+}
+
+function submitMetricViewerForm() {
+    selectValidOption();
+    MetricViewerForm.submit();
+}
+
+onloads.push(selectValidOption);
 </script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle">
@@ -118,19 +133,19 @@ function handleEnter (field, event) {
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.ResourceType"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-              <html:select property="resourceType" onchange="MetricViewerForm.submit()">
-              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></html:option>
-              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></html:option>
+              <html:select property="resourceType" onchange="submitMetricViewerForm()">
+              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></html:option>
+              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></html:option>
               <c:forEach var="type" items="${platformTypes}">
                   <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
               </c:forEach>
-              <html:option value="" disabled="true"></html:option>
-              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.serverTypes"/></html:option>
+              <html:option value="-1" disabled="true">&nbsp;</html:option>
+              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.serverTypes"/></html:option>
               <c:forEach var="type" items="${serverTypes}">
                   <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
               </c:forEach>
-              <html:option value="" disabled="true"></html:option>
-              <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.serviceTypes"/></html:option>
+              <html:option value="-1" disabled="true">&nbsp;</html:option>
+              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.serviceTypes"/></html:option>
               <c:forEach var="type" items="${serviceTypes}">
                   <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
               </c:forEach>
@@ -140,8 +155,8 @@ function handleEnter (field, event) {
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-             <html:select property="metric" onchange="MetricViewerForm.submit()">
-             <html:option value="-1" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
+             <html:select property="metric" onchange="submitMetricViewerForm()">
+             <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
              <c:forEach var="metric" items="${metrics}">
                  <c:if test="${metric.defaultOn}">
                  <html:option value="${metric.id}"> - <c:out value="${metric.name}"/></html:option>
