@@ -205,11 +205,8 @@ public class FileSystemDetector
                 if (recurse) {
                     addFileServices(services, recurse,
                                     ent, sigar, type);
-                    return;
                 }
-                else {
-                    continue;
-                }
+                continue;
             }
             AIServiceValue svc =
                 createSystemService(type, path,
