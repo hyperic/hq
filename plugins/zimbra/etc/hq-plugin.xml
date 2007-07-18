@@ -387,6 +387,20 @@
       &process-metrics;
     </service>
 
+    <service name="LDAP">
+      <filter name="template"
+              value="LDAP:hostname=localhost:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
     <service name="SMTP">
       <filter name="template"
               value="SMTP:hostname=localhost:${alias}"/>

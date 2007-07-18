@@ -118,6 +118,10 @@ public class ZimbraServerDetector
         services.add(getService("Log Watch", installpath));
         services.add(getService("Swatch", installpath));
         services.add(getService("MTA Config", installpath));
+        services.add(getService("SMTP", installpath));
+        services.add(getService("POP3", installpath));
+        services.add(getService("IMAP", installpath));
+        services.add(getService("LDAP", installpath));
         return services;
     }
 
