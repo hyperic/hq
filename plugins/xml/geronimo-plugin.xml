@@ -55,11 +55,14 @@
     <property name="PROC_HOME_PROPERTY"
               value="org.apache.geronimo.base.dir"/>
 
-    <property name="DEFAULT_CONF"
+    <property name="DEFAULT_CONFIG_FILE"
               value="var/conf/config.xml"/>
 
     <property name="DEFAULT_LOG_FILE"
               value="var/log/geronimo.log"/>
+
+    <property name="DEFAULT_PROGRAM"
+              value="bin/geronimo.sh"/>
 
     <config>
       <option name="jmx.url"
