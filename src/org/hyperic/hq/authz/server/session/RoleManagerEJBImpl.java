@@ -59,8 +59,11 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
+import org.hyperic.hq.authz.shared.RoleManagerLocal;
+import org.hyperic.hq.authz.shared.RoleManagerUtil;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
 import org.hyperic.hq.common.server.session.WeekEntry;
@@ -1818,6 +1821,14 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         roleLocal.setSubjects(sLocals);
     }
 
+    public static RoleManagerLocal getOne() {
+        try {
+            return RoleManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     public void ejbPassivate() { }
 
     public void ejbActivate() { }

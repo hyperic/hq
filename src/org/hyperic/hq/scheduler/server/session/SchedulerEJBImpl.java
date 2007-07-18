@@ -34,7 +34,10 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.management.ObjectName;
 
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean;
+import org.hyperic.hq.scheduler.shared.SchedulerLocal;
+import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1223,5 +1226,13 @@ public class SchedulerEJBImpl
    public SessionContext getSessionContext()
    {
       return sessCtx;
+   }
+   
+   public static SchedulerLocal getOne() {
+       try {
+           return SchedulerUtil.getLocalHome().create();
+       } catch(Exception e) {
+           throw new SystemException(e);
+       }
    }
 }
