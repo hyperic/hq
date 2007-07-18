@@ -48,15 +48,18 @@
      <html:link href="mailto:${User.emailAddress}">
       <c:out value="${User.emailAddress}"/>
      </html:link>
-      <fmt:message key="parenthesis">
-        <c:choose>
+      <c:set var="format">
+      <c:choose>
         <c:when test="${User.htmlEmail}">
-          <fmt:param><fmt:message key="admin.user.generalProperties.format.HTML"/></fmt:param>
+            <fmt:message key="admin.user.generalProperties.format.HTML"/>
         </c:when>
         <c:otherwise>
-          <fmt:param><fmt:message key="admin.user.generalProperties.format.TEXT"/></fmt:param>
+            <fmt:message key="admin.user.generalProperties.format.TEXT"/>
         </c:otherwise>
-        </c:choose>
+      </c:choose>
+      </c:set>
+      <fmt:message key="parenthesis">
+        <fmt:param value="${format}"/>
       </fmt:message>
     </td>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.Phone"/></td>
