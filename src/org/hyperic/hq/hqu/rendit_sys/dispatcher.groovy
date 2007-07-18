@@ -10,6 +10,7 @@ import org.hyperic.hq.hqu.rendit.metaclass.AlertCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MetricCategory
 import org.hyperic.hq.hqu.rendit.metaclass.ResourceCategory
+import org.hyperic.hq.hqu.rendit.metaclass.ResourceGroupCategory
 import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 import org.hyperic.hq.hqu.UIPluginDescriptor
 
@@ -29,7 +30,7 @@ class Dispatcher {
     
     private final CATEGORIES = [AuthzSubjectCategory, AlertCategory,
                                 MapCategory, MetricCategory, ResourceCategory, 
-                                StringCategory]  
+                                ResourceGroupCategory, StringCategory]  
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 
