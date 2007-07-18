@@ -38,6 +38,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -375,9 +376,11 @@ public class GalertManagerEJBImpl
             alerts = _logDAO.findByCreateTime(endTime- timeRange, endTime, 
                                               count);
         } else {
+            PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE,
+                                             false);
             alerts = _logDAO.findByCreateTimeAndPriority(endTime - timeRange,
                                                          endTime, priority, 
-                                                         count);
+                                                         pInfo);
         }
             
         List result = new ArrayList();
@@ -396,6 +399,16 @@ public class GalertManagerEJBImpl
         return result;
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public List findAlerts(AuthzSubjectValue subj, AlertSeverity severity,
+                           long timeRange, long endTime, PageInfo pInfo)
+    {
+        return _logDAO.findByCreateTimeAndPriority(endTime - timeRange, endTime, 
+                                                   severity.getCode(), pInfo);
+    }
+
     /**
      * @ejb:interface-method  
      */

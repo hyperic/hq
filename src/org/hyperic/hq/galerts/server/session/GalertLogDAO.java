@@ -28,11 +28,14 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.pager.PageControl;
@@ -118,20 +121,29 @@ class GalertLogDAO
     }
     
     List findByCreateTimeAndPriority(long begin, long end, int priority,
-                                     int count) 
+                                     PageInfo pageInfo) 
     {
-        String sql = "from GalertLog a " +
-            "WHERE a.timestamp between :begin and :end " + 
-            "and (a.alertDef.severityEnum = :priority " +
-            "     or a.alertDef.severityEnum > :priority) " +
-            "order by a.timestamp desc"; 
+        GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
+        String sql = "select a from GalertLog a " +
+                     "join a.alertDef d " + 
+                     "join d.group g " +
+               "where a.timestamp between :begin and :end " + 
+                 "and d.severityEnum >= :priority " + 
+               "order by " + sort.getSortString("a", "d", "g") + 
+               (pageInfo.isAscending() ? "" : " DESC");
+
+               
+        if (!sort.equals(GalertLogSortField.DATE)) {
+            sql += ", " + GalertLogSortField.DATE.getSortString("a", "d", "g") +
+                   " DESC";
+        }
+               
+        Query q = getSession().createQuery(sql)
+                              .setLong("begin", begin)
+                              .setLong("end", end)
+                              .setInteger("priority", priority);
         
-        return getSession().createQuery(sql)
-                .setLong("begin", begin)
-                .setLong("end", end)
-                .setInteger("priority", priority)
-                .setMaxResults(count)
-                .list();
+        return pageInfo.pageResults(q).list();
     }
 
     void removeAll(ResourceGroup g) {
