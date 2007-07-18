@@ -228,7 +228,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                   XXX:  Why would you ever not want to overwrite?
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
+     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void addData(List data, boolean overwrite) {
         Connection conn = null;
@@ -249,25 +249,39 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
          *      will continue with the rest of the batch.
          */
         
-        List left = data;
-            
         try {
+            List left = data;
+            
             // XXX:  Get a better connection here - directly from Hibernate
             conn = DBUtil.getConnByContext(getInitialContext(), 
                                            DATASOURCE_NAME);
-            int numLeft = left.size();
-            _log.debug("Attempting to insert " + numLeft + " points");
-            left = insertData(conn, left, overwrite);
-            _log.debug("Num left = " + left.size());
-            
-            if (!left.isEmpty()) {
-                _log.warn("Unable to do anything about " + left.size() + 
-                          " data points.  Sorry.");
+            while (true && !left.isEmpty()) {
+                int numLeft = left.size();
+                _log.debug("Attempting to insert " + numLeft + " points");
+                left = insertData(conn, left, overwrite);
+                _log.debug("Num left = " + left.size());
                 
-                while (!left.isEmpty()) {
+                if (left.isEmpty())
+                    break;
+                
+                if (!overwrite)
+                    return;
+                
+                // The insert couldn't insert everything, so attempt to update
+                // the things that are left
+                _log.debug("Sending " + left.size() + " data points to update");
+                left = updateData(conn, left);
+                if (left.isEmpty())
+                    break;
+
+                _log.debug("Update left " + left.size() + " points to process");
+                
+                if (numLeft == left.size() && numLeft != 0) {
                     DataPoint remPt = (DataPoint)left.remove(0);
                     // There are some entries that we weren't able to do
                     // anything about ... that sucks.
+                    _log.warn("Unable to do anything about " + numLeft + 
+                              " data points.  Sorry.");
                     _log.warn("Throwing away data point " + remPt);
                 }
             }
@@ -277,7 +291,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             DBUtil.closeConnection(logCtx, conn);
         }
         
-        sendMetricEvents(data.subList(0, data.size() - left.size()));
+        sendMetricEvents(data);
     }
 
     /**
@@ -295,6 +309,57 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return val;
     }
     
+    /**
+     * This method is called to perform 'updates' for any inserts which failed
+     * in addData. 
+     */
+    private List updateData(Connection conn, List data) 
+        throws SQLException
+    { 
+        Statement stmt = null;
+        
+        try {
+            stmt = conn.createStatement();
+            DataPoint pt = (DataPoint)data.get(0);
+            Integer metricId = pt.getMetricId();
+            MetricValue val = pt.getMetricValue();
+            BigDecimal bigDec = null;
+                
+            try {
+                bigDec = new BigDecimal(val.getValue());
+            } catch(NumberFormatException e) {  // infinite, or NaN
+                _log.warn("Unable to insert infinite or NaN for metric id=" +
+                          metricId);
+                data.remove(0);
+                return data;
+            }
+            long currtime      = System.currentTimeMillis();
+            String currTable   = MeasTabManagerUtil.getMeasTabname(currtime);
+            String updateTable = currTable;
+            int rowsaffected   = 0;
+            do
+            {
+                String sql;
+                sql = "UPDATE " + currTable +
+                      " SET value = " + getDecimalInRange(bigDec) +
+                      " WHERE measurement_id = " + metricId.intValue() +
+                      " AND timestamp = " + val.getTimestamp();
+                rowsaffected = stmt.executeUpdate(sql);
+                if (rowsaffected > 0)
+                    _log.debug("updated metric data with "+sql);
+                currtime     = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
+                updateTable  = MeasTabManagerUtil.getMeasTabname(currtime);
+            }
+            while (!updateTable.equals(currTable) && rowsaffected == 0);
+            
+            data.remove(0);
+
+        } finally {
+            DBUtil.closeStatement(logCtx, stmt);
+        }
+        return data;
+    }
+
     private void sendMetricEvents(List data) {
         MetricDataCache cache = MetricDataCache.getInstance();
         ArrayList events  = new ArrayList();
