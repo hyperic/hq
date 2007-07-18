@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+  <!-- extracted to: pdk/work/scripts/sendmail/hq-sendmail-stat -->
+  <script name="hq-sendmail-stat">
+#!/bin/sh
+
+# linux
+[ -d "/var/spool/mqueue" ] &amp;&amp;
+    msgdir="/var/spool/mqueue" &amp;&amp;
+    premsgdir="/var/spool/clientmqueue"
+
+# solaris
+[ -d "/usr/spool/mqueue" ] &amp;&amp;
+    msgdir="/usr/spool/mqueue" &amp;&amp;
+    premsgdir="/usr/spool/clientmqueue"
+
+[ -z "$msgdir" ] &amp;&amp;
+    exit 1
+
+cd $msgdir
+[ $? != 0 ] &amp;&amp;
+    exit 1
+messfiles=`find * -print 2>/dev/null | wc -w`
+
+cd $premsgdir
+[ $? != 0 ] &amp;&amp;
+    exit 1
+premessfiles=`find * -print 2>/dev/null | wc -w`
+
+echo MessagesInQueue=$messfiles
+echo MessagesAwaitingPreprocessing=$premessfiles
+  </script>
+
+  <server name="SendMail">
+    <config>
+      <option name="process.query"
+              description="Process Query"
+              default="State.Name.eq=sendmail,CredName.User.eq=root"/>
+    </config>
+
+    <!--notifies the plugin to auto-discover one instance of each service-->
+    <property name="HAS_BUILTIN_SERVICES"
+              value="true"/>
+
+    <property name="PROC_QUERY"
+              value="State.Name.eq=sendmail"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.DaemonDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <service name="SendMail Message Submission Process">
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=sendmail,CredName.User.ne=root"
+                description="PTQL for SendMail Message Submission Process"/>
+      </config>
+
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="SendMail Root Daemon Process">
+      <plugin type="autoinventory"/>
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=sendmail,CredName.User.eq=root"
+                description="PTQL for SendMail Root Daemon Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <!-- sendmail-stat metrics -->
+    <filter name="template"
+            value="exec:file=pdk/work/scripts/sendmail/hq-sendmail-stat,exec=sudo:${alias}"/>
+
+    <metric name="Messages In Queue"
+            indicator="true"/>
+
+    <metric name="Messages Awaiting Preprocessing"
+            indicator="true"/>
+
+    <!-- protocol services+metrics -->
+    <service name="SMTP">
+      <config>
+        <option name="hostname"
+                description="SMTP Hostname"
+                default="localhost"/>
+      </config>
+      <filter name="template"
+              value="SMTP:hostname=%hostname%:${alias}"/>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Inbound Connections"
+              indicator="true"/>
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+  </server>
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="SendMail">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for monitoring SendMail</h3>
+  </p>
+  <p>
+  This plugin needs sudo access as root in order to access the appropriate
+  <br>
+  SendMail dirs.
+  <br>
+  To configure sudo (in /etc/sudoers):
+  <br>
+  Cmnd_Alias HQ_SENDMAIL_STAT = &lt;hqdir&gt;/agent/pdk/work/scripts/sendmail/hq-sendmail-stat
+  <br>
+  &lt;agentuser&gt; ALL = NOPASSWD: HQ_SENDMAIL_STAT
+  </p>
+  ]]>
+  </help>
+</plugin>
