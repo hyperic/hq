@@ -110,15 +110,22 @@
   <server name="Jetty"
           version="6.x">
 
+    <property name="HAS_BUILTIN_SERVICES"
+              value="true"/>
+
     <property name="VERSION_FILE"
               value="lib/jetty-6.*.jar"/>
+
+    <property name="DEFAULT_PROGRAM"
+              value="bin/jetty.sh"/>
 
     <property name="domain"
               value="Jetty"/>
 
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
+    &process-metrics;
 
     <property name="OBJECT_NAME"
               value="java.lang:type=ClassLoading"/>
@@ -134,6 +141,13 @@
     <!-- listen for JMX notifications -->
     <plugin type="log_track"
             class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=GarbageCollector,name=PS Scavenge"/>
+    <metrics include="Garbage Collector"/>
+    <property name="OBJECT_NAME"
+              value="java.lang:type=GarbageCollector,name=PS MarkSweep"/>
+    <metrics include="Garbage Collector"/>
 
     <property name="OBJECT_NAME"
               value="java.lang:type=Threading"/>
@@ -160,8 +174,8 @@
               optional="true"
               default=""
               type="secret"/>
-      <option name="ptql"
-              description="PTQL for Tomcat Process"
+      <option name="process.query"
+              description="PTQL for Jetty Java Process"
               default="State.Name.eq=java,Args.*.ct=start.jar"/>
     </config>
 
@@ -173,18 +187,6 @@
             class="org.hyperic.hq.product.jmx.MxServerDetector"/>
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
-
-    <service name="Garbage Collector">
-      <plugin type="autoinventory"/>
-      <config>
-        <option name="name"
-                description="GC Type"
-                default=""/>
-      </config>
-      <property name="OBJECT_NAME"
-                value="java.lang:type=GarbageCollector,name=*"/>
-      <metrics include="Garbage Collector"/>
-    </service>
 
     <service name="Jetty IO">
       <plugin type="autoinventory"/>
@@ -200,32 +202,6 @@
       <metrics include="Jetty IO"/>
     </service>
 
-    <service name="HTTP">
-      <config include="http"/>
-      <filter name="template"
-              value="${http.template}:${alias}"/>
-
-      <metric name="Availability"
-              indicator="true"/>
-
-      <metric name="Inbound Connections"
-              indicator="true"/>
-
-      <metric name="Outbound Connections"
-              indicator="true"/>
-    </service>
-
-    <service name="Java Process Metrics">
-      <config>
-        <option name="process.query"
-                default="%ptql%"
-                description="PTQL for Jetty Java Process"/>
-      </config>
-      <metric name="Availability"
-              template="sigar:Type=ProcState,Arg=%process.query%:State"
-              indicator="true"/>
-      &process-metrics;
-    </service>
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
@@ -235,7 +211,7 @@
   <h3>Configure HQ for monitoring Jetty</h3>
   </p>
   <p>
-  1) Configure Jetty's JMX statistics collection follow the instructions on:<br>
+  1) Configure Jetty's JMX statistics collection follow the instructions on: 
   <a href="http://docs.codehaus.org/display/JETTY/Statistics">Jetty JMX Stats configuration</a>
   </p>
   <p>
