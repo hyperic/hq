@@ -126,35 +126,9 @@ public class ColdfusionServerDetector
         setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
         server.setMeasurementConfig();
-        server.setName(SERVER_NAME+" "+version);
+        server.setName(getPlatformName()+" "+SERVER_NAME+" "+version);
         servers.add(server);
 
         return servers;
     }
-
-/*
-    protected List discoverServices(ConfigResponse config)
-        throws PluginException
-    {
-        String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        List services = new ArrayList();
-        return services;
-    }
-
-    private ServiceResource getService(String name, String installpath)
-    {
-        ServiceResource service = new ServiceResource();
-        service.setType(this, name);
-        service.setServiceName(name);
-        ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue(ProductPlugin.PROP_INSTALLPATH, installpath);
-        setProductConfig(service, productConfig);
-//        service.setProductConfig(config);
-        // set an empty measurement config
-        service.setMeasurementConfig();
-        // set an empty control config
-//        service.setControlConfig();
-        return service;
-    }
-*/
 }

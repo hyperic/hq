@@ -37,7 +37,7 @@
     <property name="DEFAULT_LOG_FILE"
               value="logs/server.log"/>
     <plugin type="log_track"
-            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+            class="ColdfusionErrorLogPlugin"/>
 
     <plugin type="autoinventory"
             class="ColdfusionServerDetector"/>
