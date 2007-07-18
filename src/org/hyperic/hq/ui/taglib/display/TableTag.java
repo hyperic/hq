@@ -495,66 +495,75 @@ public class TableTag extends TablePropertyTag {
                 value = this.autoLink( value.toString() );
             }
             
-            // set up a link if href="" property is defined
             String href = null;
-            if( tag.getHref() != null ) {
-                try {
-                    href =
-                    (String) evalAttr("href", tag.getHref(), String.class);
-                }
-            	catch (NullAttributeException ne) {
-                    throw new JspException("bean " + tag.getHref() + " not found");
-            	}
-
-                if( tag.getParamId() != null ) {
-                    String name = tag.getParamName();
-                    
-                    if( name == null ) {
-                        name = "smartRow";
-                    }
-
-                    Object param = this.lookup( pageContext, name,
-						tag.getParamProperty(), tag.getParamScope(), true );
-
-                    // URL escape params
-                    // PR: 7709
-                    String paramId = null;
-                    String paramVal = null;
-                    String tmp = param instanceof String ? (String) param :
-                        param.toString();
+            if (value != null && value.toString().length() > 0) {
+                // set up a link if href="" property is defined
+                if( tag.getHref() != null ) {
                     try {
-                        paramId = URLEncoder.encode(tag.getParamId(), "UTF-8");
-                        paramVal = URLEncoder.encode(tmp, "UTF-8");
+                        href = (String) evalAttr("href", tag.getHref(),
+                                                 String.class);
                     }
-                    catch (UnsupportedEncodingException e) {
-                        throw new JspException("could not encode ActionForward path parameters because the JVM does not support UTF-8!?", e);
+                    catch (NullAttributeException ne) {
+                        throw new JspException("bean " + tag.getHref() +
+                                               " not found");
                     }
 
-                    // flag to determine if we should use a ? or a &
-                    int index = href.indexOf('?');
-                    String separator = "";
-                    if (index == -1) {
-                        separator = "?";
-                    } else {
-                        separator = "&";
+                    if( tag.getParamId() != null ) {
+                        String name = tag.getParamName();
+
+                        if( name == null ) {
+                            name = "smartRow";
+                        }
+
+                        Object param = this.lookup( pageContext, name,
+                                                    tag.getParamProperty(),
+                                                    tag.getParamScope(), true );
+
+                        // URL escape params
+                        // PR: 7709
+                        String paramId = null;
+                        String paramVal = null;
+                        String tmp = param instanceof String ? (String) param :
+                            param.toString();
+                        try {
+                            paramId = URLEncoder.encode(tag.getParamId(),
+                                                        "UTF-8");
+                            paramVal = URLEncoder.encode(tmp, "UTF-8");
+                        }
+                        catch (UnsupportedEncodingException e) {
+                            throw new JspException(
+                                "could not encode ActionForward path " +
+                                "parameters because the JVM does not support " +
+                                "UTF-8!?", e);
+                        }
+
+                        // flag to determine if we should use a ? or a &
+                        int index = href.indexOf('?');
+                        String separator = "";
+                        if (index == -1) {
+                            separator = "?";
+                        } else {
+                            separator = "&";
+                        }
+                        // if value has been chopped, add leftover as title
+                        if( chopped ) {
+                            value = "<a href=\"" + href + separator + paramId +
+                                "=" + paramVal + "\" title=\"" + leftover +
+                                "\">" + value + "</a>";
+                        } else {
+                            value = "<a href=\"" + href + separator + paramId +
+                                "=" + paramVal + "\">" + value + "</a>";
+                        }
+                    } else /* tag.getParamId() == null */ {
+                        // if value has been chopped, add leftover as title
+                        if( chopped ) {
+                            value = "<a href=\"" + href + "\" title=\"" + leftover + "\">" + value + "</a>";
+                        } else {
+                            value = "<a href=\"" + href + "\">" + value + "</a>";
+                        }
                     }
-                    // if value has been chopped, add leftover as title
-                    if( chopped ) {
-                        value = "<a href=\"" + href + separator + paramId +
-                        "=" + paramVal + "\" title=\"" + leftover + "\">" + value + "</a>";
-                    } else {
-                        value = "<a href=\"" + href + separator + paramId +
-                        "=" + paramVal + "\">" + value + "</a>";
-                    }
-                } else /* tag.getParamId() == null */ {
-                    // if value has been chopped, add leftover as title
-                    if( chopped ) {
-                        value = "<a href=\"" + href + "\" title=\"" + leftover + "\">" + value + "</a>";
-                    } else {
-                        value = "<a href=\"" + href + "\">" + value + "</a>";
-                    }
-                }
-            }            
+                }            
+            }
             
             if( chopped && href == null ) {
                 
