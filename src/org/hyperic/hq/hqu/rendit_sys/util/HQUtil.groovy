@@ -25,7 +25,6 @@ class HQUtil {
     
     static boolean isEnterpriseEdition() {
         synchronized (LOCK) {
-            println "IS_EE is ${IS_EE}"
             if (IS_EE != null) 
                 return IS_EE
                 
