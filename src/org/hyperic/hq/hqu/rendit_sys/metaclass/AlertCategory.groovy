@@ -17,7 +17,14 @@ class AlertCategory {
     }
 
     static AuthzSubject getAcknowledgedBy(Alert a) {
-        def id = a.ackedBy
+        _getAcknowledgedBy(a.ackedBy)
+    }
+
+    static AuthzSubject getAcknowledgedBy(GalertLog a) {
+        _getAcknowledgedBy(a.ackedBy)
+    }
+    
+    private static AuthzSubject _getAcknowledgedBy(id) {
         if (id == null)
             return null
             
