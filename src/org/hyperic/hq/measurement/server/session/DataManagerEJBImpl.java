@@ -220,7 +220,43 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Write metric datapoints to the DB
+     * Write metric datapoints to the DB with transaction
+     * 
+     * @param data       a list of {@link DataPoint}s 
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public boolean addData(List data) {
+        Connection conn = null;
+
+        List left = data;
+            
+        try {
+            // XXX:  Get a better connection here - directly from Hibernate
+            conn = DBUtil.getConnByContext(getInitialContext(), 
+                                           DATASOURCE_NAME);
+            int numLeft = left.size();
+            _log.debug("Attempting to insert " + numLeft + " points");
+            left = insertData(conn, left, true);
+            _log.debug("Num left = " + left.size());
+            
+            if (!left.isEmpty()) {
+                _log.warn("Need to update data " + left.remove(0));
+                return false;
+            }
+        } catch(Exception e) {
+            _log.warn("Error while inserting data", e);
+        } finally {
+            DBUtil.closeConnection(logCtx, conn);
+        }
+        
+        sendMetricEvents(data.subList(0, data.size() - left.size()));
+        return true;
+    }
+
+    /**
+     * Write metric datapoints to the DB without transaction
      * 
      * @param data       a list of {@link DataPoint}s 
      * @param overwrite  If true, attempt to over-write values when an insert

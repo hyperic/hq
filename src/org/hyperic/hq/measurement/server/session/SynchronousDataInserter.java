@@ -39,6 +39,8 @@ public class SynchronousDataInserter
     private DataManagerLocal _dMan = DataManagerEJBImpl.getOne();
     
     public void insertMetrics(List metricData) throws InterruptedException {
-        _dMan.addData(metricData, true);
+        if (!_dMan.addData(metricData)) {
+            _dMan.addData(metricData, true);
+        }
     }
 }

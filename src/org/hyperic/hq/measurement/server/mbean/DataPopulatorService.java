@@ -78,7 +78,9 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
                 _log.info("Generated " + data.size() + " data points");
 
-                dataMan.addData(data, true);
+                if (!dataMan.addData(data)) {
+                    dataMan.addData(data, true);
+                }
             }
         }
     }
