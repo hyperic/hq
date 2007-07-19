@@ -562,20 +562,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Get the UNION statement from the detailed measurement tables based on
      * the beginning of the time range.
      * @param begin The beginning of the time range.
+     * @param end The end of the time range
      * @return The UNION SQL statement.
      */
-    private String getUnionStatement(long begin) {
+    private String getUnionStatement(long begin, long end) {
         // We always include the _COMPAT table, it contains the backfilled
         // data
         StringBuffer sql = new StringBuffer();
         sql.append("(SELECT * FROM ").
             append(MeasTabManagerUtil.OLD_MEAS_TABLE);
-        long ts = System.currentTimeMillis();
-        while (ts > begin) {
-            String table = MeasTabManagerUtil.getMeasTabname(ts);
+        while (end > begin) {
+            String table = MeasTabManagerUtil.getMeasTabname(end);
             sql.append(" UNION ALL SELECT * FROM ").
                 append(table);
-            ts = MeasTabManagerUtil.getPrevMeasTabTime(ts);
+            end = MeasTabManagerUtil.getPrevMeasTabTime(end);
         }
 
         sql.append(") ").append(TAB_DATA);
@@ -587,16 +587,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * table we should query for measurement data.  If the slice is for the
      * detailed data segment, we return the UNION view of the required time
      * slices.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
      */
-    private String getDataTable(long begin)
+    private String getDataTable(long begin, long end)
     {
         long now = System.currentTimeMillis();
 
-        if (!this.confDefaultsLoaded)
+        if (!confDefaultsLoaded)
             loadConfigDefaults();
 
-        if (now - this.purgeRaw < begin) {
-            return getUnionStatement(begin);
+        if (now - purgeRaw < begin) {
+            return getUnionStatement(begin, end);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -640,7 +642,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         int total = 0;
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
     
         try {
             conn =
@@ -801,7 +803,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet         rs   = null;
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
     
         try {
             StopWatch timer = new StopWatch(current);
@@ -1216,7 +1218,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public MetricValue getTimedData(Integer id, long startTime,
-                                         long intervalInMs, int prev) 
+                                    long intervalInMs, int prev) 
         throws DataNotAvailableException {
         // jwescott -- this really is voodoo
         long[] bounds = TimingVoodoo.previous(startTime, intervalInMs, prev);
@@ -1226,7 +1228,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet         rs   = null;
 
         // The table to query from
-        String table = getDataTable(startTime);
+        String table = getDataTable(startTime, System.currentTimeMillis());
     
         try {
             conn =
@@ -1281,7 +1283,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet         rs   = null;
 
         // The table to query from
-        String table = getDataTable(reqTime);
+        String table = getDataTable(reqTime, System.currentTimeMillis());
 
         try {
             conn =
@@ -1484,7 +1486,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet rs = null;
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
     
         try {
             conn =
@@ -1558,7 +1560,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
 
         StringBuffer iidsConj = new StringBuffer(
                 DBUtil.composeConjunctions("instance_id", iids.length));
@@ -1729,7 +1731,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet rs = null;
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
 
         StopWatch timer = new StopWatch();    
     
@@ -1815,7 +1817,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
     
         // Result set
         HashMap resMap = new HashMap();
@@ -1917,7 +1919,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
     
         // Result set
         HashMap resMap = new HashMap();
@@ -2015,7 +2017,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // The table to query from
-        String table = getDataTable(begin);
+        String table = getDataTable(begin, end);
 
         if (tids.length == 0)
             return new Integer[0];
