@@ -56,8 +56,7 @@ public class ColdfusionErrorLogPlugin extends LogFileTailPlugin
         {
             String[] toks = line.split("\",\"");
             return newTrackEvent(getTimeMillis(toks[2], toks[3]),
-                                 errorLevel, info.getName(),
-                                 getMessage(toks[1], toks[5]));
+                                 errorLevel, info.getName(), line);
         }
         catch (NumberFormatException e) {
         }
