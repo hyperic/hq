@@ -71,6 +71,6 @@ public class Oracle9Dialect
                " WHERE "+commonKey+
                " IN (select "+commonKey+
                " FROM "+joinTables+
-               " WHERE "+joinKeys+cond+limitCond+")";
+               " WHERE "+joinKeys+cond+")"+limitCond;
     }
 }

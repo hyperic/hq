@@ -251,7 +251,7 @@ public class DataCompressEJBImpl
             HQDialect dialect = Util.getHQDialect();
             int totalrows = 0;
             int rows = 0;
-            while (rows > 0)
+            do
             {
                 String delTable   = BF_TABLE+" b",
                        commonKey  = "b.measurement_id",
@@ -269,10 +269,9 @@ public class DataCompressEJBImpl
                 rows = stmt.executeUpdate(sql);
                 totalrows += rows;
             }
+            while (rows > 0);
             if (totalrows > 0) {
-                log.debug("Purged "+rows+" rows of backfilled data between"+
-                          " "+TimeUtil.toString(max_time)+" and "+
-                          TimeUtil.toString(max_time+BF_PURGE_INCR));
+                log.debug("Purged "+totalrows+" rows of backfilled data");
             }
         }
         finally {
