@@ -237,19 +237,22 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	     <div class="boldText"  style="position: relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+	    <div style="position:absolute;padding-left:10px;font-size:13px;padding-top:2px;font-weight:bold;">${params.id}</div>
+	        <div class="boldText" style="position:relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	         <div class="pageButtonCont">
-                 <div id="${idVar}_pageLeft" style="position: relative;width: 19px;height:20px;float: left;"
+                 <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
                       class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-                 <div id="${idVar}_pageNumbers">&nbsp;</div>
-                 <div id="${idVar}_pageRight" style="position: relative;width: 19px;height:20px;float: left;"
+                 <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
+                 <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;"
                       class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+
              </div>
+
              <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-                                 
+
              <div style="clear: both;"></div>
          </div>
-         <div style="clear: both;"></div>
+        
           <table id='${id}'>
             <thead>
               <tr>
