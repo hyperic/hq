@@ -98,6 +98,13 @@ public class ScheduledItem {
      * interval for which the object should repeat.
      */
     public void stepNextTime(){
+        long curTime = System.currentTimeMillis();
+        
         this.nextTime += this.interval;
+        // Somehow the clock jumped (laptop was suspended?), or we got really 
+        // far behind.  Jump up to the next slot  
+        if (this.nextTime < curTime) {
+            this.nextTime = getScheduledTime(this.interval);
+        }
     }
 }
