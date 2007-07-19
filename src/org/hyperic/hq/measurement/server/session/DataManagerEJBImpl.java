@@ -309,57 +309,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return val;
     }
     
-    /**
-     * This method is called to perform 'updates' for any inserts which failed
-     * in addData. 
-     */
-    private List updateData(Connection conn, List data) 
-        throws SQLException
-    { 
-        Statement stmt = null;
-        
-        try {
-            stmt = conn.createStatement();
-            DataPoint pt = (DataPoint)data.get(0);
-            Integer metricId = pt.getMetricId();
-            MetricValue val = pt.getMetricValue();
-            BigDecimal bigDec = null;
-                
-            try {
-                bigDec = new BigDecimal(val.getValue());
-            } catch(NumberFormatException e) {  // infinite, or NaN
-                _log.warn("Unable to insert infinite or NaN for metric id=" +
-                          metricId);
-                data.remove(0);
-                return data;
-            }
-            long currtime      = System.currentTimeMillis();
-            String currTable   = MeasTabManagerUtil.getMeasTabname(currtime);
-            String updateTable = currTable;
-            int rowsaffected   = 0;
-            do
-            {
-                String sql;
-                sql = "UPDATE " + currTable +
-                      " SET value = " + getDecimalInRange(bigDec) +
-                      " WHERE measurement_id = " + metricId.intValue() +
-                      " AND timestamp = " + val.getTimestamp();
-                rowsaffected = stmt.executeUpdate(sql);
-                if (rowsaffected > 0)
-                    _log.debug("updated metric data with "+sql);
-                currtime     = MeasTabManagerUtil.getPrevMeasTabTime(currtime);
-                updateTable  = MeasTabManagerUtil.getMeasTabname(currtime);
-            }
-            while (!updateTable.equals(currTable) && rowsaffected == 0);
-            
-            data.remove(0);
-
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
-        }
-        return data;
-    }
-
     private void sendMetricEvents(List data) {
         MetricDataCache cache = MetricDataCache.getInstance();
         ArrayList events  = new ArrayList();
@@ -450,6 +399,28 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
 
+    private Map bucketData(List data, boolean overwrite) {
+        HashMap buckets = new HashMap();
+        
+        // Bucket the data first
+        for (Iterator it = data.iterator(); it.hasNext(); ) {
+            DataPoint pt = (DataPoint) it.next();
+            String table = overwrite ?
+                MeasTabManagerUtil
+                    .getMeasTabname(pt.getMetricValue().getTimestamp()) :
+                MeasTabManagerUtil.OLD_MEAS_TABLE;
+                    
+            if (!buckets.containsKey(table)) {
+                buckets.put(table, new ArrayList());
+            }
+            
+            List dpts = (List) buckets.get(table);
+            dpts.add(pt);
+        }
+        
+        return buckets;
+    }
+
     /**
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
@@ -460,47 +431,106 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         throws SQLException
     {
         PreparedStatement stmt = null;
-        List left;
-        String table = overwrite ?
-            MeasTabManagerUtil.getMeasTabname(System.currentTimeMillis()) :
-            MeasTabManagerUtil.OLD_MEAS_TABLE;
+        List left = new ArrayList();
+        Map buckets = bucketData(data, overwrite);
         
-        try {
-            stmt = conn.prepareStatement("INSERT /*+ APPEND */ INTO " + 
-                                         table + 
-                                         " (measurement_id, timestamp, value)"+
-                                         " VALUES (?, ?, ?)");
-            
-            for (Iterator i=data.iterator(); i.hasNext(); ) {
-                DataPoint pt = (DataPoint)i.next();
-                Integer metricId  = pt.getMetricId();
-                MetricValue val   = pt.getMetricValue();
-                BigDecimal bigDec;
-                
-                try {
-                    bigDec = new BigDecimal(val.getValue());
-                } catch(NumberFormatException e) {  // infinite, or NaN
-                    _log.warn("Unable to insert infinite or NaN for metric id="
-                              + metricId);
-                    continue;
+        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String table = (String) entry.getKey();
+            List dpts = (List) entry.getValue();
+
+            try {
+                stmt = conn.prepareStatement(
+                    "INSERT /*+ APPEND */ INTO " + table + 
+                    " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
+
+                for (Iterator i=dpts.iterator(); i.hasNext(); ) {
+                    DataPoint pt = (DataPoint)i.next();
+                    Integer metricId  = pt.getMetricId();
+                    MetricValue val   = pt.getMetricValue();
+                    BigDecimal bigDec;
+
+                    try {
+                        bigDec = new BigDecimal(val.getValue());
+                    } catch(NumberFormatException e) {  // infinite, or NaN
+                        _log.warn("Unable to insert infinite or NaN for " +
+                                  "metric id=" + metricId);
+                        continue;
+                    }
+                    stmt.setInt(1, metricId.intValue());
+                    stmt.setLong(2, val.getTimestamp());
+                    stmt.setBigDecimal(3, getDecimalInRange(bigDec));
+                    stmt.addBatch();
                 }
-                stmt.setInt(1, metricId.intValue());
-                stmt.setLong(2, val.getTimestamp());
-                stmt.setBigDecimal(3, getDecimalInRange(bigDec));
-                stmt.addBatch();
+
+                int[] execInfo = stmt.executeBatch();
+                left.addAll(getRemainingDataPoints(dpts, execInfo));
+            } catch(BatchUpdateException e) {
+                left.addAll(
+                    getRemainingDataPointsAfterBatchFail(data, 
+                                                         e.getUpdateCounts()));
+            } finally {
+                DBUtil.closeStatement(logCtx, stmt);
             }
-            
-            int[] execInfo = stmt.executeBatch();
-            left = getRemainingDataPoints(data, execInfo);
-        } catch(BatchUpdateException e) {
-            left = getRemainingDataPointsAfterBatchFail(data, 
-                                                        e.getUpdateCounts());
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
         }
+
         return left;
     }
-    
+
+    /**
+     * This method is called to perform 'updates' for any inserts which failed
+     * in addData. 
+     */
+    private List updateData(Connection conn, List data) 
+        throws SQLException
+    {
+        PreparedStatement stmt = null;
+        List left = new ArrayList();
+        Map buckets = bucketData(data, true);
+        
+        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String table = (String) entry.getKey();
+            List dpts = (List) entry.getValue();
+
+            try {
+                stmt = conn.prepareStatement(
+                    "UPDATE " + table + 
+                    " SET value = ? WHERE measurement_id = ? AND timestamp = ?");
+
+                for (Iterator i = dpts.iterator(); i.hasNext();) {
+                    DataPoint pt = (DataPoint) i.next();
+                    Integer metricId  = pt.getMetricId();
+                    MetricValue val   = pt.getMetricValue();
+                    BigDecimal bigDec;
+
+                    try {
+                        bigDec = new BigDecimal(val.getValue());
+                    } catch(NumberFormatException e) {  // infinite, or NaN
+                        _log.warn("Unable to update infinite or NaN for " +
+                                  "metric id=" + metricId);
+                        continue;
+                    }
+                    stmt.setBigDecimal(1, getDecimalInRange(bigDec));
+                    stmt.setInt(2, metricId.intValue());
+                    stmt.setLong(3, val.getTimestamp());
+                    stmt.addBatch();
+                }
+
+                int[] execInfo = stmt.executeBatch();
+                left.addAll(getRemainingDataPoints(dpts, execInfo));
+            } catch(BatchUpdateException e) {
+                left.addAll(
+                    getRemainingDataPointsAfterBatchFail(data, 
+                                                         e.getUpdateCounts()));
+            } finally {
+                DBUtil.closeStatement(logCtx, stmt);
+            }
+        }
+
+        return left;
+    }
+
     /**
      * Get the server purge configuration and storage option, loaded on startup.
      */
