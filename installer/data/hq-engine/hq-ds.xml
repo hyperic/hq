@@ -21,7 +21,7 @@
 
     <!--pooling parameters-->
     <min-pool-size>5</min-pool-size>
-    <max-pool-size>100</max-pool-size>
+    <max-pool-size>500</max-pool-size>
     <blocking-timeout-millis>5000</blocking-timeout-millis>
     <idle-timeout-minutes>15</idle-timeout-minutes>
     <prepared-statement-cache-size>75</prepared-statement-cache-size>
