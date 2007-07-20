@@ -273,6 +273,7 @@ public class SybaseMeasurementPlugin
                MetricInvalidException,
                MetricNotFoundException
     {
+        initQueries();
         String objectName = metric.getObjectName(),
                alias      = metric.getAttributeName();
         if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
