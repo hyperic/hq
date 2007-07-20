@@ -32,7 +32,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.Constants;
@@ -46,12 +53,6 @@ import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A <code>ResourceControllerAction</code> that sets up server
@@ -130,6 +131,18 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
 
+        // Check to see if it's a platform service type
+        AppdefResourceValue service = RequestUtils.getResource(request);
+
+        Integer sessionId = RequestUtils.getSessionId(request);
+        ServletContext ctx = getServlet().getServletContext();
+        ServerValue server = ContextUtils.getAppdefBoss(ctx)
+            .findServerByService(sessionId.intValue(), service.getId());
+        
+        request.setAttribute("modifiableName",
+                             new Boolean(server.getServerType().getVirtual()));
+        
+        
         return null;
     }
 
