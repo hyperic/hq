@@ -46,41 +46,18 @@ public class ResourceGroup extends AuthzNamedBean
     private long _ctime;
     private long _mtime;
     private String _modifiedBy;
+    private Resource _resource;
     private Collection _resourceSet = new HashSet();
     private Collection _roles = new HashSet();
 
     private ResourceGroupValue _resourceGroupValue = new ResourceGroupValue();
 
-    public ResourceGroup() {
+    protected ResourceGroup() {
         super();
     }
 
-    public ResourceGroup(ResourceGroupValue val) {
+    ResourceGroup(ResourceGroupValue val) {
         setResourceGroupValue(val);
-    }
-
-    public ResourceGroup(String name, Integer cid,
-                         String description, String location, boolean fsystem,
-                         Integer groupType, Integer groupEntType,
-                         Integer groupEntResType, Integer clusterId,
-                         long ctime, long mtime, String modifiedBy,
-                         Resource resourceId, Collection resources,
-                         Collection roles)
-    {
-        super(name);
-        _cid = cid;
-        _description = description;
-        _location = location;
-        _system = fsystem;
-        _groupType = groupType;
-        _groupEntType = groupEntType;
-        _groupEntResType = groupEntResType;
-        _clusterId = clusterId;
-        _ctime = ctime;
-        _mtime = mtime;
-        _modifiedBy = modifiedBy;
-        _resourceSet = resources;
-        _roles = roles;
     }
 
     public Integer getCid() {
@@ -175,6 +152,14 @@ public class ResourceGroup extends AuthzNamedBean
         return _resourceSet;
     }
 
+    protected void setResource(Resource r) {
+        _resource = r;
+    }
+    
+    public Resource getResource() {
+        return _resource;
+    }
+    
     public Collection getResources()
     {
         TreeSet resources = new TreeSet(new AuthzNamedBean.Comparator());

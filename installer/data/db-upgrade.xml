@@ -6365,6 +6365,20 @@ has already been defined.
                             nullable="NOT NULL"/>
     </schemaSpec>
     
+    <schemaSpec version="3.36">
+        <schema-addColumn table="EAM_RESOURCE_GROUP" column="RESOURCE_ID" 
+                          columnType="INTEGER"/>
+        <schema-directSQL>
+          <statement>
+              update eam_resource_group g set resource_id = (
+                  select r.id from eam_resource r 
+                  where r.resource_type_id = 3 and r.instance_id = g.id)
+          </statement>
+        </schema-directSQL>
+
+        <schema-alterColumn table="EAM_RESOURCE_GROUP" column="RESOURCE_ID" 
+                            nullable="NOT NULL"/>
+    </schemaSpec>
 
 </dbupgrade>
 </target>

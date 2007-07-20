@@ -49,7 +49,6 @@ public class ResourceGroupDAO extends HibernateDAO
                                 boolean isSystem) 
     {
         ResourceGroup resGrp = new ResourceGroup(createInfo);
-        save(resGrp);
 
         ResourceType resType = new ResourceTypeDAO(DAOFactory.getDAOFactory())
             .findById(AuthzConstants.authzGroup);
@@ -59,10 +58,13 @@ public class ResourceGroupDAO extends HibernateDAO
                                       AuthzConstants.groupResourceTypeName);
         }
 
-        new ResourceDAO(DAOFactory.getDAOFactory())
+        Resource r = new ResourceDAO(DAOFactory.getDAOFactory()) 
             .create(resType, resGrp.getName(), creator,  resGrp.getId(),
                     isSystem);
-            
+        resGrp.setResource(r);
+        save(resGrp);
+        r.setInstanceId(resGrp.getId());
+        save(r);
         return resGrp;
     }
 
@@ -84,13 +86,13 @@ public class ResourceGroupDAO extends HibernateDAO
         // remove all resources
         entity.getResourceSet().clear();
 
+        super.remove(entity);
+
         // remove this resourceGroup itself
         ResourceDAO dao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource resource =
             dao.findByInstanceId(AuthzConstants.authzGroup, entity.getId());
         dao.remove(resource);
-        
-        super.remove(entity);
     }
     
     public void addResource(ResourceGroup entity, Resource res) {
