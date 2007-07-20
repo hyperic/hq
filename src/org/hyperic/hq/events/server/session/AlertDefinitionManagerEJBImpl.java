@@ -187,8 +187,9 @@ public class AlertDefinitionManagerEJBImpl
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
             canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
                                                          a.getAppdefId()));
-        }
-        else {
+        // Subject permissions should have already been checked when creating 
+        // the parent (resource type) alert definition.
+        } else if (!a.parentIdHasBeenSet()) {
             canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
                                                      a.getAppdefId()));
         }
