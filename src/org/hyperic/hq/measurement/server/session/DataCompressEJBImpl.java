@@ -253,8 +253,8 @@ public class DataCompressEJBImpl
             int rows = 0;
             do
             {
-                String delTable   = BF_TABLE+" b",
-                       commonKey  = "b.measurement_id",
+                String delTable   = BF_TABLE,
+                       commonKey  = "measurement_id",
                        joinTables = BF_TABLE+" b, "+METRIC_DATA_VIEW+" m",
                        joinKeys   = "m.measurement_id = b.measurement_id"+
                                     " and m.timestamp = b.timestamp",
