@@ -39,7 +39,6 @@
 	<title>Hyperic HQ - Alert Email</title>
 </head>
 <body style="font-family: arial, sans-serif;font-size:13px;">
-<center>
 <table border="0" width="95%" cellspacing="0" 
        style="margin-left:auto;margin-right:auto;border:1px solid #999999" >
   <tr>
@@ -91,10 +90,9 @@
   </tr>
   <tr>
     <td align="center">
-      <img src="http://www.hyperic.com/images/bg-footer.gif" alt="Hyperic footer image">
+      <img src="http://www.hyperic.com/images/app/bg-footer.gif" alt="Hyperic footer image">
     </td>
   </tr>
   </table>
-</center>
 </body>
 </html>
