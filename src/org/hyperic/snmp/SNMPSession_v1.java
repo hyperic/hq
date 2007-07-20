@@ -40,6 +40,7 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
@@ -61,7 +62,8 @@ class SNMPSession_v1 implements SNMPSession {
         throws IOException {
 
         if (sessionInstance == null) {
-            sessionInstance = new Snmp(new DefaultUdpTransportMapping());
+            UdpAddress addr = new UdpAddress("0.0.0.0/0");
+            sessionInstance = new Snmp(new DefaultUdpTransportMapping(addr));
             sessionInstance.listen();
         }
 
