@@ -6370,9 +6370,10 @@ has already been defined.
                           columnType="INTEGER"/>
         <schema-directSQL>
           <statement>
-              update eam_resource_group g set resource_id = (
+              update eam_resource_group set resource_id = (
                   select r.id from eam_resource r 
-                  where r.resource_type_id = 3 and r.instance_id = g.id)
+                  where r.resource_type_id = 3 and 
+                        r.instance_id = eam_resource_group.id)
           </statement>
         </schema-directSQL>
 
