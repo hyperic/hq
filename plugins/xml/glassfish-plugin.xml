@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.glassfish">
+
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <metrics name="Class Loading Metrics">
+    <metric name="Loaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+    <metric name="Total Loaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+    <metric name="Unloaded Class Count"
+            indicator="false"
+            category="THROUGHPUT"/>
+  </metrics>
+
+  <metrics name="Compilation">
+    <metric name="Total Compilation Time"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="Garbage Collector">
+    <metric name="Collection Count"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Collection Time"
+            indicator="false"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="Memory">
+    <metric name="Object Pending Finalization Count"
+            category="THROUGHPUT"
+            indicator="false"/>
+  </metrics>
+
+  <metrics name="Threading">
+    <metric name="Thread Count"
+            category="UTILIZATION"
+            indicator="false"/>
+    <metric name="Daemon Thread Count"
+            category="UTILIZATION"
+            indicator="false"/>
+  </metrics>
+
+  <server name="GlassFish"
+          version="9.x">
+
+    <property name="HAS_BUILTIN_SERVICES"
+              value="true"/>
+
+<!-- NEED TO FILL THIS IN
+    <property name="VERSION_FILE"
+              value="lib/"/>
+-->
+
+    <property name="DEFAULT_PROGRAM"
+              value="bin/startserv"/>
+
+    <property name="domain"
+              value="GlassFish"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+    &process-metrics;
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=ClassLoading"/>
+    <metrics include="Class Loading Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Compilation"/>
+    <metrics include="Compilation"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Memory"/>
+    <metrics include="Memory"/>
+    <!-- listen for JMX notifications -->
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=GarbageCollector,name=PS Scavenge"/>
+    <metrics include="Garbage Collector"/>
+    <property name="OBJECT_NAME"
+              value="java.lang:type=GarbageCollector,name=PS MarkSweep"/>
+    <metrics include="Garbage Collector"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Threading"/>
+    <metrics include="Threading"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="%logpath%"/>
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <config>
+      <option name="logpath"
+              description="GlassFish Log File (Full Path)"
+              default="%installpath%/logs/server.log"/>
+      <option name="jmx.url"
+              description="JMX URL to MBeanServer"
+              default="service:jmx:rmi:///jndi/rmi://localhost:6968/jmxrmi"/>
+      <option name="jmx.username"
+              description="JMX username"
+              optional="true"
+              default=""/>
+      <option name="jmx.password"
+              description="JMX password"
+              optional="true"
+              default=""
+              type="secret"/>
+      <option name="process.query"
+              description="PTQL for GlassFish Java Process"
+              default="State.Name.eq=java,Args.*.ct=glassfish"/>
+    </config>
+
+    <!-- derive installpath from -Dcom.sun.aas.instanceRoot... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="com.sun.aas.instanceRoot"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="GlassFish">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for monitoring GlassFish</h3>
+  </p>
+  <p>
+  </p>
+  ]]>
+  </help>
+  <help name="GlassFish 9.x" include="GlassFish"/>
+</plugin>
