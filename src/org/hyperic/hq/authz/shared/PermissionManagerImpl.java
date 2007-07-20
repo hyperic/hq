@@ -339,4 +339,11 @@ public class PermissionManagerImpl
           "where a.ctime between :begin and :end and " +
                 "d.priority >= :priority ";
     }
+
+    public String getGroupAlertsHQL() {
+        return "select a from GalertLog a " +
+               "join a.alertDef d " +
+         "where a.timestamp between :begin and :end " + 
+           "and d.severityEnum >= :priority ";
+    }
 }

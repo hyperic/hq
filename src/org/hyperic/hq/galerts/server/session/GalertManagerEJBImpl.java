@@ -378,8 +378,10 @@ public class GalertManagerEJBImpl
         } else {
             PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE,
                                              false);
-            alerts = _logDAO.findByCreateTimeAndPriority(endTime - timeRange,
-                                                         endTime, priority, 
+            AlertSeverity s = AlertSeverity.findByCode(priority);
+            alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
+                                                         endTime - timeRange,
+                                                         endTime, s, 
                                                          pInfo);
         }
             
@@ -405,8 +407,9 @@ public class GalertManagerEJBImpl
     public List findAlerts(AuthzSubjectValue subj, AlertSeverity severity,
                            long timeRange, long endTime, PageInfo pInfo)
     {
-        return _logDAO.findByCreateTimeAndPriority(endTime - timeRange, endTime, 
-                                                   severity.getCode(), pInfo);
+        return _logDAO.findByCreateTimeAndPriority(subj.getId(), 
+                                                   endTime - timeRange, endTime, 
+                                                   severity, pInfo);
     }
 
     /**

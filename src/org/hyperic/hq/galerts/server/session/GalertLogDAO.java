@@ -36,8 +36,12 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.SortField;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -120,17 +124,15 @@ class GalertLogDAO
             .list();
     }
     
-    List findByCreateTimeAndPriority(long begin, long end, int priority,
-                                     PageInfo pageInfo) 
+    List findByCreateTimeAndPriority(Integer subjectId, long begin, long end, 
+                                     AlertSeverity severity, PageInfo pageInfo) 
     {
         GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
-        String sql = "select a from GalertLog a " +
-                     "join a.alertDef d " + 
-                     "join d.group g " +
-               "where a.timestamp between :begin and :end " + 
-                 "and d.severityEnum >= :priority " + 
-               "order by " + sort.getSortString("a", "d", "g") + 
-               (pageInfo.isAscending() ? "" : " DESC");
+        String op = AuthzConstants.groupOpManageAlerts;
+        String sql = 
+            PermissionManagerFactory.getInstance().getGroupAlertsHQL() +
+            " order by " + sort.getSortString("a", "d", "g") + 
+            (pageInfo.isAscending() ? "" : " DESC");
 
                
         if (!sort.equals(GalertLogSortField.DATE)) {
@@ -141,8 +143,13 @@ class GalertLogDAO
         Query q = getSession().createQuery(sql)
                               .setLong("begin", begin)
                               .setLong("end", end)
-                              .setInteger("priority", priority);
-        
+                              .setInteger("priority", severity.getCode());
+                              
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subjectId.intValue())
+             .setParameter("op", op);
+        }
+
         return pageInfo.pageResults(q).list();
     }
 
