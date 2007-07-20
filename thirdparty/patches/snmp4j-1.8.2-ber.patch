@@ -1,0 +1,19 @@
+--- snmp4j-1.8.2/src/org/snmp4j/asn1/BER.java	2007-03-10 20:45:42.000000000 -0800
++++ snmp4j-1.8.2-patched/src/org/snmp4j/asn1/BER.java	2007-05-16 15:22:09.000000000 -0700
+@@ -668,6 +668,16 @@
+ 
+     // check for legal uint size
+     int b = is.read();
++    if ((length == 5) && (b != 0x00)) {
++        String msg =
++            "Only 32bit unsigned integers are supported (len=" + length + ", b=" + b +
++            ", type=" + type.value + ")" +
++            getPositionMessage(is);
++        //new IOException(msg).printStackTrace();
++        //XXX major hack for mod_snmp
++        b = 0x00;
++    }
++
+     if ((length > 5) || ((length > 4) && (b != 0x00))) {
+       throw new IOException("Only 32bit unsigned integers are supported"+
+                             getPositionMessage(is));
