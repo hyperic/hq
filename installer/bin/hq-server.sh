@@ -162,7 +162,7 @@ startBuiltinDB () {
   DBPIDFILE="${SERVER_HOME}/hqdb/data/postmaster.pid"
   debugOut "Checking existence of pidfile: ${DBPIDFILE}"
   if [ -f "${DBPIDFILE}" ] ; then
-    DBPID=`cat ${DBPIDFILE} | tr -d ' '`
+    DBPID=`head -n 1 ${DBPIDFILE}`
     if [ ! "x${DBPID}" = "x" ]; then
       # First check for stale pid file
       DBPIDCHECK=`kill -0 ${DBPID} 2> /dev/null`
