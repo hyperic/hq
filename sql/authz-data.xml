@@ -46,10 +46,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               FSYSTEM="TRUE" FACTIVE="TRUE" HTML_EMAIL="FALSE"/>
     </table>
 
-    <table name="EAM_RESOURCE_GROUP">
-        <data ID="0" CID="0" NAME="covalentAuthzResourceGroup" FSYSTEM="TRUE" />
-    </table>
-
     <!-- setup resources -->
     <table name="EAM_RESOURCE">
         <data ID="0" CID="0" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:0"
@@ -72,14 +68,27 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"
               FSYSTEM="TRUE"/>
-        <data ID="5" CID="5" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:0"
+    </table>
+    <table name="EAM_RESOURCE">
+        <data ID="5" CID="5" 
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"
               FSYSTEM="TRUE"/>
+    </table>
+    <table name="EAM_RESOURCE">
         <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"    
               FSYSTEM="TRUE"/>
+    </table>
+
+    <table name="EAM_RESOURCE_GROUP">
+        <data ID="0" CID="0" NAME="covalentAuthzResourceGroup" 
+              RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" />
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data CID="5" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:0"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -323,21 +332,26 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               FSYSTEM="TRUE"/>
     </table>
     
-       <!-- Create the Special Root Resource Group. This group will contain
+    <!-- Create the Special Root Resource Group. This group will contain
          a reference to every single resource that is created in the system.
          This resource is what is used to create the root user concept
          in EAM. The root role will include this group and allow any permission
          available on every entity in the system. -->
-    <table name="EAM_RESOURCE_GROUP">
-        <data ID="1" CID="1" NAME="ROOT_RESOURCE_GROUP" FSYSTEM="TRUE" />
-    </table>
-
     <!-- add a resource for the group (intuitive, no? :) -->
     <table name="EAM_RESOURCE">
-        <data ID="7" CID="7" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:1"
+        <data ID="7" CID="7" 
             RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
             SUBJECT_ID="%EAM_SUBJECT.ID:1"
             FSYSTEM="TRUE"/>
+    </table>
+
+    <table name="EAM_RESOURCE_GROUP">
+        <data ID="1" CID="1" NAME="ROOT_RESOURCE_GROUP" FSYSTEM="TRUE" 
+              RESOURCE_ID="%EAM_RESOURCE.ID:7"/>
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data CID="7" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:1"/>
     </table>
 
     <!-- add an entry in the user prefs for the root user -->
