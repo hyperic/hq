@@ -148,22 +148,11 @@ public class ViewAction extends BaseAction {
                 return "red";
             } else if (avail == MeasurementConstants.AVAIL_PAUSED) {
                 return "orange";
-            } else if (avail == MeasurementConstants.AVAIL_WARN) {
+            } else if (avail > MeasurementConstants.AVAIL_DOWN && 
+                       avail < MeasurementConstants.AVAIL_UP) {
                 return "yellow";
             }
         }
         return "unknown";
-    }
-
-    private List getResources(String key, MeasurementBoss boss, WebUser user)
-        throws Exception
-    {
-        List entityIds =  DashboardUtils.preferencesAsEntityIds(key, user);                                    
-
-        AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-        arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
-        
-        return boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
-                                               arrayIds);
     }
 }
