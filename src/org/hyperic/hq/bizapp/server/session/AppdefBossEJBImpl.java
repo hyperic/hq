@@ -49,6 +49,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -1460,14 +1461,9 @@ public class AppdefBossEJBImpl
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         ApplicationManagerLocal appMan = getApplicationManager();
             
-        Integer pk =
+        Application pk =
             appMan.createApplication(subject, appVal, services);
-        try {
-            return appMan.getApplicationById(subject, pk);
-        } catch (ApplicationNotFoundException e) {
-            // Should never happen
-            throw new SystemException("Could not find app we just created");
-        }
+        return pk.getApplicationValue();
     }
 
     /**

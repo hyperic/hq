@@ -37,6 +37,7 @@ import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -132,9 +133,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * null if you are creating an empty application.
      * @ejb:interface-method
      */
-    public Integer createApplication(AuthzSubjectValue subject,
-                                     ApplicationValue newApp,
-                                     Collection services)
+    public Application createApplication(AuthzSubjectValue subject,
+                                         ApplicationValue newApp,
+                                         Collection services)
         throws CreateException, ValidationException, PermissionException,
                AppdefDuplicateNameException
     {
@@ -170,7 +171,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 log.debug("Adding service: " + aService + " to application");
                 application.addService(aService.getId());
             }
-            return application.getId();
+            return application;
         } catch (FinderException e) {
             log.error("Unable to find dependent object", e);
             throw new CreateException("Unable to find dependent object: " +

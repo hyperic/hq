@@ -36,6 +36,7 @@ import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentCommandsAPI;
+import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
@@ -682,14 +683,9 @@ class ImportHelper
         }
 
         try {
-            Integer pk = _appMan.createApplication(_subject, aApp,
-                                                   serviceList);
-            try {
-                aApp = _appMan.getApplicationById(_subject, pk);
-            } catch (ApplicationNotFoundException e) {
-                throw new BatchImportException(
-                    "Failed to find app we just created");
-            }
+            Application pk =
+                _appMan.createApplication(_subject, aApp, serviceList);
+            aApp = pk.getApplicationValue();
         } catch(CreateException exc){
             throw new BatchImportException("Failed to create application '" +
                                            name + "': " + exc.getMessage());
