@@ -365,10 +365,18 @@ public class EventsBossEJBImpl
                     clone.setMeasurementId(dmv.getId().intValue());
                     break;
                 case EventConstants.TYPE_ALERT:
-                    Integer recoverId;
-                    recoverId = getADM().findChildAlertDefinitionId(
-                        id, new Integer(clone.getMeasurementId()));
-                    clone.setMeasurementId(recoverId.intValue());
+                    Integer recoverId = getADM().findChildAlertDefinitionId(
+                                     id, new Integer(clone.getMeasurementId()));
+                    
+                    if (recoverId == null) {
+                        _log.error("A recovery alert has no associated recover " +
+                                   "from alert. Setting alert condition " +
+                                   "measurement Id to 0.");
+                        clone.setMeasurementId(0);
+                    } else {
+                        clone.setMeasurementId(recoverId.intValue());                        
+                    }
+                    
                     break;
                 }
             } catch (MeasurementNotFoundException e) {

@@ -698,6 +698,9 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** Get the resource-specific alert definition ID by parent ID
+     * 
+     * @return The alert definition ID or <code>null</code> if no child alert 
+     *          definition is found.
      * @ejb:interface-method
      */
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
