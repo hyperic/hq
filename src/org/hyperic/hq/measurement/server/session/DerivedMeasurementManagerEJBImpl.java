@@ -1025,7 +1025,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // passed, but may have more than that in our map.
         for (int i=0; i<tids.length; i++) {
             if (!intervals.containsKey(tids[i]))
-                intervals.put(tids[i], new Long(0));
+                intervals.put(tids[i], null);
         }
         
         List tidList = Arrays.asList(tids);
