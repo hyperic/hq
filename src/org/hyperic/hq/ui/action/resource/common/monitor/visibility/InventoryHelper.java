@@ -246,12 +246,12 @@ public abstract class InventoryHelper {
         throws ServletException, AppdefEntityNotFoundException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, EncodingException, RemoteException {
-        final String CONFIG_ATTR = "IsConfigured-" + entityId;
+        final String CONFIG_ATTR = "IsResourceUnconfigured";
 
         Boolean configured =
             (Boolean) request.getAttribute(CONFIG_ATTR);
         if (configured != null)
-            return configured.booleanValue();
+            return !configured.booleanValue();
         
         if (AppdefEntityConstants.APPDEF_TYPE_GROUP == entityId.getType())
             return true;
@@ -277,7 +277,7 @@ public abstract class InventoryHelper {
                 RequestUtils.setError(request, error, 
                                       ActionMessages.GLOBAL_MESSAGE);
             }
-            request.setAttribute(CONFIG_ATTR, Boolean.FALSE);
+            request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
             return false;
         }
 
@@ -286,7 +286,7 @@ public abstract class InventoryHelper {
             pboss.getConfigResponse(sessionId, entityId).getValidationError();
 
         if (validationError == null) {
-            request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
+            request.setAttribute(CONFIG_ATTR, Boolean.FALSE);
             return true;
         }
         if (setError) {
@@ -303,7 +303,7 @@ public abstract class InventoryHelper {
             RequestUtils.setError(request, error, 
                                   ActionMessages.GLOBAL_MESSAGE);
         }
-        request.setAttribute(CONFIG_ATTR, Boolean.FALSE);
+        request.setAttribute(CONFIG_ATTR, Boolean.TRUE);
         return false;
     }
 }

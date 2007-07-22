@@ -327,6 +327,7 @@ sometimes we don't want any left side buttons or checkboxes at all
   </c:forEach>
   </table>
 
+<c:if test="${not IsResourceUnconfigured}">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="ToolbarContent">
 <tr><td>
 <tiles:insert definition=".resource.common.monitor.visibility.metricsToolbar">
@@ -373,6 +374,7 @@ sometimes we don't want any left side buttons or checkboxes at all
 </tiles:insert>
 </td></tr>
 </table>
+</c:if>
 
 </div>
 
