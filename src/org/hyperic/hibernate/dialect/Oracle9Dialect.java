@@ -67,10 +67,8 @@ public class Oracle9Dialect
     {
         String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
         String limitCond = (limit <= 0) ? "" : " AND rownum <= "+limit;
-        return "DELETE FROM "+deleteTable+
-               " WHERE "+commonKey+
-               " IN (select "+commonKey+
-               " FROM "+joinTables+
+        return "DELETE FROM "+deleteTable+" WHERE EXISTS"+
+               " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")"+limitCond;
     }
 }

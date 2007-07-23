@@ -226,13 +226,15 @@ public class DataCompressEJBImpl
      * Clean backfilled data
      * @ejb:interface-method
      */
-    public void purgeBackfilled() throws SQLException, NamingException {
+    public void purgeBackfilled() throws SQLException, NamingException
+    {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
-        try {
-            long min_time = 0;
-            long max_time = 0;
+        try
+        {
+            long minTime = 0,
+                 maxTime = 0;
             conn = DBUtil
                     .getConnByContext(getInitialContext(), DATASOURCE_NAME);
             stmt = conn.createStatement();
@@ -240,42 +242,55 @@ public class DataCompressEJBImpl
                          " HAVING min(timestamp) is not null";
             rs = stmt.executeQuery(sql);
             if (rs.next())
-                min_time = rs.getLong(1);
+                minTime = rs.getLong(1);
 
             sql = "SELECT max(timestamp) FROM "+BF_TABLE+
                   " HAVING max(timestamp) is not null";
             rs = stmt.executeQuery(sql);
             if (rs.next())
-                max_time = rs.getLong(1);
+                maxTime = rs.getLong(1);
 
             HQDialect dialect = Util.getHQDialect();
-            int totalrows = 0;
-            int rows = 0;
-            do
-            {
-                String delTable   = BF_TABLE,
-                       commonKey  = "measurement_id",
-                       joinTables = BF_TABLE+" b, "+METRIC_DATA_VIEW+" m",
-                       joinKeys   = "m.measurement_id = b.measurement_id"+
-                                    " and m.timestamp = b.timestamp",
-                       condition  = "";
+            int totalrows = 0,
+                rows      = 0;
 
+            long interval = BF_PURGE_INCR;
+            StopWatch watch = new StopWatch();
+
+            while (maxTime > minTime)
+            {
+                String b          = BF_TABLE,
+                       delTable   = b,
+                       commonKey  = "m.measurement_id,m.timestamp",
+                       joinTables = METRIC_DATA_VIEW+" m",
+                       joinKeys   = b+".measurement_id = m.measurement_id and "+
+                                    b+".timestamp = m.timestamp",
+                       condition  = "m.timestamp between "+(maxTime-=interval)+
+                                    " and "+(maxTime+interval);
                 sql = dialect.getDeleteJoinStmt(delTable,
                                                 commonKey,
                                                 joinTables,
                                                 joinKeys,
                                                 condition,
-                                                MAX_BF_DEL_ROWS);
+                                                0);
+
                 rows = stmt.executeUpdate(sql);
                 totalrows += rows;
+                if (rows > 0) {
+                    log.debug("Purged "+rows+" rows between " +
+                              TimeUtil.toString(maxTime) + " and " +
+                              TimeUtil.toString(maxTime+interval) + " in " +
+                              BF_TABLE);
+                }
             }
-            while (rows > 0);
+            log.info("Done purging backfilled data (" +
+                    ((watch.getElapsed()) / 1000) + " secs)");
             if (totalrows > 0) {
                 log.debug("Purged "+totalrows+" rows of backfilled data");
             }
         }
         finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
     }
         

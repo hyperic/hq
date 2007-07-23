@@ -61,10 +61,8 @@ public class PostgreSQLDialect
     {
         String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
         String limitCond = (limit <= 0) ? "" : " LIMIT "+limit;
-        return "DELETE FROM "+deleteTable+
-               " WHERE "+commonKey+
-               " IN (SELECT "+commonKey+
-               " FROM "+joinTables+
-               " WHERE "+joinKeys+cond+limitCond+")";
+        return "DELETE FROM "+deleteTable+" WHERE EXISTS"+
+               " (SELECT "+commonKey+" FROM "+joinTables+
+               " WHERE "+joinKeys+cond+")";
     }
 }
