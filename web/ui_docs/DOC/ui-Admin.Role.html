@@ -1,0 +1,168 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Admin.Role</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Admin.Role
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 04, 2007 by <font color="#0050B2">mbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Admin.Role-ViewingandEditingaRole"></a>Viewing and Editing a Role</h1>
+<p><b>Available in Enterprise Edition.</b></p>
+
+<p>This screen allows users to view and manage an individual role. This screen displays the permissions set for the role, the groups of resources assigned to the role, and the users assigned to the role. </p>
+
+<p><a name="ui-Admin.Role-top"></a></p>
+
+<ul>
+	<li><a href="#ui-Admin.Role-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Admin.Role-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-Admin.Role-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><a name="ui-Admin.Role-Tasks"></a></p>
+<h3><a name="ui-Admin.Role-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do (or at least start) the following tasks:</p>
+
+<p><b>To change the role's properties or permissions:</b></p>
+<ul>
+	<li>In the "Properties &amp; Permissions" section, click <img src="../16158/tbb_edit.gif" align="absmiddle" border="0" /> and proceed to the "Edit" screen.</li>
+</ul>
+
+
+<p><b>To assign a user to the role:</b></p>
+<ul>
+	<li>In the "Assigned Users" section, click <img src="../16158/tbb_addtolist.gif" align="absmiddle" border="0" /> and proceed to the "Add Users to Roles" screen.</li>
+</ul>
+
+
+<p><b>To remove a user from the role:</b></p>
+<ul>
+	<li>In the "Assigned Users" section, check the user and click <img src="../16158/tbb_removefromlist.gif" align="absmiddle" border="0" />.</li>
+</ul>
+
+
+<p><b>To assign a group to the role:</b></p>
+<ul>
+	<li>In the "Assigned Groups" section, click <img src="../16158/tbb_addtolist.gif" align="absmiddle" border="0" /> and proceed to the "Add Groups to Roles" screen.</li>
+</ul>
+
+
+<p><b>To remove a group from the role:</b></p>
+<ul>
+	<li>In the "Assigned Groups" section, check the group and click <img src="../16158/tbb_removefromlist.gif" align="absmiddle" border="0" />.</li>
+</ul>
+
+
+<p><em><a href="#ui-Admin.Role-top">Back to top</a></em></p>
+
+<p><a name="ui-Admin.Role-Sections"></a></p>
+<h3><a name="ui-Admin.Role-SectionsonThisScreen"></a>Sections on This Screen</h3>
+
+<h4><a name="ui-Admin.Role-Properties%26Permissions"></a>Properties &amp; Permissions</h4>
+
+<p>This section lists basic information about the role:</p>
+<ul>
+	<li><ins>Name</ins></li>
+	<li><ins>Owner</ins></li>
+	<li><ins>Description</ins></li>
+	<li><ins>Administer HQ Server Configuration</ins>: Indicates whether the users in this role may configure the HQ Server Settings. This is NO by default.</li>
+</ul>
+
+
+<h4><a name="ui-Admin.Role-AssignedUsers"></a>Assigned Users</h4>
+
+<p>This section lists the users assigned to this role. To view a user listed here, click the user's name. Users can add and remove users from the role.</p>
+
+<h4><a name="ui-Admin.Role-AssignedGroups"></a>Assigned Groups</h4>
+
+<p>This section lists the groups assigned to this role. To view a group listed here, click the group's name. Users can add and remove groups from the role. </p>
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='warningMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">The Final Step</b><br /><br/>
+Even if users are assigned to the role, the role's (and users') permissions will not apply to any specific resources until a group (of said specific resources) is also assigned to the role.</td></tr></table>
+
+<p><a name="ui-Admin.Role-Navigating"></a></p>
+<h3><a name="ui-Admin.Role-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain the same menu in the masthead. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'><b>Dashboard</b></td>
+<td class='confluenceTd'>Takes users to the starting screen in HQ, which displays information about resource health, recent alerts, recently performed Auto-Discoveries, and control actions.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Browse Resources</b></td>
+<td class='confluenceTd'>Takes users to the screen where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a></td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Administration</b></td>
+<td class='confluenceTd'>Takes users (who are assigned to a role that has the <em>Administer Hyperic HQ Server Configuration</em> option enabled) to the screen where they can manage the Hyperic HQ Server configuration.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Recently Viewed Resources</b></td>
+<td class='confluenceTd'>Provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the inventory of that resource.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Help</b></td>
+<td class='confluenceTd'>Opens screen-sensitive online help in a secondary window</td>
+</tr>
+</tbody></table>
+
+<p><em><a href="#ui-Admin.Role-top">Back to top</a></em></p>
+
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p><a href="ui-Admin.Role.Permissions.html" title="ui-Admin.Role.Permissions">Edit the role's properties and permissions</a><br/>
+<a href="ui-Inventory.AssignRolesToGroups.html" title="ui-Inventory.AssignRolesToGroups">Assign groups to the role</a><br/>
+<a href="ui-Admin.AssignRolesToUsers.html" title="ui-Admin.AssignRolesToUsers">Assign users to the role</a><br/>
+<a href="ui-Admin.Role.List.html" title="ui-Admin.Role.List">View all user roles</a></p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>An explanation of <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/HQ+Users+and+Roles" title="HQ Users and Roles">HQ users and roles</a></p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Admin.Role-ReturntothetoplevelrolespageuiAdmin.Role.List."></a>Return to the <a href="ui-Admin.Role.List.html" title="ui-Admin.Role.List">top-level roles page</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16158/tbb_removefromlist.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16158/tbb_addtolist.gif">tbb_addtolist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16158/tbb_edit.gif">tbb_edit.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 23, 2007 10:40</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
