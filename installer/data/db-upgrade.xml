@@ -5241,9 +5241,9 @@ has already been defined.
             update eam_alert_definition set resource_id =
               (select r.id from eam_resource r,
                 (select id, 1 as appdef_type from eam_resource_type where cid = 301
-                 union
+                 union all
                  select id, 2 as appdef_type from eam_resource_type where cid = 303
-                 union
+                 union all
                  select id, 3 as appdef_type from eam_resource_type where cid = 305)
                  m
                where eam_alert_definition.appdef_id = r.instance_id and
