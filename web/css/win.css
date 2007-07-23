@@ -1074,20 +1074,39 @@ border-left:1px solid #D5D8DE;
  background-color:#eaedf2;
 }
 
-.headTopNav {
-    height:36px;
+.headRightWrapper {
     position:relative;
     margin-left:225px;
+    height:60px;
+}
+.headTopNav {
+    height:38px;
+}
+
+.headUsrName {
+color:#333333;
+font-weight:bold;
+padding-top:4px;
+padding-top:5px;
+    display:inline;
+    float:left;
+}
+
+a.headUsrName {
+ color: #003399;
+ text-decoration:none;
+ font-weight: bold;
 }
 
 .headAlertWrapper {
-    color:#333333;font-weight:bold;display:inline;float:left;
+    color:#333333;
+    font-weight:bold;
+    display:inline;
+    float:left;
+    padding-left:10px;
 }
 
 .headBotNav {
-    position:relative;
-    margin-left:225px;
-    margin-top:3px;
     padding-top:4px;
     padding-bottom:4px;
     background-color:#336699;
@@ -1103,25 +1122,28 @@ border-left:1px solid #D5D8DE;
  white-space:nowrap;
 }
 
-.headUsrName {
-color:#333333;
-font-weight:bold;
-padding-right:35px;
-    padding-top:4px;
-    padding-left:9px;
-    padding-left:9px;
-    padding-top:5px;
-    float:left;
-}
-
-a.headUsrName {
- color: #003399;
- text-decoration:none;
- font-weight: bold;
-}
-
 #recentAlerts {
-    position:relative;padding-top:1px;font-weight:bold;color:black;
+    float:left;
+    display:inline;
+    padding-top:1px;
+    font-weight:bold;
+    color:black;
+    width:590px;
+    white-space: nowrap ;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+
+#navigationTbl  {
+ font-family: arial,sans-serif;
+ font-size: 11px;
+ display:inline;
+position:relative;
+ margin-left: 0px;
+ padding-left: 0px;
+ color: #ffffff;
+font-weight: bold;
+width:775px;
 }
 
 #navigationTbl li {
@@ -1134,20 +1156,22 @@ a.headUsrName {
     border-right:1px solid #ffffff;
 }
 
-#navigationTbl  {
- font-family: arial,sans-serif;
- font-size: 11px;
- display:inline;
- margin-left: 0;
- padding-left: 0;
- color: #ffffff;
-font-weight: bold;
-}
-
 #navigationTbl a {
  color: #ffffff;
  text-decoration:none;
  font-weight: bold;
+}
+
+#recent a {
+color: #062b7a;
+ font-weight: bold;  
+}
+
+#recent li {
+    padding:0px;
+    margin:0px;
+    display:block;
+    list-style:none;
 }
 
 #displaySelAction {
@@ -1205,3 +1229,4 @@ font-weight: bold;
     background-image: url('/web/images/HeaderBkgd6.gif');
     background-repeat:repeat-x;
 }
+

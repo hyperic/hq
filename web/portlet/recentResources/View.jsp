@@ -32,8 +32,8 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <tiles:importAttribute name="resources"/>
 
-<div id="recent" class="DropDown" style="background-color:#ffffff;position:absolute; z-index: 300; margin-top: 2px;display:none;">
-  <ul style="list-style-type: none;">
+<div id="recent" style="background-color:#ffffff;position:absolute;right:0px;z-index: 300;margin-top:4px;padding:4px;display:none;<!--[if lte IE  7]>margin-top:14px;<![endif]-->">
+  <ul style="list-style-type: none;margin-left: 0;padding-left: 0;">
 <c:choose>
 <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">

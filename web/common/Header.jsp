@@ -50,7 +50,7 @@
 
 </script>
 <div class="headerWrapper">
-<div style="position:absolute;left:0px;top:1px;width:225px;">
+<div style="position:absolute;left:0px;top:1px;width:225px;height:60px;">
     <html:link action="/Dashboard">
         <c:choose>
             <c:when test="${applicationScope.largeLogo}">
@@ -65,9 +65,8 @@
         </c:choose>
     </html:link>
 </div>
-<%--<td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:1px solid #60a5ea;">
-<html:img page="/images/logo_Image_large4.jpg" width="175" height="54" alt="" border="0"/>--%>
-<div style="display:inline;position:relative;">
+
+<div class="headRightWrapper">
 <div class="headTopNav">
             <div class="headUsrName">
                 <c:out value="${sessionScope.webUser.username}"/>
@@ -77,14 +76,14 @@
                 </html:link>
             </div>
             <div class="headAlertWrapper">
-                            <div style="float:left;display:inline;padding-top:4px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts" style="width:680px;"></div>
-                            <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+                            <div style="float:left;display:inline;padding-top:4px;width:90px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
+                            <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
             </div>
-     <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+     <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
 </div>
-    <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+
 <div class="headBotNav">
-    <div>
+
     <ul id="navigationTbl">
         <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
@@ -110,9 +109,9 @@
 
         </li>
         <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-            <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a>
-            
+            <a href="." onclick="toggleMenu('recent');return false;"><span  id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a><tiles:insert definition=".toolbar.recentResources"/>
             </li>
+        
         <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
         <html:link href="." onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
@@ -121,21 +120,21 @@
         </li>
         
         </ul>
-    </div>
-    <div style="display:none;position:absolute;right:5px;top:2px;" id="loading">
+
+    <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
         <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
     <c:if test="${not empty HQUpdateReport}">
-        <div style="position:absolute;right:26px;top:2px;" id="hb">
+        <div style="position:absolute;right:26px;bottom:2px;" id="hb">
             <html:img page="/images/transmit2.gif" border="0" width="16" height="16"
                       onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/>
         </div>
   </c:if>
-
 </div>
+
     </div>
 </div>
-<div style="clear:both;"></div>
+
 <c:if test="${not empty HQUpdateReport}">
 <div id="update" class="menu" style="border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
 <c:out value="${HQUpdateReport}" escapeXml="false"/>
