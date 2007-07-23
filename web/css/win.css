@@ -1,4 +1,4 @@
-/* GENERAL */
+c/* GENERAL */
 BODY {background-color: #ffffff;}
 BODY, FORM {margin: 0px;}
 BODY, P, TD, TH, OPTION, INPUT, TEXTAREA, SELECT {font-size: 11px; color: #000000; font-family: arial, sans-serif;}
@@ -184,7 +184,7 @@ A.MastheadLink:visited {font-weight: bold; color: #105CA8; text-decoration: none
 A.MastheadLink:hover {font-weight: bold; color: #105CA8; text-decoration: underline;}
 A.MastheadLink:active {font-weight: bold; color: #666666; text-decoration: none;}
 
-.MastheadContent, .RecentAlerts {font-size: 10px; color: #3b3b74;}
+.MastheadContent {font-size: 11px; color: #000000;}
 td.MastheadBgTop .MastheadContent{color: #ffffff;}
 
 .RecentPlaces {color: #000000; font-weight: bold;}
@@ -1074,6 +1074,27 @@ border-left:1px solid #D5D8DE;
  background-color:#eaedf2;
 }
 
+.headTopNav {
+    height:36px;
+    position:relative;
+    margin-left:225px;
+}
+
+.headAlertWrapper {
+    color:#333333;font-weight:bold;display:inline;float:left;
+}
+
+.headBotNav {
+    position:relative;
+    margin-left:225px;
+    margin-top:3px;
+    padding-top:4px;
+    padding-bottom:4px;
+    background-color:#336699;
+    border-top:1px solid #ffffff;
+    border-left:1px solid #ffffff;
+}
+
 .mainNavText {
  font-family: Helvetica, sans-serif;
  font-size: 11px;
@@ -1082,14 +1103,51 @@ border-left:1px solid #D5D8DE;
  white-space:nowrap;
 }
 
-#navigationTbl  .mainNavText {
- font-family: arial,sans-serif;
- font-size: 11px;
+.headUsrName {
+color:#333333;
+font-weight:bold;
+padding-right:35px;
+    padding-top:4px;
+    padding-left:9px;
+    padding-left:9px;
+    padding-top:5px;
+    float:left;
 }
 
-.mainNavText a, .mainNavText td a{
- color: #062b7a;
+a.headUsrName {
+ color: #003399;
  text-decoration:none;
+ font-weight: bold;
+}
+
+#recentAlerts {
+    position:relative;padding-top:1px;font-weight:bold;color:black;
+}
+
+#navigationTbl li {
+    display:inline;
+    list-style:none;
+    padding-left:15px;
+    padding-right:15px;
+     padding-top:4px;
+    padding-bottom:4px;
+    border-right:1px solid #ffffff;
+}
+
+#navigationTbl  {
+ font-family: arial,sans-serif;
+ font-size: 11px;
+ display:inline;
+ margin-left: 0;
+ padding-left: 0;
+ color: #ffffff;
+font-weight: bold;
+}
+
+#navigationTbl a {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
 }
 
 #displaySelAction {
@@ -1140,3 +1198,10 @@ border-left:1px solid #D5D8DE;
 }
 
 .italicInfo {font-size: 11px; font-style: italic; color:#333333;}
+
+.headerWrapper {
+    height:60px;
+    border-top:1px solid #eeeeee;
+    background-image: url('/web/images/HeaderBkgd6.gif');
+    background-repeat:repeat-x;
+}

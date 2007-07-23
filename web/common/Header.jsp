@@ -29,7 +29,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+ <link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
@@ -48,123 +48,93 @@
      menuLayers.hide();
    }
 
-
 </script>
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-top:2px solid #3399ff;border-bottom:2px solid #3399ff;" height="56">
-
-<tr>
-<td rowspan="2">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;">
-                <html:link action="/Dashboard">
-                    <c:choose>
-                        <c:when test="${applicationScope.largeLogo}">
-                            <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt=""
-                                      border="0"/>
-                            <br>
-                            <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
-                        </c:when>
-                        <c:otherwise>
-                            <html:img page="/images/logo_large2.gif" width="223" height="54" alt="" border="0"/>
-                        </c:otherwise>
-                    </c:choose>
+<div class="headerWrapper">
+<div style="position:absolute;left:0px;top:1px;width:225px;">
+    <html:link action="/Dashboard">
+        <c:choose>
+            <c:when test="${applicationScope.largeLogo}">
+                <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt=""
+                          border="0"/>
+               
+                <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
+            </c:when>
+            <c:otherwise>
+                <html:img page="/images/newLogo18.gif" width="203" height="60" alt="" border="0" />
+            </c:otherwise>
+        </c:choose>
+    </html:link>
+</div>
+<%--<td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:1px solid #60a5ea;">
+<html:img page="/images/logo_Image_large4.jpg" width="175" height="54" alt="" border="0"/>--%>
+<div style="display:inline;position:relative;">
+<div class="headTopNav">
+            <div class="headUsrName">
+                <c:out value="${sessionScope.webUser.username}"/>
+                &nbsp;-&nbsp;
+                <html:link action="/Logout">
+                    <fmt:message key="admin.user.generalProperties.Logout"/>
                 </html:link>
-            </td>
-            <td class="logo" style="border-top:1px solid #60a5ea;border-bottom:1px solid #60a5ea;border-right:1px solid #60a5ea;">
-                <html:img page="/images/logo_Image_large4.jpg" width="175" height="54" alt="" border="0"/>
-            </td>
-        </tr>
-    </table>
-</td>
-<td valign="top" width="100%">
-    <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%">
-        <tr>
-            <td class="MastheadBgTop" colspan="5" nowrap style="border-bottom:1px solid #ffffff;" height="34">
+            </div>
+            <div class="headAlertWrapper">
+                            <div style="float:left;display:inline;padding-top:4px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts" style="width:680px;"></div>
+                            <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+            </div>
+     <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+</div>
+<div class="headBotNav">
+    <div>
+    <ul id="navigationTbl">
+        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
-                <c:if test="${not empty HQUpdateReport}">
-                 <div style="position:absolute;top:10px;right:30px;" id="hb">
-		        <html:img page="/images/transmit.gif" border="0" width="16" height="16" onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/></div>
-                </c:if>
+            <html:link page="/Dashboard.do"><fmt:message key="dash.home.PageTitle"/></html:link>
 
-                 <div style="display:none;position:absolute;top:10px;right:10px;" id="loading">
-		        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16" /></div>
-		        <div style="clear:both;"></div>
-                <table border="0" cellspacing="0" cellpadding="0">
-                    <tr>
+        </li>
 
-                        <td class="MastheadContent" nowrap style="font-weight:bold;padding-right:35px;padding-left:9px;">
-                            <c:out value="${sessionScope.webUser.username}"/>
-                            &nbsp;-&nbsp;
-                            <html:link action="/Logout"><fmt:message key="admin.user.generalProperties.Logout"/></html:link>
-                        </td>
-                        <td height="18" class="MastheadBgTop" nowrap>
-                        <table border="0" cellspacing="0" cellpadding="0" height="20">
-                           <tr>
+        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
-                        <td class="MastheadContent" nowrap style="font-weight:bold;padding-left:9px;">
-                            <fmt:message key="header.RecentAlerts"/>:
-                        </td>
-                        <td>
-                            <div id="recentAlerts" style="font-weight:bold;color:#ffffff;overflow:hidden;width:100%"></div>
-                        </td>
-                       </tr>
-                    </table>
-                </td>
-          </tr>
-         </table>
-       </td>
-    </tr>
-    <tr>
-            <td class="MastheadBgBottom" style="padding-top:0px" align="left" colspan="5">
-                <table border="0" cellspacing="0" cellpadding="0" id="navigationTbl" height="100%">
-                    <tr>
-                        <td style="padding-left:10px;" class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                            <html:link page="/Dashboard.do"><span
-                                    style="padding-right:10px;"><fmt:message key="dash.home.PageTitle"/></span></html:link>
-                        </td>
-                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                            <html:link page="/ResourceHub.do"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="resource.hub.ResourceHubPageTitle"/></span></html:link>
-                        </td>
-                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+        <html:link page="/ResourceHub.do"><fmt:message key="resource.hub.ResourceHubPageTitle"/></html:link>
 
-                    <c:if test="${not empty mastheadAttachments}">
-                      <c:forEach var="attachment" items="${mastheadAttachments}">
-                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                            <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><span style="padding-right:10px;padding-left:10px;"><c:out value="${attachment.view.description}"/></span></html:link>
-                        </td>
-                          <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+        </li>
+         <c:if test="${not empty mastheadAttachments}"><c:forEach var="attachment" items="${mastheadAttachments}">
+             <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
-                      </c:forEach>
-                    </c:if>
-                        <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                            <html:link action="/Admin"><span style="padding-right:10px;padding-left:10px;"><fmt:message key="admin.admin.AdministrationTitle"/></span></html:link>
-                        </td>
-                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+             <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link>
 
-                        <td class="mainNavText" onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                        <a href="." onclick="toggleMenu('recent');return false;"><span
-                                id="recentImg" style="padding-right:10px;padding-left:10px;"><fmt:message key=".dashContent.recentResources"/></span></a>
-                            <div style="clear: all;"></div>
-                            <tiles:insert definition=".toolbar.recentResources"/>
-                        </td>
-                        <td style="width:2px;background-color:#ffffff;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
-                         <td class="mainNavText" nowrap onmouseover="this.style.backgroundColor='#ffffff';" onmouseout="this.style.backgroundColor='#DBE3F6';">
-                            <html:link href=""
-                                       onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
-                                <span style="padding-right:10px;padding-left:10px;"><fmt:message key="common.label.Help"/></span></html:link>
-                        </td>
-                    </tr>
+             </li>
+         </c:forEach></c:if>
+        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
 
-                </table>
-            </td>
-        </tr>
-    </table>
-    </td>
-</tr>
+        <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
 
-</table>
+        </li>
+        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+            <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a>
+            
+            </li>
+        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+
+        <html:link href="." onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+            <fmt:message key="common.label.Help"/></html:link>
+
+        </li>
+        
+        </ul>
+    </div>
+    <div style="display:none;position:absolute;right:5px;top:2px;" id="loading">
+        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
+    </div>
+    <c:if test="${not empty HQUpdateReport}">
+        <div style="position:absolute;right:26px;top:2px;" id="hb">
+            <html:img page="/images/transmit2.gif" border="0" width="16" height="16"
+                      onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/>
+        </div>
+  </c:if>
+
+</div>
+    </div>
+</div>
+<div style="clear:both;"></div>
 <c:if test="${not empty HQUpdateReport}">
 <div id="update" class="menu" style="border:1px solid black;padding-top:15px;padding-bottom:15px;font-weight:bold;font-size:12px;">
 <c:out value="${HQUpdateReport}" escapeXml="false"/>
