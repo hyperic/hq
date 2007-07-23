@@ -131,6 +131,7 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.pager.SortAttribute;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -641,8 +642,17 @@ public class EventsBossEJBImpl
         // Find the alert definitions for the type
         AppdefEntityTypeID aetid =
             new AppdefEntityTypeID(type.getAppdefType(), type.getId());
+        
+        // The alert definitions should be returned sorted by creation time.
+        // This should minimize the possibility of creating a recovery alert 
+        // before the recover from alert.
+        PageControl pc = new PageControl(0, 
+                                         PageControl.SIZE_UNLIMITED, 
+                                         PageControl.SORT_ASC, 
+                                         SortAttribute.CTIME);
+                
         List defs = getADM().findAlertDefinitions(subject,
-            aetid, EventConstants.TYPE_ALERT_DEF_ID, PageControl.PAGE_ALL);
+            aetid, EventConstants.TYPE_ALERT_DEF_ID, pc);
         
         AlertDefinitionManagerLocal adm = getADM();
         ArrayList triggers = new ArrayList();
