@@ -82,6 +82,7 @@
             </div>
      <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
 </div>
+    <div style="height:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
 <div class="headBotNav">
     <div>
     <ul id="navigationTbl">
