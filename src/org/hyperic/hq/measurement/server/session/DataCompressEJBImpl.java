@@ -71,7 +71,7 @@ public class DataCompressEJBImpl
     implements SessionBean {
 
     // !!!NEEDS TO BE CHANGED WHEN WE CONVERT DB FROM long to int
-    private static final long BF_PURGE_INCR = 1200000;
+    private static final long BF_PURGE_INCR = 3600000;
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
@@ -254,19 +254,19 @@ public class DataCompressEJBImpl
             int totalrows = 0,
                 rows      = 0;
 
-            long interval = BF_PURGE_INCR;
             StopWatch watch = new StopWatch();
 
             while (maxTime > minTime)
             {
+                long max = maxTime,
+                     min = (maxTime-=BF_PURGE_INCR);
                 String b          = BF_TABLE,
                        delTable   = b,
                        commonKey  = "m.measurement_id,m.timestamp",
-                       joinTables = METRIC_DATA_VIEW+" m",
+                       joinTables = "("+getMetricDataView(min, max)+") m",
                        joinKeys   = b+".measurement_id = m.measurement_id and "+
                                     b+".timestamp = m.timestamp",
-                       condition  = "m.timestamp between "+(maxTime-=interval)+
-                                    " and "+(maxTime+interval);
+                       condition  = "m.timestamp between "+min+" and "+max;
                 sql = dialect.getDeleteJoinStmt(delTable,
                                                 commonKey,
                                                 joinTables,
@@ -278,8 +278,8 @@ public class DataCompressEJBImpl
                 totalrows += rows;
                 if (rows > 0) {
                     log.debug("Purged "+rows+" rows between " +
-                              TimeUtil.toString(maxTime) + " and " +
-                              TimeUtil.toString(maxTime+interval) + " in " +
+                              TimeUtil.toString(min) + " and " +
+                              TimeUtil.toString(max) + " in " +
                               BF_TABLE);
                 }
             }
@@ -293,7 +293,20 @@ public class DataCompressEJBImpl
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
     }
-        
+
+    private String getMetricDataView(long minTime, long maxTime)
+    {
+        StringBuffer rtn = new StringBuffer();
+        String unionAll = "UNION ALL";
+        while (maxTime > minTime)
+        {
+            String table = MeasTabManagerUtil.getMeasTabname(maxTime);
+            rtn.append("SELECT * FROM "+table+" "+unionAll+" ");
+            maxTime = MeasTabManagerUtil.getPrevMeasTabTime(maxTime);
+        }
+        return rtn.substring(0, (rtn.length()-unionAll.length()-2));
+    }
+
     /**
      * Entry point for data compression routines
      * 

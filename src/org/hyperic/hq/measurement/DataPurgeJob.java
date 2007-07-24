@@ -59,8 +59,10 @@ public class DataPurgeJob implements Job {
     // dynamically proxied (which would result in multiple instances of
     // static variables
     private static class DataPurgeLockHolder {
-        private static final Object RUNNING_LOCK = new Object();
-        private static boolean running = false;
+        private static final Object ANALYZE_RUNNING_LOCK = new Object();
+        private static boolean analyzeRunning = false;
+        private static final Object COMPRESS_RUNNING_LOCK = new Object();
+        private static boolean compressRunning = false;
     }
     
     /**
@@ -105,60 +107,93 @@ public class DataPurgeJob implements Job {
             DataCompressUtil.getLocalHome().create();
 
         // First check if we are already running
-        synchronized (DataPurgeLockHolder.RUNNING_LOCK) {
-            if (DataPurgeLockHolder.running) {
+        synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
+            if (DataPurgeLockHolder.compressRunning) {
                 _log.info("Not starting data compression. (Already running)");
                 return;
             } else {
-                DataPurgeLockHolder.running = true;
+                DataPurgeLockHolder.compressRunning = true;
             }
         }
 
         long time_start = System.currentTimeMillis();
         
         try {
+    
+            boolean ten_past = false;
+            // We'll only do the compress if it's 10 past the hour
+            Calendar cal = Calendar.getInstance();
+            long voodooTime = TimingVoodoo.roundDownTime(time_start, MINUTE);
+            cal.setTime(new java.util.Date(voodooTime));
+            if (cal.get(Calendar.MINUTE) != 10)
+                ten_past = false;
+            else
+                ten_past = true;
+        
             // First purge backfilled data
             try {
                 dataCompress.purgeBackfilled();
             } catch (SQLException e) {
                 _log.error("Unable to clear out duplicated backfilled data", e);
             }
-    
-            // We'll only do the rest of the maintenance if it's 10 past the
-            // hour
 
-            Calendar cal = Calendar.getInstance();
-            long voodooTime = TimingVoodoo.roundDownTime(time_start, MINUTE);
-            cal.setTime(new java.util.Date(voodooTime));
-            if (cal.get(Calendar.MINUTE) != 10) {
-                return;
-            }
+            runDBAnalyze(serverConfig);
     
             // Announce
             _log.info("Data compression starting at " +
                       TimeUtil.toString(time_start));
             
+            if (!ten_past)
+                return;
+
             dataCompress.compressData();
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
         } finally {
-            synchronized (DataPurgeLockHolder.RUNNING_LOCK) {
-                DataPurgeLockHolder.running = false;
+            synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
+                DataPurgeLockHolder.compressRunning = false;
             }
         }
-        
 
         long time_end = System.currentTimeMillis();
         _log.info("Data compression completed in " +
                   ((time_end - time_start)/1000) +
                   " seconds.");
+        runDBMaintenance(serverConfig);
+    }
 
-        // We want to analyze the current and previous hq_metric_data 
-        // tables every hour
-        long analyzeStart = System.currentTimeMillis();
-        _log.info("Performing database maintenance (ANALYZE)");
-        serverConfig.analyze();
+    private static void runDBAnalyze(ServerConfigManagerLocal serverConfig)
+    {
+        // First check if we are already running
+        synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK)
+        {
+            if (DataPurgeLockHolder.analyzeRunning) {
+                _log.info("Not starting db analyze. (Already running)");
+                return;
+            } else {
+                DataPurgeLockHolder.analyzeRunning = true;
+            }
+        }
+        try
+        {
+            // We want to analyze the current and previous hq_metric_data 
+            // tables every hour
+            long analyzeStart = System.currentTimeMillis();
+            _log.info("Performing database analyze");
+            serverConfig.analyze();
+            long secs = (System.currentTimeMillis()-analyzeStart)/1000;
+            _log.info("Completed database analyze "+secs+" secs");
+        }
+        finally
+        {
+            synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
+                DataPurgeLockHolder.analyzeRunning = false;
+            }
+        }
+    }
 
+    private static void runDBMaintenance(ServerConfigManagerLocal serverConfig)
+    {
         // Once compression finishes, we check to see if databae maintaince
         // should be performed.  This is defaulted to 1 hour, so it should
         // always run unless changed by the user.  This is only a safeguard,
@@ -167,6 +202,7 @@ public class DataPurgeJob implements Job {
         //
         // VACUUM will occur every day at midnight.
 
+        long time_start = System.currentTimeMillis();
         Properties conf;
         
         try {
@@ -206,7 +242,6 @@ public class DataPurgeJob implements Job {
                 _log.info("Re-indexing HQ data tables");
                 serverConfig.reindex();
             }
-
             _log.info("Database maintenance completed in " +
                       ((System.currentTimeMillis() - vacuumStart)/1000) +
                       " seconds.");
