@@ -32,8 +32,7 @@
     </bag>
 
     <many-to-one name="alertDefinition" class="AlertDefinition">
-      
-      <column name="ALERT_DEFINITION_ID"/>
+      <column name="ALERT_DEFINITION_ID" index="ACTION_ALERT_DEFINITION_ID_IDX" />
     </many-to-one>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="logEntriesBag" table="EAM_ALERT_ACTION_LOG">
