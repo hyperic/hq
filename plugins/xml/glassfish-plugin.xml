@@ -2,6 +2,7 @@
 
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+  <!ENTITY jvm-jmx-metrics SYSTEM "/pdk/plugins/jvm-jmx-metrics.xml">
 ]>
 
 <!--
@@ -38,62 +39,14 @@
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
 
-  <metrics name="Class Loading Metrics">
-    <metric name="Loaded Class Count"
-            indicator="false"
-            category="THROUGHPUT"/>
-    <metric name="Total Loaded Class Count"
-            indicator="false"
-            category="THROUGHPUT"/>
-    <metric name="Unloaded Class Count"
-            indicator="false"
-            category="THROUGHPUT"/>
-  </metrics>
-
-  <metrics name="Compilation">
-    <metric name="Total Compilation Time"
-            indicator="false"
-            category="THROUGHPUT"
-            collectionType="trendsup"
-            units="ms"/>
-  </metrics>
-
-  <metrics name="Garbage Collector">
-    <metric name="Collection Count"
-            indicator="false"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
-    <metric name="Collection Time"
-            indicator="false"
-            category="THROUGHPUT"
-            collectionType="trendsup"/>
-  </metrics>
-
-  <metrics name="Memory">
-    <metric name="Object Pending Finalization Count"
-            category="THROUGHPUT"
-            indicator="false"/>
-  </metrics>
-
-  <metrics name="Threading">
-    <metric name="Thread Count"
-            category="UTILIZATION"
-            indicator="false"/>
-    <metric name="Daemon Thread Count"
-            category="UTILIZATION"
-            indicator="false"/>
-  </metrics>
-
   <server name="GlassFish"
           version="9.x">
 
     <property name="HAS_BUILTIN_SERVICES"
               value="true"/>
 
-<!-- NEED TO FILL THIS IN
     <property name="VERSION_FILE"
-              value="lib/"/>
--->
+              value="../../lib/jhall.jar"/>
 
     <property name="DEFAULT_PROGRAM"
               value="bin/startserv"/>
@@ -101,62 +54,35 @@
     <property name="domain"
               value="GlassFish"/>
 
-    <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%process.query%:State"
-            indicator="true"/>
-    &process-metrics;
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=ClassLoading"/>
-    <metrics include="Class Loading Metrics"/>
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=Compilation"/>
-    <metrics include="Compilation"/>
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=Memory"/>
-    <metrics include="Memory"/>
-    <!-- listen for JMX notifications -->
-    <plugin type="log_track"
-            class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=GarbageCollector,name=PS Scavenge"/>
-    <metrics include="Garbage Collector"/>
-    <property name="OBJECT_NAME"
-              value="java.lang:type=GarbageCollector,name=PS MarkSweep"/>
-    <metrics include="Garbage Collector"/>
-
-    <property name="OBJECT_NAME"
-              value="java.lang:type=Threading"/>
-    <metrics include="Threading"/>
-
-    <property name="DEFAULT_LOG_FILE"
-              value="%logpath%"/>
-    <plugin type="log_track"
-            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
-
     <config>
       <option name="logpath"
               description="GlassFish Log File (Full Path)"
               default="%installpath%/logs/server.log"/>
       <option name="jmx.url"
               description="JMX URL to MBeanServer"
-              default="service:jmx:rmi:///jndi/rmi://localhost:6968/jmxrmi"/>
+              default="service:jmx:rmi:///jndi/rmi://localhost:8686/jmxrmi"/>
       <option name="jmx.username"
               description="JMX username"
               optional="true"
-              default=""/>
+              default="admin"/>
       <option name="jmx.password"
               description="JMX password"
               optional="true"
-              default=""
+              default="adminadmin"
               type="secret"/>
       <option name="process.query"
               description="PTQL for GlassFish Java Process"
-              default="State.Name.eq=java,Args.*.ct=glassfish"/>
+              default="State.Name.eq=java,Args.*.ct=com.sun.aas.instanceRoot"/>
     </config>
+
+    <!-- listen for JMX notifications -->
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="%logpath%"/>
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
     <!-- derive installpath from -Dcom.sun.aas.instanceRoot... -->
     <property name="PROC_HOME_PROPERTY"
@@ -166,6 +92,266 @@
             class="org.hyperic.hq.product.jmx.MxServerDetector"/>
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+    &process-metrics;
+    &jvm-jmx-metrics;
+    <service name="Global Request Processor">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=GlobalRequestProcessor,name=*"/>
+      <metric name="Bytes Sent"
+              alias="bytesSent"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Bytes Received"
+              alias="bytesReceived"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Open Connections"
+              alias="countOpenConnections"
+              indicator="true"
+              category="UTILIZATION"
+              collectionType="dynamic"/>
+      <metric name="Requests"
+              alias="requestCount"
+              indicator="true"
+              category="UTILIZATION"
+              collectionType="trendsup"/>
+      <metric name="Errors"
+              alias="errorCount"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="trendsup"
+              units="ms"/>
+    </service>
+
+    <service name="Manager">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=Manager,path=*,host=*"/>
+      <metric name="Active Sessions"
+              alias="activeSessions"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="dynamic"/>
+      <metric name="Sessions"
+              alias="sessionCount"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="trendsup"/>
+      <metric name="Rejected Sessions"
+              alias="rejectedSessions"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Expired Sessions"
+              alias="expiredSessions"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="trendsup"
+              units="ms"/>
+      <metric name="Duplicates"
+              alias="duplicates"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="PWC Connection Queue">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=PWCConnectionQueue,name=*"/>
+      <metric name="Queued 5 Min Average"
+              alias="countQueued5MinuteAverage"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Queued 1 Minute Average"
+              alias="countQueued1MinuteAverage"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Queued 15 Minute Average"
+              alias="countQueued15MinuteAverage"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Overflows"
+              alias="countOverflows"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Total Queued"
+              alias="countTotalQueued"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Queued"
+              alias="countQueued"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Total Connections"
+              alias="countTotalConnections"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="PWC File Cache">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=PWCFileCache,name=*"/>
+      <metric name="Info Hits"
+              alias="countInfoHits"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Misses"
+              alias="countMisses"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Content Misses"
+              alias="countContentMisses"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Info Misses"
+              alias="countInfoMisses"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Entries"
+              alias="countEntries"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Content Hits"
+              alias="countContentHits"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Hits"
+              alias="countHits"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="PWC Keep Alive">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=PWCKeepAlive,name=*"/>
+      <metric name="Connections"
+              alias="countConnections"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Refusals"
+              alias="countRefusals"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Timeouts"
+              alias="countTimeouts"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Flushes"
+              alias="countFlushes"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Hits"
+              alias="countHits"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="Servlet">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:j2eeType=Servlet,name=*,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+      <metric name="Processing Time"
+              alias="processingTimeMillis"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="trendsup"
+              units="ms"/>
+      <metric name="Max Time Processing Requests"
+              alias="maxTimeMillis"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="static"
+              units="ms"/>
+      <metric name="Min Time Processing Requests"
+              alias="minTimeMillis"
+              indicator="false"
+              category="UTILIZATION"
+              collectionType="static"
+              units="ms"/>
+      <metric name="Load Time"
+              alias="loadTime"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Class Load Time"
+              alias="classLoadTime"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Error Count"
+              alias="errorCount"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Request Count"
+              alias="requestCount"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="WebModule">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=*"/>
+      <metric name="Time To Start Servlet"
+              alias="startTimeMillis"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="static"/>
+      <metric name="Processing Time"
+              alias="processingTimeMillis"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"
+              units="ms"/>
+      <metric name="Time Scanning Jars for TLDs"
+              alias="tldScanTime"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"
+              units="ms"/>
+    </service>
+
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
