@@ -49,7 +49,7 @@
    }
 
 </script>
-<div class="headerWrapper">
+<div class="headerWrapper" style="background-image: url('<html:rewrite page="/images/HeaderBkgd6.gif"/>')">
 <div style="position:absolute;left:0px;top:1px;width:225px;height:60px;">
     <html:link action="/Dashboard">
         <c:choose>
