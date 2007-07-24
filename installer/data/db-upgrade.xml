@@ -6507,6 +6507,14 @@ has already been defined.
           <statement>CREATE INDEX METRIC_DATA_8D_1S_MID_IDX ON HQ_METRIC_DATA_8D_1S(MEASUREMENT_ID)</statement>
         </schema-directSQL>
     </schemaSpec>
+	
+	<schemaSpec version="3.43">
+        <schema-directSQL>
+		  <statement desc="Create new index for alert_definition_id in eam_action for faster lookup of an alert definitions actions.">
+			CREATE INDEX ACTION_ALERT_DEFINITION_ID_IDX ON EAM_ACTION ( ALERT_DEFINITION_ID )
+		  </statement>			
+        </schema-directSQL>
+    </schemaSpec>
 
 </dbupgrade>
 </target>
