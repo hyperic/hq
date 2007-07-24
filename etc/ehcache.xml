@@ -470,14 +470,8 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.Action.childrenBag"
-         maxElementsInMemory="50"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.Action.logEntriesBag"
-         maxElementsInMemory="50"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -501,7 +495,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertDefinition.triggersBag"
-         maxElementsInMemory="50"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -519,7 +513,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertCondition.logEntriesBag"
-         maxElementsInMemory="100"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
