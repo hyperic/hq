@@ -6381,6 +6381,29 @@ has already been defined.
                             nullable="NOT NULL"/>
     </schemaSpec>
 
+    <schemaSpec version="3.37">
+        <schema-directSQL>
+          <statement>CREATE INDEX METRIC_DATA_0D_0S_MID_IDX ON HQ_METRIC_DATA_0D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_0D_1S_MID_IDX ON HQ_METRIC_DATA_0D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_1D_0S_MID_IDX ON HQ_METRIC_DATA_1D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_1D_1S_MID_IDX ON HQ_METRIC_DATA_1D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_2D_0S_MID_IDX ON HQ_METRIC_DATA_2D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_2D_1S_MID_IDX ON HQ_METRIC_DATA_2D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_3D_0S_MID_IDX ON HQ_METRIC_DATA_3D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_3D_1S_MID_IDX ON HQ_METRIC_DATA_3D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_4D_0S_MID_IDX ON HQ_METRIC_DATA_4D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_4D_1S_MID_IDX ON HQ_METRIC_DATA_4D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_5D_0S_MID_IDX ON HQ_METRIC_DATA_5D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_5D_1S_MID_IDX ON HQ_METRIC_DATA_5D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_6D_0S_MID_IDX ON HQ_METRIC_DATA_6D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_6D_1S_MID_IDX ON HQ_METRIC_DATA_6D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_7D_0S_MID_IDX ON HQ_METRIC_DATA_7D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_7D_1S_MID_IDX ON HQ_METRIC_DATA_7D_1S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_8D_0S_MID_IDX ON HQ_METRIC_DATA_8D_0S(MEASUREMENT_ID)</statement>
+          <statement>CREATE INDEX METRIC_DATA_8D_1S_MID_IDX ON HQ_METRIC_DATA_8D_1S(MEASUREMENT_ID)</statement>
+        </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 
