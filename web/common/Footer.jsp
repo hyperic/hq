@@ -56,7 +56,7 @@
 	          </div>
           </td>
           <td class="FooterRegular" width="30"></td>
-          <td class="FooterSmall" nowrap><fmt:message key="footer.pageVersionPrefix"/><c:out value="${camTitle}"/><fmt:message key="footer.pageVersionSuffix"/></td>
+          <td class="FooterSmall" nowrap></td>
           <td class="FooterRegular" width="100%" align="right"><fmt:message key="footer.Copyright"/></td>
           <td class="FooterBold" nowrap><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
           <td class="FooterBold" width="15">&nbsp;</td>
