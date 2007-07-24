@@ -41,9 +41,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -113,7 +111,8 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Remove alert definitions
+     * Remove alert definitions. It is assumed that the subject has permission 
+     * to remove this alert definition and any of its' child alert definitions.
      */
     private boolean deleteAlertDefinition(AuthzSubjectValue subj,
                                           AlertDefinition alertdef,
@@ -122,10 +121,6 @@ public class AlertDefinitionManagerEJBImpl
         StopWatch watch = new StopWatch();
         
         if (!force) {
-            watch.markTimeBegin("canManageAlerts");
-            canManageAlerts(subj, alertdef);
-            watch.markTimeEnd("canManageAlerts");
-
             // If there are any children, delete them, too
             watch.markTimeBegin("delete children");
             for (Iterator it = alertdef.getChildrenBag().iterator(); it.hasNext(); )
@@ -450,6 +445,8 @@ public class AlertDefinitionManagerEJBImpl
                 continue;
             }
             
+            canManageAlerts(subj, alertdef);
+            
             deleteAlertDefinition(subj, alertdef, false);
         }
     }
@@ -700,7 +697,7 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Get the resource-specific alert definition ID by parent ID
+     * Get the resource-specific alert definition ID by parent ID.
      * 
      * @param aeid The resource.
      * @param pid The ID of the resource type alert definition (parent ID).
@@ -716,28 +713,26 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /** 
-     * Get the resource-specific alert definition ID by parent ID, specifying 
-     * the flush mode for the query.
+     * Get the resource-specific alert definition ID by parent ID, allowing for 
+     * the query to return a stale copy of the alert definition (for efficiency 
+     * reasons).
      * 
      * @param aeid The resource.
      * @param pid The ID of the resource type alert definition (parent ID).
-     * @param flushMode The flush mode.
+     * @param allowStale <code>true</code> to allow stale copies of an alert 
+     *                   definition in the query results; <code>false</code> to 
+     *                   never allow stale copies, potentially always forcing a 
+     *                   sync with the database.
      * @return The alert definition ID or <code>null</code> if no alert definition 
      *         is found for the resource.
      * @ejb:interface-method
      */
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
                                               Integer pid,
-                                              FlushMode flushMode) {
-        Session session = this.getAlertDefDAO().getSession();
-        FlushMode oldFlushMode = session.getFlushMode();
+                                              boolean allowStale) {
+        AlertDefinition def = getAlertDefDAO().findChildAlertDef(aeid, pid, true);
         
-        try {
-            session.setFlushMode(flushMode);
-            return this.findChildAlertDefinitionId(aeid, pid); 
-        } finally {
-            session.setFlushMode(oldFlushMode);
-        } 
+        return def == null ? null : def.getId();        
     }
     
 
