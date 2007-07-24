@@ -82,7 +82,7 @@ public class HelpTag extends VarSetterBaseTag {
         else {
             helpURL =
                 ((HttpServletRequest) pageContext.getRequest()).getContextPath()
-                + "/ui_docs/";
+                + "/ui_docs/DOC/";
         }
 
         if (context) {
