@@ -27,7 +27,6 @@
     </many-to-one>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="childrenBag">
-      <cache usage="read-write"/>
       <key on-delete="cascade" column="PARENT_ID"/>
       <one-to-many class="Action"/>
     </bag>
