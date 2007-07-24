@@ -202,10 +202,11 @@ class MetricTag
         if (notSet(ATTR_ALIAS)) {
             String name =
                 getAttribute(ATTR_NAME);
+
             StringBuffer buf = new StringBuffer();
             for (int i=0; i<name.length(); i++) {
                 char c = name.charAt(i);
-                if (MeasurementInfo.isValidAliasCharacter(c)) {
+                if (!Character.isWhitespace(c)) {
                     buf.append(c);
                 }
             }
@@ -374,14 +375,6 @@ class MetricTag
 
         if (alias.length() > max) {
             return "> " + max + " chars";
-        }
-        
-        char[] aliasChars = new char[alias.length()];
-        alias.getChars(0, aliasChars.length, aliasChars, 0);
-        for (int j=0; j<aliasChars.length; j++) {
-            if (!MeasurementInfo.isValidAliasCharacter(aliasChars[j])) {
-                return "invalid char '" + aliasChars[j] + "'";
-            }
         }
 
         return null;
