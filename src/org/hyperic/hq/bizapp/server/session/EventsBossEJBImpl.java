@@ -43,6 +43,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -360,14 +361,24 @@ public class EventsBossEJBImpl
                 case EventConstants.TYPE_BASELINE:
                 case EventConstants.TYPE_CHANGE:
                     Integer tid = new Integer(clone.getMeasurementId());
+                    
+                    // Don't need to synch the DerivedMeasurement with the db 
+                    // since changes to the DerivedMeasurement aren't cascaded 
+                    // on saving the AlertCondition.
+                    // Manual flush mode will prevent any synching.
                     DerivedMeasurementValue dmv =
-                        getDerivedMeasurementManager()
-                            .findMeasurement(subject, tid, id.getId());
+                        getDerivedMeasurementManager().findMeasurement(subject, 
+                                             tid, id.getId(), FlushMode.MANUAL);
                     clone.setMeasurementId(dmv.getId().intValue());
                     break;
                 case EventConstants.TYPE_ALERT:
-                    Integer recoverId = getADM().findChildAlertDefinitionId(
-                                     id, new Integer(clone.getMeasurementId()));
+                    
+                    // Don't need to synch the child alert definition Id lookup.
+                    // Manual flush mode will prevent any synching.
+                    Integer recoverId = 
+                        getADM().findChildAlertDefinitionId(id, 
+                                          new Integer(clone.getMeasurementId()),
+                                          FlushMode.MANUAL);
                     
                     if (recoverId == null) {
                         _log.error("A recovery alert has no associated recover " +

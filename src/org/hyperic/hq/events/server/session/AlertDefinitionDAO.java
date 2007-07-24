@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.FlushMode;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
@@ -218,8 +219,12 @@ public class AlertDefinitionDAO extends HibernateDAO {
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
             AppdefEntityID aeid = def.getAppdefEntityId();
             ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+            
+            // Don't need to synch the Resource with the db since changes 
+            // to the Resource aren't cascaded on saving the AlertDefinition.
             def.setResource(rDao.findByInstanceId(aeid.getAuthzTypeId(),
-                                                  aeid.getId()));
+                                                  aeid.getId(), 
+                                                  FlushMode.MANUAL));
         }
 
         def.setFrequencyType(val.getFrequencyType());

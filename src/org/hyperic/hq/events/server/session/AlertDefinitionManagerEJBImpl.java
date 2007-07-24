@@ -41,7 +41,9 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -697,10 +699,13 @@ public class AlertDefinitionManagerEJBImpl
         return new PageList(vals, vals.size());
     }
 
-    /** Get the resource-specific alert definition ID by parent ID
+    /** 
+     * Get the resource-specific alert definition ID by parent ID
      * 
-     * @return The alert definition ID or <code>null</code> if no child alert 
-     *          definition is found.
+     * @param aeid The resource.
+     * @param pid The ID of the resource type alert definition (parent ID).
+     * @return The alert definition ID or <code>null</code> if no alert definition 
+     *         is found for the resource.
      * @ejb:interface-method
      */
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
@@ -709,6 +714,32 @@ public class AlertDefinitionManagerEJBImpl
         
         return def == null ? null : def.getId();
     }
+    
+    /** 
+     * Get the resource-specific alert definition ID by parent ID, specifying 
+     * the flush mode for the query.
+     * 
+     * @param aeid The resource.
+     * @param pid The ID of the resource type alert definition (parent ID).
+     * @param flushMode The flush mode.
+     * @return The alert definition ID or <code>null</code> if no alert definition 
+     *         is found for the resource.
+     * @ejb:interface-method
+     */
+    public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
+                                              Integer pid,
+                                              FlushMode flushMode) {
+        Session session = this.getAlertDefDAO().getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+        
+        try {
+            session.setFlushMode(flushMode);
+            return this.findChildAlertDefinitionId(aeid, pid); 
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        } 
+    }
+    
 
     /** 
      * Get list of alert conditions for a resource

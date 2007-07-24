@@ -34,6 +34,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -184,6 +185,27 @@ public class ResourceDAO
             .setCacheRegion("Resource.findByInstanceId")
             .uniqueResult();
     }
+    
+    /**
+     * Find a Resource by type Id and instance Id, specifying the flush mode 
+     * for the query.
+     * 
+     * @param typeId The type Id.
+     * @param id The instance Id.
+     * @param flushMode The flush mode used for this query.
+     * @return The Resource.
+     */
+    public Resource findByInstanceId(Integer typeId, Integer id, FlushMode flushMode) {                    
+        FlushMode oldFlushMode = this.getSession().getFlushMode();
+        
+        try {
+            this.getSession().setFlushMode(flushMode);
+            return findByInstanceId(typeId, id);            
+        } finally {
+            this.getSession().setFlushMode(oldFlushMode);
+        }
+    }
+    
     
     public Collection findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner.id = ?";

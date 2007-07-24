@@ -47,6 +47,8 @@ import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -751,6 +753,32 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return dm.getDerivedMeasurementValue();
     }
 
+    /**
+     * Look up a derived measurement POJO, specifying the flush mode for the query.
+     *
+     * @param subject The subject.
+     * @param tid The template Id.
+     * @param iid The instance Id.
+     * @return a DerivedMeasurement value
+     * @ejb:interface-method
+     */
+    public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
+                                                   Integer tid, 
+                                                   Integer iid,
+                                                   FlushMode flushMode)
+        throws MeasurementNotFoundException {
+        
+        Session session = this.getDerivedMeasurementDAO().getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+        
+        try {
+            session.setFlushMode(flushMode);
+            return this.findMeasurement(subject, tid, iid);   
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        }        
+    }
+        
     /**
      * Look up a list of derived measurement EJBs for a template and instances
      *
