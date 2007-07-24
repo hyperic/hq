@@ -2,7 +2,7 @@
 
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
-  <!-- ENTITY jvm-jmx-metrics SYSTEM "/pdk/plugins/jvm-jmx-metrics.xml" -->
+  <!ENTITY jvm-jmx-metrics SYSTEM "/pdk/plugins/jvm-jmx-metrics.xml">
 ]>
 
 <!--
@@ -97,7 +97,7 @@
             template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
     &process-metrics;
-    <!-- &jvm-jmx-metrics; -->
+    &jvm-jmx-metrics;
     <service name="Global Request Processor">
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
