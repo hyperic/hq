@@ -6382,6 +6382,110 @@ has already been defined.
     </schemaSpec>
 
     <schemaSpec version="3.37">
+        <schema-addColumn table="EAM_GALERT_AUX_LOGS" column="DEF_ID" 
+                          columnType="INTEGER"/>
+        <schema-directSQL>
+          <statement>
+              update eam_galert_aux_logs set def_id = (
+                  select l.def_id from eam_galert_logs l
+                  where l.id = galert_id)
+          </statement>
+        </schema-directSQL>
+
+        <schema-alterColumn table="EAM_GALERT_AUX_LOGS" column="DEF_ID" 
+                            nullable="NOT NULL"/>
+    </schemaSpec>
+
+    <schemaSpec version="3.38">
+      <schema-directSQL>
+        <statement> 
+          CREATE INDEX aux_log_def_idx on eam_galert_aux_logs (def_id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_galert_aux_logs DROP CONSTRAINT fke20899066993629f CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE eam_galert_aux_logs
+            ADD CONSTRAINT fke20899066993629f FOREIGN KEY (parent) 
+            REFERENCES eam_galert_aux_logs(id) ON DELETE CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE  eam_galert_aux_logs
+            ADD CONSTRAINT fke2089906706267a5 FOREIGN KEY (def_id) 
+            REFERENCES eam_galert_defs(id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_galert_aux_logs DROP CONSTRAINT fke2089906c7d09794 CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE eam_galert_aux_logs
+            ADD CONSTRAINT fke2089906c7d09794 FOREIGN KEY (galert_id) 
+            REFERENCES eam_galert_logs(id) ON DELETE CASCADE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.39">
+      <schema-addColumn table="EAM_METRIC_AUX_LOGS" column="DEF_ID" 
+                        columnType="INTEGER"/>
+      <schema-directSQL>
+        <statement>
+          update eam_metric_aux_logs set def_id = (
+              select l.def_id from eam_galert_aux_logs l
+              where l.id = aux_log_id)
+        </statement>
+      </schema-directSQL>
+
+      <schema-alterColumn table="EAM_METRIC_AUX_LOGS" column="DEF_ID" 
+                          nullable="NOT NULL"/>
+      <schema-directSQL>
+        <statement> 
+          CREATE INDEX metric_aux_log_idx ON eam_metric_aux_logs (def_id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_metric_aux_logs
+            ADD CONSTRAINT fke7d70b0b706267a5 FOREIGN KEY (def_id) 
+            REFERENCES eam_galert_defs(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.40">
+      <schema-addColumn table="EAM_RESOURCE_AUX_LOGS" column="DEF_ID" 
+                        columnType="INTEGER"/>
+      <schema-directSQL>
+        <statement>
+          update eam_resource_aux_logs set def_id = (
+              select l.def_id from eam_galert_aux_logs l
+              where l.id = aux_log_id)
+        </statement>
+      </schema-directSQL>
+
+      <schema-alterColumn table="EAM_RESOURCE_AUX_LOGS" column="DEF_ID" 
+                          nullable="NOT NULL"/>
+      <schema-directSQL>
+        <statement> 
+          CREATE INDEX rsrc_aux_log_idx ON eam_resource_aux_logs (def_id)
+        </statement>
+        <statement> 
+          ALTER TABLE eam_resource_aux_logs
+            ADD CONSTRAINT fk859d15ed706267a5 FOREIGN KEY (def_id) 
+            REFERENCES eam_galert_defs(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.41">
+      <schema-directSQL>
+        <statement> 
+          ALTER TABLE eam_resource_group
+            ADD CONSTRAINT fk6dbccdbcfc176ae FOREIGN KEY (resource_id) 
+            REFERENCES eam_resource(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.42">
         <schema-directSQL>
           <statement>CREATE INDEX METRIC_DATA_0D_0S_MID_IDX ON HQ_METRIC_DATA_0D_0S(MEASUREMENT_ID)</statement>
           <statement>CREATE INDEX METRIC_DATA_0D_1S_MID_IDX ON HQ_METRIC_DATA_0D_1S(MEASUREMENT_ID)</statement>
