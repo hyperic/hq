@@ -321,8 +321,4 @@ public class MeasurementInfo
                                                rate);
         }
     }
-
-    public static boolean isValidAliasCharacter(char c) {
-        return Character.isLetterOrDigit(c) || (c == '_');
-    }
 }
