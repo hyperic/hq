@@ -6,6 +6,7 @@ import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 
 public class ResourceAuxLogPojo
     extends PersistedObject
@@ -13,14 +14,17 @@ public class ResourceAuxLogPojo
     private GalertAuxLog  _auxLog;
     private int           _appdefType;
     private int           _appdefId;
+    private GalertDef     _def;
     
     protected ResourceAuxLogPojo() {
     }
 
-    ResourceAuxLogPojo(GalertAuxLog log, ResourceAuxLog logInfo) { 
+    ResourceAuxLogPojo(GalertAuxLog log, ResourceAuxLog logInfo, GalertDef def) 
+    { 
         _auxLog     = log;
         _appdefType = logInfo.getEntity().getType();
-        _appdefId   = logInfo.getEntity().getID(); 
+        _appdefId   = logInfo.getEntity().getID();
+        _def        = def;
     }
    
     public GalertAuxLog getAuxLog() {
@@ -49,6 +53,14 @@ public class ResourceAuxLogPojo
     
     public AppdefEntityID getEntityId() {
         return new AppdefEntityID(getAppdefType(), getAppdefId());
+    }
+    
+    public GalertDef getAlertDef() {
+        return _def;
+    }
+    
+    protected void setAlertDef(GalertDef def) {
+        _def = def;
     }
     
     public AlertAuxLogProvider getProvider() {

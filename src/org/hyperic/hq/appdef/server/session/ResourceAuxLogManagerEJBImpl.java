@@ -34,6 +34,7 @@ import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerLocal;
 import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 
 /**
@@ -64,7 +65,8 @@ public class ResourceAuxLogManagerEJBImpl
      * @ejb:interface-method
      */
     public ResourceAuxLogPojo create(GalertAuxLog log, ResourceAuxLog logInfo) { 
-        ResourceAuxLogPojo resourceLog = new ResourceAuxLogPojo(log, logInfo);
+        ResourceAuxLogPojo resourceLog = 
+            new ResourceAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
         
         getDAO().save(resourceLog);
         return resourceLog;
@@ -82,6 +84,13 @@ public class ResourceAuxLogManagerEJBImpl
      */
     public ResourceAuxLogPojo find(GalertAuxLog log) { 
         return getDAO().find(log);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void removeAll(GalertDef def) {
+        getDAO().removeAll(def);
     }
 
     public void ejbCreate() { }

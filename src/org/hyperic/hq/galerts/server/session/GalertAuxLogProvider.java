@@ -52,7 +52,7 @@ public class GalertAuxLogProvider
         // contained within the {@link GalertAuxLog} class
     }
 
-    public void delete(int auxLogId) {
+    public void deleteAll(GalertDef def) {
         // NOOP, these entries are deleted by the Galert manager
     }
 }

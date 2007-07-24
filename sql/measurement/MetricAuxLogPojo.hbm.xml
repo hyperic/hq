@@ -21,5 +21,10 @@
     <many-to-one name="metric">
       <column name="METRIC_ID" not-null="true"/>
     </many-to-one>
+
+    <many-to-one name="alertDef">
+      <column name="DEF_ID" index="METRIC_AUX_LOG_IDX" not-null="true"/>
+    </many-to-one>
+
   </class>
 </hibernate-mapping>

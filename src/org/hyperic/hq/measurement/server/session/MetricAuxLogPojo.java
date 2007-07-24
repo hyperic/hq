@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 
@@ -36,18 +37,15 @@ public class MetricAuxLogPojo
 {
     private GalertAuxLog       _auxLog;
     private DerivedMeasurement _metric;
+    private GalertDef          _def;
     
     protected MetricAuxLogPojo() {
     }
 
-    MetricAuxLogPojo(GalertAuxLog log, DerivedMeasurement metric) {
-        _auxLog = log;
-        _metric = metric;
-    }
-   
-    MetricAuxLogPojo(GalertAuxLog log, MetricAuxLog logInfo) {
+    MetricAuxLogPojo(GalertAuxLog log, MetricAuxLog logInfo, GalertDef def) {
         _auxLog = log;
         _metric = logInfo.getMetric();
+        _def    = def;
     }
 
     public GalertAuxLog getAuxLog() {
@@ -66,6 +64,14 @@ public class MetricAuxLogPojo
         _metric = metric;
     }
 
+    public GalertDef getAlertDef() {
+        return _def;
+    }
+    
+    protected void setAlertDef(GalertDef def) {
+        _def = def;
+    }
+    
     public AlertAuxLogProvider getProvider() {
         return MetricAuxLogProvider.INSTANCE;
     }

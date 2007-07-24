@@ -25,5 +25,9 @@
 	<property name="appdefId">
 	  <column name="APPDEF_ID" not-null="true"/>
 	</property>
+	
+	<many-to-one name="alertDef">
+	  <column name="DEF_ID" index="RSRC_AUX_LOG_IDX" not-null="true"/>
+	</many-to-one>
   </class>
 </hibernate-mapping>

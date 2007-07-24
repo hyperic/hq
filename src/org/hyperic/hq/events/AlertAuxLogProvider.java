@@ -24,9 +24,11 @@
  */
 package org.hyperic.hq.events;
 
+import java.util.Collection;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.util.HypericEnum;
 
 
@@ -64,5 +66,9 @@ public abstract class AlertAuxLogProvider
     /**
      * Delete any auxillary logs associated with the specified auxLogId
      */
-    public abstract void delete(int auxLogId);
+    public abstract void deleteAll(GalertDef def);
+    
+    public static Collection findAll() {
+        return HypericEnum.getAll(AlertAuxLogProvider.class);
+    }
 }

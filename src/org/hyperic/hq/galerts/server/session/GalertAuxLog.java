@@ -42,6 +42,7 @@ public class GalertAuxLog
     private String       _description;
     private GalertAuxLog _parent;
     private Collection   _children;
+    private GalertDef    _def;
     
     protected GalertAuxLog() {}
     
@@ -59,6 +60,7 @@ public class GalertAuxLog
         if (_parent != null) {
             _parent.getChildrenBag().add(this);
         }
+        _def = alert.getAlertDef();
     }
     
     public long getTimestamp() {
@@ -115,6 +117,14 @@ public class GalertAuxLog
     
     public Collection getChildren() {
         return Collections.unmodifiableCollection(_children);
+    }
+    
+    public GalertDef getAlertDef() {
+        return _def;
+    }
+    
+    protected void setAlertDef(GalertDef def) {
+        _def = def;
     }
     
     public int hashCode() {

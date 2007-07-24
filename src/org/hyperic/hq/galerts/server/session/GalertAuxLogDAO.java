@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
@@ -51,13 +50,10 @@ class GalertAuxLogDAO
     }
 
     void removeAll(GalertDef def) {
-        for (Iterator i = findAll(def).iterator(); i.hasNext(); ) {
-            GalertAuxLog log = (GalertAuxLog)i.next();
-            
-            log.getAlert().getAuxLogBag().clear();
-            log.getChildrenBag().clear();
-            log.setParent(null);
-            super.remove(log);
-        }
+        String sql = "delete from GalertAuxLog l where l.alertDef = :def";
+        
+        getSession().createQuery(sql)
+                    .setParameter("def", def)
+                    .executeUpdate();
     }
 }

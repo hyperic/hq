@@ -31,6 +31,7 @@ import javax.ejb.SessionContext;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
@@ -64,7 +65,8 @@ public class MetricAuxLogManagerEJBImpl
      * @ejb:interface-method
      */
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {  
-        MetricAuxLogPojo metricLog = new MetricAuxLogPojo(log, logInfo);
+        MetricAuxLogPojo metricLog = 
+            new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
         
         getDAO().save(metricLog);
         return metricLog;
@@ -73,10 +75,8 @@ public class MetricAuxLogManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void remove(GalertAuxLog log) { 
-        MetricAuxLogPojo p = find(log);
-        
-        getDAO().remove(p);
+    public void removeAll(GalertDef def) {
+        getDAO().removeAll(def);
     }
 
     /**

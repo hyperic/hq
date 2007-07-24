@@ -54,7 +54,7 @@
     <bag name="auxLogBag" table="EAM_GALERT_AUX_LOGS" 
          cascade="all-delete-orphan" inverse="true" order-by="TIMESTAMP, ID">
       <cache usage="read-write" />
-      <key column="GALERT_ID" not-null="true"/>
+      <key on-delete="cascade" column="GALERT_ID" not-null="true"/>
       <one-to-many class="GalertAuxLog" />
     </bag>
 

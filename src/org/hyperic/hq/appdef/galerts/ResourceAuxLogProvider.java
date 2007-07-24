@@ -9,6 +9,7 @@ import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 
 public class ResourceAuxLogProvider 
@@ -46,9 +47,7 @@ public class ResourceAuxLogProvider
         ResourceAuxLogManagerEJBImpl.getOne().create(gAuxLog, logInfo);
     }
 
-    public void delete(int auxLogId) {
-        GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
-        
-        ResourceAuxLogManagerEJBImpl.getOne().remove(gAuxLog);
+    public void deleteAll(GalertDef def) {
+        ResourceAuxLogManagerEJBImpl.getOne().removeAll(def);
     }
 }

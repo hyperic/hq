@@ -40,10 +40,14 @@
       <column name="PARENT" not-null="false"/>
     </many-to-one>
     
+    <many-to-one name="alertDef">
+      <column name="DEF_ID" index="AUX_LOG_DEF_IDX" not-null="true"/>
+    </many-to-one>
+
     <bag name="childrenBag" table="EAM_GALERT_AUX_LOGS" 
          cascade="all-delete-orphan" inverse="true">
       <cache usage="read-write" />
-      <key column="PARENT" not-null="false"/>      
+      <key on-delete="cascade" column="PARENT" not-null="false"/>      
       <one-to-many class="GalertAuxLog" />
     </bag>
     

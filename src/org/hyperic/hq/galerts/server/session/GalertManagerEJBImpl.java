@@ -583,10 +583,10 @@ public class GalertManagerEJBImpl
         List nukeCrispos = new ArrayList();
         Integer defId = def.getId();
         
-        for (Iterator i=_auxLogDAO.findAll(def).iterator(); i.hasNext(); ) {
-            GalertAuxLog auxLog = (GalertAuxLog)i.next();
+        for (Iterator i=AlertAuxLogProvider.findAll().iterator(); i.hasNext();){
+            AlertAuxLogProvider p = (AlertAuxLogProvider)i.next();
             
-            auxLog.getProvider().delete(auxLog.getId().intValue());
+            p.deleteAll(def);
         }
         _auxLogDAO.removeAll(def);
         

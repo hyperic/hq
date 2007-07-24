@@ -29,6 +29,7 @@ import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 
 public class MetricAuxLogDAO extends HibernateDAO {
     public MetricAuxLogDAO(DAOFactory f) {
@@ -51,5 +52,13 @@ public class MetricAuxLogDAO extends HibernateDAO {
         return (MetricAuxLogPojo) createCriteria()
             .add(Expression.eq("auxLog", log))
             .uniqueResult();
+    }
+    
+    void removeAll(GalertDef def) {
+        String sql = "delete from MetricAuxLogPojo p where p.alertDef = :def";
+            
+        getSession().createQuery(sql)
+                    .setParameter("def", def)
+                    .executeUpdate();
     }
 }
