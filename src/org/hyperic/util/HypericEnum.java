@@ -25,6 +25,8 @@
 
 package org.hyperic.util;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,7 +65,7 @@ import org.json.JSONObject;
  *           http://www.hibernate.org/203.html
  */
 public abstract class HypericEnum 
-    implements JSON
+    implements JSON, Serializable
 {
     private static final Log _log = LogFactory.getLog(HypericEnum.class);
     private static final boolean DEBUG_ENUMS = false;
@@ -76,9 +78,9 @@ public abstract class HypericEnum
     
     private Class          _implClass;
     private int            _code;
-    private String         _desc;
-    private String         _localeProp;
-    private ResourceBundle _bundle;
+    private transient String         _desc;
+    private transient String         _localeProp;
+    private transient ResourceBundle _bundle;
     
     protected HypericEnum(int code, String desc, String localeProp,
                           ResourceBundle bundle) 
@@ -246,5 +248,9 @@ public abstract class HypericEnum
         res = new ArrayList(vals);
         Collections.sort(res, CODE_COMPARATOR);
         return Collections.unmodifiableList(res);
+    }
+    
+    private Object readResolve() throws ObjectStreamException {
+        return findByCode(_implClass, _code);
     }
 }
