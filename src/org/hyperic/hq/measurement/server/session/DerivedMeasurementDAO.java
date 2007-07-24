@@ -29,7 +29,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.FlushMode;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -95,6 +97,36 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setCacheRegion("DerivedMeasurement.findByTemplateForInstance")
             .uniqueResult();
     }
+    
+    /**
+     * Look up a derived measurement, allowing for the query to return a stale 
+     * copy of the derived measurement (for efficiency reasons).
+     * 
+     * @param tid
+     * @param iid
+     * @param allowStale <code>true</code> to allow stale copies of an alert 
+     *                   definition in the query results; <code>false</code> to 
+     *                   never allow stale copies, potentially always forcing a 
+     *                   sync with the database.
+     * @return The derived measurement or <code>null</code>.
+     */
+    public DerivedMeasurement findByTemplateForInstance(Integer tid, 
+                                                        Integer iid, 
+                                                        boolean allowStale) {
+        Session session = this.getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+        
+        try {
+            if (allowStale) {
+                session.setFlushMode(FlushMode.MANUAL);                
+            }
+            
+            return this.findByTemplateForInstance(tid, iid); 
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        } 
+    }
+
 
     public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
         String sql = "select id from DerivedMeasurement " +

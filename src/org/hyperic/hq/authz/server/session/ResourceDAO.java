@@ -185,21 +185,27 @@ public class ResourceDAO
             .setCacheRegion("Resource.findByInstanceId")
             .uniqueResult();
     }
-    
+        
     /**
-     * Find a Resource by type Id and instance Id, specifying the flush mode 
-     * for the query.
+     * Find a Resource by type Id and instance Id, allowing for the query to 
+     * return a stale copy of the resource (for efficiency reasons).
      * 
      * @param typeId The type Id.
      * @param id The instance Id.
-     * @param flushMode The flush mode used for this query.
+     * @param allowStale <code>true</code> to allow stale copies of an alert 
+     *                   definition in the query results; <code>false</code> to 
+     *                   never allow stale copies, potentially always forcing a 
+     *                   sync with the database.
      * @return The Resource.
      */
-    public Resource findByInstanceId(Integer typeId, Integer id, FlushMode flushMode) {                    
+    public Resource findByInstanceId(Integer typeId, Integer id, boolean allowStale) {                    
         FlushMode oldFlushMode = this.getSession().getFlushMode();
         
         try {
-            this.getSession().setFlushMode(flushMode);
+            if (allowStale) {
+                this.getSession().setFlushMode(FlushMode.MANUAL);                
+            }
+            
             return findByInstanceId(typeId, id);            
         } finally {
             this.getSession().setFlushMode(oldFlushMode);

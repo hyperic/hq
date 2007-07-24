@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
@@ -102,6 +103,37 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
 
         return (AlertDefinition) defs.get(0);
+    }
+    
+    /**
+     * Find the alert def for a given appdef entity that is the child of the 
+     * parent alert def passed in, allowing for the query to return a stale copy 
+     * of the alert definition (for efficiency reasons).
+     * 
+     * @param ent
+     * @param parentId
+     * @param allowStale <code>true</code> to allow stale copies of an alert 
+     *                   definition in the query results; <code>false</code> to 
+     *                   never allow stale copies, potentially always forcing a 
+     *                   sync with the database.
+     * @return The alert definition or <code>null</code>.
+     */
+    public AlertDefinition findChildAlertDef(AppdefEntityID ent, 
+                                             Integer parentId, 
+                                             boolean allowStale) {
+        Session session = this.getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+        
+        try {
+            if (allowStale) {
+                session.setFlushMode(FlushMode.MANUAL);                
+            }
+            
+            return this.findChildAlertDef(ent, parentId);
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        } 
+
     }
 
     public AlertDefinition findById(Integer id) {
@@ -224,7 +256,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
             // to the Resource aren't cascaded on saving the AlertDefinition.
             def.setResource(rDao.findByInstanceId(aeid.getAuthzTypeId(),
                                                   aeid.getId(), 
-                                                  FlushMode.MANUAL));
+                                                  true));
         }
 
         def.setFrequencyType(val.getFrequencyType());

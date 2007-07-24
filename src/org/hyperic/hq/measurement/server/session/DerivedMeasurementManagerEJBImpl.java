@@ -47,8 +47,6 @@ import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -754,29 +752,35 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Look up a derived measurement POJO, specifying the flush mode for the query.
+     * Look up a derived measurement POJO, allowing for the query to return a 
+     * stale copy of the derived measurement (for efficiency reasons).
      *
      * @param subject The subject.
      * @param tid The template Id.
      * @param iid The instance Id.
+     * @param allowStale <code>true</code> to allow stale copies of an alert 
+     *                   definition in the query results; <code>false</code> to 
+     *                   never allow stale copies, potentially always forcing a 
+     *                   sync with the database.
      * @return a DerivedMeasurement value
      * @ejb:interface-method
      */
     public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
                                                    Integer tid, 
                                                    Integer iid,
-                                                   FlushMode flushMode)
+                                                   boolean allowStale)
         throws MeasurementNotFoundException {
         
-        Session session = this.getDerivedMeasurementDAO().getSession();
-        FlushMode oldFlushMode = session.getFlushMode();
+        DerivedMeasurement dm =
+            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid, allowStale);
+            
+        if (dm == null) {
+            throw new MeasurementNotFoundException("No measurement found " +
+                                                   "for " + iid + " with " +
+                                                   "template " + tid);
+        }
         
-        try {
-            session.setFlushMode(flushMode);
-            return this.findMeasurement(subject, tid, iid);   
-        } finally {
-            session.setFlushMode(oldFlushMode);
-        }        
+        return dm.getDerivedMeasurementValue();
     }
         
     /**
