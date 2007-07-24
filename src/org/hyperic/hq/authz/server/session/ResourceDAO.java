@@ -168,7 +168,32 @@ public class ResourceDAO
         // kludge to work around hiberate's limitation to define
         // on-delete="cascade" on many-to-many relationships
         deleteResourceObject(ids, "ResGrpResMap", "id.resource.id");
-        return deleteResourceObject(ids, "Resource", "id");
+        
+        // Now delete the resources
+        Map map = groupByAuthzType(ids);
+        StringBuffer sql = new StringBuffer("delete Resource where ");
+        
+        for (int i = 0; i < map.size(); i++) {
+            if (i > 0) {
+                sql.append(" or ");
+            }
+
+            sql.append("(instanceId in (:list" +  i + ") and resourceType.id=");
+            
+            sql.append("(select rt.id from ResourceType rt " +
+                        "where rt.name = :rtname" + i + ")");
+            
+            sql.append(')');
+        }
+        
+        Query q = getSession().createQuery(sql.toString());
+        int j = 0;
+        for (Iterator i = map.entrySet().iterator(); i.hasNext(); j++) {
+            Map.Entry entry = (Map.Entry) i.next();
+            q.setString("rtname" + j, (String) entry.getKey())
+             .setParameterList("list" + j, (List) entry.getValue());
+        }
+        return q.executeUpdate();
     }
 
     public Resource findByInstanceId(ResourceType type, Integer id) {

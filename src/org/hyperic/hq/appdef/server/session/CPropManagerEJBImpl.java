@@ -556,14 +556,11 @@ public class CPropManagerEJBImpl
         CpropKeyDAO cpdao = getCPropKeyDAO();
         try {
             conn = cpdao.getSession().connection();
-            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " " +
-                                         "WHERE ID IN " +
-                                         "(SELECT prop.id " +
-                                         "FROM EAM_CPROP prop, " +
-                                         "EAM_CPROP_KEY key " +
-                                         "WHERE prop.keyid = key.id " +
-                                         "AND key.appdef_type = ? " +
-                                         "AND prop.appdef_id = ?)");
+            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE +
+                                         " WHERE keyid = " +
+                                         "(SELECT id FROM " + CPROPKEY_TABLE +
+                                         " WHERE appdef_type = ?) " +
+                                         "AND appdef_id = ?");
             stmt.setInt(1, appdefType);
             stmt.setInt(2, id);
                                          
