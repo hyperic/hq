@@ -76,7 +76,7 @@
                 </html:link>
             </div>
             <div class="headAlertWrapper">
-                            <div style="float:left;display:inline;padding-top:4px;width:90px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
+                            <div style="float:left;display:inline;padding-top:4px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
                             <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
             </div>
      <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>

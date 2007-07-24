@@ -1086,7 +1086,6 @@ border-left:1px solid #D5D8DE;
 .headUsrName {
 color:#333333;
 font-weight:bold;
-padding-top:4px;
 padding-top:5px;
     display:inline;
     float:left;
@@ -1128,7 +1127,7 @@ a.headUsrName {
     padding-top:1px;
     font-weight:bold;
     color:black;
-    width:590px;
+    width:580px;
     white-space: nowrap ;
     text-overflow:ellipsis;
     overflow:hidden;
