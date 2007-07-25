@@ -70,57 +70,52 @@
 <div class="headTopNav">
             <div class="headUsrName">
                 <c:out value="${sessionScope.webUser.username}"/>
-                &nbsp;-&nbsp;
+               <span style="display:block;padding-top:4px;">
                 <html:link action="/Logout">
-                    <fmt:message key="admin.user.generalProperties.Logout"/>
-                </html:link>
+                    <span style="font-size:10px;"><fmt:message key="admin.user.generalProperties.Logout"/></span>
+                </html:link></span>
             </div>
             <div class="headAlertWrapper">
-                            <div style="float:left;display:inline;padding-top:4px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
+                            <div style="float:left;display:inline;padding-top:5px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
                             <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
             </div>
      <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
 </div>
 
 <div class="headBotNav">
+      <table border="0" cellspacing="0" cellpadding="0" id="navigationTbl">
+                    <tr>
+                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                            <html:link page="/Dashboard.do"><fmt:message key="dash.home.PageTitle"/></html:link>
+                        </td>
+                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                            <html:link page="/ResourceHub.do"><fmt:message key="resource.hub.ResourceHubPageTitle"/></html:link>
+                        </td>
 
-    <ul id="navigationTbl">
-        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                    <c:if test="${not empty mastheadAttachments}">
+                      <c:forEach var="attachment" items="${mastheadAttachments}">
+                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                            <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link>
+                        </td>
 
-            <html:link page="/Dashboard.do"><fmt:message key="dash.home.PageTitle"/></html:link>
+                      </c:forEach>
+                    </c:if>
+                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                            <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
+                        </td>
+                         <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                            <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+                                <fmt:message key="common.label.Help"/></html:link>
+                        </td>
+                        <td class="navText" onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></a>
+                            <div style="clear: all;"></div>
+                            <tiles:insert definition=".toolbar.recentResources"/>
+                        </td>
 
-        </li>
+                    </tr>
 
-        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-
-        <html:link page="/ResourceHub.do"><fmt:message key="resource.hub.ResourceHubPageTitle"/></html:link>
-
-        </li>
-         <c:if test="${not empty mastheadAttachments}"><c:forEach var="attachment" items="${mastheadAttachments}">
-             <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-
-             <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link>
-
-             </li>
-         </c:forEach></c:if>
-        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-
-        <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
-
-        </li>
-        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-            <a href="." onclick="toggleMenu('recent');return false;"><span  id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a><tiles:insert definition=".toolbar.recentResources"/>
-            </li>
-        
-        <li onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-
-        <html:link href="." onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
-            <fmt:message key="common.label.Help"/></html:link>
-
-        </li>
-        
-        </ul>
-
+                </table>
     <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
         <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
