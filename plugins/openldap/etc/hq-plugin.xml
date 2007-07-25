@@ -237,6 +237,11 @@
     <property name="HAS_BUILTIN_SERVICES"
               value="true"/>
 
+    <properties>
+       <property name="version"
+                 description="OpenLDAP Version"/>
+    </properties>
+
     <config>
       <option name="ldapDriver"
               description="LDAP Driver Class"
