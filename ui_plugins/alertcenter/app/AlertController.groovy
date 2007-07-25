@@ -70,7 +70,7 @@ class AlertController
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
             [field:GalertLogSortField.ACKED_BY,
              label:{
-                 def by = it.ackedBy
+                 def by = it.acknowledgedBy
                  by == null ? "" : by.fullName }],
             [field:GalertLogSortField.SEVERITY,
              label:{
