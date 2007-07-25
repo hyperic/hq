@@ -1089,12 +1089,15 @@ font-weight:bold;
 padding-top:5px;
     display:inline;
     float:left;
+    padding-left:1px;
+    padding-right:20px;
 }
 
 a.headUsrName {
  color: #003399;
  text-decoration:none;
  font-weight: bold;
+    font-size:8px;
 }
 
 .headAlertWrapper {
@@ -1103,11 +1106,10 @@ a.headUsrName {
     display:inline;
     float:left;
     padding-left:10px;
+    border:0px solid green;
 }
 
 .headBotNav {
-    padding-top:4px;
-    padding-bottom:4px;
     background-color:#336699;
     border-top:1px solid #ffffff;
     border-left:1px solid #ffffff;
@@ -1127,7 +1129,7 @@ a.headUsrName {
     padding-top:1px;
     font-weight:bold;
     color:black;
-    width:585px;
+    width:600px;
     white-space: nowrap ;
     text-overflow:ellipsis;
     overflow:hidden;
@@ -1138,19 +1140,14 @@ a.headUsrName {
  font-size: 11px;
  display:inline;
 position:relative;
- margin-left: 0px;
- padding-left: 0px;
  color: #ffffff;
 font-weight: bold;
-width:775px;
 }
 
-#navigationTbl li {
-    display:inline;
-    list-style:none;
+#navigationTbl .navText {
     padding-left:15px;
     padding-right:15px;
-     padding-top:4px;
+    padding-top:4px;
     padding-bottom:4px;
     border-right:1px solid #ffffff;
 }
@@ -1162,8 +1159,8 @@ width:775px;
 }
 
 #recent a {
-color: #062b7a;
- font-weight: bold;  
+ color: #ffffff;
+ font-weight: bold;
 }
 
 #recent li {

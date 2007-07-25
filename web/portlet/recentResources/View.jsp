@@ -32,7 +32,7 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <tiles:importAttribute name="resources"/>
 
-<div id="recent" style="background-color:#ffffff;position:absolute;right:0px;z-index: 300;margin-top:4px;padding:4px;display:none;<!--[if lte IE  7]>margin-top:14px;<![endif]-->">
+<div id="recent" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;z-index: 300;margin-top:4px;padding:3px 2px;display:none;">
   <ul style="list-style-type: none;margin-left: 0;padding-left: 0;">
 <c:choose>
 <c:when test="${not empty resources}">
@@ -43,7 +43,7 @@
     </li>
   </c:when>
   <c:otherwise>
-    <li><fmt:message key="common.label.None"/></li>
+    <li style="color:#ffffff"><fmt:message key="common.label.None"/></li>
   </c:otherwise>
 </c:choose>
   </ul>
