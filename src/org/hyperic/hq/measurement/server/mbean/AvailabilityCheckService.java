@@ -69,6 +69,9 @@ public class AvailabilityCheckService
     private final String logCtx = AvailabilityCheckService.class.getName();
     private Log log = LogFactory.getLog(logCtx);
 
+    private static final Object BACKFILL_TRUNCATE_LOCK = 
+                                    MeasurementConstants.BACKFILL_TRUNCATE_LOCK;
+
     private long interval = 0;
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
@@ -294,9 +297,11 @@ public class AvailabilityCheckService
                 addData.add(new DataPoint(dm.getId(), mval));
             }
         }
-        watch.markTimeBegin("addData");
-        getDataMan().addData(addData, false);
-        watch.markTimeEnd("addData");
+        synchronized (BACKFILL_TRUNCATE_LOCK) {
+            watch.markTimeBegin("addData");
+            getDataMan().addData(addData, false);
+            watch.markTimeEnd("addData");
+        }
 
         wait = 0;
         log.debug(watch);
