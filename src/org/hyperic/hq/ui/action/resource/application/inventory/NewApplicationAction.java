@@ -25,36 +25,31 @@
 
 package org.hyperic.hq.ui.action.resource.application.inventory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.ObjectNotFoundException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.action.resource.application.ApplicationForm;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * This class handles saving the submission from the application
@@ -95,31 +90,30 @@ public class NewApplicationAction extends BaseAction {
             log.trace("finding application type [" + applicationTypeId + "]");
             ApplicationTypeValue applicationType =
                 boss.findApplicationTypeById(sessionId.intValue(),
-                                          applicationTypeId);
+                                             applicationTypeId);
             app.setApplicationType(applicationType);
-            log.trace("creating application [" + app.getName()
-                               + "]" + " with attributes " + newForm);
-            // XXX ConfigResponse is a dummy arg, must be nuked when the boss interface fixed
-            ApplicationValue newApp =
-                boss.createApplication(sessionId.intValue(), app, new ArrayList(), new ConfigResponse());
-            Integer appId = newApp.getId();
-            Integer entityType = new Integer(newApp.getEntityId().getType());
-            log.trace("created application [" + newApp.getName()
-                               + "]" + " with attributes " + newApp.toString()  + " and has resource type " + 
-                               entityType);
-            newForm.setType(entityType);
-            newForm.setRid(appId);
+            log.trace("creating application [" + app.getName() +
+                      "] with attributes " + newForm);
+            // XXX ConfigResponse is a dummy arg, must be nuked when the boss
+            // interface fixed
+            app = boss.createApplication(sessionId.intValue(), app,
+                                         new ArrayList(), new ConfigResponse());
+            AppdefEntityID appId = app.getEntityId();
+            log.trace("created application [" + app.getName() +
+                      "] with attributes " + app.toString() +
+                      " and has appdef ID " + appId);
             RequestUtils.setConfirmation(request,
-                                         "resource.application.inventory.confirm.CreateApplication",
+                                         "resource.application.inventory." +
+                                         "confirm.CreateApplication",
                                          app.getName());
-            forwardParams.put(Constants.RESOURCE_PARAM, appId);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
+            forwardParams.put(Constants.ENTITY_ID_PARAM, appId);
             return returnNew(request, mapping, forwardParams);
         }
         catch (ObjectNotFoundException oe) {
             RequestUtils
                 .setError(request,
-                          "resource.application.inventory.error.ApplicationTypeNotFound",
+                          "resource.application.inventory.error." +
+                          "ApplicationTypeNotFound",
                           "resourceType");
             return returnFailure(request, mapping, forwardParams);
         }        
