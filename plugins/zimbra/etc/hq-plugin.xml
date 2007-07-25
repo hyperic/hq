@@ -44,6 +44,11 @@
     <filter name="template"
             value="zimbra-stats:installpath=%installpath%:${alias}"/>
 
+    <properties>
+       <property name="version"
+                 description="Zimbra Version"/>
+    </properties>
+
     <config>
       <option name="installpath"
               default="/opt/zimbra"
