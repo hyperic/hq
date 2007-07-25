@@ -49,12 +49,15 @@
               value="../../lib/jhall.jar"/>
 
     <property name="DEFAULT_PROGRAM"
-              value="bin/startserv"/>
+              value="../../bin/asadmin"/>
 
     <property name="domain"
               value="GlassFish"/>
 
     <config>
+      <option name="domain"
+              description="GlassFish Domain"
+              default="domain1"/>
       <option name="logpath"
               description="GlassFish Log File (Full Path)"
               default="%installpath%/logs/server.log"/>
@@ -88,10 +91,20 @@
     <property name="PROC_HOME_PROPERTY"
               value="com.sun.aas.instanceRoot"/>
 
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.jmx.MxServerDetector"/>
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <actions include="stop,start"/>
+
+    <property name="start.args"
+              value="start-domain %domain%"/>
+
+    <property name="stop.args"
+              value="stop-domain %domain%"/>
 
     <metric name="Availability"
             template="sigar:Type=ProcState,Arg=%process.query%:State"
