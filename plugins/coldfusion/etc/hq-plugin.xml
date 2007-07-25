@@ -46,6 +46,11 @@
     <plugin type="collector"
             class="org.hyperic.hq.plugin.coldfusion.ColdfusionCollector"/>
 
+    <properties>
+       <property name="version"
+                 description="Coldfusion Version"/>
+    </properties>
+
     <config>
       <option name="installpath"
               default="/opt/coldfusionmx7"
