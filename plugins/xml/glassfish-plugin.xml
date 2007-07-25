@@ -352,6 +352,80 @@
               units="ms"/>
     </service>
 
+    <service name="Class Loading System">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:name=class-loading-system,type=*,category=*,server=*"/>
+      <metric name="Unloaded Class Count"
+              alias="unloadedclasscount-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Loaded Class Count"
+              alias="loadedclasscount-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Total Loaded Class Count"
+              alias="totalloadedclasscount-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+    </service>
+
+    <service name="System Compilation">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:name=compilation-system,type=*,category=*,server=*"/>
+      <metric name="Total Compilation Time"
+              alias="totalcompilationtime-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"
+              units="ms"/>
+    </service>
+
+    <service name="Connection Queue">
+      <plugin type="autoinventory"/>
+      <property name="OBJECT_NAME"
+                value="com.sun.appserv:type=connection-queue,category=*,server=*"/>
+      <metric name="Queued 15 Min Average"
+              alias="countqueued15minuteaverage-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Queued 5 Min Average"
+              alias="countqueued5minuteaverage-count"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Queued 1 Min Average"
+              alias="countqueued1minuteaverage-count"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Total Queued"
+              alias="counttotalqueued-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Total Connections"
+              alias="counttotalconnections-count"
+              indicator="false"
+              category="THROUGHPUT"
+              collectionType="trendsup"/>
+      <metric name="Queued"
+              alias="countqueued-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+      <metric name="Overflows"
+              alias="countoverflows-count"
+              indicator="true"
+              category="THROUGHPUT"
+              collectionType="dynamic"/>
+    </service>
+
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
@@ -361,6 +435,9 @@
   <h3>Configure HQ for monitoring GlassFish</h3>
   </p>
   <p>
+    GlassFish has its own JMX agent to listen for connections.  Therefore there is no
+    need to configure jmxremote directly for the java process.  Everything will work
+    by default.
   </p>
   ]]>
   </help>
