@@ -64,7 +64,7 @@ public class AgentServerDetector
         ServerResource res;
         String installPath, agtName;
         String version = ProductProperties.getVersion();
-        agtName = getPlatformName() + " HQ Agent (" + version + ")";
+        agtName = getPlatformName() + " HQ Agent " + version;
         installPath = (new File(".")).getAbsoluteFile().getParent();
 
         res = createServerResource(installPath);
