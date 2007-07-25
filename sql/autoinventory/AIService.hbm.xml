@@ -51,19 +51,19 @@
     </property>
 
     <property lazy="true" name="productConfig" type="binary">
-      <column name="PRODUCT_CONFIG" not-null="false" size="65535"/>
+      <column name="PRODUCT_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <property lazy="true" name="controlConfig" type="binary">
-      <column name="CONTROL_CONFIG" not-null="false" size="65535"/>
+      <column name="CONTROL_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <property lazy="true" name="measurementConfig" type="binary">
-      <column name="MEASUREMENT_CONFIG" not-null="false" size="65535"/>
+      <column name="MEASUREMENT_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <property lazy="true" name="responseTimeConfig" type="binary">
-      <column name="RESPONSETIME_CONFIG" not-null="false" size="65535"/>
+      <column name="RESPONSETIME_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <many-to-one name="server" class="org.hyperic.hq.appdef.server.session.Server">

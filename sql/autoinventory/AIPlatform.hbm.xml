@@ -103,15 +103,15 @@
     </property>
 
     <property lazy="true" name="productConfig" type="binary">
-      <column name="PRODUCT_CONFIG" not-null="false" size="65535"/>
+      <column name="PRODUCT_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <property lazy="true" name="controlConfig" type="binary">
-      <column name="CONTROL_CONFIG" not-null="false" size="65535"/>
+      <column name="CONTROL_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <property lazy="true" name="measurementConfig" type="binary">
-      <column name="MEASUREMENT_CONFIG" not-null="false" size="65535"/>
+      <column name="MEASUREMENT_CONFIG" not-null="false" length="65535"/>
     </property>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="AIIps" table="EAM_AIQ_IP" lazy="true">
