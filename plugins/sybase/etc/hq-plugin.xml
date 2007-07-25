@@ -216,6 +216,11 @@
     <metrics include="ServerMetrics"/>
     <metrics include="sp_sysmon"/>
 
+    <properties>
+       <property name="version"
+                 description="Sybase Version"/>
+    </properties>
+
     <config>
       <option name="jdbcUrl"
               description="JDBC Url (NOTE: localhost may not work)"
