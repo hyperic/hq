@@ -49,6 +49,11 @@
     <plugin type="measurement"
             class="org.hyperic.hq.plugin.alfresco.AlfrescoMeasurementPlugin"/>
 
+    <properties>
+       <property name="version"
+                 description="Alfresco Version"/>
+    </properties>
+
     <config>
       <option name="jdbcUrl"
               description="JDBC Url"
@@ -123,6 +128,8 @@
     </service>
 
     <service name="Tomcat">
+      <plugin type="autoinventory"
+              class="AlfrescoServerDetector"/>
       <property name="DEFAULT_LOG_FILE"
                 value="tomcat/logs/catalina.out"/>
       <plugin type="log_track"
