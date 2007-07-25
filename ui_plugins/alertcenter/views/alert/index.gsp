@@ -26,7 +26,7 @@ onloads.push(setSelectedOption);
 </script>
 
 <div class="BlockTitle"> ${l.SelectTypeMsg}:
-  <select id='selectDrop' onchange=swapTables(options[selectedIndex].value)>
+  <select id='selectDrop' onchange='swapTables(options[selectedIndex].value)'>
     <option value='0' selected>${l.ClassicAlerts}</option>
     <option value='1'>${l.GroupAlerts}</option>
   </select>
