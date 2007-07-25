@@ -33,6 +33,7 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
+import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -41,6 +42,7 @@ public class MeasurementStartupListener
     private static final Object LOCK = new Object();
     private static DataInserter _dataInserter;
     private static DefaultMetricEnableCallback _defEnableCallback;
+    private static MetricDeleteCallback _delCallback;
     
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
@@ -62,8 +64,23 @@ public class MeasurementStartupListener
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)
                 app.registerCallbackCaller(DefaultMetricEnableCallback.class);
+            _delCallback = (MetricDeleteCallback)
+                app.registerCallbackCaller(MetricDeleteCallback.class);
             _dataInserter = new SynchronousDataInserter();
         }
+        
+        app.registerCallbackListener(MetricDeleteCallback.class, 
+                                     new MetricDeleteCallback() {
+            public void beforeMetricDelete(RawMeasurement m) {
+            }
+
+            public void beforeMetricDelete(DerivedMeasurement m) {
+                MetricAuxLogManagerLocal man = 
+                    MetricAuxLogManagerEJBImpl.getOne();
+                
+                man.metricDeleted(m);
+            }
+        });
     }
     
     public static void setDataInserter(DataInserter d) {
@@ -81,6 +98,12 @@ public class MeasurementStartupListener
     static DefaultMetricEnableCallback getDefaultEnableObj() {
         synchronized (LOCK) {
             return _defEnableCallback;
+        }
+    }
+    
+    static MetricDeleteCallback getMetricDeleteCallbackObj() {
+        synchronized (LOCK) {
+            return _delCallback;
         }
     }
 }

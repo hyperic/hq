@@ -166,8 +166,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .list();
     }
 
-    int deleteByInstances(AppdefEntityID[] ids)
-    {
+    List findByInstances(AppdefEntityID[] ids) {
         Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer("from DerivedMeasurement where ");
         for (int i = 0; i < map.size(); i++) {
@@ -187,11 +186,6 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
         // delete derived measurements
         Query q = getSession().createQuery(sql.toString());
-        return executeUpdate(map, q);
-    }
-
-    private int executeUpdate(Map map, Query q)
-    {
         int j = 0;
         for (Iterator i = map.keySet().iterator(); i.hasNext(); j++) {
             Integer appdefType = (Integer)i.next();
@@ -200,9 +194,14 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 .setParameterList("list"+j, list);
         }
         
-        List v = q.list();
-        for (Iterator it = v.iterator(); it.hasNext(); ) {
-            remove((DerivedMeasurement) it.next());
+        return q.list();
+    }
+
+    int deleteByInstances(AppdefEntityID[] ids) {
+        List v = findByInstances(ids);
+        
+        for (Iterator i=v.iterator(); i.hasNext(); ) {
+            remove((DerivedMeasurement)i.next());
         }
         return v.size();
     }

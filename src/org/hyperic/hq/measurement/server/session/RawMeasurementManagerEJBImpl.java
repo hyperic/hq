@@ -302,7 +302,17 @@ public class RawMeasurementManagerEJBImpl
      * @ejb:interface-method
      */
     public void removeMeasurements(AppdefEntityID[] ids) {
-        getRawMeasurementDAO().deleteByInstances(ids);
+        MetricDeleteCallback cb = 
+            MeasurementStartupListener.getMetricDeleteCallbackObj();
+        RawMeasurementDAO dao = getRawMeasurementDAO();
+        Collection metrics = dao.findByInstances(ids);
+
+        for (Iterator i=metrics.iterator(); i.hasNext(); ) {
+            RawMeasurement m = (RawMeasurement)i.next();
+            
+            cb.beforeMetricDelete(m);
+            dao.remove(m);
+        }
     }
 
     public static RawMeasurementManagerLocal getOne() {

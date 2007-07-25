@@ -54,6 +54,15 @@ public class MetricAuxLogDAO extends HibernateDAO {
             .uniqueResult();
     }
     
+    MetricAuxLogPojo find(DerivedMeasurement m) {
+        String sql = "from MetricAuxLogPojo p where p.metric = :metric";
+        
+        return (MetricAuxLogPojo)
+            getSession().createQuery(sql)
+                        .setParameter("metric", m)
+                        .uniqueResult();
+    }
+    
     void removeAll(GalertDef def) {
         String sql = "delete from MetricAuxLogPojo p where p.alertDef = :def";
             

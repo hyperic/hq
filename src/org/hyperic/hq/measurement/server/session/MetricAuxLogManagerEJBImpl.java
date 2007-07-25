@@ -28,14 +28,18 @@ package org.hyperic.hq.measurement.server.session;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 
 /**
  * @ejb:bean name="MetricAuxLogManager"
@@ -49,6 +53,9 @@ import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 public class MetricAuxLogManagerEJBImpl 
     implements SessionBean
 {
+    private final Log _log = 
+        LogFactory.getLog(MetricAuxLogManagerEJBImpl.class);
+    
     public static MetricAuxLogManagerLocal getOne() {
         try {
             return MetricAuxLogManagerUtil.getLocalHome().create();
@@ -84,6 +91,22 @@ public class MetricAuxLogManagerEJBImpl
      */
     public MetricAuxLogPojo find(GalertAuxLog log) { 
         return getDAO().find(log);
+    }
+
+    /**
+     * Callback, invoked when a metric is deleted.  Since we still want to keep
+     * the measurement around, we delete the value from the metric_aux_log and
+     * transform the entry in the galert_aux_log to a regular entry.
+     * 
+     * @ejb:interface-method
+     */
+    public void metricDeleted(DerivedMeasurement m) {
+        MetricAuxLogPojo p = getDAO().find(m);
+ 
+        if (p != null) {
+            getDAO().remove(p);
+            GalertManagerEJBImpl.getOne().resetLogLink(p.getAuxLog());
+        }
     }
 
     public void ejbCreate() { }

@@ -275,6 +275,16 @@ public class GalertManagerEJBImpl
     }
     
     /**
+     * This method resets the associated type between an aux log and
+     * other subsystems (such as metrics, resource, etc.)
+     * 
+     * @ejb:interface-method  
+     */
+    public void resetLogLink(GalertAuxLog l) {
+        l.setAuxType(GalertAuxLogProvider.INSTANCE.getCode());
+    }
+
+    /**
      * @ejb:interface-method  
      */
     public List findAlertLogs(GalertDef def) {

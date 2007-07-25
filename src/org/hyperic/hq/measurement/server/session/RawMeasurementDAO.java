@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +73,7 @@ public class RawMeasurementDAO extends HibernateDAO {
             .setInteger(1, appdefId).list();
     }
 
-    int deleteByInstances(AppdefEntityID[] ids)
-    {
+    Collection findByInstances(AppdefEntityID[] ids) {
         Map map = AppdefUtil.groupByAppdefType(ids);
         StringBuffer sql = new StringBuffer()
             .append("from RawMeasurement where ");
@@ -101,11 +100,16 @@ public class RawMeasurementDAO extends HibernateDAO {
              .setParameterList("list" + j, list);
         }
         
-        List v = q.list();
-        for (Iterator i=v.iterator(); i.hasNext(); ) {
+        return q.list();
+    }
+    
+    int deleteByInstances(AppdefEntityID[] ids) {
+        int num = 0;
+        for (Iterator i=findByInstances(ids).iterator(); i.hasNext(); ) {
             remove(i.next());
+            num++;
         }
-        return v.size();
+        return num;
     }
 
     RawMeasurement findByDsnForInstance(String dsn, Integer id) {

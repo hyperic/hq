@@ -510,6 +510,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                    AppdefEntityID[] entIds)
         throws RemoveException, PermissionException
     {
+        MetricDeleteCallback cb = 
+            MeasurementStartupListener.getMetricDeleteCallbackObj();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
         /* Authz check should be performed on entity removal
         for (int i = 0; i < entIds.length; i++) {
@@ -517,12 +519,18 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             checkDeletePermission(subject, entIds[i]);
         }
         */
-        dao.deleteByInstances(entIds);
+
+        for (Iterator i=dao.findByInstances(entIds).iterator(); i.hasNext(); ) {
+            DerivedMeasurement dm = (DerivedMeasurement)i.next();
+
+            cb.beforeMetricDelete(dm);
+            dao.remove(dm);
+        }
 
         // send queue message to unschedule
         UnScheduleArgs unschBean = new UnScheduleArgs(agentEnt, entIds);
         Messenger msg = new Messenger();
-        log.info("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
+        log.debug("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
         msg.sendMessage(MeasurementConstants.SCHEDULE_QUEUE, unschBean);
     }
 
