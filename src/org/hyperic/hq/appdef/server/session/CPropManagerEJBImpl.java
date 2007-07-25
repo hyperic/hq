@@ -557,7 +557,7 @@ public class CPropManagerEJBImpl
         try {
             conn = cpdao.getSession().connection();
             stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE +
-                                         " WHERE keyid = " +
+                                         " WHERE keyid IN " +
                                          "(SELECT id FROM " + CPROPKEY_TABLE +
                                          " WHERE appdef_type = ?) " +
                                          "AND appdef_id = ?");
