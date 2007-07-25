@@ -77,6 +77,9 @@ public class DataCompressEJBImpl
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
     private static final String METRIC_DATA_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
+    private static final Object BACKFILL_TRUNCATE_LOCK = 
+                                    MeasurementConstants.BACKFILL_TRUNCATE_LOCK;
+
     // For purging alerts
     private AlertManagerLocal alertManager = null;
 
@@ -191,8 +194,8 @@ public class DataCompressEJBImpl
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
             }
-            // for backwards compatibility
-            truncateOldMeasTable(truncateBefore, stmt);
+            // for backfilled data
+            truncateBackfillMeasTable(truncateBefore, stmt);
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         }
@@ -201,21 +204,32 @@ public class DataCompressEJBImpl
         }
     }
 
-    private void truncateOldMeasTable(long truncateBefore, Statement stmt)
+    private void truncateBackfillMeasTable(long truncateBefore, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
         try
         {
-            String sql = "SELECT max(timestamp) as maxtimestamp "+
-                         " FROM "+BF_TABLE+
-                         " HAVING max(timestamp) is not null";
-            rs = stmt.executeQuery(sql);
-            while (rs.next())
+            boolean truncated = false;
+            synchronized(BACKFILL_TRUNCATE_LOCK)
             {
-                if (truncateBefore > rs.getLong("maxtimestamp"))
-                    stmt.executeUpdate("truncate table "+BF_TABLE);
+                String sql = "SELECT max(timestamp) as maxtimestamp "+
+                             " FROM "+BF_TABLE+
+                             " HAVING max(timestamp) is not null";
+                rs = stmt.executeQuery(sql);
+                if (rs.next())
+                {
+                    if (truncateBefore > rs.getLong("maxtimestamp"))
+                    {
+                        stmt.executeUpdate("truncate table "+BF_TABLE);
+                        truncated = true;
+                    }
+                }
             }
+            if (truncated)
+                return;
+            String sql = "DELETE FROM "+BF_TABLE+" where timestamp < "+truncateBefore;
+            stmt.executeUpdate(sql);
         }
         finally {
             if (rs != null) rs.close();
