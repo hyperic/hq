@@ -638,7 +638,7 @@
               scope="request"
               validate="true"
               input="/resource/platform/Inventory.do?mode=new">
-        <set-property property="title" value="2.2.6"/>
+        <set-property property="title" value=" ui-Inventory.Platform.New"/>
         
         <forward name="cancel" path="/ResourceHub.do" redirect="true"/>
         <forward name="reset" path="/resource/platform/Inventory.do?mode=new"
@@ -704,7 +704,7 @@
               name="RemoveServersForm"
               scope="request"
               input="/resource/platform/inventory.do?mode=view">
-        <set-property property="title" value="2.2.6"/>
+        <set-property property="title" value="ui-Inventory.Server"/>
         <forward name="failure" path="/resource/platform/Inventory.do?mode=view"/>
         <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
       </action>
@@ -760,7 +760,7 @@
               type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscovery{1}Action"
               input="/resource/platform/AutoDiscovery.do?mode=edit">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
-        <set-property property="title" value="2.2.7.4"/>
+        <set-property property="title" value=" ui-Dashboard.AutoDiscovery"/>
         <forward name="cancel"  path="/resource/platform/AutoDiscovery.do?mode=view" redirect="true"/>
         <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=edit" redirect="true"/>
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=edit"/>
@@ -769,7 +769,7 @@
       
       <action path="/resource/platform/autodiscovery/ViewAutoDiscovery"
               type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewAutoDiscoveryAction">
-        <set-property property="title" value="2.2.7.3"/>
+        <set-property property="title" value="Auto-Discovery"/>
       </action>
       
       <action path="/resource/platform/autodiscovery/ViewResultsPrep"
@@ -777,7 +777,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewResultsPrepAction">
         <set-property property="workflow" value="autodiscovery/ViewResults"/>
-        <set-property property="title" value="2.2.7.5"/>
+        <set-property property="title" value="Auto-Discovery"/>
       </action>
 
       <action path="/resource/platform/autodiscovery/ScanControl*"
@@ -859,7 +859,7 @@
               type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewMetricMetadataAction"
               name="MetricMetadataForm"
               scope="request">
-        <set-property property="title" value="2.2.5.2"/>
+        <set-property property="title" value=" ui-Monitor.CurrentHealth.Metrics"/>
         <forward name="success" path="/resource/common/monitor/Visibility.do?mode=metricMetadata"/>
       </action>
       
@@ -939,7 +939,7 @@
               name="MetricsDisplayForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.server.monitor.visibility.ServerServicesMetricsFormPrepareAction">
-        <set-property property="title" value="2.3.2.1.3"/>
+        <set-property property="title" value=" ui-Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <!-- / -->
@@ -982,7 +982,7 @@
               name="MetricsDisplayForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.application.monitor.visibility.ApplicationServicesFormPrepareAction">
-        <set-property property="title" value="2.3.2.1.3"/>
+        <set-property property="title" value=" ui-Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <!-- application monitoring config -->      
@@ -1147,7 +1147,7 @@
               name="ServerControlForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction">
-        <set-property property="title" value="2.3.7.2"/>
+        <set-property property="title" value="ui-Control"/>
       </action>
 
       <action path="/resource/server/control/Edit"
@@ -1394,7 +1394,7 @@
               name="EditApplicationForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.application.inventory.EditApplicationPropertiesFormPrepareAction">
-        <set-property property="title" value="2.1.6.2"/>
+        <set-property property="title" value="ui-Inventory.Application"/>
       </action>
           
       <action path="/resource/application/inventory/EditApplicationProperties"
@@ -1423,14 +1423,14 @@
               name="ListServiceDependenciesForm"
               type="org.hyperic.hq.ui.action.resource.application.inventory.ListServiceDependenciesAction"
               scope="request">
-        <set-property property="title" value="2.1.6.6"/>
+        <set-property property="title" value="ui-Inventory.Application"/>
       </action>
 
       <action path="/resource/application/inventory/AddServiceDependenciesFormPrepare"
               name="AddApplicationServicesForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.application.inventory.AddServiceDependenciesFormPrepareAction">
-        <set-property property="title" value="2.1.6.5"/>
+        <set-property property="title" value="ui-Inventory.Application"/>
       </action>
 
       <action path="/resource/application/inventory/AddServiceDependencies" 
@@ -1470,7 +1470,7 @@
               name="AddApplicationServicesForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServiceFormPrepareAction">
-        <set-property property="title" value="2.1.6.4"/>
+        <set-property property="title" value="ui-Inventory.Application"/>
       </action>
 
 
@@ -1502,7 +1502,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupFormPrepareAction">
         <set-property property="workflow" value="group/NewGroup"/>
-        <set-property property="title" value="2.4.1.0"/>
+        <set-property property="title" value="ui-Inventory.Group.New"/>
       </action>
       
       <action path="/resource/group/inventory/EditGeneralFormPrepare"
@@ -1540,14 +1540,14 @@
 
       <action path="/resource/group/inventory/ViewGroup"
               type="org.hyperic.hq.ui.action.resource.group.inventory.ViewGroupAction">
-        <set-property property="title" value="2.4.6.0"/>
+        <set-property property="title" value="ui-Inventory.Group"/>
       </action>
 
       <action path="/resource/group/inventory/AddGroupResourcesFormPrepare"
               name="AddGroupResourcesForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction">
-        <set-property property="title" value="2.4.6.3"/>
+        <set-property property="title" value="ui-Group.AddResource"/>
       </action>
 
       <action path="/resource/group/inventory/AddGroupResources"
@@ -1666,7 +1666,7 @@
               
       <action path="/resource/group/control/ListDetail"       
               type="org.hyperic.hq.ui.action.resource.group.control.ListDetailAction" >
-        <set-property property="title" value="2.4.7.5"/>
+        <set-property property="title" value="ui-Inventory.Group"/>
       </action>
             
       <!-- / end resource group control -->
@@ -2025,7 +2025,7 @@
               name="EscalationForm"
               scope="request"
               input="/alerts/Config.do?mode=viewEscalation">
-        <set-property property="title" value="2.2.3.3"/>
+        <set-property property="title" value=" ui-Admin.Escalation"/>
               <forward name="success" path="/alerts/Config.do?mode=viewEscalation" redirect="true"/>
               <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
       </action>
@@ -2215,7 +2215,7 @@
               name="RemoveResourceGroupsForm"
               scope="request"
               input="/resource/{1}/Inventory.do?mode=view">
-        <set-property property="title" value="2.2.6"/>
+        <set-property property="title" value="ui-Inventory.Group"/>
         <forward name="failure" path="/resource/{1}/Inventory.do?mode=view"/>
         <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
       </action>
