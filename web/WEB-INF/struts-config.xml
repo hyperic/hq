@@ -1361,7 +1361,7 @@
               name="ApplicationForm"
               scope="request"
               input="/resource/application/Inventory.do?mode=new">
-        <forward name="success" path="/resource/application/Inventory.do?mode=view" redirect="true/>
+        <forward name="success" path="/resource/application/Inventory.do?mode=view" redirect="true"/>
         <forward name="cancel"  path="/ResourceHub.do" redirect="true"/>
         <forward name="reset"   path="/resource/application/Inventory.do?mode=new"
                  redirect="true"/>
