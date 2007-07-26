@@ -120,7 +120,9 @@ public abstract class ServiceQuery extends JBossQuery {
     
     public Properties getResourceConfig() {
         Properties props = new Properties();
-        props.setProperty(getPropertyName(), getName());
+        if (getName() != null) {
+            props.setProperty(getPropertyName(), getName());
+        }
         return props;
     }
 
@@ -136,7 +138,10 @@ public abstract class ServiceQuery extends JBossQuery {
         StringBuffer buf = new StringBuffer();
 
         ArrayList names = new ArrayList();
-        names.add(getName());
+        String name = getName();
+        if (name != null) {
+            names.add(name);    
+        }
 
         JBossQuery query = this;
         while ((query = query.getParent()) != null) {
@@ -150,7 +155,9 @@ public abstract class ServiceQuery extends JBossQuery {
             }
         }
 
-        buf.append(" ");
+        if (buf.length() != 0) {
+            buf.append(" ");
+        }
         buf.append(getServiceResourceType());
 
         return buf.toString();
