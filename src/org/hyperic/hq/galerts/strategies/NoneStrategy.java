@@ -85,7 +85,7 @@ public class NoneStrategy
             _firedMap.put(t, Boolean.TRUE);
         }
         _numFired = _triggers.size();
-        _log.info("Resetting None strategy.  NumFired=" + _numFired);
+        _log.debug("Resetting None strategy.  NumFired=" + _numFired);
     }
 
     public ExecutionReason shouldFire() {
@@ -105,7 +105,7 @@ public class NoneStrategy
             _numFired++;
         }
         
-        _log.info(trigger + " fired.  Numfired= " + _numFired);
+        _log.debug(trigger + " fired.  Numfired= " + _numFired);
     }
 
     public void triggerNotFired(Gtrigger trigger) {
@@ -115,6 +115,6 @@ public class NoneStrategy
             _firedMap.put(trigger, Boolean.FALSE);
             _numFired--;
         }
-        _log.info(trigger + " unfired.  Numfired= " + _numFired);
+        _log.debug(trigger + " unfired.  Numfired= " + _numFired);
     }
 }
