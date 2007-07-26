@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -53,6 +54,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -735,6 +737,23 @@ public class AlertDefinitionManagerEJBImpl
         return def == null ? null : def.getId();        
     }
     
+
+    /**
+     * Find alert definitions passing the criteria.
+     * 
+     * @param minSeverity  Specifies the minimum severity that the defs should
+     *                     be set for
+     * @param pInfo        Paging information.  The sort field must be a 
+     *                     value from {@link AlertDefSortField}
+     * 
+     * @ejb:interface-method
+     */
+    public List findAlertDefinitions(AuthzSubjectValue subj, 
+                                     AlertSeverity minSeverity,
+                                     PageInfo pInfo)
+    {
+        return getAlertDefDAO().findDefinitions(subj, minSeverity, pInfo);
+    }
 
     /** 
      * Get list of alert conditions for a resource

@@ -28,11 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.FlushMode;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -266,5 +270,28 @@ public class AlertDefinitionDAO extends HibernateDAO {
         if (val.actOnTriggerIdHasBeenSet()) {
             def.setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
         }
+    }
+    
+    List findDefinitions(AuthzSubjectValue subj, AlertSeverity minSeverity, 
+                         PageInfo pInfo)
+    {
+        AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
+        String sql = "select d from AlertDefinition d " +
+                     "join d.resource r " +
+                     "where " +
+                     "    d.priority >= :priority ";
+        
+        sql += " order by " + sort.getSortString("d", "r") + 
+               (pInfo.isAscending() ? "" : " DESC");
+
+        if (!sort.equals(AlertDefSortField.CTIME)) {
+            sql += ", " + AlertDefSortField.CTIME.getSortString("d", "r") +
+                   " DESC";
+        }
+               
+        Query q = getSession().createQuery(sql)
+                              .setInteger("priority", minSeverity.getCode());
+
+        return pInfo.pageResults(q).list();
     }
 }
