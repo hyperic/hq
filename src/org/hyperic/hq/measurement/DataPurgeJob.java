@@ -119,7 +119,6 @@ public class DataPurgeJob implements Job {
         long time_start = System.currentTimeMillis();
         
         try {
-    
             boolean ten_past = false;
             // We'll only do the compress if it's 10 past the hour
             Calendar cal = Calendar.getInstance();
@@ -130,19 +129,12 @@ public class DataPurgeJob implements Job {
             else
                 ten_past = true;
         
-            // First purge backfilled data
-            try {
-                dataCompress.purgeBackfilled();
-            } catch (SQLException e) {
-                _log.error("Unable to clear out duplicated backfilled data", e);
-            }
-
-            runDBAnalyze(serverConfig);
-    
             // Announce
             _log.info("Data compression starting at " +
                       TimeUtil.toString(time_start));
             
+            runDBAnalyze(serverConfig);
+    
             if (!ten_past)
                 return;
 

@@ -435,16 +435,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
 
-    private Map bucketData(List data, boolean overwrite) {
+    private Map bucketData(List data) {
         HashMap buckets = new HashMap();
         
         // Bucket the data first
         for (Iterator it = data.iterator(); it.hasNext(); ) {
             DataPoint pt = (DataPoint) it.next();
-            String table = overwrite ?
-                MeasTabManagerUtil
-                    .getMeasTabname(pt.getMetricValue().getTimestamp()) :
-                MeasTabManagerUtil.OLD_MEAS_TABLE;
+            String table = MeasTabManagerUtil
+                .getMeasTabname(pt.getMetricValue().getTimestamp());
                     
             if (!buckets.containsKey(table)) {
                 buckets.put(table, new ArrayList());
@@ -468,7 +466,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data, overwrite);
+        Map buckets = bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -522,7 +520,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data, true);
+        Map buckets = bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
