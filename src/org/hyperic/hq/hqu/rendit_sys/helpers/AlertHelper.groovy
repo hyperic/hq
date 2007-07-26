@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl
 import org.hyperic.hq.events.AlertSeverity
@@ -9,6 +10,7 @@ import org.hyperic.hq.events.AlertSeverity
 class AlertHelper extends BaseHelper {
     private alertMan  = AlertManagerEJBImpl.one
     private galertMan = GalertManagerEJBImpl.one
+    private defMan    = AlertDefinitionManagerEJBImpl.one
     
     AlertHelper(AuthzSubject user) {
         super(user)
@@ -69,5 +71,9 @@ class AlertHelper extends BaseHelper {
     def findGroupAlerts(AlertSeverity severity, PageInfo pInfo) {
         long millis = System.currentTimeMillis()
         galertMan.findAlerts(userValue, severity, millis, millis, pInfo)
+    }
+    
+    def findDefinitions(AlertSeverity severity, PageInfo pInfo) {
+        defMan.findAlertDefinitions(userValue, severity, pInfo)
     }
 }
