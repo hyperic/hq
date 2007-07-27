@@ -236,6 +236,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // XXX:  Get a better connection here - directly from Hibernate
             conn = DBUtil.getConnByContext(getInitialContext(), 
                                            DATASOURCE_NAME);
+            
+            // XXX: MySQL does not handle the batch insert in single transaction
+            // so return right away
+            if (DBUtil.isMySQL(conn))
+                return false;
+            
             int numLeft = left.size();
             _log.debug("Attempting to insert " + numLeft + " points");
             left = insertData(conn, left, true);
