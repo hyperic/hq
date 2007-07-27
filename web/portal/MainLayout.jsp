@@ -22,7 +22,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@page errorPage="/common/Error.jsp"  %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>

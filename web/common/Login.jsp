@@ -1,4 +1,5 @@
-<%@ page language="java" %>
+<%@ page pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
