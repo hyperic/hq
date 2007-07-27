@@ -30,7 +30,6 @@
 
 <script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page='/js/requests.js'/>" type="text/javascript" id="requests"></script>
-<td>
 <script src="<html:rewrite page="/js/dashboard.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 
@@ -92,6 +91,7 @@
 
         for (i = 0; i < nodes.length; i++) {
             if (/metricTable/.test(nodes[i].id)) {
+                //alert('in metric table')
                 var metricTblId = nodes[i].id;
                 var getId = metricTblId.split('_');
                 var metricIdPart = getId[1];
@@ -99,9 +99,9 @@
                 if (metricIdPart) {
                     var metricIdToken = '_' + metricIdPart;
 
-                    setInterval("requestMetricsResponse" + metricIdToken + "()", 60000);
+                    setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
                 } else {
-                    setInterval("requestMetricsResponse()", 60000);
+                    setInterval("requestMetricsResponse()", 30000);
                 }
             }
         }
@@ -109,6 +109,7 @@
 
         for (i = 0; i < nodes.length; i++) {
             if (/availTable/.test(nodes[i].id)) {
+                // alert('in avail table')
                 var availTblId = nodes[i].id;
                 var getId = availTblId.split('_');
                 var availIdPart = getId[1];
@@ -116,9 +117,9 @@
                 if (availIdPart) {
                     var availIdToken = '_' + availIdPart;
 
-                    setInterval("requestAvailSummary" + availIdToken + "()", 60000);
+                    setInterval("requestAvailSummary" + availIdToken + "()", 30000);
                 } else {
-                    setInterval("requestAvailSummary()", 60000);
+                    setInterval("requestAvailSummary()", 30000);
                 }
             }
         }
@@ -128,6 +129,7 @@
             if (/RemoveAlerts/.test(getRecentForm[i].action)) {
                 for (i = 0; i < nodes.length; i++) {
                     if (/recentAlertsTable/.test(nodes[i].id)) {
+                         //alert('in recent alerts table')
                         var alertTblId = nodes[i].id;
                         var getId = alertTblId.split('_');
                         var alertIdPart = getId[1];
@@ -135,9 +137,9 @@
                         if (alertIdPart) {
                             var alertIdToken = '_' + alertIdPart;
 
-                            setInterval("requestRecentAlerts" + alertIdToken + "()", 60000);
+                            setInterval("requestRecentAlerts" + alertIdToken + "()", 30000);
                         } else {
-                            setInterval("requestRecentAlerts()", 60000);
+                            setInterval("requestRecentAlerts()", 30000);
                         }
 
                     }
@@ -147,15 +149,15 @@
 
 
         if (problemPortlet) {
-            setInterval("requestProblemResponse()", 60000);
+            setInterval("requestProblemResponse()", 30000);
         }
 
         if (favoritePortlet) {
-            setInterval("requestFavoriteResources()", 60000);
+            setInterval("requestFavoriteResources()", 30000);
         }
     }
 
-    onloads.push(refreshPortlets);
+   onloads.push(refreshPortlets);
 
 </script>
 
@@ -287,4 +289,4 @@
 </table> 
 </div>
 <!-- /Content Block --> 
-</td>
+

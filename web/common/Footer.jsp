@@ -91,7 +91,7 @@
   </tr>
   <tr>
     <td colspan="3">&nbsp;</td>
-  </td>
+    </tr>
 </table>
 </div>
 
