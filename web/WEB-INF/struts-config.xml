@@ -2009,7 +2009,7 @@
               scope="request"
               name="EscalationSchemeForm"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewEscalationAction">
-        <set-property property="title" value="Alert.Detail"/>
+        <set-property property="title" value="Alert.Edit"/>
       </action>
 
       <action path="/alerts/ViewSyslogAction"
@@ -2020,7 +2020,7 @@
               name="RemoveNotificationsForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotifications{1}Action">
-        <set-property property="title" value="Alert.Detail"/>
+        <set-property property="title" value="Alert.Edit"/>
       </action>
               
       <action path="/alerts/Remove*"
