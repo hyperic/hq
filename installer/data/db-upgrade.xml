@@ -4934,8 +4934,17 @@ has already been defined.
     </schemaSpec>
 
     <schemaSpec version="3.21">
-        <schema-alterColumn table="EAM_UPDATE_STATUS" column="REPORT" 
-                            nullable="NULL"/>
+	  <schema-directSQL>
+	    <statement targetDB="oracle" fail="false">
+          update EAM_UPDATE_STATUS set REPORT='upgraded'
+	    </statement>
+	    <statement targetDB="oracle" fail="false">
+          alter table EAM_UPDATE_STATUS MODIFY (REPORT NOT NULL)
+	    </statement>
+      </schema-directSQL>
+
+      <schema-alterColumn table="EAM_UPDATE_STATUS" column="REPORT" 
+                          nullable="NULL"/>
     </schemaSpec>
 
 	<schemaSpec version="3.22">
