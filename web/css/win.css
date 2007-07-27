@@ -1129,10 +1129,7 @@ a.headUsrName {
     padding-top:1px;
     font-weight:bold;
     color:black;
-    width:600px;
     white-space: nowrap ;
-    text-overflow:ellipsis;
-    overflow:hidden;
 }
 
 #navigationTbl  {
@@ -1145,8 +1142,8 @@ font-weight: bold;
 }
 
 #navigationTbl .navText {
-    padding-left:15px;
-    padding-right:15px;
+    padding-left:10px;
+    padding-right:10px;
     padding-top:4px;
     padding-bottom:4px;
     border-right:1px solid #ffffff;

@@ -103,16 +103,15 @@
                         <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
                             <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
                         </td>
+                         <td class="navText" onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
+                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></a>
+                            <div style="clear: both;"></div>
+                            <tiles:insert definition=".toolbar.recentResources"/>
+                        </td>
                          <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
                             <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                                 <fmt:message key="common.label.Help"/></html:link>
                         </td>
-                        <td class="navText" onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></a>
-                            <div style="clear: all;"></div>
-                            <tiles:insert definition=".toolbar.recentResources"/>
-                        </td>
-
                     </tr>
 
                 </table>
