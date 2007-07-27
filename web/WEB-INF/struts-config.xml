@@ -531,6 +531,11 @@
         <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
       </action>
 
+      <action path="/EscalationHelp"
+              type="org.hyperic.hq.ui.action.BaseAction">
+        <set-property property="title" value="Admin.Escalation"/>
+      </action>
+
       <!--end admin CONFIG -->
       
       <!-- resource hub -->

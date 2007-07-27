@@ -71,7 +71,8 @@
               path="/admin/config/ListDefinitions.jsp"/>
 
   <definition name=".admin.config.EditEscalationConfig"
-              extends=".admin.main.layout">
+              extends=".admin.main.layout"
+              controllerUrl="/EscalationHelp.do">
     <put name="titleKey" value="admin.home.EscalationSchemes"/>
     <put name="configTile" value="/admin/config/ListEscalationSchemes.jsp"/>
   </definition>
