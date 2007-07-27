@@ -1,11 +1,5 @@
 <% if (isEE) { %>
 <script type="text/javascript">
-     var onloads = new Array();
-    function bodyOnLoad() {
-      for ( var i = 0 ; i < onloads.length ; i++ )
-        onloads[i]();
-    }
-
 function swapTables(sel) {
     if (sel=="0")  {
         dojo.html.show('alertsTable');
