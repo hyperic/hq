@@ -67,7 +67,7 @@
     </html:link>
 </div>
 
-<div class="headRightWrapper">
+<div class="headRightWrapper" style="z-index: 300;">
 <div class="headTopNav">
             <div class="headUsrName">
                 <c:out value="${sessionScope.webUser.username}"/>
