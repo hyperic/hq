@@ -92,15 +92,7 @@
                         <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
                             <html:link page="/ResourceHub.do"><fmt:message key="resource.hub.ResourceHubPageTitle"/></html:link>
                         </td>
-
-                    <c:if test="${not empty mastheadAttachments}">
-                      <c:forEach var="attachment" items="${mastheadAttachments}">
-                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                            <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link>
-                        </td>
-
-                      </c:forEach>
-                    </c:if>
+                        <tiles:insert definition=".header.optional.tabs"/>
                         <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
                             <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
                         </td>

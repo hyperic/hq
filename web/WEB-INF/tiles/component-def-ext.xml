@@ -4,6 +4,9 @@
      "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
 
 <tiles-definitions>
+  <definition name=".header.optional.tabs"
+              path="/common/HeaderTabs.jsp"/>
+
   <definition name=".footer.current.time"
               path="/common/CurrentTime.jsp"/>
  
