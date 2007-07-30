@@ -47,16 +47,50 @@
     </c:if>
    </fmt:message>
   </title>
-<script type="text/javascript">
-    var onloads = new Array();
-    function bodyOnLoad() {
-      for ( var i = 0 ; i < onloads.length ; i++ )
-        onloads[i]();
-    }
-  </script>
+    <script type="text/javascript">
+        var onloads = [];
+         function init() {
 
+            if (arguments.callee.done) return;
+            arguments.callee.done = true;
+            if (_timer) clearInterval(_timer);
+            for ( var i = 0 ; i < onloads.length ; i++ )
+             onloads[i]();
+
+        };
+
+        /* for Mozilla/Opera9 */
+        if (document.addEventListener) {
+            document.addEventListener("DOMContentLoaded", init, false);
+        }
+
+        /* for Internet Explorer */
+        /*@cc_on @*/
+        /*@if (@_win32)
+            document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
+            var script = document.getElementById("__ie_onload");
+            script.onreadystatechange = function() {
+                if (this.readyState == "complete") {
+                    init(); // call the onload handler
+                }
+            };
+        /*@end @*/
+
+        /* for Safari */
+        if (/WebKit/i.test(navigator.userAgent)) { // sniff
+            var _timer = setInterval(function() {
+                if (/loaded|complete/.test(document.readyState)) {
+                    init(); // call the onload handler
+                }
+            }, 10);
+        }
+
+        /* for other browsers */
+        window.onload = init;
+        
+    </script>
 </head>
-<body style="background-color: #FFFFFF;" onload="bodyOnLoad();">
+<body style="background-color: #FFFFFF;">
   <c:choose>    
     <c:when test="${portal.dialog}">    
      <tiles:insert attribute="headerSmall"/>
