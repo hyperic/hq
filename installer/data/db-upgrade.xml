@@ -6164,18 +6164,18 @@ has already been defined.
 
     <schemaSpec version="3.29">
       <schema-directSQL>
-        <statement>alter table eam_qrtz_blob_triggers rename to qrtz_blob_triggers</statement>
-        <statement>alter table eam_qrtz_calendars rename to qrtz_calendars</statement>
-        <statement>alter table eam_qrtz_cron_triggers rename to qrtz_cron_triggers</statement>
-        <statement>alter table eam_qrtz_fired_triggers rename to qrtz_fired_triggers</statement>
-        <statement>alter table eam_qrtz_job_details rename to qrtz_job_details</statement>
-        <statement>alter table eam_qrtz_job_listeners rename to qrtz_job_listeners</statement>
-        <statement>alter table eam_qrtz_locks rename to qrtz_locks</statement>
-        <statement>alter table eam_qrtz_paused_trigger_grps rename to qrtz_paused_trigger_grps</statement>
-        <statement>alter table eam_qrtz_scheduler_state rename to qrtz_scheduler_state</statement>
-        <statement>alter table eam_qrtz_simple_triggers rename to qrtz_simple_triggers</statement>
-        <statement>alter table eam_qrtz_trigger_listeners rename to qrtz_trigger_listeners</statement>
-        <statement>alter table eam_qrtz_triggers rename to qrtz_triggers</statement>
+        <statement>ALTER TABLE EAM_QRTZ_BLOB_TRIGGERS RENAME TO QRTZ_BLOB_TRIGGERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_CALENDARS RENAME TO QRTZ_CALENDARS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_CRON_TRIGGERS RENAME TO QRTZ_CRON_TRIGGERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_FIRED_TRIGGERS RENAME TO QRTZ_FIRED_TRIGGERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_JOB_DETAILS RENAME TO QRTZ_JOB_DETAILS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_JOB_LISTENERS RENAME TO QRTZ_JOB_LISTENERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_LOCKS RENAME TO QRTZ_LOCKS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_PAUSED_TRIGGER_GRPS RENAME TO QRTZ_PAUSED_TRIGGER_GRPS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_SCHEDULER_STATE RENAME TO QRTZ_SCHEDULER_STATE</statement>
+        <statement>ALTER TABLE EAM_QRTZ_SIMPLE_TRIGGERS RENAME TO QRTZ_SIMPLE_TRIGGERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_TRIGGER_LISTENERS RENAME TO QRTZ_TRIGGER_LISTENERS</statement>
+        <statement>ALTER TABLE EAM_QRTZ_TRIGGERS RENAME TO QRTZ_TRIGGERS</statement>
       </schema-directSQL>
     </schemaSpec>
 
@@ -6517,11 +6517,40 @@ has already been defined.
         </schema-directSQL>
     </schemaSpec>
 	
-	<schemaSpec version="3.43">
+    <schemaSpec version="3.43">
         <schema-directSQL>
 		  <statement desc="Create new index for alert_definition_id in eam_action for faster lookup of an alert definitions actions.">
 			CREATE INDEX ACTION_ALERT_DEFINITION_ID_IDX ON EAM_ACTION ( ALERT_DEFINITION_ID )
 		  </statement>			
+        </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.44">
+        <schema-directSQL>
+        <statement>ALTER TABLE QRTZ_BLOB_TRIGGERS DROP CONSTRAINT eam_qrtz_blob_triggers_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_BLOB_TRIGGERS ADD CONSTRAINT qrtz_blob_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)</statement>
+        <statement>ALTER TABLE QRTZ_CALENDARS DROP CONSTRAINT eam_qrtz_calendars_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_CALENDARS ADD CONSTRAINT qrtz_calendars_pkey PRIMARY KEY (calendar_name)</statement>
+        <statement>ALTER TABLE QRTZ_CRON_TRIGGERS DROP CONSTRAINT eam_qrtz_cron_triggers_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_CRON_TRIGGERS ADD CONSTRAINT qrtz_cron_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)</statement>
+        <statement>ALTER TABLE QRTZ_FIRED_TRIGGERS DROP CONSTRAINT eam_qrtz_fired_triggers_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_FIRED_TRIGGERS ADD CONSTRAINT qrtz_fired_triggers_pkey PRIMARY KEY (entry_id)</statement>
+        <statement>ALTER TABLE QRTZ_JOB_DETAILS DROP CONSTRAINT eam_qrtz_job_details_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_JOB_DETAILS ADD CONSTRAINT qrtz_job_details_pkey PRIMARY KEY (job_name, job_group)</statement>
+        <statement>ALTER TABLE QRTZ_JOB_LISTENERS DROP CONSTRAINT eam_qrtz_job_listeners_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_JOB_LISTENERS ADD CONSTRAINT qrtz_job_listeners_pkey PRIMARY KEY (job_name, job_group, job_listener)</statement>
+        <statement>ALTER TABLE QRTZ_LOCKS DROP CONSTRAINT eam_qrtz_locks_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_LOCKS ADD CONSTRAINT qrtz_locks_pkey PRIMARY KEY (lock_name)</statement>
+        <statement>ALTER TABLE QRTZ_PAUSED_TRIGGER_GRPS DROP CONSTRAINT eam_qrtz_paused_trigger_grps_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_PAUSED_TRIGGER_GRPS ADD CONSTRAINT qrtz_paused_trigger_grps_pkey PRIMARY KEY (trigger_group)</statement>
+        <statement>ALTER TABLE QRTZ_SCHEDULER_STATE DROP CONSTRAINT eam_qrtz_scheduler_state_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_SCHEDULER_STATE ADD CONSTRAINT qrtz_scheduler_state_pkey PRIMARY KEY (instance_name)</statement>
+        <statement>ALTER TABLE QRTZ_SIMPLE_TRIGGERS DROP CONSTRAINT eam_qrtz_simple_triggers_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_SIMPLE_TRIGGERS ADD CONSTRAINT qrtz_simple_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)</statement>
+        <statement>ALTER TABLE QRTZ_TRIGGER_LISTENERS DROP CONSTRAINT eam_qrtz_trigger_listeners_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_TRIGGER_LISTENERS ADD CONSTRAINT qrtz_trigger_listeners_pkey PRIMARY KEY (trigger_name, trigger_group, trigger_listener)</statement>
+        <statement>ALTER TABLE QRTZ_TRIGGERS DROP CONSTRAINT eam_qrtz_triggers_pkey CASCADE</statement>
+        <statement>ALTER TABLE QRTZ_TRIGGERS ADD CONSTRAINT qrtz_triggers_pkey PRIMARY KEY (trigger_name, trigger_group)</statement>
         </schema-directSQL>
     </schemaSpec>
 
