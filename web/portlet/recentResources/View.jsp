@@ -32,19 +32,21 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <tiles:importAttribute name="resources"/>
 
-<div id="recent" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;z-index: 300;margin-top:4px;padding:3px 2px;display:none;">
-  <ul style="list-style-type: none;margin-left: 0;padding-left: 0;">
+<div id="recent" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;width:100%;z-index: 100000;margin-top:4px;display:none;">
+  <div style="height:100%;width:100%;padding:0px;">
+  <ul style="list-style-type: none;width:100%;height:100%;padding-left:10px;">
 <c:choose>
 <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">
-    <li>
+    <li style="white-space: nowrap;padding-top:2px;padding-bottom:2px;">
       <html:link page="/Resource.do?eid=${resource.entityId}"><c:out value="${resource.name}"/></html:link>
   </c:forEach>
     </li>
   </c:when>
   <c:otherwise>
-    <li style="color:#ffffff"><fmt:message key="common.label.None"/></li>
+    <li style="color:#ffffff;white-space: nowrap;padding-top:2px;padding-bottom:2px;"><fmt:message key="common.label.None"/></li>
   </c:otherwise>
 </c:choose>
   </ul>
+</div>
 </div>

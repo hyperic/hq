@@ -1165,6 +1165,7 @@ font-weight: bold;
     margin:0px;
     display:block;
     list-style:none;
+    white-space:nowrap;
 }
 
 #displaySelAction {
