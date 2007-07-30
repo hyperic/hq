@@ -574,7 +574,25 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertAuxLog"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertAuxLog.childrenBag"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.galerts.server.session.GalertLog.actionLogBag"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.galerts.server.session.GalertLog.auxLogBag"
          maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
@@ -582,6 +600,18 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="GalertLog.findByCreateTime"
          maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.measurement.server.session.MetricAuxLogPojo"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -628,7 +658,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-
   <cache name="MetricViewer"
          maxElementsInMemory="2000"
          eternal="true"
@@ -643,5 +672,58 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- Calendar caches -->
+  <cache name="org.hyperic.hq.common.server.session.CalendarEntry"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.Calendar"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.common.server.session.Calendar.entriesBag"
+         maxElementsInMemory="20"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.RoleCalendar"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.authz.server.session.Role.calendarBag"
+         maxElementsInMemory="200"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <!-- UI Plugin caches -->
+  <cache name="org.hyperic.hq.hqu.server.session.Attachment"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.hqu.server.session.UIPlugin"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.hqu.server.session.View"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
 
 </ehcache>
