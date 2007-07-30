@@ -1,0 +1,308 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Monitor.CurrentHealth</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Monitor.CurrentHealth
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 22, 2007 by <font color="#0050B2">mbartelt</font>.
+				    </div>
+
+				    <h3><a name="ui-Monitor.CurrentHealth-CurrentHealthofaResource"></a>Current Health of a Resource</h3>
+
+<p>This page presents an overview of the resource's current health, as well as the current health of its related resources. The Current Health page is also a work area where you can compare and analyze the metrics of the resource and its related resources.</p>
+
+<p><b><a name="ui-Monitor.CurrentHealth-display"></a>To change the metric display range:</b></p>
+<ul>
+	<li>On the <img src="../16117/tab_Monitor_on.gif" align="absmiddle" border="0" /> tab, in <b>Metric Display Range</b> at screen bottom, either:
+	<ul>
+		<li>For a range counting back from the current time: Select a length of time and click <img src="../16117/dash-button_go-arrow.gif" align="absmiddle" border="0" />.</li>
+		<li>For a date/time range:
+		<ol>
+			<li>Click <b>Advanced Settings</b>.</li>
+			<li>In the resulting dialogue, select either a length of time or a date/time range and click <img src="../16117/fb_redraw.gif" align="absmiddle" border="0" /><br/>
+The metric charts on the screen automatically refresh to reflect the new display range. This display range applies to the metric display across all resource-monitoring screens.</li>
+		</ol>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+
+<h3><a name="ui-Monitor.CurrentHealth-ResourcesColumn"></a>Resources Column</h3>
+
+<p>In the <img src="../16117/MiniTab_Resources_on.png" align="absmiddle" border="0" /> column are several portlets that display the resource's child resources and/or host resources. Each portlet lists the resources either by name or by type, if there are more than one resource of that type related to the current resource.</p>
+
+<p>For a child resources portlet, HQ displays a two value columns: the Total column denotes how many resources are included; the Avail column displays the last known availability value(s) of the resource(s).  Hovering over the <img src="../16117/comment.gif" align="absmiddle" border="0" /> icon will bring up the Child Resource menu, which displays:</p>
+
+<ul>
+	<li>Resource Type</li>
+	<li>Last Known Usage Metric Value</li>
+	<li>Detailed Breakdown of Availability (applies to autogroups only)</li>
+</ul>
+
+
+<p>For a host resources portlet, HQ displays the Avail column, which shows the last known availability value of the host resource. Hovering over <img src="../16117/comment.gif" align="absmiddle" border="0" /> the icon will bring up the Host Resource menu, which displays:</p>
+
+<ul>
+	<li>Resource Type</li>
+	<li>The Last Known Usage Metric Value</li>
+</ul>
+
+
+<p>A group or autogroup resource will display a group members portlet. Much like the child or host resources portlet, it displays the list of resources that comprise its group and their current availability.  Hovering over <img src="../16117/comment.gif" align="absmiddle" border="0" /> the icon will bring up the resource menu, which displays:</p>
+
+<ul>
+	<li>Resource Type</li>
+	<li>The Last Known Usage Metric Value</li>
+</ul>
+
+
+<p>The <img src="../16117/fb_addResourcesApply.png" align="absmiddle" border="0" /> button allows you to include the metrics of the related resources above in the problem metrics portlet below by setting the checkboxes next to any of the other resources and/or types and clicking the button.</p>
+
+<p>At the bottom of this column is the Problem Metrics portlet, which displays the list of metrics that have either collected out-of-bounds values or have caused alerts in the metric display range. You can switch the mode of the portlet to display all metrics by changing the drop-down option to All Metrics. Of course, to switch back to view only the problem metrics, select Problem Metrics in the same drop-down. Each metric is displayed with two counts: O.O.B. and Alerts. The <img src="../16117/icon_menu.png" align="absmiddle" border="0" /> icon menu button appears to the right of the count columns. To display the metric data of the problem metric as a column chart in the   workspace on the right-hand side of the page, simply click the <img src="../16117/icon_menu.png" align="absmiddle" border="0" /> icon. Otherwise, hovering over the icon will bring up the context-sensitive problem metrics menu. The menu has the following data and function:</p>
+
+<ul>
+	<li><b>Resource Type:</b> the resource type of the metric. This value will reflect the varying resource types when other resources have been selected above. If the resource type represents more than one resource in the hiearchy, then this item will also display the number of resources that have the same problem metric in parenthesis.</li>
+	<li><b>Problems Began:</b> the time of the first occurrence of O.O.B. metric value or alert</li>
+	<li><b>Chart Metric in Indicators:</b> click on this option to display a chart for this metric in the Indicators workspace on the right-hand side of the page.</li>
+	<li><b>View Full Chart:</b> click on this option to navigate to the full chart page of this metric.</li>
+	<li><b>Metric Data:</b> click on this option to display a popup window which contains the meta data information on this metric and its data.</li>
+</ul>
+
+
+<h3><a name="ui-Monitor.CurrentHealth-IndicatorsColumn"></a>Indicators Column</h3>
+
+<p>The   column is basically a work area for you to analyze the health of your resource(s) from a historical perspective. You can aggregate the metric data from the current resource and its related resources together in the charts area and analyze their behavior at any given time.</p>
+
+<p>The View drop-down can be used to save or update the current indicator charts view. In addition, you can navigate to one of your previously saved views by selecting it in the drop-down.</p>
+
+<p>The Availability history displays the resource's availability in the metric display range. Each availability light reflects the average availability over the time slice represented. Clicking on any of the availability lights will bring up or move a highlight bar, which conveniently lines up all of the metrics in the indicator charts with the availability light that you are analysing.</p>
+
+<p>The Indicator Charts are charts of the metric data collected for the specified metric over the metric display range. These charts can be rearranged (with <img src="../16117/chart_up_button.png" align="absmiddle" border="0" /> and <img src="../16117/chart_down_button.png" align="absmiddle" border="0" /> buttons) or removed (with <img src="../16117/chart_close_button.png" align="absmiddle" border="0" /> button) and new charts can be added from the problem metrics portlet. Once you set up a list of metrics in the order that you want, you can save both the metrics and their ordering as a view using the controls above.</p>
+
+<p>Events/Logs Tracking displays markers for time slices that have events associated with them. To view the details of the event(s), click on the blue marker and a details display will appear below the timeline.</p>
+
+<p>The timeline has the same ability to bring up the highlight bar as the availability history. In addition, hovering over any of the time slice will bring up a popup that specifies the time represented by the square, giving you an idea what occurred in that time frame by lining up the availability and the metric data.</p>
+
+<p>The <img src="../16117/MiniTab_Indicators_on.png" align="absmiddle" border="0" /> column on the Current Health page provides a visual workspace for you to analyze and compare metrics in-depth to gain insight into the current health of your resource(s).</p>
+
+<p><b>Availability and Timeline</b></p>
+
+<p>Near the top of the Indicators column is the availability history of the resource. The availability values span across the defined metric display range. The overall average availability value appears after the Availability heading. Each availability light reflects the average availability over the time slice represented. There are four possible color values:</p>
+
+<p><b>Availability Values Color Table</b></p>
+
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'>Green</td>
+<td class='confluenceTd'><img src="../16117/icon_available_green.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>100% availability</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Red</td>
+<td class='confluenceTd'><img src="../16117/icon_available_red.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>0% availability</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Yellow</td>
+<td class='confluenceTd'><img src="../16117/icon_available_yellow.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>Availability between 0% to 100%</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Orange</td>
+<td class='confluenceTd'><img src="../16117/icon_available_orange.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>Resource is paused</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Gray</td>
+<td class='confluenceTd'><img src="../16117/icon_available_error.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>No availability was collected in the time frame</td>
+</tr>
+</tbody></table>
+
+<p>Clicking on any of the availability lights will bring up or move a highlight bar, which conveniently lines up all of the metrics in the indicator charts with the availability light that you are analyzing. Near the bottom of the column is the timeline display. The timeline has the same ability to bring up the highlight bar as the availability history. In addition, hovering over any of the time slice will bring up a popup that specifies the time represented by the square, giving you an idea what occurred in that time frame by lining up the availability and the metric data.</p>
+
+<p><b>Indicator Charts and Views</b></p>
+
+<p>Below the availability history is an scrollable (if necessary) area where the metrics are charted, these are known as the indicator charts. The indicator charts are displayed as column charts, where the area of each column indicates the value range (the high and low values) of the metric. The average value of the metric is indicated by the cross in the column. By default, charts of metrics that have been selected by the plugin as designated metrics for the type of resource you are viewing are displayed. You can choose additional metrics to be charted by selecting them from the Problem Metrics Portlet. The indicator charts are stacked vertically so that their X-axis (time) values line up. This works in conjunction with the highlight bar from the availability and timeline to analyze the metric data across multiple metrics for any given time. This is especially useful when you are trying to diagnose a problem at a specific time by correlating the important metrics and their metric values.</p>
+
+<p>When the number of charts displayed exceed the screen real estate, a vertical scrollbar appears. You can use the scrollbar to navigate to the metric charts that are not currently visible on the screen. The order of the charts can be easily changed by using the <img src="../16117/chart_up_button.png" align="absmiddle" border="0" /> and <img src="../16117/chart_down_button.png" align="absmiddle" border="0" /> buttons that appear in the upper-right hand corner of each of the charts. Furthermore, you can remove a chart from this display by clicking on the <img src="../16117/chart_close_button.png" align="absmiddle" border="0" /> chart close button.</p>
+
+<p>Once you have a set of metrics that you have arranged, you can persist the set and its order as a view. The view controls appear in the upper right-hand corner of the Indicators column. The name of the current view appears in the text box. There are several actions you can take by selecting the appropriate option from the view drop-down.</p>
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='noteMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td> The drop down displays only options that are currently applicable, therefore, not all of the following actions appear in the drop-down list at all times.</td></tr></table>
+
+<p><b>Indicator Charts View Actions Table</b></p>
+
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'><b>Update view</b></td>
+<td class='confluenceTd'>Update the current view as displayed.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Create New View</b></td>
+<td class='confluenceTd'>Create a new view with the current display. You must enter a valid view name in the name text box.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Delete view</b></td>
+<td class='confluenceTd'>Delete the current view.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Go to View</b></td>
+<td class='confluenceTd'>Select one of the following view(s) to display a previously saved view.</td>
+</tr>
+</tbody></table>
+
+<p>To execute any of the actions, select it in the drop-down and, if necessary, click on the <img src="../16117/icon_menu.png" align="absmiddle" border="0" /> button.</p>
+
+<p><a name="ui-Monitor.CurrentHealth-eventsLogsTrack"></a><br/>
+<b>Events and Logs Tracking</b></p>
+
+<p>Between the Indicator Charts and the bottom Timeline is the Events and Logs Tracking display, labeled <b>Events/Logs Tracking</b>.</p>
+
+<p>If one or more events have been recorded in a time slice, then a blue box appears along the display at the corresponding time display, allowing the occurrence to be correlated to the indicator metrics charts above using the highlight bar. Clicking on any one of the blue boxes will bring up a box below the timeline with the detail(s) of the event(s) in the time slice. The default view displays all details, however, the display can be filtered by: Error, Warn, Info, Debug, HQ Alerts, and Control Actions. To enable events/log tracking of individual resources (not all resource types support tracking), you will need to configure the resource in its inventory properties. HQ Alerts and Control Actions are automatically tracked when they are created or performed.</p>
+
+<p><a name="ui-Monitor.CurrentHealth-portlet"></a></p>
+<h3><a name="ui-Monitor.CurrentHealth-MetricsDisplayPortlets"></a>Metrics-Display Portlets</h3>
+
+<p>There are several portlets in the <img src="../16117/MiniTab_Resources_on.png" align="absmiddle" border="0" /> column of the Current Health screen. The number and types of portlets depend on the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a> being viewed.</p>
+
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Portlet Name</th>
+<th class='confluenceTh'>Portlet Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'><a name="ui-Monitor.CurrentHealth-child"></a>Child Resources Health</td>
+<td class='confluenceTd'>Displays a list of the resource's child resources (as defined by HQ's resource hierarchy) and a snapshot of their current health. There may be more than one child resources portlet displayed for given resource, depending on the type of the resource displayed. The title of the portlet will reflect how the child resources are categorized.
+<br clear="all" />
+<ul>
+	<li><b>Platforms</b> display two portlets: Platform Services and Deployed Servers.</li>
+	<li><b>Servers</b> and <b>Applications</b> display two portlets: Deployed Services and Internal Services.</li>
+	<li><b>Services</b>, <b>Autogroups</b>, and <b>Groups</b> have no child resources.<br/>
+Each resource in the list is displayed with either their name or type, if there are more than one child resource of that type (this is an autogroup). If the resource is an autogroup, then the Total column will denote how many resources are included. The Avail column displays the last known availability value of the resource.<br/>
+In the right most column of this list is the <img src="../16117/icon_menu_up.png" align="absmiddle" border="0" /> menu icon. Clicking on this icon or the resource/type name will take you directly to the Current Health page of that resource. Hovering over the icon will bring up the Child Resource menu. The menu displays the resource type, last known Usage metric value, and a detailed breakdown of availability (applies to autogroups only).</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'><a name="ui-Monitor.CurrentHealth-host"></a>Host Resources Health</td>
+<td class='confluenceTd'>Displays one or more host resources of the resource you are currently viewing. Each resource is displayed with its current availability, as well as an icon that displays the Host Resource menu. Following list is how the hosts are determined for each resource type:
+<br clear="all" />
+<ul>
+	<li><b>Servers and Platform Services</b> display their host platforms.</li>
+	<li><b>Services</b> display their host servers.</li>
+	<li><b>Applications</b> display the servers that are host servers of the services included in the application.</li>
+	<li><b>Groups</b> and <b>Autogroups</b> display the host resources of the group members, unless the group consisting of platforms.<br/>
+The title of the portlet will specify the relationship described above. Clicking on the <img src="../16117/icon_menu_down.png" align="absmiddle" border="0" /> menu icon or the resource name will take you directly to the Current Health page of that resource. Hovering over the icon will bring up the Host Resource menu, which displays the resource type and the last known Usage metric value.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'><a name="ui-Monitor.CurrentHealth-group"></a>Group Member Resources Health</td>
+<td class='confluenceTd'>Appears only when you are view a Group or Autogroup. Lists the member resources of this group, along with each resource's current availability.  The data displayed in the Problem Metrics Portlet and the Indicators will only include the data from a given member resource only if its checkbox had been checked.  The right most column is an icon for the resource's menu. Clicking on the menu icon or the resource name will take you directly to the Current Health page of that resource. Hovering over the icon will bring up the resource menu, which displays the resource type and the last known Usage metric value.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><a name="ui-Monitor.CurrentHealth-problem"></a>Problem Metrics Portlet</td>
+<td class='confluenceTd'>Displays the list of problem metrics in the metric display range. By default, it displays only the problem metrics of the resource that you are viewing. However, you can view the problem metrics of other related resources by setting the checkboxes next to any of the other resources and resource types listed above the portlet and clicking the <img src="../16117/fb_addResourcesApply.png" align="absmiddle" border="0" /> button to display the problem metrics of the checked resources as well.<br/>
+Each problem metric is displayed with two counts: O.O.B. and Alerts. The <img src="../16117/icon_menu.png" align="absmiddle" border="0" /> icon menu button appears to the right of the count columns. To display the metric data of the problem metric as a column chart in the <img src="../16117/MiniTab_Indicators_on.png" align="absmiddle" border="0" /> workspace on the right-hand side of the page, simply click the <img src="../16117/icon_menu.png" align="absmiddle" border="0" /> icon. Otherwise, hovering over the icon will bring up the context-sensitive problem metrics menu. The menu has the following data and function:
+<br clear="all" />
+<ul>
+	<li><b>Resource Type:</b> the resource type of the metric. This value will reflect the varying resource types when other resources have been selected above. If the resource type represents more than one resource in the hierarchy, then this item will also display the number of resources that have the same problem metric in parenthesis.</li>
+	<li><b>Problems Began</b> the time of the first occurrence of O.O.B. metric value or alert</li>
+	<li><b>Chart Metric in Indicators:</b> click on this option to display a chart for this metric in the Indicators workspace on the right-hand side of the page.</li>
+	<li><b>View Full Chart:</b> click on this option to navigate to the full chart page of this metric.</li>
+	<li><b>Metric Data:</b> click on this option to display a popup window which contains the meta data information on this metric and its data.<br/>
+You can also switch the list of metrics to include all metrics, instead of only problem metrics. To view all metrics, click on the <b>Problem Metrics</b> drop-down and select <b>All Metrics</b>. All of the functionality of the problem metrics display apply to the all metrics display.</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/comment.gif">comment.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/chart_close_button.png">chart_close_button.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/chart_down_button.png">chart_down_button.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/fb_addResourcesApply.png">fb_addResourcesApply.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/chart_up_button.png">chart_up_button.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/MiniTab_Resources_on.png">MiniTab_Resources_on.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_menu_down.png">icon_menu_down.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/MiniTab_Indicators_on.png">MiniTab_Indicators_on.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_menu.png">icon_menu.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_menu_up.png">icon_menu_up.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_available_yellow.gif">icon_available_yellow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_available_red.gif">icon_available_red.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_available_orange.gif">icon_available_orange.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_available_green.gif">icon_available_green.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/icon_available_error.gif">icon_available_error.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/tab_Monitor_on.gif">tab_Monitor_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/dash-button_go-arrow.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16117/fb_redraw.gif">fb_redraw.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2007 23:40</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
