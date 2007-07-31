@@ -1,0 +1,214 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Admin.Escalation</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Admin.Escalation
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 30, 2007 by <font color="#0050B2">mbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Admin.Escalation-ConfiguringEscalationSchemes"></a>Configuring Escalation Schemes</h1>
+<p><b>Available in Open Source</b></p>
+
+<p>This screen allows users to view and manage all defined <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-escalation">escalation schemes</a> and to create a new escalation scheme. Escalation schemes are then assigned to alert definitions.</p>
+
+<ul>
+	<li><a href="#ui-Admin.Escalation-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Admin.Escalation-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-Admin.Escalation-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<h3><a name="ui-Admin.Escalation-TasksAvailableinThisScreen"></a>Tasks Available in This Screen</h3>
+
+<p>On this screen, users can do the following tasks:</p>
+
+<p><b>To create a new escalation scheme:</b></p>
+<ol>
+	<li>Initiate a new escalation scheme:
+	<ul>
+		<li>If the right-hand side of the screen displays "Step 1 - Create New Escalation Scheme," simply continue to step 2.</li>
+		<li>If the right-hand side of the screen displays an already defined escalation scheme, click <img src="../16351/tbb_new.gif" align="absmiddle" border="0" /> in the "Escalation Name" section.</li>
+	</ul>
+	</li>
+	<li>Fill in the scheme's general information:
+	<ul>
+		<li><ins>Name</ins></li>
+		<li><ins>Description</ins> (optional)</li>
+	</ul>
+	</li>
+	<li>Select when HQ should kick off the escalation chain (defined <a href="#ui-Admin.Escalation-chain">below</a>) under the following two circumstances:
+	<ul>
+		<li><a name="ui-Admin.Escalation-ack"></a>When the alert is <a href="ui-Alert.List.html#ui-Alert.List-ack">acknowledged</a>: HQ can either "Allow user to pause escalation for" a number of minutes (HQ will do nothing for that time), or it can "Continue escalation without pausing" (HQ immediately takes the next action in the escalation chain).</li>
+		<li>When the alert state changes: HQ can either notify everyone on the escalation chain of the change or notify only the users who have already been notified (that the alert was triggered and of subsequent escalation actions taken)</li>
+	</ul>
+	</li>
+	<li>Click <b>Next Step</b>.<br/>
+<a name="ui-Admin.Escalation-chain"></a></li>
+	<li>Create the escalation chain.
+	<ol>
+		<li>Click <b>Create Action</b>.</li>
+		<li>Select the method by which HQ will notify selected users: Email, SMS, an entry in the system log, SNMP trap, or suppress the alert.</li>
+		<li>Specify the necessary details for the method:
+		<ul>
+			<li>"email" or "SMS": Select whom HQ will notify:
+			<ul>
+				<li>All users assigned to a specific role. On the ensuing dialogue, check the roles and click <img src="../16351/fb_ok.gif" align="absmiddle" border="0" /> at the bottom of the dialogue.</li>
+				<li>A subset of all HQ Users. On the ensuing dialogue, check the desired users and click <img src="../16351/fb_ok.gif" align="absmiddle" border="0" /> at the bottom of the dialogue.</li>
+				<li>Non-HQ users ("Other Recipients"). Type in comma-separated email addresses in the new text box to the right.</li>
+			</ul>
+			</li>
+			<li>"Sys Log": Information required for logging events to the logfile: <ins>Meta</ins>, <ins>Product</ins>, and <ins>Version</ins></li>
+			<li>"SNMP Trap": The target machine's <ins>IP Address</ins> and port (format: xxx.xxx.xxx.xxx/port) and the trap OID (format: x.x.x.x)</li>
+			<li>"Suppress Alerts": No additional information is required. This selection means that, when the alert is triggered, HQ will not do anything (notify people, etc.) until the triggering condition is resolved on its own or until the alert is marked "fixed."</li>
+		</ul>
+		</li>
+		<li>Select how long HQ should wait until escalating the alert (that is, before performing the next action (if any) in the escalation chain). The "continue" value means "do not wait at all."</li>
+		<li>Click <b>Save</b>.<br/>
+The details of the action (all the selected values) are displayed at the right under "Action Details."</li>
+		<li>For as many additional escalation actions desired for this escalation chain, repeat steps 5-1 through 5-5.<br/>
+An escalation chain can have one or more actions.</li>
+	</ol>
+	</li>
+</ol>
+
+
+<p><b>To view an existing escalation scheme:</b></p>
+<ul>
+	<li>In the "Escalation Name" section, click the scheme's name.<br/>
+The scheme's details are displayed to the right.</li>
+</ul>
+
+
+<p><b>To edit an escalation scheme:</b></p>
+<ol>
+	<li>In the "Escalation Name" section, click the scheme's name.<br/>
+The scheme's details are displayed to the right.</li>
+	<li>To change the scheme's <ins>Name</ins>, <ins>Description</ins>, or high-level instructions, click <b>Edit</b>. Change the values and click <b>Save</b>.</li>
+	<li>To create a new action, click <b>Create Action</b> and follow step 5 above.</li>
+	<li>To delete an existing action, click <img src="../16351/tbb_delete.png" align="absmiddle" border="0" /> to the right of the action.<br/>
+(Actions cannot be edited; they must be deleted and recreated.)</li>
+</ol>
+
+
+<p><b>To delete an existing escalation scheme:</b></p>
+<ul>
+	<li>In the "Escalation Name" section, click <img src="../16351/tbb_delete.gif" align="absmiddle" border="0" /> to the right of the scheme's name.</li>
+</ul>
+
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='warningMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Editing or Deleting Escalation Schemes</b><br /><br/>
+If an escalation scheme that is currently in progress for a specific alert is edited or deleted on this screen, HQ immediately stops executing the scheme. Furthermore, all changes (including deletion) are then propagated down to any alert definition that has this escalation scheme assigned to it. (In the case of deletion, this means that the alert definition no longer has this escalation scheme. </td></tr></table>
+
+<p><a name="ui-Admin.Escalation-Sections"></a></p>
+<h3><a name="ui-Admin.Escalation-SectionsOnThisScreen"></a>Sections On This Screen</h3>
+
+<h4><a name="ui-Admin.Escalation-EscalationName"></a>Escalation Name</h4>
+
+<p>This section lists all the defined escalation schemes in HQ. To view a scheme, click its name.</p>
+
+<h4><a name="ui-Admin.Escalation-EscalationScheme"></a>Escalation Scheme</h4>
+
+<p>This section provides a high-level description of the escalation scheme. It describes what HQ should do when an alert with this escalation scheme is acknowledged (whether to start executing escalation-scheme actions immediately or to pause for a user-selected amount of time first) and whom to notify when the alert's status changes (everyone in the escalation chain or a subset).</p>
+
+<h4><a name="ui-Admin.Escalation-EscalationSchemeActions"></a>Escalation Scheme Actions</h4>
+
+<p>This section, which is displayed when users look at an existing escalation scheme, displays all the actions defined as part of this escalation scheme. HQ performs the actions in the order from top down, waiting between actions the amount of time listed under <ins>Wait time before escalating</ins>.</p>
+
+<p><em><a href="#ui-Admin.Escalation-top">Back to top</a></em></p>
+
+<p><a name="ui-Admin.Escalation-Navigating"></a></p>
+<h3><a name="ui-Admin.Escalation-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain the same menu in the masthead. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'><b>Dashboard</b></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Browse Resources</b></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Resources.html" title="ui-Resources">screen</a> where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a></td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Alert Center</b></td>
+<td class='confluenceTd'>Takes users to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Center" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Administration</b></td>
+<td class='confluenceTd'>Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration screen</a>, where they can manage the system-wide settings</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Recent Resources</b></td>
+<td class='confluenceTd'>Provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Help</b></td>
+<td class='confluenceTd'>Opens screen-sensitive online help in a secondary window</td>
+</tr>
+</tbody></table>
+
+<p><em><a href="#ui-Admin.Escalation-top">Back to top</a></em></p>
+
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p><a href="ui-Alert.Edit.html" title="ui-Alert.Edit">Assign the escalation scheme</a> to an alert definition<br/>
+<a href="ui-Alert.List.html#ui-Alert.List-ack">Acknowledge</a> an alert</p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>Learn more about <a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">escalation</a><br/>
+Learn more about <a href="http://support.hyperic.com/confluence/display/DOC/Syslog" title="Syslog">Syslog</a></p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Admin.Escalation-ReturntoHQAdministrationuiAdmin."></a>Return to <a href="ui-Admin.html" title="ui-Admin">HQ Administration</a>.</h5>
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16351/tbb_delete.png">tbb_delete.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16351/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16351/tbb_new.gif">tbb_new.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16351/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16351/tbb_delete.gif">tbb_delete.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 30, 2007 23:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
