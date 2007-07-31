@@ -32,7 +32,7 @@
 <%@ taglib uri="jstl-c" prefix="c" %>
 <tiles:importAttribute name="resources"/>
 
-<div id="recent" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;width:100%;z-index: 300;margin-top:4px;display:none;">
+<div id="recent" style="background-color:#60a5ea;border:1px solid #ffffff;position:absolute;right:0px;z-index: 300;margin-top:4px;display:none;">
   <div style="height:100%;width:100%;padding:0px;">
   <ul style="list-style-type: none;width:100%;height:100%;margin:0px auto;padding-left:10px;padding-right:30px;">
 <c:choose>
