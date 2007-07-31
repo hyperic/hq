@@ -34,14 +34,19 @@ public class MastheadAction extends BaseAction {
         for (Iterator it = attachments.iterator(); it.hasNext(); ) {
             Attachment attach = (Attachment) it.next();
             if (attach.getId().equals(id)) {
-                request.setAttribute(Constants.TITLE_PARAM_ATTR,
-                                     attach.getView().getDescription());
+                String title = attach.getView().getDescription();
+                request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
                 ServletContext ctx = getServlet().getServletContext();
                 ProductBoss pBoss = ContextUtils.getProductBoss(ctx );
                 request.setAttribute("attachment",
                     pBoss.findViewById(
                         RequestUtils.getSessionId(request).intValue(),
                         attach.getView().getId()));
+                
+                // Set the help text
+                String helpTag = title.replace(' ', '.');
+                request.setAttribute(Constants.PAGE_TITLE_KEY, helpTag);
+        
                 break;
             }
         }
