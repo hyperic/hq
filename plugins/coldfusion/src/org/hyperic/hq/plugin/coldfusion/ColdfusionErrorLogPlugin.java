@@ -86,7 +86,11 @@ public class ColdfusionErrorLogPlugin extends LogFileTailPlugin
         Calendar rtn = Calendar.getInstance();
         rtn.clear();
         String[] dateToks = date.split("\\/"),
-                 timeToks = timeOfDay.split("\\/");
+                 timeToks = timeOfDay.split(":");
+
+        if (dateToks.length != 3 || timeToks.length != 3)
+            return System.currentTimeMillis();
+
         int month = Integer.parseInt(dateToks[0]),
             day   = Integer.parseInt(dateToks[1]),
             year  = Integer.parseInt(dateToks[2]),
