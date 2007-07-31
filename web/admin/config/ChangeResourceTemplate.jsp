@@ -44,6 +44,13 @@
              el.style.background="#EBEDF2";
          }
 </script>
+
+<span class="italicInfo" style="padding: 4px;">
+  <fmt:message key="feature.available.in.EE">
+    <fmt:param><fmt:message key="inform.config.admin.AlertingPolicies"/></fmt:param>
+    <fmt:param value="http://support.hyperic.com/confluence/display/DOC/Resource-Type+Alerts"/>
+  </fmt:message>
+</span>
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
 	<tr class="ListHeaderDark">

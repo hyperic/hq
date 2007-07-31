@@ -97,7 +97,7 @@
                             <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
                         </td>
                          <td class="navText" onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></a>
+                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a>
                             <div style="clear: both;"></div>
                             <tiles:insert definition=".toolbar.recentResources"/>
                         </td>
