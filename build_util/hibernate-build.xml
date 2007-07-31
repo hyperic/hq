@@ -1,0 +1,254 @@
+
+   <!-- Hibernate common targets -->
+
+  <property name="hibernate-properties" location="${build.dir}/dd/hibernate/hibernate.properties" />
+  <property name="hibernate-hq-config" location="${hq.home}/etc/hibernate/hibernate.hq-cfg-xml" />
+  <property name="hibernate-mapping.xslt" location="${hq.home}/etc/hibernate/hibernate-mapping.xsl" /> 
+  <property name="hibernate-config.xslt" location="${hq.home}/etc/hibernate/hibernate-config.xsl" />
+  <property name="hibernate-jar" location="${hq.home}/thirdparty/lib/hibernate/hibernate3.jar" />
+  
+  <path id="hibernate-classpath">
+    <path refid="alljars" />
+    <fileset dir="${hq.home}/thirdparty/lib/xslt" includes="*.jar" />
+  </path>
+
+  <target name="hibernate-check">
+    <uptodate property="hibernate.notrequired"
+              targetfile="${build.dir}/dd/hibernate/tstamp">
+      <srcfiles dir="${hq.home}/sql">
+        <include name="**/*.hbm.xml"/>
+      </srcfiles>
+      <srcfiles dir="${hq.home}/etc">
+        <include name="hibernate/**/*.hq-cfg-xml"/>
+        <include name="hibernate/**/*.ftl"/>
+        <include name="build.properties" />
+      </srcfiles>
+      <srcfiles dir="etc">
+        <include name="**/*.hq-cfg-xml"/>
+        <include name="build.properties" />
+      </srcfiles>
+    </uptodate>
+  </target>
+
+   <target name="hibernate-clean">
+     <delete failonerror="false">
+       <fileset dir="${build.dir}/sql">
+         <include name="hibernate-*.sql" />
+       </fileset>
+      <fileset dir="${build.dir}/classes/META-INF">
+        <include name="**/*.cfg.xml" />
+        <include name="**/*.hbm.xml" />
+      </fileset>
+      <fileset dir="${build.dir}/src">
+        <include name="**/hibernate/**/*.java" />
+      </fileset>
+    </delete>
+    <delete failonerror="false" dir="${build.dir}/dd/hibernate" />
+  </target>
+
+  <target name="common-taskdefs" unless="init-taskdefs.notrequired">
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+             classpathref="alljars"/>
+    <taskdef name="for" classname="net.sf.antcontrib.logic.For"
+             classpathref="alljars"/>
+  </target>
+
+  <target name="hibernate-init-taskdefs" depends="common-taskdefs"
+          unless="hibernate-init-taskdefs.notrequired">
+    <taskdef name="hibernatetool"
+             classname="org.hibernate.tool.ant.HibernateToolTask"
+             classpathref="hibernate-classpath" />
+    <property name="hibernate-init-taskdefs.notrequired" value="true"/>
+  </target>
+
+  <target name="hibernate-taskdefs" depends="hibernate-init-taskdefs">
+    <switch value="${hq.server.ds-mapping}">
+      <case value="Oracle8">
+        <property name="hyperic.dialect" value="Oracle" />
+      </case>
+      <case value="Oracle9i">
+        <property name="hyperic.dialect" value="Oracle9" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="Oracle10g">
+        <property name="hyperic.dialect" value="Oracle9" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="PostgreSQL">
+        <property name="hyperic.dialect" value="PostgreSQL" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <case value="MySQL">
+        <property name="hyperic.dialect" value="MySQL5InnoDB" />
+        <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
+      </case>
+      <default>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.${hyperic.dialect}Dialect" />
+        <fail>
+        Unrecognized datasource mapping name: ${hq.server.ds-mapping}
+        </fail>
+      </default>
+    </switch>
+  </target>
+
+  <target name="hibernate-prep" depends="xdoclet,hibernate-taskdefs,hibernate-check" unless="hibernate.notrequired">
+    <delete failonerror="false">
+      <fileset dir="${build.dir}/classes/META-INF" includes="**/*.hbm.xml,**/*.cfg.xml" />
+      <fileset dir="${build.dir}/dd/hibernate" />
+    </delete>
+    <mkdir dir="${build.dir}/classes/META-INF" />
+    <mkdir dir="${build.dir}/src" />
+    <mkdir dir="${build.dir}/dd" />
+    <mkdir dir="${build.dir}/dd/hibernate" />
+    <mkdir dir="${build.dir}/dd/hibernate/sql" />
+
+    <copy todir="${build.dir}/classes/META-INF">
+      <fileset dir="${hq.home}/sql" includes="**/*.hbm.xml"/>
+    </copy>
+    
+    <!-- export hibernate properties (these values can be from .hq/build.properties file) -->
+    <pathconvert targetos="unix" property="hbm-files" pathsep=",">
+      <path>
+        <fileset dir="${build.dir}/classes">
+          <include name="**/*.hbm.xml"/>
+        </fileset>
+      </path>
+      <mapper>
+        <globmapper from="${build.dir}/classes/" to="" handledirsep="true" />
+      </mapper>
+    </pathconvert>
+    <for param="file" list="${hbm-files}">
+      <sequential>
+        <property name="mapping.@{file}" value="@{file}" />
+      </sequential>
+    </for>
+
+    <echoproperties destfile="${hibernate-properties}.xml" format="xml">
+      <propertyset>
+        <propertyref prefix="mapping."/>
+        <propertyref prefix="hibernate."/>
+        <propertyref prefix="hq."/>
+      </propertyset>
+    </echoproperties>
+
+    <property name="hibernate.connection.url" value="${hq.jdbc.url}" />
+    <property name="hibernate.connection.driver_class" value="${hq.jdbc.driver}" />
+    <property name="hibernate.connection.username" value="${hq.jdbc.user}" />
+    <property name="hibernate.connection.password" value="${hq.jdbc.password}" />
+    <property name="hibernate.connection.pool_size" value="0" />
+
+    <echoproperties destfile="${hibernate-properties}" format="text">
+      <propertyset>
+        <propertyref name="hibernate.dialect"/>
+        <propertyref name="hibernate.connection.url"/>
+        <propertyref name="hibernate.connection.driver_class"/>
+        <propertyref name="hibernate.connection.username"/>
+        <propertyref name="hibernate.connection.password"/>
+        <propertyref name="hibernate.connection.password"/>
+        <propertyref name="hibernate.connection.pool_size"/>
+      </propertyset>
+    </echoproperties>
+
+    <!-- generate hibernate configuration file  -->
+    <style
+        style="${hibernate-config.xslt}"
+        in="${hibernate-hq-config}"
+        out="${build.dir}/classes/META-INF/hibernate.cfg.xml">
+
+      <param name="dialect" expression="${hyperic.dialect}" />
+      <param name="properties" expression="${hibernate-properties}.xml" />
+
+      <!-- search hibernate-mapping.dtd in the classpath -->
+      <xmlcatalog>
+        <classpath>
+          <pathelement location="${hibernate-jar}" />
+        </classpath>
+        <dtd
+            publicId="-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+            location="org/hibernate/hibernate-configuration-3.0.dtd"/>
+      </xmlcatalog>
+    </style>
+
+    <touch file="${build.dir}/dd/hibernate/tstamp"/>
+  </target>
+
+  <target name="hibernate-schema-create-init">
+    <delete failonerror="false" file="${build.dir}/sql/hibernate-create.sql" />
+    <mkdir dir="${build.dir}/sql" />
+  </target>
+
+  <target name="hibernate-schema-create" depends="hibernate-prep,compile,hibernate-schema-create-init">
+    <!-- the second pass.  all tables will be created -->
+    <hibernatetool>
+      <classpath>
+        <path location="${build.dir}/classes" />
+      </classpath>
+      <configuration propertyFile="${hibernate-properties}">
+        <fileset dir="${build.dir}/classes">
+          <include name="**/*.hbm.xml" />
+        </fileset>
+      </configuration>
+
+      <hbm2ddl
+          destdir="${build.dir}/sql"
+          outputFileName="hibernate-create.sql"
+          drop="false"
+          create="true"
+          update="false"
+          format="true"
+          console="false"
+          export="${hq.schema.export}"
+          delimiter="${hq.schema.statement.delimiter}"
+          haltOnError="true"
+          />
+    </hibernatetool>
+  </target>
+
+  <target name="hibernate-schema-drop" depends="hibernate-prep,compile">
+
+    <delete failonerror="false" file="${build.dir}/sql/hibernate-drop.sql" />
+    <mkdir dir="${build.dir}/sql" />
+    <hibernatetool>
+      <classpath>
+        <path location="${build.dir}/classes" />
+      </classpath>
+      <configuration propertyFile="${hibernate-properties}">
+        <fileset dir="${build.dir}/classes">
+          <include name="**/*.hbm.xml" />
+        </fileset>
+      </configuration>
+
+      <hbm2ddl
+          destdir="${build.dir}/sql"
+          outputFileName="hibernate-drop.sql"
+          drop="true"
+          create="false"
+          update="false"
+          format="true"
+          console="false"
+          export="${hq.schema.export}"
+          delimiter="${hq.schema.statement.delimiter}"
+          />
+    </hibernatetool>
+  </target>
+
+  <target name="hibernate-schema-validation" depends="hibernate-prep,compile">
+    <taskdef name="validate-schema"
+             classname="org.hibernate.tool.hbm2ddl.SchemaValidatorTask">
+      <classpath>
+        <path location="${build.dir}/classes" />
+        <path refid="hibernate-classpath" />
+      </classpath>
+    </taskdef>
+    <validate-schema properties="${hibernate-properties}">
+      <fileset dir="${build.dir}/classes">
+        <include name="**/*.hbm.xml" />
+      </fileset>
+    </validate-schema>
+  </target>
+
+  <target name="hibernate-setup" depends="hibernate-schema-drop,hibernate-schema-create" />
+
+  <target name="hibernate-create" depends="hibernate-schema-create" />
+  <target name="hibernate-drop" depends="hibernate-schema-drop" />
+  <target name="hibernate-validate" depends="hibernate-schema-validation" />

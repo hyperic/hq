@@ -1,0 +1,247 @@
+
+  <!-- JBoss 4.0.3SP1 targets -->
+
+  <!-- Server ports -->
+  <property name="jboss.server.port" value="9093" />
+  <property name="jboss.jnp.port" value="2099" />
+
+  <target name="jboss-version">
+    <basename property="jboss.version" file="${jboss.zip}" suffix=".zip"/>
+  </target>
+
+  <target name="unpack-jboss"
+          depends="jboss-version"
+          description="Prepare JBoss for use within HQ, mainly used by archive">
+
+    <delete dir="${build.dir}/${jboss.version}"/>
+    <mkdir dir="${build.dir}/${jboss.version}"/>
+    <unzip src="${jboss.zip}" dest="${build.dir}"/>
+
+    <!-- The only thing we need in the jboss/client dir is the
+         main client jar, for the jboss plugin -->
+    <delete>
+      <fileset dir="${build.dir}/${jboss.version}/client">
+        <include name="**"/>
+        <exclude name="jbossall-client.jar"/>
+      </fileset>
+    </delete>
+
+    <!-- No jmx-console in release builds -->
+    <delete dir="${build.dir}/${jboss.version}/server/default/deploy/jmx-console.war"/>
+
+    <!-- No web-console in release builds -->
+    <delete dir="${build.dir}/${jboss.version}/server/default/deploy/management"/>
+
+    <!-- Do regular prepare stuff -->
+    <antcall target="pre-prepare-jboss">
+      <param name="jboss.home" value="${build.dir}/${jboss.version}"/>
+      <param name="tomcat.home"
+             value="${build.dir}/${jboss.version}/server/default/deploy/${jbossweb.home}/"/>
+    </antcall>
+
+    <antcall target="post-prepare-jboss">
+      <param name="jboss.home" value="${build.dir}/${jboss.version}"/>
+      <param name="tomcat.home"
+             value="${build.dir}/${jboss.version}/server/default/deploy/${jbossweb.home}/"/>
+    </antcall>
+
+    <!-- Do release prepare stuff -->
+    <antcall target="prepare-release-jboss">
+      <param name="jboss.home" value="${build.dir}/${jboss.version}"/>
+      <param name="tomcat.home"
+             value="${build.dir}/${jboss.version}/server/default/deploy/${jbossweb.home}/"/>
+    </antcall>
+
+    <delete dir="${build.dir}/${jboss.version}/docs"/>
+    <delete dir="${build.dir}/${jboss.version}/server/all"/>
+    <delete dir="${build.dir}/${jboss.version}/server/minimal"/>
+
+  </target>
+
+  <target name="instrument-jboss" description="Make JBoss Tomcat monitorable">
+    <echo message="Copying ${hq.home}/installer/data/web.xml to ${tomcat.home}/conf/ "/> 
+    <delete file="${tomcat.home}/conf/web.xml"/>
+    <copy todir="${tomcat.home}/conf" file="${hq.home}/installer/data/web.xml" />
+    <copy todir="${tomcat.home}"
+          file="${hq.home}/build/native_plugins/libs/hq-filter.jar" />
+  </target>
+
+  <target name="pre-prepare-jboss"
+          description="The parts of prepare-jboss we can do without compiling any code.">
+
+    <!-- Copy JGroups and JDBC drivers and Hibernate -->
+    <copy toDir="${jboss.home}/server/default/lib" flatten="true">
+      <fileset dir="${thirdparty.lib}">
+        <include name="commons-modeler.jar" />
+        <include name="jgroups-all.jar" />
+      </fileset>
+      <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="ojdbc14.jar"/>
+      <fileset dir="${thirdparty.lib}/postgresql">
+        <include name="postgresql-8.2-*.jdbc3.jar"/>
+      </fileset>
+      <fileset dir="${thirdparty.lib}/mysql_jdbc">
+        <include name="mysql*.jar"/>
+      </fileset>
+      <fileset dir="${thirdparty.lib}/hibernate">
+        <include name="hibernate3.jar" />
+        <include name="antlr-2.7.6.jar" />
+      </fileset>
+    </copy>
+
+    <!-- HA support -->
+    <copy file="${jboss.home}/server/all/lib/jbossha.jar"
+          tofile="${jboss.home}/server/default/lib/jbossha.jar"/>
+
+    <!-- remove obsolete jars -->
+    <delete file="${jboss.home}/server/default/lib/antlr-2.7.5H3.jar" />
+
+    <!-- Remove stuff we don't need to deploy -->
+    <property name="jboss-deploy-dir"
+              value="${jboss.home}/server/default/deploy"/>
+    <delete dir="${jboss-deploy-dir}/http-invoker.sar"/>
+    <delete file="${jboss-deploy-dir}/jms/jbossmq-destinations-service.xml"/>
+
+    <!-- Copy our standardjboss file, overwrite the existing one
+         all Hyperic specific items in this file are labled Hyperic HQ
+         and should have an explanation for what/why the change is made 
+         from the shipping default -->
+
+    <!-- Copy our standardjboss file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/conf/standardjboss.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/standardjboss.xml"
+          tofile="${jboss.home}/server/default/conf/standardjboss.xml"/>
+
+    <!-- Copy our ejb-deployer file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/deploy/ejb-deployer.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/ejb-deployer.xml"
+          tofile="${jboss.home}/server/default/deploy/ejb-deployer.xml"/>
+
+    <!-- Copy our standardjbosscmp-jdbc file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/conf/standardjbosscmp-jdbc.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/standardjbosscmp-jdbc.xml"
+          tofile="${jboss.home}/server/default/conf/standardjbosscmp-jdbc.xml"/>
+
+    <!-- Copy our jboss-service file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/conf/jboss-service.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/jboss-service.xml"
+          tofile="${jboss.home}/server/default/conf/jboss-service.xml"/>
+    <replace file="${jboss.home}/server/default/conf/jboss-service.xml" >
+      <replacefilter token="@@@hq-engine.server.port@@@" value="${jboss.server.port}" />
+      <replacefilter token="@@@hq-engine.jnp.port@@@" value="${jboss.jnp.port}" />
+    </replace>
+
+    <!-- Copy our jbossmq-service file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/deploy/jms/jbossmq-service.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/jbossmq-service.xml"
+          tofile="${jboss.home}/server/default/deploy/jms/jbossmq-service.xml"/>
+
+     <!-- Copy our hsqldb-ds.xml file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/deploy/hsqldb-ds.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/hsqldb-ds.xml"
+          tofile="${jboss.home}/server/default/deploy/hsqldb-ds.xml"/>
+
+    <delete dir="${jboss.home}/server/default/deploy/jms/jbossmq-httpil.sar"/>
+    <delete file="${jboss.home}/server/default/deploy/jms/oil-service.xml"/>
+    <delete file="${jboss.home}/server/default/deploy/jms/oil2-service.xml"/>
+    <delete file="${jboss.home}/server/default/deploy/jms/rmi-il-service.xml"/>
+    <delete file="${jboss.home}/server/default/deploy/jms/uil2-service.xml"/>
+
+    <!-- Remove the Cache Invalidation service for JMS -->
+    <delete file="${jboss.home}/server/default/deploy/cache-invalidation-service.xml"/>
+    
+    <!-- Remove the uuid generator service -->
+    <delete dir="${jboss.home}/server/default/deploy/uuid-key-generator.sar"/>
+
+    <!-- Remove the snmp adaptor... we speak JMX here -->
+    <delete dir="${jboss.home}/server/default/deploy/snmp-adaptor.sar"/>
+
+    <!-- Remove the jboss-xa-jdbc service. We manage our own transactions -->
+    <delete file="${jboss.home}/server/default/deploy/jboss-xa-jdbc.rar"/>
+
+    <!-- Remove the jboss-net.sar, not used -->
+    <delete dir="${jboss-deploy-dir}/jboss-net.sar" />
+
+    <!-- Remove jboss bundled hibernate libararies.  We are using version 3.1.3 -->
+    <delete failonerror="false" dir="${jboss-deploy-dir}/jboss-hibernate.deployer" />
+
+    <delete dir="${jboss-deploy-dir}/lather-jboss.sar" />
+    <unzip src="${lather.lib}/lather-jboss.sar"
+           dest="${jboss-deploy-dir}/lather-jboss.sar"
+           overwrite="false"/>
+    <mkdir dir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady"/>
+    <copy todir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady">
+        <fileset dir="${hq.home}/build/classes/org/hyperic/util/notReady">
+            <include name="*.class"/>
+        </fileset>
+    </copy>
+
+    <!-- Copy over hq-ds.xml file and substitute db properties -->
+    <delete file="${jboss-deploy-dir}/hq-ds.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/hq-ds.xml"
+          tofile="${jboss-deploy-dir}/hq-ds.xml" />
+
+    <replace file="${jboss-deploy-dir}/hq-ds.xml">
+      <replacefilter token="@@@server.database-url@@@" value="${hq.jdbc.url}"/>
+      <replacefilter token="@@@server.database-driver@@@" value="${hq.jdbc.driver}"/>
+      <replacefilter token="@@@server.database-user@@@" value="${hq.jdbc.user}"/>
+      <replacefilter token="@@@server.database-password@@@" value="${hq.jdbc.password}"/>
+    </replace>
+
+    <!-- Copy over server.xml for hq configured tomcat -->
+    <delete>
+        <fileset dir="${tomcat.home}" includes="**/server.xml"/>
+    </delete>
+    <copy file="${hq.home}/installer/data/hq-engine/server.xml"
+          tofile="${tomcat.home}/server.xml" overwrite="true"/>
+
+    <replace file="${tomcat.home}/server.xml">
+      <replacefilter token="@@@server.webapp.port@@@"
+                     value="${server.webapp.port}"/>
+      <replacefilter token="@@@server.webapp.secure.port@@@"
+                     value="${server.webapp.secure.port}"/>
+    </replace>
+    
+    <available property="available.keystore"
+               file="${jboss.home}/server/default/conf/hyperic.keystore"/>
+    <antcall target="prepare-ssl"/>
+  </target>
+
+  <target name="post-prepare-jboss"
+          description="The parts of prepare-jboss we do after compiling code.">
+
+    <!-- Copy our startup webapp -->
+    <copy todir="${tomcat.home}/ROOT.war">
+        <fileset dir="${ROOT.war}" />
+    </copy>
+
+    <!-- Add txsnatch.jar, containing our transaction interceptor -->
+    <delete file="${jboss.home}/server/default/lib/txsnatch.jar" />
+    <jar destfile="${jboss.home}/server/default/lib/txsnatch.jar"
+         basedir="${hq.home}/build/tools/txsnatch/classes"/>
+
+    <property name="jboss-deploy-dir"
+              value="${jboss.home}/server/default/deploy"/> 
+    <copy todir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady">
+        <fileset dir="${hq.home}/build/classes/org/hyperic/util/notReady">
+            <include name="*.class"/>
+        </fileset>
+    </copy>
+    <antcall target="instrument-jboss"/>
+  </target>
+
+  <target name="prepare-release-jboss">
+    <!-- Copy our log4j config file, overwrite the existing one -->
+    <delete file="${jboss.home}/server/default/conf/log4j.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/log4j.xml"
+          tofile="${jboss.home}/server/default/conf/log4j.xml"/>
+  </target>
+  
+  <target name="prepare-ssl" unless="available.keystore">
+    <!-- Server key for ssl -->
+    <echo message="Generating a SSL key for https"/>
+    <genkey alias="HQ" 
+            keystore="${jboss.home}/server/default/conf/hyperic.keystore"
+            keyalg="rsa"
+            storepass="hyperic" 
+            dname="CN=Hyperic HQ, OU=HQ, O=hyperic.net, C=US"/>
+  </target>
