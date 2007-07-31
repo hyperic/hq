@@ -1,4 +1,6 @@
+<?xml version="1.0"?>
 
+<project name="util-build" basedir="..">
   <!-- Build file for common utility targets -->
 
   <target name="chmod-exec">
@@ -79,3 +81,5 @@
       <then><delete dir="${archive-dir}"/></then>
     </if>
   </target>
+
+</project>

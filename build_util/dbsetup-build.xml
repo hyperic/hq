@@ -1,3 +1,7 @@
+<?xml version="1.0"?>
+
+<project name="dbsetup-build" basedir="..">
+
   <!-- ==================== DBSetup ==================== -->
   <target name="dbsetup-init" depends="init-taskdefs" unless="dbsetup-init.isLoaded">
   
@@ -192,3 +196,5 @@
       <property name="schema.target" value="${hq.schema.target.version}"/>
     </ant>
   </target>
+
+</project>

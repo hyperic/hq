@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+
+<project name="hibernate-build" basedir="..">
 
    <!-- Hibernate common targets -->
 
@@ -252,3 +255,5 @@
   <target name="hibernate-create" depends="hibernate-schema-create" />
   <target name="hibernate-drop" depends="hibernate-schema-drop" />
   <target name="hibernate-validate" depends="hibernate-schema-validation" />
+
+</project>

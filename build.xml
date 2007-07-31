@@ -1,16 +1,5 @@
 <?xml version="1.0"?>
 
-<!DOCTYPE project [
-    <!ENTITY xdoclet-build SYSTEM "build_util/xdoclet-build.xml">
-    <!ENTITY util-build SYSTEM "build_util/util-build.xml">
-    <!ENTITY jsp-build SYSTEM "build_util/jsp-build.xml">
-    <!ENTITY jboss-build SYSTEM "build_util/jboss-build.xml">
-    <!ENTITY archive-build SYSTEM "build_util/archive-build.xml">
-    <!ENTITY hibernate-build SYSTEM "build_util/hibernate-build.xml">
-    <!ENTITY dbsetup-build SYSTEM "build_util/dbsetup-build.xml">
-    <!ENTITY test-build SYSTEM "build_util/test-build.xml">
-]>
-
 <project name="HQ" default="build" basedir=".">
   <property environment="ENV" />
 
@@ -151,8 +140,8 @@
   </path>
     
   <!-- Source common targets -->
-  &util-build;
-  &test-build;
+  <import file="${hq.home}/build_util/util-build.xml"/>
+  <import file="${hq.home}/build_util/test-build.xml"/>
     
   <target name="init-props" unless="init-props.notrequired">
      <property file="${version.properties}" />
@@ -282,16 +271,16 @@
 
   <!-- ==================== JSP precompile ============================ -->
   
-  &jsp-build; <!-- Include precompile-jsp -->
+  <import file="${hq.home}/build_util/jsp-build.xml"/>
 
   <!-- ==================== Source code generation ==================== -->
 
-  &xdoclet-build;
-  &hibernate-build;
+  <import file="${hq.home}/build_util/xdoclet-build.xml"/>
+  <import file="${hq.home}/build_util/hibernate-build.xml"/>
 
   <!-- ================== DB Setup =================== -->
 
-  &dbsetup-build;
+  <import file="${hq.home}/build_util/dbsetup-build.xml"/>
 
   <!-- ==================== EAR packaging ==================== -->
 
@@ -1384,7 +1373,7 @@
   <!--
   Source JBoss targets for prepare prepare-jboss
   -->
-  &jboss-build;
+  <import file="${hq.home}/build_util/jboss-build.xml"/>
 
   <target name="prepare-jboss" 
           depends="pre-prepare-jboss,post-prepare-jboss"
@@ -1577,7 +1566,7 @@
   </target>
 
   <!-- Bring in tasks for rolling the archives -->
-  &archive-build;
+  <import file="${hq.home}/build_util/archive-build.xml"/>
 
   <target name="archive-full" depends="init,check-release,all,precompile-jsp,pdk-javadoc,unpack-jboss,dbsetup-combine,jboss-version,pack-installer,precompile-jsp-check,remove-tests">
 

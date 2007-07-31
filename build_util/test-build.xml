@@ -1,4 +1,8 @@
- <target name="test" depends="init,init-taskdefs">
+<?xml version="1.0"?>
+
+<project name="test-build" basedir="..">
+
+<target name="test" depends="init,init-taskdefs">
     <mkdir dir="${junitResults.dir}"/>
     <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
       <classpath>
@@ -79,3 +83,5 @@
       </report>
     </emma>
   </target>
+
+</project>

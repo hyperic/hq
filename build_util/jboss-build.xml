@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+
+<project name="jboss-build" basedir="..">
 
   <!-- JBoss 4.0.3SP1 targets -->
 
@@ -245,3 +248,5 @@
             storepass="hyperic" 
             dname="CN=Hyperic HQ, OU=HQ, O=hyperic.net, C=US"/>
   </target>
+
+</project>

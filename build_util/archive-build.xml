@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+
+<project name="archive-build" basedir="..">
 
   <!-- Common targets for rolling release archives -->
 
@@ -202,3 +205,5 @@
       <fileset dir="${pgsql.dir}/${archive-suffix}/conf" includes="**"/>
     </copy>
   </target>
+
+</project>

@@ -1,3 +1,7 @@
+<?xml version="1.0"?>
+
+<project name="jsp-build" basedir="..">
+
   <!-- Precompile JSP's located in ${ear.dir}/hq.war -->
 
   <target name="precompile-jsp-check">
@@ -60,3 +64,5 @@
         <fileset dir="${ear.dir}/hq.war" includes="**/*.jsp"/>
     </delete>
   </target>
+
+</project>

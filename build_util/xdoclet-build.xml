@@ -1,3 +1,6 @@
+<?xml version="1.0"?>
+
+<project name="xdoclet-build" basedir="..">
 
   <!-- XDoclet common targets -->
 
@@ -113,3 +116,5 @@
 
     <touch file="${build.dir}/dd/tstamp" />
   </target>
+
+</project>
