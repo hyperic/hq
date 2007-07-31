@@ -156,7 +156,7 @@ public class WindowsDetector
         if (config == null) {
             return null;
         }
-        svc.setName(config.getDisplayName());
+        svc.setName(getFullServiceName(config.getDisplayName()));
         log.debug("Found service " + svc.getName() +
                   " - " + svc.getDescription());
         ConfigResponse productConfig = new ConfigResponse();
