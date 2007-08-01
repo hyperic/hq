@@ -16,23 +16,23 @@
     </version>
 
     <property lazy="true" name="productResponse" type="binary">
-      <column name="PRODUCT_RESPONSE" not-null="false" length="65535"/>
+      <column name="PRODUCT_RESPONSE" not-null="false" length="256"/>
     </property>
 
     <property lazy="true" name="controlResponse" type="binary">
-      <column name="CONTROL_RESPONSE" not-null="false" length="65535"/>
+      <column name="CONTROL_RESPONSE" not-null="false" length="256"/>
     </property>
 
     <property lazy="true" name="measurementResponse" type="binary">
-      <column name="MEASUREMENT_RESPONSE" not-null="false" length="65535"/>
+      <column name="MEASUREMENT_RESPONSE" not-null="false" length="256"/>
     </property>
 
     <property lazy="true" name="autoInventoryResponse" type="binary">
-      <column name="AUTOINVENTORY_RESPONSE" not-null="false" length="65535"/>
+      <column name="AUTOINVENTORY_RESPONSE" not-null="false" length="256"/>
     </property>
 
     <property lazy="true" name="responseTimeResponse" type="binary">
-      <column name="RESPONSE_TIME_RESPONSE" not-null="false" length="65535"/>
+      <column name="RESPONSE_TIME_RESPONSE" not-null="false" length="256"/>
     </property>
 
     <property name="userManaged" type="boolean">
