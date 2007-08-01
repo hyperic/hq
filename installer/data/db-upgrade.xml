@@ -6566,6 +6566,11 @@ has already been defined.
         </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.45">
+        <schema-directSQL>
+          <statement targetDB="oracle" fail="false">ALTER TABLE EAM_ALERT_ACTION_LOG MODIFY DETAIL NULL</statement>
+        </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
