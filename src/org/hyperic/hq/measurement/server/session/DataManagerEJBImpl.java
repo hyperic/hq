@@ -637,7 +637,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (!confDefaultsLoaded)
             loadConfigDefaults();
 
-        if (now - purgeRaw < begin) {
+        if (MeasTabManagerUtil.getMeasTabStartTime(now - purgeRaw) < begin) {
             return getUnionStatement(begin, end);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;

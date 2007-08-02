@@ -30,6 +30,7 @@ import java.util.Calendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class MeasTabManagerUtil {
     private static Calendar _baseCal = Calendar.getInstance();
@@ -88,6 +89,12 @@ public class MeasTabManagerUtil {
             dayslice++;
         }
         return MEAS_TABLE + "_" + daytable + "D_" + dayslice + "S";
+    }
+    
+    public static long getMeasTabStartTime(long timems) {
+        timems -=
+            timems % (MeasurementConstants.DAY / NUMBER_OF_TABLES_PER_DAY);
+        return timems;
     }
 
     public static long getPrevMeasTabTime(long timems) {
