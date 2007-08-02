@@ -95,8 +95,12 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         for (int i = 0; i < dps.size(); i++) {
             DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
             DataPoint dp = (DataPoint)dps.get(i);
-            List data = genData(m, dp, detailedPurgeInterval);
 
+            if (dp == null) {
+                continue; // No data for this metric id.
+            }
+
+            List data = genData(m, dp, detailedPurgeInterval);
             _log.info("Inserting " + data.size() + " data points");
             if (!dataMan.addData(data)) {
                 dataMan.addData(data, true);
