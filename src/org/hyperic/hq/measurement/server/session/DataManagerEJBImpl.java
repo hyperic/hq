@@ -239,7 +239,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             
             // XXX: MySQL does not handle the batch insert in single transaction
             // so return right away
-            if (DBUtil.isMySQL(conn))
+            if (DBUtil.isMySQL(conn) || DBUtil.isOracle(conn))
                 return false;
             
             int numLeft = left.size();
