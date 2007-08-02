@@ -75,39 +75,34 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         _log.info("Starting data populatation at " +
                   TimeUtil.toString(start));
 
-        for (int j = 0; j < cats.length; j++) {
-            List meas = dmManager.findMeasurementsByCategory(cats[j]);
-            _log.info("Found " + meas.size() + " enabled metrics for " +
-                      cats[j]);
-
-            for (Iterator i = meas.iterator(); i.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement)i.next();
-                DataPoint last = getLastDataPoint(dm.getId());
-
-                if (last == null)
-                    continue;
-
-                List data = genData(dm, last, detailedPurgeInterval);
-
-                _log.info("Generated " + data.size() + " data points for id=" +
-                           dm.getId());
-                num += data.size();
-
-                if (!dataMan.addData(data)) {
-                    dataMan.addData(data, true);
-                }
-
-                if (num > max) {
-                    break;    
-                }
-            }
-
-            if (num > max) {
-                break;
-            }
+        List measurements = new ArrayList();
+        for (int i = 0; i < cats.length; i++) {
+            _log.info("Loading " + cats[i] + " measurements.");
+            List meas = dmManager.findMeasurementsByCategory(cats[i]);
+            measurements.addAll(meas);
         }
 
+        _log.info("Loaded " + measurements.size() + " measurements");
 
+        List dps = new ArrayList();
+        max = (max < measurements.size()) ? max : measurements.size(); 
+        for (int i = 0; i < max; i++ ) {
+            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            _log.info("Loaded last data point for " + m.getId());
+            dps.add(getLastDataPoint(m.getId()));
+        }
+
+        for (int i = 0; i < dps.size(); i++) {
+            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            DataPoint dp = (DataPoint)dps.get(i);
+            List data = genData(m, dp, detailedPurgeInterval);
+
+            _log.info("Inserting " + data.size() + " data points");
+            if (!dataMan.addData(data)) {
+                dataMan.addData(data, true);
+            }
+            num += data.size();
+        }
 
         long duration = System.currentTimeMillis() - start;
         double rate =  num / (duration/1000);
