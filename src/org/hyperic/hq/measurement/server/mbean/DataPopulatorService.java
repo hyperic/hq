@@ -11,6 +11,8 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.TimeUtil;
+import org.hyperic.util.StringUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,6 +54,13 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
      * @jmx:managed-operation
      */
     public void populate() throws Exception {
+        populate(Long.MAX_VALUE);
+    }
+
+    /**
+     * @jmx:managed-operation
+     */
+    public void populate(long max) throws Exception {
 
         DerivedMeasurementManagerLocal dmManager =
             DerivedMeasurementManagerEJBImpl.getOne();
@@ -59,6 +68,13 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
         long detailedPurgeInterval = getDetailedPurgeInterval();
         String cats[] = MeasurementConstants.VALID_CATEGORIES;
+
+        long start = System.currentTimeMillis();
+        long num = 0;
+
+        _log.info("Starting data populatation at " +
+                  TimeUtil.toString(start));
+
         for (int j = 0; j < cats.length; j++) {
             List meas = dmManager.findMeasurementsByCategory(cats[j]);
             _log.info("Found " + meas.size() + " enabled metrics for " +
@@ -71,18 +87,33 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
                 if (last == null)
                     continue;
 
-                _log.info("Last metric for dm=" + dm.getId() + "=" +
-                          last.getMetricValue());
-
                 List data = genData(dm, last, detailedPurgeInterval);
 
-                _log.info("Generated " + data.size() + " data points");
+                _log.info("Generated " + data.size() + " data points for id=" +
+                           dm.getId());
+                num += data.size();
 
                 if (!dataMan.addData(data)) {
                     dataMan.addData(data, true);
                 }
+
+                if (num > max) {
+                    break;    
+                }
+            }
+
+            if (num > max) {
+                break;
             }
         }
+
+
+
+        long duration = System.currentTimeMillis() - start;
+        double rate =  num / (duration/1000);
+        _log.info("Inserted " + num + " metrics in " +
+                  StringUtil.formatDuration(duration) + " (" + rate +
+                  " per second)");
     }
 
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
