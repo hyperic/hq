@@ -330,9 +330,9 @@ public class EscalationManagerEJBImpl
         // does not exist.
         EscalationState s = _stateDAO.get(stateId);
         
-        if (this.hasEscalationStateOrEscalatingEntityBeenRemoved(s)) {
+        if (hasEscalationStateOrEscalatingEntityBeenRemoved(s)) {
             // just to be safe
-            this.endEscalation(s);
+            endEscalation(s);
             return;
         }
         
@@ -347,7 +347,7 @@ public class EscalationManagerEJBImpl
         if (actionIdx >= e.getActions().size()) {
             _log.debug("Reached the end of the escalation state[" + 
                        s.getId() + "].  Ending it");
-            this.endEscalation(s);
+            endEscalation(s);
             return;
         }
         

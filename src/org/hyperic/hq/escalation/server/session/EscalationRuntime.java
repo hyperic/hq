@@ -233,7 +233,7 @@ class EscalationRuntime {
     
     private void unscheduleEscalation_(Integer stateId) {
         synchronized (_stateIdsToTasks) {
-            this.doUnscheduleEscalation_(stateId);
+            doUnscheduleEscalation_(stateId);
             _esclEntityIdsToStateIds.values().remove(stateId);
         }
     }
@@ -243,7 +243,7 @@ class EscalationRuntime {
             for (int i = 0; i < esclEntityIds.length; i++) {
                 Integer stateId = 
                     (Integer)_esclEntityIdsToStateIds.remove(esclEntityIds[i]);                
-                this.doUnscheduleEscalation_(stateId);
+                doUnscheduleEscalation_(stateId);
             }            
         }
     }

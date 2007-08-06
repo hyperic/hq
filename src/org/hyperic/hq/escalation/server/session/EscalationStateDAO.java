@@ -106,10 +106,10 @@ class EscalationStateDAO
             return;
         }
         
-        this.getSession()
-            .createQuery("delete from EscalationState s where s.id in (:stateIds)")
-            .setParameterList("stateIds", stateIds)
-            .executeUpdate();
+        getSession()
+         .createQuery("delete from EscalationState s where s.id in (:stateIds)")
+         .setParameterList("stateIds", stateIds)
+         .executeUpdate();
     }
     
 }

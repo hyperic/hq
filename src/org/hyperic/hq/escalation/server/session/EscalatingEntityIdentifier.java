@@ -88,8 +88,8 @@ final class EscalatingEntityIdentifier {
         
         if (obj instanceof EscalatingEntityIdentifier) {
             EscalatingEntityIdentifier compareTo = (EscalatingEntityIdentifier)obj;
-            return this.getAlertType().equals(compareTo.getAlertType()) 
-                              && this.getId().equals(compareTo.getId());
+            return getAlertType().equals(compareTo.getAlertType()) 
+                              && getId().equals(compareTo.getId());
         }
         
         return false;
@@ -97,8 +97,8 @@ final class EscalatingEntityIdentifier {
     
     public int hashCode() {
         int result = 17;
-        result += 37*result + this.getId().intValue();
-        result += 37*result + this.getAlertType().hashCode();
+        result += 37*result + getId().intValue();
+        result += 37*result + getAlertType().hashCode();
         return result;
     }
     
