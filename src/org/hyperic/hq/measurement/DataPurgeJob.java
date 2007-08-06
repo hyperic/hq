@@ -119,15 +119,11 @@ public class DataPurgeJob implements Job {
         long time_start = System.currentTimeMillis();
         
         try {
-            boolean ten_past = false;
             // We'll only do the compress if it's 10 past the hour
             Calendar cal = Calendar.getInstance();
             long voodooTime = TimingVoodoo.roundDownTime(time_start, MINUTE);
             cal.setTime(new java.util.Date(voodooTime));
-            if (cal.get(Calendar.MINUTE) != 10)
-                ten_past = false;
-            else
-                ten_past = true;
+            boolean ten_past = cal.get(Calendar.MINUTE) == 10;
         
             // Announce
             _log.info("Data compression starting at " +
