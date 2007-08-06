@@ -11,6 +11,8 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.TimeUtil;
+import org.hyperic.util.StringUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,6 +54,13 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
      * @jmx:managed-operation
      */
     public void populate() throws Exception {
+        populate(Long.MAX_VALUE);
+    }
+
+    /**
+     * @jmx:managed-operation
+     */
+    public void populate(long max) throws Exception {
 
         DerivedMeasurementManagerLocal dmManager =
             DerivedMeasurementManagerEJBImpl.getOne();
@@ -59,36 +68,57 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
         long detailedPurgeInterval = getDetailedPurgeInterval();
         String cats[] = MeasurementConstants.VALID_CATEGORIES;
-        for (int j = 0; j < cats.length; j++) {
-            List meas = dmManager.findMeasurementsByCategory(cats[j]);
-            _log.info("Found " + meas.size() + " enabled metrics for " +
-                      cats[j]);
 
-            for (Iterator i = meas.iterator(); i.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement)i.next();
-                DataPoint last = getLastDataPoint(dm.getId());
+        long start = System.currentTimeMillis();
+        long num = 0;
 
-                if (last == null)
-                    continue;
+        _log.info("Starting data populatation at " +
+                  TimeUtil.toString(start));
 
-                _log.info("Last metric for dm=" + dm.getId() + "=" +
-                          last.getMetricValue());
-
-                List data = genData(dm, last, detailedPurgeInterval);
-
-                _log.info("Generated " + data.size() + " data points");
-
-                dataMan.addData(data, true);
-            }
+        List measurements = new ArrayList();
+        for (int i = 0; i < cats.length; i++) {
+            _log.info("Loading " + cats[i] + " measurements.");
+            List meas = dmManager.findMeasurementsByCategory(cats[i]);
+            measurements.addAll(meas);
         }
+
+        _log.info("Loaded " + measurements.size() + " measurements");
+
+        List dps = new ArrayList();
+        max = (max < measurements.size()) ? max : measurements.size(); 
+        for (int i = 0; i < max; i++ ) {
+            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            _log.info("Loaded last data point for " + m.getId());
+            dps.add(getLastDataPoint(m.getId()));
+        }
+
+        for (int i = 0; i < dps.size(); i++) {
+            DerivedMeasurement m = (DerivedMeasurement)measurements.get(i);
+            DataPoint dp = (DataPoint)dps.get(i);
+
+            if (dp == null) {
+                continue; // No data for this metric id.
+            }
+
+            List data = genData(m, dp, detailedPurgeInterval);
+            _log.info("Inserting " + data.size() + " data points");
+            dataMan.addData(data, true);
+            num += data.size();
+        }
+
+        long duration = System.currentTimeMillis() - start;
+        double rate =  num / (duration/1000);
+        _log.info("Inserted " + num + " metrics in " +
+                  StringUtil.formatDuration(duration) + " (" + rate +
+                  " per second)");
     }
 
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
         final String SQL =
-            "SELECT timestamp, value FROM eam_measurement_data " +
+            "SELECT timestamp, value FROM EAM_MEASUREMENT_DATA " +
             "WHERE measurement_id = ? AND timestamp = " +
-            "(SELECT min(timestamp) FROM eam_measurement_data " +
+            "(SELECT min(timestamp) FROM EAM_MEASUREMENT_DATA " +
             " WHERE measurement_id = ?)";
 
         Connection conn = null;
