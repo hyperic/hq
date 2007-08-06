@@ -290,17 +290,26 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void endEscalation(PerformsEscalations def) {
-        EscalationState curState = _stateDAO.find(def);
-        
-        if (curState == null)
-            return; // Already ended
-        
-        endEscalation(curState);
+        EscalationRuntime.getInstance().unscheduleAllEscalationsFor(def);
     }
-
+        
     private void endEscalation(EscalationState state) {
-        _stateDAO.remove(state);
-        EscalationRuntime.getInstance().unscheduleEscalation(state);
+        if (state != null) {
+            _stateDAO.remove(state);
+            EscalationRuntime.getInstance().unscheduleEscalation(state);
+        }        
+    }
+    
+    /**
+     * This method is only for internal use by the {@link EscalationRuntime}.
+     * 
+     * This method deletes in batch the given escalation states.
+     * 
+     * @param stateIds The Ids for the escalation states to delete.
+     * @ejb:interface-method  
+     */    
+    public void deleteAllEscalationStates(Integer[] stateIds) {
+        _stateDAO.removeAllEscalationStates(stateIds);
     }
     
     /**
@@ -314,7 +323,19 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void executeState(Integer stateId) {
-        EscalationState s = _stateDAO.findById(stateId);
+        // Use a get() so that the state is retrieved from the 
+        // database (in case the escalation state was deleted 
+        // in a separate session when ending an escalation).
+        // The get() will return null if the escalation state
+        // does not exist.
+        EscalationState s = _stateDAO.get(stateId);
+        
+        if (this.hasEscalationStateOrEscalatingEntityBeenRemoved(s)) {
+            // just to be safe
+            this.endEscalation(s);
+            return;
+        }
+        
         Escalation e = s.getEscalation();
         EscalationAction eAction;
         Action action;
@@ -326,7 +347,7 @@ public class EscalationManagerEJBImpl
         if (actionIdx >= e.getActions().size()) {
             _log.debug("Reached the end of the escalation state[" + 
                        s.getId() + "].  Ending it");
-            endEscalation(s);
+            this.endEscalation(s);
             return;
         }
         
@@ -364,6 +385,22 @@ public class EscalationManagerEJBImpl
         }
     }
     
+    /**
+     * Check if the escalation state or its associated escalating entity 
+     * has been removed. This may be a rare occurrence that would only surface 
+     * because of subtle timing holes between the scheduling and escalation state 
+     * deletion algorithms.
+     * 
+     * @param s The escalation state.
+     * @return <code>true</code> if the escalation state or escalating entity 
+     *         has been removed.
+     */
+    private boolean hasEscalationStateOrEscalatingEntityBeenRemoved(EscalationState s) {
+        return s == null || 
+               s.getAlertType().findDefinition(
+                            new Integer(s.getAlertDefinitionId())) == null;
+    }
+        
     /**
      * Find an escalation based on the type and ID of the definition.  
      * 

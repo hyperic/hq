@@ -42,6 +42,10 @@ class EscalationStateDAO
     EscalationState findById(Integer id) {
         return (EscalationState)super.findById(id);
     }
+    
+    EscalationState get(Integer id) {
+        return (EscalationState)super.get(id);
+    }
 
     void save(EscalationState s) {
         super.save(s);
@@ -51,6 +55,13 @@ class EscalationStateDAO
         super.remove(s);
     }
 
+    /**
+     * Find the current escalation state.
+     * 
+     * @param def The entity performing escalations.
+     * @return The current escalation state or <code>null</code> if none 
+     *          exists for the entity performing escalations.
+     */
     EscalationState find(PerformsEscalations def) { 
         return (EscalationState)createCriteria()
             .add(Expression.eq("alertDefinitionId", def.getId()))
@@ -84,4 +95,21 @@ class EscalationStateDAO
             .setMaxResults(maxEscalations)
             .list();
     }
+
+    /**
+     * Delete in batch the given escalation states.
+     * 
+     * @param stateIds The Ids for the escalation states to delete.
+     */
+    void removeAllEscalationStates(Integer[] stateIds) {
+        if (stateIds.length==0) {
+            return;
+        }
+        
+        this.getSession()
+            .createQuery("delete from EscalationState s where s.id in (:stateIds)")
+            .setParameterList("stateIds", stateIds)
+            .executeUpdate();
+    }
+    
 }

@@ -274,6 +274,7 @@ public class HQApp {
             }
 
             public void beforeCompletion() {
+                runPreCommitListeners();
             }
         });
     }
@@ -297,7 +298,27 @@ public class HQApp {
         // and looks like it will be fixed up again in 3.3.. :-(
         Util.getSessionFactory().getCurrentSession().flush();
     }
+    
+    /**
+     * Execute all the pre-commit listeners registered with the current thread.
+     */
+    private void runPreCommitListeners() {
+        List list = (List)_txListeners.get();
+        
+        if (list == null)
+            return;
 
+        for (Iterator i=list.iterator(); i.hasNext(); ) {
+            TransactionListener l = (TransactionListener)i.next();
+        
+            try {
+                l.beforeCommit();
+            } catch(Exception e) {
+                _log.warn("Error running pre-commit listener [" + l + "]", e);
+            }
+        } 
+    }
+    
     /**
      * Execute all the post-commit listeners registered with the current thread
      */
@@ -314,7 +335,7 @@ public class HQApp {
                 try {
                     l.afterCommit(success);
                 } catch(Exception e) {
-                    _log.warn("Error running commit listener [" + l + "]", e);
+                    _log.warn("Error running post-commit listener [" + l + "]", e);
                 }
             } 
         } finally {

@@ -26,6 +26,13 @@
 package org.hyperic.hq.application;
 
 public interface TransactionListener {
+    
+    /**
+     * Called just before the transaction is committed in the context 
+     * of the currently executing transaction.
+     */
+    void beforeCommit();
+    
     /**
      * Called after a transaction was committed 
      */

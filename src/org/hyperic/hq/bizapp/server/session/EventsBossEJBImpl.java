@@ -376,8 +376,12 @@ public class EventsBossEJBImpl
                         getADM().findChildAlertDefinitionId(id, 
                                           new Integer(clone.getMeasurementId()),
                                           true);
-                    
-                    if (recoverId == null) {
+                                        
+                    if (recoverId == null) {                        
+                        // recoverId should never be null, but if it is and assertions 
+                        // are disabled, just move on.
+                        assert false : "recover Id should not be null.";
+                        
                         _log.error("A recovery alert has no associated recover " +
                                    "from alert. Setting alert condition " +
                                    "measurement Id to 0.");

@@ -24,9 +24,13 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,10 +68,12 @@ import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
  */
 class EscalationRuntime {
     private static final EscalationRuntime INSTANCE = new EscalationRuntime();
-
+    
+    private final ThreadLocal _batchUnscheduleTxnListeners = new ThreadLocal();
     private final Log _log = LogFactory.getLog(EscalationRuntime.class);
     private final ClockDaemon             _schedule = new ClockDaemon();
     private final Map                     _stateIdsToTasks = new HashMap();
+    private final Map                     _esclEntityIdsToStateIds = new HashMap();
     private final PooledExecutor          _executor;
     private final EscalationManagerLocal  _esclMan;
     
@@ -120,7 +126,7 @@ class EscalationRuntime {
 
     /**
      * Unschedule the execution of an escalation state.  The unschedule will
-     * only occur if the transaction succesfully commits.
+     * only occur if the transaction successfully commits.
      */
     void unscheduleEscalation(EscalationState state) {
         final Integer stateId = state.getId();
@@ -131,21 +137,127 @@ class EscalationRuntime {
                     unscheduleEscalation_(stateId);
                 }
             }
+
+            public void beforeCommit() {
+            }
         });
+    }
+        
+    /**
+     * Unschedule the execution of all escalation states associated with this 
+     * entity that performs escalations. The unschedule will only occur if the 
+     * transaction successfully commits.
+     */
+    void unscheduleAllEscalationsFor(PerformsEscalations def) {
+        BatchUnscheduleEscalationsTransactionListener batchTxnListener = 
+            (BatchUnscheduleEscalationsTransactionListener)
+            _batchUnscheduleTxnListeners.get();
+        
+        if (batchTxnListener == null) {
+            batchTxnListener = new BatchUnscheduleEscalationsTransactionListener();
+            _batchUnscheduleTxnListeners.set(batchTxnListener);
+            HQApp.getInstance().addTransactionListener(batchTxnListener);
+        }
+        
+        batchTxnListener.unscheduleAllEscalationsFor(def);
+    }
+        
+    /**
+     * A txn listener that unschedules escalations in batch. 
+     * This class is not thread safe. We assume that this txn listener 
+     * is called back by the same thread originally unscheduling the 
+     * escalations.
+     */
+    private class BatchUnscheduleEscalationsTransactionListener 
+        implements TransactionListener {
+        private final Set _escalationsToUnschedule;
+        
+        public BatchUnscheduleEscalationsTransactionListener() {
+            _escalationsToUnschedule = new HashSet();
+        }
+        
+        /**
+         * Unscheduled all escalations associated with this entity.
+         * 
+         * @param def The entity that performs escalations.
+         */
+        public void unscheduleAllEscalationsFor(PerformsEscalations def) {
+            _escalationsToUnschedule.add(new EscalatingEntityIdentifier(def));
+        }
+        
+        public void afterCommit(boolean success) {
+            try {
+                _log.debug("Transaction committed:  success=" + success);
+                if (success) {
+                    unscheduledAllEscalations_((EscalatingEntityIdentifier[])
+                            _escalationsToUnschedule.toArray(
+                                    new EscalatingEntityIdentifier[
+                                        _escalationsToUnschedule.size()]));
+                }                
+            } finally {
+                _batchUnscheduleTxnListeners.set(null);
+            }
+        }
+
+        public void beforeCommit() {
+            deleteAllEscalations_((EscalatingEntityIdentifier[])
+                _escalationsToUnschedule.toArray(
+                        new EscalatingEntityIdentifier[
+                            _escalationsToUnschedule.size()]));            
+        }
+                
+    }
+    
+    private void deleteAllEscalations_(EscalatingEntityIdentifier[] escalatingEntities) {
+        List stateIds = new ArrayList(escalatingEntities.length);
+        
+        synchronized (_stateIdsToTasks) {
+            for (int i = 0; i < escalatingEntities.length; i++) {
+                Integer stateId = (Integer)_esclEntityIdsToStateIds.get(
+                                                    escalatingEntities[i]);
+                                
+                if (stateId != null) {
+                    stateIds.add(stateId);
+                } else {
+                    // state Id should never be null, but if it is and assertions 
+                    // are disabled, just move on
+                    assert false : "stateId should not be null";                    
+                }
+                    
+            }
+        }
+        
+        _esclMan.deleteAllEscalationStates(
+                (Integer[])stateIds.toArray(new Integer[stateIds.size()])); 
     }
     
     private void unscheduleEscalation_(Integer stateId) {
         synchronized (_stateIdsToTasks) {
-            Object task = _stateIdsToTasks.get(stateId);
-         
-            if (task != null) {
-                ClockDaemon.cancel(task);
-                _log.debug("Canceled state[" + stateId + "]");
-            } else {
-                _log.debug("Canceling state[" + stateId + "] but was " + 
-                           "not found");
-            }
+            this.doUnscheduleEscalation_(stateId);
+            _esclEntityIdsToStateIds.values().remove(stateId);
         }
+    }
+        
+    private void unscheduledAllEscalations_(EscalatingEntityIdentifier[] esclEntityIds) {
+        synchronized (_stateIdsToTasks) {
+            for (int i = 0; i < esclEntityIds.length; i++) {
+                Integer stateId = 
+                    (Integer)_esclEntityIdsToStateIds.remove(esclEntityIds[i]);                
+                this.doUnscheduleEscalation_(stateId);
+            }            
+        }
+    }
+    
+    private void doUnscheduleEscalation_(Integer stateId) {
+        Object task = _stateIdsToTasks.remove(stateId);
+        
+        if (task != null) {
+            ClockDaemon.cancel(task);
+            _log.debug("Canceled state[" + stateId + "]");
+        } else {
+            _log.debug("Canceling state[" + stateId + "] but was " + 
+                       "not found");
+        }        
     }
     
     /**
@@ -156,21 +268,25 @@ class EscalationRuntime {
      * If the state had been previously scheduled, it will be rescheduled with
      * the new time. 
      */
-    void scheduleEscalation(EscalationState state) {
-        final Integer stateId   = state.getId();
-        final long    schedTime = state.getNextActionTime();
+    void scheduleEscalation(final EscalationState state) {
+        final long schedTime = state.getNextActionTime();
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
             public void afterCommit(boolean success) {
                 _log.debug("Transaction committed:  success=" + success);
                 if (success) {
-                    scheduleEscalation_(stateId, schedTime);
+                    scheduleEscalation_(state, schedTime);
                 }
+            }
+
+            public void beforeCommit() {
             }
         });
     }
     
-    private void scheduleEscalation_(Integer stateId, long schedTime) {
+    private void scheduleEscalation_(EscalationState state, long schedTime) {
+        Integer stateId   = state.getId();
+        
         synchronized (_stateIdsToTasks) {
             Object task = _stateIdsToTasks.get(stateId);
             
@@ -186,6 +302,8 @@ class EscalationRuntime {
                                        new ScheduleWatcher(stateId, _executor)); 
                                                            
             _stateIdsToTasks.put(stateId, task);
+            _esclEntityIdsToStateIds.put(new EscalatingEntityIdentifier(state), 
+                                         stateId);
         }
     }
     

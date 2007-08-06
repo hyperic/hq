@@ -236,6 +236,9 @@ public class GalertProcessor {
                     }
                 }
             }
+
+            public void beforeCommit() { 
+            }
         });
     }
     
@@ -270,6 +273,9 @@ public class GalertProcessor {
                     }
                 }
             }
+
+            public void beforeCommit() {
+            }
         });
     }
     
@@ -283,6 +289,9 @@ public class GalertProcessor {
                 if (success) {
                     handleUnload(defId);
                 }
+            }
+
+            public void beforeCommit() {
             }
         });
     }
