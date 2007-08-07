@@ -128,12 +128,20 @@ document.write(
 "	<tr>\n" + 
 "		<td class=\"ErrorBlock\"><img src=\"<html:rewrite page="/images/"/>tt_error.gif\" width=\"10\" height=\"11\" hspace=\"5\" border=\"0\"/></td>\n" + 
 "		<td class=\"ErrorBlock\" width=\"100%\"><fmt:message key="errors.jsp.problem"/> <a href=\"javascript:displayStackTrace<%= randomNum %>()\"><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/></td>\n" + 
-"	</tr>\n" + 
+"	</tr>\n" +
+"	<tr>\n" +
+"		<td class=\"ErrorBlock\" style=\"border-top:0px;border-bottom:1px solid #FF9C15;\"><img src=\"<html:rewrite page="/images/"/>spacer.gif\" width=\"10\" height=\"11\" hspace=\"5\" border=\"0\"/></td>\n" +
+"		<td class=\"ErrorBlock\" width=\"100%\" style=\"border-top:0px;border-bottom:1px solid #FF9C15;\"><fmt:message key="errors.jsp.contactsupport"/>  - <fmt:message key="errors.jsp.callhyperic"/> - <fmt:message key="errors.jsp.email"/> <a href=\'mailto:<fmt:message key="errors.jsp.support"/>?subject=<fmt:message key="error.Error.Title"/>&body=" + exText<%= randomNum %> + "\'><fmt:message key="errors.jsp.support"/></a></td>\n" +
+"	</tr>\n" +
 "</table>\n" + 
 "</td>\n" + 
 "<tr>\n"
 );
-	
+
+
+
+
+
 function displayStackTrace<%= randomNum %>() {
 	errorPopup = open("","errorPopup<%= randomNum %>","width=750,height=600,resizable=yes,scrollbars=yes,left=200,top=10");
 	errorPopup.document.open();
@@ -143,7 +151,7 @@ function displayStackTrace<%= randomNum %>() {
 	"<a name=\"top\"></a>\n" + 
 	"<a href=\"javascript:window.close()\">close window</a><br><br><br>\n" + 
 	"<div align='center'>\n" + 
-	"<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" + 
+	"<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
 	"    <tr>\n" + 
 	"      <td>\n" + 
 	"				<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n" +
