@@ -35,12 +35,6 @@ import java.util.HashMap;
  */
 public final class MeasurementConstants  {
 
-    /**
-     *  Lock to be used when backfill data points are
-     *  inserted and backfill truncation occurs
-     */
-    public static final Object BACKFILL_TRUNCATE_LOCK = new Object();
- 
     /** Measurement category availability */
     public static final String CAT_AVAILABILITY   = "AVAILABILITY";
 
