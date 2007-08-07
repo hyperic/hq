@@ -39,6 +39,7 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -409,6 +410,19 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return resourceMap;
     }
 
+    
+    /**
+     * Find all the resources of an authz resource type
+     * 
+     * @param resourceType 301 for platforms, etc.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="Required" 
+     */
+    public List findResourcesOfType(int resourceType, PageInfo pInfo) { 
+        return getResourceDAO().findResourcesOfType(resourceType, pInfo);
+    }
+    
     /**
      * Get viewable service resources. Service resources include individual
      * cluster unassigned services as well as service clusters. 

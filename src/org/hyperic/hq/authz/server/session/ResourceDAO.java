@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -198,6 +199,18 @@ public class ResourceDAO
 
     public Resource findByInstanceId(ResourceType type, Integer id) {
         return findByInstanceId(type.getId(), id);
+    }
+
+    List findResourcesOfType(int typeId, PageInfo pInfo) {
+        String sql = "from Resource r where resourceType.id = :typeId ";
+        ResourceSortField sort = (ResourceSortField)pInfo.getSort();
+        
+        sql += " order by " + sort.getSortString("r") + 
+               (pInfo.isAscending() ? "" : " DESC");
+        
+        return pInfo.pageResults(getSession().createQuery(sql)
+                                             .setInteger("typeId", typeId))
+                    .list();
     }
     
     public Resource findByInstanceId(Integer typeId, Integer id) {            
