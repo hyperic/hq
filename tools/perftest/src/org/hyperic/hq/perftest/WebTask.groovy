@@ -10,16 +10,18 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput
 
 class WebTask extends Task { 
-	private Closure  closure
+	private Closure closure
 	
     def WebTask(String desc, Closure c) {
         super(desc, c)
         closure = c
     }
 
-    protected void executeClosure() {
+    protected void executeClosure(Closure statsCollector) {
         def client = new HQClient()
         client.login()
-        closure(client)
+        statsCollector() {
+            closure(client)
+        }
     }
 }

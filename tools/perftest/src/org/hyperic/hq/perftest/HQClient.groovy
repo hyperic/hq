@@ -41,6 +41,7 @@ class HQClient {
         } else {
             throw new RuntimeException("Unhandled target [" + opts + "]")
         }
+        println page.asXml()
     }
     
     /**

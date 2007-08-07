@@ -18,22 +18,28 @@ class Task
         System.currentTimeMillis()
     }
     
-    protected void executeClosure() {
-        closure()
+    protected void executeClosure(Closure statsCollector) {
+        statsCollector() {
+            closure()
+        }
     }
     
     void run() {
-        long startTime = now
-    	executeClosure()
-        long totTime = now - startTime
-        
-        synchronized (timings) {
-            if (totTime < timings.min)
-                timings.min = totTime
-            if (totTime> timings.max)
-                timings.max = totTime
-            timings.total += totTime
-            timings.num_runs++
+        def statsCollector = { subclosure ->
+            long startTime = now
+            subclosure()
+            long totTime = now - startTime
+            
+            synchronized (timings) {
+                if (totTime < timings.min)
+                    timings.min = totTime
+                if (totTime> timings.max)
+                    timings.max = totTime
+                timings.total += totTime
+                timings.num_runs++
+            }
         }
+        
+        executeClosure(statsCollector)
     }
 }
