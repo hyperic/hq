@@ -51,4 +51,9 @@ public interface HQDialect
      *               may be table percentage or random number
      */
     public String getOptimizeStmt(String table, int cost);
+
+    /*
+     * Returns true if the database supports a multi insert stmt.
+     */
+    public boolean supportsMultiInsertStmt();
 }

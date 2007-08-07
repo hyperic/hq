@@ -46,6 +46,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -237,9 +239,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn = DBUtil.getConnByContext(getInitialContext(), 
                                            DATASOURCE_NAME);
             
-            // XXX: MySQL does not handle the batch insert in single transaction
+            HQDialect dialect = Util.getHQDialect();
+
+            if (dialect.supportsMultiInsertStmt())
+                return insertDataWithOneInsert(data);
+
+            // Oracle does not handle the batch insert in single transaction
             // so return right away
-            if (DBUtil.isMySQL(conn) || DBUtil.isOracle(conn))
+            if (DBUtil.isOracle(conn))
                 return false;
             
             int numLeft = left.size();
@@ -461,6 +468,60 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return buckets;
     }
 
+    private boolean insertDataWithOneInsert(List data)
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map buckets = bucketData(data);
+
+        try {
+            // XXX:  Get a better connection here - directly from Hibernate
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           DATASOURCE_NAME);
+
+            for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
+            {
+                Map.Entry entry = (Map.Entry) it.next();
+                String table = (String) entry.getKey();
+                List dpts = (List) entry.getValue();
+
+                StringBuffer values = new StringBuffer();
+                int rowsToUpdate = 0;
+                for (Iterator i=dpts.iterator(); i.hasNext(); )
+                {
+                    DataPoint pt = (DataPoint)i.next();
+                    Integer metricId  = pt.getMetricId();
+                    MetricValue val   = pt.getMetricValue();
+                    BigDecimal bigDec;
+                    try {
+                        bigDec = new BigDecimal(val.getValue());
+                    } catch(NumberFormatException e) {  // infinite, or NaN
+                        _log.warn("Unable to insert infinite or NaN for " +
+                                  "metric id=" + metricId);
+                        continue;
+                    }
+                    rowsToUpdate++;
+                    values.append("("+val.getTimestamp()+", "+metricId.intValue()+
+                                  ", "+getDecimalInRange(bigDec)+"),");
+                }
+                String sql = "insert into "+table+" (timestamp, measurement_id, "+
+                             "value) values "+values.substring(0, values.length()-1);
+                stmt = conn.createStatement();
+                int rows = stmt.executeUpdate(sql);
+                _log.debug("Inserted "+rows+" rows into "+table+
+                           " (attempted "+rowsToUpdate+" rows)");
+                if (rows < rowsToUpdate)
+                    return false;
+            }
+        } catch(Exception e) {
+            _log.warn("Error while inserting data", e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+        }
+        return true;
+    }
+
     /**
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
@@ -599,30 +660,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Get the UNION statement from the detailed measurement tables based on
-     * the beginning of the time range.
-     * @param begin The beginning of the time range.
-     * @param end The end of the time range
-     * @return The UNION SQL statement.
-     */
-    private String getUnionStatement(long begin, long end) {
-        // We always include the _COMPAT table, it contains the backfilled
-        // data
-        StringBuffer sql = new StringBuffer();
-        sql.append("(SELECT * FROM ").
-            append(MeasTabManagerUtil.OLD_MEAS_TABLE);
-        while (end > begin) {
-            String table = MeasTabManagerUtil.getMeasTabname(end);
-            sql.append(" UNION ALL SELECT * FROM ").
-                append(table);
-            end = MeasTabManagerUtil.getPrevMeasTabTime(end);
-        }
-
-        sql.append(") ").append(TAB_DATA);
-        return sql.toString();
-    }
-
-    /**
      * Based on the given start time, determine which measurement 
      * table we should query for measurement data.  If the slice is for the
      * detailed data segment, we return the UNION view of the required time
@@ -638,7 +675,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             loadConfigDefaults();
 
         if (MeasTabManagerUtil.getMeasTabStartTime(now - purgeRaw) < begin) {
-            return getUnionStatement(begin, end);
+            return MeasTabManagerUtil.getUnionStatement(begin, end);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -1102,15 +1139,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
              * AND id=10012 GROUP BY id,interval) mt WHERE MEASUREMENT_ID = id
              * AND TIMESTAMP = (maxt - i * interval);
              */
+            String metricUnion = 
+                MeasTabManagerUtil.getUnionStatement(purgeRaw);
             StringBuffer sqlBuf = new StringBuffer(
-                "SELECT timestamp, value FROM " + TAB_DATA + ", " +
-                                                  TAB_NUMS + ", " +
-                    "(SELECT id, interval, MAX(timestamp) AS maxt" +
-                    " FROM " + TAB_DATA + ", " + TAB_MEAS +
+                "SELECT timestamp, value FROM " + metricUnion +
+                                              ", " + TAB_NUMS + ", "+
+                    "(SELECT id, interval, MAX(timestamp) AS maxt"+
+                    " FROM " + metricUnion + ", "+TAB_MEAS+
                     " WHERE measurement_id = id AND id = ?" +
                     " GROUP BY id, interval) mt " +
                 "WHERE measurement_id = id AND" +
-                     " timestamp = (maxt - i * interval)");
+                    " timestamp = (maxt - i * interval)");
 
             stmt = conn.prepareStatement(sqlBuf.toString());
             
@@ -1152,12 +1191,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         this.checkTimeArguments(begin, end);
         
         // The SQL that we will use
+        String metricUnion = MeasTabManagerUtil.getUnionStatement(purgeRaw);
         final String SQL =
             "SELECT (? + (? * i)) FROM " + TAB_NUMS +
             " WHERE i < ? AND" +
-                  " NOT EXISTS (SELECT timestamp FROM " + TAB_DATA +
-                               " WHERE measurement_id = ? AND" +
-                                     " timestamp = (? + (? * i)))";
+                  " NOT EXISTS (SELECT timestamp FROM " + metricUnion +
+                               " WHERE timestamp = (? + (? * i)) AND " +
+                               " measurement_id = ?)";
        
         //Get the data points and add to the ArrayList
         Connection        conn = null;
@@ -1177,9 +1217,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             stmt.setLong(i++, begin);
             stmt.setLong(i++, interval);
             stmt.setInt (i++, totalIntervals);
-            stmt.setInt (i++, id.intValue());
             stmt.setLong(i++, begin);
             stmt.setLong(i++, interval);
+            stmt.setInt (i++, id.intValue());
 
             rs = stmt.executeQuery();
 
@@ -1376,22 +1416,24 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private StringBuffer getLastDataPointsSQL(int len, boolean constrain) {
+    private StringBuffer getLastDataPointsSQL(int len, boolean constrain)
+    {
+        String tables = MeasTabManagerUtil.getUnionStatement(purgeRaw);
         StringBuffer sqlBuf = new StringBuffer(
             "SELECT measurement_id, value, timestamp" +
-            " FROM " + TAB_DATA + ", " +
+            " FROM " + tables + ", " +
                      "(SELECT measurement_id AS id, MAX(timestamp) AS maxt" +
-                     " FROM " + TAB_DATA + " WHERE ")
+                     " FROM " + tables + " WHERE ")
                      .append(DBUtil.composeConjunctions("measurement_id", len));
         
         if (constrain)
             sqlBuf.append(" AND timestamp >= ? ");
         
         sqlBuf.append(" GROUP BY measurement_id) mt")
-              .append(" WHERE measurement_id = id AND timestamp = maxt");
+              .append(" WHERE timestamp = maxt AND measurement_id = id");
         return sqlBuf;
     }
-    
+
     /**
      * Fetch the most recent data point for particular DerivedMeasurements.
      *
@@ -2128,10 +2170,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // and interval is not null and
             // and 0 = (SELECT COUNT(*) FROM EAM_MEASUREMENT_DATA WHERE
             // ID = measurement_id and timestamp > (105410357766 -3 * interval));
+            String metricUnion =
+                MeasTabManagerUtil.getUnionStatement(purgeRaw);
             stmt = conn.prepareStatement(
-                "SELECT ID FROM " + TAB_MEAS +
+                "SELECT ID FROM " + metricUnion +
                 " WHERE enabled = ? AND NOT interval IS NULL AND " +
-                      " NOT EXISTS (SELECT timestamp FROM " + TAB_DATA +
+                      " NOT EXISTS (SELECT timestamp FROM " + metricUnion +
                                   " WHERE id = measurement_id AND " +
                                         " timestamp > (? - ? * interval))");
     

@@ -52,6 +52,11 @@ public class PostgreSQLDialect
         return "ANALYZE "+table;
     }
 
+    public boolean supportsMultiInsertStmt()
+    {
+        return false;
+    }
+
     public String getDeleteJoinStmt(String deleteTable,
                                     String commonKey,
                                     String joinTables,

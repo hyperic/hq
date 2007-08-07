@@ -77,9 +77,6 @@ public class DataCompressEJBImpl
     private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
     private static final String METRIC_DATA_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
-    private static final Object BACKFILL_TRUNCATE_LOCK = 
-                                    MeasurementConstants.BACKFILL_TRUNCATE_LOCK;
-
     // For purging alerts
     private AlertManagerLocal alertManager = null;
 
@@ -194,8 +191,8 @@ public class DataCompressEJBImpl
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
             }
-            // for backfilled data
-            truncateBackfillMeasTable(truncateBefore, stmt);
+            // for backwards compatibility
+            truncateCompatMeasTable(truncateBefore, stmt);
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         }
@@ -204,32 +201,25 @@ public class DataCompressEJBImpl
         }
     }
 
-    private void truncateBackfillMeasTable(long truncateBefore, Statement stmt)
+    private void truncateCompatMeasTable(long truncateBefore, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
         try
         {
             boolean truncated = false;
-            synchronized(BACKFILL_TRUNCATE_LOCK)
+            String sql = "SELECT max(timestamp) as maxtimestamp "+
+                         " FROM "+BF_TABLE+
+                         " HAVING max(timestamp) is not null";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
             {
-                String sql = "SELECT max(timestamp) as maxtimestamp "+
-                             " FROM "+BF_TABLE+
-                             " HAVING max(timestamp) is not null";
-                rs = stmt.executeQuery(sql);
-                if (rs.next())
+                if (truncateBefore > rs.getLong("maxtimestamp"))
                 {
-                    if (truncateBefore > rs.getLong("maxtimestamp"))
-                    {
-                        stmt.executeUpdate("truncate table "+BF_TABLE);
-                        truncated = true;
-                    }
+                    stmt.executeUpdate("truncate table "+BF_TABLE);
+                    truncated = true;
                 }
             }
-            if (truncated)
-                return;
-            String sql = "DELETE FROM "+BF_TABLE+" where timestamp < "+truncateBefore;
-            stmt.executeUpdate(sql);
         }
         finally {
             if (rs != null) rs.close();
@@ -338,7 +328,8 @@ public class DataCompressEJBImpl
         long last;
 
         // Compress hourly data
-        last = compressData(TAB_DATA, TAB_DATA_1H, HOUR, now);
+        String metricUnion = MeasTabManagerUtil.getUnionStatement((now-HOUR), now);
+        last = compressData(metricUnion, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
         truncateRawMeasurements(Math.min(now - this.purgeRaw, last));
 
@@ -424,7 +415,7 @@ public class DataCompressEJBImpl
             // already compressed table, we'll take the MIN and
             // MAX from the already calculated min and max columns.
             String minMax;
-            if (fromTable.equals(TAB_DATA)) {
+            if (fromTable.endsWith(TAB_DATA)) {
                 minMax = "AVG(value), MIN(value), MAX(value) ";
             } else {
                 minMax = "AVG(value), MIN(minvalue), MAX(maxvalue) ";

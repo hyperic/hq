@@ -37,10 +37,11 @@ public class MeasTabManagerUtil {
     private static final Log _log = LogFactory.getLog(MeasTabManagerUtil.class);
 
     static final int NUMBER_OF_TABLES = 18,
-        NUMBER_OF_TABLES_PER_DAY = 2;
+                     NUMBER_OF_TABLES_PER_DAY = 2;
     public static final String MEAS_TABLE = "HQ_METRIC_DATA";
     public static final String MEAS_VIEW = MEAS_TABLE;
     public static final String OLD_MEAS_TABLE = MEAS_TABLE + "_COMPAT";
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
 
     static {
         _baseCal.set(2006, 0, 1, 0, 0);
@@ -48,6 +49,35 @@ public class MeasTabManagerUtil {
 
     public static long getBaseTime() {
         return _baseCal.getTimeInMillis();
+    }
+
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @return The UNION SQL statement.
+     */
+    public static String getUnionStatement(long begin, long end) {
+        // We always include the _COMPAT table, it contains the backfilled
+        // data
+        StringBuffer sql = new StringBuffer();
+        sql.append("(SELECT * FROM ").append(OLD_MEAS_TABLE);
+        while (end > begin) {
+            String table = MeasTabManagerUtil.getMeasTabname(end);
+            sql.append(" UNION ALL SELECT * FROM ").
+                append(table);
+            end = MeasTabManagerUtil.getPrevMeasTabTime(end);
+        }
+
+        sql.append(") ").append(TAB_DATA);
+        return sql.toString();
+    }
+
+    public static String getUnionStatement(long millisBack) {
+        long timeNow = System.currentTimeMillis(),
+             begin   = timeNow - millisBack;
+        return getUnionStatement(begin, timeNow);
     }
 
     private static int getDayOfPeriod(long timems) {

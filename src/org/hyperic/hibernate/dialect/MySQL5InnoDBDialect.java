@@ -113,4 +113,8 @@ public class MySQL5InnoDBDialect
     public String getQuerySequencesString() {
         return "SELECT " + SEQUENCE_TABLE + " FROM " + SEQUENCE_TABLE;
     }
+
+    public boolean supportsMultiInsertStmt() {
+        return true;
+    }
 }

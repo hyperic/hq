@@ -71,4 +71,9 @@ public class Oracle9Dialect
                " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")"+limitCond;
     }
+
+    public boolean supportsMultiInsertStmt()
+    {
+        return false;
+    }
 }
