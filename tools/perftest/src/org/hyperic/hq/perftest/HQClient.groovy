@@ -10,8 +10,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput
 
 class HQClient {
-    private WebClient client
-
+    private static Random rand = new Random()
+    private static Object resourceInit = new Object()
+    private static Map    resources
+    
+    private WebClient  client
+    
     def baseUrl = System.properties['hq.url']
                                     
     def jumpTo(opts, targ) {
@@ -38,12 +42,66 @@ class HQClient {
                 pageSize = -1
                 
             page = client.getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
-        } else {
-            throw new RuntimeException("Unhandled target [" + opts + "]")
+        } else if (targ in Map && targ.type == 'platform') {
+            page = client.getPage("${baseUrl}/Resource.do?eid=1:${targ.instanceId}")
+        } else if (targ in Map && targ.type == 'server') {
+            page = client.getPage("${baseUrl}/Resource.do?eid=2:${targ.instanceId}")
+        } else if (targ in Map && targ.type == 'service') {
+            page = client.getPage("${baseUrl}/Resource.do?eid=3:${targ.instanceId}")
+    	} else {
+            throw new RuntimeException("Unhandled target [" + target + "]")
         }
-        println page.asXml()
+    }
+
+    def getPerfSupportPage(action) {
+    	client.getPage("${baseUrl}/hqu/perfsupport/support/${action}.hqu") 
+    }
+
+    private void initResources() {
+        if (resources == null) {
+            resources = [:]
+            for (t in [platforms : 'platform', servers : 'server',
+                       services : 'service'])
+            {
+                def page  = getPerfSupportPage(t.key)
+                def res   = []
+                def nodes = page.xmlDocument.getElementsByTagName('resource')
+        
+                for (i in 0..<nodes.length) {
+                    def attrs = nodes.item(i).attributes
+            
+		            res << [id:attrs.getNamedItem('id').nodeValue,
+			                type:t.value,
+		                    instanceId:attrs.getNamedItem('instanceId').nodeValue,
+    			            name:attrs.getNamedItem('name').nodeValue]
+                }
+                
+                resources[t.key] = res
+            }
+        }
     }
     
+    def getRandomPlatform() {
+        synchronized (resourceInit) {
+            initResources()
+            return resources.platforms[rand.nextInt(resources.platforms.size)]
+        }
+    }
+    
+    def getRandomServer() {
+        synchronized (resourceInit) {
+            initResources()
+            return resources.servers[rand.nextInt(resources.servers.size)]
+        }
+    }
+
+    def getRandomService() {
+        synchronized (resourceInit) {
+            initResources()
+            return resources.services[rand.nextInt(resources.services.size)]
+        }
+    }
+
     /**
      * Setup the web client and login.  
      */

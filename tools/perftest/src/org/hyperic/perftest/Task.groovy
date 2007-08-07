@@ -1,8 +1,6 @@
 package org.hyperic.perftest
 
-class Task 
-    implements Runnable
-{
+class Task implements Runnable { 
     Map     timings
     String  name
 	Closure closure
