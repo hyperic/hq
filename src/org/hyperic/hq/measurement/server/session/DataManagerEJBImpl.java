@@ -33,11 +33,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -231,9 +234,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public boolean addData(List data) {
         Connection conn = null;
-
+        data = enforceUnmodifiable(data);
         List left = data;
-            
+                
         try {
             // XXX:  Get a better connection here - directly from Hibernate
             conn = DBUtil.getConnByContext(getInitialContext(), 
@@ -249,22 +252,28 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if (DBUtil.isOracle(conn))
                 return false;
             
-            int numLeft = left.size();
-            _log.debug("Attempting to insert " + numLeft + " points");
-            left = insertData(conn, left, true);
+            _log.debug("Attempting to insert " + left.size() + " points");
+            left = insertData(conn, left);
             _log.debug("Num left = " + left.size());
             
             if (!left.isEmpty()) {
-                _log.warn("Need to update data " + left.remove(0));
+                _log.warn("Need to update " + left.size() + " data points.");
+                
+                if (_log.isDebugEnabled())
+                    _log.debug("Data points to update: " + left);                
+                
                 return false;
-            }
+            }            
         } catch(Exception e) {
-            _log.warn("Error while inserting data", e);
+            // If there is a general exception, then none of the data points 
+            // were inserted.
+            _log.warn("Error while inserting data in batch", e);
+            return false;
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
         
-        sendMetricEvents(data.subList(0, data.size() - left.size()));
+        sendMetricEvents(data);
         return true;
     }
 
@@ -280,8 +289,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public void addData(List data, boolean overwrite) {
-        Connection conn = null;
-
         /**
          * We have to account for 2 types of metric data insertion here:
          *  1 - New data, using 'insert'
@@ -297,36 +304,44 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
          *      throw the exception at the first instance of an error, and some
          *      will continue with the rest of the batch.
          */
+
+        Connection conn = null;
+        Set failedToSaveMetrics = new HashSet();
+        data = enforceUnmodifiable(data);
+        List left = data;
         
-        try {
-            List left = data;
-            
+        try {            
             // XXX:  Get a better connection here - directly from Hibernate
             conn = DBUtil.getConnByContext(getInitialContext(), 
                                            DATASOURCE_NAME);
             while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
-                left = insertData(conn, left, overwrite);
+                left = insertData(conn, left);
                 _log.debug("Num left = " + left.size());
                 
                 if (left.isEmpty())
                     break;
                 
-                if (!overwrite)
-                    return;
-                
+                if (!overwrite) {
+                    failedToSaveMetrics.addAll(left);
+                    break;
+                }
+                                    
                 // The insert couldn't insert everything, so attempt to update
                 // the things that are left
                 _log.debug("Sending " + left.size() + " data points to update");
-                left = updateData(conn, left);
+                
+                left = updateData(conn, left);                    
+                
                 if (left.isEmpty())
                     break;
 
                 _log.debug("Update left " + left.size() + " points to process");
                 
-                if (numLeft == left.size() && numLeft != 0) {
+                if (numLeft == left.size()) {
                     DataPoint remPt = (DataPoint)left.remove(0);
+                    failedToSaveMetrics.add(remPt);
                     // There are some entries that we weren't able to do
                     // anything about ... that sucks.
                     _log.warn("Unable to do anything about " + numLeft + 
@@ -336,11 +351,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         } catch(Exception e) {
             _log.warn("Error while inserting data", e);
+            failedToSaveMetrics.addAll(left);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
         
-        sendMetricEvents(data);
+        sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
+    }
+    
+    private List enforceUnmodifiable(List aList) {
+        return Collections.unmodifiableList(aList);
+    }
+    
+    private List removeMetricsFromList(List data, Set metricsToRemove) {
+        if (metricsToRemove.isEmpty()) {
+            return data;
+        }
+        
+        Set allMetrics = new HashSet(data);
+        allMetrics.removeAll(metricsToRemove);
+        return new ArrayList(allMetrics);
     }
 
     /**
@@ -357,36 +387,50 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         return val;
     }
-    
+        
     private void sendMetricEvents(List data) {
-        MetricDataCache cache = MetricDataCache.getInstance();
-        ArrayList events  = new ArrayList();
-        List zevents = new ArrayList();
-
+        if (data.isEmpty()) {
+            return;
+        }
+        
         // Finally, for all the data which we put into the system, make sure
         // we update our internal cache, kick off the events, etc.
-        for (Iterator i=data.iterator(); i.hasNext(); ) {
-            DataPoint dp = (DataPoint)i.next();
-            Integer metricId = dp.getMetricId();
-            MetricValue val  = dp.getMetricValue();
+        analyzeMetricData(data);
         
-            if (analyzer != null) {
-                analyzer.analyzeMetricValue(metricId, val);
-            }
-                
-            // Save value in "last" cache -- technically this is not
-            // transactionally correct.  XXX
-            if (cache.add(metricId, val)) {
-                MeasurementEvent event = new MeasurementEvent(metricId, 
-                                                              val);
-                
-                if (RegisteredTriggers.isTriggerInterested(event))
-                    events.add(event);
-                
-                zevents.add(new MeasurementZevent(metricId.intValue(), val));
+        List cachedData = updateMetricDataCache(data);
+        
+        sendDataToEventHandlers(cachedData);        
+    }  
+    
+    private void analyzeMetricData(List data) {
+        if (analyzer != null) {
+            for (Iterator i = data.iterator(); i.hasNext();) {
+                DataPoint dp = (DataPoint) i.next();
+                analyzer.analyzeMetricValue(dp.getMetricId(), dp.getMetricValue());
             }
         }
+    }
+    
+    private List updateMetricDataCache(List data) {
+        MetricDataCache cache = MetricDataCache.getInstance();
+        return cache.bulkAdd(data);
+    }
+    
+    private void sendDataToEventHandlers(List data) {
+        ArrayList events  = new ArrayList();
+        List zevents = new ArrayList();
+        
+        for (Iterator i = data.iterator(); i.hasNext();) {
+            DataPoint dp = (DataPoint) i.next();
+            Integer metricId = dp.getMetricId();
+            MetricValue val = dp.getMetricValue();
+            MeasurementEvent event = new MeasurementEvent(metricId, val);
 
+            if (RegisteredTriggers.isTriggerInterested(event))
+                events.add(event);
+
+            zevents.add(new MeasurementZevent(metricId.intValue(), val));
+        }
         
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
@@ -515,7 +559,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     return false;
             }
         } catch(Exception e) {
-            _log.warn("Error while inserting data", e);
+            _log.warn("Error while inserting data in batch", e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
@@ -526,9 +570,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
      * be returned in the result list.
-     * @param overwrite TODO
+     * 
+     * @return The data points that were not inserted or an empty list.
+     * @throws SQLException if a general SQL Exception occurs. In this case none 
+     *                      of the data points will be inserted.
      */
-    private List insertData(Connection conn, List data, boolean overwrite) 
+    private List insertData(Connection conn, List data) 
         throws SQLException
     {
         PreparedStatement stmt = null;
@@ -579,8 +626,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * This method is called to perform 'updates' for any inserts which failed
-     * in addData. 
+     * This method is called to perform 'updates' for any inserts that failed. 
+     * 
+     * @return The data points that were not updated or an empty list.
+     * @throws SQLException if a general SQL Exception occurs. In this case none 
+     *                      of the data points will be updated.
      */
     private List updateData(Connection conn, List data) 
         throws SQLException
@@ -1526,13 +1576,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
 
                 rs = stmt.executeQuery();
-
+                
                 while (rs.next()) {
                     Integer mid = new Integer(rs.getInt(1));
                     if (!data.containsKey(mid)) {
                         MetricValue mval = getMetricValue(rs);
                         data.put(mid, mval);
-                        cache.add(mid, mval);
                     }
                 }
                 
@@ -1550,8 +1599,32 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                           "time: " + timer.getElapsed());
             }
         }
-    
+        
+        List dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
+        updateMetricDataCache(dataPoints);
+        
         return data;
+    }
+
+    /**
+     * Convert the MetricId->MetricValue map to a list of DataPoints.
+     * 
+     * @param metricId2MetricValueMap The map to convert.
+     * @return The list of DataPoints.
+     */
+    private List convertMetricId2MetricValueMapToDataPoints(
+            Map metricId2MetricValueMap) {
+        
+        List dataPoints = new ArrayList(metricId2MetricValueMap.size());
+        
+        for (Iterator i = metricId2MetricValueMap.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry) i.next();
+            Integer mid = (Integer)entry.getKey();
+            MetricValue mval = (MetricValue)entry.getValue();
+            dataPoints.add(new DataPoint(mid, mval));
+        }
+        
+        return dataPoints;
     }
 
     /**
