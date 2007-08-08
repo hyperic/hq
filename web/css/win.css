@@ -1126,10 +1126,13 @@ a.headUsrName {
 #recentAlerts {
     float:left;
     display:inline;
+    width:605px;
     padding-top:1px;
     font-weight:bold;
     color:black;
-    white-space: nowrap ;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 #navigationTbl  {
