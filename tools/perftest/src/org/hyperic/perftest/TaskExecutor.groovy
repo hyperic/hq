@@ -10,10 +10,11 @@ class TaskExecutor {
     private List runData = []
     
     def execute(String runName, List tasks) {
-        println "Executing run [${runName}]"
+        println "Executing [${runName}]"
         def pools = []
         for (t in tasks) {
-            println "Task [${t.task.name}] -- starting pool with ${t.max_threads} threads"
+            println "Task [${t.task.name}] -- max_threads=${t.max_threads} " + 
+                    "repeat=${t.num_times}"
             def q = new ArrayBlockingQueue(t.num_times)
             def pool = new ThreadPoolExecutor(t.max_threads, t.max_threads,
                                               Long.MAX_VALUE, TimeUnit.SECONDS,

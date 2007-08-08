@@ -24,9 +24,16 @@ JAVA="${JAVA_HOME}/bin/java"
 JAVA_OPTS=-Xmx1024m
 CLASS=groovy.lang.GroovyShell
 
+if [ $# != 2 ] ; then
+   echo "Syntax: $0 <testFile.groovy> <config.props>"
+   exit 1
+fi
+
 java $JAVA_OPTS -classpath $LIBS \
      -Dcom.gargoylesoftware.htmlunit=DEBUG \
      -Dperftest.script="$1" \
      -Dperftest.propfile="$2" \
      $CLASS \
-     src/org/hyperic/perftest/PerfTest.groovy
+     src/org/hyperic/perftest/PerfTest.groovy 2>&1 \
+ | grep -v isRedirectNeeded | grep -v followRedirects
+     
