@@ -223,9 +223,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         addData(pts, overwrite);
     }
-
+    
     /**
-     * Write metric datapoints to the DB with transaction
+     * Write metric data points to the DB with transaction
      * 
      * @param data       a list of {@link DataPoint}s 
      *
@@ -233,48 +233,22 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public boolean addData(List data) {
-        Connection conn = null;
         data = enforceUnmodifiable(data);
-        List left = data;
-                
-        try {
-            // XXX:  Get a better connection here - directly from Hibernate
-            conn = DBUtil.getConnByContext(getInitialContext(), 
-                                           DATASOURCE_NAME);
-            
-            HQDialect dialect = Util.getHQDialect();
-
-            if (dialect.supportsMultiInsertStmt())
-                return insertDataWithOneInsert(data);
-
-            // Oracle does not handle the batch insert in single transaction
-            // so return right away
-            if (DBUtil.isOracle(conn))
-                return false;
-            
-            _log.debug("Attempting to insert " + left.size() + " points");
-            left = insertData(conn, left);
-            _log.debug("Num left = " + left.size());
-            
-            if (!left.isEmpty()) {
-                _log.warn("Need to update " + left.size() + " data points.");
-                
-                if (_log.isDebugEnabled())
-                    _log.debug("Data points to update: " + left);                
-                
-                return false;
-            }            
-        } catch(Exception e) {
-            // If there is a general exception, then none of the data points 
-            // were inserted.
-            _log.warn("Error while inserting data in batch", e);
-            return false;
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
+        
+        HQDialect dialect = Util.getHQDialect();
+        boolean succeeded = false;
+        
+        if (dialect.supportsMultiInsertStmt()) {
+            succeeded = insertDataWithOneInsert(data);            
+        } else {
+            succeeded = insertDataInBatch(data);
         }
         
-        sendMetricEvents(data);
-        return true;
+        if (succeeded) {
+            sendMetricEvents(data);
+        }
+        
+        return succeeded;        
     }
 
     /**
@@ -512,8 +486,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return buckets;
     }
 
-    private boolean insertDataWithOneInsert(List data)
-    {
+    private boolean insertDataWithOneInsert(List data) {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -563,6 +536,51 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
+        return true;
+    }
+    
+    /**
+     * Insert the metric data points to the DB in batch.
+     * 
+     * @param data a list of {@link DataPoint}s 
+     * @return <code>true</code> if the batch insert succeeded; <code>false</code> 
+     *         otherwise.
+     */
+    private boolean insertDataInBatch(List data) {
+        Connection conn = null;
+        List left = data;
+                
+        try {
+            // XXX:  Get a better connection here - directly from Hibernate
+            conn = DBUtil.getConnByContext(getInitialContext(), 
+                                           DATASOURCE_NAME);
+            
+            // Oracle does not handle the batch insert in single transaction
+            // so return right away
+            if (DBUtil.isOracle(conn))
+                return false;
+            
+            _log.debug("Attempting to insert " + left.size() + " points");
+            left = insertData(conn, left);
+            _log.debug("Num left = " + left.size());
+            
+            if (!left.isEmpty()) {
+                _log.warn("Need to update " + left.size() + " data points.");
+                
+                if (_log.isDebugEnabled())
+                    _log.debug("Data points to update: " + left);                
+                
+                return false;
+            }            
+        } catch(Exception e) {
+            // If there is a general exception, then none of the data points 
+            // were inserted.
+            _log.warn("Error while inserting data in batch", e);
+            return false;
+        } finally {
+            DBUtil.closeConnection(logCtx, conn);
+        }
+        
         return true;
     }
 
