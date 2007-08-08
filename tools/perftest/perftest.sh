@@ -1,6 +1,7 @@
 #!/bin/sh
 
-LIBDIR=../../thirdparty/lib
+HQDIR=../..
+LIBDIR=$HQDIR/thirdparty/lib
 LIBS=$LIBDIR/groovy-all-1.0.jar
 LIBS="$LIBS:$LIBDIR/commons-cli-1.1.jar"
 LIBS="$LIBS:$LIBDIR/commons-httpclient-3.0.1.jar"
@@ -16,6 +17,7 @@ LIBS="$LIBS:lib/commons-cli-1.1.jar"
 LIBS="$LIBS:lib/jaxen-1.1.1.jar"
 LIBS="$LIBS:lib/js.jar"
 LIBS="$LIBS:lib/nekohtml.jar"
+LIBS="$LIBS:$HQDIR/build/classes"
 LIBS="$LIBS:src"
 
 JAVA="${JAVA_HOME}/bin/java"

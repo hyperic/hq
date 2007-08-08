@@ -1,5 +1,7 @@
 package org.hyperic.perftest
 
+import org.hyperic.util.PrintfFormat
+
 import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit
 import edu.emory.mathcs.backport.java.util.concurrent.ArrayBlockingQueue
@@ -39,6 +41,9 @@ class TaskExecutor {
     }
     
     def dumpReport() {
+        def sfmt = new PrintfFormat('%-40s %-6s %-6s %-6s %-6s %-6s')
+        def dfmt = new PrintfFormat('%-40s %-6.1f %-6.1f %-6.1f %-6d %-6.1f')
+        println sfmt.sprintf(['', 'min', 'max', 'avg', 'oops', 'stddev'] as Object[])
         for (r in runData) {
         	println "$r.name:"
 			for (t in r.tasks) {
@@ -57,9 +62,13 @@ class TaskExecutor {
                 }
 			    devsum /= (successRuns.size - 1)
 			    def stddev = Math.sqrt(devsum) / 1000
-                
-			    println "    ${t.name} min=${min} max=${max} avg=${avg} " +
-			            "oops=${oops} stddev=${stddev}"
+        
+			    println dfmt.sprintf(["    ${t.name}", 
+			                          min as float,
+			                          max as float,
+			                          avg as float,
+			                          oops as int,
+			                          stddev as float] as Object[])
 			}
             println ""
         }
