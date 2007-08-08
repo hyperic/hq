@@ -49,14 +49,17 @@ class TaskExecutor {
 			    def avg     = totTime / successRuns.size()
 			    def oops    = t.timings.num_oops
 			    
+			    println successRuns
+			    
                 def devsum = 0
                 for (s in successRuns) {
-                    devsum += (s - avg) * (s - avg)
+                    devsum += (s - avg * 1000) * (s - avg * 1000)
                 }
 			    devsum /= (successRuns.size - 1)
+			    def stddev = Math.sqrt(devsum)
                 
 			    println "    ${t.name} min=${min} max=${max} avg=${avg} " +
-			            "oops=${oops} stddev=${devsum}"
+			            "oops=${oops} stddev=${stddev}"
 			}
         }
     }

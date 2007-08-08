@@ -19,9 +19,7 @@ class HQClient {
     
     def baseUrl = System.properties['hq.url']
                                     
-    def jumpTo(opts, targ) {
-        def page
-        
+    def jumpTo(targ, opts) {
         if (targ == 'hub') {
             def ff
             def pageSize
@@ -42,35 +40,36 @@ class HQClient {
             if ((pageSize in String) && pageSize == 'unlimited') 
                 pageSize = -1
                 
-            page = getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
+            return getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
         } else if (targ in Map && targ.type in ['platform', 'server', 'service'] ) {
             def appdefType = typeToAppdefType[targ.type]
             def aeid       = "${appdefType}:${targ.instanceId}"
 
-            if (targ.inventory) {
-                if (targ.inventory.main) {
-                    page = getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
+            if (opts.inventory) {
+                if (opts.inventory == 'main') {
+                    return getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
                 } else {
-                    throw new RuntimeException("Unsupported inventory type [${targ.inventory}]")
+                    throw new RuntimeException("Unsupported inventory type [${opts.inventory}]")
                 }
-            } else if (targ.monitor) {
-                if (targ.monitor.indicators) {
-                    page = getPage("${baseUrl}/Resource.do?eid=${aeid}")
-                } else if (targ.monitor.metric_data) {
-                    page = getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
+            } else if (opts.monitor) {
+                if (ops.monitor == 'indicators') {
+                    return getPage("${baseUrl}/Resource.do?eid=${aeid}")
+                } else if (ops.monitor == 'metric_data') {
+                    return getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
                 } else {
-                    throw new RuntimeException("Unsupported monitor type [${targ.monitor}]")
+                    throw new RuntimeException("Unsupported monitor type [${ops.monitor}]")
                 } 
-            } else if (targ.alert) {
-                if (targ.alert.configure) {
-                    page = getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
+            } else if (ops.alert) {
+                if (ops.alert == 'configure') {
+                    return getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
                 } else {
-                  throw new RuntimeException("Unsupported alert type [${targ.alert}]")
+                  throw new RuntimeException("Unsupported alert type [${ops.alert}]")
                 }
+            } else {
+                throw new RuntimeException("Unsupported resource jump for [${targ}]")
             }
-    	} else {
-            throw new RuntimeException("Unhandled target [" + target + "]")
-        }
+    	} 
+        throw new RuntimeException("Unhandled target [" + targ + "]")
     }
 
     def getPerfSupportPage(action) {
@@ -78,7 +77,8 @@ class HQClient {
     }
     
     def getPage(url) {
-        client.getPage(url)
+        def page = client.getPage(url)
+        return page
     }
 
     private void initResources() {
