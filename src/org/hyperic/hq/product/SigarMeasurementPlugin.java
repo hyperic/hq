@@ -63,6 +63,8 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     static {
         AVAIL_ATTRS.put("DirUsage", "Total");
         AVAIL_ATTRS.put("FileInfo", "Total");
+        AVAIL_ATTRS.put("MultiProcCpu", "Processes");
+        AVAIL_ATTRS.put("MultiProcMem", "Size");
     }
 
     protected Sigar getSigar() throws PluginException {
