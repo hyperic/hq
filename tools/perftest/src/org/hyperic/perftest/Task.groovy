@@ -1,9 +1,9 @@
 package org.hyperic.perftest
 
 class Task implements Runnable { 
-    Map     timings
-    String  name
-	Closure closure
+            Map     stats = [:]
+            String  name
+	private Closure closure
 	
     def Task(String name, Closure c) {
     	this.name    = name
@@ -16,10 +16,20 @@ class Task implements Runnable {
     }
     
     def resetTimings() {
-    	timings = [min:Long.MAX_VALUE, max:Long.MIN_VALUE, total:0, 
-    	           num_runs:0, num_oops:0]
+        synchronized (stats) {
+        	stats.clear()
+        	stats.successRuns = []
+        	stats.num_oops = 0
+        }
     }
     
+    def getTimings() {
+        synchronized (stats) {
+            return [successRuns : stats.successRuns + [],
+                    num_oops    : stats.num_oops ]
+        }
+    }
+
     protected void executeClosure(Closure statsCollector) {
         statsCollector() {
             closure()
@@ -32,21 +42,17 @@ class Task implements Runnable {
             subclosure()
             long totTime = now - startTime
             
-            synchronized (timings) {
-                if (totTime < timings.min)
-                    timings.min = totTime
-                if (totTime> timings.max)
-                    timings.max = totTime
-                timings.total += totTime
-                timings.num_runs++
+            synchronized (stats) {
+                stats.successRuns << totTime
             }
         }
         
         try {
         	executeClosure(statsCollector)
         } catch(Exception e) {
-            synchronized (timings) {
-                timings.num_oops++
+            e.printStackTrace()
+            synchronized (stats) {
+                stats.num_oops++
             }
         }
     }

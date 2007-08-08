@@ -30,10 +30,9 @@ class TaskExecutor {
             p.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS)
         }
 
-        def runInfo = [name:runName, taskTimes:[]]
+        def runInfo = [name:runName, tasks:[]]
         for (t in tasks.task) {
-        	runInfo.taskTimes << [taskName : t.name, 
-        	                      timing : t.timings + ['avg':t.timings.total / t.timings.num_runs]]
+            runInfo.tasks << [name : t.name, timings : t.timings]
         	t.resetTimings()
         }
         runData << runInfo
@@ -42,13 +41,17 @@ class TaskExecutor {
     def dumpReport() {
         for (r in runData) {
         	println "$r.name:"
-        	for (t in r.taskTimes) {
-				println "    $t.taskName: runs=${t.timing.num_runs} " + 
-				        "min=${t.timing.min / 1000.0} " +
-				        "max=${t.timing.max / 1000.0} " + 
-				        "avg=${t.timing.avg / 1000.0} " + 
-				        "oops=${t.timing.num_oops}"
-        	}
+			for (t in r.tasks) {
+			    def successRuns = t.timings.successRuns
+			    def min     = successRuns.min() / 1000.0
+			    def max     = successRuns.max() / 1000.0
+			    def totTime = successRuns.sum() / 1000.0
+			    def avg     = totTime / successRuns.size()
+			    def oops    = t.timings.num_oops
+			    
+			    println "    ${t.name} min=${min} max=${max} avg=${avg} " +
+			            "oops=${oops}"
+			}
         }
     }
 }
