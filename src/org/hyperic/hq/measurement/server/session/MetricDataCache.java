@@ -25,11 +25,15 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.product.MetricValue;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+
+import org.hyperic.hq.product.MetricValue;
 
     /**
  * The MetricDataCache caches the last measurement keyed on the derived
@@ -45,6 +49,9 @@ public class MetricDataCache {
 
     private static MetricDataCache _singleton = new MetricDataCache();
     
+    private Object _cacheLock = new Object();
+    
+    
     /**
      * Singleton accessor
      */
@@ -55,31 +62,66 @@ public class MetricDataCache {
     private MetricDataCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
     }
+    
+    /**
+     * Add MetricValues to the cache. This method checks the timestamp of
+     * each MetricValue to be added to ensure it's not an older data point than
+     * what is already cached.
+     *
+     * @param data The list of DataPoint objects representing each MetricValue.
+     * @return The list of DataPoint objects added to the cache. Any DataPoints 
+     *         older than what is already cached will NOT be contained in this 
+     *         list.
+     */
+    public List bulkAdd(List data) {
+        List cachedData = new ArrayList(data.size());
+        
+        synchronized (_cacheLock) {
+            for (Iterator iter = data.iterator(); iter.hasNext();) {
+                DataPoint dp = (DataPoint) iter.next();
+                
+                if (add(dp.getMetricId(), dp.getMetricValue())) {
+                    cachedData.add(dp);
+                }
+            }
+        }
+        
+        return cachedData;
+    }
 
     /**
-     * Add a MetricValue to the cache.  This method checks the timestamp of
-     * the MetricValue to be added to ensure it's not an older datapoint than
+     * Add a MetricValue to the cache. This method checks the timestamp of
+     * the MetricValue to be added to ensure it's not an older data point than
      * what is already cached.
+     * 
+     * Each invocation of this method is synchronized internally, so consider 
+     * using the {@link #bulkAdd(List) bulk add} for batch updates to the cache.
      *
      * @param mid The measurement id.
      * @param mval The MetricValue to store.
      * @return true if the MetricValue was added to the cache, false otherwise.
      */
     public boolean add(Integer mid, MetricValue mval) {
-        Element el = _cache.get(mid);
+        // Need to synchronize on cache update since the back filler  
+        // may be updating the cache concurrently with the data inserter.
+        // Without synchronization, a race condition could cause the latest 
+        // metric to be overwritten in the cache by an older metric.
+        synchronized (_cacheLock) {
+            Element el = _cache.get(mid);
 
-        if (el != null) {
-            // Check if existing cached data is newer
-            MetricValue val = (MetricValue)el.getObjectValue();
-            if (val.getTimestamp() > mval.getTimestamp()) {
-                return false;
+            if (el != null) {
+                // Check if existing cached data is newer
+                MetricValue val = (MetricValue)el.getObjectValue();
+                if (val.getTimestamp() > mval.getTimestamp()) {
+                    return false;
+                }
             }
+
+            el = new Element(mid, mval);
+            _cache.put(el);
+
+            return true;            
         }
-
-        el = new Element(mid, mval);
-        _cache.put(el);
-
-        return true;
     }
 
     /**
