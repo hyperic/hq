@@ -10,6 +10,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTextArea
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput
 
 class HQClient {
+    private static typeToAppdefType = [platform:1, server:2, service:3]
     private static Random rand = new Random()
     private static Object resourceInit = new Object()
     private static Map    resources
@@ -42,12 +43,31 @@ class HQClient {
                 pageSize = -1
                 
             page = client.getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
-        } else if (targ in Map && targ.type == 'platform') {
-            page = client.getPage("${baseUrl}/Resource.do?eid=1:${targ.instanceId}")
-        } else if (targ in Map && targ.type == 'server') {
-            page = client.getPage("${baseUrl}/Resource.do?eid=2:${targ.instanceId}")
-        } else if (targ in Map && targ.type == 'service') {
-            page = client.getPage("${baseUrl}/Resource.do?eid=3:${targ.instanceId}")
+        } else if (targ in Map && targ.type in ['platform', 'server', 'service'] ) {
+            def appdefType = typeToAppdefType[targ.type]
+            def aeid       = "${appdefType}:${targ.instanceId}"
+
+            if (targ.inventory) {
+                if (targ.inventory.main) {
+                    page = client.getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
+                } else {
+                    throw new RuntimeException("Unsupported inventory type [${targ.inventory}]")
+                }
+            } else if (targ.monitor) {
+                if (targ.monitor.indicators) {
+                    page = client.getPage("${baseUrl}/Resource.do?eid=${aeid}")
+                } else if (targ.monitor.metric_data) {
+                    page = client.getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
+                } else {
+                    throw new RuntimeException("Unsupported monitor type [${targ.monitor}]")
+                } 
+            } else if (targ.alert) {
+                if (targ.alert.configure) {
+                    page = client.getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
+                } else {
+                  throw new RuntimeException("Unsupported alert type [${targ.alert}]")
+                }
+            }
     	} else {
             throw new RuntimeException("Unhandled target [" + target + "]")
         }
@@ -118,5 +138,9 @@ class HQClient {
         passField.setValueAttribute(System.properties['hq.pword'])
 
         f.submit();
+    }
+    
+    static def preload() {
+        new HQClient().login()
     }
 }
