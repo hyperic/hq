@@ -33,7 +33,8 @@ class TaskExecutor {
         def runInfo = [name:runName, taskTimes:[]]
         for (t in tasks.task) {
         	runInfo.taskTimes << [taskName : t.name, 
-        	                      timing : t.timings + ['avg':t.timings.total / t.timings.num_runs]]	    
+        	                      timing : t.timings + ['avg':t.timings.total / t.timings.num_runs]]
+        	t.resetTimings()
         }
         runData << runInfo
     }
@@ -45,7 +46,8 @@ class TaskExecutor {
 				println "    $t.taskName: runs=${t.timing.num_runs} " + 
 				        "min=${t.timing.min / 1000.0} " +
 				        "max=${t.timing.max / 1000.0} " + 
-				        "avg=${t.timing.avg / 1000.0}"
+				        "avg=${t.timing.avg / 1000.0} " + 
+				        "oops=${t.timing.num_oops}"
         	}
         }
     }

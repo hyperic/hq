@@ -8,12 +8,16 @@ class Task implements Runnable {
     def Task(String name, Closure c) {
     	this.name    = name
     	this.closure = c
-    	this.timings = [min:Long.MAX_VALUE, max:Long.MIN_VALUE, total:0, 
-    	                num_runs:0]
+    	resetTimings()
     }
     
     long getNow() {
         System.currentTimeMillis()
+    }
+    
+    def resetTimings() {
+    	timings = [min:Long.MAX_VALUE, max:Long.MIN_VALUE, total:0, 
+    	           num_runs:0, num_oops:0]
     }
     
     protected void executeClosure(Closure statsCollector) {
@@ -38,6 +42,12 @@ class Task implements Runnable {
             }
         }
         
-        executeClosure(statsCollector)
+        try {
+        	executeClosure(statsCollector)
+        } catch(Exception e) {
+            synchronized (timings) {
+                timings.num_oops++
+            }
+        }
     }
 }

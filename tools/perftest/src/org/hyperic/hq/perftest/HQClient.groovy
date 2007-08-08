@@ -42,28 +42,28 @@ class HQClient {
             if ((pageSize in String) && pageSize == 'unlimited') 
                 pageSize = -1
                 
-            page = client.getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
+            page = getPage("${baseUrl}/ResourceHub.do?ff=$ff&view=list&ps=$pageSize")
         } else if (targ in Map && targ.type in ['platform', 'server', 'service'] ) {
             def appdefType = typeToAppdefType[targ.type]
             def aeid       = "${appdefType}:${targ.instanceId}"
 
             if (targ.inventory) {
                 if (targ.inventory.main) {
-                    page = client.getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
+                    page = getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
                 } else {
                     throw new RuntimeException("Unsupported inventory type [${targ.inventory}]")
                 }
             } else if (targ.monitor) {
                 if (targ.monitor.indicators) {
-                    page = client.getPage("${baseUrl}/Resource.do?eid=${aeid}")
+                    page = getPage("${baseUrl}/Resource.do?eid=${aeid}")
                 } else if (targ.monitor.metric_data) {
-                    page = client.getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
+                    page = getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
                 } else {
                     throw new RuntimeException("Unsupported monitor type [${targ.monitor}]")
                 } 
             } else if (targ.alert) {
                 if (targ.alert.configure) {
-                    page = client.getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
+                    page = getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
                 } else {
                   throw new RuntimeException("Unsupported alert type [${targ.alert}]")
                 }
@@ -74,7 +74,11 @@ class HQClient {
     }
 
     def getPerfSupportPage(action) {
-    	client.getPage("${baseUrl}/hqu/perfsupport/support/${action}.hqu") 
+    	getPage("${baseUrl}/hqu/perfsupport/support/${action}.hqu") 
+    }
+    
+    def getPage(url) {
+        client.getPage(url)
     }
 
     private void initResources() {
