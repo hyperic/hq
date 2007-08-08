@@ -77,52 +77,61 @@ class HQClient {
     }
     
     def getPage(url) {
-        def page = client.getPage(url)
-        return page
+        client.getPage(url)
+    }
+    
+    def getHQPage(url) {
+		getPage("${baseUrl}${url}")        
     }
 
     private void initResources() {
-        if (resources == null) {
-            resources = [:]
-            for (t in [platforms : 'platform', servers : 'server',
-                       services : 'service'])
-            {
-                def page  = getPerfSupportPage(t.key)
-                def res   = []
-                def nodes = page.xmlDocument.getElementsByTagName('resource')
-        
-                for (i in 0..<nodes.length) {
-                    def attrs = nodes.item(i).attributes
+        if (resources != null)
+            return
             
-		            res << [id:attrs.getNamedItem('id').nodeValue,
-			                type:t.value,
-		                    instanceId:attrs.getNamedItem('instanceId').nodeValue,
-    			            name:attrs.getNamedItem('name').nodeValue]
-                }
-                
-                resources[t.key] = res
-            }
-        }
-    }
-    
+        def page = getHQPage('/admin/sql.jsp')
+        def form = page.getForms().iterator().next()
+        def sqlArea = form.getTextAreasByName("sql").iterator().next()
+        sqlArea.setText('select id, resource_type_id, instance_id, name ' + 
+                        'from eam_resource ' +
+                        'where resource_type_id in (301, 303, 305);')
+        
+        def button = form.getInputByName('ok') 
+        
+        page = button.click()
+        def nodes = page.getByXPath('//tbody//font[1]/text()')
+    	def vals  = nodes.nodeValue[4..-10]
+    	def platforms = []
+        def servers   = []
+        def services  = []
+        def typeMap = ["301" : 'platform', 
+                       "303" : 'server', 
+                       "305" : 'service']
+        resources = [platform:[], server:[], service:[]]
+    	for (int i=0; i<vals.size(); i+=4) {
+    	    def typeName = typeMap[vals[i+1]]
+    	    resources[typeName] << [id:vals[i+0], type:typeName,
+    	                            instanceId:vals[i+2], name:vals[i+3]]
+    	}
+    }        
+        
     def getRandomPlatform() {
         synchronized (resourceInit) {
             initResources()
-            return resources.platforms[rand.nextInt(resources.platforms.size)]
+            return resources.platform[rand.nextInt(resources.platform.size)]
         }
     }
     
     def getRandomServer() {
         synchronized (resourceInit) {
             initResources()
-            return resources.servers[rand.nextInt(resources.servers.size)]
+            return resources.server[rand.nextInt(resources.server.size)]
         }
     }
 
     def getRandomService() {
         synchronized (resourceInit) {
             initResources()
-            return resources.services[rand.nextInt(resources.services.size)]
+            return resources.service[rand.nextInt(resources.service.size)]
         }
     }
 
