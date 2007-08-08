@@ -47,23 +47,23 @@ class HQClient {
 
             if (opts.inventory) {
                 if (opts.inventory == 'main') {
-                    return getPage("${baseUrl}//resource/platform/Inventory.do?mode=view&eid=${aeid}")
+                    return getPage("${baseUrl}/resource/platform/Inventory.do?mode=view&eid=${aeid}")
                 } else {
                     throw new RuntimeException("Unsupported inventory type [${opts.inventory}]")
                 }
             } else if (opts.monitor) {
-                if (ops.monitor == 'indicators') {
+                if (opts.monitor == 'indicators') {
                     return getPage("${baseUrl}/Resource.do?eid=${aeid}")
-                } else if (ops.monitor == 'metric_data') {
+                } else if (opts.monitor == 'metric_data') {
                     return getPage("${baseUrl}/resource/platform/monitor/Visibility.do?mode=resourceMetrics&eid=${aeid}")
                 } else {
-                    throw new RuntimeException("Unsupported monitor type [${ops.monitor}]")
+                    throw new RuntimeException("Unsupported monitor type [${opts.monitor}]")
                 } 
-            } else if (ops.alert) {
-                if (ops.alert == 'configure') {
+            } else if (opts.alert) {
+                if (opts.alert == 'configure') {
                     return getPage("${baseUrl}/alerts/Config.do?mode=list&eid=${aeid}")
                 } else {
-                  throw new RuntimeException("Unsupported alert type [${ops.alert}]")
+                  throw new RuntimeException("Unsupported alert type [${opts.alert}]")
                 }
             } else {
                 throw new RuntimeException("Unsupported resource jump for [${targ}]")
@@ -145,6 +145,8 @@ class HQClient {
     }
     
     static def preload() {
-        new HQClient().login()
+        def c = new HQClient()
+        c.login()
+        c.getRandomPlatform()
     }
 }

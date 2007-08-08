@@ -25,7 +25,7 @@ class TaskExecutor {
         }
         
         for (p in pools) {
-            println "Shutting down pool [${p}]"
+            // println "Shutting down pool [${p}]"
             p.shutdown()
             p.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS)
         }
@@ -49,18 +49,19 @@ class TaskExecutor {
 			    def avg     = totTime / successRuns.size()
 			    def oops    = t.timings.num_oops
 			    
-			    println successRuns
+			    //println successRuns
 			    
                 def devsum = 0
                 for (s in successRuns) {
                     devsum += (s - avg * 1000) * (s - avg * 1000)
                 }
 			    devsum /= (successRuns.size - 1)
-			    def stddev = Math.sqrt(devsum)
+			    def stddev = Math.sqrt(devsum) / 1000
                 
 			    println "    ${t.name} min=${min} max=${max} avg=${avg} " +
 			            "oops=${oops} stddev=${stddev}"
 			}
+            println ""
         }
     }
 }

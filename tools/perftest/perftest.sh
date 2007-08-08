@@ -19,9 +19,10 @@ LIBS="$LIBS:lib/nekohtml.jar"
 LIBS="$LIBS:src"
 
 JAVA="${JAVA_HOME}/bin/java"
+JAVA_OPTS=-Xmx1024m
 CLASS=groovy.lang.GroovyShell
 
-java -classpath $LIBS \
+java $JAVA_OPTS -classpath $LIBS \
      -Dcom.gargoylesoftware.htmlunit=DEBUG \
      -Dperftest.script="$1" \
      -Dperftest.propfile="$2" \
