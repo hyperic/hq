@@ -37,8 +37,10 @@ import java.util.Properties;
 
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.TypeInfo;
 
@@ -46,11 +48,6 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
 
 public class MySQLMeasurementPlugin
     extends JDBCMeasurementPlugin {

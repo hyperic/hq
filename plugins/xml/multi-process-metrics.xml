@@ -26,7 +26,7 @@
 <!-- Multi process metrics, see activemq-plugin.xml for example usage -->
 <metric name="Availability"
         alias="Availability"
-        template="system.avail:Type=MultiProcCpu,Arg=%process.query%:Processes"
+        template="sigar:Type=MultiProcCpu,Arg=%process.query%:Availability"
         category="AVAILABILITY"
         indicator="true"
         units="percentage"

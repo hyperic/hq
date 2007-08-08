@@ -75,9 +75,6 @@ print "DENY_FCB=".@deny_fcb."\n";
       <option name="process.query"
               default="State.Name.eq=smbd"
               description="PTQL for Samba Process"/>
-      <option name="avail.query"
-              default="State.Name.eq=smbd,State.Name.Pne=$1"
-              description="PTQL for Samba Process"/>
     </config>
 
     <properties>
@@ -97,9 +94,6 @@ print "DENY_FCB=".@deny_fcb."\n";
     <filter name="template"
             value="exec:file=pdk/work/scripts/samba/hq-samba-stat:${alias}"/>
 
-    <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%avail.query%:State"
-            indicator="true"/>
     <metric name="Read Only Locks"
             alias="RD_ONLY_LOCKS"
             category="UTILIZATION"
