@@ -33,7 +33,7 @@
 
 
 <tiles:importAttribute name="formName"/>
-
+  <input type="hidden" name="remove.x" id="remove.x"/>
 <tr>
   <td width="20%" class="BlockLabel">
     <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
