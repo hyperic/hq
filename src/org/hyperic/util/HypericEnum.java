@@ -228,6 +228,30 @@ public abstract class HypericEnum
         throw new IllegalStateException("Unknown Enum Class [" + 
                                         c.getName() + "] code=" + code);
     }
+
+    /**
+     * Find an enum of a specific class type by description.
+     *
+     * @param c A subclass of {@link HypericEnum}
+     * @param description The description represented by the enum.
+     * @return The enum, else null.
+     */
+    public static HypericEnum findByDescription(Class c, String description) {
+        synchronized (_enumsByClass) {
+            Set vals = (Set)_enumsByClass.get(c);
+
+            if (vals != null) {
+                for (Iterator i = vals.iterator(); i.hasNext(); ) {
+                    HypericEnum e = (HypericEnum)i.next();
+
+                    if (e.getDescription().equals(description)) {
+                        return e;
+                    }
+                }
+            }
+        }
+        return null;
+    }
     
     /**
      * Return a list of {@link HypericEnum} objects for a specific class, 
