@@ -63,7 +63,6 @@ public class SambaErrorLogPlugin extends LogFileTailPlugin
     public TrackEvent processLine(FileInfo info, String line)
     {
         String errorLevel;
-System.out.println(line);
         if (beginLine.matcher(line).find())
         {
             myBegin = line;
