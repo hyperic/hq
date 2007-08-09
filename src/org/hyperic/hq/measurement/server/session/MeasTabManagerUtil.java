@@ -63,7 +63,8 @@ public class MeasTabManagerUtil {
         // data
         StringBuffer sql = new StringBuffer();
         sql.append("(SELECT * FROM ").append(OLD_MEAS_TABLE);
-        while (end > begin) {
+        while (end >= begin)
+        {
             String table = MeasTabManagerUtil.getMeasTabname(end);
             sql.append(" UNION ALL SELECT * FROM ").
                 append(table);
