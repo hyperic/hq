@@ -44,6 +44,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
+import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -56,6 +57,7 @@ public class MxServerDetector
     static final String PROP_SERVICE_NAME = "name";
     public static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
     public static final String PROC_HOME_PROPERTY = "PROC_HOME_PROPERTY";
+    public static final String PROC_HOME_ENV      = "PROC_HOME_ENV";
     public static final String PROP_PROCESS_QUERY = "process.query";
     protected static final String PROC_JAVA = "State.Name.sw=java";
     protected static final String SUN_JMX_REMOTE =
@@ -107,6 +109,24 @@ public class MxServerDetector
 
     protected String getProcHomeProperty() {
         return getTypeProperty(PROC_HOME_PROPERTY);
+    }
+
+    protected String getProcHomeEnv() {
+        return getTypeProperty(PROC_HOME_ENV);
+    }
+
+    private String getProcHomeEnv(long pid) {
+        String key = getProcHomeEnv();
+        if (key == null) {
+            return null;
+        }
+
+        try {
+            String val = getSigar().getProcEnv(pid, key);
+            return val;
+        } catch (SigarException e) {
+            return null;
+        }
     }
 
     protected String getProcQuery() {
@@ -175,18 +195,34 @@ public class MxServerDetector
         String homeProp = "-D" + getProcHomeProperty() + "=";
 
         for (int i=0; i<pids.length; i++) {
-            String[] args = getProcArgs(pids[i]);
-            
+            long pid = pids[i];
+            //need to find installpath for each match
+            //-Dfoo.home arg, FOO_HOME env var or cwd
+            String[] args = getProcArgs(pid);
+            String path = null;
+
             for (int j=0; j<args.length; j++) {
                 String arg = args[j];
 
                 if (arg.startsWith(homeProp)) {
-                    MxProcess process =
-                        new MxProcess(pids[i],
-                                      args,
-                                      arg.substring(homeProp.length()));        
-                    procs.add(process);
+                    path = arg.substring(homeProp.length());
+                    break;
                 }
+            }
+
+            if (path == null) {
+                path = getProcHomeEnv(pid);
+            }
+            if (path == null) {
+                path = getProcCwd(pid);
+            }
+
+            if (path != null) {
+                MxProcess process =
+                    new MxProcess(pid,
+                                  args,
+                                  path);        
+                procs.add(process);
             }
         }
 
