@@ -300,7 +300,6 @@ public class GalertBossEJBImpl
      * DAO finder convention
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                     long end, PageControl pc)

@@ -40,6 +40,7 @@ import org.hyperic.lather.LatherValue;
  *      local-jndi-name="LocalLatherBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class LatherBossEJBImpl
     extends BizappSessionEJB
@@ -60,7 +61,6 @@ public class LatherBossEJBImpl
      *         representing the result of the invoked method
      *
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public LatherValue dispatch(LatherContext ctx, String method, 
                                 LatherValue arg)

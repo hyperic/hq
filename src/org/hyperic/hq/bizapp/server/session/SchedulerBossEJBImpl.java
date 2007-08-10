@@ -56,6 +56,7 @@ import org.hyperic.hq.scheduler.shared.SchedulerUtil;
  *      local-jndi-name="LocalSchedulerBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="REQUIRED"
  */
 public class SchedulerBossEJBImpl implements SessionBean {
     private SessionManager manager;
@@ -74,7 +75,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all job groups in the scheduler.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String[] getJobGroupNames(int sessionID) throws
         SessionNotFoundException,
@@ -91,7 +91,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all trigger groups in the scheduler.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String[] getTriggerGroupNames(int sessionID) throws
         SessionNotFoundException,
@@ -110,7 +109,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param jobGroup the group whose jobs should be listed
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String[] getJobNames(int sessionID, String jobGroup) throws
         SessionNotFoundException,
@@ -129,7 +127,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param triggerGroup the group whose triggers should be listed
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String[] getTriggerNames(int sessionID, String triggerGroup) throws
         SessionNotFoundException,
@@ -146,7 +143,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * Get a list of all currently-executing jobs.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Key[] getCurrentlyExecutingJobs(int sessionID) throws
         SessionNotFoundException,
@@ -176,7 +172,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @return true if a job was removed, false otherwise
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean deleteJob(int sessionID, String jobName, String groupName) throws
         SessionNotFoundException,
@@ -197,7 +192,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @return true if a schedule was deleted, false otherwise
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean deleteSchedule(int sessionID, String scheduleName, String groupName) throws
         SessionNotFoundException,
@@ -217,7 +211,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @return number of schedules deleted
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public int deleteScheduleGroup(int sessionID, String groupName) throws
         SessionNotFoundException,
@@ -243,7 +236,6 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @return number of jobs deleted
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public int deleteJobGroup(int sessionID, String groupName) throws
         SessionNotFoundException,

@@ -328,7 +328,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     /**
      * Remove all of the scheduled jobs for an appdef entity.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeScheduledJobs(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -386,7 +385,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      * Remove an entry from the control history
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      *
      * @TODO Authz integration
      */
@@ -480,7 +478,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      * Delete a ControlJob based on an id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * @param ids Array of job ids to be deleted
      */
     public void deleteControlJob(int sessionId, Integer[] ids)
@@ -564,7 +561,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     *
     * @return    List of entities that are control authorized.
     * @ejb:interface-method
-    * @ejb:transaction type="Required"
     */
     public List batchCheckControlPermissions(int sessionId,
                                              AppdefEntityID[] entities)
