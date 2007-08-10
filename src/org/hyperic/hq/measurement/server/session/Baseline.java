@@ -36,22 +36,17 @@ public class Baseline extends PersistedObject
     private DerivedMeasurement _derivedMeasurement;
     private long _computeTime;
     private boolean _userEntered = false;
-    private double _mean;
-    private double _minExpectedVal;
-    private double _maxExpectedVal;
+    private Double _mean;
+    private Double _minExpectedVal;
+    private Double _maxExpectedVal;
 
     // Constructors
     public Baseline() {
     }
 
-    public Baseline(long computeTime, boolean userEntered) {
-        _computeTime = computeTime;
-        _userEntered = userEntered;
-    }
-
     public Baseline(DerivedMeasurement derivedMeasurement, long computeTime,
-                    boolean userEntered, double mean, double minExpectedVal,
-                    double maxExpectedVal) {
+                    boolean userEntered, Double mean, Double minExpectedVal,
+                    Double maxExpectedVal) {
         _derivedMeasurement = derivedMeasurement;
         _computeTime = computeTime;
         _userEntered = userEntered;
@@ -85,35 +80,36 @@ public class Baseline extends PersistedObject
         _userEntered = userEntered;
     }
 
-    public double getMean() {
+    public Double getMean() {
         return _mean;
     }
     
-    protected void setMean(double mean) {
+    protected void setMean(Double mean) {
         _mean = mean;
     }
 
-    public double getMinExpectedVal() {
+    public Double getMinExpectedVal() {
         return _minExpectedVal;
     }
     
-    protected void setMinExpectedVal(double minExpectedVal) {
+    protected void setMinExpectedVal(Double minExpectedVal) {
         _minExpectedVal = minExpectedVal;
     }
 
-    public double getMaxExpectedVal() {
+    public Double getMaxExpectedVal() {
         return _maxExpectedVal;
     }
     
-    protected void setMaxExpectedVal(double maxExpectedVal) {
+    protected void setMaxExpectedVal(Double maxExpectedVal) {
         _maxExpectedVal = maxExpectedVal;
     }
 
     /**
      * Update a Baseline
      */
-    public void update(long computeTime, boolean userEntered, double mean,
-                       double minExpectedValue, double maxExpectedValue) {
+    public void update(long computeTime, boolean userEntered,
+                       Double mean, Double minExpectedValue,
+                       Double maxExpectedValue) {
         setComputeTime(computeTime);
         setUserEntered(userEntered);
         setMean(mean);
@@ -131,9 +127,9 @@ public class Baseline extends PersistedObject
         b.setMeasurementId(getDerivedMeasurement().getId());
         b.setComputeTime(getComputeTime());
         b.setUserEntered(isUserEntered());
-        b.setMean(new Double(getMean()));
-        b.setMinExpectedValue(new Double(getMinExpectedVal()));
-        b.setMaxExpectedValue(new Double(getMaxExpectedVal()));
+        b.setMean(getMean());
+        b.setMinExpectedValue(getMinExpectedVal());
+        b.setMaxExpectedValue(getMaxExpectedVal());
         return b;
     }
 }
