@@ -237,6 +237,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public boolean addData(List data) {
         data = enforceUnmodifiable(data);
         
+        _log.debug("Attempting to insert data in a single transaction.");
+        
         HQDialect dialect = Util.getHQDialect();
         boolean succeeded = false;
         
@@ -244,10 +246,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             succeeded = insertDataWithOneInsert(data);            
         } else {
             succeeded = insertDataInBatch(data);
-        }
+        }            
         
         if (succeeded) {
+            _log.debug("Inserting data in a single transaction succeeded.");
             sendMetricEvents(data);
+        } else {
+            _log.debug("Inserting data in a single transaction failed.");
         }
         
         return succeeded;        
@@ -280,27 +285,29 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
          *      throw the exception at the first instance of an error, and some
          *      will continue with the rest of the batch.
          */
+        
+        _log.debug("Attempting to insert/update data outside a transaction.");
 
-        Connection conn = null;
         Set failedToSaveMetrics = new HashSet();
         data = enforceUnmodifiable(data);
         List left = data;
-        DataInsertResult result = new DataInsertResult(left);
         
-        try {            
-            // XXX:  Get a better connection here - directly from Hibernate
-            conn = DBUtil.getConnByContext(getInitialContext(), 
-                                           DATASOURCE_NAME);
+        Connection conn = safeGetConnection();
+        
+        if (conn == null) {
+            _log.debug("Inserting/Updating data outside a transaction failed.");
+            return;
+        }
+        
+        try {
             while (true && !left.isEmpty()) {
                 int numLeft = left.size();
                 _log.debug("Attempting to insert " + numLeft + " points");
                 
-                result = insertData(conn, left);
-                
-                if (result.exceptionOccurred()) {
-                    throw result.getException();
-                } else {
-                    left = result.getRemainingDataPoints();
+                try {
+                    left = insertData(conn, left, true);
+                } catch (SQLException e) {
+                    assert false : "The SQLException should not happen: "+e;
                 }
                                 
                 _log.debug("Num left = " + left.size());
@@ -309,6 +316,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     break;
                 
                 if (!overwrite) {
+                    _log.debug("We are not updating the remaining "+
+                                left.size()+" points");
                     failedToSaveMetrics.addAll(left);
                     break;
                 }
@@ -317,13 +326,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 // the things that are left
                 _log.debug("Sending " + left.size() + " data points to update");
                                 
-                result = updateData(conn, left);                    
-                
-                if (result.exceptionOccurred()) {
-                    throw result.getException();
-                } else {
-                    left = result.getRemainingDataPoints();
-                }
+                left = updateData(conn, left);                    
                 
                 if (left.isEmpty())
                     break;
@@ -340,15 +343,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     _log.warn("Throwing away data point " + remPt);
                 }
             }
-        } catch (NamingException e) {
-            _log.warn("Failed to insert data outside a transaction", e);
-            return;            
-        } catch (SQLException e) {
-            _log.warn("Error while inserting data", e);
-            failedToSaveMetrics.addAll(result.getRemainingDataPoints());
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
+        
+        _log.debug("Inserting/Updating data outside a transaction finished.");
         
         sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
     }
@@ -506,27 +505,37 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return buckets;
     }
 
+    /**
+     * Insert the metric data points to the DB with one insert statement. This 
+     * should only be invoked when the DB supports multi-insert statements.
+     * 
+     * @param data a list of {@link DataPoint}s 
+     * @return <code>true</code> if the multi-insert succeeded; <code>false</code> 
+     *         otherwise.
+     */
     private boolean insertDataWithOneInsert(List data) {
-        Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
         Map buckets = bucketData(data);
+        
+        Connection conn = safeGetConnection();
+        
+        if (conn == null) {
+            // We are in a bad state. Set txn rollback in case this txn was 
+            // initiated by the client.
+            _ctx.setRollbackOnly();
+            return false;
+        }
 
         try {
-            // XXX:  Get a better connection here - directly from Hibernate
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           DATASOURCE_NAME);
-
-            for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
-            {
+            for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 String table = (String) entry.getKey();
                 List dpts = (List) entry.getValue();
 
                 StringBuffer values = new StringBuffer();
                 int rowsToUpdate = 0;
-                for (Iterator i=dpts.iterator(); i.hasNext(); )
-                {
+                for (Iterator i=dpts.iterator(); i.hasNext(); ) {
                     DataPoint pt = (DataPoint)i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
@@ -550,14 +559,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                            " (attempted "+rowsToUpdate+" rows)");
                 if (rows < rowsToUpdate)
                     return false;
-            }
-        } catch (NamingException e) {
-            _log.warn("Failed to insert data with one insert", e);
-            return false;    
+            }   
         } catch (SQLException e) {
-            // If there is a general exception, then none of the data points 
-            // were inserted. Set the txn to rollback just to be sure.
-            _log.warn("Error while inserting data with one insert", e);
+            // If there is a SQLException, then none of the data points 
+            // should be inserted. Roll back the txn.
+            _log.debug("Error while inserting data with one insert", e);
             _ctx.setRollbackOnly();
             return false;            
         } finally {
@@ -571,48 +577,42 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * 
      * @param data a list of {@link DataPoint}s 
      * @return <code>true</code> if the batch insert succeeded; <code>false</code> 
-     *         otherwise.
+     *         otherwise.       
      */
     private boolean insertDataInBatch(List data) {
-        Connection conn = null;
         List left = data;
+        
+        Connection conn = safeGetConnection();
+        
+        if (conn == null) {
+            // We are in a bad state. Set txn rollback in case this txn was 
+            // initiated by the client.
+            _ctx.setRollbackOnly();
+            return false;
+        }
                 
-        try {
-            // XXX:  Get a better connection here - directly from Hibernate
-            conn = DBUtil.getConnByContext(getInitialContext(), 
-                                           DATASOURCE_NAME);
-            
+        try {            
             // Oracle does not handle the batch insert in single transaction
             // so return right away
             if (DBUtil.isOracle(conn))
                 return false;
             
             _log.debug("Attempting to insert " + left.size() + " points");
-            DataInsertResult result = insertData(conn, left);
-            
-            if (result.exceptionOccurred()) {
-                throw result.getException();
-            } else {
-                left = result.getRemainingDataPoints();    
-            }
-            
+            left = insertData(conn, left, false);            
             _log.debug("Num left = " + left.size());
             
             if (!left.isEmpty()) {
-                _log.warn("Need to update " + left.size() + " data points.");
+                _log.debug("Need to update " + left.size() + " data points.");
                 
                 if (_log.isDebugEnabled())
                     _log.debug("Data points to update: " + left);                
                 
                 return false;
             }
-        } catch (NamingException e) {
-            _log.warn("Failed to insert data in batch", e);
-            return false;
         } catch (SQLException e) {
-            // If there is a general exception, then none of the data points 
-            // were inserted. Set the txn to rollback just to be sure.
-            _log.warn("Error while inserting data in batch", e);
+            // If there is a SQLException, then none of the data points 
+            // should be inserted. Roll back the txn.
+            _log.debug("Error while inserting data in batch", e);
             _ctx.setRollbackOnly();
             return false;
         } finally {
@@ -621,17 +621,49 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         return true;
     }
+    
+    /**
+     * Retrieve a DB connection.
+     * 
+     * @return The connection or <code>null</code>.
+     */
+    private Connection safeGetConnection() {
+        Connection conn = null;
+        
+        try {
+            // XXX:  Get a better connection here - directly from Hibernate
+            conn = DBUtil.getConnByContext(getInitialContext(), 
+                        DATASOURCE_NAME);              
+        } catch (NamingException e) {
+            _log.error("Failed to retrieve data source", e);
+        } catch (SQLException e) {
+            _log.error("Failed to retrieve connection from data source", e);
+        }
+        
+        return conn;
+    }
 
     /**
      * This method inserts data into the data table.  If any data points in the
      * list fail to get added (e.g. because of a constraint violation), it will
      * be returned in the result list.
      * 
-     * @return The data insert result containing the data points that were 
-     *         not inserted and the outcome as to whether or not the inserts 
-     *         aborted prematurely due to a general SQLException.
+     * @param conn The connection.
+     * @param data The data points to insert.
+     * @param continueOnSQLException <code>true</code> to continue inserting the 
+     *                               rest of the data points even after a 
+     *                               <code>SQLException</code> occurs; 
+     *                               <code>false</code> to throw the 
+     *                               <code>SQLException</code>.
+     * @return The list of data points that were not inserted.
+     * @throws SQLException only if there is an exception for one of the data 
+     *                      point batch inserts and <code>continueOnSQLException</code> 
+     *                      is set to <code>false</code>.
      */
-    private DataInsertResult insertData(Connection conn, List data) {
+    private List insertData(Connection conn, 
+                            List data, 
+                            boolean continueOnSQLException) 
+        throws SQLException {
         PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = bucketData(data);
@@ -668,36 +700,43 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
             } catch (BatchUpdateException e) {
+                if (!continueOnSQLException) {
+                    throw e;
+                }
+                
                 left.addAll(
                     getRemainingDataPointsAfterBatchFail(dpts, 
                                                          e.getUpdateCounts()));
             } catch (SQLException e) {
-                // Need to track all data points remaining after previous inserts 
-                // plus data points in those buckets that have not yet been inserted.
-                left.addAll(dpts);
-                
-                while (it.hasNext()) {
-                    entry = (Map.Entry) it.next();
-                    left.addAll((List)entry.getValue());
+                if (!continueOnSQLException) {
+                    throw e;
                 }
                 
-                return new DataInsertResult(left, e);                
+                // If the batch insert is not within a transaction, then we 
+                // don't know which of the inserts completed successfully. 
+                // Assume they all failed.
+                left.addAll(dpts);
+                
+                if (_log.isDebugEnabled()) {
+                    _log.debug("A general SQLException occurred during the insert. " +
+                               "Assuming that none of the "+dpts.size()+
+                               " data points were inserted.", e);
+                }
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
-            }
+            }            
         }
 
-        return new DataInsertResult(left);
+        return left;
     }
     
     /**
      * This method is called to perform 'updates' for any inserts that failed. 
      * 
      * @return The data insert result containing the data points that were 
-     *         not updated and the outcome as to whether or not the updates 
-     *         aborted prematurely due to a general SQLException.
+     *         not updated.
      */
-    private DataInsertResult updateData(Connection conn, List data) {
+    private List updateData(Connection conn, List data) {
         PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = bucketData(data);
@@ -738,74 +777,22 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     getRemainingDataPointsAfterBatchFail(dpts, 
                                                          e.getUpdateCounts()));
             } catch (SQLException e) {
-                // Need to track all data points remaining after previous updates 
-                // plus data points in those buckets that have not yet been updated.
+                // If the batch update is not within a transaction, then we 
+                // don't know which of the updates completed successfully. 
+                // Assume they all failed.
                 left.addAll(dpts);
                 
-                while (it.hasNext()) {
-                    entry = (Map.Entry) it.next();
-                    left.addAll((List)entry.getValue());
+                if (_log.isDebugEnabled()) {
+                    _log.debug("A general SQLException occurred during the update. " +
+                               "Assuming that none of the "+dpts.size()+
+                               " data points were updated.", e);
                 }
-                
-                return new DataInsertResult(left, e);
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }
         }
 
-        return new DataInsertResult(left);
-    }
-
-    /**
-     * Results from a data point insert/update.
-     */
-    private static class DataInsertResult {
-        private final List _left;
-        private final SQLException _e;
-        
-        /**
-         * Creates an instance where no irrecoverable exception occurred 
-         * during the data point insert/update. All the sql operations 
-         * completed.
-         *
-         * @param left The data points remaining to be inserted/updated.
-         */
-        public DataInsertResult(List left) {
-            this(left, null);
-        }
-        
-        /**
-         * Creates an instance where an irrecoverable exception occurred 
-         * during the data point insert/update.
-         *
-         * @param left The data points remaining to be inserted/updated.
-         * @param e The exception occurring.
-         */
-        public DataInsertResult(List left, SQLException e) {
-            if (left.isEmpty()) {
-                _left = Collections.EMPTY_LIST;
-            } else {
-                _left = new ArrayList(left);                
-            }
-            
-            _e = e;
-        }
-        
-        public List getRemainingDataPoints() {
-            return Collections.unmodifiableList(_left);
-        }
-        
-        public boolean exceptionOccurred() {
-            return _e != null;
-        }
-        
-        public SQLException getException() {
-            if (!exceptionOccurred()) {
-                throw new IllegalStateException("no exception occurred.");
-            }
-            
-            return _e;
-        } 
+        return left;
     }
 
     /**
