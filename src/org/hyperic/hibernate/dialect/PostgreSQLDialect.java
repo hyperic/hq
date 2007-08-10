@@ -25,10 +25,18 @@
 
 package org.hyperic.hibernate.dialect;
 
+import org.hyperic.util.jdbc.DBUtil;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
+
 public class PostgreSQLDialect 
     extends org.hibernate.dialect.PostgreSQLDialect
     implements HQDialect
 {
+    private static final String logCtx = PostgreSQLDialect.class.getName();
+
     public String getCascadeConstraintsString() {
         return " cascade ";
     }
@@ -55,6 +63,24 @@ public class PostgreSQLDialect
     public boolean supportsMultiInsertStmt()
     {
         return false;
+    }
+
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT viewname from pg_views"+
+                         " WHERE lower(viewname) = lower('"+viewName+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
     }
 
     public String getDeleteJoinStmt(String deleteTable,

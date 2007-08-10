@@ -25,7 +25,13 @@
 
 package org.hyperic.hibernate.dialect;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 import java.sql.Types;
+
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * HQ customized Oracle dialect to (re)define default
@@ -36,6 +42,8 @@ public class Oracle9Dialect
     extends org.hibernate.dialect.Oracle9Dialect
     implements HQDialect
 {
+    private static final String logCtx = Oracle9Dialect.class.getName();
+
     public Oracle9Dialect() {
         registerColumnType(Types.VARBINARY, 2000, "blob");
     }
@@ -75,5 +83,23 @@ public class Oracle9Dialect
     public boolean supportsMultiInsertStmt()
     {
         return false;
+    }
+
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT table_name from all_tables"+
+                         " WHERE lower(table_name) = lower('"+viewName+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
     }
 }

@@ -25,6 +25,8 @@
 
 package org.hyperic.hibernate.dialect;
 
+import java.sql.Statement;
+import java.sql.SQLException;
 
 /**
  *
@@ -55,4 +57,10 @@ public interface HQDialect
      * Returns true if the database supports a multi insert stmt.
      */
     public boolean supportsMultiInsertStmt();
+
+    /*
+     * Returns true if the database contains the specified viewName
+     */
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException;
 }
