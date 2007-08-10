@@ -151,12 +151,12 @@ function clickAdd(formName) {
 }
 
 function clickRemove(formName, index) {
-	/*var newInput = document.createElement("input");
+	var newInput = document.createElement("input");
 	newInput.setAttribute("type", "hidden");
 	newInput.setAttribute("name", "remove.x");
 	newInput.setAttribute("value", index);
-	document.forms[formName].appendChild(newInput);*/
-    $('remove.x').value=index;                                                                    
+	document.forms[formName].appendChild(newInput);
+   // $('remove.x').value=index;
 }
 
 function clickAIPlatformImport(formName) {

@@ -29,9 +29,9 @@
   USA.
  --%>
 
-
+ <!--<input type="hidden" name="remove.x" id="remove.x"/>-->
 <tiles:importAttribute name="formName"/>
- <input type="hidden" name="remove.x" id="remove.x"/>
+
 <!-- Content Block Title -->
 <tiles:insert definition=".header.tab">
 <tiles:put name="tabKey" value="alert.config.props.CondBox"/>
