@@ -433,9 +433,11 @@ public class ConfigManagerEJBImpl
      *
      * @param existingBytes The existing configuration
      * @param newBytes The new configuration
+     * @param overwrite TODO
      * @return The newly merged configuration
      */
-    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes)
+    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes,
+                                      boolean overwrite)
     {
         if ((existingBytes == null) || (existingBytes.length == 0)) {
             return newBytes;
@@ -450,7 +452,7 @@ public class ConfigManagerEJBImpl
                 ConfigResponse.decode(existingBytes);
             ConfigResponse newConfig =
                 ConfigResponse.decode(newBytes);
-            existingConfig.merge(newConfig, true);
+            existingConfig.merge(newConfig, overwrite);
             return existingConfig.encode();
         } catch (EncodingException e) {
             throw new IllegalArgumentException(e.getMessage());
@@ -531,9 +533,12 @@ public class ConfigManagerEJBImpl
 
         boolean wasUpdated = false;
         ConfigResponseDB existingConfig = getConfigResponse(appdefID);
+        boolean overwrite =
+            ((userManaged != null) && (userManaged.booleanValue() == true)) || //via UI or CLI
+            !existingConfig.isUserManaged(); //via AI, dont overwrite changes made via UI or CLI
 
         configBytes = mergeConfig(existingConfig.getProductResponse(),
-                                  productConfig);
+                                  productConfig, overwrite);
         if (!AICompare.configsEqual(configBytes,
                                     existingConfig.getProductResponse())) {
             existingConfig.setProductResponse(configBytes);
@@ -541,7 +546,7 @@ public class ConfigManagerEJBImpl
         }
 
         configBytes = mergeConfig(existingConfig.getMeasurementResponse(),
-                                  measurementConfig);
+                                  measurementConfig, overwrite);
         if (!AICompare.configsEqual(configBytes,
                                     existingConfig.getMeasurementResponse())) {
             existingConfig.setMeasurementResponse(configBytes);
@@ -549,7 +554,7 @@ public class ConfigManagerEJBImpl
         }
 
         configBytes = mergeConfig(existingConfig.getControlResponse(),
-                                  controlConfig);
+                                  controlConfig, overwrite);
         if (!AICompare.configsEqual(configBytes,
                                     existingConfig.getControlResponse())) {
             existingConfig.setControlResponse(configBytes);
@@ -557,7 +562,7 @@ public class ConfigManagerEJBImpl
         }
 
         configBytes = mergeConfig(existingConfig.getResponseTimeResponse(),
-                                  rtConfig);
+                                  rtConfig, overwrite);
         if (!AICompare.configsEqual(configBytes,
                                     existingConfig.getResponseTimeResponse())) {
             existingConfig.setResponseTimeResponse(configBytes);
