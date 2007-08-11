@@ -25,57 +25,13 @@
 
 package org.hyperic.hq.product.servlet.client;
 
-import java.net.URL;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-
-import java.io.InputStream;
-
 /**
  * Talk to HQ JMXServlet over https.
  */
 public class JMXProtocolHttps
-    extends JMXProtocolRequest
-    implements HostnameVerifier {
+    extends JMXProtocolHttp {
 
-    public void shutdown() {
-    }
-
-    public boolean verify(String hostname, SSLSession session) {
+    protected boolean isSSL() {
         return true;
-    }
-    
-    public InputStream openStream(String host, int port,
-                                  String user, String pass,
-                                  String path, String query)
-        throws Exception 
-    {
-        if (query != null) {
-            path=path + "?" + query;
-        }
-
-        //XXX cache
-
-        URL url = new URL("https", host, port, path);
-
-        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-
-        // HQ certificate signed with hyperic.net.  Install 
-        // a bogus HostnameVerifier to allow identification mismatch
-        // as no customers will have that hostname.
-        conn.setHostnameVerifier(this);
-
-        if (user != null) {
-            String auth = user + ":" + pass;
-            
-            // Easiest - but may not be very portable.
-            auth = new sun.misc.BASE64Encoder().encode(auth.getBytes());
-
-            conn.setRequestProperty("Authorization", "Basic " + auth);
-        }
-        
-        return conn.getInputStream();
     }
 }
