@@ -25,13 +25,9 @@
 
 package org.hyperic.util.notReady;
 
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.Lifecycle;
-
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import javax.naming.InitialContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,22 +66,16 @@ public class NotReadyManager
      * We start them early to avoid long server startup times.
      */
     public void postRegister(Boolean registrationDone) {
-        _log.info("Starting Tomcat connectors");
+        _log.info("Starting WebServer connectors");
 
         try {
             ObjectName service = 
-                new ObjectName("jboss.web:type=Service,serviceName=jboss.web");
-            Object[] args = {};
-            String[] sig = {};
-            Connector[] connectors = (Connector[]) 
-                _server.invoke(service, "findConnectors", args, sig);
+                new ObjectName("jboss.web:service=WebServer");
 
-            for (int n = 0; n < connectors.length; n++) {
-                Lifecycle lc = (Lifecycle) connectors[n];
-                lc.start();
-            }
+            _server.invoke(service, "startConnectors",
+                           new Object[0], new String[0]);
         } catch (Exception e) {
-            _log.error("Unable to start Tomcat connectors: " + e, e);
+            _log.error("Unable to start WebServer connectors: " + e);
         }
     }
 
