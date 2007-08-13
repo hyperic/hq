@@ -1103,8 +1103,6 @@ a.headUsrName {
 .headAlertWrapper {
     color:#333333;
     font-weight:bold;
-    display:inline;
-    float:left;
     padding-left:10px;
     border:0px solid green;
 }
@@ -1124,8 +1122,6 @@ a.headUsrName {
 }
 
 #recentAlerts {
-    float:left;
-    display:inline;
     width:605px;
     padding-top:1px;
     font-weight:bold;
@@ -1139,9 +1135,10 @@ a.headUsrName {
  font-family: arial,sans-serif;
  font-size: 11px;
  display:inline;
-position:relative;
+ position:relative;
  color: #ffffff;
-font-weight: bold;
+ font-weight: bold;
+ white-space: nowrap;
 }
 
 #navigationTbl .navText {
