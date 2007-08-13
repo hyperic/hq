@@ -120,6 +120,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
+        def.setLastFired(new Long(ctime));
         getAlertDAO().save(alert);
         return alert;
     }

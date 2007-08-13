@@ -70,6 +70,7 @@ public class AlertDefinition
     private Collection        _actions = new ArrayList();
     private Escalation        _escalation;
     private Resource          _resource;
+    private Long              _lastFired;
 
     private AlertDefinitionValue      _value;
     
@@ -370,6 +371,17 @@ public class AlertDefinition
 
     public AppdefEntityID getAppdefEntityId() {
         return new AppdefEntityID(getAppdefType(), getAppdefId());
+    }
+    
+    /**
+     * Get the time that the alert definition last fired.
+     */
+    public Long getLastFired() {
+        return _lastFired;
+    }
+    
+    protected void setLastFired(Long lastFired) {
+        _lastFired = lastFired;
     }
     
     public AlertDefinitionValue getAlertDefinitionValue() {

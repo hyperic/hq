@@ -6571,6 +6571,12 @@ has already been defined.
           <statement targetDB="oracle" fail="false">ALTER TABLE EAM_ALERT_ACTION_LOG MODIFY DETAIL NULL</statement>
         </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="3.46">
+      <schema-addColumn table="EAM_ALERT_DEFINITION" column="LAST_FIRED" 
+                        columnType="LONG"/>
+    </schemaSpec>
+    
 </dbupgrade>
 </target>
 

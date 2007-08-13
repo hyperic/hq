@@ -26,7 +26,6 @@
     <property name="mtime" type="long">
       <column name="MTIME" not-null="true"/>
     </property>
-
     
     <many-to-one name="parent" class="AlertDefinition">
       <column name="PARENT_ID" index="ALERT_DEF_CHILD_IDX"/>
@@ -87,6 +86,10 @@
 
     <property name="deleted" type="boolean">
       <column name="DELETED" not-null="true"/>
+    </property>
+
+    <property name="lastFired">
+      <column name="LAST_FIRED" not-null="false"/>
     </property>
 
     <many-to-one name="escalation">
