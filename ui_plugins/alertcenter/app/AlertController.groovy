@@ -93,7 +93,9 @@ class AlertController
     ]
     
     private final DEF_TABLE_SCHEMA = [
-        getData: {pageInfo -> alertHelper.findDefinitions(AlertSeverity.LOW, pageInfo)},
+        getData: {pageInfo -> 
+            alertHelper.findDefinitions(AlertSeverity.LOW, null, true, pageInfo)
+        },
         defaultSort: AlertDefSortField.CTIME,
         defaultSortOrder: 0,  // descending
         rowId: {it.id},
