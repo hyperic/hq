@@ -136,10 +136,7 @@ public class AlertDefinitionManagerEJBImpl
         
         // Disassociate from Resource
         alertdef.setResource(null);
-        
-        // Disassociate from parent, too
-        alertdef.setParent(null);
-        
+                
         // Get rid of their triggers first
         watch.markTimeBegin("removeTriggers");
         TriggerDAO tdao = getTriggerDAO();
@@ -148,7 +145,7 @@ public class AlertDefinitionManagerEJBImpl
 
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
-        if (alertdef.getEscalation() != null) {
+        if (alertdef.getEscalation() != null && !alertdef.isResourceTypeDefinition()) {
             EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
         }
         // Disassociated from escalations
@@ -165,6 +162,11 @@ public class AlertDefinitionManagerEJBImpl
             act.setParent(null);
             act.getChildrenBag().clear();
         }
+        
+        // Disassociate from parent
+        // This must be at the very end since we use the parent to determine 
+        // whether or not this is a resource type alert definition.
+        alertdef.setParent(null);
         
         watch.markTimeEnd("mark deleted");
         if (log.isDebugEnabled()) {
