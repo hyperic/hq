@@ -35,7 +35,7 @@
 </tiles:insert>
 
 <!--  GENERAL PROPERTIES CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockBg">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
     <td width="30%" class="BlockContent"><c:out value="${User.firstName} ${User.lastName}"/></td>
@@ -98,16 +98,15 @@
     <td width="20%" class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
     <td width="30%" class="BlockContent"><c:out value="${User.smsaddress}"/></td>
   </tr>
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
 </table>
 <!--  /  -->
 
 <!--  GENERAL PROPERTIES TOOLBAR -->
+<c:if test="${useroperations['modifySubject']}">
 <tiles:insert definition=".toolbar.edit">
   <tiles:put name="editUrl" value="/admin/user/UserAdmin.do?mode=edit"/>
   <tiles:put name="editParamName" value="u"/>
   <tiles:put name="editParamValue" beanName="User" beanProperty="id"/>
 </tiles:insert>
+</c:if>
 <br>
