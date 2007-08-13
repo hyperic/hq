@@ -189,7 +189,7 @@ class EscalationRuntime {
             try {
                 _log.debug("Transaction committed:  success=" + success);
                 if (success) {
-                    unscheduledAllEscalations_((EscalatingEntityIdentifier[])
+                    unscheduleAllEscalations_((EscalatingEntityIdentifier[])
                             _escalationsToUnschedule.toArray(
                                     new EscalatingEntityIdentifier[
                                         _escalationsToUnschedule.size()]));
@@ -215,13 +215,10 @@ class EscalationRuntime {
             for (int i = 0; i < escalatingEntities.length; i++) {
                 Integer stateId = (Integer)_esclEntityIdsToStateIds.get(
                                                     escalatingEntities[i]);
-                                
+                // stateId may be null if an escalation has not been scheduled 
+                // for this escalating entity.
                 if (stateId != null) {
                     stateIds.add(stateId);
-                } else {
-                    // state Id should never be null, but if it is and assertions 
-                    // are disabled, just move on
-                    assert false : "stateId should not be null";                    
                 }
                     
             }
@@ -238,7 +235,7 @@ class EscalationRuntime {
         }
     }
         
-    private void unscheduledAllEscalations_(EscalatingEntityIdentifier[] esclEntityIds) {
+    private void unscheduleAllEscalations_(EscalatingEntityIdentifier[] esclEntityIds) {
         synchronized (_stateIdsToTasks) {
             for (int i = 0; i < esclEntityIds.length; i++) {
                 Integer stateId = 
@@ -249,15 +246,17 @@ class EscalationRuntime {
     }
     
     private void doUnscheduleEscalation_(Integer stateId) {
-        Object task = _stateIdsToTasks.remove(stateId);
-        
-        if (task != null) {
-            ClockDaemon.cancel(task);
-            _log.debug("Canceled state[" + stateId + "]");
-        } else {
-            _log.debug("Canceling state[" + stateId + "] but was " + 
-                       "not found");
-        }        
+        if (stateId != null) {
+            Object task = _stateIdsToTasks.remove(stateId);
+            
+            if (task != null) {
+                ClockDaemon.cancel(task);
+                _log.debug("Canceled state[" + stateId + "]");
+            } else {
+                _log.debug("Canceling state[" + stateId + "] but was " + 
+                           "not found");
+            }                    
+        }
     }
     
     /**
@@ -287,6 +286,11 @@ class EscalationRuntime {
     private void scheduleEscalation_(EscalationState state, long schedTime) {
         Integer stateId   = state.getId();
         
+        if (stateId == null) {
+            throw new IllegalStateException("Cannot schedule a " +
+            		"transient escalation state (stateId=null).");
+        }
+        
         synchronized (_stateIdsToTasks) {
             Object task = _stateIdsToTasks.get(stateId);
             
@@ -295,7 +299,7 @@ class EscalationRuntime {
                 ClockDaemon.cancel(task);
                 _log.debug("Rescheduling state[" + stateId + "]");
             } else {
-                _log.debug("Scheduleing state[" + stateId + "]");
+                _log.debug("Scheduling state[" + stateId + "]");
             }
 
             task = _schedule.executeAt(new Date(schedTime),

@@ -330,7 +330,7 @@ public class EscalationManagerEJBImpl
         // does not exist.
         EscalationState s = _stateDAO.get(stateId);
         
-        if (hasEscalationStateOrEscalatingEntityBeenRemoved(s)) {
+        if (hasEscalationStateOrEscalatingEntityBeenDeleted(s)) {
             // just to be safe
             endEscalation(s);
             return;
@@ -387,18 +387,23 @@ public class EscalationManagerEJBImpl
     
     /**
      * Check if the escalation state or its associated escalating entity 
-     * has been removed. This may be a rare occurrence that would only surface 
-     * because of subtle timing holes between the scheduling and escalation state 
-     * deletion algorithms.
+     * has been deleted.
      * 
      * @param s The escalation state.
      * @return <code>true</code> if the escalation state or escalating entity 
-     *         has been removed.
+     *         has been deleted.
      */
-    private boolean hasEscalationStateOrEscalatingEntityBeenRemoved(EscalationState s) {
-        return s == null || 
-               s.getAlertType().findDefinition(
-                            new Integer(s.getAlertDefinitionId())) == null;
+    private boolean hasEscalationStateOrEscalatingEntityBeenDeleted(EscalationState s) {
+        if (s == null) {
+            return true;
+        }
+        
+        PerformsEscalations def = s.getAlertType().findDefinition(
+                                    new Integer(s.getAlertDefinitionId()));
+        
+        // galert defs may be deleted from the DB when the group is deleted, 
+        // so we may get a null value.
+        return def == null || def.isDeleted();
     }
         
     /**

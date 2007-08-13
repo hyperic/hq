@@ -149,6 +149,10 @@ public class EscalatingEntityIdentifier_test extends TestCase {
         public String getName() {
             return null;
         }
+
+        public boolean isDeleted() {
+            return false;
+        }
         
     }
 

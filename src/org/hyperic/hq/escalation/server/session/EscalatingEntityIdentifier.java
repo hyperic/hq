@@ -81,6 +81,13 @@ final class EscalatingEntityIdentifier {
         return _alertType;
     }
     
+    public String toString() {
+        return this.getClass().getName()+
+               " Alert Type: desc="+getAlertType().getDescription()+
+               ", code="+getAlertType().getCode()+
+               "; Escalating Entity: id="+getId();
+    }
+    
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
