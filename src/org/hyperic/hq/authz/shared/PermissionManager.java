@@ -222,5 +222,7 @@ public interface PermissionManager {
     
     public String getAlertsHQL();
     
+    public String getAlertDefsHQL();
+
     public String getGroupAlertsHQL();    
 }

@@ -34,7 +34,9 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
@@ -133,11 +135,10 @@ public class AlertDefinitionDAO extends HibernateDAO {
                 session.setFlushMode(FlushMode.MANUAL);                
             }
             
-            return this.findChildAlertDef(ent, parentId);
+            return findChildAlertDef(ent, parentId);
         } finally {
             session.setFlushMode(oldFlushMode);
         } 
-
     }
 
     public AlertDefinition findById(Integer id) {
@@ -273,13 +274,23 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     List findDefinitions(AuthzSubjectValue subj, AlertSeverity minSeverity, 
-                         PageInfo pInfo)
+                         Boolean enabled, boolean simpleOnly, PageInfo pInfo)
     {
+        String[] ops = new String[] { AuthzConstants.platformOpManageAlerts,
+                                      AuthzConstants.serverOpManageAlerts,
+                                      AuthzConstants.serviceOpManageAlerts };
         AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
-        String sql = "select d from AlertDefinition d " +
-                     "join d.resource r " +
-                     "where " +
-                     "    d.priority >= :priority ";
+        String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
+        
+        sql += " and d.deleted = false";
+        if (enabled != null) {
+            sql += " and d.enabled = " + 
+                   (enabled.booleanValue() ? "true" : "false");
+        }
+        
+        if (simpleOnly) {
+            sql += " and d.parent is null";
+        }
         
         sql += " order by " + sort.getSortString("d", "r") + 
                (pInfo.isAscending() ? "" : " DESC");
@@ -290,8 +301,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
                
         Query q = getSession().createQuery(sql)
-                              .setInteger("priority", minSeverity.getCode());
+            .setInteger("priority", minSeverity.getCode());
 
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subj.getId().intValue())
+             .setParameterList("ops", ops);
+        }
+        
         return pInfo.pageResults(q).list();
     }
 }

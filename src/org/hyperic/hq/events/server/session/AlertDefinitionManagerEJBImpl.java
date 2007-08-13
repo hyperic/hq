@@ -745,16 +745,23 @@ public class AlertDefinitionManagerEJBImpl
      * 
      * @param minSeverity  Specifies the minimum severity that the defs should
      *                     be set for
+     * @param enabled      If non-null, specifies the nature of the returned
+     *                     definitions (i.e. only return enabled or disabled
+     *                     defs)
+     * @param simpleOnly   If true, only return alert definitions dealing with
+     *                     simple (non type-based) defs
+     *                              
      * @param pInfo        Paging information.  The sort field must be a 
      *                     value from {@link AlertDefSortField}
      * 
      * @ejb:interface-method
      */
     public List findAlertDefinitions(AuthzSubjectValue subj, 
-                                     AlertSeverity minSeverity,
-                                     PageInfo pInfo)
+                                     AlertSeverity minSeverity, Boolean enabled,
+                                     boolean simpleOnly, PageInfo pInfo)
     {
-        return getAlertDefDAO().findDefinitions(subj, minSeverity, pInfo);
+        return getAlertDefDAO().findDefinitions(subj, minSeverity, enabled, 
+                                                simpleOnly, pInfo);
     }
 
     /** 
