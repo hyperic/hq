@@ -123,9 +123,16 @@ public class MeasTabManagerUtil {
     }
     
     public static long getMeasTabStartTime(long timems) {
-        timems -=
-            timems % (MeasurementConstants.DAY / NUMBER_OF_TABLES_PER_DAY);
-        return timems;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new java.util.Date(timems));
+        if (cal.get(Calendar.HOUR_OF_DAY) < 12) {
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+        } else {
+            cal.set(Calendar.HOUR_OF_DAY, 12);
+        }
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        return cal.getTimeInMillis();
     }
 
     public static long getPrevMeasTabTime(long timems) {
