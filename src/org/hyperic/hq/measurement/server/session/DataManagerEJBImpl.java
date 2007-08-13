@@ -487,22 +487,90 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private Map bucketData(List data) {
         HashMap buckets = new HashMap();
-        
-        // Bucket the data first
+        List ranges =  getTableRanges();
         for (Iterator it = data.iterator(); it.hasNext(); ) {
             DataPoint pt = (DataPoint) it.next();
-            String table = MeasTabManagerUtil
-                .getMeasTabname(pt.getMetricValue().getTimestamp());
-                    
+            String table =  getMeasTable(pt.getMetricValue().getTimestamp(),
+                                         ranges);
             if (!buckets.containsKey(table)) {
                 buckets.put(table, new ArrayList());
             }
-            
             List dpts = (List) buckets.get(table);
             dpts.add(pt);
         }
-        
         return buckets;
+    }
+
+    private class MeasRange
+    {
+        private long minTime,
+                     maxTime;
+
+        private String table;
+
+        MeasRange(String table, long minTime, long maxTime)
+        {
+            this.table = table;
+            this.minTime = minTime;
+            this.maxTime = maxTime;
+        }
+
+        long getMaxTimestamp()
+        {
+            return maxTime;
+        }
+
+        long getMinTimestamp()
+        {
+            return minTime;
+        }
+
+        String getTable()
+        {
+            return table;
+        }
+
+        public String toString()
+        {
+            return table+", min: "+TimeUtil.toString(minTime)+
+                         ", max: "+TimeUtil.toString(maxTime);
+        }
+    }
+
+    private List getTableRanges()
+    {
+        List rtn = new ArrayList();
+        long currTime = System.currentTimeMillis();
+        currTime = MeasTabManagerUtil.getMeasTabStartTime(currTime);
+        String currTable = MeasTabManagerUtil.getMeasTabname(currTime);
+        String table = currTable;
+        MeasRange range = new MeasRange(currTable, currTime,
+                                        System.currentTimeMillis());
+        do
+        {
+            _log.debug(range);
+            rtn.add(range);
+            long max = currTime-1000l;
+            currTime = MeasTabManagerUtil.getPrevMeasTabTime(currTime);
+            currTime = MeasTabManagerUtil.getMeasTabStartTime(currTime);
+            table = MeasTabManagerUtil.getMeasTabname(currTime);
+            range = new MeasRange(table, currTime, max);
+        }
+        while (!currTable.equals(table));
+        return rtn;
+    }
+
+    private String getMeasTable(long timestamp, List ranges)
+    {
+        for (Iterator i=ranges.iterator(); i.hasNext(); )
+        {
+            MeasRange range = (MeasRange)i.next();
+            if (timestamp <= range.getMaxTimestamp() &&
+                timestamp >= range.getMinTimestamp()) {
+                return range.getTable();
+            }
+        }
+        return MeasTabManagerUtil.getMeasTabname(timestamp);
     }
 
     /**
