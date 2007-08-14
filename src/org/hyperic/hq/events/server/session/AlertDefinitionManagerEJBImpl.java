@@ -748,9 +748,8 @@ public class AlertDefinitionManagerEJBImpl
      * @param enabled      If non-null, specifies the nature of the returned
      *                     definitions (i.e. only return enabled or disabled
      *                     defs)
-     * @param simpleOnly   If true, only return alert definitions dealing with
-     *                     simple (non type-based) defs
-     *                              
+     * @param excludeTypeBased  If true, exclude any alert definitions 
+     *                          associated with a type-based def.
      * @param pInfo        Paging information.  The sort field must be a 
      *                     value from {@link AlertDefSortField}
      * 
@@ -758,10 +757,10 @@ public class AlertDefinitionManagerEJBImpl
      */
     public List findAlertDefinitions(AuthzSubjectValue subj, 
                                      AlertSeverity minSeverity, Boolean enabled,
-                                     boolean simpleOnly, PageInfo pInfo)
+                                     boolean excludeTypeBased, PageInfo pInfo)
     {
         return getAlertDefDAO().findDefinitions(subj, minSeverity, enabled, 
-                                                simpleOnly, pInfo);
+                                                excludeTypeBased, pInfo);
     }
 
     /** 

@@ -74,9 +74,9 @@ class AlertHelper extends BaseHelper {
     }
     
     def findDefinitions(AlertSeverity severity, Boolean enabled,
-                        boolean simpleOnly, PageInfo pInfo) 
+                        boolean excludeTypeBased, PageInfo pInfo) 
     {
-        defMan.findAlertDefinitions(userValue, severity, enabled, simpleOnly, 
-                                    pInfo)
+        defMan.findAlertDefinitions(userValue, severity, enabled, 
+                                    excludeTypeBased, pInfo)
     }
 }

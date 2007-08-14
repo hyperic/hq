@@ -46,6 +46,12 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinitionDAO extends HibernateDAO {
+    private static final String[] MANAGE_ALERTS_OPS = new String[] { 
+        AuthzConstants.platformOpManageAlerts,
+        AuthzConstants.serverOpManageAlerts,
+        AuthzConstants.serviceOpManageAlerts 
+    };
+
     public AlertDefinitionDAO(DAOFactory f) {
         super(AlertDefinition.class, f);
     }
@@ -274,11 +280,9 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     List findDefinitions(AuthzSubjectValue subj, AlertSeverity minSeverity, 
-                         Boolean enabled, boolean simpleOnly, PageInfo pInfo)
+                         Boolean enabled, boolean excludeTypeBased, 
+                         PageInfo pInfo)
     {
-        String[] ops = new String[] { AuthzConstants.platformOpManageAlerts,
-                                      AuthzConstants.serverOpManageAlerts,
-                                      AuthzConstants.serviceOpManageAlerts };
         AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
         String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
         
@@ -288,7 +292,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
                    (enabled.booleanValue() ? "true" : "false");
         }
         
-        if (simpleOnly) {
+        if (excludeTypeBased) {
             sql += " and d.parent is null";
         }
         
@@ -305,7 +309,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.getId().intValue())
-             .setParameterList("ops", ops);
+             .setParameterList("ops", MANAGE_ALERTS_OPS);
         }
         
         return pInfo.pageResults(q).list();
