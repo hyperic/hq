@@ -55,7 +55,7 @@
   --%>
 <tiles:importAttribute name="showAddToListBtn" ignore="true"/>
 
-<c:if test="${empty showAddToListBtn}">
+<c:if test="${empty showAddToListBtn || showAddToListBtn}">
   <c:set var="showAddToListBtn" value="true"/>
   <tiles:importAttribute name="addToListUrl"/>
 </c:if>
