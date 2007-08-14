@@ -30,6 +30,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+<!--[if lte IE 7]>
+<link rel=stylesheet href="<html:rewrite page="/css/iecss.css"/>" type="text/css">
+ <![endif]-->
+
  <link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
@@ -77,7 +81,7 @@
                 </html:link></span>
             </div>
             <div class="headAlertWrapper">
-                            <div style="padding-top:5px;"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
+                            <div class="recentText"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
                             <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
             </div>
      <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
