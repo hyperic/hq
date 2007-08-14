@@ -122,16 +122,25 @@ class AlertController
                            [resource:it.resource])}],
         ]
     ]
+    
+    private TYPE_DEF_TABLE_SCHEMA
+            
 
     def AlertController() {
-        setTemplate('standard')  // in views/templates/standard.gsp 
+        setTemplate('standard')  
+        
+        TYPE_DEF_TABLE_SCHEMA = DEF_TABLE_SCHEMA + [:]
+        TYPE_DEF_TABLE_SCHEMA.getData = { pageInfo ->
+            alertHelper.findDefinitions(AlertSeverity.LOW, null, false, pageInfo)
+        }
     }
     
     def index = { params ->
-    	render(locals:[alertSchema:TABLE_SCHEMA, 
-    	               galertSchema:GALERT_TABLE_SCHEMA,
-    	               defSchema:DEF_TABLE_SCHEMA,
-    	               isEE:HQUtil.isEnterpriseEdition()])
+    	render(locals:[alertSchema   : TABLE_SCHEMA, 
+    	               galertSchema  : GALERT_TABLE_SCHEMA,
+    	               defSchema     : DEF_TABLE_SCHEMA,
+    	               typeDefSchema : TYPE_DEF_TABLE_SCHEMA,
+    	               isEE          : HQUtil.isEnterpriseEdition()])
     }
     
     def data(params) {
@@ -146,6 +155,11 @@ class AlertController
     
     def defData(params) {
         def json = DojoUtil.processTableRequest(DEF_TABLE_SCHEMA, params)
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
+    }
+
+    def typeDefData(params) {
+        def json = DojoUtil.processTableRequest(TYPE_DEF_TABLE_SCHEMA, params)
 		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
 }

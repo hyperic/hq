@@ -4,16 +4,25 @@ function swapTables(sel) {
         dojo.html.show('alertsTable');
         dojo.html.hide("groupalertsTable");
         dojo.html.hide("defsTable");
+        dojo.html.hide("typeDefsTable");
     }
     if (sel=="1")  {
         dojo.html.hide('alertsTable');
         dojo.html.show("groupalertsTable");
         dojo.html.hide('defsTable');
+        dojo.html.hide("typeDefsTable");
     }
     if (sel=="2")  {
         dojo.html.hide('alertsTable');
         dojo.html.hide("groupalertsTable");
         dojo.html.show("defsTable");
+        dojo.html.hide("typeDefsTable");
+    }
+    if (sel=="3")  {
+        dojo.html.hide('alertsTable');
+        dojo.html.hide("groupalertsTable");
+        dojo.html.hide("defsTable");
+        dojo.html.show("typeDefsTable");
     }
 }
 
@@ -32,6 +41,9 @@ onloads.push(setSelectedOption);
       <option value='1'>${l.GroupAlerts}</option>
     <% } %>
     <option value='2'>${l.ClassicDefs}</option>
+    <% if (isEE) { %>
+      <option value='3'>${l.TypeDefs}</option>
+    <% } %>
   </select>
 </div>
 
@@ -50,4 +62,11 @@ onloads.push(setSelectedOption);
 <div id="defsTable" style="display:none;">
   <%= dojoTable(id:'Defs', url:urlFor(action:'defData'),
                 schema:defSchema, numRows:15) %>
+</div>
+
+<div id="typeDefsTable" style="display:none;">
+<% if (isEE) { %>
+  <%= dojoTable(id:'TypeDefs', url:urlFor(action:'typeDefData'),
+                schema:typeDefSchema, numRows:15) %>
+<% } %>
 </div>
