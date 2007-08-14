@@ -1081,6 +1081,7 @@ border-left:1px solid #D5D8DE;
 }
 .headTopNav {
     height:38px;
+    width:100%;
 }
 
 .headUsrName {
@@ -1103,6 +1104,8 @@ a.headUsrName {
 .headAlertWrapper {
     color:#333333;
     font-weight:bold;
+    display:inline;
+    float:left;
     padding-left:10px;
     border:0px solid green;
 }
@@ -1121,8 +1124,17 @@ a.headUsrName {
  white-space:nowrap;
 }
 
+.recentText {
+float:left;
+display:inline;
+width:85px;
+padding-top:5px;
+}
+
 #recentAlerts {
-    width:605px;
+    position:absolute;
+    top:0px;
+    padding-left:80px;
     padding-top:1px;
     font-weight:bold;
     color:black;
@@ -1135,10 +1147,10 @@ a.headUsrName {
  font-family: arial,sans-serif;
  font-size: 11px;
  display:inline;
- position:relative;
+position:relative;
  color: #ffffff;
- font-weight: bold;
- white-space: nowrap;
+font-weight: bold;
+white-space: nowrap;
 }
 
 #navigationTbl .navText {
