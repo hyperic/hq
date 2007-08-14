@@ -66,6 +66,9 @@ echo MessagesAwaitingPreprocessing=$premessfiles
       <option name="process.query"
               description="Process Query"
               default="State.Name.eq=sendmail,CredName.User.eq=root"/>
+      <option name="exec"
+              description="Type &quot;sudo&quot; To Avoid Having Agent As Root"
+              default=""/>
     </config>
 
     <!--notifies the plugin to auto-discover one instance of each service-->
@@ -117,7 +120,7 @@ echo MessagesAwaitingPreprocessing=$premessfiles
 
     <!-- sendmail-stat metrics -->
     <filter name="template"
-            value="exec:file=pdk/work/scripts/sendmail/hq-sendmail-stat,exec=sudo:${alias}"/>
+            value="exec:file=pdk/work/scripts/sendmail/hq-sendmail-stat,exec=%exec%:${alias}"/>
 
     <metric name="Messages In Queue"
             indicator="true"/>
