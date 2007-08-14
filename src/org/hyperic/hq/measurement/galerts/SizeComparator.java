@@ -41,7 +41,7 @@ public class SizeComparator
     private static final String BUNDLE = "org.hyperic.hq.measurement.Resources";
     
     public static final SizeComparator LESS_THAN = 
-        new SizeComparator(0, "Less than", "compare.lessThan", 
+        new SizeComparator(0, "Fewer than", "compare.lessThan", 
                            ComparisonOperator.LT);
     public static final SizeComparator MORE_THAN = 
         new SizeComparator(1, "More than", "compare.greaterThan",
