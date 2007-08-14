@@ -857,7 +857,12 @@ function showViewEscResponse(originalRequest) {
 <div style="margin-bottom:10px;border:1px solid #D5D8DE;" class="ListHeaderInactive">
      <table cellpadding="3" cellspacing="0" border="0">
          <tr>
-             <td><fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" /></td>
+             <td>
+             <fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" />
+             <c:if test="${not useroperations['createEscalation']}">
+               <fmt:message key="inform.config.escalation.scheme.select" />
+             </c:if>
+             </td>
          </tr>
       </table>
  </div>

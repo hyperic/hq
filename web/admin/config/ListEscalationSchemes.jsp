@@ -69,7 +69,7 @@
 </td>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
-<span id="deleteBtn" style="display: none;">
+<span id="deleteBtn" style="display: none;">&nbsp;
 <c:if test="${useroperations['removeEscalation']}">
 <html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/>
 </c:if>
