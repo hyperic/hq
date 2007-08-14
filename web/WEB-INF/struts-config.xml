@@ -2153,6 +2153,7 @@
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesAction"
               name="EditAlertDefinitionPropertiesForm"
               scope="request"
+              validate="true"
               input="/alerts/Config.do?mode=editProperties">
         <forward name="cancel" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
         <forward name="reset" path="/alerts/Config.do?mode=editProperties" redirect="true"/>
