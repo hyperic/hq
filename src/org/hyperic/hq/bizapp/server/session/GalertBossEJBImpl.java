@@ -338,6 +338,8 @@ public class GalertBossEJBImpl
                 .put("time", date)
                 .put("name", alert.getAlertDefinitionInterface().getName())
                 .put("defId", alert.getAlertDefinitionInterface().getId())
+                .put("priority",
+                     alert.getAlertDefinitionInterface().getPriority())
                 .put("reason", alert.getShortReason())
                 .put("fixed", alert.isFixed())
                 .put("acknowledgeable", alert.isAcknowledgeable()));
