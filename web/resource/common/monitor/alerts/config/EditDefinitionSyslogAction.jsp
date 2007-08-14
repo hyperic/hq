@@ -33,10 +33,13 @@
 
 <html:form action="/alerts/EditSyslogAction">
 
+<c:if test="${not empty param.aetid}">
 <html:hidden property="aetid"/>
+</c:if>
+<c:if test="${not empty param.eid}">
 <html:hidden property="eid"/>
+</c:if>
 <html:hidden property="ad"/>
-<html:hidden property="id"/>
 
 <tiles:insert definition=".page.title.events">
   <tiles:put name="titleKey" value="alert.config.props.Syslog.AddActionTitle"/>
@@ -67,42 +70,42 @@
     </logic:messagesNotPresent>
   </tr>
   <tr valign="top">
-    <td width="20%" class="BlockLabel">
+    <td class="BlockLabel">
       <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
       <fmt:message key="alert.config.props.Syslog.Project"/>:
     </td>
     <logic:messagesPresent property="project">
-    <td width="80%" class="ErrorField">
+    <td class="ErrorField">
       <html:text size="30" property="project"/>
       <span class="ErrorFieldContent">- <html:errors property="project"/></span>
     </td>
     </logic:messagesPresent>
     <logic:messagesNotPresent property="project">
-    <td width="80%" class="BlockContent">
+    <td class="BlockContent">
       <html:text size="30" property="project"/>
     </td>
     </logic:messagesNotPresent>
   </tr>
   <tr valign="top">
-    <td width="20%" class="BlockLabel">
+    <td class="BlockLabel">
       <html:img page="/images/icon_required.gif" width="9" height="9" border="0"/>
       <fmt:message key="alert.config.props.Syslog.Version"/>:
     </td>
     <logic:messagesPresent property="version">
-    <td width="80%" class="ErrorField">
+    <td class="ErrorField">
       <html:text size="30" property="version"/>
       <span class="ErrorFieldContent">- <html:errors property="version"/></span>
     </td>
     </logic:messagesPresent>
     <logic:messagesNotPresent property="version">
-    <td width="80%" class="BlockContent">
+    <td class="BlockContent">
       <html:text size="30" property="version"/>
     </td>
     </logic:messagesNotPresent>
   </tr>
   <c:if test="${(! empty EditAlertDefinitionSyslogActionForm.id) and (EditAlertDefinitionSyslogActionForm.id > 0)}">
   <tr valign="top">
-    <td colspan="2" width="100%" class="BlockContent">
+    <td colspan="2"  class="BlockContent">
       <html:checkbox property="shouldBeRemoved" onclick="javascript:syslogFormEnabledToggle();"/>
       <fmt:message key="alert.config.props.Syslog.Dissociate"/>
     </td>
