@@ -66,7 +66,8 @@
       <fmt:message key="error.Error.ThePageRequestedEtc"/>  
       <fmt:message key="error.Error.YouCan"/>          
       <span id="stacktrace_link">
-      <html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>         
+      <html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>
+      <fmt:message key="errors.jsp.contactsupport"/>  - <fmt:message key="errors.jsp.callhyperic"/> - <fmt:message key="errors.jsp.email"/> <a href='mailto:<fmt:message key="errors.jsp.support"/>?subject=<fmt:message key="error.Error.Title"/>'><fmt:message key="errors.jsp.support"/></a><br/><br/>
       </span>
       <fmt:message key="error.Error.ReturnTo"/>
       <html:link href="javascript:history.back(1)"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
