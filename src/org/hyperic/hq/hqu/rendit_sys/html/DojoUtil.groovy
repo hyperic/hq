@@ -101,6 +101,7 @@ class DojoUtil {
 	    def pageNumVar   = "${idVar}_pageNum"
 	    def lastPageVar  = "${idVar}_lastPage"
 	    def sortOrderVar = "${idVar}_sortOrder"
+	    def urlXtraVar   = "${idVar}_urlXtra"
 	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
         
@@ -108,6 +109,7 @@ class DojoUtil {
         var ${pageNumVar}  = 0;
         var ${lastPageVar} = false;
         var ${sortOrderVar};
+        var ${urlXtraVar} = {};
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
@@ -115,8 +117,12 @@ class DojoUtil {
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
             ${tableVar}.createSorter = function(a) { return null; };
-            ${idVar}_refreshTable();
+            ${id}_refreshTable();
 	    });    
+
+        function ${id}_getUrlXtras() {
+            return ${urlXtraVar}
+        }
 
         function ${idVar}_makeQueryStr() {
             var res = '?pageNum=' + ${pageNumVar};
@@ -128,6 +134,10 @@ class DojoUtil {
             if (${sortOrderVar} != null)
                 res += '&sortOrder=' + ${sortOrderVar};
 
+            for (var v in ${urlXtraVar}) {
+                if (v == 'extend') continue;
+                res += '&' + v + '=' + ${urlXtraVar}[v];
+            }
             return res;
         }
 
@@ -147,10 +157,10 @@ class DojoUtil {
             ${tableVar}.sortInformation[0] = {index:el.getAttribute('colidx'),
                                               direction:${sortOrderVar}};
             ${pageNumVar}   = 0;
-            ${idVar}_refreshTable();
+            ${id}_refreshTable();
         }
 
-        function ${idVar}_refreshTable() {
+        function ${id}_refreshTable() {
             var queryStr = ${idVar}_makeQueryStr();
             dojo.io.bind({
                 url: '${params.url}' + queryStr,
@@ -222,14 +232,14 @@ class DojoUtil {
         function ${idVar}_nextPage() {
             if (${lastPageVar} == false)  {
                 ${pageNumVar}++;
-                ${idVar}_refreshTable();
+                ${id}_refreshTable();
             }
         }
 
         function ${idVar}_previousPage() {
             if (${pageNumVar} != 0) {
                 ${pageNumVar}--;
-                ${idVar}_refreshTable();
+                ${id}_refreshTable();
             }
         }
 	    </script>
@@ -237,25 +247,22 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	    <div style="position:absolute;padding-left:10px;font-size:13px;padding-top:2px;font-weight:bold;">${params.id}</div>
-	        <div class="boldText" style="position:relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
-	         <div class="pageButtonCont">
-                 <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
-                      class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-                 <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
-                 <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;"
-                      class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+        <div class="boldText" style="position:relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+	      <div class="pageButtonCont">
+            <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
+                 class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+            <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
+            <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;"
+                 class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
 
-             </div>
-
-             <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-
-             <div style="clear: both;"></div>
+         </div>
+         <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
+           <div style="clear: both;"></div>
          </div>
         
-          <table id='${id}'>
-            <thead>
-              <tr>
+         <table id='${id}'>
+           <thead>
+             <tr>
         """
         
         def colIdx = 0;
@@ -321,7 +328,7 @@ class DojoUtil {
 		   we aren't on the last page */
 		def pageInfo = PageInfo.create(pageNum, pageSize + 1, sortColumn, 
 		                               sortOrder)
-        def data     = schema.getData(pageInfo)
+        def data     = schema.getData(pageInfo, params)
         def lastPage = (data.size() <= pageSize)
 
         if (data.size() == pageSize + 1)
