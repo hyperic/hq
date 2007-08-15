@@ -117,7 +117,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
@@ -134,6 +133,7 @@ import org.hyperic.util.schedule.ScheduleException;
 
 import org.hyperic.hq.bizapp.client.pageFetcher.FindControlJobFetcher;
 import org.hyperic.hq.bizapp.client.pageFetcher.FindControlScheduleFetcher;
+import org.quartz.SchedulerException;
 
 public class ClientShellEntityFetcher {
     protected ClientShellBossManager   bossManager;
@@ -1304,11 +1304,10 @@ public class ClientShellEntityFetcher {
 
     public void doAction(AppdefEntityID id, String action,
                          ScheduleValue schedule, int[] orderSpec)
-        throws PluginException, ScheduleWillNeverFireException,
-               ApplicationException, SessionNotFoundException,
+        throws PluginException, ApplicationException, SessionNotFoundException,
                SessionTimeoutException, PermissionException,
                ClientShellAuthenticationException, GroupNotCompatibleException,
-               AppdefEntityNotFoundException
+               AppdefEntityNotFoundException, SchedulerException
     {
         ControlBoss boss;
 
