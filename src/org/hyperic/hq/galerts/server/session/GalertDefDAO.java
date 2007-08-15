@@ -28,9 +28,15 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertSeverity;
 
 class GalertDefDAO
     extends HibernateDAO
@@ -88,6 +94,43 @@ class GalertDefDAO
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
+    }
+    
+    List findAll(AuthzSubject subj, AlertSeverity minSeverity, 
+                 Boolean enabled, PageInfo pInfo)
+    {
+        String sql = PermissionManagerFactory.getInstance()
+            .getGroupAlertDefsHQL();
+        
+        sql += " and d.deleted = false";
+        if (enabled != null) {
+            sql += " and d.enabled = " + 
+                   (enabled.booleanValue() ? "true" : "false");
+        }
+
+        sql += getOrderByClause(pInfo);
+               
+        Query q = getSession().createQuery(sql)
+            .setInteger("priority", minSeverity.getCode());
+
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subj.getId().intValue())
+             .setParameter("op", AuthzConstants.groupOpManageAlerts);
+        }
+        
+        return pInfo.pageResults(q).list();
+    }
+
+    private String getOrderByClause(PageInfo pInfo) {
+        GalertDefSortField sort = (GalertDefSortField)pInfo.getSort();
+        String res = " order by " + sort.getSortString("d", "g", "e") + 
+            (pInfo.isAscending() ? "" : " DESC");
+        
+        if (!sort.equals(GalertDefSortField.CTIME)) {
+            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e")+ 
+                   " DESC";
+        }
+        return res;
     }
     
     int countByStrategy(ExecutionStrategyTypeInfo strat) {

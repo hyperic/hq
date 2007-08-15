@@ -185,6 +185,22 @@ public class GalertManagerEJBImpl
     }
 
     /**
+     * Find all group alert definitions.
+     * 
+     * @param minSeverity Minimum severity for returned defs
+     * @param enabled     If non-null specifies the nature of the 'enabled'
+     *                    flag for the results.
+     * @param pInfo       Paging information.  Must contain a sort field from
+     *                    {@link GalertDefSortField}
+     * @ejb:interface-method  
+     */
+    public List findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
+                              Boolean enabled, PageInfo pInfo)  
+    {
+        return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
+    }
+
+    /**
      * @ejb:interface-method  
      */
     public Collection findAllStrategyTypes() {
