@@ -1853,7 +1853,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     iidsConj + " AND " + tidsConj + " GROUP BY template_id";
         
         final String lastSQL =
-            "SELECT /*+ RULE */ value FROM " + table + ", " +
+            "SELECT value FROM " + table + ", " +
                 "(SELECT id FROM " + TAB_MEAS +
                     " WHERE template_id = ? AND " + iidsConj + ") ids " +
             "WHERE id = measurement_id AND timestamp = ?";
