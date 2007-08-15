@@ -81,9 +81,9 @@ public class MeasTabManagerUtil {
         return getUnionStatement(begin, timeNow);
     }
 
-    private static int getDayOfPeriod(long timems) {
+    private static int getDayOfPeriod(Calendar cal, long timems) {
         int rtn = 0;
-        Calendar cal = Calendar.getInstance();
+        cal.clear();
         cal.setTime(new java.util.Date(timems));
         Calendar currCal = Calendar.getInstance();
         currCal.setTime(new java.util.Date(timems));
@@ -105,8 +105,13 @@ public class MeasTabManagerUtil {
 
     public static String getMeasTabname(long timems) {
         Calendar cal = Calendar.getInstance();
+        return getMeasTabname(cal, timems);
+    }
+
+    public static String getMeasTabname(Calendar cal, long timems) {
+        int dayofperiod = getDayOfPeriod(cal, timems);
+        cal.clear();
         cal.setTime(new java.util.Date(timems));
-        int dayofperiod = getDayOfPeriod(timems);
         _log.debug("dayofperiod -> " + dayofperiod);
         int hourofday = cal.get(Calendar.HOUR_OF_DAY);
         int numdaytables = NUMBER_OF_TABLES / NUMBER_OF_TABLES_PER_DAY;
@@ -122,21 +127,55 @@ public class MeasTabManagerUtil {
         return MEAS_TABLE + "_" + daytable + "D_" + dayslice + "S";
     }
     
-    public static long getMeasTabStartTime(long timems) {
-        Calendar cal = Calendar.getInstance();
+    public static long getMeasTabEndTime(Calendar cal, long timems) {
+        cal.clear();
         cal.setTime(new java.util.Date(timems));
-        if (cal.get(Calendar.HOUR_OF_DAY) < 12) {
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-        } else {
-            cal.set(Calendar.HOUR_OF_DAY, 12);
+        int incr = 24/NUMBER_OF_TABLES_PER_DAY;
+        for (int i=incr; i<=24; i+=incr)
+        {
+            if (cal.get(Calendar.HOUR_OF_DAY) < i) {
+                cal.set(Calendar.HOUR_OF_DAY, i-1);
+                break;
+            }
+        }
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        return cal.getTimeInMillis();
+    }
+
+    public static long getMeasTabEndTime(long timems) {
+        Calendar cal = Calendar.getInstance();
+        return getMeasTabEndTime(cal, timems);
+    }
+
+    public static long getMeasTabStartTime(Calendar cal, long timems) {
+        cal.clear();
+        cal.setTime(new java.util.Date(timems));
+        int incr = 24/NUMBER_OF_TABLES_PER_DAY;
+        for (int i=incr; i<=24; i+=incr)
+        {
+            if (cal.get(Calendar.HOUR_OF_DAY) < i) {
+                cal.set(Calendar.HOUR_OF_DAY, i-incr);
+                break;
+            }
         }
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         return cal.getTimeInMillis();
     }
 
+    public static long getMeasTabStartTime(long timems) {
+        Calendar cal = Calendar.getInstance();
+        return getMeasTabStartTime(cal, timems);
+    }
+
     public static long getPrevMeasTabTime(long timems) {
         Calendar cal = Calendar.getInstance();
+        return getPrevMeasTabTime(cal, timems);
+    }
+
+    public static long getPrevMeasTabTime(Calendar cal, long timems) {
+        cal.clear();
         cal.setTime(new java.util.Date(timems));
         long rtn = -1;
 

@@ -485,94 +485,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
 
-    private Map bucketData(List data) {
-        HashMap buckets = new HashMap();
-        List ranges =  getTableRanges();
-        for (Iterator it = data.iterator(); it.hasNext(); ) {
-            DataPoint pt = (DataPoint) it.next();
-            String table =  getMeasTable(pt.getMetricValue().getTimestamp(),
-                                         ranges);
-            if (!buckets.containsKey(table)) {
-                buckets.put(table, new ArrayList());
-            }
-            List dpts = (List) buckets.get(table);
-            dpts.add(pt);
-        }
-        return buckets;
-    }
-
-    private class MeasRange
-    {
-        private long minTime,
-                     maxTime;
-
-        private String table;
-
-        MeasRange(String table, long minTime, long maxTime)
-        {
-            this.table = table;
-            this.minTime = minTime;
-            this.maxTime = maxTime;
-        }
-
-        long getMaxTimestamp()
-        {
-            return maxTime;
-        }
-
-        long getMinTimestamp()
-        {
-            return minTime;
-        }
-
-        String getTable()
-        {
-            return table;
-        }
-
-        public String toString()
-        {
-            return table+", min: "+TimeUtil.toString(minTime)+
-                         ", max: "+TimeUtil.toString(maxTime);
-        }
-    }
-
-    private List getTableRanges()
-    {
-        List rtn = new ArrayList();
-        long currTime = System.currentTimeMillis();
-        currTime = MeasTabManagerUtil.getMeasTabStartTime(currTime);
-        String currTable = MeasTabManagerUtil.getMeasTabname(currTime);
-        String table = currTable;
-        MeasRange range = new MeasRange(currTable, currTime,
-                                        System.currentTimeMillis());
-        do
-        {
-            _log.debug(range);
-            rtn.add(range);
-            long max = currTime-1000l;
-            currTime = MeasTabManagerUtil.getPrevMeasTabTime(currTime);
-            currTime = MeasTabManagerUtil.getMeasTabStartTime(currTime);
-            table = MeasTabManagerUtil.getMeasTabname(currTime);
-            range = new MeasRange(table, currTime, max);
-        }
-        while (!currTable.equals(table));
-        return rtn;
-    }
-
-    private String getMeasTable(long timestamp, List ranges)
-    {
-        for (Iterator i=ranges.iterator(); i.hasNext(); )
-        {
-            MeasRange range = (MeasRange)i.next();
-            if (timestamp <= range.getMaxTimestamp() &&
-                timestamp >= range.getMinTimestamp()) {
-                return range.getTable();
-            }
-        }
-        return MeasTabManagerUtil.getMeasTabname(timestamp);
-    }
-
     /**
      * Insert the metric data points to the DB with one insert statement. This 
      * should only be invoked when the DB supports multi-insert statements.
@@ -584,7 +496,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean insertDataWithOneInsert(List data) {
         Statement stmt = null;
         ResultSet rs = null;
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         Connection conn = safeGetConnection();
         
@@ -734,7 +646,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         throws SQLException {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -807,7 +719,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private List updateData(Connection conn, List data) {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -915,7 +827,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return TAB_DATA_1D;
         }
     }
-    
+
     /**
      * Fetch the list of historical data points given
      * a start and stop time range
@@ -933,25 +845,24 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
-        
+
         // Push begin to at least current - 1 min, avoid row contention with
         // current writes
         long current = System.currentTimeMillis();
         begin = Math.min(begin, current - 60000);
 
         ArrayList history = new ArrayList();
-    
+
         //Get the data points and add to the ArrayList
         Connection        conn = null;
         PreparedStatement stmt = null;
         ResultSet         rs   = null;
-        
+
         // The total count
         int total = 0;
 
         // The table to query from
         String table = getDataTable(begin, end);
-    
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
@@ -960,13 +871,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 stmt = conn.prepareStatement(
                     "SELECT count(*) FROM " + table +
                     " WHERE measurement_id=? AND timestamp BETWEEN ? AND ?");
-    
+
                 int i = 1;
                 stmt.setInt (i++, id.intValue());
                 stmt.setLong(i++, begin);
                 stmt.setLong(i++, end);
                 rs = stmt.executeQuery();
-    
+
                 if (rs.next())
                     total = rs.getInt(1);
 
@@ -984,13 +895,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             try {
                 // The index
                 int i = 1;
-            
-                StringBuffer sqlBuf;
 
+                StringBuffer sqlBuf;
                 // Now get the page that user wants
                 boolean sizeLimit =
                     pc.getPagesize() != PageControl.SIZE_UNLIMITED;
-                
+
                 if (sizeLimit) {
                     // This query dynamically counts the number of rows to 
                     // return the correct paged ResultSet
@@ -1030,9 +940,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     if ( _log.isDebugEnabled() )
                         _log.debug("arg4 = " + (pc.getPageEntityIndex() + 1));
                 }
-                
+
                 StopWatch timer = new StopWatch(current);
-                
+
                 rs = stmt.executeQuery();
 
                 if ( _log.isTraceEnabled() ) {
@@ -1042,7 +952,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
                 for (i = 1; rs.next(); i++) {
                     history.add(getMetricValue(rs));
-                    
+
                     if (sizeLimit && (i == pc.getPagesize()))
                         break;
                 }
