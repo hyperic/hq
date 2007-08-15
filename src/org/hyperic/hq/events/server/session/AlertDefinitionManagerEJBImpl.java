@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -762,9 +763,25 @@ public class AlertDefinitionManagerEJBImpl
         return getAlertDefDAO().findDefinitions(subj, minSeverity, enabled, 
                                                 excludeTypeBased, pInfo);
     }
+    
+    /** 
+     * Get the list of type-based alert definitions.
+     * 
+     * @param pInfo Paging information.  The sort field must be a value from
+     *              {@link AlertDefSortField}
+     * @ejb:interface-method
+     */
+    public List findTypeBasedDefinitions(AuthzSubjectValue subj, 
+                                         PageInfo pInfo) 
+        throws PermissionException
+    {
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj)) {
+            throw new PermissionException("Only administrators can do this");
+        }
+        return getAlertDefDAO().findTypeBased(pInfo);
+    }
 
     /** 
-     * Get list of alert conditions for a resource
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(AuthzSubjectValue subj,

@@ -283,7 +283,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
                          Boolean enabled, boolean excludeTypeBased, 
                          PageInfo pInfo)
     {
-        AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
         String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
         
         sql += " and d.deleted = false";
@@ -295,14 +294,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
         if (excludeTypeBased) {
             sql += " and d.parent is null";
         }
-        
-        sql += " order by " + sort.getSortString("d", "r") + 
-               (pInfo.isAscending() ? "" : " DESC");
 
-        if (!sort.equals(AlertDefSortField.CTIME)) {
-            sql += ", " + AlertDefSortField.CTIME.getSortString("d", "r") +
-                   " DESC";
-        }
+        sql += getOrderByClause(pInfo);
                
         Query q = getSession().createQuery(sql)
             .setInteger("priority", minSeverity.getCode());
@@ -311,6 +304,28 @@ public class AlertDefinitionDAO extends HibernateDAO {
             q.setInteger("subj", subj.getId().intValue())
              .setParameterList("ops", MANAGE_ALERTS_OPS);
         }
+        
+        return pInfo.pageResults(q).list();
+    }
+
+    private String getOrderByClause(PageInfo pInfo) {
+        AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
+        String res = " order by " + sort.getSortString("d", "r") + 
+            (pInfo.isAscending() ? "" : " DESC");
+        
+        if (!sort.equals(AlertDefSortField.CTIME)) {
+            res += ", " + AlertDefSortField.CTIME.getSortString("d", "r") + 
+                   " DESC";
+        }
+        return res;
+    }
+    
+    List findTypeBased(PageInfo pInfo) {
+        String sql = "from AlertDefinition d " + 
+            "where d.deleted = false and d.parent.id = 0 " +
+            getOrderByClause(pInfo);
+                   
+        Query q = getSession().createQuery(sql);
         
         return pInfo.pageResults(q).list();
     }
