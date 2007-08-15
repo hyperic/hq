@@ -83,10 +83,10 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.scheduler.ScheduleValue;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
+import org.quartz.SchedulerException;
 
 /** The server-side control system.
  *
@@ -202,8 +202,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      */
     public void doAction(AuthzSubjectValue subject, AppdefEntityID id,
                          String action, ScheduleValue schedule)
-        throws PluginException,
-               PermissionException, ScheduleWillNeverFireException
+        throws PluginException, PermissionException, SchedulerException
     {
         // This method doesn't support groups.
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
@@ -247,6 +246,7 @@ public class ControlManagerEJBImpl implements SessionBean {
 
     /**
      * Schedule a single control action for a group of given entities.
+     * @throws SchedulerException 
      * 
      * @ejb:interface-method view-type="local"
      * @ejb:transaction type="SUPPORTS"
@@ -255,9 +255,8 @@ public class ControlManagerEJBImpl implements SessionBean {
                               AppdefEntityID id,
                               String action, int[] order, 
                               ScheduleValue schedule)
-        throws PluginException,
-               PermissionException, GroupNotCompatibleException,
-               AppdefEntityNotFoundException, ScheduleWillNeverFireException
+        throws PluginException, PermissionException, SchedulerException,
+               GroupNotCompatibleException, AppdefEntityNotFoundException
     {
         List groupMembers = GroupUtil.getCompatGroupMembers(subject, id, 
                                                             order,

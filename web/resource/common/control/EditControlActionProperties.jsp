@@ -30,13 +30,15 @@
   USA.
  --%>
 
+<tiles:insert definition=".portlet.confirm"/>
+<tiles:insert definition=".portlet.error"/>
+
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.server.Control.Properties.Title"/>
 </tiles:insert>
 <!--  /  -->
-<tiles:insert definition=".portlet.confirm"/>
-<tiles:insert definition=".portlet.error"/>
+
 <!-- CONSTANT DEFINITIONS -->
 
 <c:set var="formBean" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>

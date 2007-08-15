@@ -48,6 +48,7 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.quartz.SchedulerException;
 
 /**
  * An <code>Action</code> subclass that creates a control action associated
@@ -131,6 +132,10 @@ public class NewAction extends BaseAction {
         } catch (PermissionException pe) {
             RequestUtils.setError(request,
                 "resource.common.control.error.NewPermission");
+            return returnFailure(request, mapping, parms);
+        } catch (SchedulerException se) {
+            RequestUtils.setError(request,
+                "resource.common.control.error.ScheduleInvalid");
             return returnFailure(request, mapping, parms);
         }
     } 
