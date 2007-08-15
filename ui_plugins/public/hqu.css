@@ -212,4 +212,16 @@
     font-weight: bold;
 }
 
+.filterBox {
+padding:8px;
+}
 
+.dojoTab div {
+font-size:100%;
+font-weight:bold;
+}
+
+.filters {
+    background-color:#EFEFEF;
+    border: 1px solid #7bafff;
+}

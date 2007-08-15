@@ -52,9 +52,9 @@ function selectDefType(t) {
   <div dojoType="ContentPane" label="Alerts">
     <div style="margin:5px;">
       <div style="float:left;width:18%;margin-right:12px;">
-        <div style="background-color:#EFEFEF">
+        <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
-          <div style="padding:8px;">
+          <div class="filterBox">
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.AlertType}:</strong></span>
               <select onchange='selectAlertType(options[selectedIndex].value)'>
