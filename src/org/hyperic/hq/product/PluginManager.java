@@ -47,10 +47,9 @@ import org.apache.commons.logging.Log;
  * - shutdown() propagated to all plugins
  */
 public abstract class PluginManager {
-    private static final String OS =
-        OperatingSystem.getInstance().getName();
-    private static final String OS_SUFFIX =
-        " " + OS;
+    private final String OS;
+    private final String OS_SUFFIX;
+
     protected HashMap plugins = new HashMap();
     private HashMap pluginInfo = new HashMap();
     private Properties props = null;
@@ -64,6 +63,8 @@ public abstract class PluginManager {
     public PluginManager(Properties props) {
         log = LogFactory.getLog(this.getClass().getName());
         this.props = props;
+        OS = OperatingSystem.getInstance().getName();
+        OS_SUFFIX = " " + OS;        
     }
 
     public abstract String getName();
