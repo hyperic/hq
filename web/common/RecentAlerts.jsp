@@ -39,9 +39,9 @@
         <c:url var="alertUrl" value="/alerts/Alerts.do">
           <c:param name="mode" value="viewAlert"/>
         </c:url>
-        <li class="MastheadContent"><html:link href="${alertUrl}&amp;eid=${alert.type}:${alert.rid}&amp;a=${alert.id}" styleClass="MastheadLink"><hq:dateFormatter value="${alert.ctime}"/></html:link>
+        <li class="MastheadContent" title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName}"/>"><html:link href="${alertUrl}&amp;eid=${alert.type}:${alert.rid}&amp;a=${alert.id}" styleClass="MastheadLink"><hq:dateFormatter value="${alert.ctime}"/></html:link>
         <fmt:message key="common.label.Dash"/>
-        <c:out value="${alert.resourceName}"/><fmt:message key="common.label.Colon"/>
+        <%--<c:out value="${alert.resourceName}"/><fmt:message key="common.label.Colon"/>--%>
         <c:out value="${alert.name}"/></li>
       </c:forEach>
     </ul>
