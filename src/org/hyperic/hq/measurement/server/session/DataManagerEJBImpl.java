@@ -485,6 +485,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
 
+    Map bucketData(List data)
+    {
+        HashMap buckets = new HashMap();
+        MeasRangeObj rangeObj = MeasRangeObj.getInstance();
+        List ranges = rangeObj.getRanges();
+        for (Iterator it = data.iterator(); it.hasNext(); )
+        {
+            DataPoint pt = (DataPoint) it.next();
+            String table = rangeObj.getTable(ranges,
+                                        pt.getMetricValue().getTimestamp());
+            List dpts;
+            if (null == (dpts = (List)buckets.get(table))) {
+                dpts = new ArrayList();
+                buckets.put(table, dpts);
+            }
+            dpts.add(pt);
+        }
+        return buckets;
+    }
+
     /**
      * Insert the metric data points to the DB with one insert statement. This 
      * should only be invoked when the DB supports multi-insert statements.
@@ -496,7 +516,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean insertDataWithOneInsert(List data) {
         Statement stmt = null;
         ResultSet rs = null;
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        Map buckets = bucketData(data);
         
         Connection conn = safeGetConnection();
         
@@ -646,7 +666,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         throws SQLException {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        Map buckets = bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -719,7 +739,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private List updateData(Connection conn, List data) {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        Map buckets = bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();

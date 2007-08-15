@@ -79,39 +79,26 @@ class MeasRangeObj
         }
     }
 
-    Map bucketData(List data)
+    List getRanges()
     {
         synchronized(_ranges)
         {
-            HashMap buckets = new HashMap();
-            MeasRangeObj rangeObj = MeasRangeObj.getInstance();
-            for (Iterator it = data.iterator(); it.hasNext(); )
+            MeasRange latestRange = (MeasRange)_ranges.get(0);
+            long now = System.currentTimeMillis();
+            if (now > latestRange.getMaxTimestamp())
             {
-                DataPoint pt = (DataPoint) it.next();
-                String table = getTable(pt.getMetricValue().getTimestamp());
-                List dpts;
-                if (null == (dpts = (List)buckets.get(table))) {
-                    dpts = new ArrayList();
-                    buckets.put(table, dpts);
-                }
-                dpts.add(pt);
+                _ranges.remove(_ranges.size()-1);
+                MeasRange latest = getCurrentRange();
+                _log.debug("loading measurement range -> "+latest);
+                _ranges.add(0, latest);
             }
-            return buckets;
+            return new ArrayList(_ranges);
         }
     }
 
-    private String getTable(long timestamp)
+    String getTable(List ranges, long timestamp)
     {
-        MeasRange latestRange = (MeasRange)_ranges.get(0);
-        if (timestamp > latestRange.getMaxTimestamp())
-        {
-            _ranges.remove(_ranges.size()-1);
-            MeasRange latest = getCurrentRange();
-            _log.debug("loading measurement range -> "+latest);
-            _ranges.add(0, latest);
-            return  latest.getTable();
-        }
-        for (Iterator i=_ranges.iterator(); i.hasNext(); )
+        for (Iterator i=ranges.iterator(); i.hasNext(); )
         {
             MeasRange range = (MeasRange)i.next();
             if (timestamp <= range.getMaxTimestamp() &&
@@ -119,7 +106,7 @@ class MeasRangeObj
                 return range.getTable();
             }
         }
-        _log.error("Could not find an appropriate range for "+TimeUtil.toString(timestamp));
+        _log.debug("Could not find an appropriate range for "+TimeUtil.toString(timestamp));
         return MeasTabManagerUtil.getMeasTabname(timestamp);
     }
 
