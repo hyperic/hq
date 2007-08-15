@@ -125,4 +125,31 @@ class HtmlUtil {
 		"  </div>" +
 		"</form>"
 	}
+
+	/**
+	 * Create a <select> list with <options>.
+	 * 
+	 * @param vals  A list of objects to fill out the select box.  For
+	 *              each element, e.getCode() will be called to fill in the
+	 *              value for each <option>, and e.getValue() will be called
+	 *              to fill out the text for the option.
+	 *
+	 * @param htmlOpts A map, specifying key=value pairs to place as options
+	 *                 on the returned <select> tag
+	 */
+	static String selectList(vals, htmlOpts) {
+        def res = "<select "
+        
+        for (i in htmlOpts) {
+            res += "${i.key}='${i.value}' "
+        }
+        res += ">\n"
+        
+        for (i in vals) {
+            res += "<option value='${i.code}'>${escapeHtml(i.value)}</option>\n"    
+        }
+        
+        res += "</select>\n"
+        res
+    }
 }
