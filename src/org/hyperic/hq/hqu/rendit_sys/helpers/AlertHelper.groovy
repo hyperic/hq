@@ -73,10 +73,47 @@ class AlertHelper extends BaseHelper {
         galertMan.findAlerts(userValue, severity, millis, millis, pInfo)
     }
     
+    /**
+     * Finds all alert definitions.  
+     * 
+     * @param severity Minimum severity for returned defs
+     * @param enabled  If non-null, specifies whether the returned defs should
+     *                 be enabled or disabled
+     * @param excludeTypeBased  Exclude alert-defs created from a type-based
+     *                          template
+     * @param pInfo Paging information.  The sort field must be a value from
+     *              {@link AlertDefSortField}
+     */
     def findDefinitions(AlertSeverity severity, Boolean enabled,
                         boolean excludeTypeBased, PageInfo pInfo) 
     {
         defMan.findAlertDefinitions(userValue, severity, enabled, 
                                     excludeTypeBased, pInfo)
+    }
+
+    /**
+     * Find type-based alert definitions.  These are the templates for
+     * the individual resource definitions.
+     *
+     * @param pInfo Paging information, where the sort field is a value from
+     *              {@link AlertDefSortField}
+     */
+    def findTypeBasedDefinitions(PageInfo pInfo) { 
+        defMan.findTypeBasedDefinitions(userValue, pInfo) 
+    }
+    
+    /**
+     * Find group alert definitions.
+     *
+     * @param minSeverity Minimum severity for returned definitions
+     * @param enabled     If non-null, specifies whether the returned defs 
+     *                    should be enabled or disabled.
+     * @param pInfo       Pageing information where the sort field is one
+     *                    of {@link GalertDefSortField}
+     */
+    def findGroupDefinitions(AlertSeverity minSeverity,
+                             Boolean enabled, PageInfo pInfo)
+    {
+        galertMan.findAlertDefs(user, minSeverity, enabled, pInfo)
     }
 }
