@@ -217,7 +217,7 @@ public class ActionUtils {
         for (Iterator i=enums.iterator(); i.hasNext(); ) {
             HypericEnum e = (HypericEnum)i.next();
             
-            res.add(new LabelValueBean(e.getDescription(), e.getCode() + "")); 
+            res.add(new LabelValueBean(e.getValue(), e.getCode() + "")); 
         }
         return res;
     }
