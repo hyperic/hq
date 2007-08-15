@@ -84,6 +84,7 @@ class RenderFrame {
                    l       : controller.localeBundle]
 
         res += staticMethodsToMap(DojoUtil)        
+        res += staticMethodsToMap(HtmlUtil)        
         
         // Override general methods which generate links so that URLs can
         // be re-written
