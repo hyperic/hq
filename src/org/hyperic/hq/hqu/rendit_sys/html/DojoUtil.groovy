@@ -76,10 +76,11 @@ class DojoUtil {
      *       defaultSort:  A class implementing SortField, which is the 
      *                     default column to sort on
      *       defaultSortOrder: 0 to sort by descending, 1 by ascending
-     *       rowId:  A closure which takes a single object (an element as
-     *               returned from the getData() call), and must return an
-     *               ID for the row.  This ID is used to map the row to the
-     *               object.
+     *       rowId:  (optional) A closure which takes a single object (an 
+     *               element as returned from the getData() call), and must 
+     *               return an ID for the row.  This ID is used to map the row 
+     *               to the object.  By default this calls the object.getId()
+     *               
      *       styleClass (optional):  A closure which takes an element returned
      *                               from getData and returns a String to use
      *                               as the styleclass for that row.  If it 
@@ -335,9 +336,13 @@ class DojoUtil {
             data = data[0..-2]
 		
 		JSONArray jsonData = new JSONArray()
+        def rowId = schema.rowId
+        if (rowId == null) {
+            rowId = { it -> it.getId() }
+        }
         for (d in data) {
             def val = [:]
-            val.id = schema.rowId(d)
+            val.id = rowId(d)
             for (c in schema.columns) {
                 val[c.field.description] = c.label(d)
             }

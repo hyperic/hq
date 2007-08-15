@@ -42,7 +42,6 @@ class AlertController
         },
         defaultSort: AlertSortField.DATE,
         defaultSortOrder: 0,  // descending
-        rowId: {it.id},
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
             [field:AlertSortField.DATE, 
@@ -80,7 +79,6 @@ class AlertController
         },
         defaultSort: GalertLogSortField.DATE,
         defaultSortOrder: 0,  // descending
-        rowId: {it.id},
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
             [field:GalertLogSortField.DATE, 
@@ -117,7 +115,6 @@ class AlertController
         },
         defaultSort: AlertDefSortField.CTIME,
         defaultSortOrder: 0,  // descending
-        rowId: {it.id},
         columns: [
             [field:AlertDefSortField.NAME,
              label:{linkTo(it.name, [resource:it]) }],
@@ -148,7 +145,6 @@ class AlertController
         },
         defaultSort: AlertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
-        rowId: {it.id},
         columns: [
             [field:AlertDefSortField.NAME,
              label:{linkTo(it.name, [resource:it]) }],
@@ -169,7 +165,6 @@ class AlertController
         },
         defaultSort: GalertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
-        rowId: {it.id},
         columns: [
             [field:GalertDefSortField.NAME,
              label:{it.name }],
