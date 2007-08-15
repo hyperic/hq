@@ -235,6 +235,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:transaction type="REQUIRED"
      */
     public boolean addData(List data) {
+        if (shouldAbortDataInsertion(data)) {
+            return true;
+        }
+        
         data = enforceUnmodifiable(data);
         
         _log.debug("Attempting to insert data in a single transaction.");
@@ -285,11 +289,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
          *      throw the exception at the first instance of an error, and some
          *      will continue with the rest of the batch.
          */
+        if (shouldAbortDataInsertion(data)) {
+            return;
+        }
         
         _log.debug("Attempting to insert/update data outside a transaction.");
 
-        Set failedToSaveMetrics = new HashSet();
         data = enforceUnmodifiable(data);
+        Set failedToSaveMetrics = new HashSet();
         List left = data;
         
         Connection conn = safeGetConnection();
@@ -350,6 +357,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         _log.debug("Inserting/Updating data outside a transaction finished.");
         
         sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
+    }
+    
+    private boolean shouldAbortDataInsertion(List data) {
+        if (data.isEmpty()) {
+            _log.debug("Aborting data insertion since data list is empty. This is ok.");
+            return true;
+        } else {
+            return false;
+        }
     }
     
     private List enforceUnmodifiable(List aList) {
