@@ -599,13 +599,16 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Map results = new HashMap();
         if (platforms != null)
             results.putAll(this.getResourceMetrics(subject, platforms,
-                                                   mtids, begin, end, null));
+                                                   mtids, begin, end,
+                                                   Boolean.TRUE));
         if (servers != null)
             results.putAll(this.getResourceMetrics(subject, servers,
-                                                   mtids, begin, end, null));
+                                                   mtids, begin, end,
+                                                   Boolean.TRUE));
         if (services != null)
             results.putAll(this.getResourceMetrics(subject, services,
-                                                   mtids, begin, end, null));
+                                                   mtids, begin, end,
+                                                   Boolean.TRUE));
         return results;
     }
 
