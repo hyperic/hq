@@ -156,6 +156,9 @@ class AlertController
              label:{getSeverityImg(it.severity)}],
             [field:AlertDefSortField.ENABLED, 
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
+            [field:[getValue: {localeBundle.ResourceType },
+                    description:'resourceType', sortable:false],
+             label:{it.resourceType.name}],
         ]
     ]
             
