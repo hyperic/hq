@@ -95,11 +95,13 @@ class AlertHelper extends BaseHelper {
      * Find type-based alert definitions.  These are the templates for
      * the individual resource definitions.
      *
+     * @param enabled If non-null, specifies whether the returned defs
+     *                should be enabled or disabled.
      * @param pInfo Paging information, where the sort field is a value from
      *              {@link AlertDefSortField}
      */
-    def findTypeBasedDefinitions(PageInfo pInfo) { 
-        defMan.findTypeBasedDefinitions(userValue, pInfo) 
+    def findTypeBasedDefinitions(Boolean enabled, PageInfo pInfo) { 
+        defMan.findTypeBasedDefinitions(userValue, enabled, pInfo) 
     }
     
     /**
