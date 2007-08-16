@@ -79,7 +79,7 @@ function selectDefType(t) {
           </div>
         </div>
       </div>
-      <div style="float:left;width:80%">
+      <div style="float:left;width:80%" id="alertsCont">
         <div id="alertsTable">
           <%= dojoTable(id:'Alerts', url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
@@ -95,9 +95,9 @@ function selectDefType(t) {
   <div dojoType="ContentPane" label="Definitions">
     <div style="margin:5px;">
       <div style="float:left;width:18%;margin-right:12px;">
-        <div style="background-color:#EFEFEF">
+        <div class="filters">
           <div class="BlockTitle">${l.DefFilter}</div>
-          <div style="padding:8px;">
+          <div class="filterBox">
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.DefType}:</strong></span>
               <select onchange='selectDefType(options[selectedIndex].value)'>
@@ -115,7 +115,7 @@ function selectDefType(t) {
            </div>
         </div>
       </div>
-      <div style="float:left;width:80%">
+      <div style="float:left;width:80%" id="defsCont">
         <div id="defsTable">
           <%= dojoTable(id:'Defs', url:urlFor(action:'defData'),
                         schema:defSchema, numRows:15) %>
