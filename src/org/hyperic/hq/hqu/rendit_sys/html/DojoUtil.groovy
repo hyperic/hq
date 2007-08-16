@@ -272,6 +272,10 @@ class DojoUtil {
 	        def label     = field.value
 	        def fieldName = field.description 
 
+	        if (label == null && field['getValue'] != null) {
+				label = field.getValue()
+	        }
+	        
 	        res << """<th field='${fieldName}' align='left' nosort='true'  nowrap='true'
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
