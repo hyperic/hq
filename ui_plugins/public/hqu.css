@@ -224,3 +224,29 @@ font-weight:bold;
     background-color:#EFEFEF;
     border: 1px solid #7bafff;
 }
+
+.tableTitleWrapper {
+    display:inline;
+    float:left;
+    width:325px;
+    white-space:nowrap;
+    padding-left:15px;top:7px;
+    font-weight:bold;
+    font-size:1.3em;
+}
+
+.alertInfo {
+    width:300px;
+    white-space:nowrap;
+    display:inline;
+    margin-left:20px;
+    border: 1px solid rgb(213, 216, 222);
+    padding:3px 15px 3px 15px;
+    font-family:arial,sans-serif;
+    font-size:11px;
+    font-weight:normal;
+    background-color: #DBE3F5;
+    border-top: solid #ABB1C7;
+    border-bottom: solid #C6CFE5;
+    border-width: 1px;
+}

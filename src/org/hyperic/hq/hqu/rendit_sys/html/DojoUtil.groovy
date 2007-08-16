@@ -248,6 +248,7 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
+	    <div class="tableTitleWrapper"><div id="tableTitle" style="display:inline;width:75px;">${id}</div><div class="alertInfo">red highlighted alerts are not fixed</div></div>
         <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	      <div class="pageButtonCont">
             <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
