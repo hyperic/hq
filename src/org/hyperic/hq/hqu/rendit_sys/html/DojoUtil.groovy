@@ -93,6 +93,9 @@ class DojoUtil {
      *                   information about sortability, column header,
      *           label:  a closure which takes an element returned by getData
      *                   and returns a string which will be the cell text
+     *           width (optional):  Specifies the width of the column.  
+     *                              For instance: '10%' will ensure that the 
+     *                              column is 10% of the table width
      */
     static String dojoTable(params) {
         def id           = "${params.id}"
@@ -110,7 +113,7 @@ class DojoUtil {
         var ${pageNumVar}  = 0;
         var ${lastPageVar} = false;
         var ${sortOrderVar};
-        var ${urlXtraVar} = {};
+        var ${urlXtraVar} = [];
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
@@ -121,8 +124,10 @@ class DojoUtil {
             ${id}_refreshTable();
 	    });    
 
-        function ${id}_getUrlXtras() {
-            return ${urlXtraVar}
+        // Allows the caller to specify a callback which will return 
+        // additional query parameters (in the form of a map)
+        function ${id}_addUrlXtraCallback(fn) {
+            ${urlXtraVar}.push(fn);
         }
 
         function ${idVar}_makeQueryStr() {
@@ -135,9 +140,15 @@ class DojoUtil {
             if (${sortOrderVar} != null)
                 res += '&sortOrder=' + ${sortOrderVar};
 
-            for (var v in ${urlXtraVar}) {
-                if (v == 'extend') continue;
-                res += '&' + v + '=' + ${urlXtraVar}[v];
+            var callbacks = ${urlXtraVar};
+            for (var i=0; i<callbacks.length; i++) {
+                var cb = callbacks[i];
+
+                var cbmap = cb("${id}");
+                for (var v in cbmap) {
+                    if (v == 'extend') continue;
+                    res += '&' + v + '=' + cbmap[v];
+                }
             }
             return res;
         }
@@ -277,7 +288,12 @@ class DojoUtil {
 				label = field.getValue()
 	        }
 	        
-	        res << """<th width="16%" field='${fieldName}' align='left' nosort='true'  nowrap='true'
+	        def widthvar = ""
+	        if (c.width != null) {
+	            widthvar="width=\"${c.width}\""   
+	        }
+	        res << """<th ${widthvar} field='${fieldName}' align='left' 
+                          nosort='true'  nowrap='true'
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
