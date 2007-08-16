@@ -364,6 +364,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Find a ServiceType by id
+     * @ejb:interface-method
+     */
+    public ServiceType findServiceType(Integer id) {
+        return getServiceTypeDAO().findById(id); 
+    }
+    
+    /**
      * Find service type by name
      * @ejb:interface-method
      * @ejb:transaction type="Required"
