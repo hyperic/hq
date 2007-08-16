@@ -20,18 +20,6 @@ function refreshDefTables() {
   GalertDefs_refreshTable();
 }
 
-function selectMinAlertPriority(val) {
-  Alerts_getUrlXtras()['minPriority']      = val;
-  GroupAlerts_getUrlXtras()['minPriority'] = val;
-  refreshAlertTables();
-}
-
-function selectAlertTime(val) {
-  Alerts_getUrlXtras()['alertTime']      = val;
-  GroupAlerts_getUrlXtras()['alertTime'] = val;
-  refreshAlertTables();
-}
-
 function selectDefType(t) {
   if (t == '1') {
     dojo.html.show('defsTable')
@@ -73,14 +61,14 @@ function selectDefType(t) {
               <span><strong>${l.MinPriority}</strong></span>
               <%= selectList(severities, 
      	                     [id:'alertSevSelect',
-     	                      onchange:'selectMinAlertPriority(options[selectedIndex].value)']) %>
+     	                      onchange:'refreshAlertTables();']) %>
             </div>          
 
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.InTheLast}</strong></span>
        	      <%= selectList(lastDays, 
      	                     [id:'alertTimeSelect',
-     	                      onchange:'selectAlertTime(options[selectedIndex].value)']) %>
+     	                      onchange:'refreshAlertTables();']) %>
             </div>          
 
           </div>
@@ -118,14 +106,14 @@ function selectDefType(t) {
                  style="margin-bottom:8px;">
               <span><strong>${l.ExcludeTypeBased}:</strong></span>
               <input id="excludeTypeBox" type="checkbox" name="excludeTypeBased" 
-                     value="true"  onchange="Defs_getUrlXtras()['excludeTypes'] = dojo.byId('excludeTypeBox').checked;  Defs_refreshTable();"/>
+                     value="true"  onchange="Defs_refreshTable();"/>
             </div>
 
             <div id="onlyShowDisabled" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <span><strong>${l.OnlyShowDisabled}:</strong></span>
               <input id="onlyShowDisabledBox" type="checkbox" name="onlyShowDisabled" 
-                     value="true"  onchange="Defs_getUrlXtras()['onlyShowDisabled'] = dojo.byId('onlyShowDisabledBox').checked;  refreshDefTables();"/>
+                     value="true"  onchange="refreshDefTables();"/>
             </div>
             
           </div>
@@ -150,3 +138,28 @@ function selectDefType(t) {
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+    function getAlertsUrlMap(id) {
+        var res = {};
+        var sevSelect  = dojo.byId('alertSevSelect');
+        var timeSelect = dojo.byId('alertTimeSelect');
+        res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
+        res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
+        return res;
+    }
+    
+    function getDefsUrlMap(id) {
+        var res = {};
+        res['excludeTypes']     = dojo.byId('excludeTypeBox').checked;
+        res['onlyShowDisabled'] = dojo.byId('onlyShowDisabledBox').checked;        
+        return res;
+    }
+    
+    Alerts_addUrlXtraCallback(getAlertsUrlMap);
+    GroupAlerts_addUrlXtraCallback(getAlertsUrlMap);
+    
+    Defs_addUrlXtraCallback(getDefsUrlMap);
+    TypeDefs_addUrlXtraCallback(getDefsUrlMap);
+    GalertDefs_addUrlXtraCallback(getDefsUrlMap);
+</script>

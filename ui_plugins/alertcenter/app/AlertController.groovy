@@ -44,21 +44,21 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:AlertSortField.DATE, 
+            [field:AlertSortField.DATE, width:'12%',
              label:{df.format(it.timestamp)}],
-            [field:AlertSortField.DEFINITION,
+            [field:AlertSortField.DEFINITION, width:'10%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
-            [field:AlertSortField.RESOURCE,
+            [field:AlertSortField.RESOURCE, width:'57%',
              label:{linkTo(it.alertDefinition.resource.name,
                            [resource:it.alertDefinition.resource])}],
-            [field:AlertSortField.FIXED,
+            [field:AlertSortField.FIXED, width:'4%',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:AlertSortField.ACKED_BY,
+            [field:AlertSortField.ACKED_BY, width:'5%',
              label:{
                  def by = it.acknowledgedBy
                  by == null ? "" : by.fullName
             }],
-            [field:AlertSortField.SEVERITY,
+            [field:AlertSortField.SEVERITY, width:'12%',
              label:{
                 def s = it.alertDefinition.severity
                 def imgUrl = urlFor(asset:'images') + 
@@ -81,20 +81,20 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:GalertLogSortField.DATE, 
+            [field:GalertLogSortField.DATE, width:'12%',
              label:{df.format(it.timestamp)}],
-            [field:GalertLogSortField.DEFINITION,
+            [field:GalertLogSortField.DEFINITION, width:'10%',
              label:{linkTo(it.alertDef.name, [resource:it]) }],
-            [field:GalertLogSortField.GROUP,
+            [field:GalertLogSortField.GROUP, width:'57%',
              label:{linkTo(it.alertDef.group.name,
                     [resource:it.alertDef.group])}],
-            [field:GalertLogSortField.FIXED,
+            [field:GalertLogSortField.FIXED, width:'4%',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:GalertLogSortField.ACKED_BY,
+            [field:GalertLogSortField.ACKED_BY, width:'5%',
              label:{
                  def by = it.acknowledgedBy
                  by == null ? "" : by.fullName }],
-            [field:GalertLogSortField.SEVERITY,
+            [field:GalertLogSortField.SEVERITY, width:'12%',
              label:{
                  def s = it.alertDef.severity
                  def imgUrl = urlFor(asset:'images') + 
@@ -123,24 +123,24 @@ class AlertController
         defaultSort: AlertDefSortField.CTIME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:AlertDefSortField.NAME,
+            [field:AlertDefSortField.NAME, width:'14%',
              label:{linkTo(it.name, [resource:it]) }],
-            [field:AlertDefSortField.CTIME, 
+            [field:AlertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
-            [field:AlertDefSortField.MTIME, 
+            [field:AlertDefSortField.MTIME, width:'10%',
              label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.PRIORITY, 
+            [field:AlertDefSortField.PRIORITY, width:'8%',
              label:{getSeverityImg(it.severity)}],
-            [field:AlertDefSortField.ENABLED, 
+            [field:AlertDefSortField.ENABLED, width:'5%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
-            [field:AlertDefSortField.LAST_FIRED, 
+            [field:AlertDefSortField.LAST_FIRED, width:'10%', 
              label:{
                 if (it.lastFired)
                     return df.format(it.lastFired)
                 else
                     return ''
             }],
-            [field:AlertDefSortField.RESOURCE, 
+            [field:AlertDefSortField.RESOURCE, width:'43%', 
              label:{linkTo(it.resource.name,
                            [resource:it.resource])}],
         ]
@@ -148,23 +148,24 @@ class AlertController
     
     private final TYPE_DEF_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
-            alertHelper.findTypeBasedDefinitions(pageInfo)
+            def onlyShowDisabled = getOnlyShowDisabled(params)
+            alertHelper.findTypeBasedDefinitions(onlyShowDisabled, pageInfo)
         },
         defaultSort: AlertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:AlertDefSortField.NAME,
+            [field:AlertDefSortField.NAME, width:'20%',
              label:{linkTo(it.name, [resource:it]) }],
-            [field:AlertDefSortField.CTIME, 
-             label:{df.format(it.ctime)}],
-            [field:AlertDefSortField.MTIME, 
-             label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.PRIORITY, 
-             label:{getSeverityImg(it.severity)}],
-            [field:AlertDefSortField.ENABLED, 
+            [field:AlertDefSortField.CTIME, width:'10%', 
+             label:{df.format(it.ctime)}], 
+            [field:AlertDefSortField.MTIME, width:'10%', 
+             label:{df.format(it.mtime)}], 
+            [field:AlertDefSortField.PRIORITY, width:'9%',
+             label:{getSeverityImg(it.severity)}], 
+            [field:AlertDefSortField.ENABLED, width:'10%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:[getValue: {localeBundle.ResourceType },
-                    description:'resourceType', sortable:false],
+                    description:'resourceType', sortable:false], width:'41%',
              label:{it.resourceType.name}],
         ]
     ]
@@ -176,19 +177,19 @@ class AlertController
         defaultSort: GalertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:GalertDefSortField.NAME,
+            [field:GalertDefSortField.NAME, width:'20%',
              label:{it.name }],
-            [field:GalertDefSortField.CTIME, 
+            [field:GalertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
-            [field:GalertDefSortField.MTIME, 
+            [field:GalertDefSortField.MTIME, width:'10%',
              label:{df.format(it.mtime)}],
-            [field:GalertDefSortField.SEVERITY, 
-             label:{getSeverityImg(it.severity)}],
-            [field:GalertDefSortField.ENABLED, 
+            [field:GalertDefSortField.SEVERITY, width:'10%', 
+             label:{getSeverityImg(it.severity)}], 
+            [field:GalertDefSortField.ENABLED, width:'10%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
-            [field:GalertDefSortField.ESCALATION, 
+            [field:GalertDefSortField.ESCALATION, width:'20%',
              label:{it.escalation.name}],
-            [field:GalertDefSortField.GROUP, 
+            [field:GalertDefSortField.GROUP, width:'20%',
              label:{it.group.name}]
         ]
     ]
@@ -226,6 +227,16 @@ class AlertController
     	               severities      : AlertSeverity.all,
     	               lastDays        : lastDays,
     	               isEE            : HQUtil.isEnterpriseEdition()])
+    }
+    
+    private getOnlyShowDisabled(params) { 
+        def disabledOnly = params.getOne('onlyShowDisabled', 'false').toBoolean()
+    
+        if (disabledOnly == false) {
+            return null
+        } else {
+            return !disabledOnly
+        }
     }
     
     def data(params) {
