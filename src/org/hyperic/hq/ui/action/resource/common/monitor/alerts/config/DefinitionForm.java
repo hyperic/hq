@@ -500,12 +500,13 @@ public class DefinitionForm extends ResourceForm  {
         //-- conditions
         //------------------------------------------------------------
         AlertConditionValue[] acvs = adv.getConditions();
-        setNumConditions(0);        // Start from 0
+        if (conditions.size() < acvs.length) {
+            setNumConditions(acvs.length);
+        }
         for (int i = 0; i < acvs.length; ++i) {
             if (acvs[i].getType() == EventConstants.TYPE_ALERT)
                 continue;
             
-            setNumConditions(conditions.size() + 1);
             ConditionBean cond = (ConditionBean)conditions.get(i);
             cond.importProperties(acvs[i], isTypeAlert, sessionId, mb);
         }
