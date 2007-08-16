@@ -423,6 +423,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
       * @throws AppdefGroupNotFoundException  - non-existent group
       * @throws AppdefEntityNotFoundException - group member doesn't exist
       * @throws PermissionException           - unable to view group
+      * @ejb:interface-method
       */
     public PageList getGroupMemberValues(AuthzSubjectValue subject,
                                          Integer gid, PageControl pc)
