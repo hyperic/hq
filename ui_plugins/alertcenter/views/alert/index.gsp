@@ -56,8 +56,8 @@ function selectDefType(t) {
 <div dojoType="TabContainer" id="mainTabContainer" 
      style="width: 95%; height: 900px;">
   <div dojoType="ContentPane" label="Alerts">
-    <div style="margin:5px;">
-      <div style="float:left;width:18%;margin-right:12px;">
+    <div style="margin:5px;border:0px solid red;">
+      <div style="float:left;width:18%;margin-right:14px;">
         <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
@@ -101,7 +101,7 @@ function selectDefType(t) {
   
   <div dojoType="ContentPane" label="Definitions">
     <div style="margin:5px;">
-      <div style="float:left;width:18%;margin-right:12px;">
+      <div style="float:left;width:18%;margin-right:14px;">
         <div class="filters">
           <div class="BlockTitle">${l.DefFilter}</div>
           <div class="filterBox">
