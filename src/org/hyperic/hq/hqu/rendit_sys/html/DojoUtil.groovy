@@ -248,7 +248,7 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-        <div class="boldText" style="position:relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+        <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	      <div class="pageButtonCont">
             <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
                  class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
@@ -276,7 +276,7 @@ class DojoUtil {
 				label = field.getValue()
 	        }
 	        
-	        res << """<th field='${fieldName}' align='left' nosort='true'  nowrap='true'
+	        res << """<th width="16%" field='${fieldName}' align='left' nosort='true'  nowrap='true'
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
