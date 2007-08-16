@@ -766,19 +766,20 @@ public class AlertDefinitionManagerEJBImpl
     
     /** 
      * Get the list of type-based alert definitions.
-     * 
+     *
+     * @param enabled If non-null, specifies the nature of the returned defs.
      * @param pInfo Paging information.  The sort field must be a value from
      *              {@link AlertDefSortField}
      * @ejb:interface-method
      */
     public List findTypeBasedDefinitions(AuthzSubjectValue subj, 
-                                         PageInfo pInfo) 
+                                         Boolean enabled, PageInfo pInfo) 
         throws PermissionException
     {
         if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj)) {
             throw new PermissionException("Only administrators can do this");
         }
-        return getAlertDefDAO().findTypeBased(pInfo);
+        return getAlertDefDAO().findTypeBased(enabled, pInfo);
     }
 
     /** 

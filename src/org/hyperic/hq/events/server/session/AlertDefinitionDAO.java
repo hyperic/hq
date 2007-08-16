@@ -320,10 +320,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return res;
     }
     
-    List findTypeBased(PageInfo pInfo) {
+    List findTypeBased(Boolean enabled, PageInfo pInfo) {
         String sql = "from AlertDefinition d " + 
-            "where d.deleted = false and d.parent.id = 0 " +
-            getOrderByClause(pInfo);
+            "where d.deleted = false and d.parent.id = 0 ";
+        
+        if (enabled != null) {
+            sql += " and d.enabled = " + 
+                (enabled.booleanValue() ? "true" : "false");
+        }
+        sql += getOrderByClause(pInfo);
                    
         Query q = getSession().createQuery(sql);
         
