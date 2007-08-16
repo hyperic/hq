@@ -69,6 +69,9 @@ public class ResourceDAO
             new ResourceGroupDAO(DAOFactory.getDAOFactory()).findRootGroup();
         authzGroup.addResource(resource);
 
+        // Need to flush so that later permission checking can succeed
+        getSession().flush();
+        
         return resource;
     }
 
