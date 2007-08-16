@@ -348,7 +348,12 @@ class DojoUtil {
             def val = [:]
             val.id = rowId(d)
             for (c in schema.columns) {
-                val[c.field.description] = c.label(d)
+                def v = c.label(d)
+                
+                if (v == null || v.trim() == '') {
+                    v = '&nbsp;' // We need this to get the bottom border on <td>
+                }
+                val[c.field.description] = v
             }
 
             // Optionally define a styleClass attribute if the schema defines
