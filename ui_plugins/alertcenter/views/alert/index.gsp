@@ -14,6 +14,12 @@ function refreshAlertTables() {
   GroupAlerts_refreshTable();
 }
   
+function refreshDefTables() {
+  Defs_refreshTable();
+  TypeDefs_refreshTable();
+  GalertDefs_refreshTable();
+}
+
 function selectMinAlertPriority(val) {
   Alerts_getUrlXtras()['minPriority']      = val;
   GroupAlerts_getUrlXtras()['minPriority'] = val;
@@ -76,6 +82,7 @@ function selectDefType(t) {
      	                     [id:'alertTimeSelect',
      	                      onchange:'selectAlertTime(options[selectedIndex].value)']) %>
             </div>          
+
           </div>
         </div>
       </div>
@@ -106,13 +113,22 @@ function selectDefType(t) {
                 <option value='3'>${l.GroupDefs}</option>
               </select>          
             </div>
+            
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <span><strong>${l.ExcludeTypeBased}:</strong></span>
               <input id="excludeTypeBox" type="checkbox" name="excludeTypeBased" 
                      value="true"  onchange="Defs_getUrlXtras()['excludeTypes'] = dojo.byId('excludeTypeBox').checked;  Defs_refreshTable();"/>
-             </div>
-           </div>
+            </div>
+
+            <div id="onlyShowDisabled" class="fieldSetStacked" 
+                 style="margin-bottom:8px;">
+              <span><strong>${l.OnlyShowDisabled}:</strong></span>
+              <input id="onlyShowDisabledBox" type="checkbox" name="onlyShowDisabled" 
+                     value="true"  onchange="Defs_getUrlXtras()['onlyShowDisabled'] = dojo.byId('onlyShowDisabledBox').checked;  refreshDefTables();"/>
+            </div>
+            
+          </div>
         </div>
       </div>
       <div style="float:left;width:80%" id="defsCont">

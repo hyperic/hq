@@ -110,8 +110,15 @@ class AlertController
     private final DEF_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
             def excludeTypes = params.getOne('excludeTypes', 'true').toBoolean()
-            alertHelper.findDefinitions(AlertSeverity.LOW, null, excludeTypes, 
-                                        pageInfo)
+            def disabledOnly = params.getOne('onlyShowDisabled', 'false').toBoolean()
+            
+            if (disabledOnly == false) {
+                disabledOnly = null
+            } else {
+                disabledOnly = !disabledOnly;
+            }
+            alertHelper.findDefinitions(AlertSeverity.LOW, disabledOnly, 
+                                        excludeTypes, pageInfo) 
         },
         defaultSort: AlertDefSortField.CTIME,
         defaultSortOrder: 0,  // descending
