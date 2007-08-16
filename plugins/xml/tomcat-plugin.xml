@@ -163,9 +163,6 @@
               default="State.Name.eq=java,Args.*.ct=catalina.home"/>
     </config>
 
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
-
     <plugin type="measurement"
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
@@ -486,6 +483,8 @@
           include="5.5">
     <property name="VERSION_FILE"
               value="lib/catalina-ha.jar"/>
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
