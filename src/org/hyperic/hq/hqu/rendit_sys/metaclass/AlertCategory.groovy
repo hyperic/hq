@@ -9,6 +9,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl
 import org.hyperic.hq.events.server.session.Alert
 import org.hyperic.hq.events.server.session.AlertDefinition
+import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.server.session.GalertLog
 
 class AlertCategory {
@@ -20,6 +21,23 @@ class AlertCategory {
     static String urlFor(GalertLog a, String context) {
         def d = a.alertDef
         "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefID}&a=${a.id}"
+    }
+
+    static String urlFor(GalertDef d, String context) {
+        def groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP
+        "/alerts/Config.do?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
+    }
+
+    static String urlFor(AlertDefinition d, String context) {
+        if (context == 'listAlerts') {
+            return "/alerts/Alerts.do?mode=list&rid=${d.appdefId}&type=${d.appdefType}"
+        }
+        
+        if (d.typeBased) {
+            // Type-based definition
+            return "/alerts/Config.do?mode=viewDefinition&aetid=${d.appdefEntityId}&ad=${d.id}"            
+        }
+        "/alerts/Config.do?mode=viewDefinition&eid=${d.appdefEntityId}&ad=${d.id}"        
     }
 
     /**
@@ -38,16 +56,16 @@ class AlertCategory {
         }
     }
     
-    static String urlFor(AlertDefinition d, String context) {
-        "/alerts/Config.do?mode=viewDefinition&eid=${d.appdefEntityId}&ad=${d.id}"        
-    }
-
     static AuthzSubject getAcknowledgedBy(Alert a) {
         _getAcknowledgedBy(a.ackedBy)
     }
 
     static AuthzSubject getAcknowledgedBy(GalertLog a) {
         _getAcknowledgedBy(a.ackedBy)
+    }
+    
+    static boolean getTypeBased(AlertDefinition d) {
+        return d.parent != null && d.parent.id == 0;
     }
     
     private static AuthzSubject _getAcknowledgedBy(id) {
