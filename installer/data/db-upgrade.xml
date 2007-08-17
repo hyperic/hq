@@ -6576,6 +6576,11 @@ has already been defined.
       <schema-addColumn table="EAM_ALERT_DEFINITION" column="LAST_FIRED" 
                         columnType="LONG"/>
     </schemaSpec>
+
+    <schemaSpec version="3.47">
+      <schema-addColumn table="EAM_GALERT_DEFS" column="LAST_FIRED" 
+                        columnType="LONG"/>
+    </schemaSpec>
     
 </dbupgrade>
 </target>

@@ -262,6 +262,7 @@ public class GalertManagerEJBImpl
             if (provider != null)
                 provider.save(gAuxLog.getId().intValue(), auxLog);
         }
+        def.setLastFired(new Long(System.currentTimeMillis()));
         return newLog;
     }
     

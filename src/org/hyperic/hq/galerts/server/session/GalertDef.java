@@ -55,6 +55,7 @@ public class GalertDef
     private long          _ctime;
     private long          _mtime;
     private boolean       _deleted;
+    private Long          _lastFired;
     
     protected GalertDef() {}
     
@@ -70,6 +71,7 @@ public class GalertDef
         _ctime      = System.currentTimeMillis();
         _mtime      = _ctime;
         _deleted    = false;
+        _lastFired  = null;
     }
         
     ExecutionStrategyInfo 
@@ -218,6 +220,14 @@ public class GalertDef
     
     public boolean isDeleted() {
         return _deleted;
+    }
+    
+    protected void setLastFired(Long l) {
+        _lastFired = l;
+    }
+    
+    public Long getLastFired() {
+        return _lastFired;
     }
 
     public EscalationAlertType getAlertType() {

@@ -120,6 +120,18 @@ public abstract class GalertDefSortField
         }
     };
 
+    public static final GalertDefSortField LAST_FIRED = 
+        new GalertDefSortField(7, "LastFired", "galertDef.sortField.lastFired")
+    {
+        String getSortString(String def, String group, String escalation) {
+            return def + ".lastFired";
+        }
+
+        public boolean isSortable() {
+            return true;
+        }
+    };
+
     private GalertDefSortField(int code, String desc, String localeProp) {
         super(GalertDefSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));

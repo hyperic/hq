@@ -110,14 +110,8 @@ class AlertController
     private final DEF_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
             def excludeTypes = params.getOne('excludeTypes', 'true').toBoolean()
-            def disabledOnly = params.getOne('onlyShowDisabled', 'false').toBoolean()
-            
-            if (disabledOnly == false) {
-                disabledOnly = null
-            } else {
-                disabledOnly = !disabledOnly;
-            }
-            alertHelper.findDefinitions(AlertSeverity.LOW, disabledOnly, 
+            alertHelper.findDefinitions(AlertSeverity.LOW, 
+                                        getOnlyShowDisabled(params),
                                         excludeTypes, pageInfo) 
         },
         defaultSort: AlertDefSortField.CTIME,
@@ -149,8 +143,8 @@ class AlertController
     
     private final TYPE_DEF_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
-            def onlyShowDisabled = getOnlyShowDisabled(params)
-            alertHelper.findTypeBasedDefinitions(onlyShowDisabled, pageInfo)
+            alertHelper.findTypeBasedDefinitions(getOnlyShowDisabled(params),
+                                                 pageInfo)
         },
         defaultSort: AlertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
@@ -180,7 +174,7 @@ class AlertController
         defaultSort: GalertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:GalertDefSortField.NAME, width:'20%',
+            [field:GalertDefSortField.NAME, width:'18%',
              label:{linkTo(it.name, [resource:it]) }],
             [field:GalertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
@@ -188,10 +182,18 @@ class AlertController
              label:{df.format(it.mtime)}],
             [field:GalertDefSortField.SEVERITY, width:'10%', 
              label:{getSeverityImg(it.severity)}], 
-            [field:GalertDefSortField.ENABLED, width:'10%',
+            [field:GalertDefSortField.ENABLED, width:'7%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:GalertDefSortField.ESCALATION, width:'20%',
              label:{linkTo(it.escalation.name, [resource:it.escalation])}],
+            [field:GalertDefSortField.LAST_FIRED, width:'10%', 
+             label:{
+                 if (it.lastFired)
+                     return linkTo(df.format(it.lastFired),
+                                   [resource:it, resourceContext:'listAlerts'])
+                 else
+                     return ''
+             }],
             [field:GalertDefSortField.GROUP, width:'20%',
              label:{linkTo(it.group.name, [resource:it.group])}]
         ]
