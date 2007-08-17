@@ -24,17 +24,17 @@ function selectDefType(t) {
   if (t == '1') {
     dojo.html.show('defsTable')
     dojo.html.show('excludeTypeBasedInput')
-    dojo.html.hide('typeDefsTable')
+    <% if (superUser) { %> dojo.html.hide('typeDefsTable') <% } %>
     dojo.html.hide('galertDefsTable')
   } else if (t == '2') {
     dojo.html.hide('defsTable')
     dojo.html.hide('excludeTypeBasedInput')
-    dojo.html.show('typeDefsTable')
+    <% if (superUser) { %> dojo.html.show('typeDefsTable') <% } %>
     dojo.html.hide('galertDefsTable')
   } else if (t == '3') {
     dojo.html.hide('defsTable')
     dojo.html.hide('excludeTypeBasedInput')
-    dojo.html.hide('typeDefsTable')
+    <% if (superUser) { %> dojo.html.hide('typeDefsTable') <% } %>
     dojo.html.show('galertDefsTable')
   }
 }
@@ -111,7 +111,9 @@ onloads.push(setSelectedOption);
               <select id="defSelect"
                       onchange='selectDefType(options[selectedIndex].value)'>
                 <option value='1'>${l.PlainDefs}</option>
-                <option value='2'>${l.TypeBasedDefs}</option>
+                <% if (superUser) { %>
+                  <option value='2'>${l.TypeBasedDefs}</option>
+                <% } %>
                 <option value='3'>${l.GroupDefs}</option>
               </select>          
             </div>
@@ -141,9 +143,11 @@ onloads.push(setSelectedOption);
         </div>
       
         <div id="typeDefsTable" style="display:none;">
-          <%= dojoTable(id:'TypeDefs', title:l.TypeDefs,
-                        url:urlFor(action:'typeDefData'),
-                        schema:typeDefSchema, numRows:15) %>
+          <% if (superUser) { %>
+            <%= dojoTable(id:'TypeDefs', title:l.TypeDefs,
+                          url:urlFor(action:'typeDefData'),
+                          schema:typeDefSchema, numRows:15) %>
+          <% } %>
         </div>    
 
         <div id="galertDefsTable" style="display:none;">

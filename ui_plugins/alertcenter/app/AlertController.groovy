@@ -223,7 +223,7 @@ class AlertController
         })
     }
     
-    def index = { params ->
+    def index(params) {
     	render(locals:[alertSchema     : ALERT_TABLE_SCHEMA, 
     	               galertSchema    : GALERT_TABLE_SCHEMA,
     	               defSchema       : DEF_TABLE_SCHEMA,
@@ -231,6 +231,7 @@ class AlertController
     	               galertDefSchema : GALERT_DEF_TABLE_SCHEMA,
     	               severities      : AlertSeverity.all,
     	               lastDays        : lastDays,
+    	               superUser       : user.isSuperUser(), 
     	               isEE            : HQUtil.isEnterpriseEdition()])
     }
     
