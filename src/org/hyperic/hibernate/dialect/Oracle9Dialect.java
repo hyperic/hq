@@ -91,8 +91,8 @@ public class Oracle9Dialect
         ResultSet rs = null;
         try
         {
-            String sql = "SELECT table_name from all_tables"+
-                         " WHERE lower(table_name) = lower('"+viewName+"')";
+            String sql = "SELECT view_name from all_views"+
+                         " WHERE lower(view_name) = lower('"+viewName+"')";
             rs = stmt.executeQuery(sql);
             if (rs.next())
                 return true;
