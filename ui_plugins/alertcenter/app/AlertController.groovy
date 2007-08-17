@@ -117,15 +117,13 @@ class AlertController
         defaultSort: AlertDefSortField.CTIME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:AlertDefSortField.NAME, width:'14%',
+            [field:AlertDefSortField.NAME, width:'10%',
              label:{linkTo(it.name, [resource:it]) }],
             [field:AlertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
             [field:AlertDefSortField.MTIME, width:'10%',
              label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.PRIORITY, width:'8%',
-             label:{getSeverityImg(it.severity)}],
-            [field:AlertDefSortField.ENABLED, width:'5%',
+            [field:AlertDefSortField.ENABLED, width:'4%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:AlertDefSortField.LAST_FIRED, width:'10%', 
              label:{
@@ -135,9 +133,18 @@ class AlertController
                 else
                     return ''
             }],
-            [field:AlertDefSortField.RESOURCE, width:'43%', 
+            [field:AlertDefSortField.RESOURCE, width:'28%', 
              label:{linkTo(it.resource.name,
                            [resource:it.resource])}],
+            [field:AlertDefSortField.ESCALATION, width:'20%',
+             label:{
+                if (it.escalation == null)
+                    return ""
+                else
+                    return linkTo(it.escalation.name, [resource:it.escalation])
+            }],
+            [field:AlertDefSortField.PRIORITY, width:'8%',
+             label:{getSeverityImg(it.severity)}],
         ]
     ]
     
@@ -155,13 +162,20 @@ class AlertController
              label:{df.format(it.ctime)}], 
             [field:AlertDefSortField.MTIME, width:'10%', 
              label:{df.format(it.mtime)}], 
-            [field:AlertDefSortField.PRIORITY, width:'9%',
-             label:{getSeverityImg(it.severity)}], 
             [field:AlertDefSortField.ENABLED, width:'10%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:[getValue: {localeBundle.ResourceType },
-                    description:'resourceType', sortable:false], width:'41%',
+                    description:'resourceType', sortable:false], width:'27%',
              label:{it.resourceType.name}],
+             [field:AlertDefSortField.ESCALATION, width:'15%',
+              label:{
+                 if (it.escalation == null)
+                     return ""
+                 else
+                     return linkTo(it.escalation.name, [resource:it.escalation])
+             }],
+            [field:AlertDefSortField.PRIORITY, width:'8%',
+             label:{getSeverityImg(it.severity)}], 
         ]
     ]
             
@@ -174,18 +188,14 @@ class AlertController
         defaultSort: GalertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:GalertDefSortField.NAME, width:'18%',
+            [field:GalertDefSortField.NAME, width:'10%',
              label:{linkTo(it.name, [resource:it]) }],
             [field:GalertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
             [field:GalertDefSortField.MTIME, width:'10%',
              label:{df.format(it.mtime)}],
-            [field:GalertDefSortField.SEVERITY, width:'10%', 
-             label:{getSeverityImg(it.severity)}], 
-            [field:GalertDefSortField.ENABLED, width:'7%',
+            [field:GalertDefSortField.ENABLED, width:'4%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
-            [field:GalertDefSortField.ESCALATION, width:'20%',
-             label:{linkTo(it.escalation.name, [resource:it.escalation])}],
             [field:GalertDefSortField.LAST_FIRED, width:'10%', 
              label:{
                  if (it.lastFired)
@@ -194,8 +204,12 @@ class AlertController
                  else
                      return ''
              }],
-            [field:GalertDefSortField.GROUP, width:'20%',
-             label:{linkTo(it.group.name, [resource:it.group])}]
+            [field:GalertDefSortField.GROUP, width:'28%',
+             label:{linkTo(it.group.name, [resource:it.group])}],
+            [field:GalertDefSortField.ESCALATION, width:'20%',
+             label:{linkTo(it.escalation.name, [resource:it.escalation])}],
+            [field:GalertDefSortField.SEVERITY, width:'8%', 
+             label:{getSeverityImg(it.severity)}], 
         ]
     ]
 

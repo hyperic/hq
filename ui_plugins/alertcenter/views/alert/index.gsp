@@ -111,10 +111,10 @@ onloads.push(setSelectedOption);
               <select id="defSelect"
                       onchange='selectDefType(options[selectedIndex].value)'>
                 <option value='1'>${l.PlainDefs}</option>
+                <option value='3'>${l.GroupDefs}</option>
                 <% if (superUser) { %>
                   <option value='2'>${l.TypeBasedDefs}</option>
                 <% } %>
-                <option value='3'>${l.GroupDefs}</option>
               </select>          
             </div>
             
