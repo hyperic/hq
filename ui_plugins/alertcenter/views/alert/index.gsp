@@ -40,10 +40,16 @@ function selectDefType(t) {
 }
  
 function setSelectedOption() {
-  var selectDrop = document.getElementById('alertSelect')
-  selectAlertType(selectDrop.options[selectDrop.selectedIndex].value);
-  selectDrop = document.getElementById('defSelect')
-  selectDefType(selectDrop.options[selectDrop.selectedIndex].value);
+  <% if (!isEE) { %>
+    selectAlertType('1');
+    selectDefType('1');
+    return;
+  <% } else { %>
+    var selectDrop = document.getElementById('alertSelect')
+    selectAlertType(selectDrop.options[selectDrop.selectedIndex].value);
+    selectDrop = document.getElementById('defSelect')
+    selectDefType(selectDrop.options[selectDrop.selectedIndex].value);
+  <% } %>
 }
 
 onloads.push(setSelectedOption);
@@ -57,6 +63,7 @@ onloads.push(setSelectedOption);
         <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
+            <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.AlertType}:</strong></span>
               <select id="alertSelect" 
@@ -65,6 +72,7 @@ onloads.push(setSelectedOption);
                 <option value='2'>${l.GroupAlerts}</option>
               </select>          
             </div>
+            <% } %>
           
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.MinPriority}</strong></span>
@@ -106,6 +114,7 @@ onloads.push(setSelectedOption);
         <div class="filters">
           <div class="BlockTitle">${l.DefFilter}</div>
           <div class="filterBox">
+            <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.DefType}:</strong></span>
               <select id="defSelect"
@@ -124,6 +133,7 @@ onloads.push(setSelectedOption);
               <input id="excludeTypeBox" type="checkbox" name="excludeTypeBased" 
                      value="true"  onchange="Defs_refreshTable();"/>
             </div>
+            <% } %>
 
             <div id="onlyShowDisabled" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
@@ -172,15 +182,19 @@ onloads.push(setSelectedOption);
     
     function getDefsUrlMap(id) {
         var res = {};
-        res['excludeTypes']     = dojo.byId('excludeTypeBox').checked;
+        <% if (isEE) { %>
+          res['excludeTypes']   = dojo.byId('excludeTypeBox').checked;
+        <% } %>
         res['onlyShowDisabled'] = dojo.byId('onlyShowDisabledBox').checked;        
         return res;
     }
     
     Alerts_addUrlXtraCallback(getAlertsUrlMap);
-    GroupAlerts_addUrlXtraCallback(getAlertsUrlMap);
-    
     Defs_addUrlXtraCallback(getDefsUrlMap);
-    TypeDefs_addUrlXtraCallback(getDefsUrlMap);
-    GalertDefs_addUrlXtraCallback(getDefsUrlMap);
+
+    <% if (isEE) { %>
+      GroupAlerts_addUrlXtraCallback(getAlertsUrlMap);
+      TypeDefs_addUrlXtraCallback(getDefsUrlMap);
+      GalertDefs_addUrlXtraCallback(getDefsUrlMap);
+    <% } %>
 </script>
