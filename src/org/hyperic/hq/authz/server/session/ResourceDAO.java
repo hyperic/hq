@@ -457,4 +457,13 @@ public class ResourceDAO
             .setInteger("opId", opId)
             .list();
     }
+    
+    int reassignResources(int oldOwner, int newOwner) {
+        return getSession().createQuery("UPDATE Resource " +
+                                        "SET owner.id = :newOwner " +
+                                        "WHERE owner.id = :oldOwner")
+            .setInteger("oldOwner", oldOwner)
+            .setInteger("newOwner", newOwner)
+            .executeUpdate();
+    }
 }
