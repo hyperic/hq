@@ -120,6 +120,18 @@ public abstract class AlertDefSortField
         }
     };
 
+    public static final AlertDefSortField ESCALATION  = 
+        new AlertDefSortField(7, "Escalation", "alertDef.sortField.escalation") 
+    {
+        public boolean isSortable() {
+            return true;
+        }
+        
+        String getSortString(String def, String resource) {
+            return def + ".escalation.name";
+        }
+    };
+
     private AlertDefSortField(int code, String desc, String localeProp) {
         super(AlertDefSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
