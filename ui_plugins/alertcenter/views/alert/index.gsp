@@ -76,11 +76,15 @@ function selectDefType(t) {
       </div>
       <div style="float:left;width:80%" id="alertsCont">
         <div id="alertsTable">
-          <%= dojoTable(id:'Alerts', url:urlFor(action:'data'),
+          <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
+                        titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
+                        url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
         </div>
         <div id="groupAlertsTable" style="display:none;">
-          <%= dojoTable(id:'GroupAlerts', url:urlFor(action:'groupData'),
+          <%= dojoTable(id:'GroupAlerts', title:l.GroupAlerts,
+                        titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
+                        url:urlFor(action:'groupData'),
                         schema:galertSchema, numRows:15) %>
         </div>
       </div>
@@ -121,17 +125,20 @@ function selectDefType(t) {
       </div>
       <div style="float:left;width:80%" id="defsCont">
         <div id="defsTable">
-          <%= dojoTable(id:'Defs', url:urlFor(action:'defData'),
+          <%= dojoTable(id:'Defs', title:l.ClassicDefs,
+                        url:urlFor(action:'defData'),
                         schema:defSchema, numRows:15) %>
         </div>
       
         <div id="typeDefsTable" style="display:none;">
-          <%= dojoTable(id:'TypeDefs', url:urlFor(action:'typeDefData'),
+          <%= dojoTable(id:'TypeDefs', title:l.TypeDefs,
+                        url:urlFor(action:'typeDefData'),
                         schema:typeDefSchema, numRows:15) %>
         </div>    
 
         <div id="galertDefsTable" style="display:none;">
-          <%= dojoTable(id:'GalertDefs', url:urlFor(action:'galertDefData'),
+          <%= dojoTable(id:'GalertDefs', title:l.GroupDefsTitle,
+                        url:urlFor(action:'galertDefData'),
                         schema:galertDefSchema, numRows:15) %>
         </div>    
       </div>
