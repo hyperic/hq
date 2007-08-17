@@ -38,7 +38,15 @@ function selectDefType(t) {
     dojo.html.show('galertDefsTable')
   }
 }
+ 
+function setSelectedOption() {
+  var selectDrop = document.getElementById('alertSelect')
+  selectAlertType(selectDrop.options[selectDrop.selectedIndex].value);
+  selectDrop = document.getElementById('defSelect')
+  selectDefType(selectDrop.options[selectDrop.selectedIndex].value);
+}
 
+onloads.push(setSelectedOption);
 </script>
 
 <div dojoType="TabContainer" id="mainTabContainer" 
@@ -51,7 +59,8 @@ function selectDefType(t) {
           <div class="filterBox">
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.AlertType}:</strong></span>
-              <select onchange='selectAlertType(options[selectedIndex].value)'>
+              <select id="alertSelect" 
+                      onchange='selectAlertType(options[selectedIndex].value)'>
                 <option value='1'>${l.ClassicAlerts}</option>
                 <option value='2'>${l.GroupAlerts}</option>
               </select>          
@@ -75,7 +84,7 @@ function selectDefType(t) {
         </div>
       </div>
       <div style="float:left;width:80%" id="alertsCont">
-        <div id="alertsTable">
+        <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
                         titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
                         url:urlFor(action:'data'),
@@ -99,7 +108,8 @@ function selectDefType(t) {
           <div class="filterBox">
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.DefType}:</strong></span>
-              <select onchange='selectDefType(options[selectedIndex].value)'>
+              <select id="defSelect"
+                      onchange='selectDefType(options[selectedIndex].value)'>
                 <option value='1'>${l.PlainDefs}</option>
                 <option value='2'>${l.TypeBasedDefs}</option>
                 <option value='3'>${l.GroupDefs}</option>
@@ -124,7 +134,7 @@ function selectDefType(t) {
         </div>
       </div>
       <div style="float:left;width:80%" id="defsCont">
-        <div id="defsTable">
+        <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefs,
                         url:urlFor(action:'defData'),
                         schema:defSchema, numRows:15) %>
