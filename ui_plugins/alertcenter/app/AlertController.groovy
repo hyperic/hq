@@ -46,9 +46,9 @@ class AlertController
         columns: [
             [field:AlertSortField.DATE, width:'12%',
              label:{df.format(it.timestamp)}],
-            [field:AlertSortField.DEFINITION, width:'10%',
+            [field:AlertSortField.DEFINITION, width:'20%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
-            [field:AlertSortField.RESOURCE, width:'57%',
+            [field:AlertSortField.RESOURCE, width:'47%',
              label:{linkTo(it.alertDefinition.resource.name,
                            [resource:it.alertDefinition.resource])}],
             [field:AlertSortField.FIXED, width:'4%',
@@ -83,9 +83,9 @@ class AlertController
         columns: [
             [field:GalertLogSortField.DATE, width:'12%',
              label:{df.format(it.timestamp)}],
-            [field:GalertLogSortField.DEFINITION, width:'10%',
+            [field:GalertLogSortField.DEFINITION, width:'20%',
              label:{linkTo(it.alertDef.name, [resource:it]) }],
-            [field:GalertLogSortField.GROUP, width:'57%',
+            [field:GalertLogSortField.GROUP, width:'47%',
              label:{linkTo(it.alertDef.group.name,
                     [resource:it.alertDef.group])}],
             [field:GalertLogSortField.FIXED, width:'4%',
