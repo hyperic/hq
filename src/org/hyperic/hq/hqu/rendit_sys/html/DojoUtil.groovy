@@ -63,9 +63,12 @@ class DojoUtil {
      * Spit out a table, and appropriate <script> tags to enable AJAXification.
      *
      * 'params' is a map of key/vals for configuration, which include:
+     *          (* denotes an optional parameter)
      *    
      *   id:       The HTML ID for the table.   
      *   url:      URL to contact to get data to populate the table
+     *   title*:   A title to display above the table
+     *   titleHtml*:  Additional HTML to place in the header of the table
      *   numRows:  Number of rows to display
      *   schema:   The schema is a map which contains information on how to
      *             retrieve data for the rows, how to format them, etc.  The
@@ -99,6 +102,8 @@ class DojoUtil {
      */
     static String dojoTable(params) {
         def id           = "${params.id}"
+        def tableTitle   = params.get('title', '')
+        def titleHtml    = params.get('titleHtml', '')
 	    def idVar        = "_hqu_${params.id}"
 	    def tableVar     = "${idVar}_table" 
 	    def sortFieldVar = "${idVar}_sortField"
@@ -259,7 +264,10 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	    <div class="tableTitleWrapper"><div id="tableTitle" style="display:inline;width:75px;">${id}</div><div class="alertInfo">red highlighted alerts are not fixed</div></div>
+	    <div class="tableTitleWrapper">
+          <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
+          ${titleHtml}
+        </div>
         <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	      <div class="pageButtonCont">
             <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
