@@ -172,7 +172,9 @@ class AlertController
             
     private final GALERT_DEF_TABLE_SCHEMA = [
         getData: {pageInfo, params -> 
-            alertHelper.findGroupDefinitions(AlertSeverity.LOW, true, pageInfo)
+            alertHelper.findGroupDefinitions(AlertSeverity.LOW, 
+                                             getOnlyShowDisabled(params),
+                                             pageInfo)
         },
         defaultSort: GalertDefSortField.NAME,
         defaultSortOrder: 0,  // descending
