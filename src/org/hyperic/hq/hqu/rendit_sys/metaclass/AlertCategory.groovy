@@ -25,6 +25,9 @@ class AlertCategory {
 
     static String urlFor(GalertDef d, String context) {
         def groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP
+        if (context == 'listAlerts') {
+            return "/alerts/Alerts.do?mode=list&rid=${d.group.id}&type=${groupType}"            
+        }
         "/alerts/Config.do?mode=viewGroupDefinition&eid=${groupType}:${d.group.id}&ad=${d.id}"       
     }
 
