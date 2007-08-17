@@ -501,26 +501,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return res;
     }
 
-    Map bucketData(List data)
-    {
-        HashMap buckets = new HashMap();
-        MeasRangeObj rangeObj = MeasRangeObj.getInstance();
-        List ranges = rangeObj.getRanges();
-        for (Iterator it = data.iterator(); it.hasNext(); )
-        {
-            DataPoint pt = (DataPoint) it.next();
-            String table = rangeObj.getTable(ranges,
-                                        pt.getMetricValue().getTimestamp());
-            List dpts;
-            if (null == (dpts = (List)buckets.get(table))) {
-                dpts = new ArrayList();
-                buckets.put(table, dpts);
-            }
-            dpts.add(pt);
-        }
-        return buckets;
-    }
-
     /**
      * Insert the metric data points to the DB with one insert statement. This 
      * should only be invoked when the DB supports multi-insert statements.
@@ -532,7 +512,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean insertDataWithOneInsert(List data) {
         Statement stmt = null;
         ResultSet rs = null;
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         Connection conn = safeGetConnection();
         
@@ -682,7 +662,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         throws SQLException {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -755,7 +735,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private List updateData(Connection conn, List data) {
         PreparedStatement stmt = null;
         List left = new ArrayList();
-        Map buckets = bucketData(data);
+        Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -815,6 +795,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Get the server purge configuration and storage option, loaded on startup.
      */
     private void loadConfigDefaults() { 
+
         _log.debug("Loading default purge intervals");
         Properties conf;
         try {
@@ -849,7 +830,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private String getDataTable(long begin, long end)
     {
         long now = System.currentTimeMillis();
-
         if (!confDefaultsLoaded)
             loadConfigDefaults();
 
@@ -1271,6 +1251,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
+    private long getPurgeRaw()
+    {
+        if (!confDefaultsLoaded)
+            loadConfigDefaults();
+        return purgeRaw;
+    }
+
     /**
      *
      * Fetch a list of historical data points of a specific size Note: There is
@@ -1317,7 +1304,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
              * AND TIMESTAMP = (maxt - i * interval);
              */
             String metricUnion = 
-                MeasTabManagerUtil.getUnionStatement(purgeRaw);
+                MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT timestamp, value FROM " + metricUnion +
                                               ", " + TAB_NUMS + ", "+
@@ -1368,7 +1355,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         this.checkTimeArguments(begin, end);
         
         // The SQL that we will use
-        String metricUnion = MeasTabManagerUtil.getUnionStatement(purgeRaw);
+        String metricUnion = MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
         final String SQL =
             "SELECT (? + (? * i)) FROM " + TAB_NUMS +
             " WHERE i < ? AND" +
@@ -1595,7 +1582,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private StringBuffer getLastDataPointsSQL(int len, boolean constrain)
     {
-        String tables = MeasTabManagerUtil.getUnionStatement(purgeRaw);
+        String tables = MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
         StringBuffer sqlBuf = new StringBuffer(
             "SELECT measurement_id, value, timestamp" +
             " FROM " + tables + ", " +
@@ -2371,7 +2358,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // and 0 = (SELECT COUNT(*) FROM EAM_MEASUREMENT_DATA WHERE
             // ID = measurement_id and timestamp > (105410357766 -3 * interval));
             String metricUnion =
-                MeasTabManagerUtil.getUnionStatement(purgeRaw);
+                MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
             stmt = conn.prepareStatement(
                 "SELECT ID FROM " + metricUnion +
                 " WHERE enabled = ? AND NOT interval IS NULL AND " +

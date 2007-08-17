@@ -79,7 +79,25 @@ class MeasRangeObj
         }
     }
 
-    List getRanges()
+    Map bucketData(List data)
+    {
+        HashMap buckets = new HashMap();
+        List ranges = getRanges();
+        for (Iterator it = data.iterator(); it.hasNext(); )
+        {
+            DataPoint pt = (DataPoint) it.next();
+            String table = getTable(ranges, pt.getMetricValue().getTimestamp());
+            List dpts;
+            if (null == (dpts = (List)buckets.get(table))) {
+                dpts = new ArrayList();
+                buckets.put(table, dpts);
+            }
+            dpts.add(pt);
+        }
+        return buckets;
+    }
+
+    private List getRanges()
     {
         synchronized(_ranges)
         {
