@@ -185,8 +185,10 @@ public class MeasTabManagerUtil {
         _log.debug("(getPrevMeasTabTime) before -> " + getDateStr(timems) +
                    ", " + currTable);
         String newTable;
+        int incr = 24/NUMBER_OF_TABLES_PER_DAY/3;
+        incr = ((incr < 1) ? 1 : incr)*-1;
         do {
-            cal.add(Calendar.HOUR_OF_DAY, -1);
+            cal.add(Calendar.HOUR_OF_DAY, incr);
             rtn = cal.getTimeInMillis();
             _log.debug("subtracting 1 hour: " + getDateStr(rtn));
             newTable = getMeasTabname(rtn);
