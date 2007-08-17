@@ -1167,6 +1167,24 @@ white-space: nowrap;
  font-weight: bold;
 }
 
+#navigationTbl a:visited {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
+#navigationTbl a:hover {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
+#navigationTbl a:active {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
 #recent a {
  color: #ffffff;
  font-weight: bold;
