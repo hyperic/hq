@@ -143,6 +143,11 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         return eDAO.findByEntityAndStatus(ent, begin, end, status);
     }
 
+    public List findByCtime(long begin, long end, String[] eventTypes) {
+        EventLogDAO dao = getEventLogDAO();
+        return dao.findByCtime(begin, end, eventTypes);
+    }
+
     /**
      * Get an array of log record counts based on entity ID and time range
      * 

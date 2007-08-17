@@ -102,6 +102,17 @@ public class EventLogDAO extends HibernateDAO {
             .list();
     }
 
+    List findByCtime(long begin, long end, String[] eventTypes) {
+        Criteria c = createCriteria()
+            .add(Expression.between("timestamp", new Long(begin),
+                                    new Long(end)));
+        if (eventTypes != null && eventTypes.length > 0) {
+            c.add(Expression.in("type", eventTypes));
+        }
+        c.addOrder(Order.desc("timestamp"));
+        return c.list();
+    }
+
     void deleteLogs(long begin, long end) {
         String sql = "from EventLog l " + 
             "where l.timestamp between :beg and :end";
