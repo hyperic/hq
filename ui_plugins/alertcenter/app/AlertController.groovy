@@ -136,7 +136,8 @@ class AlertController
             [field:AlertDefSortField.LAST_FIRED, width:'10%', 
              label:{
                 if (it.lastFired)
-                    return df.format(it.lastFired)
+                    return linkTo(df.format(it.lastFired),
+                                  [resource:it, resourceContext:'listAlerts'])
                 else
                     return ''
             }],
@@ -180,7 +181,7 @@ class AlertController
         defaultSortOrder: 0,  // descending
         columns: [
             [field:GalertDefSortField.NAME, width:'20%',
-             label:{it.name }],
+             label:{linkTo(it.name, [resource:it]) }],
             [field:GalertDefSortField.CTIME, width:'10%',
              label:{df.format(it.ctime)}],
             [field:GalertDefSortField.MTIME, width:'10%',
@@ -190,9 +191,9 @@ class AlertController
             [field:GalertDefSortField.ENABLED, width:'10%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:GalertDefSortField.ESCALATION, width:'20%',
-             label:{it.escalation.name}],
+             label:{linkTo(it.escalation.name, [resource:it.escalation])}],
             [field:GalertDefSortField.GROUP, width:'20%',
-             label:{it.group.name}]
+             label:{linkTo(it.group.name, [resource:it.group])}]
         ]
     ]
 
