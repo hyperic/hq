@@ -27,6 +27,8 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
@@ -35,6 +37,8 @@ import org.hyperic.hq.dao.HibernateDAO;
 
 public class ResourceGroupDAO extends HibernateDAO
 {
+    private final Log _log = LogFactory.getLog(ResourceGroupDAO.class);
+
     public ResourceGroupDAO(DAOFactory f) {
         super(ResourceGroup.class, f);
     }
@@ -58,13 +62,23 @@ public class ResourceGroupDAO extends HibernateDAO
                                       AuthzConstants.groupResourceTypeName);
         }
 
-        Resource r = new ResourceDAO(DAOFactory.getDAOFactory()) 
-            .create(resType, resGrp.getName(), creator,  resGrp.getId(),
-                    isSystem);
+        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+        Resource r = rDao.create(resType, resGrp.getName(), creator,  
+                                 resGrp.getId(), isSystem);
+                                 
         resGrp.setResource(r);
         save(resGrp);
+        
+        /* The following oddity is needed because the above rDao.create()
+         * flushes the session.  If we don't refresh the object, then 
+         * changing the instanceId here doens't seem to do anything.  This
+         * is definitely a hacky workaround for a Hibernate issue. 
+         */
+        r = rDao.findById(r.getId());
+        getSession().refresh(r);
         r.setInstanceId(resGrp.getId());
         save(r);
+        getSession().flush();
         return resGrp;
     }
 

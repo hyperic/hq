@@ -262,6 +262,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                                   Integer instanceId) {
         Resource resource = getResourceDAO().findByInstanceId(type.getId(),
                                                               instanceId);
+        
+        if (resource == null) {
+            throw new RuntimeException("Unable to find resourceType=" + 
+                                       type.getId() + " instanceId=" + 
+                                       instanceId);
+        }
         return resource.getResourceValue();
     }
 
