@@ -56,10 +56,10 @@ onloads.push(setSelectedOption);
 </script>
 
 <div dojoType="TabContainer" id="mainTabContainer" 
-     style="width: 95%; height: 900px;">
+     style="width: 100%; height: 900px;padding-right:0px;">
   <div dojoType="ContentPane" label="Alerts">
-    <div style="margin:5px;border:0px solid red;">
-      <div style="float:left;width:18%;margin-right:14px;">
+    <div style="margin-top:5px;margin-left:10px;margin-bottom:5px;">
+      <div style="float:left;width:18%;margin-right:5px;">
         <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
@@ -91,7 +91,7 @@ onloads.push(setSelectedOption);
           </div>
         </div>
       </div>
-      <div style="float:left;width:80%" id="alertsCont">
+      <div style="float:left;width:80%;padding-left:5px;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
                         titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
@@ -109,8 +109,8 @@ onloads.push(setSelectedOption);
   </div>
   
   <div dojoType="ContentPane" label="Definitions">
-    <div style="margin:5px;">
-      <div style="float:left;width:18%;margin-right:14px;">
+   <div style="margin-top:5px;margin-left:10px;margin-bottom:5px;">
+      <div style="float:left;width:18%;margin-right:5px;">
         <div class="filters">
           <div class="BlockTitle">${l.DefFilter}</div>
           <div class="filterBox">
@@ -145,7 +145,7 @@ onloads.push(setSelectedOption);
           </div>
         </div>
       </div>
-      <div style="float:left;width:80%" id="defsCont">
+       <div style="float:left;width:80%;padding-left:5px;" id="defsCont">
         <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefs,
                         url:urlFor(action:'defData'),
