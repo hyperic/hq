@@ -56,7 +56,7 @@ onloads.push(setSelectedOption);
 </script>
 
 <div dojoType="TabContainer" id="mainTabContainer" 
-     style="width: 100%; height:100%;padding-right:0px;">
+     style="width: 100%; height: 500px;padding-right:0px;">
   <div dojoType="ContentPane" label="Alerts">
     <div style="margin-top:5px;margin-left:10px;margin-bottom:5px;">
       <div style="float:left;width:18%;margin-right:5px;">
