@@ -280,7 +280,7 @@ public class RegisteredTriggers {
      * @return Value of property initialized.
      *
      */
-    public boolean isInitialized() {
+    public synchronized boolean isInitialized() {
         return this.initialized;
     }
     
@@ -288,7 +288,7 @@ public class RegisteredTriggers {
      * @param initialized New value of property initialized.
      *
      */
-    public void setInitialized(boolean initialized) {
+    public synchronized void setInitialized(boolean initialized) {
         this.initialized = initialized;
     }
     
