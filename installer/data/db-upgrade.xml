@@ -6582,6 +6582,14 @@ has already been defined.
                         columnType="LONG"/>
     </schemaSpec>
     
+    <schemaSpec version="3.48">
+      <schema-directSQL>
+        <statement>
+          update eam_gtrigger_types set type_class = 'org.hyperic.hq.measurement.galerts.MeasurementGtriggerType'
+                 where type_class = 'org.hyperic.hq.galerts.triggers.measurement.MeasurementGtriggerType'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
