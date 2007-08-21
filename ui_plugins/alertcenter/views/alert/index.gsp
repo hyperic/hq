@@ -104,8 +104,8 @@ onloads.push(setSelectedOption);
                         schema:galertSchema, numRows:15) %>
         </div>
       </div>
-    <div style="clear:both;height:1px;"></div>
     </div>
+<div style="clear:both;height:1px;"></div>
   </div>
   
   <div dojoType="ContentPane" label="Definitions">
@@ -166,8 +166,8 @@ onloads.push(setSelectedOption);
                         schema:galertDefSchema, numRows:15) %>
         </div>    
       </div>
-    <div style="clear:both;height:1px;"></div>
     </div>
+ <div style="clear:both;height:1px;"></div>
   </div>
 </div>
 
