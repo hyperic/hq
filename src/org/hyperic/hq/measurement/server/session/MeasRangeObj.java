@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-class MeasRangeObj
+public class MeasRangeObj
 {
     private static final String logCtx = MeasRangeObj.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
@@ -49,7 +49,7 @@ class MeasRangeObj
         setRanges();
     }
 
-    static MeasRangeObj getInstance()
+    public static MeasRangeObj getInstance()
     {
         return _onlyInst;
     }
@@ -97,7 +97,7 @@ class MeasRangeObj
         return buckets;
     }
 
-    private List getRanges()
+    public List getRanges()
     {
         synchronized(_ranges)
         {
@@ -136,30 +136,5 @@ class MeasRangeObj
         long start   = MeasTabManagerUtil.getMeasTabStartTime(cal, currTime);
         long end     = MeasTabManagerUtil.getMeasTabEndTime(cal, currTime);
         return new MeasRange(table, start, end);
-    }
-
-    private class MeasRange
-    {
-        private long minTime,
-                     maxTime;
-        private String table;
-        MeasRange(String table, long minTime, long maxTime) {
-            this.table = table;
-            this.minTime = minTime;
-            this.maxTime = maxTime;
-        }
-        long getMaxTimestamp() {
-            return maxTime;
-        }
-        long getMinTimestamp() {
-            return minTime;
-        }
-        String getTable() {
-            return table;
-        }
-        public String toString() {
-            return table+", min: "+TimeUtil.toString(minTime)+
-                         ", max: "+TimeUtil.toString(maxTime);
-        }
     }
 }
