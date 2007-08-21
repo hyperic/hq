@@ -56,10 +56,10 @@ onloads.push(setSelectedOption);
 </script>
 
 <div dojoType="TabContainer" id="mainTabContainer" 
-     style="width: 100%; height: 500px;padding-right:0px;">
+     style="width: 100%; height:500px;">
   <div dojoType="ContentPane" label="Alerts">
-    <div style="margin-top:5px;margin-left:10px;margin-bottom:5px;">
-      <div style="float:left;width:18%;margin-right:5px;">
+    <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
+      <div style="float:left;width:18%;margin-right:10px;">
         <div class="filters">
           <div class="BlockTitle">${l.AlertFilter}</div>
           <div class="filterBox">
@@ -87,30 +87,30 @@ onloads.push(setSelectedOption);
      	                     [id:'alertTimeSelect',
      	                      onchange:'refreshAlertTables();']) %>
             </div>          
-
-          </div>
+            </div>
         </div>
       </div>
-      <div style="float:left;width:80%;padding-left:5px;" id="alertsCont">
+      <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
-                        titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
+                        titleHtml: "",
                         url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
         </div>
         <div id="groupAlertsTable" style="display:none;">
           <%= dojoTable(id:'GroupAlerts', title:l.GroupAlerts,
-                        titleHtml: "<div class='alertInfo'>${l.RedWarning}</div>",
+                        titleHtml: "",
                         url:urlFor(action:'groupData'),
                         schema:galertSchema, numRows:15) %>
         </div>
       </div>
+    <div style="clear:both;height:1px;"></div>
     </div>
   </div>
   
   <div dojoType="ContentPane" label="Definitions">
-   <div style="margin-top:5px;margin-left:10px;margin-bottom:5px;">
-      <div style="float:left;width:18%;margin-right:5px;">
+   <div style="margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;">
+      <div style="float:left;display:inline;width:18%;margin-right:10px;">
         <div class="filters">
           <div class="BlockTitle">${l.DefFilter}</div>
           <div class="filterBox">
@@ -145,7 +145,7 @@ onloads.push(setSelectedOption);
           </div>
         </div>
       </div>
-       <div style="float:left;width:80%;padding-left:5px;" id="defsCont">
+       <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
         <div id="defsTable" style="display:none;">
           <%= dojoTable(id:'Defs', title:l.ClassicDefs,
                         url:urlFor(action:'defData'),
@@ -166,6 +166,7 @@ onloads.push(setSelectedOption);
                         schema:galertDefSchema, numRows:15) %>
         </div>    
       </div>
+    <div style="clear:both;height:1px;"></div>
     </div>
   </div>
 </div>
