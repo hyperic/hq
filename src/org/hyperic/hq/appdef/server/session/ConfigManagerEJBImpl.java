@@ -444,7 +444,10 @@ public class ConfigManagerEJBImpl
         }
 
         if ((newBytes == null) || (newBytes.length == 0)) {
-            return newBytes;
+            //likely a manually created platform service where
+            //inventory-properties are auto-discovered but config
+            //is left unchanged.
+            return existingBytes;
         }
         
         try {
