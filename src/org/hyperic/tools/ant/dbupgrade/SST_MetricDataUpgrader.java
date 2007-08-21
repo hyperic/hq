@@ -43,13 +43,14 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.jdbc.JDBC;
 import org.hyperic.tools.db.TypeMap;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.MeasTabManagerUtil;
-import org.hyperic.hq.measurement.server.session.MeasRangeObj;
-import org.hyperic.hq.measurement.server.session.MeasRange;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasRangeObj;
+import org.hyperic.hq.measurement.shared.MeasRange;
+import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.jdbc.JDBC;
+import org.hyperic.util.TimeUtil;
 
 public class SST_MetricDataUpgrader extends SchemaSpecTask {
 
@@ -84,7 +85,9 @@ public class SST_MetricDataUpgrader extends SchemaSpecTask {
                              " FROM "+TAB_COMPAT+
                              " WHERE timestamp BETWEEN "+min+" AND "+max;
                 int rows = stmt.executeUpdate(sql);
-                log("Moved "+rows+" rows from "+TAB_COMPAT+" to "+table);
+                log("Moved "+rows+" rows from "+TAB_COMPAT+" to "+table+
+                    " min -> "+TimeUtil.toString(min)+" ("+min+")"+
+                    " max -> "+TimeUtil.toString(max)+" ("+max+")");
             }
             stmt.execute("TRUNCATE TABLE "+TAB_COMPAT);
         }

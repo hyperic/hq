@@ -66,6 +66,8 @@ import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
