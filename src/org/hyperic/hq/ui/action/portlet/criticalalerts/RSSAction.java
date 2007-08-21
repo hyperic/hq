@@ -71,7 +71,8 @@ public class RSSAction extends BaseRSSAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
+        throws Exception 
+    {
         RSSFeed feed = getNewRSSFeed(request);
         
         // Set title
@@ -112,10 +113,6 @@ public class RSSAction extends BaseRSSAction {
             AppdefEntityID aeid = new AppdefEntityID(defInfo.getAppdefType(),
                                                      defInfo.getAppdefId());
                 
-            String link = feed.getBaseUrl() +
-                          "/alerts/Alerts.do?mode=viewAlert&eid=" +
-                          aeid.getAppdefKey() + "&a=" + alert.getId();
-
             DateSpecifics specs = new DateSpecifics();
             specs.setDateFormat(new SimpleDateFormat(res.getMessage(
                 Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis")));
@@ -137,7 +134,7 @@ public class RSSAction extends BaseRSSAction {
                           "<td>" + fmtd.toString() + "</td>" +
                           "<td><a href='" + feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=FIXED&a=" +
-                          alert.getId() + "'>" +
+                          alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.fixed.label") +
                           "</a></td>";
@@ -145,7 +142,7 @@ public class RSSAction extends BaseRSSAction {
                 if (alert.isAcknowledgeable()) {
                     desc += "<td><a href='" + feed.getBaseUrl() +
                           "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
-                          alert.getId() + "'>" +
+                          alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
                           res.getMessage(
                               "resource.common.alert.action.acknowledge.label")+
                           "</a></td></tr></table>";
@@ -156,6 +153,11 @@ public class RSSAction extends BaseRSSAction {
             AuthzSubject subject = aBoss.getCurrentSubject(user);
             AppdefEntityValue resource = 
                 new AppdefEntityValue(aeid, subject.getAuthzSubjectValue()); 
+
+            String link = feed.getBaseUrl() +
+                "/alerts/Alerts.do?mode=viewAlert&eid=" +
+                aeid.getAppdefKey() + "&a=" + alert.getId();
+
             feed.addItem(resource.getName()+ " " + defInfo.getName(), link, 
                          desc, alert.getAlertInfo().getTimestamp()); 
         }
