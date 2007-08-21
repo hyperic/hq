@@ -53,7 +53,7 @@ import org.hyperic.hq.measurement.server.session.MeasRange;
 
 public class SST_MetricDataUpgrader extends SchemaSpecTask {
 
-    public static final String logCtx = MetricDataUpgrader.class.getName();
+    public static final String logCtx = SST_MetricDataUpgrader.class.getName();
     private static final String TAB_COMPAT = MeasTabManagerUtil.OLD_MEAS_TABLE;
 
     public static final String SCHEMA_MOD_IN_PROGRESS
