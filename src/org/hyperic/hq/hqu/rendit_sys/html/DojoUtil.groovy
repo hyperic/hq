@@ -278,6 +278,7 @@ class DojoUtil {
 
          </div>
          <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
+         <div class="acLoader">here</div>
            <div style="clear: both;"></div>
          </div>
         

@@ -250,3 +250,18 @@ font-weight:bold;
     border-bottom: solid #C6CFE5;
     border-width: 1px;
 }
+
+.refreshButton {
+    padding-left:40px;
+    display:inline;
+}
+
+.acLoader {
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+    padding-right:30px;
+    padding-top:4px;
+}
