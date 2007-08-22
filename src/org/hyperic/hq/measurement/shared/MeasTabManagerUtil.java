@@ -59,10 +59,7 @@ public class MeasTabManagerUtil {
      * @return The UNION SQL statement.
      */
     public static String getUnionStatement(long begin, long end) {
-        // We always include the _COMPAT table, it contains the backfilled
-        // data
         StringBuffer sql = new StringBuffer();
-//        sql.append("(SELECT * FROM ").append(OLD_MEAS_TABLE);
         sql.append("(");
         while (true)
         {
