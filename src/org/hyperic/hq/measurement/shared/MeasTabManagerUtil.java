@@ -61,12 +61,14 @@ public class MeasTabManagerUtil {
     public static String getUnionStatement(long begin, long end) {
         StringBuffer sql = new StringBuffer();
         sql.append("(");
+        Calendar cal = Calendar.getInstance();
         while (true)
         {
             String table = MeasTabManagerUtil.getMeasTabname(end);
             sql.append("SELECT * FROM ").
                 append(table);
-            end = MeasTabManagerUtil.getPrevMeasTabTime(end);
+            end = getPrevMeasTabTime(cal, end);
+            end = getMeasTabEndTime(cal, end);
             if (end >= begin) {
                 sql.append(" UNION ALL ");
                 continue;
