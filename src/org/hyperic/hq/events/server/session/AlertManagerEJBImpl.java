@@ -86,6 +86,8 @@ import org.hyperic.util.units.FormattedNumber;
  * @ejb:transaction type="REQUIRED"
  */
 public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
+    private final String NOTAVAIL = "Not Available";
+    
     private final Log _log =
         LogFactory.getLog(AlertManagerEJBImpl.class.getName());
     private final String VALUE_PROCESSOR =
@@ -448,11 +450,34 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
     
     /**
+     * Convert the alert condition log value into a number in the units specified 
+     * by the derived measurement.
+     * 
+     * @param log The alert condition log.
+     * @param dm The derived measurement.
+     * @return The string representation of the converted alert condition log 
+     *         value or <code>NOTAVAIL</code> if the value cannot be converted.
+     */
+    private String safeGetAlertConditionLogNumericValue(AlertConditionLog log, 
+                                                        DerivedMeasurement dm) {
+        Number val = NumberUtil.stringAsNumber(log.getValue());
+        
+        if (NumberUtil.NaN.equals(val)) {
+            _log.warn("Alert condition log with id="+log.getId()+" has value that " +
+            		"cannot be converted to a number: "+log.getValue());
+            return NOTAVAIL;
+        } else {
+            FormattedNumber av = UnitsConvert.convert(
+                    val.doubleValue(), dm.getTemplate().getUnits());
+            return av.toString();            
+        }
+    }
+    
+    /**
      * Get the long reason for an alert
      * @ejb:interface-method
      */
     public String getLongReason(Alert alert) {
-        final String NOTAVAIL = "Not Available";
         final String indent = "    ";
 
         // Get the alert definition's conditions
@@ -461,8 +486,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertConditionLog[] logs = (AlertConditionLog[])
             clogs.toArray(new AlertConditionLog[clogs.size()]);
 
-        double val;
-        FormattedNumber av;
         StringBuffer text = new StringBuffer();
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = logs[i].getCondition();
@@ -511,11 +534,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 }
 
                 // Format the number
-                val =
-                    NumberUtil.stringAsNumber(logs[i].getValue()).doubleValue();
-                av = UnitsConvert.convert(val, dm.getTemplate().getUnits());
-                text.append(" (actual value = ").append(av.toString())
-                    .append(")");
+                String actualValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
+                text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
                 text.append(cond.getName());
@@ -549,11 +569,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 } catch (ParseException e) {
                     text.append(NOTAVAIL);
                 }
-
-                val =
-                    NumberUtil.stringAsNumber(logs[i].getValue()).doubleValue();
-                av = UnitsConvert.convert(val, dm.getTemplate().getUnits());
-                text.append(", new value = ").append(av.toString()).append(")");
+                
+                String newValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
+                text.append(", new value = ").append(newValue).append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
                 text.append(cond.getName()).append(" value changed");
