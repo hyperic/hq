@@ -38,8 +38,10 @@ import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementEvent extends AbstractEvent
-    implements Serializable, ResourceEventInterface 
-{
+    implements Serializable, ResourceEventInterface {
+
+    private static final long serialVersionUID = -4805198063892667418L;
+
     private static final Log _log = LogFactory.getLog(MeasurementEvent.class);
     
     private AppdefEntityID _resource;

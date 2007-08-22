@@ -40,6 +40,9 @@ import org.hyperic.hq.product.TrackEvent;
  */
 public class ResourceLogEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
+    
+    private static final long serialVersionUID = 2981297729726736244L;
+
     private static Map levelStrs = new HashMap();
     
     static {

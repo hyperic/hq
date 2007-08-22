@@ -38,6 +38,9 @@ import java.io.Serializable;
  * return a specific payload value.
  */
 public abstract class AbstractEvent implements Serializable {
+    
+    private static final long serialVersionUID = 1300452915258577781L;
+    
     private Long    _id;
     private Integer _instanceId;
     private long    _timestamp = System.currentTimeMillis();

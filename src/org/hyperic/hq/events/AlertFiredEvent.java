@@ -34,6 +34,8 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 public class AlertFiredEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
     
+    private static final long serialVersionUID = -3740509119080501003L;
+
     /** Holds value of alert ID. */
     private Integer alertId;
     

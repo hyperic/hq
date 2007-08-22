@@ -31,6 +31,8 @@ package org.hyperic.hq.events;
 public class TriggerNotFiredEvent extends AbstractEvent
     implements java.io.Serializable {
     
+    private static final long serialVersionUID = 9089498994742924709L;
+
     /** Creates a new instance of TriggerFiredEvent */
     public TriggerNotFiredEvent(Integer instanceId) {
         setInstanceId(instanceId);

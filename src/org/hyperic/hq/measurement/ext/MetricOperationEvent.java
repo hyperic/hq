@@ -28,6 +28,9 @@ package org.hyperic.hq.measurement.ext;
 import org.hyperic.hq.events.AbstractEvent;
 
 public class MetricOperationEvent extends AbstractEvent {
+
+    private static final long serialVersionUID = 4596330148839192447L;
+
     public static final int ACTION_CREATE = 0;
     public static final int ACTION_UPDATE = 1;
     public static final int ACTION_DELETE = 2;

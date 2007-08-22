@@ -37,6 +37,9 @@ import org.hyperic.hq.product.TrackEvent;
  */
 public class ConfigChangedEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
+    
+    private static final long serialVersionUID = 426300401969414549L;
+    
     private AppdefEntityID resource;
     private String message;
     private String source;

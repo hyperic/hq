@@ -30,6 +30,8 @@ import java.util.Date;
 public class HeartBeatEvent extends AbstractEvent
     implements java.io.Serializable {
     
+    private static final long serialVersionUID = -5753333005138238760L;
+    
     /** Holds value of property beat. */
     private Date beat;
     
