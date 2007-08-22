@@ -288,7 +288,7 @@ class DojoUtil {
 
          </div>
          <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-         <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="Refresh table" onclick='${id}_refreshTable();'/></div>
+         <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/></div>
          <div class="acLoader" id="${idVar}_loadMsg"></div>
            <div style="clear: both;"></div>
          </div>
