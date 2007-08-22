@@ -93,13 +93,11 @@ onloads.push(setSelectedOption);
       <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
           <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
-                          titleHtml: "<div class='refreshButton'><input type='button' value='Refresh' onclick='refreshTable();'/></div> ",
                         url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
         </div>
         <div id="groupAlertsTable" style="display:none;">
           <%= dojoTable(id:'GroupAlerts', title:l.GroupAlerts,
-                         titleHtml: "<div class='refreshButton'><input type='button' value='Refresh' onclick='refreshTable();'/></div> ",
                         url:urlFor(action:'groupData'),
                         schema:galertSchema, numRows:15) %>
         </div>
