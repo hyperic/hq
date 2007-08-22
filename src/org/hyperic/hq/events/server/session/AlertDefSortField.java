@@ -124,7 +124,7 @@ public abstract class AlertDefSortField
         new AlertDefSortField(7, "Escalation", "alertDef.sortField.escalation") 
     {
         public boolean isSortable() {
-            return true;
+            return false;
         }
         
         String getSortString(String def, String resource) {

@@ -68,8 +68,8 @@ onloads.push(setSelectedOption);
               <span><strong>${l.AlertType}:</strong></span>
               <select id="alertSelect" 
                       onchange='selectAlertType(options[selectedIndex].value)'>
-                <option value='1'>${l.ClassicAlerts}</option>
-                <option value='2'>${l.GroupAlerts}</option>
+                <option value='1'>${l.ClassicAlertsSelect}</option>
+                <option value='2'>${l.GroupAlertsSelect}</option>
               </select>          
             </div>
             <% } %>
@@ -92,12 +92,12 @@ onloads.push(setSelectedOption);
       </div>
       <div style="float:right;width:78%;display:inline;height: 445px;overflow-x: hidden; overflow-y: auto;" id="alertsCont">
         <div id="alertsTable" style="display:none;">
-          <%= dojoTable(id:'Alerts', title:l.ClassicAlerts,
+          <%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
                         url:urlFor(action:'data'),
                         schema:alertSchema, numRows:15) %>
         </div>
         <div id="groupAlertsTable" style="display:none;">
-          <%= dojoTable(id:'GroupAlerts', title:l.GroupAlerts,
+          <%= dojoTable(id:'GroupAlerts', title:l.GroupAlertsTable,
                         url:urlFor(action:'groupData'),
                         schema:galertSchema, numRows:15) %>
         </div>
@@ -117,27 +117,27 @@ onloads.push(setSelectedOption);
               <span><strong>${l.DefType}:</strong></span>
               <select id="defSelect"
                       onchange='selectDefType(options[selectedIndex].value)'>
-                <option value='1'>${l.PlainDefs}</option>
-                <option value='3'>${l.GroupDefs}</option>
+                <option value='1'>${l.ClassicDefsSelect}</option>
+                <option value='3'>${l.GroupDefsSelect}</option>
                 <% if (superUser) { %>
-                  <option value='2'>${l.TypeBasedDefs}</option>
+                  <option value='2'>${l.TypeBasedDefsSelect}</option>
                 <% } %>
               </select>          
             </div>
             
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
-              <span><strong>${l.ExcludeTypeBased}:</strong></span>
               <input id="excludeTypeBox" type="checkbox" name="excludeTypeBased" 
                      value="true"  onchange="Defs_refreshTable();"/>
+              <span><strong>${l.ExcludeTypeBased}</strong></span>
             </div>
             <% } %>
 
             <div id="onlyShowDisabled" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
-              <span><strong>${l.OnlyShowDisabled}:</strong></span>
               <input id="onlyShowDisabledBox" type="checkbox" name="onlyShowDisabled" 
                      value="true"  onchange="refreshDefTables();"/>
+              <span><strong>${l.OnlyShowDisabled}</strong></span>
             </div>
             
           </div>
@@ -145,21 +145,21 @@ onloads.push(setSelectedOption);
       </div>
        <div style="float:right;display:inline;width:78%;height: 445px;overflow-x: hidden; overflow-y: auto;" id="defsCont">
         <div id="defsTable" style="display:none;">
-          <%= dojoTable(id:'Defs', title:l.ClassicDefs,
+          <%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
                         url:urlFor(action:'defData'),
                         schema:defSchema, numRows:15) %>
         </div>
       
         <div id="typeDefsTable" style="display:none;">
           <% if (superUser) { %>
-            <%= dojoTable(id:'TypeDefs', title:l.TypeDefs,
+            <%= dojoTable(id:'TypeDefs', title:l.TypeDefsTable,
                           url:urlFor(action:'typeDefData'),
                           schema:typeDefSchema, numRows:15) %>
           <% } %>
         </div>    
 
         <div id="galertDefsTable" style="display:none;">
-          <%= dojoTable(id:'GalertDefs', title:l.GroupDefsTitle,
+          <%= dojoTable(id:'GalertDefs', title:l.GroupDefsTable,
                         url:urlFor(action:'galertDefData'),
                         schema:galertDefSchema, numRows:15) %>
         </div>    
