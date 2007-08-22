@@ -252,17 +252,23 @@ font-weight:bold;
 }
 
 .refreshButton {
-    padding-left:40px;
-    display:inline;
-}
-
-.acLoader {
+    padding-right:15px;
+    padding-top:2px;
     display: block;
     position: relative;
     float: right;
     width:16px;
     height:16px;
-    padding-right:30px;
-    padding-top:4px;
+}
+
+.acLoader {
     visibility: hidden;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+    padding-right:15px;
+    background-image: url( "images/ajax-loader-blue.gif" );
+    background-repeat: no-repeat;
 }

@@ -277,7 +277,6 @@ class DojoUtil {
 	    <div class="tableTitleWrapper">
           <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
           ${titleHtml}
-          <div class='refreshButton'><input type='button' value='Refresh' onclick='${id}_refreshTable();'/></div>
         </div>
         <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	      <div class="pageButtonCont">
@@ -289,7 +288,8 @@ class DojoUtil {
 
          </div>
          <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-         <div class="acLoader" id="${idVar}_loadMsg">here</div>
+         <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="Refresh table" onclick='${id}_refreshTable();'/></div>
+         <div class="acLoader" id="${idVar}_loadMsg"></div>
            <div style="clear: both;"></div>
          </div>
         
