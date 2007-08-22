@@ -31,23 +31,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.ejb.FinderException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertValue;
 
 /**
  * This class has the knowledge to create an {@link Escalatable} object
@@ -90,25 +84,20 @@ public class ClassicEscalatableCreator
         // Now create the alert
         Alert alert = alertMan.createAlert(_def, _event.getTimestamp());
 
-        // Create a alert condition logs for every condition
+        // Create a alert condition logs for every condition that triggered the alert
         Collection conds = _def.getConditions();
         for (Iterator i = conds.iterator(); i.hasNext();) {
             AlertCondition cond = (AlertCondition) i.next();
             
-            if (cond.getType() == EventConstants.TYPE_ALERT) {
-                // Don't create a log for recovery alerts, so that we don't
-                // get the multi-condition effect in the logs
-                continue;
-            }
-            
-            AlertConditionLogValue clog = new AlertConditionLogValue();
-            Integer trigId = cond.getTrigger().getId();
-
-            clog.setCondition(cond.getAlertConditionValue());
-            if (trigMap.containsKey(trigId)) {
+            if (shouldCreateConditionLogFor(cond, trigMap)) {
+                AlertConditionLogValue clog = new AlertConditionLogValue();
+                clog.setCondition(cond.getAlertConditionValue());
+                
+                Integer trigId = cond.getTrigger().getId();
                 clog.setValue(trigMap.get(trigId).toString());
+                
+                alert.createConditionLog(clog.getValue(), cond);
             }
-            alert.createConditionLog(clog.getValue(), cond);
         }
     
         // Regardless of whether or not the actions succeed, we will send an
@@ -148,4 +137,18 @@ public class ClassicEscalatableCreator
     {
         return new ClassicEscalatable(alert, shortReason, longReason); 
     }
+    
+    
+    private boolean shouldCreateConditionLogFor(AlertCondition cond, Map triggerMap) {
+        if (cond.getType() == EventConstants.TYPE_ALERT) {
+            // Don't create a log for recovery alerts, so that we don't
+            // get the multi-condition effect in the logs
+            return false;
+        }
+        
+        Integer trigId = cond.getTrigger().getId();
+        
+        return triggerMap.containsKey(trigId);
+    }    
+    
 }
