@@ -267,8 +267,7 @@ public class DurationTrigger extends AbstractTrigger
                 if (events.size() > 0) {
                     // Get the last event
                     ObjectInputStream p = (ObjectInputStream) events.getLast();
-                    // Deserialize the event
-                    AbstractEvent last = (AbstractEvent) p.readObject();
+                    AbstractEvent last = deserializeEventFromStream(p, true);
 
                     // Bug #8781.  If the current event is a
                     // TriggerNotFiredEvent, we want to use the
@@ -286,12 +285,12 @@ public class DurationTrigger extends AbstractTrigger
                         // Iterate and add up the time
                         AbstractEvent next;
                         for (Iterator i = events.iterator(); i.hasNext();) {
-                            // Deserailize each one, reuse variables
+                            // Deserialize each one, reuse variables
                             p = (ObjectInputStream) i.next();
 
                             // If last, then we've already deserialized it                            
                             if (i.hasNext())
-                                next = (AbstractEvent) p.readObject();
+                                next = deserializeEventFromStream(p, true);
                             else
                                 next = last;
 
@@ -342,7 +341,8 @@ public class DurationTrigger extends AbstractTrigger
                 }
             } catch (Exception exc) {
                 throw new ActionExecuteException(
-                    "Failed to get referenced " + "streams: " + exc);
+                        "Failed to get referenced streams for trigger id="+
+                         getId()+" : " + exc);                
             }
             
             /* Make sure we only write once (either delete or add) in this 
@@ -361,7 +361,8 @@ public class DurationTrigger extends AbstractTrigger
                                   getId());
                 } catch (Exception exc) {
                     throw new ActionExecuteException(
-                        "Error adding event reference: " + exc);
+                        "Error adding event reference for trigger id="+getId()+
+                        " : " + exc);
                 }
                 return;         // We're done
             }
@@ -372,7 +373,8 @@ public class DurationTrigger extends AbstractTrigger
                     eTracker.deleteReference(getId());
                 } catch (Exception exc) {
                     throw new ActionExecuteException
-                        ("Failed to delete referenced" + " events: " + exc);
+                        ("Failed to delete referenced events for trigger Id="+
+                         getId()+" : " + exc);
                 }
             }
             else

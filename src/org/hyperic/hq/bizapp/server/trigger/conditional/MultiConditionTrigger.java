@@ -45,6 +45,8 @@ import java.util.StringTokenizer;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -64,14 +66,10 @@ import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.config.EnumerationConfigOption;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 import org.hyperic.util.config.StringConfigOption;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** The MultiConditionTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
@@ -231,7 +229,7 @@ public class MultiConditionTrigger
         // Create a table to keep track
         HashMap fulfilled = new HashMap();
 
-        // We would only fire if we previously evaluted to fire
+        // We would only fire if we previously evaluated to fire
         if (event instanceof HeartBeatEvent) {
             // Check to make sure it's been at least 15 seconds since we decided
             // to fire.  If conditions changed, we won't fire incorrectly
@@ -250,10 +248,8 @@ public class MultiConditionTrigger
                     for (Iterator iter = streams.iterator();
                          iter.hasNext(); ) {
                         ObjectInputStream p =
-                            (ObjectInputStream) iter.next();
-                        // Deserialize the event
-                        Object obj = p.readObject();
-                        events.add(obj);
+                            (ObjectInputStream) iter.next();                        
+                        events.add(deserializeEventFromStream(p, true));
                     }
 
                     if (!durable) {
@@ -336,9 +332,7 @@ public class MultiConditionTrigger
                 ArrayList events = new ArrayList();
                 for (Iterator iter = streams.iterator(); iter.hasNext(); ) {
                     ObjectInputStream p = (ObjectInputStream) iter.next();
-                    // Deserialize the event
-                    Object obj = p.readObject();
-                    events.add(obj);
+                    events.add(deserializeEventFromStream(p, true));
                 }
 
                 // Now add the new event, too

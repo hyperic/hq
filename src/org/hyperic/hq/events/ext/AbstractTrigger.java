@@ -25,7 +25,9 @@
 
 package org.hyperic.hq.events.ext;
 
-import javax.ejb.CreateException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -35,12 +37,10 @@ import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -57,6 +57,8 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.EventTrackerLocal;
+import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 
@@ -200,6 +202,56 @@ public abstract class AbstractTrigger implements TriggerInterface {
         }
     }
     
+    /**
+     * Deserialize an event from the input stream, providing optional recovery 
+     * from stream corruption. The stream may become corrupted during upgrade 
+     * scenarios since we started providing serialization version control on 
+     * events only in HQEE 3.1.1 (Refer to ticket HQ-824). In this case, we 
+     * would want to clear out the old events and start fresh.
+     * 
+     * @param is The input stream.
+     * @param recoverFromCorruption <code>true</code> to delete all events 
+     *                              associated with this trigger if the event 
+     *                              stream is corrupted; <code>false</code> to 
+     *                              ignore the failure, only throwing the 
+     *                              exception.
+     * @return The deserialized event.
+     * @throws IOException if the event stream is corrupted.
+     * @throws ClassNotFoundException if the event stream is corrupted.
+     */
+    protected final AbstractEvent deserializeEventFromStream(ObjectInputStream is, 
+                                                    boolean recoverFromCorruption)
+        throws IOException, ClassNotFoundException {
+                
+        boolean isStreamCorrupted = false;    
+        AbstractEvent event = null;
+        
+        try {
+            event = (AbstractEvent) is.readObject();                            
+        } catch (IOException e) {
+            isStreamCorrupted = true;
+            throw e;
+        } catch (ClassNotFoundException e) {
+            isStreamCorrupted = true;
+            throw e;
+        } finally {
+            if (isStreamCorrupted && recoverFromCorruption) {
+                log.info("Attempting to recover from event stream corruption by " +
+                        "deleting all events associated with trigger id="+getId());
+                
+                try {
+                    EventTrackerLocal eTracker = EventTrackerUtil.getLocalHome().create();
+                    eTracker.deleteReference(getId());
+                    log.info("Recovery succeeded for trigger id="+getId());
+                } catch (Exception e) {
+                    log.info("Recovery failed for trigger id="+getId()+" : "+e);
+                }
+            }
+        }
+                    
+        return event;
+    }    
+    
     public Integer getId() {
         if (triggerValue == null)
             return new Integer(0);
@@ -221,4 +273,5 @@ public abstract class AbstractTrigger implements TriggerInterface {
     public void setTriggerValue(RegisteredTriggerValue tv) {
         triggerValue = tv;
     }
+    
 }

@@ -155,7 +155,7 @@ public class ValueChangeTrigger extends AbstractTrigger
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { measurementId };
     }
-
+    
     /** 
      * Process an event from the dispatcher.
      * @param event the Event to process
@@ -202,13 +202,13 @@ public class ValueChangeTrigger extends AbstractTrigger
                         // We only need the first event
                         ObjectInputStream p =
                             (ObjectInputStream) events.iterator().next();
-                
-                        // Deserialize the event
-                        last = (MeasurementEvent) p.readObject();
+                        
+                        last = (MeasurementEvent) deserializeEventFromStream(p, true);
                     }
                 } catch(Exception exc){
                     throw new ActionExecuteException(
-                        "Failed to get referenced streams: " + exc);
+                        "Failed to get referenced streams for trigger id="+
+                         getId()+" : " + exc);
                 }
             }
             

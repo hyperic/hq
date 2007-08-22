@@ -125,8 +125,9 @@ public class AvertTrigger extends AbstractTrigger
                         HeartBeatEvent heartbeat = (HeartBeatEvent) event;
                         Iterator i = events.iterator();
                         ObjectInputStream p = (ObjectInputStream) i.next();
+
                         TriggerFiredEvent tracked =
-                            (TriggerFiredEvent) p.readObject();
+                            (TriggerFiredEvent) deserializeEventFromStream(p, true);        
 
                         // Check to see if enough time has elapsed
                         if ((tracked.getTimestamp() + getTimeRange()) <
