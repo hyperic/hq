@@ -62,13 +62,20 @@ public class MeasTabManagerUtil {
         // We always include the _COMPAT table, it contains the backfilled
         // data
         StringBuffer sql = new StringBuffer();
-        sql.append("(SELECT * FROM ").append(OLD_MEAS_TABLE);
-        while (end >= begin)
+//        sql.append("(SELECT * FROM ").append(OLD_MEAS_TABLE);
+        sql.append("(");
+        while (true)
         {
             String table = MeasTabManagerUtil.getMeasTabname(end);
-            sql.append(" UNION ALL SELECT * FROM ").
+            sql.append("SELECT * FROM ").
                 append(table);
             end = MeasTabManagerUtil.getPrevMeasTabTime(end);
+            if (end >= begin) {
+                sql.append(" UNION ALL ");
+                continue;
+            } else {
+                break;
+            }
         }
 
         sql.append(") ").append(TAB_DATA);
