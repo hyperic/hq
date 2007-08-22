@@ -54,7 +54,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
-import org.hyperic.hq.measurement.server.session.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;

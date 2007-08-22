@@ -41,7 +41,7 @@ import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
