@@ -62,7 +62,7 @@
       Alert Name: <b>${alertDef.name}</b><br>
       Alert Description: <b><%= alertDef.description ? alertDef.description : "" %></b><br>
       Alert Date / Time: <b>${alertTime}</b><br>
-      Condition Set: ${action.longReason}<br>
+      Triggering Condition(s): ${action.longReason}<br>
       Alert Severity: <b>${EventConstants.getPriority(alertDef.priority)}</b><br>
       <% if (lastFix) { %>
            Previous Resolution: <b>${lastFix}</b><br>
