@@ -111,6 +111,7 @@ class DojoUtil {
 	    def lastPageVar  = "${idVar}_lastPage"
 	    def sortOrderVar = "${idVar}_sortOrder"
 	    def urlXtraVar   = "${idVar}_urlXtra"
+	    def ajaxCountVar = "${idVar}_ajaxCountVar"
 	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
         
@@ -119,6 +120,7 @@ class DojoUtil {
         var ${lastPageVar} = false;
         var ${sortOrderVar};
         var ${urlXtraVar} = [];
+        var ${ajaxCountVar} = 0;
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
@@ -179,6 +181,10 @@ class DojoUtil {
 
         function ${id}_refreshTable() {
             var queryStr = ${idVar}_makeQueryStr();
+            ${ajaxCountVar}++;
+            if (${ajaxCountVar} > 0) {
+                dojo.byId("${idVar}_loadMsg").style.visibility = 'visible';
+            }
             dojo.io.bind({
                 url: '${params.url}' + queryStr,
                 method: "get",
@@ -204,6 +210,10 @@ class DojoUtil {
                     ${lastPageVar} = data.lastPage;
                     ${idVar}_setupPager();
                     ${idVar}_highlightRow(data.data);
+                    ${ajaxCountVar}--;
+                    if (${ajaxCountVar} == 0) {
+                        dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
+                    }
                 }
             });
         }
@@ -279,7 +289,7 @@ class DojoUtil {
 
          </div>
          <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-         <div class="acLoader">here</div>
+         <div class="acLoader" id="${idVar}_loadMsg">here</div>
            <div style="clear: both;"></div>
          </div>
         
