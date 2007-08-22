@@ -278,11 +278,10 @@ class DojoUtil {
           <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
           ${titleHtml}
         </div>
-        <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+        <div class="nextText">${BUNDLE['dojoutil.Next']}</div>
 	      <div class="pageButtonCont">
-            <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
-                 class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-            <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
+            <div id="${idVar}_pageLeft" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+            <div id="${idVar}_pageNumbers" style="">&nbsp;</div>
             <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;"
                  class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
 
