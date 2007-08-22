@@ -1487,6 +1487,8 @@
       <fileset dir="${build.dir}/classes">
         <include name="org/hyperic/util/**"/>
         <include name="org/hyperic/tools/**"/>
+        <!-- For SST_MetricDataUpgrader -->
+        <include name="org/hyperic/hq/measurement/shared/**"/>
         <exclude name="**/*License*" />
         <exclude name="**/*license*" />
       </fileset>
