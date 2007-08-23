@@ -71,7 +71,7 @@
       <column name="RESOURCE_ID" not-null="true"/>
     </many-to-one>
 
-    <set name="resourceSet" table="EAM_RES_GRP_RES_MAP">
+    <set name="resourceSet" table="EAM_RES_GRP_RES_MAP" optimistic-lock="false">
       <cache usage="read-write"/>
       <key column="RESOURCE_GROUP_ID"/>
       <many-to-many class="Resource" column="RESOURCE_ID"/>
