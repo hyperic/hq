@@ -2355,14 +2355,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
-            // select id from EAM_MEASUREMENTR_DATA where enabled = true
+            // select id from EAM_MEASUREMENT where enabled = true
             // and interval is not null and
             // and 0 = (SELECT COUNT(*) FROM EAM_MEASUREMENT_DATA WHERE
             // ID = measurement_id and timestamp > (105410357766 -3 * interval));
             String metricUnion =
                 MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
             stmt = conn.prepareStatement(
-                "SELECT ID FROM " + metricUnion +
+                "SELECT ID FROM " + TAB_MEAS +
                 " WHERE enabled = ? AND NOT interval IS NULL AND " +
                       " NOT EXISTS (SELECT timestamp FROM " + metricUnion +
                                   " WHERE id = measurement_id AND " +
