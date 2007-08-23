@@ -51,7 +51,7 @@ ALERT DETAIL
 - Resource Name:      ${resource.name}
 - Alert Name:         ${alertDef.name}
 - Alert Description:  <%= alertDef.description ? alertDef.description : "" %>
-- Triggering Condition(s)jn    mj:      ${action.longReason}
+- Triggering Condition(s):      ${action.longReason}
 - Alert Severity:     ${EventConstants.getPriority(alertDef.priority)}
 - Alert Date:         ${alertTime}${lastFixStr}
 ${auxLogInfo}${indicatorStr}
