@@ -491,7 +491,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             AlertCondition cond = logs[i].getCondition();
 
             if (i == 0) {
-                text.append("\n").append(indent).append("If Condition: ");
+                text.append("\n").append(indent).append("If ");
             }
             else {
                 text.append("\n").append(indent)
