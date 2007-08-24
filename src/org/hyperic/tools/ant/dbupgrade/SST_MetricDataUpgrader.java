@@ -25,31 +25,18 @@
 
 package org.hyperic.tools.ant.dbupgrade;
 
-import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
 
-import org.hyperic.tools.db.TypeMap;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasRange;
 import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.jdbc.JDBC;
 import org.hyperic.util.TimeUtil;
 
 public class SST_MetricDataUpgrader extends SchemaSpecTask {
