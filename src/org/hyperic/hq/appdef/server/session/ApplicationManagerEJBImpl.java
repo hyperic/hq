@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -56,12 +57,15 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -801,6 +805,27 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        log.info("Application manager starting up!");
+        
+        HQApp.getInstance().registerCallbackListener(ClusterDeleteCallback.class, 
+                                                     new ClusterDeleteCallback()
+        {
+            public void preDelete(ServiceCluster c) throws VetoException {
+                ResourceBundle b = 
+                    ResourceBundle.getBundle("org.hyperic.hq.appdef.Resources");
+
+                Collection apps = getApplicationDAO().findUsingCluster(c);
+                if (apps.size() != 0) {
+                    throw new VetoException(b.getString("cluster.inUse"));
+                } 
+            }
+        });
+    }
+    
     public static ApplicationManagerLocal getOne() {
         try {
             return ApplicationManagerUtil.getLocalHome().create();

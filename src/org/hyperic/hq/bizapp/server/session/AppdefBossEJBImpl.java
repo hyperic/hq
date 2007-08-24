@@ -138,6 +138,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -2543,7 +2544,7 @@ public class AppdefBossEJBImpl
                GroupDuplicateNameException, 
                AppSvcClustDuplicateAssignException,
                SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+               PermissionException, VetoException 
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionID);
@@ -3110,7 +3111,7 @@ public class AppdefBossEJBImpl
     public void deleteGroup(int sessionId, AppdefEntityID entity)
         throws  AppdefGroupNotFoundException, SessionTimeoutException,
                 SessionNotFoundException, PermissionException,
-                SystemException 
+                VetoException 
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
@@ -3126,7 +3127,7 @@ public class AppdefBossEJBImpl
     public void deleteGroup(int sessionId, Integer groupId)
         throws AppdefGroupNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException,
-               SystemException 
+               VetoException
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
@@ -3151,7 +3152,7 @@ public class AppdefBossEJBImpl
                GroupModificationException, GroupDuplicateNameException,
                AppSvcClustDuplicateAssignException, PermissionException,
                SessionTimeoutException, SessionNotFoundException,
-               SystemException 
+               SystemException, VetoException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
@@ -3231,7 +3232,7 @@ public class AppdefBossEJBImpl
                GroupModificationException, AppSvcClustDuplicateAssignException,
                GroupDuplicateNameException, PermissionException,
                SessionTimeoutException, SessionNotFoundException,
-               SystemException 
+               VetoException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();

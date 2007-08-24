@@ -25,33 +25,12 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.common.VetoException;
 
-public class AppdefStartupListener
-    implements StartupListener
-{
-    private static final Object LOCK = new Object();
-    
-    private static ClusterDeleteCallback _callbacks;
-    
-    public void hqStarted() {
-        // Make sure we have the aux-log provider loaded
-        ResourceAuxLogProvider.class.toString();
-
-        HQApp app = HQApp.getInstance();
-
-        synchronized (LOCK) {
-            _callbacks = (ClusterDeleteCallback)
-                app.registerCallbackCaller(ClusterDeleteCallback.class);
-        }
-        ApplicationManagerEJBImpl.getOne().startup();
-    }
-    
-    static ClusterDeleteCallback getClusterDeleteCallback() {
-        synchronized (LOCK) {
-            return _callbacks;
-        }
-    }
+public interface ClusterDeleteCallback {
+    /**
+     * Called before a group is deleted, to allow other people to disallow it.
+     */
+    void preDelete(ServiceCluster c) throws VetoException;
 }

@@ -70,6 +70,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -1608,12 +1609,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public void removeCluster(AuthzSubjectValue subj, Integer clusterId)
-        throws RemoveException, FinderException, PermissionException {
-        ServiceCluster clusterLoc =
-            getServiceClusterDAO().findById(clusterId);
+        throws RemoveException, FinderException, PermissionException,
+               VetoException
+    {
+        ServiceCluster cluster = getServiceClusterDAO().findById(clusterId);
+            
+        AppdefStartupListener.getClusterDeleteCallback().preDelete(cluster);
         // XXX - Authz chex needed?
         //checkRemovePermission(subj, clusterLoc.getEntityId());
-        getServiceClusterDAO().remove(clusterLoc);
+        getServiceClusterDAO().remove(cluster);
     }
     
     /**

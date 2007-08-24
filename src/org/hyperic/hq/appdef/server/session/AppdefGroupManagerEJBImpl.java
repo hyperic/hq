@@ -72,6 +72,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupManagerLocal;
@@ -453,7 +454,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                       AppdefGroupValue gv) 
         throws CreateException, FinderException, RemoveException,
                PermissionException, AppSvcClustDuplicateAssignException,
-               AppSvcClustIncompatSvcException {
+               AppSvcClustIncompatSvcException, VetoException 
+    {
 
         // Group/cluster pre-existed, user flushed group of all
         // members, Delete the cluster.
@@ -509,7 +511,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     }
 
     private void removeServiceCluster (AuthzSubjectValue subject, int clusterId)
-        throws RemoveException, FinderException, PermissionException {
+        throws RemoveException, FinderException, PermissionException,
+               VetoException
+    {
         getServiceManager().removeCluster(subject, new Integer(clusterId));
     }
 
@@ -528,7 +532,8 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
     public void saveGroup(AuthzSubjectValue subject, AppdefGroupValue gv)
         throws GroupNotCompatibleException, GroupModificationException, 
                GroupDuplicateNameException, AppSvcClustDuplicateAssignException, 
-               PermissionException {
+               PermissionException, VetoException 
+    {
         try {
 
             // validate strictness and compatibility
@@ -810,20 +815,20 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void deleteGroup(AuthzSubjectValue subject, AppdefEntityID entityId)
-        throws AppdefGroupNotFoundException, PermissionException {
+        throws AppdefGroupNotFoundException, PermissionException, VetoException 
+    {
         deleteGroup(subject, entityId.getId());
     }
 
     /**
      * Removes a group corresponding to the provided group id.
-     * @param subject value.
-     * @param groupId id
      * @throw AppdefGroupNotFoundException when group cannot be found.
      * @throw PermissionException when group access is not authorized.
      * @ejb:interface-method
      */
     public void deleteGroup(AuthzSubjectValue subject, Integer groupId)
-        throws AppdefGroupNotFoundException, PermissionException {
+        throws AppdefGroupNotFoundException, PermissionException, VetoException 
+    {
         try {
             GroupManagerLocal manager = getGroupManager();
             AppdefGroupValue gv = findGroup(subject,groupId);
@@ -834,20 +839,13 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                 gv.getClusterId() != CLUSTER_UNDEFINED) {
                 removeServiceCluster (subject,gv.getClusterId());
             }
-        }
-        catch (FinderException e) {
-            // shouldn't happen, however, not fatal...
-            log.error("Successfully removed group. But caught finder exc "+
-                      "trying to remove it's service cluster",e);
-        } catch (RemoveException e) {
-            // shouldn't happen, however, not fatal...
-            log.error("Successfully removed group. But caught remove exc "+
-                      "trying to remove it's service cluster",e);
         } catch (GroupNotFoundException e) {
-            log.debug("deleteGroup() caught group not found exc looking for:"+
-                       groupId);
             throw new AppdefGroupNotFoundException ("caught group not " +
                         "found exc looking for:" + groupId);
+        } catch (VetoException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to delete group", e);
         }
     }
 
