@@ -25,6 +25,7 @@
 
 package org.hyperic.util.callback;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Set;
@@ -45,7 +46,11 @@ public abstract class CallbackType {
             for (Iterator i=listeners.iterator(); i.hasNext(); ) {
                 Object listener = (Object)i.next();
             
-                last = meth.invoke(listener, methArgs);
+                try {
+                    last = meth.invoke(listener, methArgs);
+                } catch(InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
             }
             
             if (last == null) {
