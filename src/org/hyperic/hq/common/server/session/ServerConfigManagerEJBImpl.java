@@ -408,7 +408,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            Util.endConnection();
+            DBUtil.closeConnection(logCtx, conn);
         }
     }
 
