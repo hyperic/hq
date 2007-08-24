@@ -2093,7 +2093,6 @@ public class AppdefBossEJBImpl
         Validator.validate(data);
         helper = new ImportHelper(subject, data);
         String result = helper.process();
-        getServerConfigManager().vacuumAppdef();
         return result;
     }
 

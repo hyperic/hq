@@ -40,13 +40,13 @@ import javax.naming.NamingException;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
+
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -71,15 +71,8 @@ public class DataCompressEJBImpl
     extends SessionEJB 
     implements SessionBean {
 
-    // !!!NEEDS TO BE CHANGED WHEN WE CONVERT DB FROM long to int
-    private static final long BF_PURGE_INCR = 3600000;
     private static final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
-    private static final String BF_TABLE = MeasTabManagerUtil.OLD_MEAS_TABLE;
-    private static final String METRIC_DATA_VIEW = MeasTabManagerUtil.MEAS_VIEW;
-
-    // For purging alerts
-    private AlertManagerLocal alertManager = null;
 
     // Data tables
     private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
@@ -93,24 +86,9 @@ public class DataCompressEJBImpl
     private final long SIX_HOUR = MeasurementConstants.SIX_HOUR;
     private final long DAY      = MeasurementConstants.DAY;
 
-    // Max delete rows per statement
-    // on backfill table
-    private final int MAX_BF_DEL_ROWS = 1000;
-
     // Purge intervals, loaded once on first invocation.
     private boolean purgeDefaultsLoaded = false;
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
-
-    private AlertManagerLocal getAlertManager() {
-        if(this.alertManager == null){
-            try {
-                this.alertManager = AlertManagerUtil.getLocalHome().create();
-            } catch(Exception exc){
-                throw new SystemException(exc);
-            }
-        }
-        return this.alertManager;
-    }
 
     /**
      * Get the server purge configuration, loaded on startup.
@@ -120,11 +98,7 @@ public class DataCompressEJBImpl
         this.log.info("Loading default purge intervals");
         Properties conf;
         try {
-            conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            conf = ServerConfigManagerEJBImpl.getOne().getConfig();
         } catch (ConfigPropertyException e) {
             // Not gonna happen
             throw new SystemException(e);
@@ -192,124 +166,13 @@ public class DataCompressEJBImpl
                                                               currTruncTime);
                 delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
             }
-            // for backwards compatibility
-            truncateCompatMeasTable(truncateBefore, stmt);
+
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         }
         finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
-    }
-
-    private void truncateCompatMeasTable(long truncateBefore, Statement stmt)
-        throws SQLException
-    {
-        ResultSet rs = null;
-        try
-        {
-            boolean truncated = false;
-            String sql = "SELECT max(timestamp) as maxtimestamp "+
-                         " FROM "+BF_TABLE+
-                         " HAVING max(timestamp) is not null";
-            rs = stmt.executeQuery(sql);
-            if (rs.next())
-            {
-                if (truncateBefore > rs.getLong("maxtimestamp"))
-                {
-                    stmt.executeUpdate("truncate table "+BF_TABLE);
-                    truncated = true;
-                }
-            }
-        }
-        finally {
-            if (rs != null) rs.close();
-        }
-    }
-    
-    /**
-     * Clean backfilled data
-     * @ejb:interface-method
-     */
-    public void purgeBackfilled() throws SQLException, NamingException
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try
-        {
-            long minTime = 0,
-                 maxTime = 0;
-            conn = DBUtil
-                    .getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            stmt = conn.createStatement();
-            String sql = "SELECT min(timestamp) FROM "+BF_TABLE+
-                         " HAVING min(timestamp) is not null";
-            rs = stmt.executeQuery(sql);
-            if (rs.next())
-                minTime = rs.getLong(1);
-
-            sql = "SELECT max(timestamp) FROM "+BF_TABLE+
-                  " HAVING max(timestamp) is not null";
-            rs = stmt.executeQuery(sql);
-            if (rs.next())
-                maxTime = rs.getLong(1);
-
-            HQDialect dialect = Util.getHQDialect();
-            int totalrows = 0,
-                rows      = 0;
-
-            StopWatch watch = new StopWatch();
-
-            while (maxTime > minTime)
-            {
-                long max = maxTime,
-                     min = (maxTime-=BF_PURGE_INCR);
-                String b          = BF_TABLE,
-                       delTable   = b,
-                       commonKey  = "m.measurement_id,m.timestamp",
-                       joinTables = "("+getMetricDataView(min, max)+") m",
-                       joinKeys   = b+".measurement_id = m.measurement_id and "+
-                                    b+".timestamp = m.timestamp",
-                       condition  = "m.timestamp between "+min+" and "+max;
-                sql = dialect.getDeleteJoinStmt(delTable,
-                                                commonKey,
-                                                joinTables,
-                                                joinKeys,
-                                                condition,
-                                                0);
-
-                rows = stmt.executeUpdate(sql);
-                totalrows += rows;
-                if (rows > 0) {
-                    log.debug("Purged "+rows+" rows between " +
-                              TimeUtil.toString(min) + " and " +
-                              TimeUtil.toString(max) + " in " +
-                              BF_TABLE);
-                }
-            }
-            log.info("Done purging backfilled data (" +
-                    ((watch.getElapsed()) / 1000) + " secs)");
-            if (totalrows > 0) {
-                log.debug("Purged "+totalrows+" rows of backfilled data");
-            }
-        }
-        finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-        }
-    }
-
-    private String getMetricDataView(long minTime, long maxTime)
-    {
-        StringBuffer rtn = new StringBuffer();
-        String unionAll = "UNION ALL";
-        while (maxTime > minTime)
-        {
-            String table = MeasTabManagerUtil.getMeasTabname(maxTime);
-            rtn.append("SELECT * FROM "+table+" "+unionAll+" ");
-            maxTime = MeasTabManagerUtil.getPrevMeasTabTime(maxTime);
-        }
-        return rtn.substring(0, (rtn.length()-unionAll.length()-2));
     }
 
     /**
@@ -357,7 +220,7 @@ public class DataCompressEJBImpl
         log.info("Purging alerts older than " +
                  TimeUtil.toString(now - this.purgeAlert));
         int alertsDeleted =
-            getAlertManager().deleteAlerts(0, now - this.purgeAlert);
+            AlertManagerEJBImpl.getOne().deleteAlerts(0, now - this.purgeAlert);
         log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 
@@ -464,10 +327,6 @@ public class DataCompressEJBImpl
         // Return the last interval that was compressed.
         return begin;
     }
-
-    /**
-     * Helper methods
-     */
 
     /**
      * Get the oldest timestamp in the database.  Getting the minimum time

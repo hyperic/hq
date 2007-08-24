@@ -26,10 +26,8 @@
 package org.hyperic.hq.common.server.session;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -41,7 +39,6 @@ import javax.ejb.SessionContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
@@ -50,9 +47,9 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
@@ -61,6 +58,7 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.safehaus.uuid.EthernetAddress;
 import org.safehaus.uuid.UUIDGenerator;
+import org.hibernate.mapping.Table;
 
 /**
  * This class is responsible for setting/getting the server 
@@ -71,20 +69,16 @@ import org.safehaus.uuid.UUIDGenerator;
  *      view-type="local"
  *      type="Stateless"
  * @ejb:util generate="physical"
+ * @ejb:transaction type="REQUIRED"
  */
 public class ServerConfigManagerEJBImpl implements SessionBean {
     private Log _log = LogFactory.getLog(ServerConfigManagerEJBImpl.class);
 
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
-    private final String SQL_ANALYZE = "ANALYZE {0}";
-    private final String ORACLE_ANALYZE =
-                                    "ANALYZE TABLE {0} COMPUTE STATISTICS";
     //only for the metric data tables
-    private final String ORACLE_SAMPLE_ANALYZE =
-                    "ANALYZE TABLE {0} ESTIMATE STATISTICS SAMPLE 15 PERCENT";
-    private final String MYSQL_ANALYZE = "ANALYZE TABLE {0}";
     private final String SQL_REINDEX = "REINDEX TABLE {0}";
-    private final String SQL_REBUILD = "ALTER INDEX {0} REBUILD UNRECOVERABLE";
+
+    private final int DEFAULT_COST = 15;
 
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
@@ -97,12 +91,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
             "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP" };
-
-    private final String[] INDEXES
-        = { "MEASUREMENT_DATA_TIME_IDX",
-            "REQSTAT_IDX_CLIENTIP", "REQSTAT_IDX_SVCTYPE",
-            "REQSTAT_IDX_BEGINTIME", "REQSTAT_IDX_ENDTIME", "SERVICE_ID", 
-            "STAT_ERRORS_REQSTAT" };
                          
     public final String logCtx
         = "org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl";
@@ -113,10 +101,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * the NULL prefix.
      * @return Properties
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Properties getConfig() throws ConfigPropertyException {
-
         return getConfig(null);
     }
 
@@ -125,7 +111,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @param prefix The prefix of the configuration to retrieve.
      * @return Properties
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
@@ -167,7 +152,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @throws ConfigPropertyException - if the props object is missing
      * a key that's currently in the database
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(Properties newProps) throws ApplicationException, 
         ConfigPropertyException {
@@ -183,7 +167,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @throws ConfigPropertyException - if the props object is missing
      * a key that's currently in the database
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(String prefix, Properties newProps)
         throws ApplicationException, ConfigPropertyException {
@@ -238,55 +221,95 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Run an analyze command.
+     * Run an analyze command on all non metric tables.  The metric tables are
+     * handled seperately using analyzeHqMetricTables() so that only the tables
+     * that have been modified are analyzed.
+     *
+     * @return The time taken in milliseconds to run the command.
      * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
-    public long analyze()
-    {
-        Connection conn = null;
-        Statement stmt = null;
-        try
-        {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                                      HQConstants.DATASOURCE);
-            stmt = conn.createStatement();
-            long systime = System.currentTimeMillis();
-            String currMetricDataTable =
-                        MeasTabManagerUtil.getMeasTabname(systime);
-            long prevtime =
-                        MeasTabManagerUtil.getPrevMeasTabTime(systime);
-            String prevMetricDataTable =
-                        MeasTabManagerUtil.getMeasTabname(prevtime);
+    public long analyzeNonMetricTables() {
 
-            HQDialect dialect = Util.getHQDialect();
-            long start = System.currentTimeMillis();
-            String sql = dialect.getOptimizeStmt(currMetricDataTable, 15);
-            stmt.execute(sql);
-            sql = dialect.getOptimizeStmt(prevMetricDataTable, 15);
-            stmt.execute(sql);
-            return System.currentTimeMillis() - start;
-        }
-        catch (NamingException e) {
+        HQDialect dialect = Util.getHQDialect();
+        long duration = 0;
+
+        Connection conn  = null;
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           HQConstants.DATASOURCE);
+
+            for (Iterator i = Util.getTableMappings(); i.hasNext();) {                
+                Table t = (Table)i.next();
+
+                if (t.getName().startsWith("EAM_MEASUREMENT_DATA") ||
+                    t.getName().startsWith("HQ_METRIC_DATA")) {
+                    continue;
+                }
+                
+                String sql = dialect.getOptimizeStmt(t.getName(),
+                                                     DEFAULT_COST);
+                duration += doCommand(conn, sql, null);
+            }
+        } catch(SQLException e){
+            log.error("Error analyzing tables", e);
             throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } finally{
+            DBUtil.closeConnection(logCtx, conn);
         }
-        catch (SQLException e) {
-            log.error("Error creating database connection", e);
-            throw new SystemException("Error analyzing database", e);
+
+        return duration;
+    }
+
+    /**
+     * Run an analyze command on both the current measurement data slice as
+     * well as the previous data slice.
+     *
+     * @return The time taken in milliseconds to run the command.
+     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:interface-method
+     */
+    public long analyzeHqMetricTables()
+    {
+        long systime = System.currentTimeMillis();
+        String currMetricDataTable = MeasTabManagerUtil.getMeasTabname(systime);
+        long prevtime = MeasTabManagerUtil.getPrevMeasTabTime(systime);
+        String prevMetricDataTable = MeasTabManagerUtil.getMeasTabname(prevtime);
+
+        long duration = 0;
+        HQDialect dialect = Util.getHQDialect();
+
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           HQConstants.DATASOURCE);
+            String sql = dialect.getOptimizeStmt(currMetricDataTable,
+                                                 DEFAULT_COST);
+            duration += doCommand(conn, sql, null);
+            sql = dialect.getOptimizeStmt(prevMetricDataTable,
+                                          DEFAULT_COST);
+            duration += doCommand(conn, sql, null);
+        } catch (SQLException e) {
+            log.error("Error analyzing metric tables", e);
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeConnection(logCtx, conn);
         }
-        finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-        }
+        return duration;
     }
 
     /**
      * Run a REINDEX command on all HQ data tables
-     * @return The time it took to vaccum, in milliseconds, or -1 if the 
+     * @return The time it took to re-index in milliseconds, or -1 if the
      * database is not PostgreSQL.
      * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
-    public long reindex () {
+    public long reindex() {
         Connection conn = null;
         try {
             conn = DBUtil.getConnByContext(getInitialContext(),
@@ -310,11 +333,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             }
 
             return duration;
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (SQLException e) {
             log.error("Error creating database connection", e);
             throw new SystemException("Error reindexing database", e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
@@ -324,18 +347,19 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * Run database-specific cleanup routines -- on PostgreSQL we
      * do a VACUUM ANALYZE.  On other databases we just return -1.
      * Since 3.1 we do not want to vacuum the hq_metric_data tables,
-     * only hq_metric_data_compat
+     * only the compressed eam_measurement_xxx tables.
+     * 
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
      * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
-    public long vacuum () {
+    public long vacuum() {
         Connection conn = null;
         long duration = 0;
         try {
             conn = DBUtil.getConnByContext(getInitialContext(),
-                                                      HQConstants.DATASOURCE);
+                                           HQConstants.DATASOURCE);
             if (!DBUtil.isPostgreSQL(conn))
                 return -1;
 
@@ -344,11 +368,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             }
 
             return duration;
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
+        } catch (NamingException e) {
+            throw new SystemException(e);
         } finally {
             DBUtil.closeConnection(logCtx, conn);
         }
@@ -360,10 +384,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * tables.  On other databases we just return -1.
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
-     * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:interface-method
      */
-    public long vacuumAppdef () {
+    public long vacuumAppdef()
+    {
         Connection conn = null;
         long duration = 0;
         try {
@@ -377,34 +402,34 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                     doCommand(conn, SQL_VACUUM, APPDEF_TABLES[i]);
             }
             return duration;
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
             return duration;
+        } catch (NamingException e) {
+            throw new SystemException(e);
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            Util.endConnection();
         }
     }
 
-    private long doCommand(Connection conn, String command, String table) { 
+    private long doCommand(Connection conn, String sql, String table)
+        throws SQLException
+    {
         Statement stmt = null;
         StopWatch watch = new StopWatch();
 
         if (table == null)
             table = "";
         
-        command = StringUtil.replace(command, "{0}", table);
+        sql = StringUtil.replace(sql, "{0}", table);
         
-        if (log.isDebugEnabled())
-            log.debug("Execute command: " + command);
-        
+        if (log.isDebugEnabled()) {
+            log.debug("Execute command: " + sql);
+        }
+
         try {
             stmt = conn.createStatement();
-            stmt.execute(command);
-            return watch.getElapsed();
-        } catch (SQLException e) {
-            log.error("Error in command: " + command + ": " + e, e);
+            stmt.execute(sql);
             return watch.getElapsed();
         } finally {
             DBUtil.closeStatement(logCtx, stmt);
@@ -427,7 +452,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * will be returned.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getGUID() {
         Properties p;
@@ -452,7 +476,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         }
         return res;
     }
-    
+
     private static InitialContext ic = null;
     protected InitialContext getInitialContext() {
         if (ic == null) {
