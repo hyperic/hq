@@ -53,7 +53,7 @@ public class DataPurgeService
     protected Log log = LogFactory.getLog(DataPurgeService.class.getName());
     
     /* Every hour at 10 after */
-    private String schedule = "0 */10 0-23 * * ?";
+    private String schedule = "0 10 0-23 * * ?";
 
     public DataPurgeService() {}
 
