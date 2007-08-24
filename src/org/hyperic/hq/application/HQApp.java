@@ -26,16 +26,20 @@
 package org.hyperic.hq.application;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.hibernate.SessionManager;
@@ -52,7 +56,8 @@ import org.jboss.invocation.Invocation;
 public class HQApp { 
     private static final HQApp INSTANCE = new HQApp(); 
     private static final Log _log = LogFactory.getLog(HQApp.class);
-    
+
+    private static Map         _txSynchs       = new HashMap();
     private ThreadLocal        _txListeners    = new ThreadLocal();
     private List               _startupClasses = new ArrayList();
     private CallbackDispatcher _callbacks;
@@ -151,22 +156,78 @@ public class HQApp {
         }
     }
     
+    private static class TxSynch implements Synchronization, Serializable {
+        private javax.transaction.Transaction _me;
+        private Session _sess;
+        
+        private TxSynch(javax.transaction.Transaction me, Session s) {
+            _me   = me;
+            _sess = s;
+        }
+        
+        public void afterCompletion(int status) {
+            synchronized (_txSynchs) {
+                if (_txSynchs.remove(_me) == null) {
+                    _log.error("Strange.  I was a registered synchronization " +
+                               "but can't find myself.  Where am I?");
+                }
+            }
+            
+            if (status != Status.STATUS_COMMITTED) {
+                if (_log.isTraceEnabled()) {
+                    _log.trace("Transaction [" + _me + "] failed!");
+                }
+                // Failed Tx -- kill the session.
+                SessionManager.cleanupSession(false);
+            }
+        }
+
+        public void beforeCompletion() {
+        }
+    }
+    
     private static class Snatcher implements TxSnatch.Snatcher  {
+        private void attemptRegisterSynch(javax.transaction.Transaction tx,
+                                          Session s) 
+        {
+            boolean newSynch = false;
+
+            synchronized (_txSynchs) {
+                if (_txSynchs.containsKey(tx))
+                    return;
+            
+                newSynch = true;
+                _txSynchs.put(tx, s);
+            }
+            if (newSynch) {
+                try {
+                    tx.registerSynchronization(new TxSynch(tx, s));
+                } catch(Exception e) {
+                    _log.error("Unable to register synchronization!", e);
+                }
+            }
+        }
+        
         private Object invokeNextBoth(Interceptor next, 
                                       org.jboss.proxy.Interceptor proxyNext,                                      
                                       Invocation v, boolean isHome) 
             throws Throwable
         {
-            Method meth       = v.getMethod();
-            String methName   = meth.getName();
-            Class c           = meth.getDeclaringClass();
-            String className  = c.getName();
-            boolean created   = false;
-            boolean readWrite = false;
-            boolean flush     = true;
-            created = SessionManager.setupSession(methName);
+            Method meth           = v.getMethod();
+            String methName       = meth.getName();
+            Class c               = meth.getDeclaringClass();
+            String className      = c.getName();
+            boolean sessCreated   = false;
+            boolean readWrite     = false;
+            boolean flush         = true;
+            sessCreated = SessionManager.setupSession(methName);
                                                   
             try {
+                if (v.getTransaction() != null) {
+                    attemptRegisterSynch(v.getTransaction(), 
+                                         SessionManager.currentSession());
+                }
+
                 if (!methIsReadOnly(methName)) {
                     if (_log.isDebugEnabled()) {
                         _log.debug("Upgrading session, due to [" + methName + 
@@ -186,7 +247,7 @@ public class HQApp {
                 flush = false;
                 throw e;
             } finally { 
-                if (created) {
+                if (sessCreated) {
                     if (!readWrite && _log.isDebugEnabled()) {
                         _log.debug("Successfully ran read-only transaction " + 
                                    "for [" + methName + "] on [" + 
