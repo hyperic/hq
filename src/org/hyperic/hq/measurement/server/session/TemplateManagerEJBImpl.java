@@ -361,7 +361,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public void updateTemplateDefaultInterval(Integer[] templIds, long interval) 
         throws TemplateNotFoundException {
-        long current = System.currentTimeMillis();
 
         HashSet toReschedule = new HashSet();
         for (int i = 0; i < templIds.length; i++) {
