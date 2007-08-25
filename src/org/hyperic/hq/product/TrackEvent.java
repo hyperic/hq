@@ -40,6 +40,12 @@ import java.io.DataOutputStream;
  */
 public class TrackEvent implements java.io.Serializable {
 
+    //maxlen as defined in schema (sql/events/EventLog.hbm.xml)
+    //events are also encoded and stored on disk with a max size of 1024
+    //see AgentDListProvider.RECSIZE
+    public static final int MESSAGE_MAXLEN = 500;
+    public static final int SOURCE_MAXLEN  = 100;
+
     private AppdefEntityID id;  // The appdef id.
     private long time;          // Timestamp of when the event was recorded.
     private int level;          // Log level. (see LogConstants.java)
@@ -80,6 +86,18 @@ public class TrackEvent implements java.io.Serializable {
         return this.level;
     }
 
+    private String truncate(String str, int max) {
+        if (str == null) {
+            return "";
+        }
+        else if (str.length() > max) {
+            return str.substring(0, max-1);
+        }
+        else {
+            return str;
+        }
+    }
+
     public String encode()
         throws IOException
     {
@@ -93,8 +111,8 @@ public class TrackEvent implements java.io.Serializable {
         dOs.writeInt(this.id.getType());
         dOs.writeLong(time);
         dOs.writeInt(level);
-        dOs.writeUTF(source);
-        dOs.writeUTF(message);
+        dOs.writeUTF(truncate(source, SOURCE_MAXLEN));
+        dOs.writeUTF(truncate(message, MESSAGE_MAXLEN));
 
         return Base64.encode(bOs.toByteArray());
     }
