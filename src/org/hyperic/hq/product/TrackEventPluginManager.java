@@ -44,6 +44,8 @@ import org.hyperic.util.config.ConfigSchema;
 public abstract class TrackEventPluginManager
     extends PluginManager {
 
+    public static final int DEFAULT_INTERVAL = 60 * 1 * 1000;
+
     public static final String PROP_INTERVAL =
         "track.interval";
 
@@ -146,7 +148,7 @@ public abstract class TrackEventPluginManager
                                 manager.getProperty(PROP_INTERVAL));
 
         if (interval == null) {
-            return 0;
+            return DEFAULT_INTERVAL;
         }
         else {
             return Long.parseLong(interval) * 1000;
