@@ -46,6 +46,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.shared.EventLogValue;
 import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -65,8 +66,8 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
 
-    private static final int MSGMAX = 500;
-    private static final int SRCMAX = 100;
+    private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
+    private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
     private EventLogDAO getEventLogDAO() {
         return DAOFactory.getDAOFactory().getEventLogDAO();
