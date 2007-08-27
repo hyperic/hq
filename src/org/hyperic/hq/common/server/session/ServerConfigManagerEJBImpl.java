@@ -242,8 +242,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             for (Iterator i = Util.getTableMappings(); i.hasNext();) {                
                 Table t = (Table)i.next();
 
-                if (t.getName().startsWith("EAM_MEASUREMENT_DATA") ||
-                    t.getName().startsWith("HQ_METRIC_DATA")) {
+                if (t.getName().toUpperCase().startsWith("EAM_MEASUREMENT_DATA") ||
+                    t.getName().toUpperCase().startsWith("HQ_METRIC_DATA") ||
+                    t.getName().toUpperCase().startsWith("HQ_SEQUENCE")) {
                     continue;
                 }
                 
@@ -252,8 +253,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 duration += doCommand(conn, sql, null);
             }
         } catch(SQLException e){
-            log.error("Error analyzing tables", e);
-            throw new SystemException(e);
+            log.error("Error analyzing table", e);
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally{
