@@ -70,6 +70,8 @@ class DojoUtil {
      *   title*:   A title to display above the table
      *   titleHtml*:  Additional HTML to place in the header of the table
      *   numRows:  Number of rows to display
+     *   refresh*:  If specified, the table will refresh at the passed # of
+     *              seconds.
      *   schema:   The schema is a map which contains information on how to
      *             retrieve data for the rows, how to format them, etc.  The
      *             following keys for the schema are used:
@@ -269,8 +271,20 @@ class DojoUtil {
                 ${id}_refreshTable();
             }
         }
-	    </script>
         """)
+
+        if (params.refresh) {
+            res << """
+            function ${idVar}_autoRefresh() {
+                setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+                ${id}_refreshTable();
+            }
+
+            setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+            """   
+        }
+	    
+	    res << "</script>"
 	    
 	    res << """
 	    <div class="pageCont">
