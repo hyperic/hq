@@ -238,8 +238,7 @@ public class ValueChangeTrigger extends AbstractTrigger
                 myEvent.setMessage( sb.toString() );
 
                 try {
-                    eTracker.updateReference(getId(), last.getId(),
-                                                  me, 0);
+                    eTracker.updateReference(getId(), last.getId(), me);
                     last = me;      // Update the last reference
                 } catch (IOException e) {
                     throw new ActionExecuteException
