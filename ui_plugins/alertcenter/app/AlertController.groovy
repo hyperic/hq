@@ -232,9 +232,6 @@ class AlertController
 
     def AlertController() {
         setTemplate('standard')
-        addBeforeFilter( { params ->
-            log.info "Params = ${params}"        
-        })
     }
     
     def index(params) {
