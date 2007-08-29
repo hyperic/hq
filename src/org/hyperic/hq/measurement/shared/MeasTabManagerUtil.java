@@ -146,6 +146,9 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
+        //this should be removed when we switch from bigint to integer
+        //for the metric data timestamp
+        cal.set(Calendar.MILLISECOND, 999);
         return cal.getTimeInMillis();
     }
 
@@ -167,6 +170,9 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
+        //this should be removed when we switch from bigint to integer
+        //for the metric data timestamp
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTimeInMillis();
     }
 
