@@ -16,9 +16,9 @@ class AlertController
 {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-    private final SEVERITY_MAP = [(AlertSeverity.LOW)    : 'low',
-                                  (AlertSeverity.MEDIUM) : 'med',
-                                  (AlertSeverity.HIGH)   : 'high']
+    private final SEVERITY_MAP = [(AlertSeverity.LOW)    : 'Low',
+                                  (AlertSeverity.MEDIUM) : 'Med',
+                                  (AlertSeverity.HIGH)   : 'High']
     private getSeverityImg(s) {
         def imgUrl = urlFor(asset:'images') + 
             "/${SEVERITY_MAP[s]}-severity.gif"
