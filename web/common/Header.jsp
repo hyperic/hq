@@ -140,7 +140,6 @@
 <script language="JavaScript1.2">
       <!--
       var refreshCount = 0;
-      var autoLogout = true;
                                                                                     
       function refreshAlerts() {
         refreshCount++;
