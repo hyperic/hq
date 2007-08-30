@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
 import org.hyperic.hq.appdef.AppdefBean;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -59,7 +60,8 @@ public class HypericInterceptor
                o instanceof Escalation ||
                o instanceof EscalationState ||
                o instanceof MeasurementTemplate ||
-               o instanceof Measurement;
+               o instanceof Measurement ||
+               o instanceof ResourceGroup;
     }
     
     public boolean onFlushDirty(Object entity, Serializable id, 
