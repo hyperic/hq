@@ -6594,6 +6594,15 @@ has already been defined.
     <schemaSpec version="3.49">
       <metricDataUpgrade/>
     </schemaSpec>
+
+    <schemaSpec version="3.50">
+        <schema-addColumn table="EAM_CONTROL_HISTORY"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CONTROL_HISTORY SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
