@@ -95,6 +95,7 @@ import org.quartz.SchedulerException;
  *      local-jndi-name="LocalControlManager"
  *      view-type="local"
  *      type="Stateless"
+ * @ejb:transaction type="REQUIRED"
  */
 public class ControlManagerEJBImpl implements SessionBean {
 
@@ -133,8 +134,8 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Enable an entity for control
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
-     */
+     *
+     **/
     public void configureControlPlugin(AuthzSubjectValue subject,
                                        AppdefEntityID id)
         throws PermissionException, PluginException, ConfigFetchException,
@@ -176,7 +177,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Execute a single control action on a given entity.
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public void doAction(AuthzSubjectValue subject, AppdefEntityID id,
                          String action, String args)
@@ -198,7 +198,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Schedule a new control action.
      * 
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public void doAction(AuthzSubjectValue subject, AppdefEntityID id,
                          String action, ScheduleValue schedule)
@@ -220,7 +219,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Single control action for a group of given entities. 
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public void doGroupAction(AuthzSubjectValue subject, 
                               AppdefEntityID id, String action, 
@@ -249,7 +247,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @throws SchedulerException 
      * 
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public void doGroupAction(AuthzSubjectValue subject, 
                               AppdefEntityID id,
@@ -279,7 +276,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * ControlPluginManager
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public List getActions(AuthzSubjectValue subject,
                            AppdefEntityID id)
@@ -296,7 +292,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * ControlPluginManager
      *
      * @ejb:interface-method view-type="local"
-     * @ejb:transaction type="SUPPORTS"
      */
     public List getActions(AuthzSubjectValue subject, AppdefEntityTypeID aetid)
         throws PluginNotFoundException {
@@ -310,7 +305,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * have been enabled for control.
      * @return flag - true if group is enabled
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public boolean isGroupControlEnabled(AuthzSubjectValue subject,
                                          AppdefEntityID id) 
@@ -352,7 +346,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @return flag - true if supported
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public boolean isControlSupported (AuthzSubjectValue subject,
                                        AppdefResourceTypeValue resType) {
@@ -369,7 +362,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @return flag - true if enabled
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public boolean isControlEnabled(AuthzSubjectValue subject,
                                     AppdefEntityID id) {
@@ -385,7 +377,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Check if an entity has been enabled for control
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void checkControlEnabled(AuthzSubjectValue subject,
                                     AppdefEntityID id)
@@ -409,7 +400,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Get the control config response
      *
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public ConfigResponse getConfigResponse(AuthzSubjectValue subject,
                                             AppdefEntityID id)
@@ -452,7 +442,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @param merge      If true, merge the product and control config data
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public byte[] getPluginConfiguration(String pluginName, boolean merge)
         throws PluginException
@@ -492,7 +481,6 @@ public class ControlManagerEJBImpl implements SessionBean {
      * Receive status information about a previous control action
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void sendCommandResult(int id, int result, long startTime, 
                                   long endTime, String message) {
@@ -552,7 +540,6 @@ public class ControlManagerEJBImpl implements SessionBean {
     *            NOTE: Returns an empty list when no resources are found.
     *
     * @ejb:interface-method
-    * @ejb:transaction type="SUPPORTS"
     */
     public List batchCheckControlPermissions (AuthzSubjectValue 
         caller, AppdefEntityID[] entities)
