@@ -80,31 +80,23 @@ public class RegisteredDispatcherEJBImpl
      * Dispatch the event to interested triggers.
      * 
      * @param event The event.
-     * @param visitedMCTriggers The set of visited multi condition triggers 
+     * @param visitedMCTriggers The set of visited multicondition triggers 
      *                          that will be updated if a trigger of this type 
      *                          processes this event.
      */
-    private void dispatchEvent(AbstractEvent event, Set visitedMCTriggers) {        
+    private void dispatchEvent(AbstractEvent event, Set visitedMCTriggers) 
+        throws InterruptedException {        
         // Get interested triggers
         Collection triggers =
             RegisteredTriggers.getInterestedTriggers(event);
         
         //log.debug("There are " + triggers.size() + " registered for event");
 
-        // Dispatch to each trigger        
+        // Dispatch to each trigger
         for (Iterator i = triggers.iterator(); i.hasNext(); ) {
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
-                // Better to be safe and assume we've actually visited the 
-                // trigger than to risk not flushing its state.
-                if (trigger instanceof MultiConditionTrigger) {
-                    boolean firstTimeVisited = visitedMCTriggers.add(trigger);
-                    
-                    if (firstTimeVisited) {
-                        ((MultiConditionTrigger)trigger).incrementInUseCounter();                        
-                    }
-                }
-                
+                updateVisitedMCTriggersSet(visitedMCTriggers, trigger);
                 trigger.processEvent(event);                
             } catch (ActionExecuteException e) {
                 // Log error
@@ -112,12 +104,32 @@ public class RegisteredDispatcherEJBImpl
             } catch (EventTypeException e) {
                 // The trigger was not meant to process this event
                 log.debug("dispatchEvent dispatched to trigger (" +
-                          trigger.getClass() + " that's not " +
-                          "configured to handle this type of event: " +
-                          event.getClass());
+                        trigger.getClass() + " that's not " +
+                        "configured to handle this type of event: " +
+                        event.getClass());
             }
-        }        
+        }            
+        
     }
+
+    private void updateVisitedMCTriggersSet(Set visitedMCTriggers,
+                                            TriggerInterface trigger) 
+        throws InterruptedException {
+        
+        if (trigger instanceof MultiConditionTrigger) {
+            boolean firstTimeVisited = visitedMCTriggers.add(trigger);
+
+            try {
+                if (firstTimeVisited) {
+                    ((MultiConditionTrigger)trigger).acquireSharedLock();                        
+                }                            
+            } catch (InterruptedException e) {
+                // failed to acquire shared lock - we will not visit this trigger
+                visitedMCTriggers.remove(trigger);
+                throw e;
+            }
+        }
+    } 
     
     /**
      * The onMessage method
@@ -147,6 +159,8 @@ public class RegisteredDispatcherEJBImpl
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
+        } catch (InterruptedException e) {
+            log.info("Thread was interrupted while processing events.");
         } finally {
             try {
                 flushStateForVisitedMCTriggers(visitedMCTriggers);
@@ -164,22 +178,21 @@ public class RegisteredDispatcherEJBImpl
         if (!visitedMCTriggers.isEmpty()) {
             FlushStateEvent event = new FlushStateEvent();
             
-            for (Iterator iterator = visitedMCTriggers.iterator(); iterator
-                    .hasNext();) {
-                MultiConditionTrigger trigger = (MultiConditionTrigger) iterator.next();
-                
+            for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
+                MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
+                                
                 try {
                     boolean lockAcquired = false;
                     
                     try {
-                        lockAcquired = trigger.tryAcquireExclusiveUseLock();
+                        lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
                         
                         if (lockAcquired) {
                             trigger.processEvent(event);                    
                         }                        
                     } finally {
                         if (lockAcquired) {
-                            trigger.releaseExclusiveUseLock();
+                            trigger.releaseExclusiveLock();
                         }
                     }
                 } catch (InterruptedException e) {

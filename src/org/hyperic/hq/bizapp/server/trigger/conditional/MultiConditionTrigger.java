@@ -91,11 +91,8 @@ public class MultiConditionTrigger
     
     private final Object lock = new Object();
     
-    private final Object counterLock = new Object();
-    
+    // make the lock reentrant just to be safe in preventing deadlocks
     private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
-    
-    private int counter;
     
     private List lastFulfillingEvents = Collections.EMPTY_LIST;
 
@@ -116,6 +113,80 @@ public class MultiConditionTrigger
     
     /** Creates a new instance of MultiConditionTrigger */
     public MultiConditionTrigger() {
+    }
+    
+    /**
+     * Acquire the shared lock for processing events. A best effort is made 
+     * to reacquire the lock even if the thread is interrupted.
+     * 
+     * @throws InterruptedException 
+     */
+    public void acquireSharedLock() throws InterruptedException {
+        // We handle the interrupted state since users acquiring a shared 
+        // lock should be able to do so to process events.
+        boolean acquired = false;
+        int counter = 0;
+        
+        while (!acquired && counter < 10) {
+            try {
+                rwLock.readLock().acquire();
+                acquired = true;
+            } catch (InterruptedException e) {
+                // interrupted state is cleared - retry
+                counter++;
+            }            
+        }
+        
+        if (!acquired) {
+            throw new InterruptedException("thread was interrupted attempting " +
+            		"to acquire shared lock.");
+        }
+    }
+    
+    /**
+     * Release the shared lock for processing events.
+     */
+    public void releaseSharedLock() {
+        rwLock.readLock().release();
+    }
+    
+    /**
+     * Release the shared lock and attempt to upgrade to an exclusive lock 
+     * for processing events. If the exclusive lock is acquired, it must 
+     * be released before others may process events. This method has the 
+     * same semantics as calling {@link #releaseSharedLock() releaseSharedLock()} 
+     * followed by {@link #attemptExclusiveLock() attemptExclusiveLock()}.
+     * 
+     * @return <code>true</code> if the exclusive lock has been acquired; 
+     *          <code>false</code> otherwise, meaning some other thread 
+     *          either has a shared lock or has already acquired the 
+     *          exclusive lock.
+     * @throws InterruptedException if the thread is interrupted while 
+     *                              attempting to acquire the exclusive lock.
+     */
+    public boolean upgradeSharedLockToExclusiveLock() throws InterruptedException {
+        releaseSharedLock();
+        return attemptExclusiveLock();
+    }
+    
+    /**
+     * Attempt to acquire the exclusive lock for processing events.
+     * 
+     * @return <code>true</code> if the exclusive lock has been acquired; 
+     *          <code>false</code> otherwise, meaning some other thread 
+     *          either has a shared lock or has already acquired the 
+     *          exclusive lock.
+     * @throws InterruptedException
+     */
+    public boolean attemptExclusiveLock() throws InterruptedException {
+        return rwLock.writeLock().attempt(0);        
+    }
+    
+    /**
+     * Release the exclusive lock for processing events.
+     */
+    public void releaseExclusiveLock() {
+        rwLock.writeLock().release();
     }
 
     public ConfigSchema getConfigSchema() {
@@ -147,49 +218,6 @@ public class MultiConditionTrigger
         resp.setValue(CFG_DURABLE, String.valueOf(endure));
         resp.setValue(CFG_TIME_RANGE, String.valueOf(range));
         return resp;
-    }
-    
-    /**
-     * Increment the in use counter.
-     */
-    public void incrementInUseCounter() {
-        synchronized (counterLock) {
-            counter++;
-        }
-    }
-    
-    /**
-     * Decrement the in use counter, and if there are no other users, acquire 
-     * an exclusive lock on processing events. If the exclusive lock is obtained, 
-     * then it must be released for other users to process events.
-     * 
-     * @return <code>true</code> if there are no other users; hence the exclusive 
-     *          lock has been obtained.
-     * @throws InterruptedException
-     */
-    public boolean tryAcquireExclusiveUseLock() throws InterruptedException {
-        synchronized (counterLock) {
-            boolean noOtherUsers;
-            
-            if (counter == 0) {
-                noOtherUsers = true;
-            } else {
-                noOtherUsers = --counter == 0;                    
-            }
-            
-            if (noOtherUsers) {
-                rwLock.writeLock().acquire();
-            }
-            
-            return noOtherUsers;
-        }
-    }
-    
-    /**
-     * Release the exclusive lock on processing events.
-     */
-    public void releaseExclusiveUseLock() {
-        rwLock.writeLock().release();
     }
             
     /** 
@@ -279,20 +307,7 @@ public class MultiConditionTrigger
             		                          "trigger id="+getId(), e);
         }
         
-        TriggerFiredEvent target = null;
-        
-        try {
-            rwLock.readLock().acquire();
-            
-            try {
-                target = prepareTargetEventOnFlush(event, etracker);
-            } finally {
-                rwLock.readLock().release();
-            }            
-        } catch (InterruptedException e) {
-            throw new ActionExecuteException("Failed to process event for " +
-            		"multi condition trigger id="+getId(), e);
-        }
+        TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
                 
         if (target != null) {
             try {
