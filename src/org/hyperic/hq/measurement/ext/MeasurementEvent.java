@@ -30,10 +30,11 @@ import java.io.Serializable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.measurement.server.session.RawMeasurementDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 
@@ -79,17 +80,16 @@ public class MeasurementEvent extends AbstractEvent
             return;
         
         try {
-            // Use RawMeasurement, because it will work for both
-            RawMeasurementDAO dao =
-                DAOFactory.getDAOFactory().getRawMeasurementDAO();
-            RawMeasurement rm = dao.findById(getInstanceId());
+            DerivedMeasurementDAO dao =
+                new DerivedMeasurementDAO(DAOFactory.getDAOFactory());
+            DerivedMeasurement dm = dao.findById(getInstanceId());
             int resourceId, resourceType;
 
-            resourceId   = rm.getInstanceId().intValue();
-            resourceType = rm.getTemplate().getMonitorableType()
+            resourceId   = dm.getInstanceId().intValue();
+            resourceType = dm.getTemplate().getMonitorableType()
                 .getAppdefType();
             _resource    = new AppdefEntityID(resourceType, resourceId);
-            _units       = rm.getTemplate().getUnits();
+            _units       = dm.getTemplate().getUnits();
         } catch (Exception e) {
             // don't set anything
             _log.warn("Couldn't setup measurement event values.", e);
