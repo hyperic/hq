@@ -37,7 +37,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -45,13 +44,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 public abstract class ControlJob extends BaseJob {
 
@@ -163,8 +159,4 @@ public abstract class ControlJob extends BaseJob {
 
         return commandHistory.getId();
     }
-
-    // Public interface for quartz 
-    public abstract void execute(JobExecutionContext context)
-        throws JobExecutionException;
 }

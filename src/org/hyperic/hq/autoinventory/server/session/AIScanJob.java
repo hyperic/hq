@@ -46,14 +46,12 @@ import org.quartz.Trigger;
 
 /**
  * A quartz job class for handling AI scans on a single entity
- *
  */
 public class AIScanJob extends AIJob {
 
     protected Log log = LogFactory.getLog(AIScanJob.class.getName());
 
-    // Public interface for quartz
-    public void execute(JobExecutionContext context)
+    public void executeInSession(JobExecutionContext context)
      {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
@@ -67,8 +65,7 @@ public class AIScanJob extends AIJob {
         } catch (JobExecutionException e) {
             log.error(e.getMessage(), e);
         }
-        Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
-        String description = dataMap.getString(PROP_DESCRIPTION);
+        Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
 
         Trigger trigger = context.getTrigger();
         Date dateScheduled = trigger.getPreviousFireTime();

@@ -36,7 +36,6 @@ import org.hyperic.hq.product.PluginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -50,9 +49,8 @@ public class ControlActionJob extends ControlJob {
 
     protected Log log = LogFactory.getLog(ControlActionJob.class.getName());
 
-    // Public interface for quartz
-    public void execute(JobExecutionContext context)
-     {
+    public void executeInSession(JobExecutionContext context)
+    {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         Integer idVal = new Integer(dataMap.getString(PROP_ID));
@@ -68,7 +66,7 @@ public class ControlActionJob extends ControlJob {
         String action = dataMap.getString(PROP_ACTION);
         String args = dataMap.getString(PROP_ARGS);
 
-        Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
+        Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
         String description = dataMap.getString(PROP_DESCRIPTION);
 
         Trigger trigger = context.getTrigger();

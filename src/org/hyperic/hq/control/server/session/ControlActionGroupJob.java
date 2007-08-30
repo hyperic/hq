@@ -62,7 +62,6 @@ import org.quartz.Trigger;
 
 /**
  * A quartz job class for handling control actions on a group entity
- *
  */
 public class ControlActionGroupJob extends ControlJob {
 
@@ -74,9 +73,8 @@ public class ControlActionGroupJob extends ControlJob {
 
     protected Log log = 
         LogFactory.getLog(ControlActionGroupJob.class.getName());    
-       
-    // Public interface for quartz
-    public void execute(JobExecutionContext context)
+
+    public void executeInSession(JobExecutionContext context)
         throws JobExecutionException
     {
         // Job configuration
@@ -89,7 +87,7 @@ public class ControlActionGroupJob extends ControlJob {
         
         String action     = dataMap.getString(PROP_ACTION);
         String args = dataMap.getString(PROP_ARGS);
-        Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
+        Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
         
         int[] order   = getOrder(dataMap.getString(PROP_ORDER));
         String description = dataMap.getString(PROP_DESCRIPTION);
@@ -150,12 +148,12 @@ public class ControlActionGroupJob extends ControlJob {
                 jobIds.add(jobId);
 
                 // If the job is ordered, synchronize the commands
-                if (order != null) {
+                if (order.length > 0) {
                     waitForJob(jobId, timeout);
                 }
             }
 
-            if (order == null) {
+            if (order.length == 0) {
                 waitForAllJobs(jobIds, longestTimeout);
             }               
 

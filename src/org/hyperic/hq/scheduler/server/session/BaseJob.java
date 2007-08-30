@@ -34,9 +34,12 @@ import javax.naming.NamingException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.hibernate.SessionManager;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.StringUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionException;
+import org.quartz.JobExecutionContext;
 
 public abstract class BaseJob implements Job {
 
@@ -48,7 +51,6 @@ public abstract class BaseJob implements Job {
     public static final String PROP_SCHEDULESTRING = "schedulestring";
     public static final String PROP_ORDER          = "order";
     public static final String PROP_DESCRIPTION    = "description";
-
 
     protected AuthzSubjectManagerLocal manager = null;
     
@@ -84,12 +86,30 @@ public abstract class BaseJob implements Job {
         List list = StringUtil.explode(orderStr, ",");
         int[] order = new int[list.size()];
         Iterator it = list.iterator();
-        for (int i = 0; i < list.size(); i++)
-        {
-            order[i] = new Integer((String)it.next()).intValue();
+        for (int i = 0; i < list.size(); i++) {
+            order[i] = Integer.parseInt((String) it.next());
         }
         return order;
     }
 
+    public void execute(final JobExecutionContext context)
+        throws JobExecutionException    
+    {
+        try {
+            SessionManager.runInSession(new SessionManager.SessionRunner() {
+                public String getName() {
+                    return "BaseJob";
+                }
 
+                public void run() throws Exception {
+                    executeInSession(context);
+                }
+            });
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public abstract void executeInSession(JobExecutionContext context)
+        throws JobExecutionException;
 }
