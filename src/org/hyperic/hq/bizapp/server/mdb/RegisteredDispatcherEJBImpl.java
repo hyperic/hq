@@ -25,8 +25,12 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
@@ -37,9 +41,15 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
+import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
+import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.EventTypeException;
+import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 
@@ -66,18 +76,36 @@ public class RegisteredDispatcherEJBImpl
     private final Log log =
         LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
 
-    private void dispatchEvent(AbstractEvent event) {
+    /**
+     * Dispatch the event to interested triggers.
+     * 
+     * @param event The event.
+     * @param visitedMCTriggers The set of visited multi condition triggers 
+     *                          that will be updated if a trigger of this type 
+     *                          processes this event.
+     */
+    private void dispatchEvent(AbstractEvent event, Set visitedMCTriggers) {        
         // Get interested triggers
         Collection triggers =
             RegisteredTriggers.getInterestedTriggers(event);
         
         //log.debug("There are " + triggers.size() + " registered for event");
 
-        // Dispatch to each trigger
+        // Dispatch to each trigger        
         for (Iterator i = triggers.iterator(); i.hasNext(); ) {
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
-                trigger.processEvent(event);
+                // Better to be safe and assume we've actually visited the 
+                // trigger than to risk not flushing its state.
+                if (trigger instanceof MultiConditionTrigger) {
+                    boolean firstTimeVisited = visitedMCTriggers.add(trigger);
+                    
+                    if (firstTimeVisited) {
+                        ((MultiConditionTrigger)trigger).incrementInUseCounter();                        
+                    }
+                }
+                
+                trigger.processEvent(event);                
             } catch (ActionExecuteException e) {
                 // Log error
                 log.error("ProcessEvent failed to execute action", e);
@@ -88,7 +116,7 @@ public class RegisteredDispatcherEJBImpl
                           "configured to handle this type of event: " +
                           event.getClass());
             }
-        }
+        }        
     }
     
     /**
@@ -98,25 +126,86 @@ public class RegisteredDispatcherEJBImpl
         if (!(inMessage instanceof ObjectMessage)) {
             return;
         }
+        
+        // Just to be safe, start with a fresh queue.
+        Messenger.resetThreadLocalQueue();
+        final Set visitedMCTriggers = new HashSet();
 
         try {
             ObjectMessage om = (ObjectMessage) inMessage;
             Object obj = om.getObject();
+                       
             if (obj instanceof AbstractEvent) {
                 AbstractEvent event = (AbstractEvent) obj;
-                dispatchEvent(event);
-            }
-            else if (obj instanceof Collection) {
+                dispatchEvent(event, visitedMCTriggers);
+            } else if (obj instanceof Collection) {
                 Collection events = (Collection) obj;
                 for (Iterator it = events.iterator(); it.hasNext(); ) {
                     AbstractEvent event = (AbstractEvent) it.next();
-                    dispatchEvent(event);
+                    dispatchEvent(event, visitedMCTriggers);
                 }
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
-            e.printStackTrace();
+        } finally {
+            try {
+                flushStateForVisitedMCTriggers(visitedMCTriggers);
+            } catch (Exception e) {
+                log.error("Failed to flush state for multi conditional trigger", e);
+            }
+            
+            publishEnqueuedEvents();
         }
+    }
+    
+    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) 
+        throws EventTypeException, ActionExecuteException {
+        
+        if (!visitedMCTriggers.isEmpty()) {
+            FlushStateEvent event = new FlushStateEvent();
+            
+            for (Iterator iterator = visitedMCTriggers.iterator(); iterator
+                    .hasNext();) {
+                MultiConditionTrigger trigger = (MultiConditionTrigger) iterator.next();
+                
+                try {
+                    boolean lockAcquired = false;
+                    
+                    try {
+                        lockAcquired = trigger.tryAcquireExclusiveUseLock();
+                        
+                        if (lockAcquired) {
+                            trigger.processEvent(event);                    
+                        }                        
+                    } finally {
+                        if (lockAcquired) {
+                            trigger.releaseExclusiveUseLock();
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    // move on
+                }                 
+            }            
+        }
+        
+    }
+    
+    private void publishEnqueuedEvents() {
+        List enqueuedEvents = Messenger.drainEnqueuedMessages();
+        
+        if (!enqueuedEvents.isEmpty()) {
+            final ArrayList eventsToPublish = new ArrayList(enqueuedEvents);
+            
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                public void afterCommit(boolean success) {
+                    Messenger sender = new Messenger();
+                    sender.publishMessage(EventConstants.EVENTS_TOPIC, eventsToPublish);
+                }
+
+                public void beforeCommit() {
+                }
+            });
+        }        
     }
 
     /**

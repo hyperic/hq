@@ -52,6 +52,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventTypeException;
+import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
@@ -68,6 +69,9 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 import org.hyperic.util.config.StringConfigOption;
+
+import EDU.oswego.cs.dl.util.concurrent.ReadWriteLock;
+import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
 
 /** The MultiConditionTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
@@ -86,6 +90,14 @@ public class MultiConditionTrigger
     public static final String OR  = "|";
     
     private final Object lock = new Object();
+    
+    private final Object counterLock = new Object();
+    
+    private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
+    
+    private int counter;
+    
+    private List lastFulfillingEvents = Collections.EMPTY_LIST;
 
     /** Holds value of property triggerIds. */
     private HashSet triggerIds;
@@ -136,7 +148,50 @@ public class MultiConditionTrigger
         resp.setValue(CFG_TIME_RANGE, String.valueOf(range));
         return resp;
     }
-
+    
+    /**
+     * Increment the in use counter.
+     */
+    public void incrementInUseCounter() {
+        synchronized (counterLock) {
+            counter++;
+        }
+    }
+    
+    /**
+     * Decrement the in use counter, and if there are no other users, acquire 
+     * an exclusive lock on processing events. If the exclusive lock is obtained, 
+     * then it must be released for other users to process events.
+     * 
+     * @return <code>true</code> if there are no other users; hence the exclusive 
+     *          lock has been obtained.
+     * @throws InterruptedException
+     */
+    public boolean tryAcquireExclusiveUseLock() throws InterruptedException {
+        synchronized (counterLock) {
+            boolean noOtherUsers;
+            
+            if (counter == 0) {
+                noOtherUsers = true;
+            } else {
+                noOtherUsers = --counter == 0;                    
+            }
+            
+            if (noOtherUsers) {
+                rwLock.writeLock().acquire();
+            }
+            
+            return noOtherUsers;
+        }
+    }
+    
+    /**
+     * Release the exclusive lock on processing events.
+     */
+    public void releaseExclusiveUseLock() {
+        rwLock.writeLock().release();
+    }
+            
     /** 
      * Initialize the trigger with a value object.
      *
@@ -209,7 +264,8 @@ public class MultiConditionTrigger
         throws EventTypeException, ActionExecuteException {
         // If we didn't fulfill the condition, then don't fire
         if(!(event instanceof TriggerFiredEvent ||
-             event instanceof TriggerNotFiredEvent))
+             event instanceof TriggerNotFiredEvent || 
+             event instanceof FlushStateEvent))
             throw new EventTypeException(
                 "Invalid event type passed, expected TriggerFiredEvent " +
                 "or TriggerNotFiredEvent");
@@ -225,14 +281,19 @@ public class MultiConditionTrigger
         
         TriggerFiredEvent target = null;
         
-        synchronized (lock) {
-            List fulfillingEvents = checkIfNewEventFulfillsConditions(event, etracker);
+        try {
+            rwLock.readLock().acquire();
             
-            if (!fulfillingEvents.isEmpty()) {
-                target = prepareTargetEvent(fulfillingEvents, etracker);
+            try {
+                target = prepareTargetEventOnFlush(event, etracker);
+            } finally {
+                rwLock.readLock().release();
             }            
+        } catch (InterruptedException e) {
+            throw new ActionExecuteException("Failed to process event for " +
+            		"multi condition trigger id="+getId(), e);
         }
-        
+                
         if (target != null) {
             try {
                 // Fire actions using the target event
@@ -246,6 +307,29 @@ public class MultiConditionTrigger
             }            
         }        
 
+    }
+
+    private TriggerFiredEvent prepareTargetEventOnFlush(AbstractEvent event,
+                                                        EventTrackerLocal etracker)
+            throws ActionExecuteException {
+        
+        TriggerFiredEvent target = null;
+        
+        synchronized (lock) {
+            if (event instanceof FlushStateEvent) {
+                if (!lastFulfillingEvents.isEmpty()) {
+                    try {
+                        target = prepareTargetEvent(lastFulfillingEvents, etracker);                        
+                    } finally {
+                        lastFulfillingEvents.clear();
+                    }
+                }                            
+            } else {
+                lastFulfillingEvents = checkIfNewEventFulfillsConditions(event, etracker);
+            }            
+        }
+        
+        return target;
     }
     
     private List checkIfNewEventFulfillsConditions(AbstractEvent event, 
@@ -444,7 +528,8 @@ public class MultiConditionTrigger
      */
     public Class[] getInterestedEventTypes() {
         return new Class[] { TriggerFiredEvent.class,
-                             TriggerNotFiredEvent.class };
+                             TriggerNotFiredEvent.class,
+                             FlushStateEvent.class };
     }
 
     /** Get a list of instance IDs specific to a class (as returned

@@ -102,10 +102,8 @@ public class ClassicEscalatableCreator
     
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC,
-                              new AlertFiredEvent(_event, alert.getId(), _def));
-
+        Messenger.enqueueMessage(new AlertFiredEvent(_event, alert.getId(), _def));
+        
         String shortReason = alertMan.getShortReason(alert);
         String longReason  = alertMan.getLongReason(alert);
         

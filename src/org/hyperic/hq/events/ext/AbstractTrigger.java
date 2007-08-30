@@ -116,8 +116,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
     }
     
     protected void publishEvent(AbstractEvent event) {
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        Messenger.enqueueMessage(event);
     }
     
     protected void notFired() {
