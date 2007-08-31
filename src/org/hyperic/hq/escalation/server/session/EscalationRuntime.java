@@ -25,6 +25,7 @@
 package org.hyperic.hq.escalation.server.session;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import EDU.oswego.cs.dl.util.concurrent.ClockDaemon;
 import EDU.oswego.cs.dl.util.concurrent.Executor;
 import EDU.oswego.cs.dl.util.concurrent.LinkedQueue;
 import EDU.oswego.cs.dl.util.concurrent.PooledExecutor;
+import EDU.oswego.cs.dl.util.concurrent.Semaphore;
 
 /**
  * This class manages the runtime execution of escalation chains.  The
@@ -71,9 +73,14 @@ class EscalationRuntime {
     
     private final ThreadLocal _batchUnscheduleTxnListeners = new ThreadLocal();
     private final Log _log = LogFactory.getLog(EscalationRuntime.class);
-    private final ClockDaemon             _schedule = new ClockDaemon();
-    private final Map                     _stateIdsToTasks = new HashMap();
-    private final Map                     _esclEntityIdsToStateIds = new HashMap();
+    private final ClockDaemon _schedule = new ClockDaemon();
+    private final Map _stateIdsToTasks = new HashMap();
+    private final Map _esclEntityIdsToStateIds = new HashMap();
+    
+    private final Semaphore _mutex = new Semaphore(1);
+    
+    private final Set _uncomittedEscalatingEntities = 
+                            Collections.synchronizedSet(new HashSet());
     private final PooledExecutor          _executor;
     private final EscalationManagerLocal  _esclMan;
     
@@ -128,7 +135,7 @@ class EscalationRuntime {
      * Unschedule the execution of an escalation state.  The unschedule will
      * only occur if the transaction successfully commits.
      */
-    void unscheduleEscalation(EscalationState state) {
+    public void unscheduleEscalation(EscalationState state) {
         final Integer stateId = state.getId();
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
@@ -148,7 +155,7 @@ class EscalationRuntime {
      * entity that performs escalations. The unschedule will only occur if the 
      * transaction successfully commits.
      */
-    void unscheduleAllEscalationsFor(PerformsEscalations def) {
+    public void unscheduleAllEscalationsFor(PerformsEscalations def) {
         BatchUnscheduleEscalationsTransactionListener batchTxnListener = 
             (BatchUnscheduleEscalationsTransactionListener)
             _batchUnscheduleTxnListeners.get();
@@ -260,6 +267,62 @@ class EscalationRuntime {
     }
     
     /**
+     * Acquire the mutex.
+     * 
+     * @throws InterruptedException
+     */
+    public void acquireMutex() throws InterruptedException {
+        _mutex.acquire();
+    }
+    
+    /**
+     * Release the mutex.
+     */
+    public void releaseMutex() {
+        _mutex.release();
+    }
+    
+    /**
+     * Add the uncommitted escalation state for this entity performing escalations 
+     * to the uncommitted escalation state cache. This cache is used to track 
+     * escalation states that have been scheduled but are not visible to other 
+     * threads prior to the transaction commit.
+     * 
+     * @param def The entity that performs escalations.
+     * @return <code>true</code> if there is already an uncommitted escalation state.
+     */
+    public boolean addToUncommittedEscalationStateCache(PerformsEscalations def) {        
+        return !_uncomittedEscalatingEntities.add(new EscalatingEntityIdentifier(def));
+    }
+    
+    /**
+     * Remove the uncommitted escalation state for this entity performing 
+     * escalations from the uncommitted escalation state cache.
+     * 
+     * @param def The entity that performs escalations.
+     * @param postTxnCommit <code>true</code> to remove post txn commit; 
+     *                      <code>false</code> to remove immediately.
+     */
+    public void removeFromUncommittedEscalationStateCache(final PerformsEscalations def, 
+                                                          boolean postTxnCommit) {        
+        if (postTxnCommit) {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+
+                public void afterCommit(boolean success) {
+                    removeFromUncommittedEscalationStateCache(def, false);
+                }
+
+                public void beforeCommit() {
+                }
+                
+            });
+        } else {
+            _uncomittedEscalatingEntities.remove(new EscalatingEntityIdentifier(def));            
+        }
+                
+    }
+    
+    /**
      * This method introduces an escalation state to the runtime.  The
      * escalation will be invoked according to the next action time of the
      * state.
@@ -267,12 +330,13 @@ class EscalationRuntime {
      * If the state had been previously scheduled, it will be rescheduled with
      * the new time. 
      */
-    void scheduleEscalation(final EscalationState state) {
+    public void scheduleEscalation(final EscalationState state) {
         final long schedTime = state.getNextActionTime();
         
         HQApp.getInstance().addTransactionListener(new TransactionListener() {
             public void afterCommit(boolean success) {
                 _log.debug("Transaction committed:  success=" + success);
+                
                 if (success) {
                     scheduleEscalation_(state, schedTime);
                 }
@@ -316,7 +380,8 @@ class EscalationRuntime {
         _esclMan.executeState(stateId);
     }
     
-    static EscalationRuntime getInstance() {
+    public static EscalationRuntime getInstance() {
         return INSTANCE;
     }
+
 }

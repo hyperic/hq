@@ -245,35 +245,116 @@ public class EscalationManagerEJBImpl
     }
 
     /**
-     * Start an escalation.  If the escalation has already been started, then
-     * this method call will be a no-op.
+     * Start an escalation. If the entity performing escalations does not have 
+     * an assigned escalation or if the escalation has already been started, 
+     * then this method call will be a no-op.
      * 
-     * @param def     Definition to start the escalation for
+     * @param def     The entity performing escalations.
      * @param creator Object which will create an {@link Escalatable} object
      *                if invoking this method actually starts an escalation.
+     * @return      <code>true</code> if the escalation is started; 
+     *              <code>false</code> if not because either there is 
+     *              no escalation assigned to the entity or the escalation 
+     *              is already in progress.             
      *                 
      * @ejb:interface-method  
      */
-    public void startEscalation(PerformsEscalations def, 
-                                EscalatableCreator creator)
-    {
-        EscalationState curState = _stateDAO.find(def);
-        Escalatable alert;
-
+    public boolean startEscalation(PerformsEscalations def, 
+                                EscalatableCreator creator) {
         if (def.getEscalation() == null) 
-            return;
+            return false;
         
-        if (curState != null) {
-            _log.debug("startEscalation called on [" + def + "] but it was " +
-                       "already running");
-            return;  
+        boolean started = false;
+        
+        try {
+            // Get the lock right now!!! We have to be sure the escalation 
+            // was scheduled for post commit before letting anyone else through.
+            // Assume we may throw an unchecked exception prior to scheduling.
+            // This is possible, especially when creating the escalatable.
+            EscalationRuntime.getInstance().acquireMutex();
+
+            try {
+                if (escalationStateExists(def)) {
+                    return started = false;
+                }
+                                
+                try {
+                    Escalatable alert = creator.createEscalatable();
+                    EscalationState curState = new EscalationState(alert);
+                    _stateDAO.save(curState);
+                    _log.debug("Escalation started: state=" + curState.getId());
+                    EscalationRuntime.getInstance().scheduleEscalation(curState);    
+                    started = true;
+                } finally {
+                    if (!started) {
+                        EscalationRuntime.getInstance()
+                            .removeFromUncommittedEscalationStateCache(def, false);
+                    }
+                }
+                
+            } finally {
+                EscalationRuntime.getInstance().releaseMutex();
+            }           
+        } catch (InterruptedException e) {
+            _log.error("Failed to start escalation for " +
+                       "alert def id="+def.getId()+
+                       "; type="+def.getAlertType().getCode(), e);
+        }
+                
+        return started;
+    }
+    
+    private boolean escalationStateExists(PerformsEscalations def) {
+        // Checks if there is an uncommitted escalation state for this def.
+        boolean existsInCache = EscalationRuntime.getInstance()
+                                .addToUncommittedEscalationStateCache(def);
+
+        boolean existsInDb = false;
+        
+        try {
+            // Checks if there is a committed escalation state for this def.
+            existsInDb = _stateDAO.find(def) != null;                
+        } catch (Exception e) {
+            _log.warn("There is more than one escalation in progress for " +
+                    "alert def id="+def.getId()+
+                    "; type="+def.getAlertType().getCode(), e);
+          // HHQ-915: A hibernate exception will occur when looking up the 
+          // escalation state if more than one exists. This shouldn't happen, 
+          // but if it does, don't create another escalation.
+            existsInDb = true;         
         }
         
-        alert    = creator.createEscalatable();
-        curState = new EscalationState(alert);
-        _stateDAO.save(curState);
-        _log.debug("Escalation started: state=" + curState.getId());
-        EscalationRuntime.getInstance().scheduleEscalation(curState);
+        // Possible scenarios when storing an escalation state -> 
+        // how to remove the def from the uncommitted cache:
+        // in_cache=false, in_db=false -> schedule to remove on commit
+        // in_cache=true, in_db=false -> do nothing,
+        //                               - will be removed from cache post-commit
+        // in_cache=false, in_db=true -> remove immediately
+        // in_cache=true, in_db=true -> (a timing issue),
+        //                              - will be removed from cache post-commit,
+        //                                but to be safe, remove immediately
+        EscalationRuntime runtime = EscalationRuntime.getInstance();
+        
+        if (existsInCache) {
+            if (existsInDb) {
+                runtime.removeFromUncommittedEscalationStateCache(def, false);
+            } else {
+                // do nothing
+            }
+        } else {
+            if (existsInDb) {
+                runtime.removeFromUncommittedEscalationStateCache(def, false);
+            } else {
+                runtime.removeFromUncommittedEscalationStateCache(def, true);
+            }
+        }
+                
+        if (existsInCache || existsInDb) {
+            _log.debug("startEscalation called on [" + def + "] but it was " +
+            "already running");            
+        }
+        
+        return existsInCache || existsInDb;
     }
      
     /**

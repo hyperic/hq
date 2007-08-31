@@ -185,13 +185,15 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 new ClassicEscalatableCreator(alertDef, event);
             
             // Now start escalation
-            if (alertDef.getEscalation() != null) {
-                EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
-                                                                  creator); 
-            }
-            else {
+            boolean started = EscalationManagerEJBImpl.getOne()
+                                        .startEscalation(alertDef, creator);
+            
+            // If there is no escalation or it wasn't started, then execute 
+            // the classic escalations.
+            if (!started) {
                 creator.createEscalatable();
             }
+
         } catch (FinderException e) {
             throw new ActionExecuteException(
                 "Alert Definition not found for trigger: " + getId());
