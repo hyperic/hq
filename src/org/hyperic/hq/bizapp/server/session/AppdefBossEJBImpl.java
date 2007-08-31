@@ -3210,9 +3210,15 @@ public class AppdefBossEJBImpl
                                                 root);
                 }
                 if(resType.equals(AuthzConstants.groupResType)) {
-                    // change group owner
-                    getAppdefGroupManager()
-                        .changeGroupOwner(root, aRes.getInstanceId(), root);
+                    try {
+                        // change group owner
+                        getAppdefGroupManager()
+                            .changeGroupOwner(root, aRes.getInstanceId(), root);
+                    } catch (AppdefGroupNotFoundException e) {
+                        // Group may not be an appdef group
+                        log.info("Group " + aRes.getInstanceId() +
+                                 " not appdef group, ownership unchanged");
+                    }
                 }
             }
         } catch (CreateException e) {

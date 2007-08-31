@@ -406,6 +406,9 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         } catch (GroupNotFoundException e) {
             log.debug("findGroup() Unable to find group:" + id); 
             throw new AppdefGroupNotFoundException ("Unable to find group:",e);
+        } catch (IllegalArgumentException e) {
+            log.debug("findGroup() unable to find an appdef group:" + id);
+            throw new AppdefGroupNotFoundException("Group not an appdef group");
         }
 
         return retVal;
