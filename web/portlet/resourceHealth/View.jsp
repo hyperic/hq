@@ -42,7 +42,6 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
   <!-- JSON available at /dashboard/ViewResourceHealth.do -->
 <script type="text/javascript">
 function requestFavoriteResources() {
