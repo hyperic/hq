@@ -160,6 +160,13 @@ public class RemoveResourceAction extends BaseAction {
                        } catch (AppdefEntityNotFoundException e) {
                            log.trace("Removing resource  " + resourceId +
                                      " failed");
+                       } catch (Exception e) {
+                           // Still referenced by an application.  Application
+                           // throws VetoException when in same web application.
+                           // However, it's JBossTransactionRollbackException
+                           // through the remote interface.
+                           RequestUtils.setError(request,
+                               "resource.group.remove.ReferencedByApp"); 
                        }
                         break;
                     default :
