@@ -135,8 +135,10 @@ public class AlertDefinitionManagerEJBImpl
             watch.markTimeEnd("delete children");
         }
         
-        // Disassociate from Resource
-        alertdef.setResource(null);
+        if (force) {
+            // Disassociate from Resource so that the Resource can be deleted
+            alertdef.setResource(null);
+        }
                 
         // Get rid of their triggers first
         watch.markTimeBegin("removeTriggers");
