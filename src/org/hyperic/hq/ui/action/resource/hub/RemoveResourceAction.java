@@ -165,8 +165,10 @@ public class RemoveResourceAction extends BaseAction {
                            // throws VetoException when in same web application.
                            // However, it's JBossTransactionRollbackException
                            // through the remote interface.
-                           RequestUtils.setError(request,
-                               "resource.group.remove.ReferencedByApp"); 
+                           if (resourceId.isGroup()) {
+                               RequestUtils.setError(request,
+                                   "resource.group.remove.ReferencedByApp");
+                           }
                        }
                         break;
                     default :
