@@ -65,7 +65,7 @@ public class AlertActionLog
         }
         else if (detail == null || detail.length() == 0) {
             // detail cannot be null and oracle treats empty strings as null
-            detail = " ";
+            _detail = " ";
         }
         else {
             _detail = detail;
