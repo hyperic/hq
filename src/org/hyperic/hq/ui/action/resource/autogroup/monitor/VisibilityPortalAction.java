@@ -70,10 +70,10 @@ public class VisibilityPortalAction
     private static final String PORTLET_AUTOGROUP_METRICS =
         ".resource.autogroup.monitor.visibility.AutoGroupMetrics";
 
-    private static final String PORTLET_PERFORMANCE =
+    public static final String PORTLET_PERFORMANCE =
         ".resource.autogroup.monitor.visibility.Performance";
 
-    private static final String TITLE_PERFORMANCE =
+    public static final String TITLE_PERFORMANCE =
         "resource.autogroup.monitor.visibility.PerformanceTitle";
 
     private static Log log =

@@ -133,8 +133,16 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
 
         super.performance(mapping, form, request, response);
 
-        Portal portal = Portal.createPortal(TITLE_PERFORMANCE,
-                                            PORTLET_PERFORMANCE);
+        boolean autogroup = RequestUtils
+            .parameterExists(request, Constants.CHILD_RESOURCE_TYPE_ID_PARAM);
+
+        Portal portal = Portal.createPortal(
+            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor
+                            .VisibilityPortalAction.TITLE_PERFORMANCE :
+                        TITLE_PERFORMANCE,
+            autogroup ? org.hyperic.hq.ui.action.resource.autogroup.monitor
+                            .VisibilityPortalAction.PORTLET_PERFORMANCE :
+                        PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
     }
