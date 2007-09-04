@@ -33,7 +33,7 @@
 <tiles:importAttribute name="portlet"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-
+<html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
