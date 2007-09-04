@@ -178,7 +178,7 @@ public class AlertDefinitionManagerEJBImpl
 
         return true;
     }
-
+    
     /** 
      * Create a new alert definition
      * @ejb:interface-method
@@ -197,6 +197,11 @@ public class AlertDefinitionManagerEJBImpl
             canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
                                                      a.getAppdefId()));
         }
+        
+        // HHQ-1054: since the alert definition mtime is managed explicitly, 
+        // let's initialize it
+        a.initializeMTimeToNow();
+        
         AlertDefinition res = new AlertDefinition();
         TriggerDAO tDAO = getTriggerDAO();
         ActionDAO aDAO = getActionDAO();
@@ -262,7 +267,7 @@ public class AlertDefinitionManagerEJBImpl
         adDAO.save(res);
         return res.getAlertDefinitionValue();
     }
-
+    
     /**
      * Update just the basics
      * @throws PermissionException 

@@ -215,6 +215,16 @@ public class AlertDefinitionValue
    public boolean ctimeHasBeenSet(){
 	  return ctimeHasBeenSet;
    }
+   
+   /**
+    * Set the mtime to the current time if it has not been set yet.
+    */
+   public void initializeMTimeToNow() {
+       if (getMtime() == 0) {
+           setMtime(System.currentTimeMillis());
+       }
+   }
+   
    public long getMtime()
    {
 	  return this.mtime;
