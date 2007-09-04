@@ -39,6 +39,8 @@ public class TriggerFiredEvent extends AbstractEvent
     /** Holds value of property message. */
     private String message;
     
+    private boolean returnMessageInToString;
+    
     /** Creates a new instance of TriggerFiredEvent */
     public TriggerFiredEvent(Integer instanceId, AbstractEvent event) {
         setInstanceId(instanceId);
@@ -111,6 +113,16 @@ public class TriggerFiredEvent extends AbstractEvent
         this.message = message;
     }
     
+    /**
+     * Set this event to return the message on invocation of {@link #toString() toString()}.
+     * 
+     * @param returnMessage <code>true</code> to return the message in the 
+     *                      {@link #toString() toString()}.
+     */
+    public void setReturnMessageInToString(boolean returnMessage) {
+        returnMessageInToString = returnMessage;
+    }
+    
     public long getTimestamp() {
         long timestamp = 0;
         for (int i = 0; i < events.length; i++) {
@@ -120,14 +132,20 @@ public class TriggerFiredEvent extends AbstractEvent
     }
 
     public String toString() {
+        if (returnMessageInToString) {
+            return message;
+        }
+        
         if (events.length == 1) {
             return events[0].toString();
         }
-        else if (this.message != null) {
-            return this.message;
+        else if (message != null) {
+            return message;
         }
         else {
             return super.toString();
         }
     }
+
+
 }
