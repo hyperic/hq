@@ -115,17 +115,17 @@ public abstract class AbstractTrigger implements TriggerInterface {
         return systemReady;
     }
     
-    protected void publishEvent(AbstractEvent event) {
+    protected final void publishEvent(AbstractEvent event) {
         Messenger.enqueueMessage(event);
     }
     
-    protected void notFired() {
+    protected final void notFired() {
         publishEvent(new TriggerNotFiredEvent(getId()));
     }
     
     /** The utility method which fires the actions of a trigger
      */    
-    protected void fireActions(TriggerFiredEvent event)
+    protected final void fireActions(TriggerFiredEvent event)
         throws ActionExecuteException, AlertCreateException {
             
         // If the system is not ready, do nothing
@@ -173,7 +173,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
                     alertDef.isWillRecover()) {
             	// Disable the alert definition now that we've fired
-                aman.updateAlertDefinitionEnable(
+                aman.updateAlertDefinitionInternalEnable(
                     AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
                     alertDef, false);
             }

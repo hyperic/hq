@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Action;
@@ -39,7 +40,7 @@ import org.json.JSONObject;
 
 public class Escalation
     extends PersistedObject
-    implements JSON
+    implements ContainerManagedTimestampTrackable, JSON
 {
     public static final String JSON_NAME = "escalation";
     
@@ -75,6 +76,22 @@ public class Escalation
         _notifyAll    = notifyAll;
         _ctime        = System.currentTimeMillis();
         _mtime        = _ctime;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
     
     public String getName() {

@@ -385,11 +385,10 @@ public class AlertDefinitionManagerEJBImpl
                                              Integer[] ids, boolean enable)
         throws FinderException, PermissionException 
     {
-        AlertDefinitionDAO aDAO = getAlertDefDAO();
         List alertdefs = new ArrayList();
         
         for (int i = 0; i < ids.length; i++) {
-            AlertDefinition alert = aDAO.findById(ids[i]);
+            AlertDefinition alert = badFindById(ids[i]);
 
             alertdefs.add(alert);
             
@@ -415,6 +414,38 @@ public class AlertDefinitionManagerEJBImpl
             def.setEnabled(enable);
             def.setMtime(System.currentTimeMillis());
         }
+    }
+    
+    /** 
+     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * does not need to be reset on each update.
+     * 
+     * @ejb:interface-method
+     */
+    public void updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                    AlertDefinition def, 
+                                                    boolean enable)
+        throws PermissionException {
+        if (def.isEnabled() != enable) {
+            canManageAlerts(subj, def);
+            def.setEnabled(enable);
+        }
+    }
+    
+    /** 
+     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * does not need to be reset on each update.
+     * 
+     * @ejb:interface-method
+     */
+    public void updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                    Integer defId, 
+                                                    boolean enable)
+        throws FinderException, PermissionException {
+        
+        AlertDefinition def = badFindById(defId);
+        
+        updateAlertDefinitionInternalEnable(subj, def, enable);
     }
     
     /** 

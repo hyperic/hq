@@ -31,14 +31,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.type.Type;
-import org.hyperic.hq.appdef.AppdefBean;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationState;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.product.Plugin;
 
 /**
  * multi-purpose interceptor for injecting runtime logic,
@@ -53,35 +45,31 @@ public class HypericInterceptor
 {
     private final Log _log = LogFactory.getLog(HypericInterceptor.class);
     
-    private boolean entHasTimestamp(Object o) {
-        return o instanceof Plugin ||
-               o instanceof AppdefBean ||
-               o instanceof AlertDefinition ||
-               o instanceof Escalation ||
-               o instanceof EscalationState ||
-               o instanceof MeasurementTemplate ||
-               o instanceof Measurement ||
-               o instanceof ResourceGroup;
+    private boolean entIsContainerManagedTimestamp(Object o) {
+        return o instanceof ContainerManagedTimestampTrackable;
     }
     
     public boolean onFlushDirty(Object entity, Serializable id, 
                                 Object[] currentState, Object[] previousState, 
                                 String[] propertyNames, Type[] types)
     {
-        if (entHasTimestamp(entity))
-            return updateTimestamp(currentState, previousState, propertyNames);
+        if (entIsContainerManagedTimestamp(entity))
+            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
+                                   currentState, previousState, propertyNames);
         return false;
     }
 
     public boolean onSave(Object entity, Serializable id, Object[] state, 
                           String[] propertyNames, Type[] types)
     {
-        if (entHasTimestamp(entity))
-            return updateTimestamp(state, null, propertyNames);
+        if (entIsContainerManagedTimestamp(entity))
+            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
+                                   state, null, propertyNames);
         return false;
     }
 
-    private boolean updateTimestamp(Object[] curState, Object[] prevState,
+    private boolean updateTimestamp(ContainerManagedTimestampTrackable entity, 
+                                    Object[] curState, Object[] prevState, 
                                     String[] propertyNames) {
         boolean modified = false;
         long ts = System.currentTimeMillis();
@@ -98,16 +86,18 @@ public class HypericInterceptor
                     modified = true;
                 }
             }
-            if ("creationTime".equals(propertyNames[i]) ||
-                "ctime".equals(propertyNames[i])) 
+            if (("creationTime".equals(propertyNames[i]) ||
+                "ctime".equals(propertyNames[i])) && 
+                entity.allowContainerManagedCreationTime()) 
             {
                 Long ctime = (Long)curState[i];
                 if (ctime == null || ctime.longValue() == 0) {
                     createdIdx = i;
                     modified =  true;
                 }
-            } else if ("modifiedTime".equals(propertyNames[i]) ||
-                       "mtime".equals(propertyNames[i]))
+            } else if (("modifiedTime".equals(propertyNames[i]) ||
+                       "mtime".equals(propertyNames[i])) && 
+                       entity.allowContainerManagedLastModifiedTime())
             {
                 modifiedIdx = i;
                 modified = true;
