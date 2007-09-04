@@ -448,21 +448,23 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         // Get the short reason for the alert
         return def.getName() + " " + name;
     }
-        
+    
     /**
-     * Convert the string numeric value into a number in the units specified 
+     * Convert the alert condition log value into a number in the units specified 
      * by the derived measurement.
      * 
-     * @param value The string numeric value.
+     * @param log The alert condition log.
      * @param dm The derived measurement.
-     * @return The string representation of the converted numeric 
+     * @return The string representation of the converted alert condition log 
      *         value or <code>NOTAVAIL</code> if the value cannot be converted.
      */
-    private String safeGetConvertedNumericValue(String value, 
-                                                DerivedMeasurement dm) {
-        Number val = NumberUtil.stringAsNumber(value);
+    private String safeGetAlertConditionLogNumericValue(AlertConditionLog log, 
+                                                        DerivedMeasurement dm) {
+        Number val = NumberUtil.stringAsNumber(log.getValue());
         
         if (NumberUtil.NaN.equals(val)) {
+            _log.warn("Alert condition log with id="+log.getId()+" has value that " +
+            		"cannot be converted to a number: "+log.getValue());
             return NOTAVAIL;
         } else {
             FormattedNumber av = UnitsConvert.convert(
@@ -532,7 +534,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 }
 
                 // Format the number
-                String actualValue = safeGetConvertedNumericValue(logs[i].getValue(), dm);
+                String actualValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
                 text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
@@ -548,33 +550,28 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 // created from the same message format. This is
                 // the best we can do until we track previous
                 // values more explicitly. (JW)
-                Object[] values = new Object[0];
-                
+                text.append(" (");
                 try {
-                    values = ValueChangeTrigger.getTriggeringConditionsFormatter()
+                    Object[] values = ValueChangeTrigger.MESSAGE_FMT
                             .parse(logs[i].getValue());
-
+                    text.append("old value = ");
                     if (log.isTraceEnabled()) {
                         log.trace("event message = " + logs[i].getValue());
                         for (int x = 0; x < values.length; ++x) {
                             log.trace("values[" + x + "] = " + values[x]);
                         }
                     }
+                    if (2 == values.length) {
+                        text.append(values[1]);
+                    } else {
+                        text.append(NOTAVAIL);
+                    }
                 } catch (ParseException e) {
-                    log.debug("Unable to parse alert condition log id="+
-                            logs[i].getId()+", value="+logs[i].getValue(), e);
-                }
-                          
-                if (2 == values.length) {
-                    String oldValue = (String)values[1];
-                    String newValue = (String)values[0];
-
-                    text.append(" (old value = ").append(oldValue);
-                    text.append(", new value = ").append(newValue).append(')');                        
-                } else {
-                    text.append(" (old/new values = ").append(NOTAVAIL).append(')');
+                    text.append(NOTAVAIL);
                 }
                 
+                String newValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
+                text.append(", new value = ").append(newValue).append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
                 text.append(cond.getName()).append(" value changed");

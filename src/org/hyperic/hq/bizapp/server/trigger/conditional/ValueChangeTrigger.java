@@ -71,10 +71,9 @@ public class ValueChangeTrigger extends AbstractTrigger
             new Integer(EventConstants.TYPE_CHANGE),
             ValueChangeTrigger.class);
     }
-    
-    private static final String MESSAGE_FMT_PATTERN = 
-        "Current value ({0}) differs from previous value ({1}).";
 
+    public static final MessageFormat MESSAGE_FMT = new MessageFormat
+        ("Current value ({0}) differs from previous value ({1}).");
 
     private Object            lock = new Object();
     private Integer           measurementId;
@@ -85,16 +84,6 @@ public class ValueChangeTrigger extends AbstractTrigger
     public ConfigSchema getConfigSchema() {
         return ConditionalTriggerSchema
             .getConfigSchema(EventConstants.TYPE_CHANGE);
-    }
-    
-    /**
-     * Retrieve the object for formatting/parsing the triggering conditions 
-     * message.
-     * 
-     * @return The trigger conditions formatter.
-     */
-    public static MessageFormat getTriggeringConditionsFormatter() {
-        return new MessageFormat(MESSAGE_FMT_PATTERN);
     }
 
     /* (non-Javadoc)
@@ -235,16 +224,15 @@ public class ValueChangeTrigger extends AbstractTrigger
             } else if (last.getValue().getValue() != me.getValue().getValue() && 
                        last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
                 // Get ready to fire                
-                myEvent = new TriggerFiredEvent(getId(), me);
+                myEvent = new TriggerFiredEvent(getId(), event);
                 double values[] = { me.getValue().getValue(),
                                     last.getValue().getValue() };
                 FormattedNumber[] fmtValues =
                     UnitsConvert.convertSame( values, me.getUnits(),
                                               Locale.getDefault() );
                 StringBuffer sb = new StringBuffer();
-                getTriggeringConditionsFormatter().format(fmtValues, sb, null);
+                MESSAGE_FMT.format(fmtValues, sb, null);
                 myEvent.setMessage( sb.toString() );
-                myEvent.setReturnMessageInToString(true);
 
                 try {
                     eTracker.updateReference(getId(), last.getId(), me);
