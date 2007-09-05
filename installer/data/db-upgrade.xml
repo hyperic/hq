@@ -6603,6 +6603,14 @@ has already been defined.
            </initializer>
          </schema-addColumn>
     </schemaSpec>
+
+    <schemaSpec version="3.51">
+      <schema-directSQL>
+        <statement targetDB="oracle" fail="false">
+            ALTER TABLE EAM_GALERT_AUX_LOGS RENAME COLUMN "timestamp" TO "TIMESTAMP"
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
