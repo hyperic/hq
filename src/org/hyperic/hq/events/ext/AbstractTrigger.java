@@ -185,12 +185,10 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 new ClassicEscalatableCreator(alertDef, event);
             
             // Now start escalation
-            boolean started = EscalationManagerEJBImpl.getOne()
-                                        .startEscalation(alertDef, creator);
-            
-            // If there is no escalation or it wasn't started, then execute 
-            // the classic escalations.
-            if (!started) {
+            if (alertDef.getEscalation() != null) {
+                EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
+                                                                  creator); 
+            } else {
                 creator.createEscalatable();
             }
 
