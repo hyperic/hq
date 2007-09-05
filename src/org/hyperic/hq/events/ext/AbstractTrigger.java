@@ -74,12 +74,12 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
     
-	public AbstractTrigger() {
-		super();
+    public AbstractTrigger() {
+        super();
         
         // set the default value
         triggerValue.setId(new Integer(-1));
-	}
+    }
 
     private boolean isSystemReady() {
         if (!systemReady) {
@@ -172,7 +172,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
             if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
                     alertDef.isWillRecover()) {
-            	// Disable the alert definition now that we've fired
+                // Disable the alert definition now that we've fired
                 aman.updateAlertDefinitionInternalEnable(
                     AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
                     alertDef, false);
@@ -185,12 +185,10 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 new ClassicEscalatableCreator(alertDef, event);
             
             // Now start escalation
-            boolean started = EscalationManagerEJBImpl.getOne()
-                                        .startEscalation(alertDef, creator);
-            
-            // If there is no escalation or it wasn't started, then execute 
-            // the classic escalations.
-            if (!started) {
+            if (alertDef.getEscalation() != null) {
+                EscalationManagerEJBImpl.getOne().startEscalation(alertDef,
+                                                                  creator); 
+            } else {
                 creator.createEscalatable();
             }
 
