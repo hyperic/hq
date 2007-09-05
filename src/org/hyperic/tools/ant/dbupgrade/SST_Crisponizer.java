@@ -51,6 +51,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
     private String _table;
     private String _column;
     private String _crispoColumn;
+    private String _onlyProperties;
     
     public SST_Crisponizer() {}
 
@@ -64,6 +65,10 @@ public class SST_Crisponizer extends SchemaSpecTask {
     
     public void setCrispoColumn(String c) {
         _crispoColumn = c;
+    }
+    
+    public void setOnlyProperties(String f) {
+        _onlyProperties = f;
     }
     
     private void createCrispoOpt(Dialect d, int crispoId, String key, 
@@ -131,6 +136,9 @@ public class SST_Crisponizer extends SchemaSpecTask {
             String key = (String)i.next();
             String val = cr.getValue(key);
             
+            if (_onlyProperties != null && key.indexOf(_onlyProperties) == -1)
+                continue;
+                
             createCrispoOpt(d, crispoId, key, val);
         }
         
