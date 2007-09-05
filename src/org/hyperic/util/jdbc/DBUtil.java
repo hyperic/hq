@@ -42,6 +42,11 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.dialect.Dialect;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
+import org.hyperic.hibernate.dialect.Oracle9Dialect;
+import org.hyperic.hibernate.dialect.PostgreSQLDialect;
 import org.hyperic.util.pager.PageControl;
 
 public class DBUtil {
@@ -285,6 +290,19 @@ public class DBUtil {
         }
     }
     
+    public static Dialect getDialect(Connection conn) throws SQLException {
+        int t = getDBType(conn);
+        
+        if (isMySQL(t)) {
+            return new MySQL5InnoDBDialect();
+        } else if(isPostgreSQL(t)) {
+            return new PostgreSQLDialect();
+        } else if (isOracle(t)) {
+            return new Oracle9Dialect();
+        } else {
+            throw new IllegalArgumentException("Unsupported DB");
+        }
+    }
 
     /**
      * Given a Connection object, this method returns a constant
