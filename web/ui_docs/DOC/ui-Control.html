@@ -1,0 +1,197 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Control</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Control
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 21, 2007 by <font color="#0050B2">mbartelt</font>.
+				    </div>
+
+				    <p><a name="ui-Control-top"></a></p>
+<h1><a name="ui-Control-ManagingControlActions"></a>Managing Control Actions</h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen allows users to view the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> currently being performed on a resource and to manage both on-demand and scheduled control actions.</p>
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='infoMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Availability of Control Actions</b><br />
+<p>The control actions available on this screen depend on the resource type. Product-specific information about control actions can be found through the list of <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Managed+Products" title="Managed Products">products managed by HQ</a>. </p></td></tr></table>
+
+<ul>
+	<li><a href="#ui-Control-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Control-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-Control-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-Control-Tasks"></a></p>
+<h3><a name="ui-Control-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do the following tasks:</p>
+
+<p><b><a name="ui-Control-quick"></a>To initiate an on-demand (quick) control action on the resource:</b></p>
+<ol>
+	<li>Select the action in <ins>Control Action</ins>.</li>
+	<li>Type in <ins>Control Arguments</ins> for the action (if the control action uses or requires arguments).</li>
+	<li>Click <img src="../16347/dash-button_go-arrow.gif" align="absmiddle" border="0" />.<br/>
+The control action will take place immediately or, if other control actions are currently taking place, just after they finish.</li>
+</ol>
+
+
+<p><b>To schedule a control action for the resource:</b></p>
+<ul>
+	<li>In the "Control Action Schedule" section, click <img src="../16347/tbb_new.gif" align="absmiddle" border="0" /> and proceed to the "New Scheduled Control Action" screen.</li>
+</ul>
+
+
+<p><b>To edit a scheduled control action:</b></p>
+<ul>
+	<li>In the "Control Action Schedule" section, click the scheduled control action and proceed to the "Edit Scheduled Control Action" screen.</li>
+</ul>
+
+
+<p><b>To delete a scheduled control action:</b></p>
+<ul>
+	<li>In the "Control Action Schedule" section, check the scheduled control action and click <img src="../16347/tbb_delete.gif" align="absmiddle" border="0" />.<br/>
+This control action will no longer be performed on the resource.</li>
+</ul>
+
+
+<p><b>To configure this server for monitoring and control:</b></p>
+<ul>
+	<li>In the Tools Menu, click <b>Configure Server</b> and proceed to the "Edit Resource Configuration" screen.</li>
+</ul>
+
+
+<p><b>To add this server to the Dashboard Favorites:</b></p>
+<ul>
+	<li>In the Tools Menu, click <b>Add to Dashboard Favorites</b>.</li>
+</ul>
+
+
+<p><b>To create a new service that will be added to this server:</b></p>
+<ul>
+	<li>In the Tools Menu, click <b>New Service</b> and proceed to the "Creating a New Service" screen.</li>
+</ul>
+
+
+<p><em><a href="#ui-Control-top">Back to top</a></em></p>
+
+<p><a name="ui-Control-Sections"></a></p>
+<h3><a name="ui-Control-SectionsonThisScreen"></a>Sections on This Screen</h3>
+
+<h4><a name="ui-Control-CurrentStatus"></a>Current Status</h4>
+
+<p>This section displays the status of a currently running control action (if any). This section displays the following information about the currently running control action:<br/>
+<ins>Control Action</ins>: The control action being performed on the resource<br/>
+<ins>Command State</ins>: The result of the control action. Possible values = Successful, Failed.<br/>
+<ins>Command Status</ins>: What the control action is currently doing. Possible values = In Progress, Stopped, Running, Restarting, Stopping.<br/>
+<ins>Elapsed Time</ins>: How long HQ has been performing the control action<br/>
+<ins>Description</ins><br/>
+<ins>Date Started</ins>: The day and time on which HQ started performing this control action<br/>
+<ins>Date Scheduled</ins>: The day and time on which the control action is scheduled to run</p>
+
+<h4><a name="ui-Control-QuickControl"></a>Quick Control</h4>
+
+<p>This section displays the control actions available for this resource and allows users to initiate an on-demand control action.</p>
+
+<h4><a name="ui-Control-ControlActionSchedule"></a>Control Action Schedule</h4>
+
+<p>This section lists all control actions currently scheduled for this resource. Users can edit or delete an existing scheduled control action or create a new one.</p>
+
+<p><em><a href="#ui-Control-top">Back to top</a></em></p>
+
+<p><a name="ui-Control-Navigating"></a></p>
+<h3><a name="ui-Control-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'><b>Dashboard</b></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Browse Resources</b></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Resources.html" title="ui-Resources">screen</a> where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a></td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Alert Center</b></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Report Center</b> <font color="red">*</font></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Report.Center.html" title="ui-Report.Center">Report Center</a>, where they can generate all reports available in HQ.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Administration</b></td>
+<td class='confluenceTd'>Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration screen</a>, where they can manage the system-wide settings</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Recent Resources</b></td>
+<td class='confluenceTd'>Provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource.</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Help</b></td>
+<td class='confluenceTd'>Opens screen-sensitive online help in a secondary window</td>
+</tr>
+</tbody></table>
+
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
+<p><em><a href="#ui-Control-top">Back to top</a></em></p>
+
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p><a href="ui-Control.New.html" title="ui-Control.New">Schedule</a> a control action<br/>
+<a href="ui-Control.Edit.html" title="ui-Control.Edit">Edit an already scheduled control action</a><br/>
+See the <a href="ui-Control.History.html" title="ui-Control.History">history</a> of control actions on this resource<br/>
+View the resource's inventory (<a href="ui-Inventory.Group.html" title="ui-Inventory.Group">group</a>, <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">platform</a>, or <a href="ui-Inventory.Server.html" title="ui-Inventory.Server">server</a>)</p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>Learn what it means to <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Resources" title="Controlling Resources">"control resources"</a> </p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Control-ReturntoUIReference."></a>Return to <a href="UI Reference.html" title="UI Reference">UI Reference</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16347/dash-button_go-arrow.GIF">dash-button_go-arrow.GIF</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16347/tbb_new.gif">tbb_new.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16347/tbb_delete.gif">tbb_delete.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 05, 2007 11:52</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
