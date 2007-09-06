@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
@@ -56,11 +59,8 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 public class LoggingDispatcherEJBImpl 
     implements MessageDrivenBean, MessageListener {
     private final Log log =
-        LogFactory.getLog(
-            "org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherEJBImpl");
+        LogFactory.getLog(LoggingDispatcherEJBImpl.class);
 
-    private EventLogManagerLocal elMan = null;
-    
     /**
      * The onMessage method
      */
@@ -74,26 +74,34 @@ public class LoggingDispatcherEJBImpl
         try {
             Object obj = om.getObject();
             
-            if (!(obj instanceof AbstractEvent)) {
-                return;
-            }
-
-            // Assume that only AbstractEvents get pumped through the topic
-            AbstractEvent event = (AbstractEvent) obj;
-            
-            // Do logging
-            if (event.isLoggingSupported()) {
-                LoggableInterface le = (LoggableInterface) event;
-                
-                if (elMan == null)
-                    elMan = EventLogManagerEJBImpl.getOne();
-                
-                elMan.createLog(event, le.getSubject(), le.getLevelString());
+            if (obj instanceof AbstractEvent) {
+                AbstractEvent event = (AbstractEvent) obj;
+                EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+                logEvent(elMan, event);
+            } else if (obj instanceof Collection) {
+                Collection events = (Collection) obj;
+                EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+                for (Iterator it = events.iterator(); it.hasNext(); ) {
+                    AbstractEvent event = (AbstractEvent) it.next();
+                    logEvent(elMan, event);
+                }
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
-            e.printStackTrace();
         }
+        
+    }
+    
+    /**
+     * Log the event if it supports logging.
+     * 
+     * @param event The event.
+     */
+    private void logEvent(EventLogManagerLocal elMan, AbstractEvent event) {
+        if (event.isLoggingSupported()) {
+            LoggableInterface le = (LoggableInterface) event;            
+            elMan.createLog(event, le.getSubject(), le.getLevelString());
+        }        
     }
 
     /**
