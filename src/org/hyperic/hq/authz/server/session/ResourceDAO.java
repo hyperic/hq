@@ -95,6 +95,8 @@ public class ResourceDAO
             rg.removeResource(entity);
         }
         entity.getResourceGroups().clear();
+        
+        getSession().flush();
         super.remove(entity);
     }
 
