@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -97,6 +98,41 @@ public class Crispo
             res.setValue(opt.getKey(), opt.getValue());
         }
         return res;
+    }
+
+    void updateWith(ConfigResponse cfg) {
+        // First, make any modifications to existing values, and add any
+        // values not contained within the crispo
+        for (Iterator i=cfg.getKeys().iterator(); i.hasNext(); ) {
+            String key = (String)i.next();
+            String val = cfg.getValue(key);
+            
+            boolean needToAdd = true;
+            for (Iterator j=_opts.iterator(); j.hasNext(); ) {
+                CrispoOption opt = (CrispoOption)j.next();
+                
+                if (opt.getKey().equals(key)) {
+                    if (!opt.getValue().equals(val)) {
+                        opt.setValue(val);
+                    }
+                    needToAdd = false;
+                    break;
+                }
+            }
+            
+            if (needToAdd) {
+                addOption(key, val);
+            }
+        }
+        
+        // Now remove any keys not contained within the cfg
+        for (Iterator i = _opts.iterator(); i.hasNext(); ) {
+            CrispoOption opt = (CrispoOption)i.next();
+            
+            if (cfg.getValue(opt.getKey()) == null) {
+                i.remove();
+            }
+        }
     }
     
     static Crispo create(Map keyVals) {

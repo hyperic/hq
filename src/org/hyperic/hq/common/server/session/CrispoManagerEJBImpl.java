@@ -106,6 +106,17 @@ public class CrispoManagerEJBImpl implements SessionBean {
         return res;
     }
     
+    /**
+     * Update a crispo, matching the saved crispo to the values in the
+     * config repsonse. 
+     * 
+     * @ejb:interface-method
+     */
+    public void update(Crispo c, ConfigResponse cfg) {
+        c.updateWith(cfg);
+        getDAO().save(c);
+    }
+
     public static CrispoManagerLocal getOne() {
         try {
             return CrispoManagerUtil.getLocalHome().create();
