@@ -359,11 +359,11 @@
       <plugin type="log_track"/>
 
       <metric name="Availability"
-              template="${sockaddr.template}"
+              template="${sockaddr.template}:${alias}"
               indicator="true"/>
 
       <metric name="Response Time"
-              template="${sockaddr.template}"
+              template="${sockaddr.template}:${alias}"
               indicator="true"
               category="Throughput"
               units="ms"/>
