@@ -25,8 +25,10 @@
 
 package org.hyperic.hibernate.dialect;
 
+import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  *
@@ -63,4 +65,22 @@ public interface HQDialect
      */
     public boolean viewExists(Statement stmt, String viewName)
         throws SQLException;
+
+    /*
+     * Needed mainly for MySQL support.
+     * Kind of messy, hopefully it will be cleaned up
+     * at some point.
+     * Gets the last data measurement values based on the
+     * lastMap templateid-lastTime pairing.
+     * It then puts the result in the resMap and returns resMap.
+     */
+    public Map getLastData(Connection conn, String minMax,
+                           Map resMap, Map lastMap, Integer[] iids,
+                           long begin, long end, String table)
+    throws SQLException;
+
+    public Map getAggData(Connection conn, String minMax, Map resMap,
+                          Integer[] tids, Integer[] iids,
+                          long begin, long end, String table)
+    throws SQLException;
 }

@@ -8,6 +8,7 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImp
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.jdbc.DBUtil;
@@ -102,9 +103,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
             List data = genData(m, dp, detailedPurgeInterval);
             _log.info("Inserting " + data.size() + " data points");
-            if (!dataMan.addData(data)) {
-                dataMan.addData(data, true);
-            }
+            dataMan.addData(data);
             num += data.size();
         }
 
@@ -117,10 +116,12 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
+        String table = MeasTabManagerUtil.getUnionStatement(
+            getDetailedPurgeInterval(), mid.intValue());
         final String SQL =
-            "SELECT timestamp, value FROM EAM_MEASUREMENT_DATA " +
-            "WHERE measurement_id = ? AND timestamp = " +
-            "(SELECT min(timestamp) FROM EAM_MEASUREMENT_DATA " +
+            "SELECT timestamp, value FROM " + table +
+            " WHERE measurement_id = ? AND timestamp = " +
+            "(SELECT min(timestamp) FROM " + table +
             " WHERE measurement_id = ?)";
 
         Connection conn = null;

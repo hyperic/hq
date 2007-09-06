@@ -115,6 +115,11 @@ public class MeasRangeObj
         }
     }
 
+    public String getTable(long timestamp)
+    {
+        return getTable(getRanges(), timestamp);
+    }
+
     public String getTable(List ranges, long timestamp)
     {
         for (Iterator i=ranges.iterator(); i.hasNext(); )

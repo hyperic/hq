@@ -40,7 +40,7 @@
     </property>
 
     <property name="validationError" type="string">
-      <column name="VALIDATIONERR" not-null="false" index="CRESP_ERR_IDX"/>
+      <column name="VALIDATIONERR" not-null="false" index="CRESP_ERR_IDX" length="512"/>
     </property>
 
   </class>

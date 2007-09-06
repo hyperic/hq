@@ -749,4 +749,15 @@ public class DBUtil {
     private static String changeNullAndTrim(String val) {
         return (val == null) ? "" : val.trim();
     }
+
+    public static void replacePlaceHolder(StringBuffer buf, String repl) {
+        int index = buf.indexOf("?");
+        if (index >= 0)
+            buf.replace(index, index + 1, repl);
+    }
+
+    public static void replacePlaceHolders(StringBuffer buf, Object[] objs) {
+        for (int i = 0; i < objs.length; i++)
+            replacePlaceHolder(buf, objs[i].toString());
+    }
 }

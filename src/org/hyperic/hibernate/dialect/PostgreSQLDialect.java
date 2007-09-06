@@ -26,6 +26,7 @@
 package org.hyperic.hibernate.dialect;
 
 import org.hyperic.util.jdbc.DBUtil;
+import java.util.Map;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -95,5 +96,25 @@ public class PostgreSQLDialect
         return "DELETE FROM "+deleteTable+" WHERE EXISTS"+
                " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")";
+    }
+
+    public Map getLastData(Connection conn, String minMax,
+                           Map resMap, Map lastMap, Integer[] iids,
+                           long begin, long end, String table)
+        throws SQLException
+    {
+        HQDialectUtil util = new HQDialectUtil();
+        return util.getLastData(conn, minMax, resMap, lastMap,
+                                iids, begin, end, table);
+    }
+
+    public Map getAggData(Connection conn, String minMax, Map resMap,
+                          Integer[] tids, Integer[] iids,
+                          long begin, long end, String table)
+        throws SQLException
+    {
+        HQDialectUtil util = new HQDialectUtil();
+        return util.getAggData(conn, minMax, resMap, tids,
+                               iids, begin, end, table);
     }
 }

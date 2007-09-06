@@ -198,9 +198,16 @@ public class DatabaseInitializer {
     class MySQLRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
             Statement stmt = null;
-            
-            String function =
-                "CREATE FUNCTION nextseqval (iname CHAR(50)) " +
+
+            String createHqSeqMemTable =
+                "CREATE TABLE HQ_MEM_SEQUENCE ( " +
+                   "seq_name varchar(50) NOT NULL, " +
+                   "seq_val int(11) default NULL, " +
+                   "PRIMARY KEY  (seq_name, seq_val) " +
+                ") ENGINE=MEMORY;";
+
+            String getNextHqSeqval =
+                "CREATE FUNCTION getNextHqSeqval(iname CHAR(50)) " +
                 "RETURNS INT " +
                 "DETERMINISTIC " +
                 "BEGIN " +
@@ -209,12 +216,58 @@ public class DatabaseInitializer {
                     "WHERE seq_name=iname; " +
                   "RETURN @new_seq_val;" +
                 "END;";
-    
+            
+            String getNextMemSeqval =
+                "CREATE PROCEDURE getNextMemSeqVal(iname VARCHAR(50), " +
+                                         "OUT rtn_val INT)" +
+                "BEGIN "+
+                "DECLARE seq_count INT; " +
+                "DECLARE idx INT; " +
+                "DECLARE next_seq INT; " +
+                "DECLARE tmp INT; " +
+                "SELECT get_lock(\"seq_lock\", 60) into tmp; " +
+                "SELECT count(*) into seq_count from HQ_MEM_SEQUENCE" +
+                " WHERE seq_name = iname; " +
+                "IF seq_count = 0 THEN " +
+                     "SET idx = 0; " +
+                     "populate: LOOP " +
+                         "IF idx >= 1000 " +
+                         "THEN " +
+                             "LEAVE populate; " +
+                         "END IF; " +
+                         "SET idx = idx + 1; " +
+                         "select getNextHqSeqval(iname) into next_seq; " +
+                         "insert into HQ_MEM_SEQUENCE (seq_name, seq_val)" +
+                         " values (iname, next_seq);" +
+                     "END LOOP populate; " +
+                "END IF; " +
+                "select min(seq_val) into rtn_val from HQ_MEM_SEQUENCE" +
+                " WHERE seq_name = iname; " +
+                "delete from HQ_MEM_SEQUENCE where seq_name = iname" +
+                " AND seq_val = rtn_val; " +
+                "SELECT release_lock(\"seq_lock\") into tmp; " +
+                "END;";
+
+            String nextseqval =
+                "CREATE FUNCTION nextseqval(iname VARCHAR(50)) " +
+                "RETURNS INT " +
+                "READS SQL DATA " +
+                "BEGIN " +
+                     "DECLARE rtn_val INT; " +
+                     "set @tmp = 0; " +
+                     "call getNextMemSeqval(iname, @tmp); " +
+                     "select name_const('seq_val', @tmp) into rtn_val; " +
+                     "return (rtn_val); " +
+                "END;";
+
             try {
                 stmt = conn.createStatement();
-                stmt.execute(function);
+                stmt.execute(createHqSeqMemTable);
+                stmt.execute(getNextHqSeqval);
+                stmt.execute(getNextMemSeqval);
+                stmt.execute(nextseqval);
             } catch (SQLException e) {
-                // Function already exists, continue
+                // Function + Procedure already exist, continue
                 if (log.isDebugEnabled()) {
                     log.debug("MySQLRoutines SQLException", e);
                 }

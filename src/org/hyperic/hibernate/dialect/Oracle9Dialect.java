@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Map;
 
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -101,5 +102,25 @@ public class Oracle9Dialect
         finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
+    }
+
+    public Map getLastData(Connection conn, String minMax,
+                           Map resMap, Map lastMap, Integer[] iids,
+                           long begin, long end, String table) 
+        throws SQLException
+    {
+        HQDialectUtil util = new HQDialectUtil();
+        return util.getLastData(conn, minMax, resMap, lastMap,
+                                iids, begin, end, table);
+    }
+
+    public Map getAggData(Connection conn, String minMax, Map resMap,
+                          Integer[] tids, Integer[] iids,
+                          long begin, long end, String table) 
+        throws SQLException
+    {   
+        HQDialectUtil util = new HQDialectUtil();
+        return util.getAggData(conn, minMax, resMap, tids,
+                               iids, begin, end, table);
     }
 }

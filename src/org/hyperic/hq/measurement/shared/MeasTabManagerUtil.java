@@ -25,16 +25,24 @@
 
 package org.hyperic.hq.measurement.shared;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class MeasTabManagerUtil {
     private static Calendar _baseCal = Calendar.getInstance();
-    private static final Log _log = LogFactory.getLog(MeasTabManagerUtil.class);
+    private static final String logCtx = MeasTabManagerUtil.class.getName();
+    private static final Log _log = LogFactory.getLog(logCtx);
 
     static final int NUMBER_OF_TABLES = 18,
                      NUMBER_OF_TABLES_PER_DAY = 2;
@@ -42,6 +50,10 @@ public class MeasTabManagerUtil {
     public static final String MEAS_VIEW = MEAS_TABLE;
     public static final String OLD_MEAS_TABLE = MEAS_TABLE + "_COMPAT";
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
+    private static final String TAB_MEAS = MeasurementConstants.TAB_MEAS;
+    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
+    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
+    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
 
     static {
         _baseCal.set(2006, 0, 1, 0, 0);
@@ -81,10 +93,88 @@ public class MeasTabManagerUtil {
         return sql.toString();
     }
 
-    public static String getUnionStatement(long millisBack) {
-        long timeNow = System.currentTimeMillis(),
-             begin   = timeNow - millisBack;
-        return getUnionStatement(begin, timeNow);
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @param measId The array of measurement ids to set the where clause against
+     * @return The UNION SQL statement.
+     */
+    public static String getUnionStatement(long begin, long end, Object[] measIds)
+    {
+        String measInStmt = (measIds.length == 0) ? "" :
+                                getMeasInStmt(measIds, true);
+        StringBuffer sql = new StringBuffer();
+        sql.append("(");
+        Calendar cal = Calendar.getInstance();
+        while (true)
+        {
+            String table = MeasTabManagerUtil.getMeasTabname(end);
+            sql.append("SELECT * FROM ").
+                append(table).
+                append(getTimeInStmt(begin, end)).
+                append(measInStmt);
+            end = getPrevMeasTabTime(cal, end);
+            end = getMeasTabEndTime(cal, end);
+            if (end >= begin) {
+                sql.append(" UNION ALL ");
+                continue;
+            } else {
+                break;
+            }
+        }
+        sql.append(") ").append(TAB_DATA);
+        return sql.toString();
+    }
+
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @param measId The array of measurement ids to set the where clause against
+     * @return The UNION SQL statement.
+     */
+    public static String getUnionStatement(Object[] measIds, long timestamp) {
+        StringBuffer sql = new StringBuffer();
+        String measInStmt = getMeasInStmt(measIds, true);
+        sql.append("(SELECT * FROM ").
+            append(MeasTabManagerUtil.getMeasTabname(timestamp)).
+            append(" WHERE timestamp = ").append(timestamp).
+            append(measInStmt).
+            append(") ").append(TAB_DATA);
+        return sql.toString();
+    }
+
+    private static String getTimeInStmt(long begin, long end)
+    {
+        return " WHERE timestamp between "+begin+" and "+end;
+    }
+
+    public static String getMeasInStmt(Object[] measIds, boolean withAnd)
+    {
+        if (measIds.length == 0) {
+            return "";
+        }
+        StringBuffer rtn = new StringBuffer();
+        rtn.append(" "+((withAnd) ? "AND" : "")+" measurement_id");
+        // mysql gets a perf boost from using "=" as apposed to "in"
+        if (measIds.length == 1) {
+            rtn.append(" = "+measIds[0]);
+            return rtn.toString();
+        }
+        rtn.append(" in (");
+        for (int i=0; i<measIds.length; i++)
+        {
+            if (measIds[i] == null)
+//                !(measIds[i] instanceof Number))
+                continue;
+            rtn.append(measIds[i]+",");
+        }
+        rtn.deleteCharAt(rtn.length()-1);
+        rtn.append(")");
+        return rtn.toString();
     }
 
     private static int getDayOfPeriod(Calendar cal, long timems) {
@@ -146,9 +236,6 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
-        //this should be removed when we switch from bigint to integer
-        //for the metric data timestamp
-        cal.set(Calendar.MILLISECOND, 999);
         return cal.getTimeInMillis();
     }
 
@@ -170,9 +257,6 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
-        //this should be removed when we switch from bigint to integer
-        //for the metric data timestamp
-        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTimeInMillis();
     }
 
@@ -208,6 +292,95 @@ public class MeasTabManagerUtil {
 
         _log.debug("(getPrevMeasTabTime) after -> " + getDateStr(rtn) + ", " +
                    newTable);
+        return rtn;
+    }
+
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @param measId The measurement id to set the where clause against
+     * @return The UNION SQL statement.
+     */
+    public static String getUnionStatement(long begin, long end, int measId) {
+        Integer[] measArray = new Integer[1];
+        measArray[0] = new Integer(measId);
+        return getUnionStatement(begin, end, measArray);
+    }
+
+    public static String getUnionStatement(long millisBack) {
+        long timeNow = System.currentTimeMillis(),
+             begin   = (timeNow - millisBack);
+        return getUnionStatement(begin, timeNow);
+    }
+
+    public static String getUnionStatement(long millisBack, Object[] measIds) {
+        long timeNow = System.currentTimeMillis(),
+             begin   = (timeNow - millisBack);
+        return getUnionStatement(begin, timeNow, measIds);
+    }
+
+    public static String getUnionStatement(long millisBack, int measId) {
+        long timeNow = System.currentTimeMillis(),
+             begin   = (timeNow - millisBack);
+        return getUnionStatement(begin, timeNow, measId);
+    }
+
+    public static List getMeasIdsFromTemplateIds(Connection conn,
+                                                 Integer[] tids)
+        throws SQLException
+    {
+        List rtn = new ArrayList();
+        StringBuffer tidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("template_id", tids.length));
+        DBUtil.replacePlaceHolders(tidsConj, tids);
+        final String sql = "SELECT distinct id FROM " + TAB_MEAS +
+                           " WHERE " + tidsConj;
+        Statement stmt = null;
+        ResultSet rs   = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                rtn.add(new Integer(rs.getInt(1)));
+            }
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+            DBUtil.closeStatement(logCtx, stmt);
+        }
+        return rtn;
+    }
+
+    public static List getMeasIds(Connection conn, Integer[] tids,
+                                  Integer[] iids)
+        throws SQLException
+    {
+        List rtn = new ArrayList();
+        StringBuffer iidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("instance_id", iids.length));
+        DBUtil.replacePlaceHolders(iidsConj, iids);
+        StringBuffer tidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("template_id", tids.length));
+        DBUtil.replacePlaceHolders(tidsConj, tids);
+        final String sql = "SELECT distinct id FROM " + TAB_MEAS +
+                           " WHERE " + iidsConj + " AND " + tidsConj;
+        Statement stmt = null;
+        ResultSet rs   = null;
+        try
+        {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                rtn.add(new Integer(rs.getInt(1)));
+            }
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+            DBUtil.closeStatement(logCtx, stmt);
+        }
         return rtn;
     }
 
