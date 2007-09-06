@@ -30,6 +30,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
@@ -52,6 +53,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
     private String _column;
     private String _crispoColumn;
     private String _onlyProperties;
+    private String _rewriteConfigResponse;
     
     public SST_Crisponizer() {}
 
@@ -69,6 +71,10 @@ public class SST_Crisponizer extends SchemaSpecTask {
     
     public void setOnlyProperties(String f) {
         _onlyProperties = f;
+    }
+    
+    public void setRewriteConfigResponse(String val) {
+        _rewriteConfigResponse = val;
     }
     
     private void createCrispoOpt(Dialect d, int crispoId, String key, 
@@ -163,6 +169,39 @@ public class SST_Crisponizer extends SchemaSpecTask {
             DBUtil.closeJDBCObjects(LOGCTX, null, stmt, null);
         }
     }
+    
+    private void rewriteConfigResponse(long rowId, ConfigResponse cr) 
+        throws SQLException, BuildException, EncodingException
+    {
+        PreparedStatement stmt = null;
+        
+        try {
+            String sql = "update " + _table + " set " + _column + 
+                         " = ? where id = " + rowId;
+            byte[] bytes;
+            
+            if (_onlyProperties != null) {
+                for (Iterator i = new HashSet(cr.getKeys()).iterator(); 
+                     i.hasNext(); )
+                {
+                    String key = (String) i.next();
+                    
+                    if (key.indexOf(_onlyProperties) != -1) {
+                        cr.unsetValue(key);
+                    }
+                }
+            }
+            bytes = cr.encode();
+            stmt = getConnection().prepareStatement(sql);
+            stmt.setBytes(1, bytes);
+            int numRows = stmt.executeUpdate();
+            if (numRows != 1) {
+                throw new BuildException("Updated " + numRows + " instead of 1");
+            }
+        } finally {
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, null);
+        }
+    }
 
     public void execute() throws BuildException {
         Statement stmt  = null;
@@ -206,6 +245,15 @@ public class SST_Crisponizer extends SchemaSpecTask {
 
                 long crispoId = createCrispo(d, cr);
                 updateRowWithCrispo(fromId, crispoId);
+                
+                if (_rewriteConfigResponse != null &&
+                    "true".equalsIgnoreCase(_rewriteConfigResponse) ||
+                    "t".equalsIgnoreCase(_rewriteConfigResponse) ||
+                    "y".equalsIgnoreCase(_rewriteConfigResponse) ||
+                    "yes".equalsIgnoreCase(_rewriteConfigResponse))
+                {
+                    rewriteConfigResponse(fromId, cr);
+                }
                 log(_table + " (id=" + fromId + ") now has " + _crispoColumn + 
                     "=" + crispoId);
             }
