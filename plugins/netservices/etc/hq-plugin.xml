@@ -339,6 +339,36 @@
     <plugin type="autoinventory"
             class="NetServicesDetector"/>
 
+    <service name="InetAddress Ping"
+             description="Java InetAddress Monitor">
+
+      <config>
+        <option name="hostname"
+                description="Hostname"
+                default="localhost"/>
+
+        <option name="sotimeout"
+                description="Socket Timeout (in seconds)"
+                default="10"
+                type="int"/>
+      </config>
+   
+      <plugin type="collector"
+              class="InetAddressChecker"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              template="${sockaddr.template}"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              template="${sockaddr.template}"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+    </service>
+
     <service name="TCP Socket"
              description="TCP Socket Address Monitor">
 
