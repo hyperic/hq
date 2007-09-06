@@ -6621,12 +6621,10 @@ has already been defined.
                    rewriteConfigResponse="true"/>
       
       <schema-directSQL>
-        <!-- Copy over all the regular user data -->
         <statement>
           insert into eam_dash_config (id, config_type, version_col, crispo_id, user_id) 
               select id - 8999, 'USER', 0, tmp_crispo_id, id from eam_user_config_resp where id > 10
         </statement>
-        <!-- Now the dash config for the hqadmin user -->
         <statement>
           insert into eam_dash_config (id, config_type, version_col, crispo_id, user_id) 
               select 1000, 'USER', 0, tmp_crispo_id, id from eam_user_config_resp where id = 1
