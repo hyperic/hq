@@ -6671,8 +6671,7 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
     
-    <!--  Temporarily commented out ... will fix in a bit
-    <schemaSpec version="3.65">
+    <schemaSpec version="3.53">
       <schema-addColumn table="EAM_USER_CONFIG_RESP" column="TMP_CRISPO_ID" 
                         columnType="LONG"/>
       <crisponizer table="eam_user_config_resp" column="pref_response"
@@ -6688,12 +6687,8 @@ has already been defined.
           insert into eam_dash_config (id, config_type, version_col, crispo_id, user_id) 
               select 1000, 'USER', 0, tmp_crispo_id, id from eam_user_config_resp where id = 1
         </statement>
-        <statement>
-          ALTER TABLE EAM_USER_CONFIG_RESP DROP COLUMN TMP_CRISPO_ID
-        </statement>
       </schema-directSQL>
     </schemaSpec>
-    -->
     
 </dbupgrade>
 </target>
