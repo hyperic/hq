@@ -157,8 +157,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 return;
             
             if (log.isDebugEnabled())
-                log.debug("Trigger ID " + getId() +
-                          " causing alert definition ID " + adId + " to fire");
+                log.debug("Trigger id " + getId() +
+                          " causing alert definition id " + alertDef.getId() + 
+                          " to fire");
 
             // See if we need to supress this trigger        
             if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
@@ -178,8 +179,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
                     alertDef, false);
             }
             
-            if (log.isDebugEnabled())
-                log.debug("Firing trigger " + getId() + " actions");
+            log.info("Firing trigger id " + getId() + 
+                    " actions for alert def ["+alertDef.getName()+
+                    "] with id="+alertDef.getId());
 
             EscalatableCreator creator = 
                 new ClassicEscalatableCreator(alertDef, event);

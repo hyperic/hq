@@ -146,7 +146,7 @@ class MemGalertDef {
         if (execReason == null) 
             return;
         
-        _log.debug("Alert def [" + _name + " firing");
+        _log.info("Alert def [" + _name + "] with id="+_id+" firing");
         _log.debug(execReason);
 
         strat.getPartition().execute(_id, execReason);
