@@ -240,8 +240,13 @@ public class SST_Crisponizer extends SchemaSpecTask {
             while (rs.next()) {
                 long fromId = rs.getLong(1);
                 byte[] b = rs.getBytes(2);
+
+                ConfigResponse cr;
                 
-                ConfigResponse cr = ConfigResponse.decode(b);
+                if (b == null)
+                    cr = new ConfigResponse();
+                else
+                    cr = ConfigResponse.decode(b);
 
                 long crispoId = createCrispo(d, cr);
                 updateRowWithCrispo(fromId, crispoId);
