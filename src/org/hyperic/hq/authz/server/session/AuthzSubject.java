@@ -31,6 +31,7 @@ import java.util.HashSet;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.common.server.session.Crispo;
 
 public class AuthzSubject extends AuthzNamedBean {
     private String     _dsn;
@@ -47,7 +48,8 @@ public class AuthzSubject extends AuthzNamedBean {
     private Resource   _resource;
     private Collection _roles = new HashSet();
     private Collection _userConfigs = new ArrayList();
-
+    private Crispo     _prefs;
+    
     private AuthzSubjectValue _valueObj;
 
     protected AuthzSubject() {
@@ -189,14 +191,14 @@ public class AuthzSubject extends AuthzNamedBean {
         _roles.clear();
     }
 
-    public Collection getUserConfigs() {
-        return _userConfigs;
+    protected Crispo getPrefs() {
+        return _prefs;
     }
-
-    protected void setUserConfigs(Collection val) {
-        _userConfigs = val;
+    
+    protected void setPrefs(Crispo c) {
+        _prefs = c;
     }
-
+    
     public Object getValueObject() {
         return getAuthzSubjectValue();
     }

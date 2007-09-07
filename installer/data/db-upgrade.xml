@@ -6690,6 +6690,23 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
     
+    <schemaSpec version="3.54">
+      <!-- Migrate the rest of the user's config response to a crispo -->
+      <crisponizer table="eam_user_config_resp" column="pref_response"
+                   crispoColumn="TMP_CRISPO_ID" />
+      <schema-addColumn table="EAM_SUBJECT" column="PREF_CRISPO_ID" 
+                        columnType="LONG"/>
+      <schema-directSQL>
+        <statement>
+          update eam_subject s set pref_crispo_id = (
+              select tmp_crispo_id from eam_user_config_resp r where r.id = s.id)
+        </statement>
+        <statement>
+          drop table eam_user_config_resp  
+        </statement>
+      </schema-directSQL>                        
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 

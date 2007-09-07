@@ -45,6 +45,8 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -392,7 +394,8 @@ public class AuthzSubjectManagerEJBImpl
      * @ejb:interface-method
      */
     public ConfigResponse getUserPrefs(AuthzSubjectValue who, Integer subjId)
-        throws PermissionException, EncodingException {
+        throws PermissionException
+    {
         // users can always see their own prefs.
         if(!who.getId().equals(subjId)) { 
             // check that the caller can see users
@@ -402,14 +405,11 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
-        byte[] bytes = confResp.getPrefResponse();
-
-        if(bytes == null) {
-            return new ConfigResponse(); 
-        } else {
-            return ConfigResponse.decode(bytes);
-        }
+        AuthzSubject targ = getSubjectDAO().findById(subjId);
+        Crispo c = targ.getPrefs();
+        if (c == null)
+            return new ConfigResponse();
+        return c.toResponse();
     }
 
     /**
@@ -418,8 +418,8 @@ public class AuthzSubjectManagerEJBImpl
      */
     public void setUserPrefs(AuthzSubjectValue who, Integer subjId,
                              ConfigResponse prefs) 
-        throws EncodingException, PermissionException {
-
+        throws PermissionException 
+    {
         // check to see if the user attempting the modification
         // is the same as the one being modified
         if(!(who.getId().intValue() == subjId.intValue())) {
@@ -429,8 +429,8 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.subjectOpModifySubject);
         }
 
-        UserConfigResp confResp = getSubjectDAO().findUserConfigResp(subjId);
-        confResp.setPrefResponse(prefs.encode());
+        AuthzSubject targ = getSubjectDAO().findById(subjId);
+        CrispoManagerEJBImpl.getOne().update(targ.getPrefs(), prefs);
     }
     
     /**

@@ -124,14 +124,8 @@ public class AuthenticateUserAction extends TilesAction {
                 ConfigResponse defaultPreferences =
                     (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
 
-                try {            
-                    preferences = authzBoss.getUserPrefs(sessionId,
-                                                         subject.getId());
-                }
-                catch (ApplicationException e ){
-                    // this is ok- the user has no prefs
-                    log.error("error retrieving user preferences:",e);
-                }
+                preferences = authzBoss.getUserPrefs(sessionId,
+                                                     subject.getId());
             
                 preferences.merge(defaultPreferences, false );
 

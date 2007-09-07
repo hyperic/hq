@@ -441,13 +441,10 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Return a ConfigResponse matching the UserPreferences
      * @ejb:interface-method
      */
-    public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId)
-        throws ApplicationException {
+    public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId) {
         try {
             AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
             return getAuthzSubjectManager().getUserPrefs(who, subjectId);
-        } catch (EncodingException e) {
-            throw new ApplicationException(e);
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -460,19 +457,16 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public void setUserPrefs(Integer sessionId, Integer subjectId,
                              ConfigResponse prefs)
         throws ApplicationException, SessionTimeoutException,
-               SessionNotFoundException {
-        try {
-            // log.debug("Invoking setUserPrefs" +
-            //         " in AuthzBossEJBImpl " +
-            //         " for " + subjectId + " at "+System.currentTimeMillis() +
-            //         " prefs = " + prefs);
-            AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
-            getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
-            prefs = getUserPrefs(sessionId, subjectId);
-            // log.debug("LOADED PREFS=" + prefs);
-        } catch (EncodingException e) {
-            throw new ApplicationException(e);
-        }
+               SessionNotFoundException 
+    {
+        // log.debug("Invoking setUserPrefs" +
+        //         " in AuthzBossEJBImpl " +
+        //         " for " + subjectId + " at "+System.currentTimeMillis() +
+        //         " prefs = " + prefs);
+        AuthzSubjectValue who = manager.getSubject(sessionId.intValue());
+        getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
+        prefs = getUserPrefs(sessionId, subjectId);
+        // log.debug("LOADED PREFS=" + prefs);
     }
 
     /**

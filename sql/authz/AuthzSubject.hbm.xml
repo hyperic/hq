@@ -79,10 +79,9 @@
       <many-to-many class="Role" column="ROLE_ID"/>
     </set>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="userConfigs" table="EAM_USER_CONFIG_RESP">
-      <key on-delete="cascade" column="ID"/>
-      <one-to-many class="UserConfigResp"/>
-    </bag>
+    <many-to-one name="prefs">
+      <column name="PREF_CRISPO_ID"/>
+    </many-to-one>
   </class>
 
   <class name="AuthzSubjRoleMap" table="EAM_SUBJECT_ROLE_MAP">

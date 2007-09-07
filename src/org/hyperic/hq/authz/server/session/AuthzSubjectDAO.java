@@ -35,7 +35,11 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.server.session.CrispoDAO;
+import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -73,12 +77,11 @@ class AuthzSubjectDAO
                                                AuthzConstants.creatorRoleName);
         }
         subject.addRole(role);
-        save(subject);
         
         // Insert an empty config response
-        UserConfigResp resp = new UserConfigResp(subject, null);
-        save(resp);
-
+        Crispo c = CrispoManagerEJBImpl.getOne().create(new ConfigResponse());
+        subject.setPrefs(c);
+        save(subject);
         return subject;
     }
 
@@ -91,8 +94,9 @@ class AuthzSubjectDAO
     }
 
     void remove(AuthzSubject entity) {
-        UserConfigResp resp = findUserConfigResp(entity.getId());
-        super.remove(resp);
+        Crispo c = entity.getPrefs();
+        entity.setPrefs(null);
+        CrispoManagerEJBImpl.getOne().deleteCrispo(c);
         super.remove(entity);
     }
 
@@ -206,12 +210,5 @@ class AuthzSubjectDAO
                          (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
-    }
-    
-    public UserConfigResp findUserConfigResp(Integer subjId) {
-        return (UserConfigResp) getSession()
-            .createCriteria( UserConfigResp.class )
-            .add( Restrictions.eq("id", subjId))
-            .uniqueResult();
     }
 }
