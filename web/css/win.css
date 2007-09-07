@@ -309,7 +309,7 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 /* NAVIGATION MAP DIAGRAM */
 #diagramDiv {
 position: absolute;
-z-index: 100;                                        3
+z-index: 100;                                 
 visibility: hidden;
 /* TURN THIS OFF B/C OF DROP-SHADOW
 filter: alpha(opacity=85);
