@@ -393,18 +393,4 @@ public class Util {
     public static Iterator getTableMappings() {
         return configuration.getTableMappings();
     }
-    
-    public static Dialect getDialect(Connection conn) throws SQLException {
-        int t = DBUtil.getDBType(conn);
-        
-        if (DBUtil.isMySQL(t)) {
-            return new MySQL5InnoDBDialect();
-        } else if(DBUtil.isPostgreSQL(t)) {
-            return new PostgreSQLDialect();
-        } else if (DBUtil.isOracle(t)) {
-            return new Oracle9Dialect();
-        } else {
-            throw new IllegalArgumentException("Unsupported DB");
-        }
-    }
 }
