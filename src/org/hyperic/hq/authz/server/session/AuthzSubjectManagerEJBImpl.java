@@ -430,7 +430,13 @@ public class AuthzSubjectManagerEJBImpl
         }
 
         AuthzSubject targ = getSubjectDAO().findById(subjId);
-        CrispoManagerEJBImpl.getOne().update(targ.getPrefs(), prefs);
+        
+        if (targ.getPrefs() != null)
+            CrispoManagerEJBImpl.getOne().update(targ.getPrefs(), prefs);
+        else {
+            Crispo newPrefs = CrispoManagerEJBImpl.getOne().create(prefs);
+            targ.setPrefs(newPrefs);
+        }
     }
     
     /**
