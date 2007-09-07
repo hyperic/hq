@@ -40,6 +40,8 @@ import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.util.Messenger;
@@ -67,6 +69,11 @@ import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 public abstract class AbstractTrigger implements TriggerInterface {
     private final Log log = LogFactory.getLog(AbstractTrigger.class);
     
+    private final Object alertDefEnabledStatusLock = new Object();
+    
+    private final AlertDefinitionEnabledStatus uncommitedAlertDefEnabledStatus = 
+                    new AlertDefinitionEnabledStatus(true);
+    
     private static boolean systemReady = false;
 
     private static MBeanServer mServer;
@@ -74,12 +81,12 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
     
-	public AbstractTrigger() {
-		super();
+    public AbstractTrigger() {
+        super();
         
         // set the default value
         triggerValue.setId(new Integer(-1));
-	}
+    }
 
     private boolean isSystemReady() {
         if (!systemReady) {
@@ -136,47 +143,26 @@ public abstract class AbstractTrigger implements TriggerInterface {
         // has fired
         publishEvent(event);
 
-        AlertDefinitionManagerLocal aman;
-        AlertDefinition alertDef;
-        
-        aman = AlertDefinitionManagerEJBImpl.getOne();
+        AlertDefinitionManagerLocal aman = AlertDefinitionManagerEJBImpl.getOne();
 
         try {
-            // See if the alert def is actually enabled and if it's our job to
-            // fire the actions
             Integer adId = aman.getIdFromTrigger(getId());
             if (adId == null)
                 return;
             
-            alertDef = aman.getByIdNoCheck(adId);
-            if (!alertDef.isEnabled())
-                return;
             
-            // Don't fire if it's up to us
-            if (!alertDef.getActOnTrigger().getId().equals(getId()))
-                return;
+            AlertDefinition alertDef = null;
             
-            if (log.isDebugEnabled())
-                log.debug("Trigger id " + getId() +
-                          " causing alert definition id " + alertDef.getId() + 
-                          " to fire");
-
-            // See if we need to supress this trigger        
-            if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
-                TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
-
-                boolean fire = tracker.fire(getId(), getFrequency());
-                // The TriggerTracker decided if we are supposed to fire
-                if (!fire)
+            // HQ-902: Retrieving the alert def and checking if the actions 
+            // should fire must be guarded by a mutex.
+            synchronized (alertDefEnabledStatusLock) {
+                alertDef = aman.getByIdNoCheck(adId, true);
+                
+                // See if the alert def is actually enabled and if it's our job to
+                // fire the actions
+                if (!shouldFireActions(aman, alertDef)) {
                     return;
-            }
-
-            if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                    alertDef.isWillRecover()) {
-            	// Disable the alert definition now that we've fired
-                aman.updateAlertDefinitionInternalEnable(
-                    AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
-                    alertDef, false);
+                }                
             }
             
             log.info("Firing trigger id " + getId() + 
@@ -201,6 +187,73 @@ public abstract class AbstractTrigger implements TriggerInterface {
             throw new ActionExecuteException(
                 "Overlord does not have permission to disable definition");
         }
+    }
+
+    private boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
+                                      AlertDefinition alertDef) 
+        throws PermissionException {
+        
+        // Check stored as well as cached alert def status
+        if (!alertDef.isEnabled() || 
+            !uncommitedAlertDefEnabledStatus.isAlertDefinitionEnabled())
+            return false;
+        
+        // Don't fire if it's not up to us to act
+        if (!alertDef.getActOnTrigger().getId().equals(getId()))
+            return false;
+        
+        if (log.isDebugEnabled())
+            log.debug("Trigger id " + getId() +
+                      " causing alert definition id " + alertDef.getId() + 
+                      " to fire");
+
+        // See if we need to suppress this trigger        
+        if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
+            TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
+
+            boolean fire = tracker.fire(getId(), getFrequency());
+            // The TriggerTracker decided if we are supposed to fire
+            if (!fire)
+                return false;
+        }
+
+        if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
+                alertDef.isWillRecover()) {
+            // Disable the alert definition now that we've fired
+            boolean succeeded = false;
+            
+            try {
+                succeeded = aman.updateAlertDefinitionInternalEnable(
+                                AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
+                                alertDef, 
+                                false);                
+            } finally {
+                if (succeeded) {
+                    setUncommitedAlertDefEnabledStatusToDisabled();                    
+                }
+            }
+        }
+        
+        return true;        
+
+    }
+        
+    private void setUncommitedAlertDefEnabledStatusToDisabled() {
+        try {
+            uncommitedAlertDefEnabledStatus.flipEnabledStatus();
+        } finally {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+
+                public void afterCommit(boolean success) {
+                    uncommitedAlertDefEnabledStatus.resetEnabledStatus();
+                }
+
+                public void beforeCommit() {
+                }
+                
+            });
+        }
+
     }
     
     /**
