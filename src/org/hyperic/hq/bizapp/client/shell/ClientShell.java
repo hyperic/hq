@@ -124,7 +124,6 @@ public class ClientShell
             
         // Register command handlers
         registerCommandHandler("alert",        new ClientShell_alert(this));
-        registerCommandHandler("alertdef",     new ClientShell_alertdef(this));
         registerCommandHandler("cache",        new ClientShell_cache(this));
         registerCommandHandler("get",          new ClientShell_get(this));
         registerCommandHandler("login",        loginCommand);
