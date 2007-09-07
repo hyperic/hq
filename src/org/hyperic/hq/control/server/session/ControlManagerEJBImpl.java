@@ -75,6 +75,8 @@ import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlManagerUtil;
+import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ControlPluginManager;
@@ -693,6 +695,14 @@ public class ControlManagerEJBImpl implements SessionBean {
         default:
             throw new IllegalArgumentException("Invalid appdef type:" + 
                                                id.getType());
+        }
+    }
+
+    public static ControlManagerLocal getOne() {
+        try {
+            return ControlManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 
