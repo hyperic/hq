@@ -22,7 +22,7 @@ class DojoUtil {
         '''
 	        <script type="text/javascript">
                 var djConfig = {
-                    isDebug: true
+                    isDebug: false
                 };
             </script>
 
