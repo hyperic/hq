@@ -35,6 +35,7 @@ import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
+import org.hyperic.hibernate.Util;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
@@ -233,7 +234,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
                         
         try {
             Connection conn = getConnection();
-            Dialect d = DBUtil.getDialect(conn);
+            Dialect d = Util.getDialect(conn);
             stmt = conn.createStatement();
             
             rs = stmt.executeQuery("select id, " + _column + " from " + _table);

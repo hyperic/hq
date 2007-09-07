@@ -50,6 +50,9 @@ import org.hibernate.cfg.Environment;
 
 import org.hibernate.dialect.Dialect;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
+import org.hyperic.hibernate.dialect.Oracle9Dialect;
+import org.hyperic.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.function.ClassicAvgFunction;
 import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
@@ -60,8 +63,10 @@ import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.jdbc.DBUtil;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -387,5 +392,19 @@ public class Util {
 
     public static Iterator getTableMappings() {
         return configuration.getTableMappings();
+    }
+    
+    public static Dialect getDialect(Connection conn) throws SQLException {
+        int t = DBUtil.getDBType(conn);
+        
+        if (DBUtil.isMySQL(t)) {
+            return new MySQL5InnoDBDialect();
+        } else if(DBUtil.isPostgreSQL(t)) {
+            return new PostgreSQLDialect();
+        } else if (DBUtil.isOracle(t)) {
+            return new Oracle9Dialect();
+        } else {
+            throw new IllegalArgumentException("Unsupported DB");
+        }
     }
 }

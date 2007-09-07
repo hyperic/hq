@@ -290,20 +290,6 @@ public class DBUtil {
         }
     }
     
-    public static Dialect getDialect(Connection conn) throws SQLException {
-        int t = getDBType(conn);
-        
-        if (isMySQL(t)) {
-            return new MySQL5InnoDBDialect();
-        } else if(isPostgreSQL(t)) {
-            return new PostgreSQLDialect();
-        } else if (isOracle(t)) {
-            return new Oracle9Dialect();
-        } else {
-            throw new IllegalArgumentException("Unsupported DB");
-        }
-    }
-
     /**
      * Given a Connection object, this method returns a constant
      * indicating what type of database the Connection is connected to.
