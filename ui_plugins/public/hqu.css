@@ -271,4 +271,5 @@ font-weight:bold;
     padding-right:15px;
     background-image: url( "images/ajax-loader-blue.gif" );
     background-repeat: no-repeat;
+    background-position: top left;
 }
