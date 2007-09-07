@@ -151,6 +151,25 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return (AlertDefinition)super.findById(id);
     }
     
+    /** 
+     * Find an alert definition by Id, loading from the session.
+     * 
+     * @param id The alert definition Id.
+     * @param refresh <code>true</code> to force the alert def state to be 
+     *                to be re-read from the database; <code>false</code> to 
+     *                allow the persistence engine to return a cached copy.
+     * @throws ObjectNotFoundException if no alert definition with the give Id exists.
+     */
+    public AlertDefinition findById(Integer id, boolean refresh) {
+        AlertDefinition def = findById(id);
+        
+        if (refresh) {
+            getSession().refresh(def);
+        }
+        
+        return def;
+    }
+    
     public List findByAppdefEntityTypeSortByCtime(AppdefEntityID id,
                                                   boolean asc) {
         return findByAppdefEntityType(id, "ctime", asc);

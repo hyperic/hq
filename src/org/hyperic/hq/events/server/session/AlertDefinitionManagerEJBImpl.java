@@ -425,32 +425,40 @@ public class AlertDefinitionManagerEJBImpl
      * Enable/Disable alert definitions. For internal use only where the mtime 
      * does not need to be reset on each update.
      * 
+     * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
-                                                    AlertDefinition def, 
-                                                    boolean enable)
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                       AlertDefinition def, 
+                                                       boolean enable)
         throws PermissionException {
+        
+        boolean succeeded = false;
+        
         if (def.isEnabled() != enable) {
             canManageAlerts(subj, def);
             def.setEnabled(enable);
+            succeeded = true;
         }
+        
+        return succeeded;
     }
     
     /** 
      * Enable/Disable alert definitions. For internal use only where the mtime 
      * does not need to be reset on each update.
      * 
+     * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
-                                                    Integer defId, 
-                                                    boolean enable)
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                       Integer defId, 
+                                                       boolean enable)
         throws FinderException, PermissionException {
         
         AlertDefinition def = badFindById(defId);
         
-        updateAlertDefinitionInternalEnable(subj, def, enable);
+        return updateAlertDefinitionInternalEnable(subj, def, enable);
     }
     
     /** 
@@ -584,6 +592,16 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
     
+    private AlertDefinition badFindById(Integer id, boolean refresh) 
+    throws FinderException
+    {
+        try {
+            return getAlertDefDAO().findById(id, refresh);
+        } catch(ObjectNotFoundException e) {
+            throw new FinderException("Couldn't find AlertDefinition#" + id);
+        }
+    }
+    
     /** Find an alert definition and return a value object
      * @throws PermissionException if user does not have permission to manage
      * alerts
@@ -612,10 +630,16 @@ public class AlertDefinitionManagerEJBImpl
     
     /** Find an alert definition and return a basic value.  This is called by
      * the abstract trigger, so it does no permission checking.
+     * 
+     * @param id The alert def Id.
+     * @param refresh <code>true</code> to force the alert def state to be 
+     *                to be re-read from the database; <code>false</code> to 
+     *                allow the persistence engine to return a cached copy.
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdNoCheck(Integer id) throws FinderException {
-        return badFindById(id);
+    public AlertDefinition getByIdNoCheck(Integer id, boolean refresh) 
+        throws FinderException {
+        return badFindById(id, refresh);
     }
     
     /** 
