@@ -66,7 +66,9 @@ public final class GalertEscalationAlertType
     }
 
     protected void setEscalation(Integer defId, Escalation escalation) {
-        getGalertMan().findById(defId).setEscalation(escalation);
+        GalertManagerLocal gMan = getGalertMan();
+        GalertDef def = gMan.findById(defId);
+        gMan.update(def, escalation);
     }
 
     protected void changeAlertState(Integer alertId, AuthzSubject who, 
