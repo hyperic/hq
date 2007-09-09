@@ -6698,8 +6698,8 @@ has already been defined.
                         columnType="LONG"/>
       <schema-directSQL>
         <statement>
-          update eam_subject s set pref_crispo_id = (
-              select tmp_crispo_id from eam_user_config_resp r where r.id = s.id)
+          update eam_subject set pref_crispo_id = (
+              select tmp_crispo_id from eam_user_config_resp r where r.id = eam_subject .id)
         </statement>
         <statement>
           drop table eam_user_config_resp  
