@@ -255,7 +255,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             } else {
                 succeeded = insertDataInBatch(data, conn);
             }            
-            conn.setAutoCommit(autocommit);
 
             if (succeeded) {
                 _log.debug("Inserting data in a single transaction succeeded.");
@@ -267,9 +266,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 addDataWithCommits(data, true, conn);
             }
             conn.commit();
+            conn.setAutoCommit(autocommit);
         }
         catch (SQLException e) {
-            _log.debug("Rollback failed");
+            _log.debug("Transaction failed around inserting metric data.", e);
         }
         finally {
             DBUtil.closeConnection(logCtx, conn);
