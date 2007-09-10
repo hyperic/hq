@@ -198,7 +198,7 @@ public class ResourceGroup extends AuthzNamedBean
     }
 
     public void addResource(Resource resource) {
-        resource.getResourceGroups().add(this);
+        resource.getResourceGroups().add(resource);
         _resourceSet.add(resource);
     }
 

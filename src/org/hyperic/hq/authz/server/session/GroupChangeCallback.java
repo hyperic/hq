@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.common.VetoException;
+
 public interface GroupChangeCallback {
     /**
      * Called after a group has been created
@@ -34,7 +36,7 @@ public interface GroupChangeCallback {
     /**
      * Called before a group is deleted 
      */
-    void preGroupDelete(ResourceGroup g);
+    void preGroupDelete(ResourceGroup g) throws VetoException;
     
     /**
      * Called after group members for a group have changed.

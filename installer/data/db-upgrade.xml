@@ -6612,6 +6612,16 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
     
+    <schemaSpec version="3.51.1">
+      <schema-directSQL>
+        <statement>
+          ALTER TABLE eam_svc_cluster
+            ADD CONSTRAINT fk39da6ecdcce79ab8 FOREIGN KEY (group_id) 
+            REFERENCES eam_resource_group(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
     <schemaSpec version="3.52">
       <schema-directSQL>
         <statement targetDB="postgresql">

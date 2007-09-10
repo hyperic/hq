@@ -835,13 +835,13 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         try {
             GroupManagerLocal manager = getGroupManager();
             AppdefGroupValue gv = findGroup(subject,groupId);
-            manager.deleteGroup(subject, groupId );
 
             if (gv.getGroupType() == 
                 AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC && 
                 gv.getClusterId() != CLUSTER_UNDEFINED) {
                 removeServiceCluster (subject,gv.getClusterId());
             }
+            manager.deleteGroup(subject, groupId );
         } catch (GroupNotFoundException e) {
             throw new AppdefGroupNotFoundException ("caught group not " +
                         "found exc looking for:" + groupId);

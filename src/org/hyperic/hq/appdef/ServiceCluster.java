@@ -34,16 +34,17 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 public class ServiceCluster extends AppdefBean
 {
-    private String _name;
-    private String _sortName;
-    private String _description;
-    private Integer _groupId;
-    private ServiceType _serviceType;
-    private Collection _appServices = new ArrayList();
-    private Collection _services = new ArrayList();
+    private String        _name;
+    private String        _sortName;
+    private String        _description;
+    private ResourceGroup _group;
+    private ServiceType   _serviceType;
+    private Collection    _appServices = new ArrayList();
+    private Collection    _services = new ArrayList();
 
     public ServiceCluster() {
         super();
@@ -74,12 +75,12 @@ public class ServiceCluster extends AppdefBean
         _description = description;
     }
 
-    public Integer getGroupId() {
-        return _groupId;
+    public ResourceGroup getGroup() {
+        return _group;
     }
 
-    public void setGroupId(Integer groupId) {
-        _groupId = groupId;
+    public void setGroup(ResourceGroup group) {
+        _group = group;
     }
 
     public ServiceType getServiceType() {
@@ -151,7 +152,7 @@ public class ServiceCluster extends AppdefBean
     public ServiceClusterValue getServiceClusterValue() {
         _serviceClusterValue.setName(getName());
         _serviceClusterValue.setDescription(getDescription());
-        _serviceClusterValue.setGroupId(getGroupId());
+        _serviceClusterValue.setGroupId(getGroup().getId());
         _serviceClusterValue.setOwner("");
         _serviceClusterValue.setModifiedBy("");
         _serviceClusterValue.setLocation("");
@@ -170,7 +171,6 @@ public class ServiceCluster extends AppdefBean
         setName(val.getName());
         setSortName(val.getSortName());
         setDescription(val.getDescription());
-        setGroupId(val.getGroupId());
 
         if (val.getServiceType() != null) {
             Integer stid = val.getServiceType().getId();

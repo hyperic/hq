@@ -94,7 +94,13 @@ public class ResourceDAO
             ResourceGroup rg = (ResourceGroup) i.next();
             rg.removeResource(entity);
         }
-        entity.getResourceGroups().clear();
+        entity.getResourceGroups().clear();        
+        
+        // Remove any references to the group from the group_resource map
+        String sql = "delete ResGrpResMap g where g.id.resource = :resource";
+        getSession().createQuery(sql)
+            .setParameter("resource", entity)
+            .executeUpdate();
         
         getSession().flush();
         super.remove(entity);
