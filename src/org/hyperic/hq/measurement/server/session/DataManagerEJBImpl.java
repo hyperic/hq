@@ -238,24 +238,24 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         HQDialect dialect = Util.getHQDialect();
         boolean succeeded = false;
 
-        _conn = safeGetConnection();
-        if (_conn == null) {
+        Connection conn = safeGetConnection();
+        if (conn == null) {
             // We are in a bad state. Set txn rollback in case this txn was 
             // initiated by the client.
             _ctx.setRollbackOnly();
             return false;
         }
 
-        boolean autocommit = false;
         try
         {
-            autocommit = _conn.getAutoCommit();
-            _conn.setAutoCommit(false);
+            boolean autocommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
             if (dialect.supportsMultiInsertStmt()) {
-                succeeded = insertDataWithOneInsert(data, _conn);
+                succeeded = insertDataWithOneInsert(data, conn);
             } else {
-                succeeded = insertDataInBatch(data, _conn);
+                succeeded = insertDataInBatch(data, conn);
             }            
+            conn.setAutoCommit(autocommit);
 
             if (succeeded) {
                 _log.debug("Inserting data in a single transaction succeeded.");
@@ -263,24 +263,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             } else {
                 _log.debug("Inserting data in a single transaction failed." +
                            "  Rolling back transaction.");
-                _conn.rollback();
-                addData(data, true);
+                conn.rollback();
+                addDataWithCommits(data, true, conn);
             }
-            _conn.commit();
+            conn.commit();
         }
         catch (SQLException e) {
             _log.debug("Rollback failed");
         }
         finally {
-            try {
-                if (_conn != null && !_conn.isClosed())
-                    _conn.setAutoCommit(autocommit);
-            } catch (SQLException e) {
-                _log.debug("Error executing Connection method.", e);
-            }
-            DBUtil.closeConnection(logCtx, _conn);
+            DBUtil.closeConnection(logCtx, conn);
         }
-
         return succeeded;        
     }
 
@@ -314,67 +307,75 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (shouldAbortDataInsertion(data)) {
             return;
         }
-        
+
         _log.debug("Attempting to insert/update data outside a transaction.");
 
         data = enforceUnmodifiable(data);
-        Set failedToSaveMetrics = new HashSet();
-        List left = data;
-        
-        Connection conn = (_conn == null) ? safeGetConnection() : _conn;
-        
+
+        Connection conn = safeGetConnection();
+
         if (conn == null) {
             _log.debug("Inserting/Updating data outside a transaction failed.");
             return;
         }
-        
         try {
-            while (true && !left.isEmpty()) {
-                int numLeft = left.size();
-                _log.debug("Attempting to insert " + numLeft + " points");
-                
-                try {
-                    left = insertData(conn, left, true);
-                } catch (SQLException e) {
-                    assert false : "The SQLException should not happen: "+e;
-                }
-                                
-                _log.debug("Num left = " + left.size());
-                
-                if (left.isEmpty())
-                    break;
-                
-                if (!overwrite) {
-                    _log.debug("We are not updating the remaining "+
-                                left.size()+" points");
-                    failedToSaveMetrics.addAll(left);
-                    break;
-                }
-                                    
-                // The insert couldn't insert everything, so attempt to update
-                // the things that are left
-                _log.debug("Sending " + left.size() + " data points to update");
-                                
-                left = updateData(conn, left);                    
-                
-                if (left.isEmpty())
-                    break;
-
-                _log.debug("Update left " + left.size() + " points to process");
-                
-                if (numLeft == left.size()) {
-                    DataPoint remPt = (DataPoint)left.remove(0);
-                    failedToSaveMetrics.add(remPt);
-                    // There are some entries that we weren't able to do
-                    // anything about ... that sucks.
-                    _log.warn("Unable to do anything about " + numLeft + 
-                              " data points.  Sorry.");
-                    _log.warn("Throwing away data point " + remPt);
-                }
-            }
-        } finally {
+            addDataWithCommits(data, overwrite, conn);
         }
-        
+        finally {
+            DBUtil.closeConnection(logCtx, conn);
+        }
+    }
+
+    private void addDataWithCommits(List data, boolean overwrite,
+                                    Connection conn)
+    {
+        Set failedToSaveMetrics = new HashSet();
+        List left = data;
+        while (true && !left.isEmpty())
+        {
+            int numLeft = left.size();
+            _log.debug("Attempting to insert " + numLeft + " points");
+            
+            try {
+                left = insertData(conn, left, true);
+            } catch (SQLException e) {
+                assert false : "The SQLException should not happen: "+e;
+            }
+                            
+            _log.debug("Num left = " + left.size());
+            
+            if (left.isEmpty())
+                break;
+            
+            if (!overwrite) {
+                _log.debug("We are not updating the remaining "+
+                            left.size()+" points");
+                failedToSaveMetrics.addAll(left);
+                break;
+            }
+                                
+            // The insert couldn't insert everything, so attempt to update
+            // the things that are left
+            _log.debug("Sending " + left.size() + " data points to update");
+                            
+            left = updateData(conn, left);                    
+            
+            if (left.isEmpty())
+                break;
+
+            _log.debug("Update left " + left.size() + " points to process");
+            
+            if (numLeft == left.size()) {
+                DataPoint remPt = (DataPoint)left.remove(0);
+                failedToSaveMetrics.add(remPt);
+                // There are some entries that we weren't able to do
+                // anything about ... that sucks.
+                _log.warn("Unable to do anything about " + numLeft + 
+                          " data points.  Sorry.");
+                _log.warn("Throwing away data point " + remPt);
+            }
+        }
+
         _log.debug("Inserting/Updating data outside a transaction finished.");
         
         sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
