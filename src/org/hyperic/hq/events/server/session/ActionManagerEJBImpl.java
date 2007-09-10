@@ -111,7 +111,9 @@ public class ActionManagerEJBImpl implements SessionBean {
      */
     public Action createAction(AlertDefinition def, ActionValue val,
                                Action parent) {
-        return def.createAction(val, parent);
+        Action action = def.createAction(val, parent);
+        def.setMtime(System.currentTimeMillis());
+        return action;
     }
 
     /**
@@ -125,6 +127,8 @@ public class ActionManagerEJBImpl implements SessionBean {
             
         action.setActionValue(val);
         setParentAction(val, action);
+        long mtime = System.currentTimeMillis();
+        action.getAlertDefinition().setMtime(mtime);
 
         // Then find and update the child actions.
 
@@ -137,6 +141,7 @@ public class ActionManagerEJBImpl implements SessionBean {
             Action act = (Action) i.next();
             act.setActionValue(val);
             setParentAction(val, act);
+            act.getAlertDefinition().setMtime(mtime);
         }
         
         return action.getActionValue();

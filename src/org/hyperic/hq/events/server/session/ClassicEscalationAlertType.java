@@ -97,11 +97,14 @@ public final class ClassicEscalationAlertType
             AlertDefinitionManagerLocal defMan = getDefMan();
             AlertDefinition def = defMan.getByIdNoCheck(defId, false);
             def.setEscalation(escalation);
+            long mtime = System.currentTimeMillis();
+            def.setMtime(mtime);
             
             Collection children = def.getChildren();
             for (Iterator it = children.iterator(); it.hasNext(); ) {
                 def = (AlertDefinition) it.next();
                 def.setEscalation(escalation);
+                def.setMtime(mtime);
             }
 
         } catch(FinderException e) {
