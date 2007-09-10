@@ -48,8 +48,11 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -64,6 +67,8 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
+import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -74,6 +79,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.util.pager.PageControl;
@@ -1191,7 +1197,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
         PlatformTypeDAO ptLHome = getPlatformTypeDAO();
         Collection curPlatforms = ptLHome.findByPlugin(plugin);
-            
+
+        AuthzSubjectValue overlord = null;
+        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
         for (Iterator i = curPlatforms.iterator(); i.hasNext();) {
             PlatformType ptlocal = (PlatformType) i.next();
             String localName = ptlocal.getName();
@@ -1200,8 +1208,55 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // See if this exists
             if (pinfo == null) {
-                // Remove platforms which are not supposed to exist
-                _log.debug("Removing PlatformType: " + localName);
+                try {
+                    // Remove platforms which are not supposed to exist
+                    _log.debug("Removing PlatformType: " + localName);
+                    // Get overlord
+                    if (overlord == null)
+                        overlord = getOverlord();
+
+                    // Find resource groups of this type and remove
+                    AppdefGroupPagerFilterGrpEntRes filter =
+                        new AppdefGroupPagerFilterGrpEntRes (
+                            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                            ptlocal.getId().intValue(), true);
+
+                    List groups = grpMgr
+                    .findAllGroups(overlord, PageControl.PAGE_ALL,
+                                   new AppdefPagerFilter[] { filter });
+                    for (Iterator grpIt = groups.iterator();
+                    grpIt.hasNext(); ) {
+                        try {
+                            AppdefGroupValue grp =
+                                (AppdefGroupValue) grpIt.next();
+                            grpMgr.deleteGroup(overlord, grp.getId());
+                        } catch (AppdefGroupNotFoundException e) {
+                            /*                            assert false :
+                            "Delete based on a group should not " +
+                            "result in AppdefGroupNotFoundException";*/
+                        } catch (VetoException e) {
+                            // Why can't we delete?
+                            log.error("Cannot delete group", e);
+                        }
+                    }
+
+                    // Remove all services
+                    for (Iterator pltIt = ptlocal.getPlatforms().iterator();
+                    pltIt.hasNext(); ) {
+                        Platform pltLocal = (Platform) pltIt.next();
+                        try {
+                            removePlatform(overlord, pltLocal);
+                        } catch (PlatformNotFoundException e) {
+                            assert false :
+                                "Delete based on a platform should not " +
+                                "result in PlatformNotFoundException";
+                        }
+                    }
+                } catch (PermissionException e) {
+                    assert false :
+                        "Overlord should not run into PermissionException";
+                }
+                
                 ptLHome.remove(ptlocal);
             } else {
                 String curName = ptlocal.getName();

@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -63,6 +64,8 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
+import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -1409,6 +1412,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         HashMap serverTypes = new HashMap();
 
         ServiceTypeDAO stLHome = getServiceTypeDAO();
+        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
         try {
             Collection curServices = stLHome.findByPlugin(plugin);
             ServerTypeDAO stHome = getServerTypeDAO();
@@ -1429,20 +1433,44 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // Get overlord
                     if (overlord == null)
                         overlord = getOverlord();
+
+                    // Find resource groups of this type and remove
+                    AppdefGroupPagerFilterGrpEntRes filter =
+                        new AppdefGroupPagerFilterGrpEntRes (
+                            AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+                            stlocal.getId().intValue(), true);
                     
-                    // Remove all services
-                    for (Iterator svcIt = stlocal.getServices().iterator();
-                         svcIt.hasNext(); ) {
-                        Service svcLocal = (Service) svcIt.next();
-                        try {
-                            removeService(overlord, svcLocal);
-                        } catch (PermissionException e) {
-                            // This should never happen, we're the overlord
-                            throw new SystemException(e);
+                    try {
+                        List groups = grpMgr
+                            .findAllGroups(overlord, PageControl.PAGE_ALL,
+                                           new AppdefPagerFilter[] { filter });
+                        for (Iterator grpIt = groups.iterator();
+                             grpIt.hasNext(); ) {
+                            try {
+                                AppdefGroupValue grp =
+                                    (AppdefGroupValue) grpIt.next();
+                                grpMgr.deleteGroup(overlord, grp.getId());
+                            } catch (AppdefGroupNotFoundException e) {
+                                assert false :
+                                    "Delete based on a group should not " +
+                                    "result in AppdefGroupNotFoundException";
+                            } catch (VetoException e) {
+                                // Why can't we delete?
+                                log.error("Cannot delete group", e);
+                            }
                         }
-                    }
                     
-           
+                        // Remove all services
+                        for (Iterator svcIt = stlocal.getServices().iterator();
+                             svcIt.hasNext(); ) {
+                            Service svcLocal = (Service) svcIt.next();
+                            removeService(overlord, svcLocal);
+                        }           
+                    } catch (PermissionException e) {
+                        assert false :
+                            "Overlord should not run into PermissionException";
+                    }
+
                     stLHome.remove(stlocal);
                 } else {
                     // Just update it
