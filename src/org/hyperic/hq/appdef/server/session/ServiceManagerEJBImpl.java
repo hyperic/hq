@@ -65,6 +65,8 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.authz.server.session.GroupChangeCallback;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -90,6 +92,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.zevents.ZeventManager;
 
 /**
@@ -716,8 +719,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             else if (o instanceof ServiceCluster) {
                 ServiceCluster aCluster = (ServiceCluster)o;
-                AppdefEntityID clusterId = new AppdefEntityID(
-                    AppdefEntityConstants.APPDEF_TYPE_GROUP,aCluster.getGroupId());
+                AppdefEntityID clusterId = 
+                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                                       aCluster.getGroup().getId());
                 if (viewableEntityIds != null &&
                     viewableEntityIds.contains(clusterId)) {
                     retVal.add(o);
@@ -1207,7 +1211,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     AppdefEntityID groupId = 
                         new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                            cluster.getGroupId().intValue());
+                            cluster.getGroup().getId());
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {
@@ -1612,12 +1616,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws RemoveException, FinderException, PermissionException,
                VetoException
     {
-        ServiceCluster cluster = getServiceClusterDAO().findById(clusterId);
-            
-        AppdefStartupListener.getClusterDeleteCallback().preDelete(cluster);
+        ServiceCluster c = getServiceClusterDAO().findById(clusterId); 
+        AppdefStartupListener.getClusterDeleteCallback().preDelete(c);
         // XXX - Authz chex needed?
         //checkRemovePermission(subj, clusterLoc.getEntityId());
-        getServiceClusterDAO().remove(cluster);
+        getServiceClusterDAO().remove(c);
     }
     
     /**

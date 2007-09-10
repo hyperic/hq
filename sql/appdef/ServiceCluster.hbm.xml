@@ -27,9 +27,9 @@
       <column name="DESCRIPTION" not-null="false" length="200"/>
     </property>
 
-    <property name="groupId">
+    <many-to-one name="group">
       <column name="GROUP_ID" not-null="false"/>
-    </property>
+    </many-to-one>
 
     <property name="creationTime">
       <column name="CTIME" not-null="false"/>

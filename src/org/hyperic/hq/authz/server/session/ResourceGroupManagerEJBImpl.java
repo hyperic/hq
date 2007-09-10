@@ -57,6 +57,7 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -100,10 +101,10 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:interface-method
      */
     public ResourceGroupValue[] getResourceGroups(ResourceValue res) {
-        Resource resLocal = getResourceDAO().findById(res.getId());
-        /** TODO PermissionCheck **/
+        Resource resource = getResourceDAO().findById(res.getId());
+        Collection pojos = getResourceGroupDAO().findContaining(resource);
         return (ResourceGroupValue[])
-            fromPojos(resLocal.getResourceGroups(), ResourceGroupValue.class);
+            fromPojos(pojos, ResourceGroupValue.class);
     }
 
     /**
@@ -219,7 +220,7 @@ public class ResourceGroupManagerEJBImpl
      */
     public void removeResourceGroup(AuthzSubjectValue whoami,
                                     ResourceGroupValue group)
-        throws PermissionException
+        throws PermissionException, VetoException
     {
         ResourceGroupDAO dao = getResourceGroupDAO();
         ResourceGroup resGrp = dao.findById(group.getId());

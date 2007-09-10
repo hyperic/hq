@@ -162,7 +162,7 @@ public class AppServiceDAO extends HibernateDAO
             "where a.application.id=? and (" +
             "r.resourceType.id=t.id AND t.name='covalentAuthzResourceGroup' "+
             "AND a.serviceCluster.id IN (" +
-            "SELECT id FROM ServiceCluster c where c.groupId = r.instanceId)"+
+            "SELECT id FROM ServiceCluster c where c.group.id = r.instanceId)"+
             " OR " +
             "(r.instanceId=a.service.id and " +
             "r.resourceType.id=t.id AND t.name='covalentEAMService')))";

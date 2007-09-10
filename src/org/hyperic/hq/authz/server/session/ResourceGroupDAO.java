@@ -78,7 +78,7 @@ public class ResourceGroupDAO extends HibernateDAO
         getSession().refresh(r);
         r.setInstanceId(resGrp.getId());
         save(r);
-        getSession().flush();
+        flush();
         return resGrp;
     }
 
@@ -101,12 +101,13 @@ public class ResourceGroupDAO extends HibernateDAO
         entity.getResourceSet().clear();
 
         super.remove(entity);
-
+        flush();
         // remove this resourceGroup itself
         ResourceDAO dao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource resource =
             dao.findByInstanceId(AuthzConstants.authzGroup, entity.getId());
         dao.remove(resource);
+        flush();
     }
     
     public void addResource(ResourceGroup entity, Resource res) {
@@ -114,7 +115,7 @@ public class ResourceGroupDAO extends HibernateDAO
     }
     
     public void removeAllResources(ResourceGroup entity) {
-        entity.getResources().clear();
+        entity.getResourceSet().clear();
     }
 
     public void removeResources(ResourceGroup entity, Resource[] resources) {
@@ -186,4 +187,13 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
+    public Collection findContaining(Resource r) {
+        String sql = "select distinct rg from ResourceGroup rg " +
+                   "join fetch rg.resourceSet r " +
+                   "where r.instanceId = ? and  r.resourceType.id = ?";
+        return getSession().createQuery(sql)
+            .setInteger(0, r.getInstanceId().intValue())
+            .setInteger(1, r.getResourceType().getId().intValue())
+            .list();
+    }
 }
