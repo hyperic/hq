@@ -6685,7 +6685,7 @@ has already been defined.
       <schema-addColumn table="EAM_USER_CONFIG_RESP" column="TMP_CRISPO_ID" 
                         columnType="LONG"/>
       <crisponizer table="eam_user_config_resp" column="pref_response"
-                   crispoColumn="TMP_CRISPO_ID" onlyProperties=".dashContent."
+                   crispoColumn="TMP_CRISPO_ID" onlyProperties=".dash[cC]ontent.*"
                    rewriteConfigResponse="true"/>
       
       <schema-directSQL>

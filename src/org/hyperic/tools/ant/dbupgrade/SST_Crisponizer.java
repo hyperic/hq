@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
@@ -50,11 +51,11 @@ public class SST_Crisponizer extends SchemaSpecTask {
     private static final String CRISPO_OPT_ID_SEQ = "EAM_CRISPO_OPT_ID_SEQ";
     private static final String CRISPO_OPT_TABLE  = "EAM_CRISPO_OPT";
     
-    private String _table;
-    private String _column;
-    private String _crispoColumn;
-    private String _onlyProperties;
-    private String _rewriteConfigResponse;
+    private String  _table;
+    private String  _column;
+    private String  _crispoColumn;
+    private Pattern _onlyProperties;
+    private String  _rewriteConfigResponse;
     
     public SST_Crisponizer() {}
 
@@ -71,7 +72,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
     }
     
     public void setOnlyProperties(String f) {
-        _onlyProperties = f;
+        _onlyProperties = Pattern.compile(f);
     }
     
     public void setRewriteConfigResponse(String val) {
@@ -143,13 +144,17 @@ public class SST_Crisponizer extends SchemaSpecTask {
             String key = (String)i.next();
             String val = cr.getValue(key);
             
-            if (_onlyProperties != null && key.indexOf(_onlyProperties) == -1)
+            if (_onlyProperties != null && !keyMatchesFilter(key))  
                 continue;
                 
             createCrispoOpt(d, crispoId, key, val);
         }
         
         return crispoId;
+    }
+    
+    private boolean keyMatchesFilter(String key) {
+        return _onlyProperties.matcher(key).matches();
     }
     
     private void updateRowWithCrispo(long fromId, long crispoId) 
@@ -187,7 +192,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
                 {
                     String key = (String) i.next();
                     
-                    if (key.indexOf(_onlyProperties) != -1) {
+                    if (keyMatchesFilter(key)) {
                         cr.unsetValue(key);
                     }
                 }
