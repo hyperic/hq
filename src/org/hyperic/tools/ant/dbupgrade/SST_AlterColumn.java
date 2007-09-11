@@ -157,7 +157,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
             sqlList.add("ALTER TABLE " + _table
                         + " RENAME " + _column + " TO tmp_" + _column);
             sqlList.add("ALTER TABLE " + _table 
-                        + " ADD " + _column + " " + _columnType);
+                        + " ADD " + _column + " " + columnTypeName);
             sqlList.add("UPDATE " + _table 
                         + " SET " + _column + " = tmp_" + _column);
             sqlList.add("ALTER TABLE " + _table
