@@ -382,9 +382,9 @@ public class MultiConditionTrigger
         }
 
         // If we've got nothing, then just clean up
-        if (fulfilled.size() == 0) {
+        if (fulfilled.size() == 0 && events.size() > 0) {
             try {
-                tryDeleteTrackedEventReferences(etracker);                
+                tryDeleteTrackedEventReferences(etracker, false);                
             } catch (Exception e) {
                 // It's ok if we can't delete the old events now.
                 // We can do it next time.
@@ -469,7 +469,7 @@ public class MultiConditionTrigger
               
         if (!durable) {
             // Get ready to fire, reset EventTracker
-            tryDeleteTrackedEventReferences(etracker);
+            tryDeleteTrackedEventReferences(etracker, true);
         }                
         
         // Message string which tracks the return message
@@ -496,14 +496,17 @@ public class MultiConditionTrigger
     }
     
     /**
-     * Try deleting the tracked events with exponential backoff.
+     * Try deleting the tracked events, optionally enabling exponential backoff 
+     * if the delete fails.
      * 
      * @param etracker
+     * @param enableExponentialBackoff
      * @throws ActionExecuteException
      */
-    private void tryDeleteTrackedEventReferences(EventTrackerLocal etracker) 
+    private void tryDeleteTrackedEventReferences(EventTrackerLocal etracker, 
+                                                 boolean enableExponentialBackoff) 
         throws ActionExecuteException {
-        long sleep = 100;
+        long sleep = 10;
         int numTries = 0;
         boolean succeeded = false;
         Exception lastException = null;
@@ -514,14 +517,19 @@ public class MultiConditionTrigger
                 succeeded = true;
             } catch (SQLException e) {
                 lastException = e;
-                numTries++;
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e1) {
-                    // ignore
-                }
                 
-                sleep = (sleep*3/2)+1;
+                if (enableExponentialBackoff) {
+                    numTries++;
+                    try {
+                        Thread.sleep(sleep);
+                    } catch (InterruptedException e1) {
+                        // ignore
+                    }
+                    
+                    sleep = (sleep*3/2)+1;                    
+                } else {
+                    break;
+                }
             }                    
         }
         
