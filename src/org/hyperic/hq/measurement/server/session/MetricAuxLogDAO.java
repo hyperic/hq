@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
+
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -54,13 +56,12 @@ public class MetricAuxLogDAO extends HibernateDAO {
             .uniqueResult();
     }
     
-    MetricAuxLogPojo find(DerivedMeasurement m) {
+    Collection find(DerivedMeasurement m) {
         String sql = "from MetricAuxLogPojo p where p.metric = :metric";
         
-        return (MetricAuxLogPojo)
-            getSession().createQuery(sql)
-                        .setParameter("metric", m)
-                        .uniqueResult();
+        return getSession().createQuery(sql) 
+                           .setParameter("metric", m)
+                           .list();
     }
     
     void removeAll(GalertDef def) {
