@@ -6709,6 +6709,11 @@ has already been defined.
     </schemaSpec>
     
     <schemaSpec version="3.54">
+      <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
+                          columnType="VARCHAR2" />
+    </schemaSpec>
+    
+    <schemaSpec version="3.55">
       <!-- Migrate the rest of the user's config response to a crispo -->
       <crisponizer table="eam_user_config_resp" column="pref_response"
                    crispoColumn="TMP_CRISPO_ID" />
