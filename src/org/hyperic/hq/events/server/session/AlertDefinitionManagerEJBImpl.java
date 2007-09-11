@@ -477,6 +477,7 @@ public class AlertDefinitionManagerEJBImpl
             EscalationManagerEJBImpl.getOne().findById(escId);
 
         def.setEscalation(escl);
+        def.setMtime(System.currentTimeMillis());
     }
 
     /** 
