@@ -354,11 +354,6 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="7" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:1"/>
     </table>
 
-    <!-- add an entry in the user prefs for the root user -->
-    <table name="EAM_USER_CONFIG_RESP">
-        <data id="%EAM_SUBJECT.ID:1"/>
-    </table>
-
     <!-- update the subject table to have a reference back to its resource -->
     <table name="EAM_SUBJECT">
         <data cid="1" RESOURCE_ID="%EAM_RESOURCE.ID:6"/>

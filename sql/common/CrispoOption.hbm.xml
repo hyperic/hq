@@ -18,7 +18,7 @@
     </property>
     
     <property name="value">
-      <column name="VAL" not-null="true"/>
+      <column name="VAL" not-null="true" length="4000"/>
     </property>
 
     <many-to-one name="crispo">
