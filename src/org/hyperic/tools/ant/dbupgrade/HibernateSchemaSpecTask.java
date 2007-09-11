@@ -56,6 +56,7 @@ public abstract class HibernateSchemaSpecTask extends SchemaSpecTask {
             Connection conn = getConnection();
             stmt = conn.createStatement();
             
+            log(">>>>>>  Executing update [" + sql + "]");
             return stmt.executeUpdate(sql);
         } catch (SQLException e) {
             throw new BuildException(e.getMessage(), e);
