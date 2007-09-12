@@ -191,7 +191,7 @@ public class ActionManagerEJBImpl implements SessionBean {
         if (val.getParentId() == null) {
             action.setParent(null);
         } else {
-            action.setParent(_actDAO.findById(val.getId()));
+            action.setParent(_actDAO.findById(val.getParentId()));
         }
     }
     
