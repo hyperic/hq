@@ -30,8 +30,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -74,13 +75,15 @@ public class MeasTabManagerUtil {
         StringBuffer sql = new StringBuffer();
         sql.append("(");
         Calendar cal = Calendar.getInstance();
-        while (true)
+        List ranges = MeasRangeObj.getInstance().getRanges();
+        for (Iterator i=ranges.iterator(); i.hasNext(); )
         {
-            String table = MeasTabManagerUtil.getMeasTabname(end);
+            MeasRange range = (MeasRange)i.next();
+            String table = MeasRangeObj.getInstance().getTable(end);
             sql.append("SELECT * FROM ").
-                append(table);
-            end = getPrevMeasTabTime(cal, end);
-            end = getMeasTabEndTime(cal, end);
+                append(table).
+                append(getTimeInStmt(begin, end));
+            end = range.getMinTimestamp()-1l;
             if (end >= begin) {
                 sql.append(" UNION ALL ");
                 continue;
@@ -108,15 +111,16 @@ public class MeasTabManagerUtil {
         StringBuffer sql = new StringBuffer();
         sql.append("(");
         Calendar cal = Calendar.getInstance();
-        while (true)
+        List ranges = MeasRangeObj.getInstance().getRanges();
+        for (Iterator i=ranges.iterator(); i.hasNext(); )
         {
-            String table = MeasTabManagerUtil.getMeasTabname(end);
+            MeasRange range = (MeasRange)i.next();
+            String table = MeasRangeObj.getInstance().getTable(ranges, end);
             sql.append("SELECT * FROM ").
                 append(table).
                 append(getTimeInStmt(begin, end)).
                 append(measInStmt);
-            end = getPrevMeasTabTime(cal, end);
-            end = getMeasTabEndTime(cal, end);
+            end = range.getMinTimestamp()-1l;
             if (end >= begin) {
                 sql.append(" UNION ALL ");
                 continue;
@@ -140,7 +144,7 @@ public class MeasTabManagerUtil {
         StringBuffer sql = new StringBuffer();
         String measInStmt = getMeasInStmt(measIds, true);
         sql.append("(SELECT * FROM ").
-            append(MeasTabManagerUtil.getMeasTabname(timestamp)).
+            append(MeasRangeObj.getInstance().getTable(timestamp)).
             append(" WHERE timestamp = ").append(timestamp).
             append(measInStmt).
             append(") ").append(TAB_DATA);
@@ -236,6 +240,7 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 59);
         cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
         return cal.getTimeInMillis();
     }
 
@@ -257,6 +262,7 @@ public class MeasTabManagerUtil {
         }
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTimeInMillis();
     }
 
