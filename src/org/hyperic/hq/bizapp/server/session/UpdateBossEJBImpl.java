@@ -152,6 +152,7 @@ public class UpdateBossEJBImpl
         addResourceProperties(req, svcs,  "hq.rsrc.svc.");
         
         req.putAll(SysStats.getCpuMemStats());
+        req.putAll(SysStats.getDBStats());
         return req;
     }
     
@@ -195,7 +196,7 @@ public class UpdateBossEJBImpl
             return;
         }
         
-        _log.info("Generated report.  Size=" + reqBytes.length + 
+        _log.debug("Generated report.  Size=" + reqBytes.length + 
                    " report:\n" + req);
         
         PostMethod post = new PostMethod(getCheckURL());
