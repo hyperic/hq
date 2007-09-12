@@ -592,11 +592,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         List left = data;
         
         try {            
-            // Oracle does not handle the batch insert in single transaction
-            // so return right away
-            if (DBUtil.isOracle(conn))
-                return false;
-            
             _log.debug("Attempting to insert " + left.size() + " points");
             left = insertData(conn, left, false);            
             _log.debug("Num left = " + left.size());
