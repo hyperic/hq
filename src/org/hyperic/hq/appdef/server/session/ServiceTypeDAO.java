@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -87,9 +88,9 @@ public class ServiceTypeDAO extends HibernateDAO
     }
 
     public Collection findByPlugin(String plugin) {
-        String sql="from ServiceType where plugin=?";
-        return getSession().createQuery(sql)
-            .setString(0, plugin)
+        return createCriteria()
+            .add(Restrictions.eq("plugin", plugin))
+            .addOrder(Order.asc("sortName"))
             .list();
     }
 
@@ -113,6 +114,7 @@ public class ServiceTypeDAO extends HibernateDAO
             .createAlias("svt.platformTypes", "pt")
             .add(Restrictions.eq("svt.virtual", Boolean.TRUE))
             .add(Restrictions.eq("pt.id", platform.getPlatformType().getId()))
+            .addOrder(Order.asc("sortName"))
             .list();
     }
 }
