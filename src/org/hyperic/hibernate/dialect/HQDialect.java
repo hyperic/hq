@@ -61,6 +61,12 @@ public interface HQDialect
     public boolean supportsMultiInsertStmt();
 
     /*
+     * Returns true if the database supports an insert stmt which
+     * updates when the unique key is violated
+     */
+    public boolean supportsDuplicateInsertStmt();
+
+    /*
      * Returns true if the database contains the specified viewName
      */
     public boolean viewExists(Statement stmt, String viewName)

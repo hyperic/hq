@@ -81,6 +81,10 @@ public class Oracle9Dialect
                " WHERE "+joinKeys+cond+")"+limitCond;
     }
 
+    public boolean supportsDuplicateInsertStmt() {
+        return false;
+    }
+
     public boolean supportsMultiInsertStmt()
     {
         return false;

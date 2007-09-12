@@ -61,6 +61,10 @@ public class PostgreSQLDialect
         return "ANALYZE "+table;
     }
 
+    public boolean supportsDuplicateInsertStmt() {
+        return false;
+    }
+
     public boolean supportsMultiInsertStmt()
     {
         return false;

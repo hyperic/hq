@@ -665,18 +665,29 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         List left = new ArrayList();
         Map buckets = MeasRangeObj.getInstance().bucketData(data);
         
-        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
+        {
             Map.Entry entry = (Map.Entry) it.next();
             String table = (String) entry.getKey();
             List dpts = (List) entry.getValue();
 
-            try {
+            try
+            {
+                HQDialect dialect = Util.getHQDialect();
+                if (dialect.supportsDuplicateInsertStmt()) {
+                    stmt = conn.prepareStatement(
+                        "INSERT /*+ APPEND */ INTO " + table + 
+                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)" +
+                        " ON DUPLICATE KEY UPDATE value = ?");
+                }
+                else {
+                    stmt = conn.prepareStatement(
+                        "INSERT /*+ APPEND */ INTO " + table + 
+                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
+                }
 
-                stmt = conn.prepareStatement(
-                    "INSERT /*+ APPEND */ INTO " + table + 
-                    " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
-
-                for (Iterator i=dpts.iterator(); i.hasNext(); ) {
+                for (Iterator i=dpts.iterator(); i.hasNext(); )
+                {
                     DataPoint pt = (DataPoint)i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
@@ -692,12 +703,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.setInt(1, metricId.intValue());
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setBigDecimal(3, getDecimalInRange(bigDec));
+
+                    if (dialect.supportsDuplicateInsertStmt())
+                        stmt.setBigDecimal(4, getDecimalInRange(bigDec));
+                    
                     stmt.addBatch();
                 }
 
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
-            } catch (BatchUpdateException e) {
+            }
+            catch (BatchUpdateException e) {
                 if (!continueOnSQLException) {
                     throw e;
                 }
@@ -705,7 +721,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 left.addAll(
                     getRemainingDataPointsAfterBatchFail(dpts, 
                                                          e.getUpdateCounts()));
-            } catch (SQLException e) {
+            }
+            catch (SQLException e) {
                 if (!continueOnSQLException) {
                     throw e;
                 }
@@ -720,7 +737,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                "Assuming that none of the "+dpts.size()+
                                " data points were inserted.", e);
                 }
-            } finally {
+            }
+            finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }            
         }

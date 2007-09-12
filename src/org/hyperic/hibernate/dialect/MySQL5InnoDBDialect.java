@@ -141,6 +141,10 @@ public class MySQL5InnoDBDialect
         return "SELECT " + SEQUENCE_TABLE + " FROM " + SEQUENCE_TABLE;
     }
 
+    public boolean supportsDuplicateInsertStmt() {
+        return true;
+    }
+
     public boolean supportsMultiInsertStmt() {
         return true;
     }
