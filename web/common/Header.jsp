@@ -74,7 +74,16 @@
 <div class="headRightWrapper" style="z-index: 300;">
 <div class="headTopNav">
             <div class="headUsrName">
+              <c:choose>
+              <c:when test="${useroperations['viewSubject']}">
+                <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
+                  <c:out value="${sessionScope.webUser.username}"/>
+                </html:link>
+              </c:when>
+              <c:otherwise>
                 <c:out value="${sessionScope.webUser.username}"/>
+              </c:otherwise>
+              </c:choose>
                <span style="display:block;padding-top:4px;">
                 <html:link action="/Logout">
                     <span style="font-size:10px;"><fmt:message key="admin.user.generalProperties.Logout"/></span>
