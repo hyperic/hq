@@ -42,16 +42,18 @@ import org.json.JSONObject;
 public class UpdateEscalation 
     extends BaseAction
 {
-    private final Log _log = LogFactory.getLog(SaveAction.class);
+    private final Log _log = LogFactory.getLog(UpdateEscalation.class);
 
     public void execute(JsonActionContext context) throws Exception {
         Map p = context.getParameterMap();
 
-        for (Iterator i=p.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            
-            _log.warn("key=" + ent.getKey() + " val=" + 
-                      ArrayUtil.toString((Object[])ent.getValue()));
+        if (_log.isDebugEnabled()) {
+            for (Iterator i=p.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry ent = (Map.Entry)i.next();
+                
+                _log.debug("key=" + ent.getKey() + " val=" + 
+                          ArrayUtil.toString((Object[])ent.getValue()));
+            }
         }
         
         String  name     = ((String[])p.get("name"))[0];
