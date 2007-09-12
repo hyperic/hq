@@ -88,8 +88,7 @@ var pageData = new Array();
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 </tiles:insert>
-<tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp"/>
-<tiles:insert definition=".resource.server.inventory.serviceCounts">
+<tiles:insert page="/resource/server/inventory/ViewTypeAndHostProperties.jsp">
   <tiles:put name="serviceCount" beanName="NumChildResources"/>
   <tiles:put name="serviceTypeMap" beanName="ResourceTypeMap"/>
 </tiles:insert>

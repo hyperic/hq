@@ -30,6 +30,9 @@
  --%>
 <!--  /  -->
 
+<tiles:importAttribute name="serviceCount"/>
+<tiles:importAttribute name="serviceTypeMap"/>
+
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 	<tr>
@@ -43,7 +46,44 @@
     </tr>
 </table>
 
-<c:set var="editUrl" value="/resource/server/Inventory.do?mode=editType&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+<!--  SERVICE COUNTS CONTENTS -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.serviceCounts.TotalServices"/></td>
+		<td width="30%" class="BlockContent"><c:out value="${serviceCount}"/></td>
+    <td width="20%" class="BlockLabel">&nbsp;</td>
+    <td width="30%" class="BlockContent">&nbsp;</td>
+  </tr>
+  <tr valign="top">
+    <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.serviceCounts.ServicesByType"/></td>
+    <td width="30%" class="BlockContentNoPadding" colspan="3">
+      <table width="66%" cellpadding="0" cellspacing="0" border="0" class="BlockContent">
+        <tr valign="top">
+<c:forEach var="entry" varStatus="status" items="${serviceTypeMap}">
+          <td width="50%"><c:out value="${entry.key}"/> (<c:out value="${entry.value}"/>)</td>
+  <c:choose>
+    <c:when test="${status.count % 2 == 0}">
+        </tr>
+        <tr>
+    </c:when>
+    <c:otherwise>
+      <c:if test="${status.last}">
+        <c:forEach begin="${(status.count % 2) + 1}" end="2">
+          <td width="50%">&nbsp;</td>
+        </c:forEach>
+      </c:if>
+    </c:otherwise>
+  </c:choose>
+</c:forEach>
+        </tr>
+      </table> 
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+</table>
+<!--  /  --><c:set var="editUrl" value="/resource/server/Inventory.do?mode=editType&rid=${Resource.id}&type=${Resource.entityId.type}"/>
 
 <c:if test="${useroperations['modifyServer']}">
 <!--  GENERAL PROPERTIES TOOLBAR -->

@@ -73,7 +73,6 @@ public class EditTypeHostAction extends BaseAction {
             
             HashMap forwardParams = new HashMap(2);
             forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
-            forwardParams.put(Constants.ACCORDION_PARAM, "1");
 
             ActionForward forward = checkSubmit(request, mapping, form,
                         forwardParams);
