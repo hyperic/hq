@@ -114,7 +114,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
 
                     // Insert into Event table first
                     int i = 1;
-                    stmt.setInt(i++, event.getId().intValue());
+                    stmt.setLong(i++, event.getId().longValue());
                     stmt.setBytes(i++, ostream.toByteArray());
                     stmt.setLong(i++, event.getTimestamp());
                     stmt.execute();

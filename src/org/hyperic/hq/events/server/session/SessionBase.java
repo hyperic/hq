@@ -88,7 +88,6 @@ public abstract class SessionBase {
         }
 
         try {
-            // Cast from long to Integer
             Long id = new Long(idGen.getNewID());
             if ( log.isDebugEnabled() ) {
                 log.debug("New ID for " + seq + ": " + id);
