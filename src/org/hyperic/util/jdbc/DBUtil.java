@@ -42,11 +42,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
-import org.hyperic.hibernate.dialect.Oracle9Dialect;
-import org.hyperic.hibernate.dialect.PostgreSQLDialect;
 import org.hyperic.util.pager.PageControl;
 
 public class DBUtil {
@@ -155,68 +150,6 @@ public class DBUtil {
         closeResultSet(ctx, rs);
         closeStatement(ctx, s);
         closeConnection(ctx, c);
-    }
-
-    /**
-     * A utility that gives us the last value of a sequence.
-     * This is useful for when you need the value of a primary for a row
-     * that you just inserted.
-     *
-     * @param ctx The logging context to use for errors.
-     * @param conn The connection to use to get the sequence value.
-     * @param table The table where the sequence is defined.
-     * @param key The column on which the sequence is defined.
-     */
-    public static long getSequenceValue ( String ctx,
-                                         Connection conn, 
-                                         String table,
-                                         String key )
-        throws SQLException {
-
-        String query = null;
-
-        // What database is this connection hitting?
-        int dbType = getDBType(conn);
-        switch ( dbType ) {
-        case DATABASE_POSTGRESQL_7:
-        case DATABASE_POSTGRESQL_8:
-            query = "SELECT last_value " +
-                "FROM " + table + "_" + key + "_seq";
-            break;
-        case DATABASE_ORACLE_8:
-        case DATABASE_ORACLE_9:
-            query = "SELECT " + table + "_" + key + "_seq.currval "
-                + "FROM DUAL";
-            break;
-        case DATABASE_CLOUDSCAPE_4:
-            query = "VALUES ConnectionInfo.lastAutoincrementValue"
-                + "('APP','" + table.toUpperCase() + "','" + key.toUpperCase() + "')";
-            break;
-        case DATABASE_POINTBASE_4:
-        	    query = PointbaseSequence.getSelectNextValCommand(
-        		table.toUpperCase() + '_' + key.toUpperCase() + "_SEQ\'"); 
-        	    break;
-        case DATABASE_MYSQL5:
-             query = "SELECT MAX(" + key + ") FROM " + table;
-             break;
-        default:
-            throw new SequencesNotSupportedException();
-        }
-        PreparedStatement selectPS = null;
-        ResultSet rs = null;
-        
-        try {
-            selectPS = conn.prepareStatement(query);
-            rs = selectPS.executeQuery();
-            if ( rs.next() ) {
-                return rs.getInt(1);
-            } else {
-                throw new SequenceRetrievalException();
-            }
-        } finally {
-            DBUtil.closeResultSet(ctx, rs);
-            DBUtil.closeStatement(ctx, selectPS);
-        }
     }
 
     /**
@@ -387,63 +320,6 @@ public class DBUtil {
         return type == DATABASE_MYSQL5;
     }
     
-    /**
-     * Returns the proper SQL syntax for invoking the AVG aggregate
-     * function.  This is necessary because with cloudscape, computing
-     * AVG on an integer-valued column uses integer (truncating) division,
-     * when what you usually want is floating-point division.
-     */
-    public static String getAVGColumn ( int dbType, String column ) {
-        switch ( dbType ) {
-        case DATABASE_CLOUDSCAPE_4:
-            return "NEW java.lang.Float(" + column + ")";
-        default:
-            return column;
-        }
-    }
-
-    public static String castColumnToLong ( int dbType, String column ) {
-        switch ( dbType ) {
-        case DATABASE_CLOUDSCAPE_4:
-            return "NEW java.lang.Long(" + column + ")";
-        default:
-            return column;
-        }
-    }
-
-    /**
-     * Counts the number of rows in a result set.  
-     */
-    public static int countRows ( int numRowsAlreadyRead, 
-                                  ResultSet rs,
-                                  Connection conn ) throws SQLException {
-        int rowCount = numRowsAlreadyRead;
-        int dbType = getDBType(conn);
-        int rsType;
-        // if ( dbType == DATABASE_POSTGRESQL_7 ) {
-        //     rsType = ResultSet.TYPE_SCROLL_SENSITIVE;
-        // } else {
-            rsType = rs.getType();
-        // }
-        switch ( rsType ) {
-            
-            // Dumb Oracle driver, makes you manually
-            // flip thru the whole result set just 
-            // to count the rows
-        case ResultSet.TYPE_FORWARD_ONLY:
-            while ( rs.next() ) rowCount++;
-            return rowCount;
-            
-            // Nice Postgres driver, JDBC 2.0 single method call...
-        default: 
-            if ( rs.last() ) {
-                return rs.getRow();
-            } else {
-                return 0;
-            }
-        }
-    }
-
     /**
      * get a connection for a datasource registered in JNDI
      */
