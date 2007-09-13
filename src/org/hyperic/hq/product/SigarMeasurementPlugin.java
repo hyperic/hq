@@ -135,9 +135,9 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             pid = processFinder.findSingleProcess(query);
         } catch (SigarNotImplementedException e) {
             throw new MetricInvalidException(e.getMessage(), e);
-        } catch (SigarException e) {
-            throw new MetricNotFoundException(e.getMessage(), e);
         } catch (MalformedQueryException e) {
+            throw new MetricNotFoundException(e.getMessage(), e);
+        } catch (SigarException e) {
             throw new MetricNotFoundException(e.getMessage(), e);
         }
 
