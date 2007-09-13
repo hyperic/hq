@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -34,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.Sigar;
+import org.hyperic.util.jdbc.DBUtil;
 
 class SysStats {
     private static final Log _log = LogFactory.getLog(SysStats.class);
@@ -41,9 +43,11 @@ class SysStats {
     static Properties getDBStats() {
         Properties props = new Properties();
         DatabaseMetaData md;
+        Connection conn = null;
         
         try {
-            md = Util.getConnection().getMetaData();
+            conn = Util.getConnection();
+            md   = conn.getMetaData();
             props.setProperty("hq.db.product.name", md.getDatabaseProductName());
             props.setProperty("hq.db.product.ver", md.getDatabaseProductVersion());
             props.setProperty("hq.db.driver.name", md.getDriverName());
@@ -51,6 +55,8 @@ class SysStats {
         } catch(SQLException e) {
             _log.warn("Error get db stats");
             return props;
+        } finally {
+            DBUtil.closeConnection(SysStats.class, conn);
         }
         
         return props;
