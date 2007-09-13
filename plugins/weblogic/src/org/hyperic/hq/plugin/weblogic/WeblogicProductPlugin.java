@@ -51,9 +51,6 @@ public class WeblogicProductPlugin extends ProductPlugin {
     public static final String NODEMGR_NAME   = "Weblogic NodeManager";
 
     public static final String VERSION_61     = "6.1";
-    public static final String VERSION_70     = "7.0";
-    public static final String VERSION_81     = "8.1";
-    public static final String VERSION_91     = "9.1";
 
     public static final String APP_NAME       = "Application";
     public static final String EXQ_NAME       = "Execute Queue";

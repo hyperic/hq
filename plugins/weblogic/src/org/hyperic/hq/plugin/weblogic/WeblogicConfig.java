@@ -114,7 +114,7 @@ public class WeblogicConfig {
         }
 
         if ((this.version != null) &&
-             this.version.startsWith("9."))
+             majorVersion(this.version) >= 9)
         {
             for (int i=0; i<this.servers.size(); i++) {
                 Server server = (Server)this.servers.get(i);
@@ -185,12 +185,32 @@ public class WeblogicConfig {
         return item.getNodeValue();
     }
 
+    private String versionSubstring(String version) {
+        int ix = version.indexOf('.');
+        if (ix == -1){
+            return version.substring(0, 3);
+        }
+        else {
+            return version.substring(0, ix+2);
+        }
+    }
+
+    public static int majorVersion(String version) {
+        int ix = version.indexOf('.');
+        if (ix == -1) {
+            return Integer.parseInt(version);
+        }
+        else {
+            return Integer.parseInt(version.substring(0, ix));
+        }
+    }
+
     private String getVersion(Node node, String attr) {
         String vers = getAttribute(node, attr);
 
         if ((vers != null) && vers.length() >= 3) {
             //7.0|8.1
-            return vers.substring(0, 3);
+            return versionSubstring(vers);
         }
 
         return this.version;
@@ -322,7 +342,7 @@ public class WeblogicConfig {
                 servers.add(server);
             }
             else if (tag.equals("configuration-version")) {
-                this.version = getText(node).substring(0, 3);
+                this.version = versionSubstring(getText(node));
             }
             else if (tag.equals("name")) {
                 this.domain = getText(node);

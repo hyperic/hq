@@ -167,9 +167,7 @@ public class WeblogicMetric {
     
     //used for replacement in hq-plugin.xml
     static Map getMetricProps(String typeVersion) {
-        int version =
-            Character.getNumericValue(typeVersion.charAt(0));
-
+        int version = WeblogicConfig.majorVersion(typeVersion);
         HashMap props = new HashMap();
         String ejbAttrs;
 

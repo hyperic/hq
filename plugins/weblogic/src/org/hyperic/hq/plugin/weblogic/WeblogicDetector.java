@@ -245,6 +245,7 @@ public class WeblogicDetector
             WeblogicMetric.PROP_ADMIN_USERNAME,
             WeblogicMetric.PROP_ADMIN_PASSWORD,
             WeblogicMetric.PROP_ADMIN_URL,
+            WeblogicMetric.PROP_JVM,
         };
 
         for (int i=0; i<credProps.length; i++) {

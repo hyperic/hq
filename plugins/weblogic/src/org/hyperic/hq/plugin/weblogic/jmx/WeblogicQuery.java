@@ -37,6 +37,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import org.hyperic.hq.plugin.weblogic.WeblogicConfig;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
 public class WeblogicQuery {
@@ -274,7 +275,7 @@ public class WeblogicQuery {
     }
     
     public static boolean isServer91(String version) {
-        return WeblogicProductPlugin.VERSION_91.equals(version);
+        return WeblogicConfig.majorVersion(version) >= 9;
     }
     
     public void setVersion(String version) {
