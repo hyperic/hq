@@ -45,9 +45,9 @@
     <td>
       <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>           
-          <td class="FooterBold" nowrap>
+          <!--<td class="FooterBold" nowrap>-->
           <tiles:insert definition=".footer.current.time"/>
-          </td>
+          <!--</td>  -->
           <td class="FooterRegular" width="30">&nbsp;</td>
           <td class="FooterRegular" nowrap>
 	          <div id="aboutAnchor" style="position:relative;">
