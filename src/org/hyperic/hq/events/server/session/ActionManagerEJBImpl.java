@@ -128,7 +128,13 @@ public class ActionManagerEJBImpl implements SessionBean {
         action.setActionValue(val);
         setParentAction(val, action);
         long mtime = System.currentTimeMillis();
-        action.getAlertDefinition().setMtime(mtime);
+        
+        // HQ 942: We have seen orphaned actions on upgrade from 
+        // 3.0.5 to 3.1.1 where the action has no associated alert def.
+        // Prevent the NPE.
+        if (action.getAlertDefinition() != null) {
+            action.getAlertDefinition().setMtime(mtime);            
+        }
 
         // Then find and update the child actions.
 
@@ -141,7 +147,13 @@ public class ActionManagerEJBImpl implements SessionBean {
             Action act = (Action) i.next();
             act.setActionValue(val);
             setParentAction(val, act);
-            act.getAlertDefinition().setMtime(mtime);
+            
+            // HQ 942: We have seen orphaned actions on upgrade from 
+            // 3.0.5 to 3.1.1 where the action has no associated alert def.
+            // Prevent the NPE.
+            if (act.getAlertDefinition() != null) {
+                act.getAlertDefinition().setMtime(mtime);                
+            }
         }
         
         return action.getActionValue();
