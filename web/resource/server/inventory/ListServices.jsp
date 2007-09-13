@@ -39,7 +39,6 @@
 <c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&rid=${Resource.id}&type=${Resource.entityId.type}" />
 <c:set var="widgetInstanceName" value="listServices"/>
 
-
 <c:url var="pssAction" value="${selfAction}">
   <c:if test="${not empty param.fs}">
     <c:param name="fs" value="${param.fs}"/>
@@ -65,6 +64,7 @@
   <c:if test="${not empty param.scg}">
     <c:param name="scg" value="${param.scg}"/>
   </c:if>
+  <c:param name="accord" value="1"/>
 </c:url>
 
 <c:url var="ssAction" value="${selfAction}">
@@ -89,6 +89,11 @@
   <c:if test="${not empty param.scg}">
     <c:param name="scg" value="${param.scg}"/>
   </c:if>
+  <c:param name="accord" value="1"/>
+</c:url>
+
+<c:url var="pnAction" value="${selfAction}">
+  <c:param name="accord" value="1"/>
 </c:url>
 
 <script language="JavaScript" src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
@@ -136,7 +141,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <tiles:put name="listSize" beanName="Services" beanProperty="totalSize"/>
   <tiles:put name="pageSizeAction" beanName="pssAction" />
   <tiles:put name="pageSizeParam" value="pss"/>
-  <tiles:put name="pageNumAction" beanName="selfAction"/>    
+  <tiles:put name="pageNumAction" beanName="pnAction"/>    
   <tiles:put name="pageNumParam" value="pns"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="defaultSortColumn" value="5"/>

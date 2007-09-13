@@ -39,7 +39,7 @@ var pageData = new Array();
 </script>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="selfAction" value="/resource/server/Inventory.do?mode=view&rid=${Resource.id}&type=${entityId.type}"/>
+<c:set var="selfAction" value="/resource/server/Inventory.do?mode=view&eid=${entityId}"/>
 
 
 <hq:pageSize var="pageSize"/>
