@@ -38,15 +38,14 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocalHome;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -166,16 +165,14 @@ public class AIScheduleManagerEJBImpl
         AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
 
         // find the os for the platform
-        PlatformValue pValue = null;
+        Platform pValue = null;
         try {
             PlatformManagerLocalHome platformManagerLocalHome =
                 PlatformManagerUtil.getLocalHome();
 
             PlatformManagerLocal platformManagerLocal = null;
             platformManagerLocal = platformManagerLocalHome.create();
-            pValue = platformManagerLocal.getPlatformValueById(subject, id.getId());
-        } catch (PermissionException e) {
-            throw new AutoinventoryException(e);
+            pValue = platformManagerLocal.findPlatformById(id.getId());
         } catch (PlatformNotFoundException e) {
             throw new AutoinventoryException(e);
         }
