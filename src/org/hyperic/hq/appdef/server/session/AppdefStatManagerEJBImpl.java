@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
@@ -49,16 +48,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -494,16 +489,17 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             case DBUtil.DATABASE_POINTBASE_4:
             case DBUtil.DATABASE_POSTGRESQL_7:
             case DBUtil.DATABASE_POSTGRESQL_8:
-            case DBUtil.DATABASE_MYSQL5:    
+            case DBUtil.DATABASE_MYSQL5:
                 return true;
             default:
+                return false;
             }
         } catch (SQLException e) {
             log.error("Unable to determine navmap capability");
+            return false;
         } finally {
             disconnect();
         }
-        return false;
     }
 
     /**<p>Return directly connected resource tree for node level platform</p>
@@ -514,10 +510,10 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         subject, Integer platformId) 
         throws PlatformNotFoundException, PermissionException {
         try {
-            PlatformValue platVo = 
-                getPlatformMgrLocal().getPlatformValueById(subject,platformId);
+            Platform platVo = 
+                getPlatformMgrLocal().findPlatformById(platformId);
             ResourceTreeNode[] retVal;
-            retVal = getNavMapDataForPlatform(subject,platVo);
+            retVal = getNavMapDataForPlatform(subject, platVo);
             return retVal;
         } catch (SQLException e) {
             log.error("Unable to get NavMap data: " + e, e);
@@ -526,7 +522,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
 
     private ResourceTreeNode[] getNavMapDataForPlatform (AuthzSubjectValue
-        subject, PlatformValue platVo)
+        subject, Platform platVo)
         throws PermissionException, SQLException {
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
@@ -543,9 +539,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             buf.append("SELECT svr_svrt_svc_svct.server_id, svr_svrt_svc_svct.server_name,   ")
                .append("        svr_svrt_svc_svct.server_type_id, svr_svrt_svc_svct.server_type_name,")
                .append("        svr_svrt_svc_svct.service_id, svr_svrt_svc_svct.service_name,")
-               .append("        svr_svrt_svc_svct.service_type_id, svr_svrt_svc_svct.service_type_name,")
-               .append("        app_appsvc.application_id, app_appsvc.application_name,")
-               .append("        app_appsvc.application_desc ")
+               .append("        svr_svrt_svc_svct.service_type_id, svr_svrt_svc_svct.service_type_name ")
                .append("FROM   (SELECT app.id as application_id, app.name as application_name,")
                .append("               app.description as application_desc, ")
                .append("               appsvc.service_id as service_id ")
@@ -621,7 +615,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       platVo.getName(), 
                       getAppdefTypeLabel(AppdefEntityConstants
                           .APPDEF_TYPE_PLATFORM,
-                          platVo.getAppdefResourceTypeValue().getName()),
+                          platVo.getAppdefResourceType().getName()),
                       platVo.getEntityId(),
                       ResourceTreeNode.RESOURCE);
 
@@ -633,9 +627,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String thisServiceName            = null;
             int    thisServiceTypeId          = 0;
             String thisServiceTypeName        = null;
-            int    thisApplicationId          = 0;
-            String thisApplicationName        = null;
-            String thisApplicationDesc        = null;
 
             stmt = conn.prepareStatement(buf.toString());
             int pos = 
@@ -665,9 +656,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 thisServiceName     = rs.getString(6);
                 thisServiceTypeId   = rs.getInt(7);
                 thisServiceTypeName = rs.getString(8);
-                thisApplicationId   = rs.getInt(9);
-                thisApplicationName = rs.getString(10);
-                thisApplicationDesc = rs.getString(11);
 
                 if (thisServerTypeName != null) {
                     servers.add( new ResourceTreeNode (
@@ -724,8 +712,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     public ResourceTreeNode[] getNavMapDataForServer (AuthzSubjectValue 
         subject, Integer serverId) 
         throws ServerNotFoundException, PermissionException {
-        ServerValue serverVo = 
-            getServerMgrLocal().getServerById(subject,serverId);
+        Server serverVo = getServerMgrLocal().findServerById(serverId);
 
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
@@ -742,9 +729,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             buf.append("SELECT svc_svct_svr_plat.platform_id, svc_svct_svr_plat.platform_name,")
                .append("       svc_svct_svr_plat.platform_type_id, svc_svct_svr_plat.platform_type_name, ")
                .append("       svc_svct_svr_plat.service_id, svc_svct_svr_plat.service_name, ")
-               .append("       svc_svct_svr_plat.service_type_id, svc_svct_svr_plat.service_type_name, ")
-               .append("       app_appsvc.application_id, app_appsvc.application_name,")
-               .append("       app_appsvc.application_desc ")
+               .append("       svc_svct_svr_plat.service_type_id, svc_svct_svr_plat.service_type_name ")
                .append("FROM   (SELECT app.id as application_id, app.name as application_name,")
                .append("               app.description as application_desc,")
                .append("               appsvc.service_id as service_id ")
@@ -853,7 +838,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                               serverVo.getName(),
                               getAppdefTypeLabel(AppdefEntityConstants
                                   .APPDEF_TYPE_SERVER,
-                                  serverVo.getAppdefResourceTypeValue().getName()),
+                                  serverVo.getAppdefResourceType().getName()),
                               new AppdefEntityID(
                                   AppdefEntityConstants.APPDEF_TYPE_SERVER,
                                   serverVo.getId().intValue()),
@@ -867,9 +852,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String thisServiceName       = null;
             int    thisServiceTypeId     = 0;
             String thisServiceTypeName   = null;
-            int    thisApplicationId     = 0;
-            String thisApplicationName   = null;
-            String thisApplicationDesc   = null;
 
             while (rs.next()) {
 
@@ -894,9 +876,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 thisServiceName     = rs.getString(6);
                 thisServiceTypeId   = rs.getInt(7);
                 thisServiceTypeName = rs.getString(8);
-                thisApplicationId   = rs.getInt(9);
-                thisApplicationName = rs.getString(10);
-                thisApplicationDesc = rs.getString(11);
 
                 if (thisServiceName != null) {
                     serviceMap.put(new Integer(thisServiceId),
@@ -941,8 +920,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     public ResourceTreeNode[] getNavMapDataForService (AuthzSubjectValue 
         subject, Integer serviceId) 
         throws ServiceNotFoundException, PermissionException {
-        ServiceValue serviceVo = 
-            getServiceMgrLocal().getServiceById(subject,serviceId);
+        Service serviceVo = getServiceMgrLocal().findServiceById(serviceId);
 
         ResourceTreeNode[] retVal;
         PreparedStatement    stmt;
@@ -1091,7 +1069,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                   serviceVo.getName(),
                   getAppdefTypeLabel(AppdefEntityConstants
                       .APPDEF_TYPE_SERVICE,
-                      serviceVo.getAppdefResourceTypeValue().getName()), 
+                      serviceVo.getAppdefResourceType().getName()), 
                   new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
                                      serviceVo.getId().intValue()),
                   ResourceTreeNode.RESOURCE);
@@ -1220,7 +1198,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             buf = new StringBuffer();
             buf.append("SELECT asvclust.service_id, asvclust.service_name, ")
                .append("       asvclust.service_type_id, asvclust.service_type_name, ")
-               .append("       asvclust.server_id, asvclust.cluster_id, ")
                .append("       group_id, group_name ")
                .append("FROM (SELECT grp.id as group_id, grp.name as group_name, cluster_id ")
                .append("      FROM   EAM_RESOURCE_GROUP grp ")
@@ -1313,7 +1290,6 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             String thisServiceName     = null;
             int    thisServiceTypeId   = 0;
             String thisServiceTypeName = null;
-            int    thisClusterId       = 0;
             int    thisGroupId         = 0;
             String thisGroupName       = null;
 
@@ -1332,9 +1308,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 thisServiceName     = rs.getString(2);
                 thisServiceTypeId   = rs.getInt(3);
                 thisServiceTypeName = rs.getString(4);
-                thisClusterId       = rs.getInt(6);
-                thisGroupId         = rs.getInt(7);
-                thisGroupName       = rs.getString(8);
+                thisGroupId         = rs.getInt(5);
+                thisGroupName       = rs.getString(6);
 
                 if (thisGroupName != null) {
                     String key = AppdefEntityConstants.APPDEF_TYPE_GROUP+
@@ -1397,8 +1372,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 getChildEntityType(parents[0].getType()) : 
                 AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
 
-            AppdefResourceTypeValue artVo = 
-                getResourceTypeValue(entType, resType);
+            AppdefResourceType artVo = getResourceTypeValue(entType, resType);
             return getNavMapDataForAutoGroup(subject,parents,artVo);
         } catch (SQLException e) {
             log.error("Unable to get NavMap data: " + e, e);
@@ -1406,27 +1380,22 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private AppdefResourceTypeValue getResourceTypeValue(int entityType,
-        Integer resType) throws AppdefEntityNotFoundException {
-        try {
-            switch (entityType) {
-                case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
-                    return getPlatformMgrLocal().findPlatformTypeValueById(resType);
-                case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
-                    return getServerMgrLocal().findServerTypeById(resType);
-                case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
-                    return getServiceMgrLocal().findServiceTypeById(resType);
-            }
-        } catch (FinderException e) {
-            // XXX - appdef needs fixing. PM.findType() throws PNFE while
-            //       SVRM AND SVCM.findType() still throw FinderExc. This
-            //       will be fixed shortly.
+    private AppdefResourceType getResourceTypeValue(int entityType,
+                                                    Integer resType)
+        throws AppdefEntityNotFoundException {
+        switch (entityType) {
+            case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
+                return getPlatformMgrLocal().findPlatformTypeById(resType);
+            case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
+                return getServerMgrLocal().findServerType(resType);
+            case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
+                return getServiceMgrLocal().findServiceType(resType);
         }
-        return (AppdefResourceTypeValue)null;
+        return null;
     }
 
     private ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubjectValue
-        subject, AppdefEntityID[] parents, AppdefResourceTypeValue artVo)
+        subject, AppdefEntityID[] parents, AppdefResourceType artVo)
         throws AppdefEntityNotFoundException, PermissionException, 
                SQLException {
         ResourceTreeNode[] retVal;
