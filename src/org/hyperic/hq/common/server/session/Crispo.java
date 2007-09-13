@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.common.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -129,7 +128,10 @@ public class Crispo
         for (Iterator i = _opts.iterator(); i.hasNext(); ) {
             CrispoOption opt = (CrispoOption)i.next();
             
-            if (cfg.getValue(opt.getKey()) == null) {
+            if (cfg.getValue(opt.getKey()) == null || 
+                opt.getValue() == null ||
+                opt.getValue().length() == 0)
+            {
                 i.remove();
             }
         }
@@ -140,8 +142,12 @@ public class Crispo
         
         for (Iterator i=keyVals.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
+            String val = (String)ent.getValue();
             
-            res.addOption((String)ent.getKey(), (String)ent.getValue());
+            if (val == null || val.length() == 0)
+                continue;
+            
+            res.addOption((String)ent.getKey(), val);
         }
         return res;
     }
@@ -151,6 +157,10 @@ public class Crispo
         
         for (Iterator i=cfg.getKeys().iterator(); i.hasNext(); ) {
             String key = (String)i.next();
+            String val = cfg.getValue(key);
+            
+            if (val == null || val.length() == 0)
+                continue;
             
             res.addOption(key, cfg.getValue(key));
         }
