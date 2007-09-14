@@ -69,8 +69,8 @@ public abstract class BaseJob implements Job {
         throws JobExecutionException
     {
         try {
-            AuthzSubjectValue overlord = getSubjectManager().findOverlord();
-            return getSubjectManager().findSubjectById(overlord, subjectId); 
+            return getSubjectManager()
+                .findSubjectById(subjectId).getAuthzSubjectValue(); 
         } catch(Exception e) { 
             throw new JobExecutionException(e, false);
         }

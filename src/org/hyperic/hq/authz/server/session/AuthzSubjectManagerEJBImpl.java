@@ -221,12 +221,9 @@ public class AuthzSubjectManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public AuthzSubjectValue findSubjectById(AuthzSubjectValue whoami,
-                                             Integer id)
+    public AuthzSubject findSubjectById(AuthzSubjectValue whoami, Integer id)
         throws PermissionException 
     {
-        AuthzSubject sub = findSubjectById(id);
-        
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         // users can see their own entries without requiring special permission
         if(!whoami.getId().equals(id)) {
@@ -234,7 +231,7 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
-        return sub.getAuthzSubjectValue();
+        return findSubjectById(id);
     }
 
     /** 

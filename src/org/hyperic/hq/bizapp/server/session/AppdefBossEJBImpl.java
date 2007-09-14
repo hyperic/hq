@@ -2812,35 +2812,28 @@ public class AppdefBossEJBImpl
             }
         }
 
-        // If the resource search is not conducted by name, or if its
-        // conducted by name in a compatible group context, then we
-        // need a filter to perform on account of HTML selectors
-        if (resourceName == null || appdefResTypeId != -1) {
-            // Install a filter that uses group type, entity type and
-            // resource type to filter the inventory set. This facilitates
-            // the HTML selectors that appear all over the product.
-            if (groupEntContext) {
-                erFilter =
-                    new AppdefPagerFilterGroupEntityResource (subject,
-                                                              groupType,
-                                                              grpEntId,
-                                                              appdefResTypeId,
-                                                              true );
-                filterList.add( erFilter );
-            } else if (groupEntity != null) {
-                erFilter =
-                    new AppdefPagerFilterGroupEntityResource (subject,
-                                                              groupType,
-                                                              appdefTypeId,
-                                                              appdefResTypeId,
-                                                              true );
-                erFilter.setGroupSelected(true);
-                filterList.add( erFilter );
-            }
-            else {
-                erFilter = null;
-            }
-        } else {
+        // Install a filter that uses group type, entity type and
+        // resource type to filter the inventory set. This facilitates
+        // the HTML selectors that appear all over the product.
+        if (groupEntContext) {
+            erFilter =
+                new AppdefPagerFilterGroupEntityResource (subject,
+                                                          groupType,
+                                                          grpEntId,
+                                                          appdefResTypeId,
+                                                          true );
+            filterList.add( erFilter );
+        } else if (groupEntity != null) {
+            erFilter =
+                new AppdefPagerFilterGroupEntityResource (subject,
+                                                          groupType,
+                                                          appdefTypeId,
+                                                          appdefResTypeId,
+                                                          true );
+            erFilter.setGroupSelected(true);
+            filterList.add( erFilter );
+        }
+        else {
             erFilter = null;
         }
 

@@ -33,6 +33,7 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.naming.NamingException;
+import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +58,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -382,6 +382,21 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                          Integer subjectId)
         throws NamingException, FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
+        return findSubjectById(sessionId, subjectId).getAuthzSubjectValue();
+    }
+
+    /**
+     * Return the <code>AuthzSubject</code> object identified by
+     * the given subject id.
+     * @throws SessionTimeoutException 
+     * @throws SessionNotFoundException 
+     * @throws PermissionException 
+     *
+     * @ejb:interface-method
+     */
+    public AuthzSubject findSubjectById(Integer sessionId, Integer subjectId)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException {
         // check for timeout
         AuthzSubjectValue subj = manager.getSubject(sessionId.intValue());
         return getAuthzSubjectManager().findSubjectById(subj, subjectId);
