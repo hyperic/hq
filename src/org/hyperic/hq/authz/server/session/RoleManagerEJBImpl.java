@@ -47,6 +47,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
@@ -66,7 +67,6 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
-import org.hyperic.hq.common.server.session.WeekEntry;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -464,9 +464,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                                   Integer[] ids)
         throws NamingException, PermissionException {
         Role roleLocal = lookupRole(role);
-//        roleLocal.setWhoami(lookupSubject(whoami));
-        HashSet sLocals = new HashSet(ids.length);
-        for (int i=0; i<ids.length; i++) {
+        for (int i = 0; i < ids.length; i++) {
             ResourceGroup group = lookupGroup(ids[i]);
             group.addRole(roleLocal);
         }
@@ -765,16 +763,16 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Collection operations = role.getOperations();
         // now for each operation, get the supported resource type
         Iterator operationIt = operations.iterator();
-        while(operationIt.hasNext()) {
-            Operation anOp = (Operation)operationIt.next();
+        while (operationIt.hasNext()) {
+            Operation anOp = (Operation) operationIt.next();
             // now get the resource Type for the op
             ResourceType resType = anOp.getResourceType();
             // check if there's a key for this entry
-            if(theMap.containsKey(resType.getName())) {
+            if (theMap.containsKey(resType.getName())) {
                 // looks like this res type is accounted for
                 // add the operation to the list
-                ((List)theMap.get(resType.getName()))
-                    .add(anOp.getOperationValue()); 
+                ((List) theMap.get(resType.getName()))
+                    .add(anOp.getOperationValue());
             } else {
                 // key's not there, add it
                 List opList = new ArrayList();
@@ -926,16 +924,14 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * subject.
      * @ejb:interface-method
      */
-    public void addRoles(AuthzSubjectValue whoami, AuthzSubjectValue subject,
+    public void addRoles(AuthzSubjectValue whoami, AuthzSubject subject,
                          RoleValue[] roles)
         throws PermissionException  {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
-        AuthzSubject subjectLocal = lookupSubject(subject);
 
         while (it != null && it.hasNext()) {
-            Role role = (Role) it.next();
-            subjectLocal.addRole(role);
+            subject.addRole((Role) it.next());
         }
     }
 
@@ -1006,7 +1002,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         removeAllRoles(whoami, subject);
 
         // Add subject to new set of roles
-        addRoles(whoami, subject, roles);
+        addRoles(whoami, subjectLocal, roles);
     }
 
     /**
