@@ -32,6 +32,7 @@ import org.hyperic.util.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +44,8 @@ public class MeasRangeObj
     private final Log _log = LogFactory.getLog(logCtx);
 
     private static MeasRangeObj _onlyInst = new MeasRangeObj();
-    private List _ranges = new ArrayList();
+    private List _ranges = new ArrayList(),
+                 _umRanges;
 
     private MeasRangeObj()
     {
@@ -77,6 +79,7 @@ public class MeasRangeObj
                 range = new MeasRange(table, currTime, max);
             }
             while (!currTable.equals(table));
+            _umRanges = Collections.unmodifiableList(_ranges);
         }
     }
 
@@ -110,8 +113,9 @@ public class MeasRangeObj
                 MeasRange latest = getCurrentRange();
                 _log.debug("loading measurement range -> "+latest);
                 _ranges.add(0, latest);
+                _umRanges = Collections.unmodifiableList(_ranges);
             }
-            return new ArrayList(_ranges);
+            return _umRanges;
         }
     }
 
