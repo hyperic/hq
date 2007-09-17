@@ -367,6 +367,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 duration += doCommand(conn, SQL_VACUUM, DATA_TABLES[i]);
             }
 
+            duration += vacuumAppdef();
             return duration;
         } catch (SQLException e) {
             log.error("Error vacuuming database: " + e.getMessage(), e);
@@ -384,11 +385,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * tables.  On other databases we just return -1.
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
-     * @ejb:transaction type="NOTSUPPORTED"
-     * @ejb:interface-method
      */
-    public long vacuumAppdef()
-    {
+    private long vacuumAppdef() {
         Connection conn = null;
         long duration = 0;
         try {
@@ -398,8 +396,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 return -1;
 
             for (int i = 0; i < APPDEF_TABLES.length; i++) {
-                duration +=
-                    doCommand(conn, SQL_VACUUM, APPDEF_TABLES[i]);
+                duration += doCommand(conn, SQL_VACUUM, APPDEF_TABLES[i]);
             }
             return duration;
         } catch (SQLException e) {
