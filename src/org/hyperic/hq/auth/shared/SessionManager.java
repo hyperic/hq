@@ -35,32 +35,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class SessionManager {
-
-    /**
-     * Our source for random id's
-     */
     private static Random _random = new Random();
-    
-    /**
-     * Our session cache
-     */
     private static Map _cache = new HashMap();
-
-    /**
-     * The singleton instance
-     */
     private static SessionManager _manager = new SessionManager();
-
-    /**
-     * The timeout for all user sessions.  
-     */
-    static private final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
+    private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
 
     private SessionManager() {}
 
-    /**
-     * @return The singleton instance of the SessionManager
-     */
     public static SessionManager getInstance() {
         return _manager;
     }
@@ -72,7 +53,7 @@ public class SessionManager {
      * @return The session id
      */
     public synchronized int put(AuthzSubjectValue subject) {
-        return this.put(subject, DEFAULT_TIMEOUT);
+        return put(subject, DEFAULT_TIMEOUT);
     }
 
     /**
