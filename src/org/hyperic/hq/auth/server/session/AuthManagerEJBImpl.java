@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Properties;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
@@ -48,7 +47,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.util.ConfigPropertyException;
@@ -108,9 +106,6 @@ public class AuthManagerEJBImpl implements SessionBean {
         if(password == null)
             throw new LoginException("No password was given");
             
-        // get the configuration properties
-        Properties config = ServerConfigManagerEJBImpl.getOne().getConfig();
-
         UsernamePasswordHandler handler =
             new UsernamePasswordHandler(user, password.toCharArray());
 

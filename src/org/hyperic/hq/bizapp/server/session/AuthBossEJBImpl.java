@@ -69,7 +69,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
                ConfigPropertyException 
     {
         try {
-            return getAuthManager().getSessionId(username, password);
+            return getAuthManager().login(username, password);
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
         }
