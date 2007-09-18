@@ -25,8 +25,11 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.dao.HibernateDAO;
 
 class DashboardConfigDAO 
@@ -47,5 +50,26 @@ class DashboardConfigDAO
             .createQuery(sql)
             .setParameter("user", user)
             .uniqueResult();
+    }
+    
+    RoleDashboardConfig findDashboard(Role role) {
+        String sql = "from RoleDashboardConfig where role = :role";
+        
+        return (RoleDashboardConfig)getSession()
+            .createQuery(sql)
+            .setParameter("role", role)
+            .uniqueResult();
+    }
+    
+    Collection findRolesFor(AuthzSubject me) {
+        String sql = "select rc from RoleDashboardConfig rc " + 
+            "join rc.role r " + 
+            "join r.subjects s " + 
+            "where s = :subject";
+        
+        return getSession()
+            .createQuery(sql)
+            .setParameter("subject", me)
+            .list();
     }
 }

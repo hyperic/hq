@@ -25,12 +25,17 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -86,11 +91,22 @@ public class DashboardManagerEJBImpl implements SessionBean {
         return _dashDAO.findDashboard(user);
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r)
+        throws PermissionException
+    {
+        PermissionManager permMan = PermissionManagerFactory.getInstance();
+
+        permMan.check(me.getId(), r.getResource().getResourceType(),
+                      r.getId(), AuthzConstants.roleOpModifyRole);
+
+        return _dashDAO.findDashboard(r);
+    }
+
     private ConfigResponse getDefaultConfig() {
-        ConfigResponse res = new ConfigResponse();
-        
-        res.setValue("foo", "bar");
-        return res;
+        return new ConfigResponse();
     }
     
     /**
@@ -116,6 +132,24 @@ public class DashboardManagerEJBImpl implements SessionBean {
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public RoleDashboardConfig createRoleDashboard(AuthzSubject me,
+                                                   Role r)
+        throws PermissionException
+    {
+        PermissionManager permMan = PermissionManagerFactory.getInstance();
+        
+        permMan.check(me.getId(), r.getResource().getResourceType(),
+                      r.getId(), AuthzConstants.roleOpModifyRole);
+        
+        Crispo cfg = CrispoManagerEJBImpl.getOne().create(getDefaultConfig());
+        RoleDashboardConfig dash = new RoleDashboardConfig(r, cfg);
+        _dashDAO.save(dash);
+        return dash;
+    }
+
+    /**
      * Reconfigure a user's dashboard
      * 
      * @ejb:interface-method
@@ -134,6 +168,40 @@ public class DashboardManagerEJBImpl implements SessionBean {
         }
         
         CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
+    }
+    
+    /**
+     * Reconfigure a user's dashboard
+     * 
+     * @ejb:interface-method
+     */
+    public void configureDashboard(AuthzSubject me, RoleDashboardConfig cfg, 
+                                   ConfigResponse newCfg)
+        throws PermissionException
+    {
+        PermissionManager permMan = PermissionManagerFactory.getInstance();
+        Role r = cfg.getRole();
+        
+        permMan.check(me.getId(), r.getResource().getResourceType(),
+                      r.getId(), AuthzConstants.roleOpModifyRole);
+
+        CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public Collection getDashboards(AuthzSubject me) 
+        throws PermissionException
+    {
+        Collection res = new ArrayList();
+        
+        UserDashboardConfig cfg = getUserDashboard(me, me);
+        if (cfg != null)
+            res.add(cfg);
+        
+        res.addAll(_dashDAO.findRolesFor(me));
+        return res;
     }
     
     public static DashboardManagerLocal getOne() {
