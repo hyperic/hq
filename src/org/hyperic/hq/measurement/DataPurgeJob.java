@@ -244,13 +244,14 @@ public class DataPurgeJob implements Job {
         EventLogManagerLocal eventLogManager =
             EventLogManagerUtil.getLocalHome().create();
 
-        _log.info("Purging events older than " +
+        _log.info("Purging event logs older than " +
             TimeUtil.toString(now - purgeEventLog));
         try {
-            eventLogManager.deleteLogs(0, now - purgeEventLog);
-            _log.info("Done (Deleting events)");
-        } catch (RemoveException e) {
-            _log.error("Unable to delete events: " + e.getMessage(), e);
+            int rowsDeleted = 
+                eventLogManager.deleteLogs(-1, now - purgeEventLog);
+            _log.info("Done (Deleted " + rowsDeleted + " event logs)");
+        } catch (Exception e) {
+            _log.error("Unable to delete event logs: " + e.getMessage(), e);
         }
     }
 }
