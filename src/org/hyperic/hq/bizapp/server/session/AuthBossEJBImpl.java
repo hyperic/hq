@@ -28,21 +28,18 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.Collection;
 
 import javax.ejb.AccessLocalException;
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.ConfigPropertyException;
 
 /** 
@@ -56,12 +53,8 @@ import org.hyperic.util.ConfigPropertyException;
  * @ejb:transaction type="Required"
  */
 public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
-
-    private SessionContext sessionCtx = null;
-
     private SessionManager manager = SessionManager.getInstance();
 
-    /** Creates a new instance of AuthBoss */
     public AuthBossEJBImpl() {}
 
     /**
@@ -69,16 +62,12 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The name of the user.
      * @param password The password.
      * @return An integer representing the session ID of the logged-in user.
-     * @exception SecurityException If we can't set the authentication config
-     * @exception LoginException If we are passed bad credentials
-     * @exception NamingException If we can't find AuthManagerLocalHome
-     * @exception CreateException If we can't create an AuthManager
      * @ejb:interface-method
      */
-    public int login ( String username,
-                       String password ) 
+    public int login ( String username, String password ) 
         throws SecurityException, LoginException, ApplicationException,
-               ConfigPropertyException {
+               ConfigPropertyException 
+    {
         try {
             return getAuthManager().getSessionId(username, password);
         } catch (AccessLocalException e) {
@@ -120,21 +109,14 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param sessionID The session id for the current user
      * @param username The username to add
      * @param password The password for this user
-     * @exception NamingException If we can't find the PrinipalsLocalHome
-     * @exception CreateExceptoin If we try to add a duplicate user
      *
      * @ejb:interface-method
      */
     public void addUser(int sessionID, String username, String password)
-        throws SessionTimeoutException, SessionNotFoundException,
-               CreateException
+        throws SessionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        try {
-            getAuthManager().addUser(subject, username, password);
-        } catch (NamingException e) {
-            throw new SystemException("NamingException in addUser", e);
-        }
+        getAuthManager().addUser(subject, username, password);
     }
 
     /**
@@ -146,17 +128,14 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void changePassword(int sessionID, String username, String password) 
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+        throws FinderException, PermissionException, SessionException
+    {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         getAuthManager().changePassword(subject, username, password);
     }
 
     /**
      * Check existence of a user
-     *
-     * @exception NamingException If we can't find PrincipalsLocalHome
-     * @exception FinderException
      *
      * @ejb:interface-method
      */
@@ -170,35 +149,21 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get a collection of all users
      *
-     * @exception NamingException If we can't find PrincipalsLocalHome
-     * @exception FinderException
-     *
      * @ejb:interface-method
      */
     public Collection getAllUsers(int sessionID)
-        throws FinderException, 
-               SessionTimeoutException, SessionNotFoundException
+        throws SessionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        try {
-            return getAuthManager().getAllUsers(subject);
-        } catch (NamingException e) {
-            throw new SystemException("NamingException in getAllUsers", e);
-        }
+        return getAuthManager().getAllUsers(subject);
     }
 
     /**
      * @ejb:create-method
      */
     public void ejbCreate() {}
-
     public void ejbRemove() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
-    public void setSessionContext(SessionContext ctx) {
-        sessionCtx = ctx;
-    }
+    public void setSessionContext(SessionContext ctx) {}
 }

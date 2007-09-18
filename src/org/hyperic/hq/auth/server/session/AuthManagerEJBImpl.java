@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.auth.server.session;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,11 +32,8 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -46,15 +42,14 @@ import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.util.ConfigPropertyException;
 import org.jboss.security.Util;
@@ -75,15 +70,10 @@ public class AuthManagerEJBImpl implements SessionBean {
     private static final String appName = HQConstants.ApplicationName;
 
     public AuthManagerEJBImpl() {}
-
     public void ejbCreate() {}
-
     public void ejbRemove() {}
-
     public void ejbActivate() {}
-
     public void ejbPassivate() {}
-
     public void setSessionContext(SessionContext ctx) {}
 
     /**
@@ -94,9 +84,7 @@ public class AuthManagerEJBImpl implements SessionBean {
     {
     }
 
-    private AuthzSubjectValue createSubjectValue(String name, String dsn)
-        throws FinderException
-    {
+    private AuthzSubjectValue createSubjectValue(String name, String dsn) {
         AuthzSubjectValue  value = new AuthzSubjectValue();
         value.setName(name);
         value.setAuthDsn(dsn);
@@ -110,68 +98,53 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param user The user to authenticate
      * @param password The password for the user
      * @return session id that is associated with the user
-     * @throws SQLException 
      * @ejb:interface-method
      * @ejb:transaction type="SUPPORTS"
      */
     public int getSessionId(String user, String password)
         throws SecurityException, LoginException, ConfigPropertyException,
-               ApplicationException {
-
+               ApplicationException 
+    {
         if(password == null)
             throw new LoginException("No password was given");
             
-        try {
-            // get the configuration properties
-            Properties config = ServerConfigManagerUtil.getLocalHome().create()
-                .getConfig();
+        // get the configuration properties
+        Properties config = ServerConfigManagerEJBImpl.getOne().getConfig();
 
-            UsernamePasswordHandler handler =
-                new UsernamePasswordHandler(user, password.toCharArray());
+        UsernamePasswordHandler handler =
+            new UsernamePasswordHandler(user, password.toCharArray());
 
-            LoginContext loginContext = new LoginContext(appName, handler);
-            loginContext.login();
-            loginContext.logout();
+        LoginContext loginContext = new LoginContext(appName, handler);
+        loginContext.login();
+        loginContext.logout();
 
-            // User is authenticated, get the id from the authz system
-            // and return an id from the Session Manager
-            AuthzSubjectManagerLocal subjMgrLocal = 
-                    AuthzSubjectManagerUtil.getLocalHome().create();
+        // User is authenticated, get the id from the authz system
+        // and return an id from the Session Manager
+        AuthzSubjectManagerLocal subjMgrLocal = 
+            AuthzSubjectManagerEJBImpl.getOne();
         
-            AuthzSubjectValue subject;
-            try {
-                subject = subjMgrLocal.findSubjectByAuth(user, appName);
-                if (!subject.getActive()) {
-                    throw new LoginException("User account has been disabled.");
-                }
-            } catch (SubjectNotFoundException fe) {
-                // User not found in the authz system.  Create it.
-                try {
-                    AuthzSubjectValue overlord =
-                        subjMgrLocal.findOverlord();
-                    AuthzSubjectValue newUser
-                        = createSubjectValue(user, appName);
-
-                    AuthzSubject sub = subjMgrLocal.createSubject(overlord,
-                                                                  newUser);
-                    subject = sub.getAuthzSubjectValue();
-                } catch (CreateException e) {
-                    throw new
-                        ApplicationException("Unable to add user to " +
-                                             "authorization system", e);
-                }
+        AuthzSubjectValue subject;
+        try {
+            subject = subjMgrLocal.findSubjectByAuth(user, appName);
+            if (!subject.getActive()) {
+                throw new LoginException("User account has been disabled.");
             }
+        } catch (SubjectNotFoundException fe) {
+            // User not found in the authz system.  Create it.
+            try {
+                AuthzSubjectValue overlord = subjMgrLocal.findOverlord();
+                AuthzSubjectValue newUser = createSubjectValue(user, appName);
+                AuthzSubject sub = subjMgrLocal.createSubject(overlord,
+                                                              newUser);
+                subject = sub.getAuthzSubjectValue();
+            } catch (CreateException e) {
+                throw new ApplicationException("Unable to add user to " +
+                                               "authorization system", e);
+            }
+        }
 
-            SessionManager mgr = SessionManager.getInstance();
-            return mgr.put(subject);
-        } catch (NamingException e) {
-            throw new SystemException("Naming Error in getSessionId", e);
-        } catch (CreateException e) {
-            throw new SystemException("CreateException in getSessionId", e);
-        } catch (FinderException e) {
-            throw new ApplicationException(
-                "Unable to find Overlord User to create authz user entry", e);
-        } 
+        SessionManager mgr = SessionManager.getInstance();
+        return mgr.put(subject);
     }
 
     /**
@@ -184,7 +157,8 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="SUPPORTS"
      */
     public int getUnauthSessionId(String user)
-        throws ApplicationException {
+        throws ApplicationException 
+    {
         try {
             SessionManager mgr = SessionManager.getInstance();
             try {
@@ -198,7 +172,7 @@ public class AuthManagerEJBImpl implements SessionBean {
             // Get the id from the authz system and return an id from the
             // Session Manager
             AuthzSubjectManagerLocal subjMgrLocal = 
-                    AuthzSubjectManagerUtil.getLocalHome().create();
+                AuthzSubjectManagerEJBImpl.getOne(); 
         
             AuthzSubjectValue subject =
                 subjMgrLocal.findSubjectByAuth(user, appName);
@@ -208,10 +182,6 @@ public class AuthManagerEJBImpl implements SessionBean {
             }
 
             return mgr.put(subject, 30000);     // 30 seconds only
-        } catch (NamingException e) {
-            throw new SystemException("Naming Error in getSessionId", e);
-        } catch (CreateException e) {
-            throw new SystemException("CreateException in getSessionId", e);
         } catch (SubjectNotFoundException e) {
             throw new SessionNotFoundException("Unable to find user " + user +
                                                " to create session");
@@ -224,15 +194,12 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param subject The subject of the currently logged in user
      * @param username The username to add
      * @param password The password for this user
-     * @exception NamingException If we can't find the PrinipalsLocalHome
-     * @exception CreateExceptoin If we try to add a duplicate user
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void addUser(AuthzSubjectValue subject, 
                         String username, String password)
-        throws NamingException, CreateException
     {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         lhome.create(username, password);
@@ -244,34 +211,26 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @param subject The subject of the currently logged in user
      * @param username The username whose password will be changed.
      * @param password The new password for this user
-     * @exception NamingException If we can't find the PrinipalsLocalHome
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
     public void changePassword(AuthzSubjectValue subject, 
                                String username, String password)
-        throws SystemException, FinderException, PermissionException
+        throws PermissionException
     {
-        try {
-            // AUTHZ check
-            if(!subject.getName().equals(username)) {
-                // users can change their own passwords... only
-                // peeps with modifyUsers can modify other 
-                AuthzSubjectManagerUtil.getLocalHome().create()
-                    .checkModifyUsers(subject);
-            }
-            PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
-            Principal local = lhome.findByUsername(username);
-            // hash the password as is done in ejbCreate. Fixes 4661
-            String hash = Util.createPasswordHash("MD5", "base64",
-                                              null, null, password);
-            local.setPassword(hash);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        // AUTHZ check
+        if(!subject.getName().equals(username)) {
+            // users can change their own passwords... only
+            // peeps with modifyUsers can modify other 
+            AuthzSubjectManagerEJBImpl.getOne().checkModifyUsers(subject);
         }
+        PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
+        Principal local = lhome.findByUsername(username);
+        // hash the password as is done in ejbCreate. Fixes 4661
+        String hash = Util.createPasswordHash("MD5", "base64",
+                                              null, null, password);
+        local.setPassword(hash);
     }
 
     /**
@@ -279,9 +238,6 @@ public class AuthManagerEJBImpl implements SessionBean {
      *
      * @param subject The subject of the currently logged in user
      * @param username The user to delete
-     * @exception NamingException If we can't find PrincipalsLocalHome
-     * @exception FinderException If we can't find the user to delete
-     * @exception RemoveException If the user could not be removed 
      *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
@@ -302,14 +258,11 @@ public class AuthManagerEJBImpl implements SessionBean {
      *
      * @param subject The subject of the currently logged in user
      * @param username The username of the user to get
-     * @exception NamingException If we can't find PrincipalsLocalHome
-     * @exception FinderException
      *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public boolean isUser(AuthzSubjectValue subject, String username)
-    {
+    public boolean isUser(AuthzSubjectValue subject, String username) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         return lhome.findByUsername(username) != null;
     }
@@ -318,15 +271,11 @@ public class AuthManagerEJBImpl implements SessionBean {
      * Get a collection of all users
      *
      * @param subject The subject of the currently logged in user
-     * @exception NamingException If we can't find PrincipalsLocalHome
-     * @exception FinderException
      *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public Collection getAllUsers(AuthzSubjectValue subject)
-        throws NamingException, FinderException
-    {
+    public Collection getAllUsers(AuthzSubjectValue subject) {
         PrincipalDAO lhome = DAOFactory.getDAOFactory().getPrincipalDAO();
         
         Collection principals = lhome.findAllUsers();
