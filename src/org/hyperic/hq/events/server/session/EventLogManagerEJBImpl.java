@@ -49,7 +49,6 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -219,88 +218,38 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="NOTSUPPORTED"
      */
-    public int deleteLogs(long from, long to) { 
-        Connection conn = null;
-
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);  
-            conn.setAutoCommit(true);
+    public int deleteLogs(long from, long to) {
+        if (log.isDebugEnabled()) {
+            log.debug("deleteLogs(" + from + ", " + to + ")");
+        }
+        
+        if (from == -1) {
+            from = getEventLogDAO().getMinimumTimeStamp();
             
-            if (log.isDebugEnabled()) {
-                log.debug("deleteLogs(" + from + ", " + to + ")");
-            }
-                            
             if (from == -1) {
-                PreparedStatement ps = null;
-                
-                try {
-                    // Need to find the begin time
-                    ps = conn.prepareStatement(
-                            "SELECT MIN(TIMESTAMP) FROM EAM_EVENT_LOG");
-                    ResultSet rs = ps.executeQuery();
-                    if (rs.next()) {
-                        from = rs.getLong(1);
-                    } else {
-                        return 0;
-                    }                    
-                } finally {
-                    DBUtil.closeStatement(logCtx, ps);
-                }
-            }
-            
-            if (to == -1) {
-                to = System.currentTimeMillis();
-            }
-                        
-            if (log.isDebugEnabled()) {
-                log.debug("updated deleteLogs(" + from + ", " + to + ")");
-            }
-            
-            if (from > to) {
-                log.debug("deleteLogs range is invalid. Deleting 0 rows.");
                 return 0;
             }
-                
-            // Now that we have valid from/to values, figure out what the
-            // interval is (don't loop more than 60 times)
-            long interval = Math.max(MeasurementConstants.DAY,
-                                     (to - from) / 60);
-            
-            // Delete from the EAM_EVENT_LOG table.            
-            int rowsDeleted = 0;
-            PreparedStatement ps = null;
-            
-            try {
-                ps = conn.prepareStatement("DELETE FROM EAM_EVENT_LOG " +
-                                   "WHERE TIMESTAMP >= ? AND TIMESTAMP <= ? ");
-                
-                for (long cursor = from; cursor < to; cursor += interval) {
-                    long end = Math.min(to, cursor + interval);
-                    
-                    if (log.isDebugEnabled()) {
-                        log.debug("delete from " + cursor + " to " + end);
-                    }
-
-                    ps.setLong(1, cursor);
-                    ps.setLong(2, end);
-                    rowsDeleted += ps.executeUpdate();
-                }                
-                
-            } finally {
-                DBUtil.closeStatement(logCtx, ps);                
-            }
-                                    
-            return rowsDeleted;
-        } catch (NamingException e) {
-            throw new SystemException("Error getting connection: " +
-                                      StringUtil.getStackTrace(e), e);
-        } catch (SQLException e) {
-            throw new SystemException("Error deleting event logs from " +
-                                      "database: " + 
-                                      StringUtil.getStackTrace(e), e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }   
+        }
+        
+        if (to == -1) {
+            to = System.currentTimeMillis();
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug("updated deleteLogs(" + from + ", " + to + ")");
+        }
+        
+        if (from > to) {
+            log.debug("deleteLogs range is invalid (from > to). Deleting 0 rows.");
+            return 0;
+        }
+        
+        // Now that we have valid from/to values, figure out what the
+        // interval is (don't loop more than 60 times)
+        long interval = Math.max(MeasurementConstants.DAY,
+                                 (to - from) / 60);
+        
+        return getEventLogDAO().deleteLogs(from, to, interval); 
     }
 
     /**
