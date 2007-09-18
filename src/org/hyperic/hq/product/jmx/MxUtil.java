@@ -53,6 +53,7 @@ import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.naming.Context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -405,6 +406,19 @@ public class MxUtil {
         }
 
         JMXServiceURL url = new JMXServiceURL(jmxUrl);
+
+        String proto = url.getProtocol();
+        if (proto.equals("t3") || proto.equals("t3s")) {
+            //http://edocs.bea.com/wls/docs92/jmx/accessWLS.html
+            //WebLogic support, requires:
+            //cp $WLS_HOME/server/lib/wljmxclient.jar pdk/lib/
+            //cp $WLS_HOME/server/lib/wlclient.jar pdk/lib/
+            map.put(JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES,
+                    "weblogic.management.remote");
+            map.put(Context.SECURITY_PRINCIPAL, user);
+            map.put(Context.SECURITY_CREDENTIALS, pass);
+        }
+
         JMXConnector connector =
             JMXConnectorFactory.connect(url, map);
 
