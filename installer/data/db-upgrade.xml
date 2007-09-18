@@ -6645,7 +6645,14 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
-   
+	
+	<schemaSpec version="3.51.4">
+        <schema-directSQL>
+		  <statement desc="Create new index for timestamp in eam_event_log for faster deletion of old event logs.">
+			CREATE INDEX EVENT_LOG_TIMESTAMP_IDX ON EAM_EVENT_LOG ( TIMESTAMP )
+		  </statement>			
+        </schema-directSQL>
+    </schemaSpec>   
 
 </dbupgrade>
 </target>
