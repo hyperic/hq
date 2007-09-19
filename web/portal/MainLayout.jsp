@@ -53,8 +53,8 @@
 
             if (arguments.callee.done) return;
             arguments.callee.done = true;
-            if (_timer) clearInterval(_timer);
-            for ( var i = 0 ; i < onloads.length ; i++ )
+           if(typeof(_timer)!="undefined") clearInterval(_timer);
+           for ( var i = 0 ; i < onloads.length ; i++ )
              onloads[i]();
 
         };
@@ -87,7 +87,7 @@
 
         /* for other browsers */
         window.onload = init;
-        
+
     </script>
 </head>
 <body style="background-color: #FFFFFF;">
