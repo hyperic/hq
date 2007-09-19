@@ -17,6 +17,10 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
+    <property name="name">
+      <column name="name" length="255" not-null="true"/>
+    </property>
+
     <many-to-one name="crispo">
       <column name="CRISPO_ID" not-null="true" />
     </many-to-one>
