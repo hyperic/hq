@@ -41,7 +41,6 @@ import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLog;
@@ -65,9 +64,7 @@ import org.hyperic.util.jdbc.DBUtil;
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     private final String logCtx =
         EventLogManagerEJBImpl.class.getName();
-    
-    private final String DATASOURCE_NAME = HQConstants.DATASOURCE;
-    
+        
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
 
     private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
@@ -240,7 +237,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         }
         
         if (from > to) {
-            log.debug("deleteLogs range is invalid (from > to). Deleting 0 rows.");
+            log.debug("deleteLogs range has (from > to). There are no rows to delete.");
             return 0;
         }
         
