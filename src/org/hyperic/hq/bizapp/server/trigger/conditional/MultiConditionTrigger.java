@@ -295,8 +295,8 @@ public class MultiConditionTrigger
              event instanceof TriggerNotFiredEvent || 
              event instanceof FlushStateEvent))
             throw new EventTypeException(
-                "Invalid event type passed, expected TriggerFiredEvent " +
-                "or TriggerNotFiredEvent");
+                "Invalid event type passed: expected TriggerFiredEvent, " +
+                "TriggerNotFiredEvent, or FlushStateEvent");
         
         EventTrackerLocal etracker = null;
         
