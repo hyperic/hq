@@ -36,8 +36,8 @@ public class UserDashboardConfig
     protected UserDashboardConfig() {
     }
 
-    UserDashboardConfig(AuthzSubject user, Crispo config) {
-        super(config);
+    UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
+        super(name, config);
         _user = user;
     }
 

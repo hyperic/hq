@@ -6661,6 +6661,7 @@ has already been defined.
                 id integer NOT NULL,
                 config_type character varying(255) NOT NULL,
                 version_col bigint DEFAULT 0 NOT NULL,
+                name character varying(255) NOT NULL,
                 crispo_id integer NOT NULL,
                 role_id integer,
                 user_id integer
@@ -6679,6 +6680,7 @@ has already been defined.
                 id integer NOT NULL,
                 config_type VARCHAR2(255) NOT NULL,
                 version_col NUMBER(19, 0) NOT NULL,
+                name VARCHAR2(255) NOT NULL,
                 crispo_id integer NOT NULL,
                 role_id integer,
                 user_id integer
@@ -6708,8 +6710,6 @@ has already been defined.
             ALTER TABLE ONLY eam_dash_config
                 ADD CONSTRAINT fk1ef56c8199d737ae FOREIGN KEY (role_id) REFERENCES eam_role(id)
         </statement>
-        
-        <!-- TODO:  Need Mysql migration -->
       </schema-directSQL>
     </schemaSpec>
     
@@ -6723,12 +6723,17 @@ has already been defined.
       
       <schema-directSQL>
         <statement>
-          insert into eam_dash_config (id, config_type, version_col, crispo_id, user_id) 
-              select id - 8999, 'USER', 0, tmp_crispo_id, id from eam_user_config_resp where id > 10
+          insert into eam_dash_config (id, config_type, version_col, name, crispo_id, user_id) 
+              select id - 8999, 'USER', 0, 'user', tmp_crispo_id, id from eam_user_config_resp where id > 10
         </statement>
         <statement>
-          insert into eam_dash_config (id, config_type, version_col, crispo_id, user_id) 
-              select 1000, 'USER', 0, tmp_crispo_id, id from eam_user_config_resp where id = 1
+          insert into eam_dash_config (id, config_type, version_col, name, crispo_id, user_id) 
+              select 1000, 'USER', 0, 'user', tmp_crispo_id, id from eam_user_config_resp where id = 1
+        </statement>
+        <statement>
+          update eam_dash_config set name = (
+              select name from eam_subject s where s.id = eam_dash_config.user_id
+          ) where user_id is not null
         </statement>
       </schema-directSQL>
     </schemaSpec>

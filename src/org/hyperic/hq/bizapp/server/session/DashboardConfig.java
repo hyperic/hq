@@ -33,11 +33,13 @@ public abstract class DashboardConfig
     extends PersistedObject
 {
     private Crispo _config;
+    private String _name;
 
     protected DashboardConfig() {
     }
     
-    protected DashboardConfig(Crispo config) {
+    protected DashboardConfig(String name, Crispo config) {
+        _name   = name;
         _config = config;
     }
     
@@ -53,9 +55,18 @@ public abstract class DashboardConfig
         _config = config;
     }
     
+    public String getName() {
+        return _name;
+    }
+    
+    protected void setName(String n) {
+        _name = n;
+    }
+    
     public int hashCode() {
         int hash = 17;
 
+        hash = hash * 37 + getName().hashCode();
         hash = hash * 37 + (getCrispo() != null ? getCrispo().hashCode() : 0);
         return hash;
     }
@@ -69,6 +80,9 @@ public abstract class DashboardConfig
         
         DashboardConfig oe = (DashboardConfig)o;
 
+        if (!getName().equals(oe.getName()))
+            return false;
+        
         if (getCrispo().getId() != oe.getCrispo().getId())
             return false;
 

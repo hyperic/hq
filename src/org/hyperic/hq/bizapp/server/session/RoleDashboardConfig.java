@@ -36,8 +36,8 @@ public class RoleDashboardConfig
     protected RoleDashboardConfig() {
     }
 
-    RoleDashboardConfig(Role r, Crispo config) {
-        super(config);
+    RoleDashboardConfig(Role r, String name, Crispo config) {
+        super(name, config);
         _role = r;
     }
     

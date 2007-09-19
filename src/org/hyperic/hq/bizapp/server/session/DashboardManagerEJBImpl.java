@@ -113,7 +113,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public UserDashboardConfig createUserDashboard(AuthzSubject me,
-                                                   AuthzSubject user) 
+                                                   AuthzSubject user,
+                                                   String name) 
         throws PermissionException
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
@@ -126,7 +127,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
         }
         
         Crispo cfg = CrispoManagerEJBImpl.getOne().create(getDefaultConfig());
-        UserDashboardConfig dash = new UserDashboardConfig(user, cfg);
+        UserDashboardConfig dash = new UserDashboardConfig(user, name, cfg);
         _dashDAO.save(dash);
         return dash;
     }
@@ -134,8 +135,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
     /**
      * @ejb:interface-method
      */
-    public RoleDashboardConfig createRoleDashboard(AuthzSubject me,
-                                                   Role r)
+    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, 
+                                                   String name)
         throws PermissionException
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
@@ -144,7 +145,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
                       r.getId(), AuthzConstants.roleOpModifyRole);
         
         Crispo cfg = CrispoManagerEJBImpl.getOne().create(getDefaultConfig());
-        RoleDashboardConfig dash = new RoleDashboardConfig(r, cfg);
+        RoleDashboardConfig dash = new RoleDashboardConfig(r, name, cfg);
         _dashDAO.save(dash);
         return dash;
     }
