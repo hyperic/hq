@@ -189,6 +189,13 @@ public class RegisteredDispatcherEJBImpl
                         
                         if (lockAcquired) {
                             trigger.processEvent(event);                    
+                        } else {
+                            if (log.isDebugEnabled()) {
+                                log.debug("There must be more interesting events "+
+                                     "to multicondition alert with trigger id="+
+                                	 trigger.getId()+" since it failed to upgrade "+
+                                	 "shared lock on flushing state.");    
+                            }                            
                         }                        
                     } finally {
                         if (lockAcquired) {
