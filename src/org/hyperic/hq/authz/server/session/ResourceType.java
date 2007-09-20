@@ -28,12 +28,28 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.ResourceBundle;
 
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 
-public class ResourceType extends AuthzNamedBean
-{
+public class ResourceType extends AuthzNamedBean {
+    private static final Map TYPE_TO_PROP = new HashMap();
+    
+    static {
+        TYPE_TO_PROP.put(AuthzConstants.authzPlatform, "resource.platform");
+        TYPE_TO_PROP.put(AuthzConstants.authzServer, "resource.server");
+        TYPE_TO_PROP.put(AuthzConstants.authzService, "resource.service");
+        TYPE_TO_PROP.put(AuthzConstants.authzApplication, "resource.application");
+        TYPE_TO_PROP.put(AuthzConstants.authzEscalation, "resource.escalation");
+        TYPE_TO_PROP.put(AuthzConstants.authzGroup, "resource.group");
+        TYPE_TO_PROP.put(AuthzConstants.authzSubject, "resource.subject");
+        TYPE_TO_PROP.put(AuthzConstants.authzRole, "resource.role");
+    }
+    
     private Integer    _cid;
     private Resource   _resource;
     private boolean    _system = false;
@@ -113,6 +129,23 @@ public class ResourceType extends AuthzNamedBean
 
     public Object getValueObject() {
         return getResourceTypeValue();
+    }
+    
+    public String getLocalizedName() {
+        ResourceBundle b = 
+            ResourceBundle.getBundle("org.hyperic.hq.authz.Resources");
+        String prop = (String)TYPE_TO_PROP.get(getId());
+        
+        if (prop == null) {
+            return getName();
+        }
+        
+        String res = b.getString(prop);
+        if (res == null) {
+            return getName();
+        }
+        
+        return res;
     }
 
     public int hashCode() {
