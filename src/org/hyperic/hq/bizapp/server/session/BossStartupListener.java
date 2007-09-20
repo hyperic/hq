@@ -9,6 +9,5 @@ public class BossStartupListener
         EventsBossEJBImpl.getOne().startup();
         UpdateBossEJBImpl.getOne().startup();
         ProductBossEJBImpl.getOne().preload();
-        SystemAudit.createUpAudit();
     }
 }

@@ -52,6 +52,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -209,6 +210,10 @@ public class ProductPluginDeployer
         pluginNotify("deployer", DEPLOYER_CLEARED);
         
         setReady(true);
+        
+        if (n.getType().equals("org.jboss.system.server.started")) {
+            SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
+        }
     }
 
     protected void processNestedDeployments(DeploymentInfo di)
