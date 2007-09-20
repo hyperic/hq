@@ -120,6 +120,19 @@ public abstract class AuditSortField
         }
     };
 
+    public static final AuditSortField DURATION = 
+        new AuditSortField(7, "duration", "audit.sortField.duration") 
+    {
+        public boolean isSortable() {
+            return true;
+        }
+
+        String getSortString(String audit, String resource, String subject) {
+            return audit + ".endTime - " + audit + ".startTime"; 
+        }
+    };
+
+
     private AuditSortField(int code, String desc, String localeProp) {
         super(AuditSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));

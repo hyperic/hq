@@ -34,8 +34,7 @@ class AuditController
         columns: [
             [field:AuditSortField.START_TIME, width:'10%',
              label:{df.format(it.startTime)}],
-            [field:[getValue: {localeBundle.Duration },
-                    description:'duration', sortable:false], width:'10%',
+            [field:AuditSortField.DURATION, width:'10%',
              label:{
                 def dur = it.endTime - it.startTime
                 def val = new UnitNumber(dur, UnitsConstants.UNIT_DURATION,
