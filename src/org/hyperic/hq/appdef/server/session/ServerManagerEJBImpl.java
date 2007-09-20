@@ -265,12 +265,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, RemoveException, PermissionException,
                VetoException
     {
-        Server server;
-        try {
-            server = getServerDAO().findById(id);
-        } catch (ObjectNotFoundException e) {
+        Server server = getServerDAO().get(id);
+
+        if (server == null)
             throw new ServerNotFoundException(id);
-        }
+
         removeServer(subject, server);
     }
 

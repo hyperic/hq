@@ -73,6 +73,10 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -80,6 +84,9 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.util.pager.PageControl;
@@ -270,12 +277,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws RemoveException, PermissionException, PlatformNotFoundException,
                VetoException
     {
+        AppdefEntityID aeid = platform.getEntityId();
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(aeid);
+        AuthzSubject platPojo = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
+        Audit audit = ResourceAudit.deleteResource(r, platPojo, 0, 0);
+        boolean pushed = false;
+
         try {
+            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            pushed = true;
+
             checkRemovePermission(subject, platform.getEntityId());
 
             // keep the configresponseId so we can remove it later
             Integer cid = platform.getConfigResponseId();
-            AppdefEntityID aeid = platform.getEntityId();
 
             ServerManagerLocal srvMgr = getServerMgrLocal();
             // Server manager will update the collection, so we need to copy
@@ -291,7 +307,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
 
             // now remove the resource for the platform
-            removeAuthzResource(subject, aeid);
+            removeAuthzResource(subject, aeid, false);
 
             getPlatformDAO().remove(platform);
 
@@ -318,6 +334,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             _log.debug("Error while removing Platform");
             rollback();
             throw e;
+        } finally {
+            if (pushed)
+                AuditManagerEJBImpl.getOne().popContainer(false);
         }
     } 
 
