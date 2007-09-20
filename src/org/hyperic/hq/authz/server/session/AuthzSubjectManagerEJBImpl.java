@@ -36,6 +36,7 @@ import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.server.session.UserAudit;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -85,8 +86,10 @@ public class AuthzSubjectManagerEJBImpl
      * @return Value-object for the new Subject.
      * @ejb:interface-method
      */
-    public AuthzSubject createSubject(AuthzSubjectValue whoami,
-                                      AuthzSubjectValue subject)
+    public AuthzSubject createSubject(AuthzSubjectValue whoami, String name,
+                                      boolean active, String dsn, String dept,
+                                      String email, String first, String last,
+                                      String phone, String sms, boolean html)
         throws PermissionException, CreateException 
     {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -95,57 +98,35 @@ public class AuthzSubjectManagerEJBImpl
                  AuthzConstants.subjectOpCreateSubject);
         AuthzSubjectDAO dao = getSubjectDAO();
 
-        AuthzSubject existing = dao.findByName(subject.getName());
+        AuthzSubject existing = dao.findByName(name);
         if (existing != null) {
             throw new CreateException("A system user already exists with " +
-                                      subject.getName());
+                                      name);
         }
 
         AuthzSubject whoamiPojo  = findSubjectById(whoami.getId()); 
-        AuthzSubject subjectPojo = dao.create(whoamiPojo, subject);
-        
+        AuthzSubject subjectPojo = dao.create(whoamiPojo, name, active, dsn,
+                                              dept, email, first, last, phone, 
+                                              sms, html);
+
+        UserAudit.createCreateAudit(whoamiPojo, subjectPojo);
         return subjectPojo;
-    }
-
-    /** 
-     * Write the specified entity out to permanent storage.
-     * @param whoami The current running user.
-     * @param subject The subject to save.
-     * @ejb:interface-method
-     */
-    public void saveSubject(AuthzSubjectValue whoami,
-                            AuthzSubjectValue subject)
-        throws PermissionException 
-    {
-        AuthzSubject subjectPojo = this.lookupSubjectPojo(subject);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        // check to see if the user attempting the modification
-        // is the same as the one being modified
-        if(!whoami.getId().equals(subjectPojo.getId())) {
-            pm.check(whoami.getId(), getRootResourceType().getId(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.perm_viewSubject);
-        }
-        // Root user can not be disabled
-        if(subject.getId().equals(AuthzConstants.rootSubjectId)) {
-            subject.setActive(true);
-        }
-        subjectPojo.setAuthzSubjectValue(subject);
     }
 
     /** 
      * Update user settings for the target
      * 
      * @param whoami The current running user.
-     * @param subject The subject to save.
+     * @param target The subject to save.
      * 
      * The rest of the parameters specify settings to update.  If they are 
      * null, then no change will be made to them.
      * @ejb:interface-method
      */
     public void updateSubject(AuthzSubject whoami, AuthzSubject target,
-                              Boolean useHtmlEmail)
+                              Boolean active, String dsn, String dept,
+                              String email, String firstName, String lastName, 
+                              String phone, String sms, Boolean useHtml)
         throws PermissionException 
     {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
@@ -156,8 +137,71 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.perm_viewSubject);
         }
         
-        if (useHtmlEmail != null) {
-            target.setHtmlEmail(useHtmlEmail.booleanValue());
+        if (active != null && target.getActive() != active.booleanValue()) {
+            // Root user can not be disabled
+            if (target.getId().equals(AuthzConstants.rootSubjectId)) {
+                throw new PermissionException("Cannot change active status of "+
+                                              "root user");
+            }
+            
+            target.setActive(active.booleanValue());
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.ACTIVE,
+                                        target.getActive() + "", active + "");
+        }
+        
+        if (dsn != null && !target.getAuthDsn().equals(dsn)) {
+            target.setAuthDsn(dsn);
+        }
+        
+        if (dept != null && !target.getDepartment().equals(dept)) {
+            target.setDepartment(dept);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.DEPT,
+                                        target.getDepartment(), dept);
+        }
+        
+        if (email != null && !target.getEmailAddress().equals(email)) {
+            target.setEmailAddress(email);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.EMAIL,
+                                        target.getEmailAddress(), email);
+        }
+        
+        if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()){
+            target.setHtmlEmail(useHtml.booleanValue());
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.HTML,
+                                        target.getHtmlEmail() + "",
+                                        useHtml + "");
+        }
+        
+        if (firstName != null && !target.getFirstName().equals(firstName)) {
+            target.setFirstName(firstName);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.FIRSTNAME,
+                                        target.getFirstName(), firstName);
+        }
+
+        if (lastName != null && !target.getLastName().equals(lastName)) {
+            target.setFirstName(firstName);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.LASTNAME,
+                                        target.getLastName(), lastName);
+        }
+
+        if (phone != null && !target.getPhoneNumber().equals(phone)) {
+            target.setPhoneNumber(phone);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.PHONE,
+                                        target.getPhoneNumber(), phone);
+        }
+
+        if (sms != null && !target.getSMSAddress().equals(sms)) {
+            target.setSMSAddress(sms);
+            UserAudit.createUpdateAudit(whoami, target, 
+                                        AuthzSubjectField.SMS,
+                                        target.getSMSAddress(), sms);
         }
     }
 
@@ -446,6 +490,13 @@ public class AuthzSubjectManagerEJBImpl
     public AuthzSubjectValue getOverlord() {
         return getSubjectDAO().findById(AuthzConstants.overlordId)
                               .getAuthzSubjectValue();
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public AuthzSubject getOverlordPojo() {
+        return getSubjectDAO().findById(AuthzConstants.overlordId);
     }
 
     /**

@@ -45,6 +45,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -56,6 +57,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -225,20 +227,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Remove resources by appdef id
-     *
-     * @ejb:interface-method
-     */
-    public void removeResources(AppdefEntityID[] ids) {
-        // should do some permission checks here.
-        // This is meant to be called from other bosses
-        // that need to remove resources as a last step
-        // to clean the repo.  i.e., for model use case
-        // see AppdefBossEJBImpl.removePlatform();
-        getResourceManager().removeResources(ids);
-    }
-
-    /**
      * Remove the user identified by the given ids from the subject as well 
      * as principal tables.
      *
@@ -320,17 +308,20 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
                             
     /**
-     * Save a subject
+     * Update a subject
      *
      * @ejb:interface-method
      */
-    public void saveSubject(Integer sessionId, AuthzSubjectValue user)
-        throws NamingException, FinderException, RemoveException,
-               PermissionException, SessionTimeoutException,
-               SessionNotFoundException {
-        // check for timeout
-        AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
-        getAuthzSubjectManager().saveSubject(whoami, user);        
+    public void updateSubject(Integer sessionId, AuthzSubject target,
+                              Boolean active, String dsn, String dept,
+                              String email, String first, String last,
+                              String phone, String sms, Boolean useHtml)
+        throws PermissionException, SessionException 
+    {
+        AuthzSubject whoami = manager.getSubjectPojo(sessionId.intValue());
+        getAuthzSubjectManager().updateSubject(whoami, target, active, dsn,
+                                               dept, email, first, last,
+                                               phone, sms, useHtml);
     }
     
     /**
@@ -339,16 +330,21 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      *
      * @ejb:interface-method
      */
-    public AuthzSubjectValue createSubject(Integer sessionId,
-                                           AuthzSubjectValue user)
-        throws NamingException, CreateException, FinderException,
-               RemoveException, PermissionException, SessionTimeoutException,
-               SessionNotFoundException {
+    public AuthzSubjectValue createSubject(Integer sessionId, String name,
+                                           boolean active, String dsn,
+                                           String dept, String email, 
+                                           String first, String last,
+                                           String phone, String sms,
+                                           boolean useHtml) 
+        throws PermissionException, CreateException, SessionException 
+    {
         // check for timeout
         AuthzSubjectValue whoami = manager.getSubject(sessionId.intValue());        
 
         AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
-        AuthzSubject subject = subjMan.createSubject(whoami, user);
+        AuthzSubject subject = subjMan.createSubject(whoami, name, active,
+                                                     dsn, dept, email, first,
+                                                     last, phone, sms, useHtml);
         return subject.getAuthzSubjectValue();
         
     }

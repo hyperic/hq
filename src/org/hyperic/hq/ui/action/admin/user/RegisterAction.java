@@ -40,6 +40,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
@@ -86,19 +88,8 @@ public class RegisterAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();            
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
-        AuthzSubjectValue user = ContextUtils.getAuthzBoss(ctx)
-            .findSubject(RequestUtils.getSessionId(request), userForm.getId() );
 
         WebUser webUser = SessionUtils.getWebUser(session);
-
-        user.setName        ( webUser.getUsername() );
-        user.setFirstName   ( userForm.getFirstName() );
-        user.setLastName    ( userForm.getLastName() );
-        user.setDepartment  ( userForm.getDepartment() );
-        user.setEmailAddress( userForm.getEmailAddress() );
-        user.setPhoneNumber ( userForm.getPhoneNumber() );
-        user.setAuthDsn     ( HQConstants.ApplicationName);
-        user.setActive(true);
 
         // password was saved off when the user logged in
         String password =
@@ -107,16 +98,28 @@ public class RegisterAction extends BaseAction {
 
         // use the overlord to register the subject, and don't add
         // a principal
-        log.trace("registering subject [" + user.getName() + "]");
-        authzBoss.saveSubject(sessionId, user);
+        log.trace("registering subject [" + webUser.getUsername() + "]");
+        
+        AuthzSubject target = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(userForm.getId()); 
+        authzBoss.updateSubject(sessionId, target, Boolean.TRUE,
+                                HQConstants.ApplicationName,
+                                userForm.getDepartment(),
+                                userForm.getEmailAddress(),
+                                userForm.getFirstName(),
+                                userForm.getLastName(),
+                                userForm.getPhoneNumber(),
+                                userForm.getSmsAddress(), null);
+                                
 
         // nuke the temporary bizapp session and establish a new
         // one for this subject.. must be done before pulling the
         // new subject in order to do it with his own credentials
         authBoss.logout(sessionId.intValue());
-        sessionId = new Integer(authBoss.login(user.getName(), password));
+        sessionId = new Integer(authBoss.login(webUser.getUsername(),
+                                               password));
 
-        log.trace("finding subject [" + user.getName() + "]");
+        log.trace("finding subject [" + webUser.getUsername() + "]");
 
         // the new user has no prefs, but we still want to pick up
         // the defaults
@@ -133,12 +136,13 @@ public class RegisterAction extends BaseAction {
         }
 
         // we also need to create up a new web user
-        webUser = new WebUser(user, sessionId, password, preferences, false);
+        webUser = new WebUser(target.getAuthzSubjectValue(), sessionId, 
+                              password, preferences, false);
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
         HashMap parms = new HashMap(1);
-        parms.put(Constants.USER_PARAM, user.getId());
+        parms.put(Constants.USER_PARAM, target.getId());
 
         return returnSuccess(request, mapping, parms, false);
     }

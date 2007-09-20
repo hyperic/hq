@@ -25,10 +25,7 @@
 
 package org.hyperic.hq.ui.action.admin.user;
 
-import java.io.IOException;
-
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,16 +34,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.ActionUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.action.BaseAction;
-
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * Edits a <code>AuthzSubjectValue</code>.
@@ -81,23 +76,20 @@ public class EditAction extends BaseAction {
             return forward;
         }                                                                     
 
-        user.setFirstName   ( userForm.getFirstName() );
-        user.setLastName    ( userForm.getLastName() );
-        user.setDepartment  ( userForm.getDepartment() );
-        user.setName        ( userForm.getName() );
-        user.setEmailAddress( userForm.getEmailAddress() );
-        user.setHtmlEmail   ( userForm.isHtmlEmail() );
-        user.setPhoneNumber ( userForm.getPhoneNumber() );
-        user.setSMSAddress  ( userForm.getSmsAddress() );
-        user.setActive      ( userForm.getEnableLogin().equals("yes") );
-
-        log.trace("Saving user." + user);            
-        authzBoss.saveSubject(sessionId, user);
+        AuthzSubject target = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(userForm.getId());
+        authzBoss.updateSubject(sessionId, target, 
+                                new Boolean(userForm.getEnableLogin().equals("yes")), 
+                                null,
+                                userForm.getDepartment(), 
+                                userForm.getEmailAddress(),
+                                userForm.getFirstName(),
+                                userForm.getLastName(),
+                                userForm.getPhoneNumber(),
+                                userForm.getSmsAddress(),
+                                new Boolean(userForm.isHtmlEmail()));
 
         return returnSuccess(request, mapping, Constants.USER_PARAM,
                              userForm.getId());
-
-      
     }               
-    
 }

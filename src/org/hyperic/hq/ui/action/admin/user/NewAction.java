@@ -81,20 +81,19 @@ public class NewAction extends BaseAction {
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
         AuthzSubjectValue user = new AuthzSubjectValue();
 
-        user.setName        ( userForm.getName() );
-        user.setFirstName   ( userForm.getFirstName() );
-        user.setLastName    ( userForm.getLastName() );
-        user.setDepartment  ( userForm.getDepartment() );
-        user.setEmailAddress( userForm.getEmailAddress() );
-        user.setHtmlEmail   ( userForm.isHtmlEmail() );
-        user.setSMSAddress  ( userForm.getSmsAddress() );
-        user.setPhoneNumber ( userForm.getPhoneNumber() );
-        user.setAuthDsn     ( HQConstants.ApplicationName );
-        user.setActive      ( userForm.getEnableLogin().equals("yes") );
-
         // add both a subject and a principal as normal
-        log.trace("creating subject [" + user.getName() + "]");
-        authzBoss.createSubject(sessionId, user);
+        log.trace("creating subject [" + userForm.getName() + "]");
+        
+        authzBoss.createSubject(sessionId, userForm.getName(),
+                                userForm.getEnableLogin().equals("yes"),
+                                HQConstants.ApplicationName,
+                                userForm.getDepartment(),
+                                userForm.getEmailAddress(),
+                                userForm.getFirstName(),
+                                userForm.getLastName(),
+                                userForm.getPhoneNumber(),
+                                userForm.getSmsAddress(),
+                                userForm.isHtmlEmail());
 
         log.trace("adding user [" + user.getName() + "]");
         authBoss.addUser(sessionId.intValue(), user.getName(),

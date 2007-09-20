@@ -34,9 +34,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
@@ -50,10 +48,15 @@ class AuthzSubjectDAO
         super(AuthzSubject.class, f);
     }
 
-    AuthzSubject create(AuthzSubject creator, AuthzSubjectValue createInfo) {
-        AuthzSubject subject = new AuthzSubject(createInfo);
+    AuthzSubject create(AuthzSubject creator, String name, boolean active, 
+                        String dsn, String dept, String email, String first, 
+                        String last, String phone,  
+                        String sms, boolean html)
+    {
+        AuthzSubject subject = new AuthzSubject(active, dsn, dept, email,
+                                                html, first, last, name,
+                                                phone, sms, false);
         save(subject);
-
         DAOFactory daoFactory = DAOFactory.getDAOFactory();
 
         // XXX create resource for owner

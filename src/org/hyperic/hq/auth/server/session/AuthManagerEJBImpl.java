@@ -115,22 +115,24 @@ public class AuthManagerEJBImpl implements SessionBean {
 
         // User is authenticated, get the id from the authz system
         // and return an id from the Session Manager
-        AuthzSubjectManagerLocal subjMgrLocal = 
+        AuthzSubjectManagerLocal subjMan = 
             AuthzSubjectManagerEJBImpl.getOne();
         
         AuthzSubjectValue subject;
         try {
-            subject = subjMgrLocal.findSubjectByAuth(user, appName);
+            subject = subjMan.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
                 throw new LoginException("User account has been disabled.");
             }
         } catch (SubjectNotFoundException fe) {
             // User not found in the authz system.  Create it.
             try {
-                AuthzSubjectValue overlord = subjMgrLocal.findOverlord();
+                AuthzSubjectValue overlord = subjMan.findOverlord();
                 AuthzSubjectValue newUser = createSubjectValue(user, appName);
-                AuthzSubject sub = subjMgrLocal.createSubject(overlord,
-                                                              newUser);
+                AuthzSubject sub = subjMan.createSubject(overlord, user,
+                                                         true, appName, "",
+                                                         "", "", "", "",
+                                                         "", false);
                 subject = sub.getAuthzSubjectValue();
             } catch (CreateException e) {
                 throw new ApplicationException("Unable to add user to " +

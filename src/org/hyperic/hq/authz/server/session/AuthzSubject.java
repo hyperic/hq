@@ -55,8 +55,22 @@ public class AuthzSubject extends AuthzNamedBean {
     protected AuthzSubject() {
     }
 
-    public AuthzSubject(AuthzSubjectValue val) {
-        setAuthzSubjectValue(val);
+    public AuthzSubject(boolean active, String authDsn, String dept,
+                        String email, boolean useHtml, String first, 
+                        String last, String name, String phone, String sms,
+                        boolean system) 
+    {
+        setActive(active);
+        setAuthDsn(authDsn);
+        setDepartment(dept);
+        setEmailAddress(email);
+        setHtmlEmail(useHtml);
+        setFirstName(first);
+        setLastName(last);
+        setName(name);
+        setPhoneNumber(phone);
+        setSMSAddress(sms);
+        setSystem(system);
     }
 
     public String getAuthDsn() {
@@ -228,20 +242,6 @@ public class AuthzSubject extends AuthzNamedBean {
         _valueObj.setName((getName() == null) ? "" : getName());
         _valueObj.setId(getId());
         return _valueObj;
-    }
-
-    protected void setAuthzSubjectValue(AuthzSubjectValue authzSubjectValue) {
-        setActive(authzSubjectValue.getActive());
-        setAuthDsn(authzSubjectValue.getAuthDsn());
-        setDepartment(authzSubjectValue.getDepartment());
-        setEmailAddress(authzSubjectValue.getEmailAddress());
-        setHtmlEmail(authzSubjectValue.isHtmlEmail());
-        setFirstName(authzSubjectValue.getFirstName());
-        setLastName(authzSubjectValue.getLastName());
-        setName(authzSubjectValue.getName());
-        setPhoneNumber(authzSubjectValue.getPhoneNumber());
-        setSMSAddress(authzSubjectValue.getSMSAddress());
-        setSystem(authzSubjectValue.getSystem());
     }
 
     public boolean isRoot() {
