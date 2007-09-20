@@ -38,7 +38,8 @@ class AuditController
                     description:'duration', sortable:false], width:'10%',
              label:{
                 def dur = it.endTime - it.startTime
-                def val = new UnitNumber(dur, UnitsConstants.UNIT_DURATION)
+                def val = new UnitNumber(dur, UnitsConstants.UNIT_DURATION,
+                                         UnitsConstants.SCALE_MILLI)
                 UnitsFormat.format(val).toString() 
              }],
             [field:[getValue: {localeBundle.Message },
