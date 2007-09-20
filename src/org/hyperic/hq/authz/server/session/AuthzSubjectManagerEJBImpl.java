@@ -109,7 +109,7 @@ public class AuthzSubjectManagerEJBImpl
                                               dept, email, first, last, phone, 
                                               sms, html);
 
-        UserAudit.createCreateAudit(whoamiPojo, subjectPojo);
+        UserAudit.createAudit(whoamiPojo, subjectPojo);
         return subjectPojo;
     }
 
@@ -145,9 +145,8 @@ public class AuthzSubjectManagerEJBImpl
             }
             
             target.setActive(active.booleanValue());
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.ACTIVE,
-                                        target.getActive() + "", active + "");
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, 
+                                  target.getActive() + "", active + "");
         }
         
         if (dsn != null && !target.getAuthDsn().equals(dsn)) {
@@ -156,52 +155,45 @@ public class AuthzSubjectManagerEJBImpl
         
         if (dept != null && !target.getDepartment().equals(dept)) {
             target.setDepartment(dept);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.DEPT,
-                                        target.getDepartment(), dept);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.DEPT, 
+                                  target.getDepartment(), dept);
         }
         
         if (email != null && !target.getEmailAddress().equals(email)) {
             target.setEmailAddress(email);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.EMAIL,
-                                        target.getEmailAddress(), email);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.EMAIL, 
+                                  target.getEmailAddress(), email);
         }
         
         if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()){
             target.setHtmlEmail(useHtml.booleanValue());
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.HTML,
-                                        target.getHtmlEmail() + "",
-                                        useHtml + "");
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.HTML, 
+                                  target.getHtmlEmail() + "",
+                                  useHtml + "");
         }
         
         if (firstName != null && !target.getFirstName().equals(firstName)) {
             target.setFirstName(firstName);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.FIRSTNAME,
-                                        target.getFirstName(), firstName);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, 
+                                  target.getFirstName(), firstName);
         }
 
         if (lastName != null && !target.getLastName().equals(lastName)) {
             target.setFirstName(firstName);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.LASTNAME,
-                                        target.getLastName(), lastName);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, 
+                                  target.getLastName(), lastName);
         }
 
         if (phone != null && !target.getPhoneNumber().equals(phone)) {
             target.setPhoneNumber(phone);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.PHONE,
-                                        target.getPhoneNumber(), phone);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.PHONE, 
+                                  target.getPhoneNumber(), phone);
         }
 
         if (sms != null && !target.getSMSAddress().equals(sms)) {
             target.setSMSAddress(sms);
-            UserAudit.createUpdateAudit(whoami, target, 
-                                        AuthzSubjectField.SMS,
-                                        target.getSMSAddress(), sms);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.SMS, 
+                                  target.getSMSAddress(), sms);
         }
     }
 

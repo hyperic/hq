@@ -72,7 +72,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
         try {
             int res = getAuthManager().getSessionId(username, password);
             
-            UserAudit.createLoginAudit(manager.getSubjectPojo(res));
+            UserAudit.loginAudit(manager.getSubjectPojo(res));
             return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
@@ -86,7 +86,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      */
     public void logout (int sessionID) {
         try {
-            UserAudit.createLogoutAudit(manager.getSubjectPojo(sessionID));
+            UserAudit.logoutAudit(manager.getSubjectPojo(sessionID));
         } catch(SessionException e) {
         }
         manager.invalidate(sessionID);
