@@ -1031,7 +1031,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         Statement stmt = null;
         ResultSet rs   = null;
-        int total = 0;
         String sql;
         try {
             stmt = conn.createStatement();
@@ -1039,9 +1038,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                    " WHERE timestamp BETWEEN "+begin+" AND "+end+
                    " AND measurement_id="+measurementId;
             rs = stmt.executeQuery(sql);
-            if (rs.next())
-                total = rs.getInt(1);
-            if (total == 0) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
                 return 0;
             }
         } catch (SQLException e) {
@@ -1050,7 +1049,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } finally {
             DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
         }
-        return 0;
     }
 
     private String getSelectType(int type, long begin, long end)
