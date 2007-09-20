@@ -31,6 +31,7 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
@@ -52,6 +53,8 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.server.session.AIAudit;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -62,6 +65,8 @@ import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
@@ -89,7 +94,39 @@ public class RuntimeReportProcessor {
                                      AuthzSubjectManagerLocal subjectMgr)
         throws AutoinventoryException, CreateException, 
                PermissionException, ValidationException, 
-               ApplicationException {
+               ApplicationException 
+    {
+        Agent agent = AgentManagerEJBImpl.getOne().getAgentPojo(agentToken);
+        Audit audit = AIAudit.newRuntimeImportAudit(agent); 
+        boolean pushed = false;
+        
+        try {
+            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            pushed = true; 
+            _processRuntimeReport(subject, agentToken, crrr, aiMgr, platformMgr,
+                                  serverMgr, serviceMgr, configMgr, cpropMgr, 
+                                  subjectMgr);
+        } finally {
+            if (pushed) {
+                AuditManagerEJBImpl.getOne().popContainer(false);
+            }
+        }
+    }
+
+    private void _processRuntimeReport(AuthzSubjectValue subject,
+                                     String agentToken,
+                                     CompositeRuntimeResourceReport crrr,
+                                     AutoinventoryManagerLocal aiMgr,
+                                     PlatformManagerLocal platformMgr,
+                                     ServerManagerLocal serverMgr,
+                                     ServiceManagerLocal serviceMgr,
+                                     ConfigManagerLocal configMgr,
+                                     CPropManagerLocal cpropMgr,
+                                     AuthzSubjectManagerLocal subjectMgr)
+        throws AutoinventoryException, CreateException, 
+               PermissionException, ValidationException, 
+               ApplicationException 
+    {
         long startTime = System.currentTimeMillis();
 
         log.info("Processing Runtime AI Report: " + crrr.simpleSummary());

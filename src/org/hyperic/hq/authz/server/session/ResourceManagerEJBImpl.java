@@ -40,7 +40,9 @@ import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.AIAudit;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -54,6 +56,8 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -232,12 +236,18 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                    ResourceTypeValue rtv, Integer instanceId,
                                    String name, boolean system) 
     {
+        long start = System.currentTimeMillis();
         AuthzSubject owner =
             getSubjectDAO().findByAuth(whoami.getName(),
                                        whoami.getAuthDsn());
         ResourceType rt = getResourceTypeDAO().findById(rtv.getId()); 
 
-        return getResourceDAO().create(rt, name, owner, instanceId, system);
+        Resource res = getResourceDAO().create(rt, name, owner, instanceId, 
+                                               system);
+        
+        ResourceAudit.createResource(res, owner, start, 
+                                     System.currentTimeMillis());
+        return res;
     }
     
     /**
@@ -279,8 +289,14 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceById(Integer id) {
-        Resource resource = getResourceDAO().findById(id);
-        return resource.getResourceValue();
+        return findResourcePojoById(id).getResourceValue();
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Resource findResourcePojoById(Integer id) {
+        return getResourceDAO().findById(id);
     }
 
     /**
@@ -316,7 +332,19 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      *
      * @ejb:interface-method
      */
-    public void removeResources(AppdefEntityID[] ids) {
+    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids) 
+        throws VetoException
+    {
+        ResourceDeleteCallback cb = AuthzStartupListener.getCallbackObj();
+        ResourceDAO dao = getResourceDAO();
+        long now = System.currentTimeMillis();
+        
+        for (int i=0; i < ids.length; i++) {
+            Resource r = dao.findByInstanceId(ids[i].getAuthzTypeId(), 
+                                              ids[i].getId());
+            cb.preResourceDelete(r);
+            ResourceAudit.deleteResource(r, subject, now, now); 
+        }
         getResourceDAO().deleteByInstances(ids);
     }
 

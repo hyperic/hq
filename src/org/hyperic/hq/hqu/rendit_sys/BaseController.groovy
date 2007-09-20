@@ -7,6 +7,7 @@ import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
+import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
@@ -190,6 +191,10 @@ abstract class BaseController {
     
     protected AlertHelper getAlertHelper() {
         new AlertHelper(user)
+    }
+
+    protected AuditHelper getAuditHelper() {
+        new AuditHelper(user)
     }
 
     protected ResourceHelper getResourceHelper() {

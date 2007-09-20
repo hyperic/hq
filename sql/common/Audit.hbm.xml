@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hyperic.hq.common.server.session">
+  <class name="Audit" table="EAM_AUDIT">
+
+    <cache usage="read-write" />
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_AUDIT_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <discriminator column="KLAZZ" type="string"/>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0" />
+    </version>
+
+    <property name="klazz" insert="false" update="false">
+      <column name="KLAZZ" not-null="true"/>
+    </property>
+
+    <property name="startTime">
+      <column name="START_TIME" not-null="true"/>
+    </property>
+
+    <property name="endTime">
+      <column name="END_TIME" not-null="true"/>
+    </property>
+
+    <property name="purposeEnum">
+      <column name="PURPOSE" not-null="true"/>
+    </property>
+
+    <property name="importanceEnum">
+      <column name="IMPORTANCE" not-null="true"/>
+    </property>
+
+    <property name="original">
+      <column name="ORIGINAL" not-null="true"/>
+    </property>
+
+    <property name="fieldName">
+      <column name="FIELD" not-null="false"/>
+    </property>
+
+    <property name="oldFieldValue">
+      <column name="OLD_VAL" length="1000" not-null="false"/>
+    </property>
+
+    <property name="newFieldValue">
+      <column name="NEW_VAL" length="1000" not-null="false"/>
+    </property>
+
+    <property name="message">
+      <column name="MESSAGE" length="1000" not-null="true"/>
+    </property>
+
+    <many-to-one name="parent">
+      <column name="PARENT_ID" index="PARENT_ID_IDX" not-null="false"/>
+    </many-to-one>
+
+    <bag name="childrenBag" table="EAM_AUDIT" cascade="all-delete-orphan"
+         inverse="true">
+      <cache usage="read-write"/>
+      <key column="PARENT_ID" />
+      <one-to-many class="Audit"/>
+    </bag>
+
+    <many-to-one name="resource">
+      <column name="RESOURCE_ID" index="RESOURCE_ID_IDX" not-null="true"/>
+    </many-to-one>
+
+    <many-to-one name="subject">
+      <column name="SUBJECT_ID" index="SUBJECT_ID_IDX" not-null="true"/>
+    </many-to-one>
+
+    <subclass name="ResourceAudit"  discriminator-value="resource"/>
+    <subclass name="org.hyperic.hq.appdef.server.session.AIAudit"        
+              discriminator-value="ai"/>
+    <subclass name="org.hyperic.hq.bizapp.server.session.SystemAudit"
+              discriminator-value="system"/>
+    <subclass name="org.hyperic.hq.auth.server.session.UserAudit"
+              discriminator-value="user"/>
+
+  </class>
+</hibernate-mapping>

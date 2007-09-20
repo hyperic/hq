@@ -33,6 +33,7 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
+import org.hyperic.hq.auth.server.session.UserAudit;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -69,7 +70,10 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
                ConfigPropertyException 
     {
         try {
-            return getAuthManager().getSessionId(username, password);
+            int res = getAuthManager().getSessionId(username, password);
+            
+            UserAudit.createLoginAudit(manager.getSubjectPojo(res));
+            return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
         }
@@ -81,6 +85,10 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void logout (int sessionID) {
+        try {
+            UserAudit.createLogoutAudit(manager.getSubjectPojo(sessionID));
+        } catch(SessionException e) {
+        }
         manager.invalidate(sessionID);
     }
 

@@ -25,12 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -62,11 +64,14 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.AuditImportance;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
@@ -478,8 +483,34 @@ public class AIQueueManagerEJBImpl
                              int action)
         throws CreateException, FinderException, NamingException,
                PermissionException, ValidationException,
-               RemoveException, AIQApprovalException {
-
+               RemoveException, AIQApprovalException 
+    {
+        AuthzSubject s = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
+        boolean approved = false;
+        
+        try {
+            if (action == AIQueueConstants.Q_DECISION_APPROVE) {
+                approved = true;
+                AuditManagerEJBImpl.getOne()
+                                   .pushContainer(AIAudit.newImportAudit(s));
+            }
+            _processQueue(subject, platformList, serverList, ipList, action);
+        } finally {
+            if (approved)
+                AuditManagerEJBImpl.getOne().popContainer(false);
+        }
+    } 
+    
+    private void _processQueue(AuthzSubjectValue subject,
+                               List platformList,
+                               List serverList,
+                               List ipList,
+                               int action)
+        throws CreateException, FinderException, NamingException,
+               PermissionException, ValidationException,
+               RemoveException, AIQApprovalException
+    { 
         boolean isApproveAction
             = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction
