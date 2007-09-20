@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -604,7 +605,7 @@ public class ConfigManagerEJBImpl
      */
     public void updateAppdefEntities(String pluginName,
                                      TypeInfo[] entities)
-        throws FinderException, RemoveException, CreateException
+        throws FinderException, RemoveException, CreateException, VetoException
     {
         ArrayList platforms = new ArrayList();
         ArrayList servers   = new ArrayList();

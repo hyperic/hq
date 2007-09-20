@@ -1401,7 +1401,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
-        throws CreateException, FinderException, RemoveException {
+        throws CreateException, FinderException, RemoveException,
+               VetoException
+    {
         AuthzSubjectValue overlord = null;
         
         // First, put all of the infos into a Hash
@@ -1551,7 +1553,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public void removeService(AuthzSubjectValue subj, Integer serviceId)
-        throws RemoveException, FinderException, PermissionException {
+        throws RemoveException, FinderException, PermissionException,
+               VetoException 
+    {
         Service service;
         service = getServiceDAO().findById(serviceId);
         removeService(subj, service);
@@ -1564,7 +1568,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public void removeService(AuthzSubjectValue subject, Service service)
-        throws RemoveException, FinderException, PermissionException {
+        throws RemoveException, FinderException, PermissionException, 
+               VetoException  
+    {
 
         AppdefEntityID aeid = service.getEntityId();
 

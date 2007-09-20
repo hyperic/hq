@@ -56,6 +56,7 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -68,6 +69,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -264,10 +266,13 @@ public abstract class AppdefSessionEJB
      */
     protected void removeAuthzResource(AuthzSubjectValue subject,
                                        AppdefEntityID aeid)
-        throws RemoveException, PermissionException {
+        throws RemoveException, PermissionException, VetoException 
+    {
         log.debug("Removing authz resource: " + aeid);
         ResourceManagerLocal rm = getResourceManager();
-        rm.removeResources(new AppdefEntityID[] { aeid });
+        AuthzSubject s = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
+        rm.removeResources(s, new AppdefEntityID[] { aeid });
         
         // Send resource delete event
         ResourceDeletedZevent zevent =

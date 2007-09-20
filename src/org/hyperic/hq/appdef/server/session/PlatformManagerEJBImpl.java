@@ -260,13 +260,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removePlatform(AuthzSubjectValue subject, Integer id)
-        throws RemoveException, PlatformNotFoundException, PermissionException 
+        throws RemoveException, PlatformNotFoundException, PermissionException,
+               VetoException
     {
         removePlatform(subject, findPlatformById(id));
     }
     
     private void removePlatform(AuthzSubjectValue subject, Platform platform)
-        throws RemoveException, PermissionException, PlatformNotFoundException
+        throws RemoveException, PermissionException, PlatformNotFoundException,
+               VetoException
     {
         try {
             checkRemovePermission(subject, platform.getEntityId());
@@ -1189,7 +1191,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
-        throws CreateException, FinderException, RemoveException {
+        throws CreateException, FinderException, RemoveException, VetoException 
+    {
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
         for (int i = 0; i < infos.length; i++) {

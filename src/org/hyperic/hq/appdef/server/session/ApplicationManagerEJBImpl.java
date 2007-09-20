@@ -241,7 +241,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public void removeApplication(AuthzSubjectValue subject, Integer id)
         throws ApplicationNotFoundException,
-               PermissionException, RemoveException {
+               PermissionException, RemoveException, VetoException 
+    {
         Application app = getApplicationDAO().findById(id);
         checkRemovePermission(subject, app.getEntityId());
         removeAuthzResource(subject, app.getEntityId());

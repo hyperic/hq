@@ -255,8 +255,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeServer(AuthzSubjectValue subject, Integer id)
-        throws ServerNotFoundException, RemoveException, PermissionException {
-
+        throws ServerNotFoundException, RemoveException, PermissionException,
+               VetoException
+    {
         Server server;
         try {
             server = getServerDAO().findById(id);
@@ -272,7 +273,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeServer(AuthzSubjectValue subject, Server server)
-        throws ServerNotFoundException, RemoveException, PermissionException
+        throws ServerNotFoundException, RemoveException, PermissionException,
+               VetoException
     {
         AppdefEntityID aeid = server.getEntityId();
         try {
@@ -1181,8 +1183,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @ejb:transaction type="RequiresNew"
      */
     public void updateServerTypes(String plugin, ServerTypeInfo[] infos)
-        throws CreateException, FinderException, RemoveException {
-
+        throws CreateException, FinderException, RemoveException, VetoException 
+    {
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
         for (int i = 0; i < infos.length; i++) {
