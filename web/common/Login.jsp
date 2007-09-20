@@ -85,6 +85,22 @@
             </table>	
           </td>
         </tr>
+          <!--[if gt IE 6]>
+          <tr>
+            <td>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="ErrorBlock"><html:img page="/images/tt_error.gif" width="10" height="11" alt="" border="0"/></td>
+                  <td class="ErrorBlock" width="100%" style="font-weight:bold;"><fmt:message key="login.unsupportedBrowser"/></td>
+                </tr>
+                <tr>
+                    <td class="ErrorBlock">&nbsp;</td>
+                  <td class="ErrorBlock" style="padding-bottom:15px;padding-right:10px;"><fmt:message key="login.browserMessage"/></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <![endif]--> 
           <c:if test='${loginStatus ne null}'>
           <tr>
             <td>
