@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 import java.text.SimpleDateFormat;
 
 /**
@@ -196,7 +197,8 @@ public class MetricDataServlet extends HttpServlet {
             buf.append(",").append(val.getName());
         }
 
-        // Print data
+        // Print data, sorted from oldest to newest.
+        Collections.reverse(rows);
         buf.append("\n");
         for (Iterator i = rows.iterator(); i.hasNext(); ) {
             RowData row = (RowData)i.next();
