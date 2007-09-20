@@ -331,6 +331,16 @@ public class AgentManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Agent getAgentPojo(String agentToken) 
+        throws AgentNotFoundException 
+    {
+        return getAgentInternal(agentToken);
+    }
+
+    /**
      * Find an agent which can service the given entity ID
      * @return An agent which is set to manage the specified ID
      *
