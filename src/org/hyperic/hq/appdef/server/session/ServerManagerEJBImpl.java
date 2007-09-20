@@ -64,12 +64,19 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.pager.PageControl;
@@ -277,7 +284,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                VetoException
     {
         AppdefEntityID aeid = server.getEntityId();
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(aeid);
+        AuthzSubject svrPojo = 
+            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
+        Audit audit = ResourceAudit.deleteResource(r, svrPojo, 0, 0);
+        boolean pushed = false;
+        
         try {
+            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            pushed = true;
             checkRemovePermission(subject, server.getEntityId());
 
             // Service manager will update the collection, so we need to copy
@@ -291,7 +306,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Integer cid = server.getConfigResponseId();
 
             // Remove authz resource
-            removeAuthzResource(subject, aeid);
+            removeAuthzResource(subject, aeid, false);
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
@@ -321,6 +336,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             deleteCustomProperties(aeid);
         } catch (FinderException e) {
             throw new ServerNotFoundException(aeid.getId(), e);
+        } finally {
+            if (pushed) {
+                AuditManagerEJBImpl.getOne().popContainer(true);
+            }
         }
     }
 

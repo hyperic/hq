@@ -268,11 +268,21 @@ public abstract class AppdefSessionEJB
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException, VetoException 
     {
+        removeAuthzResource(subject, aeid, true);
+    }
+    
+    /**
+     * remove the authz resource entry
+     */
+    protected void removeAuthzResource(AuthzSubjectValue subject,
+                                       AppdefEntityID aeid, boolean audit)
+        throws RemoveException, PermissionException, VetoException 
+    {
         log.debug("Removing authz resource: " + aeid);
         ResourceManagerLocal rm = getResourceManager();
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
-        rm.removeResources(s, new AppdefEntityID[] { aeid });
+        rm.removeResources(s, new AppdefEntityID[] { aeid }, audit);
         
         // Send resource delete event
         ResourceDeletedZevent zevent =

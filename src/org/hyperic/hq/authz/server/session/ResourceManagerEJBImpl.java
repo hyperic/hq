@@ -328,11 +328,27 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * Remove all measurements for an instance
-     *
+     * @ejb:interface-method
+     */
+    public Resource findResource(AppdefEntityID id) {
+        return getResourceDAO().findByInstanceId(id.getAuthzTypeId(), 
+                                                 id.getId());
+    }
+    
+    /**
      * @ejb:interface-method
      */
     public void removeResources(AuthzSubject subject, AppdefEntityID[] ids) 
+        throws VetoException
+    {
+        removeResources(subject, ids, true);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids,
+                                boolean audit) 
         throws VetoException
     {
         ResourceDeleteCallback cb = AuthzStartupListener.getCallbackObj();
@@ -343,7 +359,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             Resource r = dao.findByInstanceId(ids[i].getAuthzTypeId(), 
                                               ids[i].getId());
             cb.preResourceDelete(r);
-            ResourceAudit.deleteResource(r, subject, now, now); 
+            if (audit) {
+                ResourceAudit.deleteResource(r, subject, now, now);
+            }
         }
         getResourceDAO().deleteByInstances(ids);
     }
