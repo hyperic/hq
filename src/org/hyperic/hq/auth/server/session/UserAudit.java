@@ -31,6 +31,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
 
@@ -57,9 +58,9 @@ public class UserAudit extends Audit {
     protected UserAudit() {}
     
     UserAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-              AuditImportance i, String msg)
+              AuditImportance i, AuditNature n, String msg)
     { 
-        super(s, r, p, i, msg);
+        super(s, r, p, n, i, msg);
         long now = System.currentTimeMillis();
         setStartTime(now);
         setEndTime(now);
@@ -71,47 +72,52 @@ public class UserAudit extends Audit {
         return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
     }
     
-    public static UserAudit createLoginAudit(AuthzSubject user) {
+    public static UserAudit loginAudit(AuthzSubject user) {
         String msg = MSGS.format("auditMsg.user.login", user.getFullName());
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN,
-                                      AuditImportance.LOW, msg); 
+                                      AuditImportance.LOW, 
+                                      AuditNature.START, msg); 
+                                      
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
     }
     
-    public static UserAudit createLogoutAudit(AuthzSubject user) {
+    public static UserAudit logoutAudit(AuthzSubject user) {
         String msg = MSGS.format("auditMsg.user.logout", user.getFullName());
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT,
-                                      AuditImportance.LOW, msg); 
+                                      AuditImportance.LOW, 
+                                      AuditNature.STOP, msg); 
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
     }
     
-    public static UserAudit createCreateAudit(AuthzSubject creator,
-                                              AuthzSubject newUser) 
+    public static UserAudit createAudit(AuthzSubject creator,
+                                        AuthzSubject newUser) 
     {
         String msg = MSGS.format("auditMsg.user.create", 
                                  newUser.getFullName() + "(" + 
                                  newUser.getName() + ")");
         UserAudit res = new UserAudit(newUser.getResource(), creator, 
-                                      USER_CREATE, AuditImportance.HIGH, msg); 
+                                      USER_CREATE, AuditImportance.HIGH, 
+                                      AuditNature.CREATE, msg); 
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
     }
     
-    public static UserAudit createUpdateAudit(AuthzSubject updator,
-                                              AuthzSubject target,
-                                              AuthzSubjectField field,
-                                              String oldVal, String newVal) 
+    public static UserAudit updateAudit(AuthzSubject updator,
+                                        AuthzSubject target,
+                                        AuthzSubjectField field,
+                                        String oldVal, String newVal) 
     {
         String msg = MSGS.format("auditMsg.user.update", 
                                  target.getFullName(), field.getValue(), 
                                  newVal);
         UserAudit res = new UserAudit(target.getResource(), updator, 
-                                      USER_UPDATE, AuditImportance.LOW, msg); 
+                                      USER_UPDATE, AuditImportance.LOW, 
+                                      AuditNature.UPDATE, msg); 
         
         res.setFieldName(field.getValue());
         res.setOldFieldValue(oldVal);

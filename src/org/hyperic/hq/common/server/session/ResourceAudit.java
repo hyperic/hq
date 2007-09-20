@@ -52,9 +52,10 @@ public class ResourceAudit extends Audit {
     protected ResourceAudit() {}
     
     ResourceAudit(Resource r, AuthzSubject s, AuditPurpose p, 
-                  AuditImportance i, String msg, long start, long end) 
+                  AuditImportance i, AuditNature n, String msg, long start, 
+                  long end) 
     { 
-        super(s, r, p, i, msg);
+        super(s, r, p, n, i, msg);
         setStartTime(start);
         setEndTime(end);
     }
@@ -66,8 +67,9 @@ public class ResourceAudit extends Audit {
                                  r.getResourceType().getLocalizedName(),
                                  r.getName());
         ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE,
-                                              AuditImportance.MEDIUM, msg, 
-                                              start, end); 
+                                              AuditImportance.MEDIUM, 
+                                              AuditNature.CREATE,
+                                              msg, start, end);  
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
@@ -87,8 +89,9 @@ public class ResourceAudit extends Audit {
                                  r.getName());
         ResourceAudit res = new ResourceAudit(getRootResource(), creator, 
                                               RESOURCE_DELETE,
-                                              AuditImportance.HIGH, msg, 
-                                              start, end); 
+                                              AuditImportance.HIGH, 
+                                              AuditNature.DELETE,
+                                              msg, start, end);  
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;

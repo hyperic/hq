@@ -34,6 +34,10 @@
       <column name="END_TIME" not-null="true"/>
     </property>
 
+    <property name="natureEnum">
+      <column name="NATURE" not-null="true"/>
+    </property>
+
     <property name="purposeEnum">
       <column name="PURPOSE" not-null="true"/>
     </property>

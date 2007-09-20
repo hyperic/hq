@@ -41,6 +41,7 @@ public class Audit
     private long            _endTime;
     private int             _purpose;
     private int             _importance;
+    private int             _nature;
     private boolean         _original;
     private AuthzSubject    _subject;
     private String          _message;
@@ -54,10 +55,12 @@ public class Audit
     protected Audit() {}
     
     protected Audit(AuthzSubject subject, Resource r, AuditPurpose purpose,
-                    AuditImportance importance, String message)    
+                    AuditNature nature, AuditImportance importance, 
+                    String message)    
     {
         _purpose    = purpose.getCode();
         _importance = importance.getCode();
+        _nature     = nature.getCode();
         _subject    = subject;
         _resource   = r;
         _message    = message;
@@ -102,6 +105,18 @@ public class Audit
     
     public AuditImportance getImportance() {
         return AuditImportance.findByCode(_importance);
+    }
+    
+    protected int getNatureEnum() {
+        return _nature;
+    }
+    
+    protected void setNatureEnum(int e) {
+        _nature = e;
+    }
+    
+    public AuditNature getNature() {
+        return AuditNature.findByCode(_nature);
     }
     
     protected void setImportanceEnum(int p) {

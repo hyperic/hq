@@ -32,6 +32,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
 
@@ -53,9 +54,9 @@ public class AIAudit extends Audit {
     protected AIAudit() {}
 
     AIAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, 
-            String msg) 
+            AuditNature n, String msg) 
     { 
-        super(s, r, p, i, msg);
+        super(s, r, p, n, i, msg);
     }
 
     private static Resource getRootResource() {
@@ -66,7 +67,8 @@ public class AIAudit extends Audit {
     
     public static AIAudit newImportAudit(AuthzSubject user) {
         AIAudit res = new AIAudit(user, getRootResource(), IMPORT_APPROVE, 
-                                  AuditImportance.HIGH, 
+                                  AuditImportance.HIGH,
+                                  AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.approve"));
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
@@ -77,7 +79,7 @@ public class AIAudit extends Audit {
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         AIAudit res = new AIAudit(overlord, getRootResource(), IMPORT_RUNTIME,
-                                  AuditImportance.MEDIUM,
+                                  AuditImportance.MEDIUM, AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.runtime",
                                               reporter.getAddress()));
         
