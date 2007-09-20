@@ -56,6 +56,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.text.SimpleDateFormat;
 
+/**
+ * The MetricDataServlet generates raw metric data in CVS format
+ */
 public class MetricDataServlet extends HttpServlet {
 
     private static final SimpleDateFormat _df
