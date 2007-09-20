@@ -117,6 +117,7 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -1575,10 +1576,11 @@ public class AppdefBossEJBImpl
      */
     public void removePlatform(int sessionId, Integer platformId)
         throws SessionNotFoundException, SessionTimeoutException,
-               ApplicationException 
+               ApplicationException, VetoException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-
+        AuthzSubject subjectPojo = manager.getSubjectPojo(sessionId); 
+        AuthzSubjectValue subject = subjectPojo.getAuthzSubjectValue();
+            
         try {
             // Lookup the platform (make sure someone else hasn't deleted it)
             Platform plat = getPlatformManager().findPlatformById(platformId);
@@ -1648,8 +1650,8 @@ public class AppdefBossEJBImpl
             getPlatformManager().removePlatform(subject, platformId);
 
             // Last, remove authz resources
-            getAuthzBoss().removeResources(toDeleteResourceIds);
-
+            getResourceManager().removeResources(subjectPojo, 
+                                                 toDeleteResourceIds);
         } catch (RemoveException e) {
             log.error("Caught EJB RemoveException",e);
             throw new SystemException(e);
@@ -1930,7 +1932,7 @@ public class AppdefBossEJBImpl
      */
     public void removeServer(int sessionId, Integer serverId)
         throws PermissionException, ServerNotFoundException,
-               SessionNotFoundException, SessionTimeoutException 
+               SessionException, VetoException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
 
@@ -1998,7 +2000,7 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public void removeService(int sessionId, Integer serviceId)
-        throws ApplicationException 
+        throws ApplicationException, VetoException 
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
@@ -2037,7 +2039,7 @@ public class AppdefBossEJBImpl
      */
     public void removeApplication(int sessionId, Integer appId)
         throws ApplicationException, PermissionException, 
-               SessionTimeoutException, SessionNotFoundException 
+               SessionException, VetoException
     {
         try {
             AuthzSubjectValue caller = manager.getSubject(sessionId);

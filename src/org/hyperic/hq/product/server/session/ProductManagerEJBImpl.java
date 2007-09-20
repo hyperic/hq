@@ -82,6 +82,7 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
 import org.hyperic.hq.dao.PluginDAO;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
@@ -258,7 +259,7 @@ public class ProductManagerEJBImpl
      */
     public void deploymentNotify(String pluginName)
         throws PluginNotFoundException, NamingException, FinderException,
-               CreateException, RemoveException
+               CreateException, RemoveException, VetoException
     {
         ProductPlugin pplugin = (ProductPlugin) this.ppm.getPlugin(pluginName);
         PluginDAO plHome = getPluginDAO();
