@@ -132,6 +132,17 @@ public abstract class AuditSortField
         }
     };
 
+    public static final AuditSortField NATURE = 
+        new AuditSortField(8, "nature", "audit.sortField.nature") 
+    {
+        public boolean isSortable() {
+            return true;
+        }
+
+        String getSortString(String audit, String resource, String subject) {
+            return audit + ".natureEnum";
+        }
+    };
 
     private AuditSortField(int code, String desc, String localeProp) {
         super(AuditSortField.class, code, desc, localeProp,
