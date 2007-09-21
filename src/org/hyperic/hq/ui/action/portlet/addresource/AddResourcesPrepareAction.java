@@ -223,7 +223,7 @@ public class AddResourcesPrepareAction extends Action {
             else {
                 // resourceType straight up tells us what group
                 // subtype was chosen
-                groupSubtype = resourceType;
+                groupSubtype = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
 
                 // for findCompatInventory, resourceType always need
                 // to be this, for whatever reason

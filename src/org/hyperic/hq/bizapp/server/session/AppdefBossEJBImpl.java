@@ -2764,7 +2764,9 @@ public class AppdefBossEJBImpl
         AppdefPagerFilterGroupEntityResource erFilter;
         AppdefPagerFilterAssignSvc assignedSvcFilter;
         AppdefPagerFilterGroupMemExclude groupMemberFilter;
-        boolean groupEntContext = false;
+        boolean groupEntContext =
+            groupType != APPDEF_GROUP_TYPE_UNDEFINED ||
+            grpEntId != APPDEF_GROUP_TYPE_UNDEFINED;
 
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
@@ -2779,10 +2781,6 @@ public class AppdefBossEJBImpl
         // add a pager filter for removing pending appdef entities
         if (pendingEntities != null) {
             filterList.add( new AppdefPagerFilterExclude ( pendingEntities ));
-        }
-
-        if (grpEntId != APPDEF_GROUP_TYPE_UNDEFINED) {
-            groupEntContext = true;
         }
 
         // If the caller supplied a group entity for filtering, this will be

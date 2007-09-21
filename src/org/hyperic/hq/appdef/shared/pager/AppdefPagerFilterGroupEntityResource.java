@@ -74,22 +74,15 @@ import org.hyperic.hq.authz.shared.PermissionException;
 */
 public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     
-    private int groupType;
-    private int entityType;
-    private int resourceType;
+    private int _groupType;
+    private int _entityType;
+    private int _resourceType;
     private AuthzSubjectValue subject;
     private boolean exclusive;
     private static final int UNDEFINED = -1;
     private int filterCount;
     private boolean groupSelected = false;
 
-    // Create some shorter constant references...
-    private static final int PLATFORM =
-        AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-    private static final int SERVER =
-        AppdefEntityConstants.APPDEF_TYPE_SERVER;
-    private static final int SERVICE =
-        AppdefEntityConstants.APPDEF_TYPE_SERVICE;
     private static final int APPLICATION =
         AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
     private static final int GROUP =
@@ -106,15 +99,15 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
 
     public int getGroupType() {
-        return groupType;
+        return _groupType;
     }
 
     public int getEntityType() {
-        return entityType;
+        return _entityType;
     }
 
     public int getResourceType() {
-        return resourceType;
+        return _resourceType;
     }
 
     public AuthzSubjectValue getSubject() {
@@ -134,22 +127,12 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     }
 
     public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
-                                                int gt, int et, int rt) {
-        this.subject = subject;
-        this.groupType = gt;
-        this.entityType = et;
-        this.resourceType = rt;
-        this.exclusive = true;
-        filterCount = 0;
-    }
-
-    public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
                                                 int gt, int et, int rt,
                                                 boolean negate) {
         this.subject = subject;
-        this.groupType = gt;
-        this.entityType = et;
-        this.resourceType = rt;
+        _groupType = gt;
+        _entityType = et;
+        _resourceType = rt;
         this.exclusive = (!negate);
         filterCount = 0;
     }
@@ -170,7 +153,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         
         entity = (AppdefEntityID) o;
         
-        if (!entity.isGroup() && resourceType == -1 && resourceType == -1) {
+        if (!entity.isGroup() && _resourceType == -1 && _resourceType == -1) {
             return false; // Short circuit.
         }
 
@@ -192,16 +175,12 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         AppdefResourceValue arv;
         AppdefEntityValue aev = new AppdefEntityValue(entity, subject);
 
-        switch (groupType) {
+        switch (_groupType) {
         case (GROUP_ADHOC_APP):
-            arv = aev.getLiteResourceValue();
-            return isGroupAdhocAppCompatible(arv);
         case (GROUP_ADHOC_GRP):
-            arv = aev.getLiteResourceValue();
-            return isGroupAdhocGrpCompatible(arv);
         case (GROUP_ADHOC_PSS):
             arv = aev.getLiteResourceValue();
-            return isGroupAdhocPSSCompatible(arv);
+            return isGroupAdhoc((AppdefGroupValue) arv);
         case (GROUP_COMPAT_PS):
             if (groupSelected)
                 return isResourceCompatible(entity);
@@ -217,7 +196,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 return isGroupResourceCompatible(arv);
             }
         case (UNDEFINED):
-            if (resourceType == UNDEFINED) {
+            if (_resourceType == UNDEFINED) {
                 arv = aev.getLiteResourceValue();
                 return isEntityCompatible(arv);
             } else {
@@ -227,7 +206,8 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 return false;      // unsupported group type?
         }
     }
-
+    
+    
     // mixed groups of applications are compatible with:
     // - applications
     // GROUP_TYPE     ENTITY_TYPE  RESOURCE_TYPE  INVENTORY RETURNED
@@ -235,122 +215,15 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // ADHOC_APP      -1           -1             Applications
     // ADHOC_APP      APP          -1             Applications
     // ADHOC_APP      GROUP        -1             Applications
-    private boolean isGroupAdhocAppCompatible(AppdefResourceValue vo) {
-        if (entityType == UNDEFINED && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == APPLICATION) {
-            return true;
+    private boolean isGroupAdhoc(AppdefGroupValue vo) {
+        if (!vo.isGroupAdhoc())
+            return false;
+        
+        if (_resourceType != UNDEFINED) {
+            return vo.getGroupEntResType() == _resourceType;
         }
-        if (entityType == APPLICATION && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == APPLICATION) {
-            return true;
-        }
-        if (entityType == GROUP && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
-            if (groupVo.getGroupType() == GROUP_ADHOC_APP) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // mixed groups of groups are compatible with:
-    // - mixed groups of application
-    // - mixed groups of platform,server,service
-    // - compat group of platform,server
-    // - compat group of service
-    // GROUP_TYPE     ENTITY_TYPE  RESOURCE_TYPE  INVENTORY RETURNED
-    // ----------------------------------------------------------------------
-    // ADHOC_GRP      GROUP        -1             Mixed Groups of Groups
-    // ADHOC_GRP      GROUP        COMPAT_PS      Compatible groups
-    // ADHOC_GRP      GROUP        ADHOC_APP      Mixed Groups of Applications            
-    // ADHOC_GRP      GROUP        ADHOC_PSS      Mixed Groups of PSS
-    private boolean isGroupAdhocGrpCompatible(AppdefResourceValue vo) {
-        // We only ever return groups, so short circuit if not group entity
-        if (vo.getEntityId().getType() ==
-            AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
-
-            if (entityType == GROUP && resourceType == UNDEFINED &&
-                groupVo.getGroupType() == GROUP_ADHOC_GRP) {
-                return true;
-            }
-            if (entityType == GROUP && resourceType == GROUP_COMPAT_PS &&
-                (groupVo.getGroupType() == GROUP_COMPAT_PS ||
-                 groupVo.getGroupType() == GROUP_COMPAT_SVC)) {
-                return true;
-            }
-            if (entityType == GROUP && resourceType == GROUP_ADHOC_APP &&
-                groupVo.getGroupType() == GROUP_ADHOC_APP) {
-                return true;
-            }
-            if (entityType == GROUP && resourceType == GROUP_ADHOC_PSS &&
-                groupVo.getGroupType() == GROUP_ADHOC_PSS) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // mixed groups of "platform,server&service" are compatible with:
-    // - platforms
-    // - servers
-    // - services
-    // GROUP_TYPE     ENTITY_TYPE  RESOURCE_TYPE  INVENTORY RETURNED
-    // ----------------------------------------------------------------------
-    // ADHOC_PSS      -1           -1             All Platforms,Servers&Services
-    // ADHOC_PSS      PLATFORM     -1             All Platforms
-    // ADHOC_PSS      PLATFORM     <type>         All Platforms of <type>
-    // ADHOC_PSS      SERVER       -1             All Servers
-    // ADHOC_PSS      SERVER       <type>         All Servers of <type>
-    // ADHOC_PSS      SERVICE      -1             All Services
-    // ADHOC_PSS      SERVICE      <type>         All Services of <type>
-    // ADHOC_PSS      GROUP        -1             Grps Platform,server,Services
-    private boolean isGroupAdhocPSSCompatible(AppdefResourceValue vo) {
-        if (entityType == UNDEFINED && resourceType == UNDEFINED &&
-            (vo.getEntityId().getType() == PLATFORM ||
-             vo.getEntityId().getType() == SERVER ||
-             vo.getEntityId().getType() == SERVICE)) {
-            return true;
-        }
-        if (entityType == PLATFORM && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == PLATFORM) {
-            return true;
-        }
-        if (entityType == PLATFORM &&
-            vo.getEntityId().getType() == PLATFORM &&
-            resourceType ==
-                vo.getAppdefResourceTypeValue().getId().intValue()) {
-            return true;
-        }
-        if (entityType == SERVER && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == SERVER) {
-            return true;
-        }
-        if (entityType == SERVER &&
-            vo.getEntityId().getType() == SERVER &&
-            resourceType ==
-                vo.getAppdefResourceTypeValue().getId().intValue()) {
-            return true;
-        }
-        if (entityType == SERVICE && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == SERVICE) {
-            return true;
-        }
-        if (entityType == SERVICE &&
-            vo.getEntityId().getType() == SERVICE &&
-            resourceType ==
-                vo.getAppdefResourceTypeValue().getId().intValue()) {
-            return true;
-        }
-        if (entityType == GROUP && resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
-            if (groupVo.getGroupType() == GROUP_ADHOC_PSS) {
-                return true;
-            }
-        }
-        return false;
+        
+        return true;
     }
 
     // Resource compatibility implies both appdef type and resource type
@@ -369,7 +242,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 AppdefGroupValue group =
                     AppdefGroupManagerEJBImpl.getOne().findGroup(subject, id);
-                return resourceType == group.getGroupEntResType();
+                return _resourceType == group.getGroupEntResType();
             default:
                 return false;
         }
@@ -388,17 +261,17 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         if (vo.getEntityId().getType() == GROUP) {
             AppdefGroupValue groupVo = (AppdefGroupValue) vo;
             if (groupVo.isGroupCompat()) {
-                if (entityType == GROUP) {
-                    if (resourceType != UNDEFINED)
-                        return resourceType == groupVo.getGroupEntResType();
+                if (_entityType == GROUP) {
+                    if (_resourceType != UNDEFINED)
+                        return _resourceType == groupVo.getGroupEntResType();
                     else
                         return true;
                 } else {
-                    if (resourceType == UNDEFINED) {
-                        return entityType == groupVo.getGroupEntType();
+                    if (_resourceType == UNDEFINED) {
+                        return groupVo.isGroupCompat();
                     } else {
-                        return (entityType == groupVo.getGroupEntType() &&
-                            resourceType == groupVo.getGroupEntResType());
+                        return (_entityType == groupVo.getGroupEntType() &&
+                            _resourceType == groupVo.getGroupEntResType());
                     }
                 }
             }
@@ -415,7 +288,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // -1             GROUP        COMPAT_SVC     All service clusters
     // -1             <type>       -1             All of entity <type>
     private boolean isEntityCompatible(AppdefResourceValue vo) {
-        if (entityType == GROUP && resourceType == UNDEFINED &&
+        if (_entityType == GROUP && _resourceType == UNDEFINED &&
             vo.getEntityId().getType() == GROUP) {
             AppdefGroupValue groupVo = (AppdefGroupValue) vo;
             if (groupVo.isGroupAdhoc()) {
@@ -423,7 +296,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             }
             return false;
         }
-        if (entityType == vo.getEntityId().getType()) {
+        if (_entityType == vo.getEntityId().getType()) {
             return true;
         }
         return false;

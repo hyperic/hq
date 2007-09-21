@@ -325,10 +325,9 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void changeOwner(AuthzSubjectValue whoami, RoleValue role,
-                            AuthzSubjectValue ownerVal)
+                            AuthzSubject owner)
         throws PermissionException {
         Role roleLocal = lookupRole(role);
-        AuthzSubject owner = lookupSubject(ownerVal);
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(), roleLocal.getResource().getResourceType(),
@@ -945,35 +944,16 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * @ejb:interface-method
      */
     public void removeRoles(AuthzSubjectValue whoami,
-                            AuthzSubjectValue subject, RoleValue[] roles)
+                            AuthzSubject subject, RoleValue[] roles)
         throws PermissionException {
         Set roleLocals = toPojos(roles);
         Iterator it = roleLocals.iterator();
-        AuthzSubject subjectLocal = lookupSubject(subject);
 
         while (it != null && it.hasNext()) {
             Role role = (Role)it.next();
 //            role.setWhoami(lookupSubject(whoami));
-            subjectLocal.removeRole(role);
+            subject.removeRole(role);
         }
-    }
-
-    /**
-     * Disassociate all roles from this subject.
-     * @param whoami The current running user.
-     * @param subject The subject.
-     * @throws PermissionException whoami may not perform removeRole on
-     * this subject.
-     * @ejb:interface-method
-     */
-    public void removeAllRoles(AuthzSubjectValue whoami,
-                               AuthzSubjectValue subject)
-        throws PermissionException {
-        AuthzSubject subjectLocal = lookupSubject(subject);
-        RoleValue[] values = (RoleValue[])
-            fromLocals(subjectLocal.getRoles(),
-                       org.hyperic.hq.authz.shared.RoleValue.class);
-        removeRoles(whoami, subject, values);
     }
 
     /**
@@ -987,11 +967,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
      * setRoles on this subject.
      * @ejb:interface-method
      */
-    public void setRoles(AuthzSubjectValue whoami, AuthzSubjectValue subject,
+    public void setRoles(AuthzSubjectValue whoami, AuthzSubject subject,
                          RoleValue[] roles)
         throws FinderException, PermissionException {
-        AuthzSubject subjectLocal = lookupSubject(subject);
-        if (subjectLocal.isRoot()) {
+        if (subject.isRoot()) {
             throw new PermissionException("The super user cannot " +
                                           "belong to a role.");
         }
@@ -999,10 +978,12 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         toPojos(roles);
 
         // Remove all roles
-        removeAllRoles(whoami, subject);
+        RoleValue[] values = (RoleValue[]) fromLocals(subject.getRoles(),
+                                                      RoleValue.class);
+        removeRoles(whoami, subject, values);
 
         // Add subject to new set of roles
-        addRoles(whoami, subjectLocal, roles);
+        addRoles(whoami, subject, roles);
     }
 
     /**
