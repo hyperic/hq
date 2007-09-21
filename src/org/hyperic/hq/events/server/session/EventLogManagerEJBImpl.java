@@ -66,7 +66,8 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         EventLogManagerEJBImpl.class.getName();
         
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
-
+    private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
+    
     private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
@@ -164,79 +165,57 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public boolean[] logsExistPerInterval(AppdefEntityID entityId, 
                                           long begin, 
-                                          long end,
-                                          int intervals) {        
-        // Execute individual selects for each interval in batch.
-        // We only care if there is at least one event log per interval.
-       boolean[] eventLogsInIntervals = new boolean[intervals];
-       long interval = (end - begin) / intervals;
-      
-       StringBuffer sql = new StringBuffer();
-       StringBuffer perIntervalSQL = new StringBuffer();
-       int i = 0;
-       
-       if (log.isDebugEnabled()) {
-           log.debug("Checking if logs exist per interval: entity_type="+
-                     entityId.getType()+", entity_id="+entityId.getID()+
-                     ", begin="+begin+", end="+end+", intervals="+intervals+
-                     ", interval="+interval);
-       }
-       
-       for (long cursor = begin; i < intervals; i++, cursor = begin+(interval*i)) {
-           perIntervalSQL.append("SELECT id FROM ")
-                         .append(TABLE_EVENT_LOG)
-                         .append(" WHERE entity_type = ")
-                         .append(entityId.getType())
-                         .append(" AND entity_id = ")
-                         .append(entityId.getID())
-                         .append(" AND timestamp BETWEEN ")
-                         .append(cursor)
-                         .append(" AND ")
-                         .append(cursor+interval-1)
-                         .append(' ')
-                         .append(Util.getHQDialect().getLimitString(1))
-                         .append(";\n");
-           
-           sql.append(perIntervalSQL);
-           perIntervalSQL.setLength(0);
-       }
-       
-       Session sess = DAOFactory.getDAOFactory().getCurrentSession();       
-       Connection conn = null;
-       Statement stmt = null;
-              
-       try {
-           conn = sess.connection();
-           stmt = conn.createStatement();
-           stmt.execute(sql.toString());
-           
-           int index = 0;
-           
-           do {
-               ResultSet rs = stmt.getResultSet();
-               
-               if (rs == null) {
-                   break;
-               }
-               
-               if (rs.next()) {
-                   eventLogsInIntervals[index] = true;
-               }
-               
-               index++;
-           } while (stmt.getMoreResults());
-           
-           assert index == intervals : 
-               "Number of query results="+index+
-               " should match number of intervals="+intervals;
-       } catch (SQLException e) {
-           log.error("SQLException when fetching logs existence", e);
-       } finally {
-           DBUtil.closeJDBCObjects(logCtx, null, stmt, null);
-           sess.disconnect();
-       }
-       
-       return eventLogsInIntervals;
+                                          long end, 
+                                          int intervals) {
+        
+        boolean[] eventLogsInIntervals = new boolean[intervals];
+        long interval = (end - begin) / intervals;       
+
+        if (log.isDebugEnabled()) {
+            log.debug("Checking if logs exist per interval: entity_type="+
+                    entityId.getType()+", entity_id="+entityId.getID()+
+                    ", begin="+begin+", end="+end+", intervals="+intervals+
+                    ", interval="+interval);
+        }
+
+        Session sess = DAOFactory.getDAOFactory().getCurrentSession();       
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        StringBuffer sql = new StringBuffer();
+        sql.append("SELECT i FROM ").append(TABLE_EAM_NUMBERS)
+           .append(" WHERE i < ").append(intervals)
+           .append(" AND EXISTS (SELECT id FROM ").append(TABLE_EVENT_LOG)
+           .append(" WHERE entity_type = ").append(entityId.getType())
+           .append(" AND entity_id = ").append(entityId.getID())
+           .append(" AND timestamp BETWEEN (")
+           .append(begin).append(" + (").append(interval).append(" * i)) AND ((")
+           .append(begin).append(" + (").append(interval).append(" * (i + 1))) - 1) ")
+           .append(Util.getHQDialect().getLimitString(1))
+           .append(')');
+        
+        if (log.isDebugEnabled()) {
+            log.debug(sql.toString());
+        }
+
+        try {
+            conn = sess.connection();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql.toString());
+
+            while (rs.next()) {
+                int index = rs.getInt(1);
+                eventLogsInIntervals[index] = true;
+            }
+        } catch (SQLException e) {
+            log.error("SQLException when fetching logs existence", e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            sess.disconnect();
+        }
+
+        return eventLogsInIntervals;
     }
 
     /** 
