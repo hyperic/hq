@@ -517,18 +517,13 @@ public class JBossDetector
         controlConfig.setValue(JBossServerControlPlugin.PROP_CONFIGSET,
                                serverName);
 
-        String logDir;
-        File brandedLogDir =
-            new File(installpath, "../../../logs");
+        String logDir =
+            ".." + File.separator +
+            ".." + File.separator +
+            ".." + File.separator + "logs";
+        File brandedLogDir = new File(installpath, logDir);
 
-        if (brandedLogDir.exists()) {
-            try {
-                logDir = brandedLogDir.getCanonicalPath();
-            } catch (IOException e) {
-                logDir = brandedLogDir.getAbsolutePath();
-            }
-        }
-        else {
+        if (!brandedLogDir.exists()) {
             logDir = "log";
         }
 
