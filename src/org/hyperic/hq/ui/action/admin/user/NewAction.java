@@ -79,7 +79,6 @@ public class NewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();            
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);             
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx); 
-        AuthzSubjectValue user = new AuthzSubjectValue();
 
         // add both a subject and a principal as normal
         log.trace("creating subject [" + userForm.getName() + "]");
@@ -95,13 +94,13 @@ public class NewAction extends BaseAction {
                                 userForm.getSmsAddress(),
                                 userForm.isHtmlEmail());
 
-        log.trace("adding user [" + user.getName() + "]");
-        authBoss.addUser(sessionId.intValue(), user.getName(),
+        log.trace("adding user [" + userForm.getName() + "]");
+        authBoss.addUser(sessionId.intValue(), userForm.getName(),
                          userForm.getNewPassword());
 
-        log.trace("finding subject [" + user.getName() + "]");
+        log.trace("finding subject [" + userForm.getName() + "]");
         AuthzSubjectValue newUser =
-            authzBoss.findSubjectByName(sessionId, user.getName());
+            authzBoss.findSubjectByName(sessionId, userForm.getName());
 
         HashMap parms = new HashMap(1);
         parms.put(Constants.USER_PARAM, newUser.getId());
