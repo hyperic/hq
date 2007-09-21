@@ -31,6 +31,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.FinderException;
@@ -44,6 +45,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
@@ -146,6 +149,66 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         }
     }
 
+    private void createChangeAudit(AuthzSubject subject, String key,
+                                   String oldVal, String newVal)
+    {
+        if (key.equals(HQConstants.BaseURL)) 
+            ServerConfigAudit.updateBaseURL(subject, newVal, oldVal);
+        else if (key.equals(HQConstants.EmailSender))
+            ServerConfigAudit.updateFromEmail(subject, newVal, oldVal);
+        else if (key.equals(HQConstants.ExternalHelp)) {
+            boolean oldExternal = oldVal.equals("true");
+            boolean newExternal = newVal.equals("true");
+            
+            ServerConfigAudit.updateExternalHelp(subject, newExternal, 
+                                                 oldExternal);
+        } else if (key.equals(HQConstants.DataMaintenance)) {
+            int oldHours = (int)(Long.parseLong(oldVal) / 60 / 60 / 1000);
+            int newHours = (int)(Long.parseLong(newVal) / 60 / 60 / 1000);
+            ServerConfigAudit.updateDBMaint(subject, newHours, oldHours);
+        } else if (key.equals(HQConstants.DataPurgeRaw)) {
+            int oldDays = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newDays = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            ServerConfigAudit.updateDeleteDetailed(subject, newDays, oldDays);
+        } else if (key.equals(HQConstants.DataReindex)) {
+            boolean oldReindex = oldVal.equals("true");
+            boolean newReindex = newVal.equals("true");
+            ServerConfigAudit.updateNightlyReindex(subject, newReindex, 
+                                                   oldReindex);
+        } else if (key.equals(HQConstants.AlertPurge)) {
+            int oldPurge = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            ServerConfigAudit.updateAlertPurgeInterval(subject, newPurge,
+                                                       oldPurge);
+        } else if (key.equals(HQConstants.EventLogPurge)) {
+            int oldPurge = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            ServerConfigAudit.updateEventPurgeInterval(subject, newPurge,
+                                                       oldPurge);
+        }
+    }
+    
+    private void createChangeAudits(AuthzSubject subject, Collection allProps, 
+                                    Properties newProps)
+    {
+        Properties oldProps = new Properties();
+        
+        for (Iterator i=allProps.iterator(); i.hasNext(); ) {
+            ConfigProperty prop = (ConfigProperty)i.next();
+            oldProps.put(prop.getKey(), prop.getValue());
+        }
+        
+        for (Iterator i=newProps.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry newEnt = (Map.Entry)i.next();
+            String newKey = (String)newEnt.getKey();
+            String newVal = (String)newEnt.getValue();
+            String oldVal = (String)oldProps.get(newKey);
+            
+            if (!oldVal.equals(newVal))
+                createChangeAudit(subject, newKey, oldVal, newVal);
+        }
+    }
+
     /**
      * Set the server configuration
      *
@@ -153,10 +216,10 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * a key that's currently in the database
      * @ejb:interface-method
      */
-    public void setConfig(Properties newProps) throws ApplicationException, 
-        ConfigPropertyException {
-
-        setConfig(null, newProps);
+    public void setConfig(AuthzSubject subject, Properties newProps) 
+        throws ApplicationException, ConfigPropertyException 
+    { 
+        setConfig(subject, null, newProps);
     }
 
     /**
@@ -168,9 +231,10 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * a key that's currently in the database
      * @ejb:interface-method
      */
-    public void setConfig(String prefix, Properties newProps)
-        throws ApplicationException, ConfigPropertyException {
-                
+    public void setConfig(AuthzSubject subject, String prefix, 
+                          Properties newProps)
+        throws ApplicationException, ConfigPropertyException 
+    {
         Collection allProps;
         String key;
         String propValue;
@@ -182,6 +246,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             // get all properties
             allProps = getProps(ccLH, prefix);
             // iterate over ejbs
+            createChangeAudits(subject, allProps, newProps);
             for(Iterator i = allProps.iterator(); i.hasNext();) {
                 ConfigProperty ejb = (ConfigProperty)i.next();
 
@@ -466,7 +531,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 return "unknown";  
             p.setProperty("HQ-GUID", res);
             try {
-                setConfig(p);
+                setConfig(AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
+                          p);
             } catch(Exception e) {
                 throw new SystemException(e);
             }

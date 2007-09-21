@@ -46,10 +46,14 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.UpdateBossLocal;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.UpdateBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigAudit;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.util.thread.LoggingThreadGroup;
@@ -273,9 +277,16 @@ public class UpdateBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void setUpdateMode(UpdateStatusMode mode) {
+    public void setUpdateMode(int sess, UpdateStatusMode mode)
+        throws SessionException
+    {
+        AuthzSubject subject = 
+            SessionManager.getInstance().getSubjectPojo(sess);
         UpdateStatus status = getOrCreateStatus();
-        
+
+        if (!status.getMode().equals(mode))
+            ServerConfigAudit.updateAnnounce(subject, mode, status.getMode());
+
         status.setMode(mode);
         
         if (mode.equals(UpdateStatusMode.NONE)) {

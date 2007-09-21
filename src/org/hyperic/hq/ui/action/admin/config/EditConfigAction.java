@@ -55,13 +55,14 @@ public class EditConfigAction extends BaseAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception {
-            
+        throws Exception 
+    {
         ActionForward forward = checkSubmit(request, mapping, form);
         if (forward != null) {
             return forward;
         }
-            
+
+        int sessionId = RequestUtils.getSessionIdInt(request);
         SystemConfigForm cForm = (SystemConfigForm)form;    
         ServletContext ctx     = getServlet().getServletContext();
         ConfigBoss boss = ContextUtils.getConfigBoss(ctx);
@@ -73,7 +74,7 @@ public class EditConfigAction extends BaseAction {
 
             if (log.isTraceEnabled())
                 log.trace("Setting config");
-            boss.setConfig(props);
+            boss.setConfig(sessionId, props);
 
             if (log.isTraceEnabled())
                 log.trace("Restarting config service");
@@ -81,7 +82,7 @@ public class EditConfigAction extends BaseAction {
 
             // Set the update mode
             UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
-            uboss.setUpdateMode(
+            uboss.setUpdateMode(sessionId,
                 UpdateStatusMode.findByCode(cForm.getUpdateMode()));
         }
 

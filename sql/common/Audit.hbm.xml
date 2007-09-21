@@ -92,6 +92,8 @@
               discriminator-value="system"/>
     <subclass name="org.hyperic.hq.auth.server.session.UserAudit"
               discriminator-value="user"/>
+    <subclass name="org.hyperic.hq.common.server.session.ServerConfigAudit"
+              discriminator-value="sysConfig"/>
 
   </class>
 </hibernate-mapping>

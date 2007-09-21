@@ -35,6 +35,7 @@ import javax.management.ObjectName;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -83,20 +84,24 @@ public class ConfigBossEJBImpl
      * Set the top-level configuration properties
      * @ejb:interface-method
      */
-    public void setConfig(Properties props) 
+    public void setConfig(int sessId, Properties props) 
         throws ApplicationException, ConfigPropertyException  
     {
-        ServerConfigManagerEJBImpl.getOne().setConfig(props);
+        AuthzSubject subject = 
+            SessionManager.getInstance().getSubjectPojo(sessId);
+        ServerConfigManagerEJBImpl.getOne().setConfig(subject, props);
     }
 
     /**
      * Set the configuration properties for a prefix
      * @ejb:interface-method
      */
-    public void setConfig(String prefix, Properties props) 
+    public void setConfig(int sessId, String prefix, Properties props) 
         throws ApplicationException, ConfigPropertyException 
     {
-        ServerConfigManagerEJBImpl.getOne().setConfig(prefix, props);
+        AuthzSubject subject = 
+            SessionManager.getInstance().getSubjectPojo(sessId);
+        ServerConfigManagerEJBImpl.getOne().setConfig(subject, prefix, props);
     }
 
     /**
