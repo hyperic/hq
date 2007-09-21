@@ -358,7 +358,7 @@ public abstract class Collector implements Runnable {
         Map results =
             Collections.synchronizedMap(new HashMap());
 
-        static PluginContainer get(MeasurementPlugin plugin) {
+        static PluginContainer get(GenericPlugin plugin) {
             String name = plugin.getName();
             synchronized (containers) {
                 PluginContainer container =
@@ -370,6 +370,14 @@ public abstract class Collector implements Runnable {
                 }
                 return container;
             }
+        }
+
+        static void setResult(Collector collector) {
+            CollectorResult result = new CollectorResult(collector);
+            if (log.isDebugEnabled()) {
+                log.debug(result);
+            }
+            get(collector.plugin).results.put(collector.props, result);
         }
     }
 
@@ -474,7 +482,21 @@ public abstract class Collector implements Runnable {
         this.result.level = -1;
         this.startTime = this.endTime = -1;
 
-        collect();
+        boolean setClassLoader = 
+            PluginLoader.setClassLoader(this);
+
+        try {
+            collect();
+        } catch (Exception e) {
+            log.error("Error running " + this.plugin.getName() +
+                      " collector: " + e, e);
+            return;
+        // XXX: catch NoClassDefFoundError ?
+        } finally {
+            if (setClassLoader) {
+                PluginLoader.resetClassLoader(this);
+            }
+        }
 
         if (this.endTime != -1) {
             this.result.timestamp = this.endTime;
@@ -483,6 +505,8 @@ public abstract class Collector implements Runnable {
         else {
             this.result.timestamp = System.currentTimeMillis();    
         }
+
+        PluginContainer.setResult(this);
     }
 
     protected void parseResults(String message) {
@@ -572,27 +596,7 @@ public abstract class Collector implements Runnable {
                 continue;
             }
 
-            boolean setClassLoader = 
-                PluginLoader.setClassLoader(collector);
-
-            try {
-                collector.run();
-            } catch (Exception e) {
-                log.error("Error running " + container.name + 
-                          " collector: " + e, e);
-                continue;
-            } // XXX: catch NoClassDefFoundError ?
-            finally {
-                if (setClassLoader) {
-                    PluginLoader.resetClassLoader(collector);
-                }
-            }
-
-            result = new CollectorResult(collector);
-            if (isDebug) {
-                log.debug(result);
-            }
-            container.results.put(collector.props, result);
+            collector.run();
         }        
     }
 
