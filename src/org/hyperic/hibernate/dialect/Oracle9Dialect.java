@@ -109,7 +109,7 @@ public class Oracle9Dialect
     }
     
     public String getLimitString(int num) {
-        return "ROWNUM <= "+num;
+        return "AND ROWNUM <= "+num;
     }
 
     public Map getLastData(Connection conn, String minMax,
