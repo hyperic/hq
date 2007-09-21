@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.hibernate.MappingException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -169,6 +168,10 @@ public class MySQL5InnoDBDialect
         finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
+    }
+    
+    public String getLimitString(int num) {
+        return "LIMIT "+num;
     }
 
     private Map getMeasIds(Connection conn, Map lastMap, Integer[] iids)

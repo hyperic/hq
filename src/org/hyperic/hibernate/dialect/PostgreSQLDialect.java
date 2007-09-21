@@ -101,6 +101,10 @@ public class PostgreSQLDialect
                " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")";
     }
+    
+    public String getLimitString(int num) {
+        return "LIMIT "+num;
+    }
 
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,

@@ -107,6 +107,10 @@ public class Oracle9Dialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
+    
+    public String getLimitString(int num) {
+        return "ROWNUM <= "+num;
+    }
 
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,

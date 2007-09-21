@@ -165,18 +165,20 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         return events;
     }
 
-    /** Get an array of log record counts based on entity ID and time range
+    /** 
+     * Get an array of boolean indicating if logs exist per interval, 
+     * for an entity over a given time range.
      *
      * @param aeid the entity ID
-     * @return array of log record counts
+     * @return boolean array indicating if logs exist per interval.
      * 
      * @ejb:interface-method
      */
-    public int[] getLogsCount(int sessionId, AppdefEntityID aeid,
-                              long beginTime, long endTime, int intervals)
+    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid,
+                                          long beginTime, long endTime, int intervals)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubjectValue subject = this.manager.getSubject(sessionId);
-        return getELM().getLogsCount(aeid, beginTime, endTime, intervals);
+        return getELM().logsExistPerInterval(aeid, beginTime, endTime, intervals);
     }
 
     /**
