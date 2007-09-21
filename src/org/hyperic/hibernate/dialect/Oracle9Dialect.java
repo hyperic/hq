@@ -104,7 +104,7 @@ public class Oracle9Dialect
     }
     
     public String getLimitString(int num) {
-        return "ROWNUM <= "+num;
+        return "AND ROWNUM <= "+num;
     }
     
 }
