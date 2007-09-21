@@ -74,7 +74,7 @@
       <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_IDX"/>
     </many-to-one>
 
-    <set name="roles" table="EAM_SUBJECT_ROLE_MAP">
+    <set name="roles" table="EAM_SUBJECT_ROLE_MAP" optimistic-lock="false">
       <key column="SUBJECT_ID"/>
       <many-to-many class="Role" column="ROLE_ID"/>
     </set>
