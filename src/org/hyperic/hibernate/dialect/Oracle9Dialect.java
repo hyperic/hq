@@ -102,4 +102,9 @@ public class Oracle9Dialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
+    
+    public String getLimitString(int num) {
+        return "ROWNUM <= "+num;
+    }
+    
 }

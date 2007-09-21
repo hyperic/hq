@@ -75,16 +75,16 @@ public class TimelineAction extends TilesAction {
         EventLogBoss boss = ContextUtils.getEventLogBoss(ctx);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
-        int[] eventsCounts = boss.getLogsCount(user.getSessionId().intValue(),
-                                               aeid, begin, end,
-                                               intervals.length);
+        boolean[] logsExist = boss.logsExistPerInterval(user.getSessionId().intValue(),
+                                                       aeid, begin, end,
+                                                       intervals.length);
 
         // Create the time intervals beans
         TimelineBean[] beans = new TimelineBean[intervals.length];
         long interval = TimeUtil.getInterval(begin, end,
                                              Constants.DEFAULT_CHART_POINTS);
         for (int i = 0; i < intervals.length; i++) {
-            beans[i] = new TimelineBean(begin + (interval * i),eventsCounts[i]);
+            beans[i] = new TimelineBean(begin + (interval * i),logsExist[i]);
         }
 
         request.setAttribute(Constants.TIME_INTERVALS_ATTR, beans);

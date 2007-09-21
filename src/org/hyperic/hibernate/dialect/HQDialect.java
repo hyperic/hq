@@ -63,4 +63,13 @@ public interface HQDialect
      */
     public boolean viewExists(Statement stmt, String viewName)
         throws SQLException;
+    
+    /**
+     * Returns the limit string.
+     * 
+     * @param num The number of rows to limit by.
+     * @return The limit string.
+     */
+    public String getLimitString(int num);
+    
 }

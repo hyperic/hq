@@ -96,4 +96,9 @@ public class PostgreSQLDialect
                " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")";
     }
+
+    public String getLimitString(int num) {
+        return "LIMIT "+num;
+    }
+    
 }

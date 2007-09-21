@@ -5,10 +5,10 @@
 
 <c:set var="count" value="0"/>
 <c:forEach var="timeTick" items="${timeIntervals}">
-  <c:set var="count" value="${count + timeTick.events}"/>
+  <c:set var="eventsExist" value="${timeTick.eventsExist || eventsExist}"/>
 </c:forEach>
 
-<c:if test="${count > 0}">
+<c:if test="${eventsExist}">
 
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 
@@ -56,15 +56,12 @@
   }
 </script>
 
-  <tr>
-    <td colspan="<c:out value="${count + 2}"/>" style="height: 2px;"></td>
-  </tr>
-  <tr style="height: 12px;">
+  <tr style="height: 12px; padding-top: 2px;">
     <td></td>
     <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
       <c:set var="count" value="${status.count}"/>
     <td background="<html:rewrite page="/images/no_event.gif"/>" align="center" valign="middle">
-      <c:if test="${timeTick.events > 0}">
+      <c:if test="${timeTick.eventsExist}">
       <div class="eventBlock" onmouseover="this.style.backgroundColor='#0000ff'" onmouseout="this.style.backgroundColor='#003399'" onmousedown="overlay.delayTimePopup(<c:out value="${count - 1}"/>);showEventsDetails(<c:out value="${timeTick.time}"/>);overlay.moveOverlay(this)"></div>
       </c:if>
     </td>

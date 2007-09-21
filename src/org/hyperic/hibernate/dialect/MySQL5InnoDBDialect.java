@@ -145,4 +145,9 @@ public class MySQL5InnoDBDialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
+    
+    public String getLimitString(int num) {
+        return "LIMIT "+num;
+    }
+    
 }
