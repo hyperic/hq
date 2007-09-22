@@ -106,9 +106,10 @@ class CollectorThread implements Runnable {
             try {
                 Thread.sleep(this.interval);
             } catch (InterruptedException e) {
-                executor.shutdown();
             }
         }
+
+        executor.shutdown();
     }
 
     public void die() {
