@@ -97,7 +97,7 @@
   <tiles:put name="disabled" beanName="alert" beanProperty="fixed"/>
 </tiles:insert>
     <c:if test="${not alert.fixed}">
-      <td class="BlockContent" width="55%">
+      <td class="BlockContent"  style="width:100%;">
         <fmt:message key="resource.common.alert.clickToFix"/>
       </td>
     </c:if>
