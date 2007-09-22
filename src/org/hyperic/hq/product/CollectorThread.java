@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.product;
 
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,10 +42,12 @@ class CollectorThread implements Runnable {
     private static CollectorThread instance = null;
     private boolean shouldDie = false;
     private long interval = DEFAULT_INTERVAL;
+    private Properties props;
 
-    static synchronized CollectorThread getInstance() {
+    static synchronized CollectorThread getInstance(PluginManager manager) {
         if (instance == null) {
             instance = new CollectorThread();
+            instance.props = manager.getProperties();
         }
 
         return instance;
@@ -85,11 +89,24 @@ class CollectorThread implements Runnable {
     }
 
     public void run() {
+        CollectorExecutor executor = new CollectorExecutor(this.props);
+        log.debug("Created ThreadPoolExecutor: " +
+                  "corePoolSize=" + executor.getCorePoolSize() + ", " +
+                  "maxPoolSize=" + executor.getMaximumPoolSize());
+
         while (!shouldDie) {
-            Collector.check();
+            Collector.check(executor);
+
+            if (log.isDebugEnabled()) {
+                log.debug("CompletedTaskCount=" + executor.getCompletedTaskCount() + ", " +
+                          "ActiveCount=" + executor.getActiveCount() + ", " +
+                          "TaskCount=" + executor.getTaskCount() + ", " +
+                          "PoolSize=" + executor.getPoolSize());
+            }
             try {
                 Thread.sleep(this.interval);
             } catch (InterruptedException e) {
+                executor.shutdown();
             }
         }
     }

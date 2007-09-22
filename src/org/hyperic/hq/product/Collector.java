@@ -375,7 +375,9 @@ public abstract class Collector implements Runnable {
         static void setResult(Collector collector) {
             CollectorResult result = new CollectorResult(collector);
             if (log.isDebugEnabled()) {
-                log.debug(result);
+                log.debug("name=" + collector.plugin.getName() + ", " +
+                          "thread=" + Thread.currentThread().getName() +
+                          ", result=" + result);
             }
             get(collector.plugin).results.put(collector.props, result);
         }
@@ -457,7 +459,7 @@ public abstract class Collector implements Runnable {
             container.collectors.put(props, collector);
 
             //we only have 1 thread, will only actually start once.
-            CollectorThread.getInstance().doStart();
+            CollectorThread.getInstance(plugin.getManager()).doStart();
         }
 
         //just added collector to the thread,
@@ -567,7 +569,8 @@ public abstract class Collector implements Runnable {
         return "on " + new Date(time);
     }
 
-    private static void check(PluginContainer container) {
+    private static void check(CollectorExecutor executor,
+                              PluginContainer container) {
         boolean isDebug = log.isDebugEnabled();
         log.debug("Running " + container.name + " collectors");
         List pluginCollectors;
@@ -596,12 +599,11 @@ public abstract class Collector implements Runnable {
                 continue;
             }
 
-            collector.run();
+            executor.execute(collector);
         }        
     }
 
-    static void check() {
-        //XXX may want to split containers into multiple threads
+    static void check(CollectorExecutor executor) {
         List pluginContainers;
 
         //copy so we don't block PluginCollector.get()
@@ -614,7 +616,7 @@ public abstract class Collector implements Runnable {
         for (int i=0; i<pluginContainers.size(); i++) {
             PluginContainer collector =
                 (PluginContainer)pluginContainers.get(i);
-            check(collector);
+            check(executor, collector);
         }
     }
 
