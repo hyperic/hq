@@ -479,6 +479,10 @@ public abstract class Collector implements Runnable {
         return this.props.hashCode();
     }
 
+    public boolean isPoolable() {
+        return true;
+    }
+
     public void run() {
         this.result.values.clear();
         this.result.level = -1;
@@ -599,7 +603,12 @@ public abstract class Collector implements Runnable {
                 continue;
             }
 
-            executor.execute(collector);
+            if (collector.isPoolable()) {
+                executor.execute(collector);
+            }
+            else {
+                collector.run();
+            }
         }        
     }
 
