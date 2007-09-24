@@ -86,8 +86,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalDataManager"
  *      view-type="local"
  *      type="Stateless"
- *
- * @ejb:transaction type="NOTSUPPORTED"
+ *      transaction-type="Bean"
  */
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
@@ -118,8 +117,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
     private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
-    
-    private SessionContext _ctx;
     
     // Pager class name
     private boolean confDefaultsLoaded = false;
@@ -224,7 +221,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param data       a list of {@link DataPoint}s 
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public boolean addData(List data) {
         if (shouldAbortDataInsertion(data)) {
@@ -240,33 +236,39 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         Connection conn = safeGetConnection();
         if (conn == null) {
-            // We are in a bad state. Set txn rollback in case this txn was 
-            // initiated by the client.
-            _ctx.setRollbackOnly();
             return false;
         }
 
         try
         {
             boolean autocommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-            if (dialect.supportsMultiInsertStmt()) {
-                succeeded = insertDataWithOneInsert(data, conn);
-            } else {
-                succeeded = insertDataInBatch(data, conn);
-            }            
+            
+            try {
+                conn.setAutoCommit(false);
+                if (dialect.supportsMultiInsertStmt()) {
+                    succeeded = insertDataWithOneInsert(data, conn);
+                } else {
+                    succeeded = insertDataInBatch(data, conn);
+                }            
 
-            if (succeeded) {
-                _log.debug("Inserting data in a single transaction succeeded.");
-                sendMetricEvents(data);
-            } else {
-                _log.debug("Inserting data in a single transaction failed." +
-                           "  Rolling back transaction.");
+                if (succeeded) {
+                    _log.debug("Inserting data in a single transaction succeeded.");
+                    conn.commit();
+                    sendMetricEvents(data);
+                } else {
+                    _log.debug("Inserting data in a single transaction failed." +
+                               "  Rolling back transaction.");
+                    conn.rollback();
+                    conn.setAutoCommit(true);
+                    addDataWithCommits(data, true, conn);
+                }
+                
+            } catch (SQLException e) {
                 conn.rollback();
-                addDataWithCommits(data, true, conn);
+                throw e;
+            } finally {
+                conn.setAutoCommit(autocommit);
             }
-            conn.commit();
-            conn.setAutoCommit(autocommit);
         }
         catch (SQLException e) {
             _log.debug("Transaction failed around inserting metric data.", e);
@@ -286,7 +288,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                   XXX:  Why would you ever not want to overwrite?
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void addData(List data, boolean overwrite) {
         /**
@@ -2326,7 +2327,5 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public void ejbActivate() {}
     public void ejbPassivate() {}
     public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {
-        _ctx = ctx;
-    }
+    public void setSessionContext(SessionContext ctx) {}
 }
