@@ -6713,8 +6713,12 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
     
-    
     <schemaSpec version="3.53">
+      <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
+                          columnType="VARCHAR2" />
+    </schemaSpec>
+    
+    <schemaSpec version="3.54">
       <schema-addColumn table="EAM_USER_CONFIG_RESP" column="TMP_CRISPO_ID" 
                         columnType="LONG"/>
       <crisponizer table="eam_user_config_resp" column="pref_response"
@@ -6736,11 +6740,6 @@ has already been defined.
           ) where user_id is not null
         </statement>
       </schema-directSQL>
-    </schemaSpec>
-    
-    <schemaSpec version="3.54">
-      <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
-                          columnType="VARCHAR2" />
     </schemaSpec>
     
     <schemaSpec version="3.55">
