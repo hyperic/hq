@@ -151,6 +151,18 @@
     <priority value="DEBUG"/>
   </category>
   -->
+	
+  <!-- Use this category to log every instance of a resource alert firing.
+	   Comment out if the log messages become unwieldy. -->	
+  <category name="org.hyperic.hq.events.ext.AbstractTrigger.Fired">
+    <priority value="DEBUG" />
+  </category>
+
+  <!-- Use this category to log every instance of a group alert firing.
+	   Comment out if the log messages become unwieldy. -->	
+  <category name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+    <priority value="DEBUG" />
+  </category>
 
   <!-- ======================= -->
   <!-- Setup the Root category -->
