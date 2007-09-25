@@ -48,8 +48,11 @@ import org.hyperic.hq.galerts.server.session.GtriggerInfo;
  * Represents an in-memory alert definition.  Different than the persisted
  * objects such as {@link GalertDef}
  */
-class MemGalertDef {
+class MemGalertDef {   
     private final Log _log = LogFactory.getLog(MemGalertDef.class);
+    
+    private final Log _triggerFiredLog = 
+        LogFactory.getLog(MemGalertDef.class.getName()+".Fired");
 
     private Integer _id;
     private String  _name;
@@ -146,7 +149,11 @@ class MemGalertDef {
         if (execReason == null) 
             return;
         
-        _log.info("Alert def [" + _name + "] with id="+_id+" firing");
+        if (_triggerFiredLog.isDebugEnabled()) {
+            _triggerFiredLog.debug("Alert def [" + _name + "] with id="+
+                                      _id+" firing");            
+        }
+        
         _log.debug(execReason);
 
         strat.getPartition().execute(_id, execReason);
