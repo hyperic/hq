@@ -57,7 +57,7 @@ import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
-
+import org.apache.commons.lang.StringEscapeUtils;
 /**
  *
  * Set an array for the timeline display
@@ -147,6 +147,7 @@ public class EventDetailsAction extends BaseAction {
                 }
             
                 html.append('>');
+
             
                 FormattedNumber fmtd =
                     UnitsFormat.format(new UnitNumber(elv.getTimestamp(),
@@ -154,9 +155,9 @@ public class EventDetailsAction extends BaseAction {
                                        UnitsConstants.SCALE_MILLI),
                                        request.getLocale(), dateSpecs);
 
-                html.append(res.getMessage(elv.getType(), fmtd.toString(),
+                html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv.getType(), fmtd.toString(),
                             ridBadChars(elv.getDetail()), elv.getSubject(),
-                            elv.getStatus()));
+                            elv.getStatus())));
 
                 html.append("</li>");
             }
