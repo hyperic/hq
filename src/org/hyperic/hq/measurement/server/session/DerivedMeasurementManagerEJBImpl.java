@@ -1034,13 +1034,16 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         final Long disabled = new Long(-1);
         DerivedMeasurementDAO ddao = getDerivedMeasurementDAO();
         Map intervals = new HashMap(tids.length);
-        for (int a = 0; a < aeids.length; a++) {
-            /* Find all the derived measurements for a given entity, and filter
-               out by template id, so as to not do a query per template */
-            List metrics = ddao.findByInstance(aeids[a].getType(),
-                                               aeids[a].getID());
-            
-            for (Iterator i = metrics.iterator(); i.hasNext();) {
+        Map derivedMeasToMetrics = ddao.findByInstance(aeids);
+
+        for (Iterator it = derivedMeasToMetrics.entrySet().iterator();
+            it.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            AppdefEntityID id = (AppdefEntityID) entry.getKey();
+            List metrics = (List)entry.getValue();
+            for (Iterator i = metrics.iterator(); i.hasNext();)
+            {
                 DerivedMeasurement dm = (DerivedMeasurement) i.next();
                 Long interval = new Long(dm.getInterval());
 
