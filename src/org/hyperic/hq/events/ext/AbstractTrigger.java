@@ -67,7 +67,11 @@ import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 /** Abstract class that defines a trigger, which can fire actions
  */
 public abstract class AbstractTrigger implements TriggerInterface {
+    
     private final Log log = LogFactory.getLog(AbstractTrigger.class);
+    
+    private final Log triggerFiredLog = 
+        LogFactory.getLog(AbstractTrigger.class.getName()+".Fired");
     
     private final Object alertDefEnabledStatusLock = new Object();
     
@@ -165,10 +169,12 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 }                
             }
             
-            log.info("Firing trigger id " + getId() + 
-                    " actions for alert def ["+alertDef.getName()+
-                    "] with id="+alertDef.getId());
-
+            if (triggerFiredLog.isDebugEnabled()) {
+                triggerFiredLog.debug("Firing actions for trigger with id="+
+                                        getId()+"; alert def ["+alertDef.getName()+
+                                        "] with id="+alertDef.getId());    
+            }
+            
             EscalatableCreator creator = 
                 new ClassicEscalatableCreator(alertDef, event);
             
