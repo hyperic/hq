@@ -155,9 +155,13 @@ public class EventDetailsAction extends BaseAction {
                                        UnitsConstants.SCALE_MILLI),
                                        request.getLocale(), dateSpecs);
 
-                html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv.getType(), fmtd.toString(),
+                           /* html.append(res.getMessage(elv.getType(), fmtd.toString(),
                             ridBadChars(elv.getDetail()), elv.getSubject(),
-                            elv.getStatus())));
+                            elv.getStatus()));*/
+
+                html.append(StringEscapeUtils.escapeHtml(res.getMessage(elv
+                        .getType(), fmtd.toString(), elv.getDetail(), elv
+                        .getSubject(), elv.getStatus())));
 
                 html.append("</li>");
             }
@@ -186,10 +190,11 @@ public class EventDetailsAction extends BaseAction {
         while (st.hasMoreElements()) {
             String tok = st.nextToken();
             tok = tok.replaceAll("['\"]", " ");
+            tok = tok.replaceAll("\\&", "&amp;");
             
             if (tok.indexOf('<') > -1)
                 tok = StringUtil.replace(tok, "<", "&lt;");
-                    
+
             buffer.append(tok).append(" ");
         }
 
