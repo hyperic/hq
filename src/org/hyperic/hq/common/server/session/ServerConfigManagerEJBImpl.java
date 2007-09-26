@@ -195,7 +195,15 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         
         for (Iterator i=allProps.iterator(); i.hasNext(); ) {
             ConfigProperty prop = (ConfigProperty)i.next();
-            oldProps.put(prop.getKey(), prop.getValue());
+            String val = prop.getValue();
+
+            if (val == null)
+                val = prop.getDefaultValue();
+            
+            if (val == null)
+                val = "";
+            
+            oldProps.put(prop.getKey(), val);
         }
         
         for (Iterator i=newProps.entrySet().iterator(); i.hasNext(); ) {
@@ -204,8 +212,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             String newVal = (String)newEnt.getValue();
             String oldVal = (String)oldProps.get(newKey);
             
-            if (!oldVal.equals(newVal))
+            if (oldVal == null || !oldVal.equals(newVal)) {
+                if (oldVal == null)
+                    oldVal = "";
                 createChangeAudit(subject, newKey, oldVal, newVal);
+            }
         }
     }
 
