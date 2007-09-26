@@ -161,6 +161,10 @@ public class ExecutableProcess extends Collector {
         }
     }
 
+    public boolean isPoolable() {
+        return true;
+    }
+
     public void collect() {
         this.output.reset();
 
