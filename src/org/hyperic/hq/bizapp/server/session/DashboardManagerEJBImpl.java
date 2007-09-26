@@ -188,6 +188,20 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
         CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
     }
+    
+    /**
+     * Determine if a dashboard is editable by the passed user
+     * 
+     * @ejb:interface-method
+     */
+    public boolean isEditable(AuthzSubject me, DashboardConfig dash) { 
+        PermissionManager permMan = PermissionManagerFactory.getInstance();
+
+        if (permMan.hasAdminPermission(me.getAuthzSubjectValue()))  
+            return true;
+
+        return dash.isEditable(me);
+    }
 
     /**
      * @ejb:interface-method
@@ -196,6 +210,11 @@ public class DashboardManagerEJBImpl implements SessionBean {
         throws PermissionException
     {
         Collection res = new ArrayList();
+
+        PermissionManager permMan = PermissionManagerFactory.getInstance();
+        if (permMan.hasAdminPermission(me.getAuthzSubjectValue())) {
+            return _dashDAO.findAll();
+        }
         
         UserDashboardConfig cfg = getUserDashboard(me, me);
         if (cfg != null)

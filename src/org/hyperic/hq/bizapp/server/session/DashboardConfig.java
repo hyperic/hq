@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -62,6 +63,8 @@ public abstract class DashboardConfig
     protected void setName(String n) {
         _name = n;
     }
+    
+    abstract boolean isEditable(AuthzSubject by);
     
     public int hashCode() {
         int hash = 17;

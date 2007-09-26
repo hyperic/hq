@@ -25,7 +25,12 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.server.session.Crispo;
 
 public class RoleDashboardConfig
@@ -49,6 +54,18 @@ public class RoleDashboardConfig
         return _role;
     }
     
+    boolean isEditable(AuthzSubject by) {
+        PermissionManager pMan = PermissionManagerFactory.getInstance();
+        
+        try {
+            pMan.check(by.getId(), _role.getResource().getResourceType(), 
+                       _role.getId(), AuthzConstants.roleOpModifyRole);
+            return true;
+        } catch (PermissionException e) {
+            return false;
+        }
+    }
+
     public int hashCode() {
         int hash = super.hashCode();
 

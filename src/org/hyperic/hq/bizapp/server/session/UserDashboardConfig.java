@@ -49,6 +49,10 @@ public class UserDashboardConfig
         _user = user;
     }
     
+    boolean isEditable(AuthzSubject by) {
+        return getUser().equals(by);
+    }
+
     public int hashCode() {
         int hash = super.hashCode();
 
