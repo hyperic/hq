@@ -83,6 +83,8 @@ import org.hyperic.util.timer.StopWatch;
 import org.hyperic.hq.dao.PluginDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.dao.DAOFactory;
 
 import org.apache.commons.logging.Log;
@@ -265,7 +267,10 @@ public class ProductManagerEJBImpl
         PluginDAO plHome = getPluginDAO();
         PluginValue ejbPlugin;
         PluginInfo pInfo;
-
+        boolean created = false;
+        boolean updated = false;
+        long start = System.currentTimeMillis();
+        
         pInfo = this.ppm.getPluginInfo(pluginName);
         Plugin plugin = plHome.findByName(pluginName);
         ejbPlugin = plugin != null ?plugin.getPluginValue() : null;
@@ -277,6 +282,7 @@ public class ProductManagerEJBImpl
             this.log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
                 this.log.info(pluginName + " configured to force update");
+                updated = true;
             }
             else {
                 pluginDeployed(pInfo);
@@ -284,75 +290,101 @@ public class ProductManagerEJBImpl
             }
         } else {
             this.log.info(pluginName + " unknown -- registering");
+            if (ejbPlugin != null)
+                updated = true;
+            else
+                created = true;
         }
            
         // Get the Appdef entities
         TypeInfo[] entities = pplugin.getTypes();
         if (entities == null) {
-            this.log.info(pluginName + " does define any resource types");
+            this.log.info(pluginName + " does not define any resource types");
             this.updateEJBPlugin(plHome, pInfo);
+            if (created)
+                PluginAudit.deployAudit(pluginName, start, 
+                                        System.currentTimeMillis());
+            else
+                PluginAudit.updateAudit(pluginName, start, 
+                                        System.currentTimeMillis());
             return;
         }
 
-        this.getConfigManagerLocal().updateAppdefEntities(pluginName,
-                                                          entities);
-
-        StopWatch timer = new StopWatch();
-
-        // Get the measurement templates
-        TemplateManagerLocal tMan = this.getTemplateManagerLocal();
-        // Keep a list of templates to add
-        HashMap toAdd = new HashMap();
-
-        for (int i = 0; i < entities.length; i++) {
-            TypeInfo info = entities[i];
+        Audit audit; 
+        boolean pushed = false;
+        
+        if (created)
+            audit = PluginAudit.deployAudit(pluginName, start, start);
+        else
+            audit = PluginAudit.updateAudit(pluginName, start, start);
+        
+        try {
+            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            pushed = true;
             
-            MeasurementInfo[] measurements;
+            getConfigManagerLocal().updateAppdefEntities(pluginName, entities);
 
-            try {
-                measurements =
-                    this.ppm.getMeasurementPluginManager().getMeasurements(info);
-            } catch (PluginNotFoundException e) {
-                if (!isVirtualServer(info)) {
-                    this.log.info(info.getName() +
-                                  " does not support measurement");
+            StopWatch timer = new StopWatch();
+
+            // Get the measurement templates
+            TemplateManagerLocal tMan = this.getTemplateManagerLocal();
+            // Keep a list of templates to add
+            HashMap toAdd = new HashMap();
+
+            for (int i = 0; i < entities.length; i++) {
+                TypeInfo info = entities[i];
+            
+                MeasurementInfo[] measurements;
+
+                try {
+                    measurements =
+                        this.ppm.getMeasurementPluginManager().getMeasurements(info);
+                } catch (PluginNotFoundException e) {
+                    if (!isVirtualServer(info)) {
+                        this.log.info(info.getName() +
+                                      " does not support measurement");
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            if (measurements != null && measurements.length > 0) {
-                MonitorableType monitorableType =
-                    tMan.getMonitorableType(pluginName, info);
-                Map newMeasurements = tMan.updateTemplates(pluginName, info,
-                                                           monitorableType,
-                                                           measurements);
-                toAdd.put(monitorableType, newMeasurements);
-            }
-        }
-
-        // For performance reasons, we add all the new measurements at once.
-        tMan.createTemplates(pluginName, toAdd);
-
-        // Add any custom properties.
-        CPropManagerLocal cPropManager = this.getCPropManagerLocal();
-        for (int i = 0; i < entities.length; i++) {
-            TypeInfo info = entities[i];
-            ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
-            List options = schema.getOptions();
-            AppdefResourceType appdefType = cPropManager.findResourceType(info);
-            for (Iterator j=options.iterator(); j.hasNext();) {
-                ConfigOption opt = (ConfigOption)j.next();
-                CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
-                if (c == null) {
-                    cPropManager.addKey(appdefType, opt.getName(),
-                                        opt.getDescription());
+                if (measurements != null && measurements.length > 0) {
+                    MonitorableType monitorableType =
+                        tMan.getMonitorableType(pluginName, info);
+                    Map newMeasurements = tMan.updateTemplates(pluginName, info,
+                                                               monitorableType,
+                                                               measurements);
+                    toAdd.put(monitorableType, newMeasurements);
                 }
             }
-        }
-        this.log.info(pluginName + " deployment took: " + timer + " seconds");
 
-        pluginDeployed(pInfo);
-        this.updateEJBPlugin(plHome, pInfo);
+            // For performance reasons, we add all the new measurements at once.
+            tMan.createTemplates(pluginName, toAdd);
+
+            // Add any custom properties.
+            CPropManagerLocal cPropManager = this.getCPropManagerLocal();
+            for (int i = 0; i < entities.length; i++) {
+                TypeInfo info = entities[i];
+                ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
+                List options = schema.getOptions();
+                AppdefResourceType appdefType = cPropManager.findResourceType(info);
+                for (Iterator j=options.iterator(); j.hasNext();) {
+                    ConfigOption opt = (ConfigOption)j.next();
+                    CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
+                    if (c == null) {
+                        cPropManager.addKey(appdefType, opt.getName(),
+                                            opt.getDescription());
+                    }
+                }
+            }
+            this.log.info(pluginName + " deployment took: " + timer + " seconds");
+
+            pluginDeployed(pInfo);
+            this.updateEJBPlugin(plHome, pInfo);
+        } finally {
+            if (pushed) {
+                AuditManagerEJBImpl.getOne().popContainer(true);
+            }
+        }
     }
 
     private ConfigManagerLocal getConfigManagerLocal()
