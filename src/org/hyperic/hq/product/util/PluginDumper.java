@@ -47,6 +47,7 @@ import java.util.Properties;
 
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
+import org.hyperic.hq.product.CollectorExecutor;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ControlPluginManager;
@@ -124,6 +125,8 @@ public class PluginDumper {
     public PluginDumper() {
         //for ExecutableThread
         setInterval("exec.interval", 1);
+        //disable ThreadPoolExecutor
+        System.setProperty(CollectorExecutor.PROP_ISPOOLABLE, "false");
         //for log/config track
         setInterval(TrackEventPluginManager.PROP_INTERVAL, 1);
 
