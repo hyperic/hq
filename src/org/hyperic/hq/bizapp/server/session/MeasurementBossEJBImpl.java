@@ -77,6 +77,7 @@ import org.hyperic.hq.appdef.shared.VirtualManagerUtil;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
@@ -108,6 +109,7 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.BaselineValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
@@ -212,9 +214,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      */
     public void updateMetricDefaultInterval(int sessionId, Integer[] tids,
                                             long interval)
-        throws TemplateNotFoundException,
-                SessionTimeoutException, SessionNotFoundException {
-        getTemplateManager().updateTemplateDefaultInterval(tids, interval);
+        throws SessionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        getTemplateManager().updateTemplateDefaultInterval(subject, tids, 
+                                                           interval);
     }
 
     /**
@@ -641,31 +645,29 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public void disableMeasurements(int sessionId, AppdefEntityID id,
-                                   Integer[] tids)
-        throws SessionTimeoutException, SessionNotFoundException,
-               RemoveException, AppdefEntityNotFoundException,
-               GroupNotCompatibleException, PermissionException,
-               TemplateNotFoundException
+                                    Integer[] tids)
+        throws SessionException, RemoveException, AppdefEntityNotFoundException,
+               GroupNotCompatibleException, PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
 
+        DerivedMeasurementManagerLocal dmm = getDerivedMeasurementManager();
         if (id == null) {
-            getTemplateManager().enableTemplateByDefault(tids, false);
-        }
-        else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+            getTemplateManager().setTemplateEnabledByDefault(subject, tids, 
+                                                             false);
+        } else if (id.isGroup()) {
             // Recursively do this for each of the group members
             List grpMembers =
-                GroupUtil.getCompatGroupMembers(subject, id, null,
+                GroupUtil.getCompatGroupMembers(subjectVal, id, null,
                                                 PageControl.PAGE_ALL);
     
             for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-                getDerivedMeasurementManager().disableMeasurements(
-                    subject, (AppdefEntityID) it.next(), tids);
+                dmm.disableMeasurements(subjectVal, (AppdefEntityID) it.next(), 
+                                        tids);
             }
-        }
-        else {
-            getDerivedMeasurementManager().disableMeasurements(
-                subject, id, tids);
+        } else {
+            dmm.disableMeasurements(subjectVal, id, tids); 
         }
     }
 

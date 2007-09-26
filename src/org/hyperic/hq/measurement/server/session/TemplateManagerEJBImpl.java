@@ -56,6 +56,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.server.session.Category;
@@ -359,13 +360,15 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param interval - the interval of collection to set to
      * @ejb:interface-method 
      */
-    public void updateTemplateDefaultInterval(Integer[] templIds, long interval) 
-        throws TemplateNotFoundException {
-
+    public void updateTemplateDefaultInterval(AuthzSubject subject, 
+                                              Integer[] templIds, long interval) 
+    {
         HashSet toReschedule = new HashSet();
+        MeasurementTemplateDAO templDao = getMeasurementTemplateDAO();
+        DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
+        
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template =
-                getMeasurementTemplateDAO().findById(templIds[i]);
+            MeasurementTemplate template = templDao.findById(templIds[i]);
 
             if (interval != template.getDefaultInterval())
                 template.setDefaultInterval(interval);
@@ -373,8 +376,10 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
 
-            List metrics =
-                getDerivedMeasurementDAO().findByTemplate(templIds[i]);
+            MetricAudit.enableAllCollection(template, subject, 
+                                            (int)(interval / 1000));
+            
+            List metrics = dmDao.findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
 
@@ -384,9 +389,8 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 if (template.isDefaultOn() != dm.isEnabled())
                     dm.setEnabled(template.isDefaultOn());
 
-                AppdefEntityID aeid =
-                    new AppdefEntityID(dm.getAppdefType(),
-                                       dm.getInstanceId());
+                AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
+                                                         dm.getInstanceId());
                 toReschedule.add(aeid);
             }
         }
@@ -409,19 +413,27 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param templIds - a list of integer template ids
      * @ejb:interface-method 
      */
-    public void enableTemplateByDefault(Integer[] templIds, boolean on) 
-        throws TemplateNotFoundException {
+    public void setTemplateEnabledByDefault(AuthzSubject subject, 
+                                            Integer[] templIds, boolean on) 
+    { 
+        DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
+        MeasurementTemplateDAO tmpDao = getMeasurementTemplateDAO();
+        SRNManagerLocal srnMan = getSRNManager();
         long current = System.currentTimeMillis();
-
+        
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template =
-                getMeasurementTemplateDAO().findById(templIds[i]);
+            MeasurementTemplate template = tmpDao.findById(templIds[i]);
 
             template.setDefaultOn(on);
 
-            List metrics =
-                getDerivedMeasurementDAO().findByTemplate(templIds[i]);
-            SRNManagerLocal srnManager = getSRNManager();
+            if (on) {
+                int numSecs = (int)(template.getDefaultInterval() / 1000);
+                MetricAudit.enableAllCollection(template, subject, numSecs);
+            } else {
+                MetricAudit.disableAllCollection(template, subject);
+            }
+                
+            List metrics = dmDao.findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
 
@@ -431,13 +443,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                 dm.setEnabled(on);
                 dm.setMtime(current);
 
-                AppdefEntityID aeid =
-                    new AppdefEntityID(dm.getAppdefType(),
-                                       dm.getInstanceId());
-                ScheduleRevNum srn = srnManager.get(aeid);
+                AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
+                                                         dm.getInstanceId());
+                ScheduleRevNum srn = srnMan.get(aeid);
                 long minInterval = (srn == null) ? dm.getInterval() :
-                    srn.getMinInterval();
-                srnManager.incrementSrn(aeid, minInterval);
+                                                   srn.getMinInterval();
+                srnMan.incrementSrn(aeid, minInterval);
             }
         }
     }
