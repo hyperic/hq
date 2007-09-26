@@ -480,7 +480,7 @@ public abstract class Collector implements Runnable {
     }
 
     public boolean isPoolable() {
-        return true;
+        return false;
     }
 
     public void run() {

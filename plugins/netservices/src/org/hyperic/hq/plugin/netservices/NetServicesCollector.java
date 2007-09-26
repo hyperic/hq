@@ -147,7 +147,11 @@ public abstract class NetServicesCollector extends Collector {
     }
 
     public abstract void collect();
-    
+
+    public boolean isPoolable() {
+        return true;
+    }
+
     public String getHostname() {
         return getProperty(PROP_HOSTNAME, DEFAULT_HOSTNAME);
     }

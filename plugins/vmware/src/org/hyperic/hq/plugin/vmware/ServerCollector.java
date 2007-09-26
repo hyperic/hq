@@ -33,10 +33,6 @@ import org.hyperic.sigar.vmware.VMwareException;
 
 public class ServerCollector extends Collector {
 
-    public boolean isPoolable() {
-        return false;
-    }
-
     public void collect() {
         try {
             Map values =

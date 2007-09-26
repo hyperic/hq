@@ -89,10 +89,6 @@ public class VMCollector extends Collector {
         return (Long)pidMap.get(vmx.toLowerCase());
     }
 
-    public boolean isPoolable() {
-        return false;
-    }
-
     public void collect() {
         getPids(); //XXX we should call this less often
 
