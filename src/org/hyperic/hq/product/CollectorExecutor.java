@@ -32,13 +32,18 @@ import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 public class CollectorExecutor extends ThreadPoolExecutor {
+    private static final String PROP_PREFIX = "collector.";
+    public static final String PROP_ISPOOLABLE =
+        PROP_PREFIX + "isPoolable";
+
     private static final int THREAD_MAX = 30;
     private Properties _props;
+    boolean _isPoolable;
 
     private static int getIntProperty(Properties props,
                                       String name,
                                       int defval) {
-        String val = props.getProperty("collector." + name);
+        String val = props.getProperty(PROP_PREFIX + name);
         if (val == null) {
             return defval;
         }
@@ -53,6 +58,12 @@ public class CollectorExecutor extends ThreadPoolExecutor {
               1, TimeUnit.MINUTES,
               new LinkedBlockingQueue());
         _props = props;
+        _isPoolable =
+            !"false".equals(props.getProperty(PROP_ISPOOLABLE));
+    }
+
+    public boolean isPoolable() {
+        return _isPoolable;
     }
 
     public void awaitTermination() throws InterruptedException {

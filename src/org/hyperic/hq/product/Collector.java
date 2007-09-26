@@ -603,7 +603,7 @@ public abstract class Collector implements Runnable {
                 continue;
             }
 
-            if (collector.isPoolable()) {
+            if (executor.isPoolable() && collector.isPoolable()) {
                 executor.execute(collector);
             }
             else {
