@@ -34,8 +34,10 @@ import org.hyperic.util.config.ConfigResponse;
 public interface ActionInterface extends ActionConfigInterface {
     
     /** 
-     * Execute the action
-     * @throws ActionExecuteException if execution causes an error
+     * Execute the action.  
+     * 
+     * @return text which will be associated with the action execution
+     *         logs.  {@link AlertActionLog}  
      */
     public String execute(AlertInterface alert, ActionExecutionInfo info)
         throws ActionExecuteException;
