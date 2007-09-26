@@ -30,6 +30,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -208,6 +209,7 @@ public class EmailAction extends EmailActionConfig
         // First, look up the addresses
         Integer uid;
         int i = 0;
+        HashSet prevRecipients = new HashSet();
         List validRecipients = new ArrayList();
         for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
@@ -238,7 +240,11 @@ public class EmailAction extends EmailActionConfig
                     addr.setPersonal(addr.getAddress());
                     break;
                 }
-                validRecipients.add(new EmailRecipient(addr, useHtml));
+                
+                // Don't send duplicate notifications
+                if (prevRecipients.add(addr)) {
+                    validRecipients.add(new EmailRecipient(addr, useHtml));
+                }
             } catch (AddressException e) {
                 _log.warn("Mail address invalid", e);
                 continue;
