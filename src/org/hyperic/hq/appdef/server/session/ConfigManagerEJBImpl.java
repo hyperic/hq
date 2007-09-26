@@ -55,7 +55,6 @@ import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.PlatformDAO;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.autoinventory.AICompare;
 
 import javax.ejb.CreateException;
@@ -579,24 +578,13 @@ public class ConfigManagerEJBImpl
             wasUpdated = true;
         }
 
-        // XXX, in some cases the configuration is not flushed when the
-        // zevent is dispatched after the commit.  Need to figure out why, in
-        // the meantime flush so that configuring servers by hand does not
-        // result in config errors.
-        ConfigResponseDAO dao =
-            DAOFactory.getDAOFactory().getConfigResponseDAO();
-        dao.getSession().flush();
-        
-        if (wasUpdated && sendConfigEvent) {
-            ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject,
-                                                                    appdefID);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        if (wasUpdated) {
+            // XXX: Need to cascade and send events for each resource that may
+            // have been affected by this config update.
+            return new AppdefEntityID[] { appdefID };
+        } else {
+            return new AppdefEntityID[] {};
         }
-
-        // XXX: Need to cascade and send events for each resource that may
-        // have been affected by this config update.
-        AppdefEntityID[] ids = { appdefID };
-        return ids;
     }
 
     /** Update the appdef entities based on TypeInfo
