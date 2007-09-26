@@ -33,7 +33,7 @@ import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 
-public class Audit
+public abstract class Audit
     extends PersistedObject
 {
     private String          _klazz;
@@ -211,6 +211,18 @@ public class Audit
     void removeChild(Audit a) {
         _children.remove(a);
         a.setParent(null);
+    }
+    
+    public String getHtmlMessage() {
+        if (!isOriginal()) {
+            return getMessage();
+        } else {
+            return formatHtmlMessage();
+        }
+    }
+    
+    protected String formatHtmlMessage() {
+        return getMessage();
     }
     
     public String toString() {
