@@ -170,8 +170,9 @@ public class EmailAction extends EmailActionConfig
                                       "html_email.gsp");
             }
 
-            filter.sendAlert(appEnt, to, createSubject(alertDef), body, 
-                             htmlBody, alertDef.isNotifyFiltered());
+            filter.sendAlert(appEnt, to, createSubject(alertDef), body,
+                             htmlBody, alertDef.getPriority(),
+                             alertDef.isNotifyFiltered());
 
             StringBuffer result = getLog(to);
             return result.toString();
@@ -286,6 +287,6 @@ public class EmailAction extends EmailActionConfig
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
         filter.sendAlert(getResource(defInfo), to, 
                          createSubject(defInfo) + " " + change.getDescription(), 
-                         message, message, false);
+                         message, message, defInfo.getPriority(), false);
     }
 }

@@ -140,13 +140,14 @@ public class EmailFilter {
         }
     }
     
-    public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
-                          String subject, String body, String htmlBody, 
-                          boolean filter)
+    void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
+                   String subject, String body, String htmlBody, int priority,
+                   boolean filter)
     {
         if (appEnt == null) {
             // Go ahead and just send the alert
-            sendEmail(addresses, subject, body, htmlBody);
+            sendEmail(addresses, subject, body, htmlBody,
+                      new Integer(priority));
             return;
         }
 
@@ -236,7 +237,7 @@ public class EmailFilter {
             }
         }
             
-        sendEmail(addresses, subject, body, htmlBody);
+        sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
     }
     
     private InternetAddress getFromAddress() {
@@ -259,7 +260,7 @@ public class EmailFilter {
     }
     
     private void sendEmail(EmailRecipient[] addresses, String subject, 
-                           String body, String htmlBody)
+                           String body, String htmlBody, Integer priority)
     {
         Session session;
         try {
@@ -288,6 +289,11 @@ public class EmailFilter {
                 log.debug("Sending HTML Alert Email: " + htmlBody);
             }
 
+            // If priority not null, set it in body
+            if (priority != null) {
+                m.addHeader("X-Priority", priority.toString());
+            }
+            
             // Send to each recipient individually (for D.B. SMS)
             for (int i = 0; i < addresses.length; i++) {
                 m.setRecipient(Message.RecipientType.TO, 
@@ -335,12 +341,12 @@ public class EmailFilter {
             if (msg.getNumEnts() == 1 && addr.useHtml()) {
                 sendEmail(new EmailRecipient[] { addr },
                           "[HQ] Filtered Notifications for " + platName,
-                          "", msg.getHtml());
+                          "", msg.getHtml(), null);
             } else {
                 addr.setHtml(false);
                 sendEmail(new EmailRecipient[] { addr },
                           "[HQ] Filtered Notifications for " + platName,
-                          msg.getText(), "");
+                          msg.getText(), "", null);
             }
         }
     }
