@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+
+<project name="server" default="sh-setup" basedir=".">
+
+  <property environment="ENV"/>
+
+  <path id="serverjars">
+    <fileset dir="${server.home}/lib" includes="*.jar"/>
+  </path>
+
+  <target name="init">
+    <fail unless="server.home">
+      No server.home property defined.
+    </fail>
+    <fail unless="engine.home">
+      No engine.home property defined.
+    </fail>
+    <fail unless="ENV.JAVA_HOME">
+      No JAVA_HOME environment variable defined.
+    </fail>
+
+    <available property="postgresql.available" file="${server.home}/hqdb"/>
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
+             classpathref="serverjars"/>
+    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
+             classpathref="serverjars"/>
+
+    <!-- If the user has defined TMPDIR in the environment, use that
+         for Java's temp dir.  Otherwise, leave it be.  -->
+    <if>
+      <isset property="ENV.TMPDIR"/>
+      <then>
+        <property name="tmpdir" value="${ENV.TMPDIR}"/>
+      </then>
+      <else>
+        <property name="tmpdir" value="${java.io.tmpdir}"/>
+      </else>
+    </if>
+
+    <condition property="isWin32">
+      <os family="windows"/>
+    </condition>
+
+    <condition property="script-ext" value=".bat">
+      <os family="windows"/>
+    </condition>
+    <condition property="script-ext" value=".sh">
+      <os family="unix"/>
+    </condition>
+  </target>
+
+  <target name="setup-pgsql" depends="init,load-conf-props" 
+          if="postgresql.available">
+    <absolutePath property="pgsql.home" path="${server.home}/hqdb"/>
+    <property name="db-start" 
+              value="${server.home}/bin/db-start${script-ext}"/>
+    <property name="db-stop"
+              value="${server.home}/bin/db-stop${script-ext}"/>
+    <property name="pgdata" value="${pgsql.home}/data"/>
+    <property name="pglog"  value="${server.home}/logs/hqdb.log"/>
+    <property name="server.hqdb.dir" value="${pgsql.home}"/>
+    <available property="pgsql.already.running"
+               file="${pgdata}/postmaster.pid"/>
+  </target>
+
+  <target name="load-conf-props" unless="load-conf-props.done">
+    <property file="${server.home}/conf/hq-server.conf"/>
+    <property name="load-conf-props.done" value="true"/>
+  </target>
+  <target name="setup-conf" depends="load-conf-props" unless="setup-conf.done">
+    <taskdef name="init-hq" classname="org.hyperic.InitializeHQServer"
+             classpathref="serverjars"/>
+    <init-hq serverHome="${server.home}" engineHome="${engine.home}"/>
+    <property name="setup-conf.done" value="true"/>
+  </target>
+
+  <!-- Check for anything bound to jboss/jndi PR4926 -->
+  <target name="detect-port-conflict-and-fail">
+    <echo>^^^DEBUG: Checking jboss jndi port...</echo>
+    <condition property="server.jboss.portConflict">
+      <socket server="127.0.0.1" port="${hq-engine.jnp.port}"/>
+    </condition>
+    <antcall target="fail-port-conflict-message"/>
+  </target>
+  <target name="fail-port-conflict-message" if="server.jboss.portConflict">
+    <fail>
+      There is already a program using one of JBoss's required ports (${hq-engine.jnp.port}).
+      This may indicate an attempt to start two similarly configured instances 
+      of HQ/JBoss.
+    </fail>
+  </target>
+
+  <!-- Check for anything bound to jboss/mbean 1099 PR4926 -->
+  <target name="detect-mbean-port-conflict-and-fail">
+    <echo>^^^DEBUG: Checking jboss mbean port...</echo>
+    <condition property="server.jboss.mbean.portConflict">
+      <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
+    </condition>
+    <antcall target="fail-mbean-port-conflict-message"/>
+  </target>
+
+  <target name="fail-mbean-port-conflict-message" if="server.jboss.mbean.portConflict">
+    <fail>
+      There is already a program using one of JBoss's required ports (${hq-engine.server.port}).
+      This may indicate an attempt to start two similarly configured instances 
+      of HQ/JBoss.
+    </fail>
+  </target>
+
+  <target name="sh-setup"
+          depends="setup-conf,detect-port-conflict-and-fail,detect-mbean-port-conflict-and-fail"/>
+
+  <target name="check-pgsql-already-running" if="pqsql.already.running">
+    <echo>^^^INFO: Built-in database is already running</echo>
+  </target>
+
+  <target name="start-postgresql"
+          depends="init,setup-pgsql,check-pgsql-already-running"
+          if="postgresql.available"
+          unless="pgsql.already.running">
+    <echo>^^^INFO: Starting built-in database... </echo>
+    <if>
+      <istrue value="${isWin32}"/>
+      <then>
+      <!-- Fix hang on windows Bug #28135, #5003-->
+      <exec executable="${db-start}"
+            spawn="true" 
+            dir="${server.home}"/>
+      </then>
+      <else>
+      <exec executable="${db-start}"
+            dir="${server.home}"
+            error="${pglog}"
+            timeout="60000"
+            failonerror="true"/>
+      </else>
+    </if>
+  </target>
+
+  <target name="stop-postgresql" depends="init,setup-pgsql" if="postgresql.available">
+    <!-- Make sure the HQ server is down first -->
+    <echo>^^^INFO: Waiting for server to stop...</echo>
+    <waitfor>
+      <not>
+        <or>
+          <socket server="127.0.0.1" port="${hq-engine.jnp.port}"/>
+          <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
+          <socket server="127.0.0.1" port="${server.webapp.port}"/>
+        </or>
+      </not>
+    </waitfor>
+
+    <echo>^^^INFO: Stopping built-in database... </echo>
+    <if>
+      <istrue value="${isWin32}"/>
+      <then>
+      <!-- Fix hang on windows Bug #28135, #5003-->
+      <exec executable="${db-stop}"
+            spawn="true" 
+            dir="${server.home}"/>
+      </then>
+      <else>
+      <exec executable="${db-stop}"
+            dir="${server.home}"
+            error="${pglog}"
+            timeout="60000"
+            failonerror="true"/>
+      </else>
+    </if>
+    <echo>^^^INFO: Built-in database stopped.</echo>
+  </target>
+
+  <target name="select-port" unless="server.postgresql.port">
+    <property file="${server.hqdb.dir}/data/postgresql.conf"
+              prefix="postgresql.conf"/>
+    <property name="server.postgresql.port"
+              value="${postgresql.conf.port}"/>
+  </target>
+
+  <target name="wait-postgresql"
+          depends="init,setup-pgsql,select-port"
+          if="postgresql.available">
+    <echo>^^^DEBUG: Waiting for built-in database to start (on port ${server.postgresql.port})...</echo>
+    <waitfor maxwait="60" maxwaitunit="second"
+             checkevery="2" checkeveryunit="second"
+             timeoutproperty="hqdb.startup.error">
+      <socket server="127.0.0.1" port="${server.postgresql.port}"/>
+    </waitfor>
+    <msgfail if="hqdb.startup.error">^^^ERROR:\
+An error occurred trying to start the HQ built-in database.  More
+ information may be available in the ${pglog} file.
+    </msgfail>
+    <sleep seconds="5"/>
+  </target>
+
+</project>

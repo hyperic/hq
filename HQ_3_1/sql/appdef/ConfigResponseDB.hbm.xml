@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef">
+
+  <class name="ConfigResponseDB" table="EAM_CONFIG_RESPONSE">
+    <cache usage="read-write"/>
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_CONFIG_RESPONSE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property lazy="true" name="productResponse" type="binary">
+      <column name="PRODUCT_RESPONSE" not-null="false" length="256"/>
+    </property>
+
+    <property lazy="true" name="controlResponse" type="binary">
+      <column name="CONTROL_RESPONSE" not-null="false" length="256"/>
+    </property>
+
+    <property lazy="true" name="measurementResponse" type="binary">
+      <column name="MEASUREMENT_RESPONSE" not-null="false" length="256"/>
+    </property>
+
+    <property lazy="true" name="autoInventoryResponse" type="binary">
+      <column name="AUTOINVENTORY_RESPONSE" not-null="false" length="256"/>
+    </property>
+
+    <property lazy="true" name="responseTimeResponse" type="binary">
+      <column name="RESPONSE_TIME_RESPONSE" not-null="false" length="256"/>
+    </property>
+
+    <property name="userManaged" type="boolean">
+      <column name="USERMANAGED" not-null="true"/>
+    </property>
+
+    <property name="validationError" type="string">
+      <column name="VALIDATIONERR" not-null="false" index="CRESP_ERR_IDX"/>
+    </property>
+
+  </class>
+
+</hibernate-mapping>

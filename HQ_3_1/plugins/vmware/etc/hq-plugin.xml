@@ -1,0 +1,474 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="vmware" class="VMwareProductPlugin">
+
+  <config name="authd">
+    <option name="authd.client.port"
+            type="int"
+            description="Authentication Server Port"
+            default="0"/>
+
+    <option name="host"
+            optional="true"
+            description="Authentication Server Hostname"/>
+
+    <option name="user"
+            optional="true"
+            description="Username"/>
+
+    <option name="pass"
+            optional="true"
+            type="secret"
+            description="Password"/>
+  </config>
+
+  <config name="vm">
+    <option name="vm.config"
+            description="VM config file"
+            default="/var/lib/vmware/VirtualMachines/Linux/redhat.vmx"/>
+  </config>
+
+  <!-- service template -->
+  <filter name="template"
+          value="vm:Config=%vm.config%,${authd.config}:${attr}"/>
+
+  <metrics name="vm-avail">
+    <metric name="Availability"
+            indicator="true"
+            attr="State"/>
+  </metrics>
+
+  <metrics name="vm-process">
+    <metric name="Process Virtual Memory Size"
+            attr="ProcSize"
+            units="B"/>
+
+    <metric name="Process Resident Memory Size"
+            attr="ProcResident"
+            units="B"/>
+
+    <metric name="Process Page Faults"
+            attr="ProcPageFaults"
+            collectionType="trendsup"/>
+
+    <metric name="Process Cpu System Time"
+            attr="ProcSysTime"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Process Cpu User Time"
+            attr="ProcUserTime"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Process Uptime"
+            attr="ProcUptime"
+            category="AVAILABILITY"
+            units="ms"
+            collectionType="static"/>
+
+    <metric name="Process Cpu Total Time"
+            attr="ProcTotalTime"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Process Cpu Usage"
+            attr="ProcCpuUsage"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="vm-esx">
+    <metric name="VM Cpu Wait"
+            attr="cpu.waitsec"
+            units="sec"
+            collectionType="trendsup"/>
+
+    <metric name="VM Cpu Used"
+            attr="cpu.usedsec"
+            indicator="true"
+            units="sec"
+            collectionType="trendsup"/>
+
+    <metric name="VM Cpu Sys"
+            attr="cpu.syssec"
+            units="sec"/>
+
+    <metric name="VM Memory Shares"
+            attr="mem.shares"/>
+
+    <metric name="VM Memory Minimum"
+            attr="mem.min"
+            units="KB"
+            collectionType="static"/>
+
+    <metric name="VM Memory Maximum"
+            attr="mem.max"
+            units="KB"
+            collectionType="static"/>
+
+    <metric name="VM Memory Size"
+            attr="mem.size"
+            indicator="true"
+            units="KB"/>
+
+    <metric name="VM Memory Ctl"
+            attr="mem.memctl"
+            units="KB"/>
+
+    <metric name="VM Memory Swapped"
+            attr="mem.swapped"
+            indicator="true"
+            units="KB"/>
+
+    <metric name="VM Memory Shared"
+            attr="mem.shared"
+            units="KB"/>
+
+    <metric name="VM Memory Active"
+            attr="mem.active"
+            units="KB"/>
+
+    <metric name="VM Memory Overhead"
+            attr="mem.overhd"
+            units="KB"/>
+
+    <metric name="VM Uptime"
+            attr="Uptime"
+            category="AVAILABILITY"
+            units="sec"
+            collectionType="static"/>
+  </metrics>
+
+  <metrics name="vm-disk">
+    <metric name="Availability"
+            indicator="true"
+	    attr="disk.%vm.disk%.avail"/>
+
+    <metric name="Reads"
+            attr="disk.%vm.disk%.reads"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Writes"
+            attr="disk.%vm.disk%.writes"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Read"
+            attr="disk.%vm.disk%.KBread"
+            indicator="true"
+            units="KB"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Written"
+            attr="disk.%vm.disk%.KBwritten"
+            indicator="true"
+            units="KB"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="vm-nic">
+    <metric name="Availability"
+            indicator="true"
+	    attr="net.%vm.nic%.avail"/>
+
+    <metric name="Packets Transmitted"
+            attr="net.%vm.nic%.totPktsTx"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Packets Received"
+            attr="net.%vm.nic%.totPktsRx"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Transmitted"
+            attr="net.%vm.nic%.totKBTx"
+            category="THROUGHPUT"
+            indicator="true"
+            units="KB"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Received"
+            attr="net.%vm.nic%.totKBRx"
+            category="THROUGHPUT"
+            indicator="true"
+            units="KB"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <!-- server template -->
+  <filter name="template"
+          value="server:${authd.config}:${attr}"/>
+
+  <metrics name="esx-server">
+    <metric name="Availability"
+            attr="${name}"
+            indicator="true"/>
+
+    <metric name="Memory Available for VMs"
+            attr="system.mem.avail"
+            indicator="true"
+            units="KB"/>
+
+    <metric name="Memory Used by VMs"
+            attr="system.mem.size"
+            indicator="true"
+            units="KB"/>
+
+    <metric name="CPU Used"
+            attr="system.cpu.usedsec"
+            indicator="true"
+            collectionType="trendsup"
+            units="sec"/>
+
+    <metric name="CPU Idle"
+            attr="system.cpu.idlesec"
+            indicator="true"
+            collectionType="trendsup"
+            units="sec"/>
+
+    <metric name="Number of CPUs"
+            attr="system.cpu.number"
+            collectionType="static"/>
+  </metrics>
+
+  <server name="VMware GSX"
+          version="3.x"
+          platforms="Win32,Linux">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.vmware.ServerCollector"/>
+
+    <plugin type="autoinventory"
+            class="VMwareDetector"/>
+
+    <config include="authd"/>
+
+    <properties>
+      <property name="version"
+                description="VMware Version"/>
+
+      <property name="build"
+                description="Build"/>
+
+      <property name="Product Documentation"
+                default="http://www.vmware.com/support/pubs/gsx_pubs.html"/>
+    </properties>
+
+    <metric name="Availability"
+            indicator="true"
+            attr="${name}"/>
+
+    <metric name="Memory Available for VMs"
+            template="sigar:Type=Mem:ActualFree"
+            indicator="true"
+            units="B"/>
+
+    <metric name="Memory Used by VMs"
+            query="State.Name.eq=vmware-vmx"
+            template="sigar:Type=MultiProcMem,Arg=${query}:Resident"
+            indicator="true"
+            units="B"/>
+
+    <service name="VM">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="org.hyperic.hq.plugin.vmware.VMCollector"/>
+
+      <plugin type="log_track"
+              class="VMwareEventLogPlugin"/>
+
+      <plugin type="config_track"
+              class="VMwareConfigTrackPlugin"/>
+
+      <plugin type="control"
+              class="VMwareControlPlugin"/>
+
+      <actions>
+        <include name="start"/>
+        <include name="stop"/>
+        <include name="reset"/>
+        <include name="suspend"/>
+        <include name="resume"/>
+        <include name="createSnapshot"/>
+        <include name="revertSnapshot"/>
+        <include name="deleteSnapshot"/>
+        <include name="saveScreenshot"/>
+      </actions>
+
+      <config include="vm"/>
+
+      <metrics include="vm-avail,vm-process"/>
+    </service>
+  </server>
+
+  <server name="VMware Server"
+          version="1.x"
+          include="VMware GSX 3.x">
+
+    <properties>
+      <property name="Product Documentation"
+                default="http://www.vmware.com/support/pubs/server_pubs.html"/>
+    </properties>
+  </server>
+
+  <!-- ESX does not run on Win32, but we want to be able to support
+       remote monitoring -->
+  <server name="VMware ESX"
+          version="2.x"
+          platforms="Linux,Win32">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.vmware.ServerCollector"/>
+
+    <plugin type="autoinventory"
+            class="VMwareDetector"/>
+
+    <config include="authd"/>
+
+    <properties>
+      <property name="version"
+                description="VMware Version"/>
+
+      <property name="build"
+                description="Build"/>
+
+      <property name="Product Documentation"
+                default="http://www.vmware.com/support/pubs/esx_pubs.html"/>
+    </properties>
+
+    <metrics include="esx-server"/>
+
+    <service name="VM">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="org.hyperic.hq.plugin.vmware.VMCollector"/>
+
+      <plugin type="log_track"
+              class="VMwareEventLogPlugin"/>
+
+      <plugin type="config_track"
+              class="VMwareConfigTrackPlugin"/>
+
+      <plugin type="control"
+              class="VMwareControlPlugin"/>
+
+      <actions>
+        <include name="start"/>
+        <include name="stop"/>
+        <include name="reset"/>
+        <include name="suspend"/>
+        <include name="resume"/>
+        <include name="createSnapshot"/>
+        <include name="revertSnapshot"/>
+        <include name="deleteSnapshot"/>
+        <include name="saveScreenshot"/>
+      </actions>
+
+      <config include="vm"/>
+
+      <properties>
+         <property name="guestOS"
+                   description="Guest OS"/>
+
+         <property name="ip"
+                   description="IP Address"/>
+
+         <property name="ethernet0.generatedAddress"
+                   description="MAC Address"/>
+
+         <property name="memsize"
+                   description="Memory Size"/>
+
+         <property name="numvcpus"
+                   description="Virtual CPUs"/>
+
+         <property name="tools.syncTime"
+                   description="Tools Sync Time"/>
+
+         <property name="scsi0.virtualDev"
+                   description="SCSI Device"/>
+      </properties>
+
+      <metrics include="vm-avail,vm-process,vm-esx"/>
+    </service>
+
+    <service name="VM Disk" internal="true">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="org.hyperic.hq.plugin.vmware.VMCollector"/>
+
+      <config include="vm">
+        <option name="vm.disk"
+                description="VM disk"
+                default="vmhba0:1:0"/>
+      </config>
+
+      <metrics include="vm-disk"/>
+    </service>
+
+    <service name="VM NIC" internal="true">
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="org.hyperic.hq.plugin.vmware.VMCollector"/>
+
+      <config include="vm">
+        <option name="vm.nic"
+                description="VM NIC"
+                default="00:0c:29:3d:34:8c"/>
+      </config>
+
+      <metrics include="vm-nic"/>
+    </service>
+  </server>
+
+  <server name="VMware ESX"
+          version="3.x"
+          include="2.x">
+
+    <properties>
+      <property name="Product Documentation"
+                default="http://www.vmware.com/support/pubs/vi_pubs.html"/>
+    </properties>
+  </server>
+</plugin>

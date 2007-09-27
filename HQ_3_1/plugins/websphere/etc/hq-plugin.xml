@@ -1,0 +1,1168 @@
+<?xml version="1.0"?> 
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="websphere" class="WebsphereProductPlugin"> 
+  <filter name="domain"
+           value="%server.node%/%server.name%"/>
+  <filter name="auth"
+          value="username=%username%,password=%password%"/>
+  <property name="template-config"
+            value="admin.host=%admin.host%,admin.port=%admin.port%,admin.vers=${admin.vers},${auth}"/>
+
+  <metrics name="websphere-jvm">
+    <metric name="JVM Total Memory"
+            alias="TotalMemory"
+            template="${domain}:Module=jvmRuntimeModule:totalMemory"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="KB"/>
+    <metric name="JVM Free Memory"
+            alias="FreeMemory"
+            template="${domain}:Module=jvmRuntimeModule:freeMemory"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="KB"/>
+    <metric name="JVM Used Memory"
+            alias="UsedMemory"
+            template="${domain}:Module=jvmRuntimeModule:usedMemory"
+            category="UTILIZATION"
+            indicator="true"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="KB"/>
+  </metrics>
+
+  <metrics name="server-pmi">
+    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
+    <metric name="JDBC Pool Number of Creates"
+            alias="NumCreates"
+            template="${domain}:Module=connectionPoolModule:numCreates"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Destroys"
+            alias="NumDestroys"
+            template="${domain}:Module=connectionPoolModule:numDestroys"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Allocates"
+            alias="NumAllocates"
+            template="${domain}:Module=connectionPoolModule:numAllocates"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Returns"
+            alias="NumReturns"
+            template="${domain}:Module=connectionPoolModule:numReturns"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Size"
+            alias="JdbcPoolSize"
+            template="${domain}:Module=connectionPoolModule:poolSize"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="JDBC Pool Concurrent Waiters"
+            alias="ConcurrentWaiters"
+            template="${domain}:Module=connectionPoolModule:concurrentWaiters"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="JDBC Pool Number of Faults"
+            alias="Faults"
+            template="${domain}:Module=connectionPoolModule:faults"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Prepared Statement Cache Discards"
+            alias="PrepStmtCacheDiscards"
+            template="${domain}:Module=connectionPoolModule:prepStmtCacheDiscards"
+            category="UTILIZATION"
+            group="Server JDBC"
+            collectionType="trendsup"
+            units="none"/>
+    <!-- XXX servletSessionsModule sessionLifeTime -->
+    <metric name="Servlet Sessions Created"
+            alias="CreatedSessions"
+            template="${domain}:Module=servletSessionsModule:createdSessions"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Servlet Sessions Invalidated"
+            alias="InvalidatedSessions"
+            template="${domain}:Module=servletSessionsModule:invalidatedSessions"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Servlet Sessions Active"
+            alias="ActiveSessions"
+            template="${domain}:Module=servletSessionsModule:activeSessions"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Servlet Sessions Live"
+            alias="LiveSessions"
+            template="${domain}:Module=servletSessionsModule:liveSessions"
+            category="UTILIZATION"
+            indicator="true"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+    <!-- XXX threadPoolModule percentMaxed -->
+    <metric name="Thread Pool Creates"
+            alias="ThreadCreates"
+            template="${domain}:Module=threadPoolModule:threadCreates"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Thread Pool Destroys"
+            alias="ThreadDestroys"
+            template="${domain}:Module=threadPoolModule:threadDestroys"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Thread Pool Active Threads"
+            alias="ActiveThreads"
+            template="${domain}:Module=threadPoolModule:activeThreads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Thread Pool Size"
+            alias="ThreadPoolSize"
+            template="${domain}:Module=threadPoolModule:poolSize"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <!-- XXX transactionModule - globalTranDuration,
+         localTranDuration, globalBeforeCompletionDuration,
+         globalPrepareDuration, globalCommitDuration
+         localBeforeCompletionDuration, localCommitDuration -->
+    <metric name="Global Transactions Begun"
+            alias="GlobalTransBegun"
+            template="${domain}:Module=transactionModule:globalTransBegun"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Global Transactions Involved"
+            alias="GlobalTransInvolved"
+            template="${domain}:Module=transactionModule:globalTransInvolved"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Local Transactions Begun"
+            alias="LocalTransBegun"
+            template="${domain}:Module=transactionModule:localTransBegun"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Global Transactions Active"
+            alias="ActiveGlobalTrans"
+            template="${domain}:Module=transactionModule:activeGlobalTrans"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Local Transactions Active"
+            alias="ActiveLocalTrans"
+            template="${domain}:Module=transactionModule:activeLocalTrans"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Optmized Transactions"
+            alias="NumOptimization"
+            template="${domain}:Module=transactionModule:numOptimization"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Global Transactions Committed"
+            alias="GlobalTransCommitted"
+            template="${domain}:Module=transactionModule:globalTransCommitted"
+            category="THROUGHPUT"
+            group="Throughput"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Local Transactions Committed"
+            alias="LocalTransCommitted"
+            template="${domain}:Module=transactionModule:localTransCommitted"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Global Transactions Rolled Back"
+            alias="GlobalTransRolledBack"
+            template="${domain}:Module=transactionModule:globalTransRolledBack"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Local Transactions Rolled Back"
+            alias="LocalTransRolledBack"
+            template="${domain}:Module=transactionModule:localTransRolledBack"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Global Transactions Timed Out"
+            alias="GlobalTransTimeout"
+            template="${domain}:Module=transactionModule:globalTransTimeout"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Local Transactions Timed Out"
+            alias="LocalTransTimeout"
+            template="${domain}:Module=transactionModule:localTransTimeout"
+            category="THROUGHPUT"
+            group="Throughput"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Webapp Number of Loaded Servlets"
+            alias="NumLoadedServlets"
+            template="${domain}:Module=webAppModule:numLoadedServlets"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Webapp Number of Servlet Reloads"
+            alias="NumReloads"
+            template="${domain}:Module=webAppModule:numReloads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            collectionType="trendsup"
+            units="none"/>
+    <!-- XXX beanModule avgMethodRt, avgCreateTime,
+             avgRemoveTime, avgDrainSize -->
+    <metric name="EJB Creates"
+            alias="Creates"
+            template="${domain}:Module=beanModule:creates"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Removes"
+            alias="Removes"
+            template="${domain}:Module=beanModule:removes"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Activates"
+            alias="Activates"
+            template="${domain}:Module=beanModule:activates"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Passivates"
+            alias="Passivates"
+            template="${domain}:Module=beanModule:passivates"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Instantiates"
+            alias="Instantiates"
+            template="${domain}:Module=beanModule:instantiates"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Destroys"
+            alias="Destroys"
+            template="${domain}:Module=beanModule:destroys"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Loads"
+            alias="Loads"
+            template="${domain}:Module=beanModule:loads"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Stores"
+            alias="Stores"
+            template="${domain}:Module=beanModule:stores"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Conncurrent Lives"
+            alias="ConcurrentLives"
+            template="${domain}:Module=beanModule:concurrentLives"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="EJB Total Method Calls"
+            alias="TotalMethodCalls"
+            template="${domain}:Module=beanModule:totalMethodCalls"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Active Methods"
+            alias="ActiveMethods"
+            template="${domain}:Module=beanModule:activeMethods"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="EJB Gets From Pool"
+            alias="GetsFromPool"
+            template="${domain}:Module=beanModule:getsFromPool"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Gets Found"
+            alias="GetsFound"
+            template="${domain}:Module=beanModule:getsFound"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Returns to Pool"
+            alias="ReturnsToPool"
+            template="${domain}:Module=beanModule:returnsToPool"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Returns Discarded"
+            alias="ReturnsDiscarded"
+            template="${domain}:Module=beanModule:returnsDiscarded"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Drains From Pool"
+            alias="DrainsFromPool"
+            template="${domain}:Module=beanModule:drainsFromPool"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Pool Size"
+            alias="EjbPoolSize"
+            template="${domain}:Module=beanModule:poolSize"
+            category="UTILIZATION"
+            group="Server EJB"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <property name="webapp.name"
+            value="%server.name%.%webapp.display%"/>
+
+  <metrics name="webapp-pmi">
+      <metric name="Webapp Number of Loaded Servlets"
+            alias="NumLoadedServlets"
+            template="${domain}/webAppModule:Module=${webapp.name}:numLoadedServlets"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+      <metric name="Webapp Number of Servlet Reloads"
+            alias="NumReloads"
+            template="${domain}/webAppModule:Module=${webapp.name}:numReloads"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+      <metric name="Webapp Total Requests"
+            alias="TotalRequests"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+      <metric name="Webapp Concurrent Requests"
+            alias="ConcurrentRequests"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:concurrentRequests"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+      <!-- XXX responseTime -->
+      <metric name="Webapp Number of Errors"
+            alias="NumErrors"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:numErrors"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="thread-pool-pmi">
+    <!-- XXX percentMaxed -->
+    <metric name="Thread Pool Creates"
+            alias="ThreadCreates"
+            template="${domain}/threadPoolModule:Module=%thrpool%:threadCreates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Thread Pool Destroys"
+            alias="ThreadDestroys"
+            template="${domain}/threadPoolModule:Module=%thrpool%:threadDestroys"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="Thread Pool Active Threads"
+            alias="ActiveThreads"
+            template="${domain}/threadPoolModule:Module=%thrpool%:activeThreads"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Thread Pool Size"
+            alias="ThreadPoolSize"
+            template="${domain}/threadPoolModule:Module=%thrpool%:poolSize"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <metrics name="conn-pool-pmi">
+    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
+    <metric name="JDBC Pool Number of Creates"
+            alias="NumCreates"
+            template="${domain}/connectionPoolModule:Module=%connpool%:numCreates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Destroys"
+            alias="NumDestroys"
+            template="${domain}/connectionPoolModule:Module=%connpool%:numDestroys"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Allocates"
+            alias="NumAllocates"
+            template="${domain}/connectionPoolModule:Module=%connpool%:numAllocates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Number of Returns"
+            alias="NumReturns"
+            template="${domain}/connectionPoolModule:Module=%connpool%:numReturns"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Size"
+            alias="JdbcPoolSize"
+            template="${domain}/connectionPoolModule:Module=%connpool%:poolSize"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="JDBC Pool Concurrent Waiters"
+            alias="ConcurrentWaiters"
+            template="${domain}/connectionPoolModule:Module=%connpool%:concurrentWaiters"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="JDBC Pool Number of Faults"
+            alias="Faults"
+            template="${domain}/connectionPoolModule:Module=%connpool%:faults"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="JDBC Pool Prepared Statement Cache Discards"
+            alias="PrepStmtCacheDiscards"
+            template="${domain}/connectionPoolModule:Module=%connpool%:prepStmtCacheDiscards"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <!-- 5.0 -->
+
+  <metrics name="WebSphere Admin 5.0">
+    <!-- XXX this avail check can be more robust -->
+    <metric name="Availability"
+            alias="Availability"
+	    template="TCP Socket:hostname=%admin.host%,port=%admin.port%,timeout=60:Availability"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <!-- metric is not all that useful.  we really do this to verify stats can be
+         collected before turning on runtime AI -->
+    <metric name="Number of JVMs"
+            alias="NumJVMs"
+            template="ws.custom:name=JVM,mbeanIdentifier=JVM,type=JVM,node=%server.node%,*:stats"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <metrics name="WebSphere 5.0" include="server-pmi,websphere-jvm">
+    <!-- XXX this avail check can be more robust -->
+    <metric name="Server Availability"
+            alias="Availability"
+            template="${domain}:Module=jvmRuntimeModule:Availability"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <property name="server.props"
+	    value="node=%server.node%,Server=%server.name%"/>
+
+  <metrics name="WebSphere 5.0 Application">
+    <metric name="Application Availability"
+            alias="Availability"
+            template="${domain}/applicationModule:Module=%app%:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="WebSphere 5.0 Thread Pool" include="thread-pool-pmi">
+    <metric name="Thread Pool Availability"
+            alias="Availability"
+            template="${domain}/threadPoolModule:Module=%thrpool%:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="WebSphere 5.0 Connection Pool" include="conn-pool-pmi">
+    <metric name="JDBC Pool Availability"
+            alias="Availability"
+            template="${domain}/connectionPoolModule:Module=%connpool%:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <property name="webapp.name"
+            value="%app%#%webapp%"/>
+
+  <property name="app.props"
+	    value="${server.props},Application=%app%"/>
+
+  <metrics name="WebSphere 5.0 Webapp">
+    <metric name="Webapp Availability"
+            alias="Availability"
+            template="${domain}/webAppModule:Module=${webapp.name}:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+      <metric name="Webapp Number of Loaded Servlets"
+            alias="NumLoadedServlets"
+            template="${domain}/webAppModule:Module=${webapp.name}:numLoadedServlets"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+      <metric name="Webapp Number of Servlet Reloads"
+            alias="NumReloads"
+            template="${domain}/webAppModule:Module=${webapp.name}:numReloads"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+      <metric name="Webapp Total Requests"
+            alias="TotalRequests"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:totalRequests"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+      <metric name="Webapp Concurrent Requests"
+            alias="ConcurrentRequests"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:concurrentRequests"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+      <!-- XXX responseTime -->
+      <metric name="Webapp Number of Errors"
+            alias="NumErrors"
+            template="${domain}/webAppModule/${webapp.name}:Module=webAppModule.servlets:numErrors"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <property name="ejb.module"
+	    value="%app%#%ejb%"/>
+
+  <metrics name="WebSphere 5.0 EJB">
+    <metric name="EJB Availability"
+            alias="Availability"
+            template="${domain}/beanModule:Module=${ejb.module}:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <!-- XXX beanModule avgMethodRt, avgCreateTime,
+             avgRemoveTime, avgDrainSize -->
+    <metric name="EJB Creates"
+            alias="Creates"
+            template="${domain}/beanModule:Module=${ejb.module}:creates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Removes"
+            alias="Removes"
+            template="${domain}/beanModule:Module=${ejb.module}:removes"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Activates"
+            alias="Activates"
+            template="${domain}/beanModule:Module=${ejb.module}:activates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Passivates"
+            alias="Passivates"
+            template="${domain}/beanModule:Module=${ejb.module}:passivates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Instantiates"
+            alias="Instantiates"
+            template="${domain}/beanModule:Module=${ejb.module}:instantiates"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Destroys"
+            alias="Destroys"
+            template="${domain}/beanModule:Module=${ejb.module}:destroys"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Loads"
+            alias="Loads"
+            template="${domain}/beanModule:Module=${ejb.module}:loads"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Stores"
+            alias="Stores"
+            template="${domain}/beanModule:Module=${ejb.module}:stores"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Conncurrent Lives"
+            alias="ConcurrentLives"
+            template="${domain}/beanModule:Module=${ejb.module}:concurrentLives"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="EJB Total Method Calls"
+            alias="TotalMethodCalls"
+            template="${domain}/beanModule:Module=${ejb.module}:totalMethodCalls"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Active Methods"
+            alias="ActiveMethods"
+            template="${domain}/beanModule:Module=${ejb.module}:activeMethods"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="EJB Gets From Pool"
+            alias="GetsFromPool"
+            template="${domain}/beanModule:Module=${ejb.module}:getsFromPool"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Gets Found"
+            alias="GetsFound"
+            template="${domain}/beanModule:Module=${ejb.module}:getsFound"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Returns to Pool"
+            alias="ReturnsToPool"
+            template="${domain}/beanModule:Module=${ejb.module}:returnsToPool"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Returns Discarded"
+            alias="ReturnsDiscarded"
+            template="${domain}/beanModule:Module=${ejb.module}:returnsDiscarded"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Drains From Pool"
+            alias="DrainsFromPool"
+            template="${domain}/beanModule:Module=${ejb.module}:drainsFromPool"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+    <metric name="EJB Pool Size"
+            alias="EjbPoolSize"
+            template="${domain}/beanModule:Module=${ejb.module}:poolSize"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <help name="enable-pmi-5">
+  <![CDATA[
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    <ul>
+      <li>Using a Web browser open http://${admin.host}:9090/admin </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring</b> </li>
+      <li>Check the Startup button </li>
+      <li>Set level to Standard </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  ]]>
+  </help>
+
+  <help name="enable-pmi-6">
+  <![CDATA[
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    WebSphere 6.x has PMI enabled at the Basic level by default,
+    which is sufficient for HQ to collect the metrics enabled by
+    default.  The PMI level may need to be increased to collect
+    certain metrics not enabled by default.
+
+    <ul>
+      <li>Using a Web browser open http://${admin.host}:9060/admin </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring</b> </li>
+      <li>Check the Startup button </li>
+      <li>Set level to Basic or higher </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  ]]>
+  </help>
+
+  <help name="agent-setup-5">
+  <![CDATA[
+    <p>
+    <b>websphere.installpath</b> may need to be configured in agent.properties,
+    for example:
+    </p>
+
+    <pre>   websphere.installpath=${installpath.escaped}
+    </pre>
+
+    <p>
+    The plugin will auto-configure this value using the Windows
+    registry or process table if WebSphere is already running.
+    </p>
+  ]]>
+  </help>
+
+  <help name="agent-setup-6">
+  <![CDATA[
+    <p>
+    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
+    </p>
+    
+    <pre>
+    ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
+    ${CMD.prompt} hq-agent.${CMD.ext} start
+    </pre>
+  ]]>
+  </help>
+
+  <help name="config-auth-5">
+  <![CDATA[
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to 
+    <i>${installpath}${FILE.sep}properties${FILE.sep}soap.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    com.ibm.ssl.keyStore=...
+    com.ibm.ssl.keyStorePassword=...
+    com.ibm.ssl.trustStore=...
+    com.ibm.ssl.trustStorePassword=...
+    </pre>
+  ]]>
+  </help>
+
+  <!-- same as above with ssl.client.props -->
+  <help name="config-auth-6">
+  <![CDATA[
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to 
+    <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    com.ibm.ssl.keyStore=...
+    com.ibm.ssl.keyStorePassword=...
+    com.ibm.ssl.trustStore=...
+    com.ibm.ssl.trustStorePassword=...
+    </pre>
+  ]]>
+  </help>
+
+  <help name="WebSphere Admin 5.0"
+        include="agent-setup-5,enable-pmi-5,config-auth-5"/>
+
+  <help name="WebSphere Admin 6.1"
+        include="agent-setup-6,enable-pmi-6,config-auth-6"/>
+
+  <help name="WebSphere Admin 5.0 Win32,config-auth-5"
+        include="enable-pmi-5"/>
+
+  <help name="WebSphere Admin 6.1 Win32,config-auth-6"
+        include="enable-pmi-6"/>
+
+  <help name="websphere-server">
+  <![CDATA[
+  <p>
+  <b>NOTE:</b> WebSphere ${product.version} server types are configured via
+  AutoDiscovery.
+  </p>
+  <p>
+  See <b>WebSphere Admin ${product.version}</b> server for product
+  setup information.
+  </p>
+  ]]>
+  </help>
+
+  <help name="WebSphere 5.0" include="websphere-server"/>
+
+  <property name="websphere5-webinf"
+            value="${installpath}${FILE.sep}config${FILE.sep}cells${FILE.sep}${server.node}${FILE.sep}applications${FILE.sep}${app}.ear${FILE.sep}deployments${FILE.sep}${app}${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}"/>
+
+  <property name="websphere5-webinf-lib"
+            value="${installpath}${FILE.sep}installedApps${FILE.sep}${server.node}${FILE.sep}${app}.ear${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}lib"/>
+
+  <help name="websphere-rt-postamble">
+  <![CDATA[
+   <p>
+   Add the following snippet of XML just after the last
+   <b>&lt;context-param&gt;</b> tag, and before the first
+   <b>&lt;servlet&gt;</b> tag.
+   </p>
+
+    <pre>
+&lt;!-- HYPERIC HQ RESPONSE TIME FILTER --&gt;
+&lt;filter&gt;
+	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
+	&lt;filter-class&gt;org.hyperic.hq.product.servlet.filter.JMXFilter&lt;/filter-class&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;responseTimeLogDir&lt;/param-name&gt;
+		&lt;param-value&gt;${installpath}${FILE.sep}logs&lt;/param-value&gt;
+	&lt;/init-param&gt;
+&lt;/filter&gt;
+&lt;filter-mapping&gt;
+	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
+	&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;
+&lt;!-- END HYPERIC RESPONSE TIME FILTER --&gt;
+    </pre>
+
+    <ul>
+    <li>Add the filter jar</li>
+    </ul>
+
+    <pre>
+${CMD.prompt} mkdir ${websphere5-webinf-lib}
+${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.sep}servlet${FILE.sep}libs${FILE.sep}hq-filter.jar \
+      ${websphere5-webinf-lib}
+    </pre>
+
+    <ul>
+    <li>Restart the WebSphere server. </li>
+    </ul>
+  ]]>
+  </help>
+
+  <help name="WebSphere 5.0 Webapp" append="websphere-rt-postamble">
+  <![CDATA[
+    <p>
+    <h4>Enable Webapp Response Time</h4>
+    </p>
+
+    <ul>
+    <li>Edit ${websphere5-webinf}web.xml</li>
+    </ul>
+  ]]>
+  </help>
+
+  <config name="connector">
+    <option name="admin.port"
+            description="SOAP Connector Port"
+            default="8880"/>
+
+    <option name="admin.host"
+            description="SOAP Connector Host"
+            default="localhost"/>
+
+    <option name="server.node"
+            description="App Server Node"
+            default="hostname"/>
+
+    <option name="username"
+            description="Username for Authentication"
+            optional="true"/>
+
+    <option name="password"
+            description="Password for Authentication"
+            optional="true"
+            type="secret"/>
+  </config>
+
+  <property name="websphere.regkey"
+            value="SOFTWARE\IBM\WebSphere Application Server"/>
+
+  <server name="WebSphere Admin"
+          version="5.0"
+          description="Admin Server">
+
+    <property name="UNIQUE_FILE"
+              value="lib/jmxc.jar"/>
+
+    <plugin type="measurement"
+            class="WebsphereMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="WebsphereControlPlugin"/>
+
+    <plugin type="autoinventory"
+            class="WebsphereDetector"/>
+
+    <scan registry="${websphere.regkey}">
+      <include name="InstallLocation"/>
+    </scan>
+
+    <scan>
+      <include name="/**/lib/wasjmx.jar"/>
+    </scan>
+
+    <config include="connector"/>
+  </server>
+
+  <server name="WebSphere"
+          version="5.0"
+          description="Application Server">
+
+    <plugin type="measurement"
+            class="WebsphereMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="WebsphereServerCollector"/>
+
+    <plugin type="control"
+            class="WebsphereControlPlugin"/>
+
+    <plugin type="log_track"
+            class="WebsphereTraceLogFileTrackPlugin"/>
+
+    <config include="connector">
+      <option name="server.name"
+              description="App Server Name"
+              default="server1"/>
+      <option name="server.port"
+              description="App Server Port"
+              default="9080"/>
+    </config>
+
+    <properties>
+      <property name="javaVendor"
+                description="Java Vendor"/>
+
+      <property name="javaVersion"
+                description="Java Version"/>
+
+      <property name="version"
+                description="WebSphere Version"/>
+
+      <property name="pid"
+                description="Process ID"/>
+
+      <property name="cellName"
+                description="Cell Name"/>
+    </properties>
+
+    <service name="Application">
+      <plugin type="collector"
+              class="ApplicationCollector"/>
+
+      <plugin type="control"
+              class="WebsphereAppControl"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+      </config>
+    </service>
+
+    <service name="EJB">
+      <plugin type="collector"
+              class="EJBCollector"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+
+        <option name="ejb"
+                description="EJB Name"
+                default="Increment"/>
+      </config>
+    </service>
+
+    <service name="Webapp">
+      <plugin type="collector"
+              class="WebappCollector"/>
+
+      <plugin type="responsetime"
+              class="WebsphereRtPlugin"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+
+        <option name="webapp"
+                description="Webapp Name"
+                default="examples"/>
+
+        <option name="webapp.context"
+                description="Webapp Context"
+                default="/examples"/>
+      </config>
+    </service>
+
+    <service name="Connection Pool"
+             internal="true">
+
+      <plugin type="collector"
+              class="ConnectionPoolCollector"/>
+
+      <config>
+        <option name="connpool"
+                description="Connection Pool Name"
+                default="SamplesDataSource"/>
+      </config>
+
+      <properties>
+        <property name="implementationClassName"
+                  description="Implementation Class"/>
+      </properties>
+    </service>
+
+    <service name="Thread Pool"
+             internal="true">
+
+      <plugin type="collector"
+              class="ThreadPoolCollector"/>
+
+      <config>
+        <option name="thrpool"
+                description="Thread Pool Name"
+                default="ORB.thread.pool"/>
+      </config>
+
+      <properties>
+        <property name="minimumSize"
+                  description="Minimum Size"/>
+
+        <property name="maximumSize"
+                  description="Maximum Size"/>
+      </properties>
+    </service>
+  </server>
+
+  <server name="WebSphere"
+          version="6.0"
+          include="5.0"/>
+
+  <server name="WebSphere Admin"
+          version="6.0"
+          include="5.0">
+
+    <property name="UNIQUE_FILE"
+              value="../../properties/version/WAS.product"/>
+  </server>
+
+  <server name="WebSphere"
+          version="6.1"
+          include="6.0"/>
+
+  <server name="WebSphere Admin"
+          version="6.1"
+          include="6.0">
+
+    <property name="was.install.root"
+              value="/opt/IBM/WebSphere/AppServer"/>
+
+    <config include="connector">
+      <option name="was.install.root"
+              description="WebSphere install root"
+              default="${was.install.root}"/>
+    </config>
+  </server>
+</plugin>

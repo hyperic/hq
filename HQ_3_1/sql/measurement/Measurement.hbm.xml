@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
+
+  <class name="Measurement" table="EAM_MEASUREMENT">
+
+    <cache usage="read-write"/>
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" index="MEAS_ID_CLASS"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <discriminator>
+      <column name="MEASUREMENT_CLASS" not-null="true" sql-type="character" length="1" index="MEAS_ID_CLASS"/>
+    </discriminator>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <properties name="measurementId" unique="true">
+      <property name="instanceId" type="integer">
+        <column name="INSTANCE_ID" not-null="true"/>
+      </property>
+      <many-to-one name="template" class="MeasurementTemplate">
+        <column name="TEMPLATE_ID" not-null="true"/>
+      </many-to-one>
+    </properties>
+
+    <property name="cid" type="integer">
+      <column name="CID"/>
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" not-null="true"/>
+    </property>
+
+    <subclass name="DerivedMeasurement" extends="Measurement" discriminator-value="D">
+      <property name="enabled" type="boolean">
+        <column name="ENABLED" not-null="false" index="MEAS_ENABLED_IDX"/>
+      </property>
+      <property name="interval" type="long">
+        <column name="COLL_INTERVAL"/>
+      </property>
+      <property name="formula" type="string">
+        <column name="DSN" length="500"/>
+      </property>
+      <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="baselinesBag" table="EAM_MEASUREMENT_BL">
+        <cache usage="read-write"/>
+        <key on-delete="cascade" column="MEASUREMENT_ID"/>
+        <one-to-many class="Baseline"/>
+      </bag>
+    </subclass>
+
+    <subclass name="RawMeasurement" extends="Measurement" discriminator-value="R">
+      <property name="dsn" type="string">
+        <column name="DSN" length="500"/>
+      </property>
+
+    </subclass>
+
+  </class>
+
+</hibernate-mapping>

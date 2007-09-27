@@ -1,0 +1,85 @@
+<%@ page language="java" %>
+<%@ page errorPage="/common/Error.jsp" %>
+<%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="hq" prefix="hq" %>
+
+<script type="text/javascript">
+  var help = "<hq:help/>";
+</script>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr class="PageTitle"> 
+    <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+    <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+    <td width="67%" class="PageTitle" nowrap><fmt:message key="dash.home.ControlActions.Title"/></td>
+    <td width="32%"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
+    <td width="1%"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+  </tr>
+  <tr> 
+    <td valign="top" align="left" rowspan="99"><html:img page="/images/title_TLcorner.gif" width="8" height="8" alt="" border="0"/></td>
+    <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="10" alt="" border="0"/></td>
+  </tr>
+  <tr valign="top"> 
+    <td colspan="2">
+      <html:form action="/dashboard/ModifyControlActions" >
+
+      <tiles:insert definition=".header.tab">
+        <tiles:put name="tabKey" value="dash.settings.DisplaySettings"/>
+      </tiles:insert>
+
+      <tiles:insert definition=".dashContent.admin.generalSettings">
+        <tiles:put name="portletName" beanName="portletName" />
+      </tiles:insert>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+         <tr valign="top">
+          <td width="20%" class="BlockLabel" rowspan="3"><fmt:message key="dash.settings.FormLabel.ControlRange"/></td>
+          <td width="5%" class="BlockContent" nowrap>
+            <html:checkbox property="useLastCompleted"/>
+            <fmt:message key="dash.settings.controlActions.last"/>
+          </td>
+          <td width="75%" class="BlockContent">
+            <html:select property="lastCompleted">
+              <html:option value="1">1</html:option>
+              <html:option value="5">5</html:option>
+              <html:option value="10">10</html:option>   
+              <html:option value="15">15</html:option>
+            </html:select> <fmt:message key="dash.settings.controlActions.completed"/>
+            <html:select property="past">
+              <html:option value="1800000" >30 <fmt:message key="admin.settings.Minutes"/></html:option>
+              <html:option value="3600000" ><fmt:message key="admin.settings.Hour"/></html:option>
+              <html:option value="43200000" >12 <fmt:message key="admin.settings.Hours"/></html:option>
+              <html:option value="86400000" ><fmt:message key="admin.settings.Day"/></html:option>
+              <html:option value="604800000"><fmt:message key="admin.settings.Week"/></html:option>
+              <html:option value="2419200000"><fmt:message key="admin.settings.Month"/></html:option>
+            </html:select> <br>
+          </td>
+        </tr>
+        <tr>
+          <td class="BlockContent" nowrap>
+            <html:checkbox property="useMostFrequent"/>
+            <fmt:message key="dash.settings.controlActions.last"/>
+          </td>
+          <td class="BlockContent">
+            <html:select property="mostFrequent"  >
+              <html:option value="1">1</html:option>
+              <html:option value="5">5</html:option>
+              <html:option value="10">10</html:option>   
+              <html:option value="15">15</html:option>
+            </html:select> <fmt:message key="dash.settings.controlActions.most.frequent"/><br>      
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+        </tr>
+      </table>
+      <tiles:insert definition=".form.buttons"/>
+      </html:form>
+    </td>
+  </tr>
+  <tr> 
+    <td colspan="3"><html:img page="/images/spacer.gif" width="1" height="13" alt="" border="0"/></td>
+  </tr>
+</table>

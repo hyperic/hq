@@ -1,0 +1,437 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY netdevice-platform SYSTEM "/etc/netdevice-platform.xml">
+  <!ENTITY netdevice-services SYSTEM "/etc/netdevice-services.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="netdevice"
+        class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
+
+  <filter name="if.config"
+          value="snmpIndexName=%interface.index%,snmpIndexValue=%interface%"/>
+
+  <filter name="storage.config"
+          value="snmpIndexName=hrStorageDescr,snmpIndexValue=%storage%"/>
+
+  <metrics name="netdevice-platform">
+    <metric name="Uptime"
+            template="${snmp.template}:sysUpTime"
+            category="AVAILABILITY"
+            units="jiffys"
+            collectionType="static"/>
+
+    <metric name="Availability"
+            template="${snmp.template},Avail=true:ifNumber"
+            indicator="true"/>
+
+    <metric name="IP In Receives"
+            template="${snmp.template}:ipInReceives"
+            category="THROUGHPUT"
+            indicator="true"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Header Errors"
+            template="${snmp.template}:ipInHdrErrors"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Address Errors"
+            template="${snmp.template}:ipInAddrErrors"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Forwards"
+            template="${snmp.template}:ipForwDatagrams"
+            category="THROUGHPUT"
+            indicator="true"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Unknown Protocol"
+            template="${snmp.template}:ipInUnknownProtos"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Discards"
+            template="${snmp.template}:ipInDiscards"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Delivers"
+            template="${snmp.template}:ipInDelivers"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out Requests"
+            template="${snmp.template}:ipOutRequests"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out Discards"
+            template="${snmp.template}:ipOutDiscards"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out No Routes"
+            template="${snmp.template}:ipOutNoRoutes"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles Required"
+            template="${snmp.template}:ipReasmReqds"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles OK"
+            template="${snmp.template}:ipReasmOKs"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles Failed"
+            template="${snmp.template}:ipReasmFails"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented OK"
+            template="${snmp.template}:ipFragOKs"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented Failures"
+            template="${snmp.template}:ipFragFails"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented Creates"
+            template="${snmp.template}:ipFragCreates"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <!-- note 'if-' prefix on several templates is to bypass the
+       snmp: proxy and use NetworkInterfaceMeasurementPlugin to
+       conditionally handle 64 bit counters -->
+
+  <metrics name="netdevice-interface">
+    <metric name="Availability"
+            template="${snmp.template},Avail=true:ifOperStatus:${if.config}"
+            indicator="true"/>
+
+    <metric name="Last Change"
+            template="${snmp.template}:ifLastChange:${if.config}"
+            category="AVAILABILITY"
+            units="jiffys"
+            collectionType="static"/>
+
+    <metric name="Bytes Received"
+            template="if-${snmp.template}:ifInOctets:${if.config}"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bits Received"
+            template="if-${snmp.template}:ifInOctets:${if.config}"
+            category="THROUGHPUT"
+            indicator="true"
+            units="bytesToBits"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Inbound Packets"
+            template="if-${snmp.template}:ifInUcastPkts:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Inbound Multicast Packets"
+            template="if-${snmp.template}:ifInNUcastPkts:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Inbound Packet Discards"
+            template="${snmp.template}:ifInDiscards:${if.config}"
+            category="THROUGHPUT"
+            indicator="true"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Inbound Errors"
+            template="${snmp.template}:ifInErrors:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Sent"
+            template="if-${snmp.template}:ifOutOctets:${if.config}"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bits Sent"
+            template="if-${snmp.template}:ifOutOctets:${if.config}"
+            category="THROUGHPUT"
+            indicator="true"
+            units="bytesToBits"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Outbound Packets"
+            template="if-${snmp.template}:ifOutUcastPkts:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Outbound Multicast Packets"
+            template="if-${snmp.template}:ifOutNUcastPkts:${if.config}"
+            category="THROUGHPUT"
+            indicator="true"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Outbound Packet Discards"
+            template="if-${snmp.template}:ifOutDiscards:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Outbound Errors"
+            template="${snmp.template}:ifOutErrors:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Outbound Packets Queues"
+            template="${snmp.template}:ifOutQLen:${if.config}"
+            category="THROUGHPUT"
+            rate="1s"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="network-host">
+    <metric name="Number of Users"
+            template="${snmp.template}:hrSystemNumUsers"
+            category="UTILIZATION"/>
+
+    <metric name="Number of Processes"
+            template="${snmp.template}:hrSystemProcesses"
+            category="UTILIZATION"/>
+  </metrics>
+
+  <metrics name="nethost-storage">
+    <metric name="Availability"
+            template="${snmp.template},Avail=true:hrStorageAllocationUnits:${storage.config}"
+            indicator="true"/>
+
+    <metric name="Used"
+            template="${snmp.template}:hrStorageUsed:${storage.config}"
+            category="UTILIZATION"
+            units="B"
+            indicator="true"/>
+
+    <metric name="Size"
+            template="${snmp.template}:hrStorageSize:${storage.config}"
+            category="UTILIZATION"
+            units="B"
+            indicator="true"/>
+
+    <metric name="Allocation Failures"
+            template="${snmp.template}:hrStorageAllocationFailures:${storage.config}"
+            category="AVAILABILITY"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <!-- CISCO-PROCESS-MIB.my -->
+  <filter name="cpmCPUTotal5sec"
+          value="1.3.6.1.4.1.9.9.109.1.1.1.1.6"/>
+
+  <filter name="cpmCPUTotal1min"
+          value="1.3.6.1.4.1.9.9.109.1.1.1.1.7"/>
+
+  <filter name="cpmCPUTotal5min"
+          value="1.3.6.1.4.1.9.9.109.1.1.1.1.8"/>
+
+  <!-- CISCO-MEMORY-POOL-MIB.my -->
+  <filter name="ciscoMemoryPoolUsed"
+          value="1.3.6.1.4.1.9.9.48.1.1.1.5"/>
+
+  <filter name="ciscoMemoryPoolFree"
+          value="1.3.6.1.4.1.9.9.48.1.1.1.6"/>
+
+  <metrics name="cisco-memory">
+    <!--
+        1:  processor memory
+        2:  i/o memory
+        3:  pci memory
+        4:  fast memory
+        5:  multibus memory
+    -->
+    <metric name="Processor Memory Free"
+            template="${snmp.template}:${ciscoMemoryPoolFree}.1"
+            category="UTILIZATION"
+            units="B"/>
+
+    <metric name="Processor Memory Used"
+            template="${snmp.template}:${ciscoMemoryPoolUsed}.1"
+            category="UTILIZATION"
+            units="B"/>
+
+    <metric name="I/O Memory Free"
+            template="${snmp.template}:${ciscoMemoryPoolFree}.2"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"/>
+
+    <metric name="I/O Memory Used"
+            template="${snmp.template}:${ciscoMemoryPoolUsed}.2"
+            category="UTILIZATION"
+            units="B"/>
+
+  </metrics>
+
+  <metrics name="cisco-cpu">
+    <!-- XXX device can have more that 1 cpu, these are totals for #1 -->
+    <metric name="Cpu Total 5sec"
+            template="${snmp.template}:${cpmCPUTotal5sec}.1"
+            category="UTILIZATION"
+            units="percent"/>
+
+    <metric name="Cpu Total 1min"
+            template="${snmp.template}:${cpmCPUTotal1min}.1"
+            category="UTILIZATION"
+            units="percent"/>
+
+    <metric name="Cpu Total 5min"
+            template="${snmp.template}:${cpmCPUTotal5min}.1"
+            category="UTILIZATION"
+            indicator="true"
+            units="percent"/>
+  </metrics>
+
+  <filter name="cfwConnectionStatCount"
+          value="1.3.6.1.4.1.9.9.147.1.2.2.2.1.4"/>
+
+  <metrics name="cisco-firewall">
+    <metric name="Current Connections"
+            template="${snmp.template}:${cfwConnectionStatCount}.40.6"
+            category="UTILIZATION"
+            indicator="true"
+            units="percent"/>
+  </metrics>
+
+  <config name="interface.index">
+    <option name="interface.index"
+            description="Interface index"
+            type="enum">
+      <include name="ifDescr"/>
+      <include name="ifName"/>
+      <include name="ifAlias"/>
+      <include name="ifIndex"/>
+    </option>
+  </config>
+
+  <platform name="Network Device">
+
+    &netdevice-platform;
+
+    <server>
+      <plugin type="autoinventory" class="NetworkDeviceDetector"/>
+
+      &netdevice-services;
+    </server>
+  </platform>
+
+  <platform name="Network Host">
+
+    &netdevice-platform;
+
+    <properties>
+      <property name="hrMemorySize"
+                description="Memory Size"/>
+    </properties>
+
+    <metrics include="network-host"/>
+
+    <server>
+      <plugin type="autoinventory" class="NetworkHostDetector"/>
+
+      &netdevice-services;
+
+      <service name="Storage">
+        <config>
+          <option name="storage"
+                  description="Storage Name"/>
+        </config>
+
+        <metrics include="nethost-storage"/>
+      </service>
+    </server>
+  </platform>
+
+  <platform name="Cisco IOS">
+
+    &netdevice-platform;
+
+    <metrics include="cisco-memory,cisco-cpu"/>
+
+    <server>
+      <plugin type="autoinventory" class="NetworkDeviceDetector"/>
+
+      &netdevice-services;
+    </server>
+  </platform>
+
+  <platform name="Cisco PIXOS">
+
+    &netdevice-platform;
+
+    <metrics include="cisco-memory,cisco-cpu,cisco-firewall"/>
+
+    <server>
+      <plugin type="autoinventory" class="NetworkDeviceDetector"/>
+
+      &netdevice-services;
+    </server>
+  </platform>
+</plugin>

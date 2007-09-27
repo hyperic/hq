@@ -1,0 +1,696 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="netservices">
+
+  <config name="sockaddr" type="global">
+    <option name="hostname"
+            description="Hostname"
+            default="localhost"/>
+
+    <option name="port"
+            description="Port"
+            type="port"/>
+
+    <option name="sotimeout"
+            description="Socket Timeout (in seconds)"
+            default="10"
+            type="int"/>
+  </config>
+
+  <config name="credentials" type="global">
+    <option name="user"
+            description="Username"
+            optional="true"/>
+
+    <option name="pass"
+            type="secret"
+            description="Password"
+            optional="true"/>
+  </config>
+
+  <config name="basicauth"
+          include="credentials" type="global">
+    <option name="realm"
+            description="Realm"
+            optional="true"/>
+  </config>
+
+  <config name="ssl" type="global">
+    <option name="ssl"
+            description="Use SSL"
+            type="boolean"
+            optional="true"
+            default="false"/>
+  </config>
+
+  <config name="sslprotocol" type="global">
+    <option name="sslprotocol" type="enum"
+            description="SSL Protocol">
+      <include name="None"/>
+      <include name="SSL"/>
+      <include name="TLS"/>
+    </option>
+  </config>
+
+  <config name="sslsockaddr"
+          include="ssl,sockaddr"
+          type="global"/>
+
+  <config name="url"
+          include="sslsockaddr"
+          type="global">
+
+    <option name="path"
+            description="Path"
+            default="/"/>
+  </config>
+
+  <!-- creates http.template for use as a template filter -->
+  <config name="http"
+          include="url,basicauth"
+          type="global">
+
+    <option name="method" type="enum"
+            description="Request Method">
+      <include name="HEAD"/>
+      <include name="GET"/>
+    </option>
+
+    <option name="hostheader"
+            description="Host Header"
+            optional="true"/>
+
+    <option name="follow"
+            description="Follow Redirects"
+            type="boolean"
+            default="false"/>
+
+    <option name="pattern"
+            description="Response Match (substring or regex)"
+            optional="true"/>
+
+    <option name="proxy"
+            description="Proxy Connection"
+            optional="true"/>
+  </config>
+
+  <config name="pop3"
+          include="sslsockaddr,credentials"
+          type="global"/>
+
+  <config name="ftp"
+          include="sockaddr,credentials"
+          type="global"/>
+
+  <config name="ldap"
+          include="sslsockaddr"
+          type="global">
+
+    <option name="baseDN"
+            description="Search Base"/>
+
+    <option name="bindDN"
+            description="Bind DN"
+            optional="true"/>
+
+    <option name="bindPW"
+            type="secret"
+            description="Bind Password"
+            optional="true"/>
+
+    <option name="filter"
+            description="Search Filter"
+            optional="true"/>
+  </config>
+
+  <config name="protocol"
+          type="global">
+
+    <option name="protocol" type="enum"
+            description="Connection Protocol">
+      <include name="http"/>
+      <include name="ftp"/>
+      <include name="socket"/>
+    </option>
+  </config>
+
+  <config name="dns"
+          include="sockaddr"
+          type="global">
+    <option name="lookupname"
+            description="Lookup Name"
+            default="www.hyperic.com"/>
+
+    <option name="pattern"
+            description="Answer Match"
+            optional="true"/>
+
+    <option name="type"
+            description="Record type"
+            type="enum">
+      <include name="A"/>
+      <include name="ANY"/>
+      <include name="CNAME"/>
+      <include name="MX"/>
+      <include name="NS"/>
+      <include name="TXT"/>
+    </option>
+  </config>
+
+  <config name="ssh"
+          include="sockaddr,credentials"
+          type="global"/>
+
+  <config name="ntp"
+          include="sockaddr"
+          type="global"/>
+
+  <config name="dhcp"
+          include="sockaddr"
+          type="global">
+
+    <option name="hwaddr"
+            description="Hardware (MAC) Address"
+            optional="true"/>
+  </config>
+
+  <config name="rpc" type="global">
+    <option name="hostname"
+            description="Hostname"/>
+            default="localhost"/>
+
+    <option name="program"
+            description="RPC program"
+            default="nfs"/>
+
+    <option name="version"
+            description="RPC version"
+            default="2"
+            type="int"/>
+  </config>
+
+  <config name="snmp" type="global">
+    <!-- type="ipaddress" XXX see HHQ-102 -->
+    <option name="snmpIp"
+            description="SNMP agent IP address"
+            default="127.0.0.1"/>
+
+    <option name="snmpPort"
+            description="SNMP agent port"
+            type="port"
+            default="161"/>
+
+    <option name="snmpVersion"
+            description="SNMP Version"
+            type="enum">
+      <include name="v2c"/>
+      <include name="v1"/>
+      <include name="v3"/>
+    </option>
+
+    <option name="snmpCommunity"
+            description="SNMP Community"
+            default="public"/>
+
+    <option name="snmpUser"
+            description="SNMP username (v3 only)"
+            default="username"
+            optional="true"/>
+
+    <option name="snmpPassword"
+            description="SNMP password (v3 only)"
+            type="secret"
+            default="password"
+            optional="true"/>
+
+    <option name="snmpAuthType"
+            description="SNMP auth type (v3 only)"
+            optional="true"
+            type="enum">
+      <include name="md5"/>
+      <include name="sha"/>
+    </option>
+  </config>
+
+  <!-- disabled by default, change to true for testing -->
+  <filter name="netstat" value="false"/>
+
+  <metrics name="sockaddr-netstat">
+    <metric name="Inbound Connections"
+            template="${sockaddr.template}:${alias}"
+            indicator="${netstat}"
+            category="Throughput"/>
+
+    <metric name="Outbound Connections"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="All Inbound Connections"
+            template="${sockaddr.template}:${alias}"
+            indicator="${netstat}"
+            category="Throughput"/>
+
+    <metric name="All Outbound Connections"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State ESTABLISHED"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State SYN_SENT"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State SYN_RECV"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State FIN_WAIT1"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State FIN_WAIT2"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State TIME_WAIT"
+            template="${sockaddr.template}:${alias}"
+            indicator="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State CLOSE"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State CLOSE_WAIT"
+            template="${sockaddr.template}:${alias}"
+            indicator="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State LAST_ACK"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+
+    <metric name="State CLOSING"
+            template="${sockaddr.template}:${alias}"
+            defaultOn="${netstat}"
+            category="Throughput"/>
+  </metrics>
+
+  <server name="Net Services"
+          description="Network Services"
+          virtual="true">
+
+    <plugin type="autoinventory"
+            class="NetServicesDetector"/>
+
+    <service name="TCP Socket"
+             description="TCP Socket Address Monitor">
+
+      <property name="DOMAIN" value="socket"/>
+
+      <config include="sockaddr"/>
+
+      <plugin type="collector"
+              class="SocketChecker"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="HTTP"
+             description="HTTP/S Monitor">
+
+      <property name="DOMAIN" value="http,url.availability"/>
+
+      <property name="port" value="80"/>
+      <property name="sslport" value="443"/>
+
+      <config include="http"/>
+
+      <plugin type="collector"
+              class="HTTPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Code"
+              indicator="true"
+              template="${http.template}:${alias}"
+              collectionType="static"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metric name="Last Modified"
+              defaultOn="true"
+              category="Availability"
+              units="epoch-millis"
+              collectionType="static"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="POP3"
+             description="POP3/s Monitor">
+
+      <property name="port" value="110"/>
+      <property name="sslport" value="995"/>
+
+      <config include="pop3"/>
+
+      <plugin type="collector"
+              class="POP3Collector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <!-- XXX this only applies to configured user/pass -->
+      <metric name="Number Of Messages"
+              indicator="true"
+              category="Throughput"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="IMAP"
+             description="IMAP/s Monitor">
+
+      <property name="port" value="143"/>
+      <property name="sslport" value="993"/>
+
+      <config include="sslsockaddr"/>
+
+      <plugin type="collector"
+              class="IMAPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="SMTP"
+             description="SMTP/s Monitor">
+
+      <property name="port" value="25"/>
+      <property name="sslport" value="220"/>
+
+      <config include="sslsockaddr"/>
+
+      <plugin type="collector"
+              class="SMTPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="FTP"
+             description="FTP Monitor">
+
+      <property name="DOMAIN" value="ftp"/>
+
+      <property name="port" value="21"/>
+
+      <config include="ftp"/>
+
+      <plugin type="collector"
+              class="FTPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="LDAP"
+             description="LDAP Monitor">
+
+      <property name="port" value="389"/>
+      <property name="sslport" value="636"/>
+
+      <config include="ldap"/>
+
+      <plugin type="collector"
+              class="LDAPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <!-- Only valid when a search filter is supplied -->
+      <metric name="Number of Matches"
+              indicator="true"/>
+
+      <metrics include="sockaddr-netstat"/>
+    </service>
+
+    <service name="DNS"
+             description="DNS Monitor">
+
+      <property name="port" value="53"/>
+
+      <config include="dns"/>
+
+      <plugin type="collector"
+              class="DNSCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+
+      <metric name="Answers"
+              indicator="true"/>
+
+      <metric name="Authority Records"
+              indicator="true"/>
+
+      <metric name="Additional Records"
+              indicator="true"/>
+
+      <help>
+      <![CDATA[
+This service checks availability of a specific DNS server, as specified by the <b>hostname</b> property.
+The service will be considered available <img src="/images/icon_available_green.gif"> if the DNS server can be spoken to,
+even if there are no answers for the specified <b>lookupname</b>.
+The optional <b>match</b> property can be used to change this behavior, where the service availability report at the
+warning level <img src="/images/icon_available_yellow.gif"> if there are no matches in the answer section.
+The <b>match</b> property can be a regular expression or substring, where a value of <b>*</b> simply means
+one or more answers of any value is considered a successful lookup.
+      ]]>
+      </help>
+    </service>
+
+    <service name="SSH"
+             description="SSH Monitor">
+
+      <property name="port" value="22"/>
+
+      <config include="ssh"/>
+
+      <plugin type="collector"
+              class="SSHCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+    </service>
+
+    <service name="NTP"
+             description="NTP Monitor">
+
+      <property name="port" value="123"/>
+
+      <config include="ntp"/>
+
+      <plugin type="collector"
+              class="NTPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+ 
+      <metric name="Local Clock Offset"
+              indicator="true"
+              category="Throughput"
+              units="sec"/>
+
+      <metric name="Round Trip Delay"
+              indicator="true"
+              category="Throughput"
+              units="sec"/>
+
+      <metric name="Root Delay"
+              indicator="true"
+              category="Throughput"
+              units="sec"/>
+
+      <metric name="Root Dispersion"
+              indicator="true"
+              category="Throughput"
+              units="sec"/>
+
+    </service>
+
+    <service name="DHCP"
+             description="DHCP Monitor">
+
+      <property name="port" value="67"/>
+      <!-- default to broadcast address -->
+      <property name="hostname" value="255.255.255.255"/>
+
+      <config include="dhcp"/>
+
+      <plugin type="collector"
+              class="DHCPCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+    </service>
+
+    <service name="SNMP"
+             description="SNMP Monitor">
+
+      <config include="snmp"/>
+
+      <metric name="Availability"
+              template="${snmp.template},Avail=true:sysUpTime"
+              indicator="true"/>
+
+      <metric name="Uptime"
+              template="${snmp.template}:sysUpTime"
+              indicator="true"
+              units="jiffys"
+              collectionType="static"/>
+    </service>
+
+    <service name="RPC"
+             description="ONC RPC Monitor">
+
+      <config include="rpc"/>
+
+      <plugin type="collector"
+              class="RPCCollector"/>
+
+      <plugin type="log_track"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Response Time"
+              indicator="true"
+              category="Throughput"
+              units="ms"/>
+    </service>
+
+  </server>
+</plugin>

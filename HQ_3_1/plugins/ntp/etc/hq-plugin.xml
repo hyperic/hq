@@ -1,0 +1,191 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.ntp">
+  <!-- we use a dummy jmx object name -->
+  <filter name="domain" value="ntpd"/>
+
+  <!-- Metrics from ntpdc -->
+  <metrics name="ntpdc">
+    <metric name="Jitter"
+            alias="Jitter"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="UTILIZATION"
+            units="sec"
+            collectionType="dynamic"/>
+
+    <metric name="Peers"
+            alias="Peers"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Uptime"
+            alias="Uptime"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="AVAILABILITY"
+            units="sec"
+            collectionType="static"/>
+
+    <metric name="Time Since Reset"
+            alias="TimeSinceReset"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="PERFORMANCE"
+            units="sec"
+            collectionType="static"/>
+
+    <metric name="Peer Average Delay"
+            alias="PeerAverageDelay"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="PERFORMANCE"
+            units="sec"
+            collectionType="dynamic"/>
+
+    <metric name="Peer Average Offset"
+            alias="PeerAverageOffset"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="PERFORMANCE"
+            indicator="true"
+            units="sec"
+            collectionType="dynamic"/>
+
+    <metric name="Peer Average Displacement"
+            alias="PeerAverageDisp"
+            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
+            category="PERFORMANCE"
+            units="sec"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <!-- Process metrics -->
+  <metrics name="process">
+    <metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Virtual Memory Size"
+            alias="VirtualMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+            category="UTILIZATION"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Open File Descriptors"
+            alias="OpenFd"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <help name="ntpdc">
+    <![CDATA[
+    <p>
+    <h3>Configure NTP ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+    Monitoring of NTP is done through the ntpdc utility provided
+    in the ntp package.  This file needs to be executable by the
+    agent process to allow the agent to collect metrics.
+    </p>
+    
+    <p><b>NOTE:</b> Due to the expensive nature of collection of metrics 
+    for NTPd, measurement will not be automatically enabled by autodiscovery.  
+    </p>
+    ]]>
+  </help>  
+
+  <server name="NTP" 
+          version="4.x"
+          platforms="Unix">
+
+    <plugin type="measurement"
+            class="NTPMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="NTPServerDetector"/>
+
+    <config>
+      <option name="ntpdc"
+              description="Path to ntpdc"
+              default="/usr/sbin/ntpdc"/>
+      <option name="process.query"
+              description="Process query for NTPd"
+              default="State.Name.eq=ntpd"/>
+      <option name="timeout"
+              description="Timeout for peer connections in seconds"
+              default="1"/>
+    </config>
+
+    <metrics include="process,ntpdc"/>
+
+    <help include="ntpdc"/>
+
+  </server>
+
+</plugin>

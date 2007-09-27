@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Covalent.DBSetup name="authz-data.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
+
+<!--
+so what's the big deal with this file.
+
+most importantly authz test expect the following set of data to be entered.
+contrary to this assumption is our goal of prohibiting our test from making
+assumptions about the data in the test database.
+
+so i was going through and adding logic to do deployment related stuff.
+a particular characteristic of authz is that there are internal checks
+for many operations. so to add the overlord subject when the overlord subject
+doesn't exist yet requires special case treatment that bypass authorization
+checks. as i entrenched into this hole i was digging to asia it became clear
+that the logic was increasing in complexity and  more importantly, far more
+prone to introduction of security bugs. therefore, i dropped that path of
+development.
+
+on a side note, this will also servce as the deployment file for the installer.
+
+with that said, tests should not assume anything else about the test database.
+the only thing that should be here are internal authorization objects. by
+extension, this file should be pretty static.
+
+one final note, everything that is a NAME= has a corresponding field in
+org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
+
+-->
+
+    <table name="EAM_RESOURCE_TYPE">
+        <data ID="0" CID="0" NAME="covalentAuthzRootResourceType" FSYSTEM="FALSE"/>
+        <data ID="1" CID="1" NAME="covalentAuthzSubject" FSYSTEM="FALSE"/>
+        <data ID="2" CID="2" NAME="covalentAuthzRole" FSYSTEM="FALSE"/>
+        <data ID="3" CID="3" NAME="covalentAuthzResourceGroup" FSYSTEM="FALSE"/>
+        <!-- Begin Definition of Events AUTHZ Entities 
+             In order to avoid CID conflicts, all Events CID's
+             will start with 4xx -->
+        <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
+    </table>
+
+    <table name="EAM_SUBJECT">
+        <data ID="0" CID="0" NAME="admin" DSN="covalentAuthzInternalDsn"
+              FIRST_NAME="System" LAST_NAME="User" DEPARTMENT="Administration" 
+              FSYSTEM="TRUE" FACTIVE="TRUE" HTML_EMAIL="FALSE"/>
+    </table>
+
+    <!-- setup resources -->
+    <table name="EAM_RESOURCE">
+        <data ID="0" CID="0" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="1" CID="1" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:1"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="2" CID="2" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:2"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="3" CID="3" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:3"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="4" CID="4" INSTANCE_ID="%EAM_SUBJECT.ID:0"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+    </table>
+    <table name="EAM_RESOURCE">
+        <data ID="5" CID="5" 
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+    </table>
+    <table name="EAM_RESOURCE">
+        <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+    </table>
+
+    <table name="EAM_RESOURCE_GROUP">
+        <data ID="0" CID="0" NAME="covalentAuthzResourceGroup" 
+              RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" />
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data CID="5" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:0"/>
+    </table>
+
+    <!-- now set the resource ids -->
+    <table name="EAM_RESOURCE_TYPE">
+        <data CID="0" RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
+        <data CID="1" RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
+        <data CID="2" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
+        <data CID="3" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
+        <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+    </table>
+
+    <table name="EAM_SUBJECT">
+        <data CID="0" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
+    </table>
+
+    <!-- dump all reources into authz resource group -->
+    <table name="EAM_RES_GRP_RES_MAP">
+        <data CID="0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
+        <data CID="1" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
+        <data CID="2" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
+        <data CID="3" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
+        <data CID="4" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
+        <data CID="5" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
+        <data CID="6" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+    </table>
+
+    <table name="EAM_OPERATION">
+      <!-- resource type -->
+      <data ID="0" CID="0" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createResource"/>
+      <data ID="1" CID="1" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="modifyResourceType"/>
+      <data ID="2" CID="2" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="addOperation"/>
+      <data ID="3" CID="3" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="removeOperation"/>
+
+      <!-- subject -->
+      <data ID="6" CID="6" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="modifySubject"/>
+      <data ID="7" CID="7" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="removeSubject"/>
+      <data ID="8" CID="8" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="viewSubject"/>
+      <data ID="10" CID="10" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createSubject"/>
+
+      <!-- role -->
+      <data ID="11" CID="11" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            NAME="modifyRole"/>
+      <data ID="12" CID="12" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createRole"/>
+      <data ID="13" CID="13" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            NAME="removeOperation"/>
+      <data ID="16" CID="16" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            NAME="viewRole"/>
+
+      <!-- resource group -->
+      <data ID="24" CID="24" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            NAME="modifyResourceGroup"/>
+      <data ID="25" CID="25" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            NAME="addRole"/>
+      <data ID="28" CID="28" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            NAME="viewResourceGroup"/>
+
+       <!-- new operations that are added here because it sucks to have
+            to move every single id stated before this line -->
+      <!-- remove role -->
+      <data ID="30" CID="30" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            NAME="removeRole"/>
+      <!-- remove group -->
+      <data ID="31" CID="31" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"    
+            NAME="removeResourceGroup"/>
+      <!-- administer cam -->
+      <data ID="32" CID="32" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" 
+            NAME="administerCAM" />
+
+    </table>
+
+    <!-- Begin Definition of AppDef AUTHZ Entities 
+         In order to avoid CID conflicts, all APPDEF CID's
+         will start with 3xx -->
+    <!-- APPDEF RESOURCE TYPES -->
+    <table name="EAM_RESOURCE_TYPE">
+        <data ID="301" CID="301" NAME="covalentEAMPlatform" FSYSTEM="FALSE"/>
+        <data ID="303" CID="303" NAME="covalentEAMServer" FSYSTEM="FALSE"/>
+        <data ID="305" CID="305" NAME="covalentEAMService" FSYSTEM="FALSE"/>
+        <data ID="308" CID="308" NAME="covalentEAMApplication" FSYSTEM="FALSE"/>
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data ID="301" CID="301" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:301"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="303" CID="303" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:303"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="305" CID="305" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:305"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+        <data ID="308" CID="308" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:308"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+    </table>
+
+    <!-- now set the resource ids -->
+    <table name="EAM_RESOURCE_TYPE">
+        <data CID="301" RESOURCE_ID="%EAM_RESOURCE.ID:301"/>
+        <data CID="303" RESOURCE_ID="%EAM_RESOURCE.ID:303"/>
+        <data CID="305" RESOURCE_ID="%EAM_RESOURCE.ID:305"/>
+        <data CID="308" RESOURCE_ID="%EAM_RESOURCE.ID:308"/>
+    </table>
+
+
+    <!-- APPDEF OPERATIONS -->
+    <table name="EAM_OPERATION">
+
+        <!-- Platform -->
+        <data ID="301" CID="301" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="modifyPlatform"/>
+        <data ID="302" CID="302" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="removePlatform"/>
+        <data ID="303" CID="303" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="addServer"/>
+        <data ID="304" CID="304" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="removeServer"/>
+        <data ID="305" CID="305" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="viewPlatform"/>
+            
+        <!-- Server -->
+        <data ID="306" CID="306" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="createServer"/>
+        <data ID="307" CID="307" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="modifyServer"/>
+        <data ID="308" CID="308" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="removeServer"/>
+        <data ID="309" CID="309" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="addService"/>
+        <data ID="311" CID="311" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="viewServer"/> 
+		
+        <!-- Service -->
+        <data ID="312" CID="312" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="createService"/>
+        <data ID="313" CID="313" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="modifyService"/>
+        <data ID="314" CID="314" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="removeService"/>
+        <data ID="315" CID="315" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="viewService"/>
+
+        <!-- Application -->
+        <data ID="316" CID="316" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createApplication"/>
+        <data ID="317" CID="317" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="modifyApplication"/>
+        <data ID="318" CID="318" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="removeApplication"/>
+        <data ID="319" CID="319" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="viewApplication"/>
+
+        <!-- root resource type -->
+        <data ID="320" CID="320" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createPlatform"/>
+
+        <!-- Monitoring permissions -->
+        <data ID="321" CID="321" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="monitorPlatform"/>
+        <data ID="322" CID="322" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="monitorServer"/>
+        <data ID="323" CID="323" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="monitorService"/>
+        <data ID="324" CID="324" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="monitorApplication"/>
+
+        <!-- Control Permissions -->
+        <data ID="325" CID="325" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="controlPlatform"/>
+        <data ID="326" CID="326" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="controlServer"/>
+        <data ID="327" CID="327" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="controlService"/>
+        <data ID="328" CID="328" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="controlApplication"/>
+
+		    <!-- Alerting Permissions -->
+		    <data ID="400" CID="400" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:301"
+            NAME="managePlatformAlerts"/>
+        <data ID="401" CID="401" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:303"
+            NAME="manageServerAlerts"/>    
+        <data ID="402" CID="402" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:305"
+            NAME="manageServiceAlerts"/>
+        <data ID="403" CID="403" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:308"
+            NAME="manageApplicationAlerts"/>  	
+		    <data ID="404" CID="404" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+		        NAME="manageGroupAlerts"/>                  
+
+        <!-- Escalation -->
+        <data ID="412" CID="412" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="createEscalation"/>
+        <data ID="413" CID="413" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="modifyEscalation"/>
+        <data ID="414" CID="414" RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+            NAME="removeEscalation"/>
+
+    </table>
+
+
+    <!-- End AppDef AUTHZ Entities -->
+
+    <!-- ROOT ROLE DEFINITION STUFF. The entries here create a role
+         which has all the authz permissions on the basic objects. 
+         It is the equivalent to the overlord role, except that 
+         the overlord is a single user which can do everything, and
+         can not log in to the system -->
+
+    <!-- create the root subject -->
+    <!-- NOTE THIS ENTRY MUST BE CREATED BY THE INSTALLER IN THE RELEASE -->
+    <table name="EAM_SUBJECT">
+        <data ID="1" CID="1" NAME="@@@ADMINUSERNAME@@@" FIRST_NAME="HQ"
+              LAST_NAME="Administrator" EMAIL_ADDRESS="@@@ADMINEMAIL@@@"
+              DSN="CAM" FSYSTEM="TRUE" FACTIVE="TRUE" HTML_EMAIL="FALSE"/>
+    </table>
+
+    <!-- add a resource for the root subject -->
+    <table name="EAM_RESOURCE">
+        <data ID="6" CID="6" INSTANCE_ID="%EAM_SUBJECT.ID:1"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              FSYSTEM="TRUE"/>
+    </table>
+    
+    <!-- Create the Special Root Resource Group. This group will contain
+         a reference to every single resource that is created in the system.
+         This resource is what is used to create the root user concept
+         in EAM. The root role will include this group and allow any permission
+         available on every entity in the system. -->
+    <!-- add a resource for the group (intuitive, no? :) -->
+    <table name="EAM_RESOURCE">
+        <data ID="7" CID="7" 
+            RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
+            SUBJECT_ID="%EAM_SUBJECT.ID:1"
+            FSYSTEM="TRUE"/>
+    </table>
+
+    <table name="EAM_RESOURCE_GROUP">
+        <data ID="1" CID="1" NAME="ROOT_RESOURCE_GROUP" FSYSTEM="TRUE" 
+              RESOURCE_ID="%EAM_RESOURCE.ID:7"/>
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data CID="7" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:1"/>
+    </table>
+
+    <!-- add an entry in the user prefs for the root user -->
+    <table name="EAM_USER_CONFIG_RESP">
+        <data id="%EAM_SUBJECT.ID:1"/>
+    </table>
+
+    <!-- update the subject table to have a reference back to its resource -->
+    <table name="EAM_SUBJECT">
+        <data cid="1" RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
+    </table>
+
+    <!-- Define a role which includes our  Admin User and
+        has all the operations availble on the authz resource group -->
+    <table name="EAM_ROLE">
+        <data ID="0" CID="0" NAME="Super User Role" FSYSTEM="TRUE"/>
+    </table>
+
+    <!-- add the role resource -->
+    <table name="EAM_RESOURCE">
+        <data ID="8" CID="8" INSTANCE_ID="%EAM_ROLE.ID:0"
+            RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            SUBJECT_ID="%EAM_SUBJECT.ID:0"
+            FSYSTEM="TRUE"/>
+    </table>
+
+    <table name="EAM_ROLE">
+        <data CID="0" RESOURCE_ID="%EAM_RESOURCE.ID:8"/>
+    </table>
+
+    <!-- put the role resource into the root resource group so we can
+         actually operate on it -->
+    <table name="EAM_RES_GRP_RES_MAP">
+        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+            RESOURCE_ID="%EAM_RESOURCE.ID:8"/>
+        <!-- the root resource group includes the root user as well -->
+        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+            RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
+    </table>
+
+    <!-- add the root resource group to the role -->
+    <table name="EAM_ROLE_RESOURCE_GROUP_MAP">
+        <data CID="0" ROLE_ID="%EAM_ROLE.ID:0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"/>
+        <data CID="1" ROLE_ID="%EAM_ROLE.ID:0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"/>
+    </table>
+
+    <!-- add the root user to the root role -->
+    <table name="EAM_SUBJECT_ROLE_MAP">
+        <data CID="0" ROLE_ID="%EAM_ROLE.ID:0" SUBJECT_ID="%EAM_SUBJECT.ID:1"/>
+    </table>
+
+    <!-- and the operations for all resource types to the root role -->
+    <table name="EAM_ROLE_OPERATION_MAP">
+        <data CID="0" OPERATION_ID="%EAM_OPERATION.ID:0" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="1" OPERATION_ID="%EAM_OPERATION.ID:1" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="2" OPERATION_ID="%EAM_OPERATION.ID:2" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="3" OPERATION_ID="%EAM_OPERATION.ID:3" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="6" OPERATION_ID="%EAM_OPERATION.ID:6" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="7" OPERATION_ID="%EAM_OPERATION.ID:7" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="8" OPERATION_ID="%EAM_OPERATION.ID:8" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="10" OPERATION_ID="%EAM_OPERATION.ID:10" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="11" OPERATION_ID="%EAM_OPERATION.ID:11" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="12" OPERATION_ID="%EAM_OPERATION.ID:12" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="13" OPERATION_ID="%EAM_OPERATION.ID:13" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="16" OPERATION_ID="%EAM_OPERATION.ID:16" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="24" OPERATION_ID="%EAM_OPERATION.ID:24" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="25" OPERATION_ID="%EAM_OPERATION.ID:25" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="28" OPERATION_ID="%EAM_OPERATION.ID:28" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="31" OPERATION_ID="%EAM_OPERATION.ID:301" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="32" OPERATION_ID="%EAM_OPERATION.ID:302" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="33" OPERATION_ID="%EAM_OPERATION.ID:303" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="35" OPERATION_ID="%EAM_OPERATION.ID:305" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="36" OPERATION_ID="%EAM_OPERATION.ID:306" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="37" OPERATION_ID="%EAM_OPERATION.ID:307" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="38" OPERATION_ID="%EAM_OPERATION.ID:308" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="39" OPERATION_ID="%EAM_OPERATION.ID:309" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="41" OPERATION_ID="%EAM_OPERATION.ID:311" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="42" OPERATION_ID="%EAM_OPERATION.ID:312" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="43" OPERATION_ID="%EAM_OPERATION.ID:313" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="44" OPERATION_ID="%EAM_OPERATION.ID:314" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="45" OPERATION_ID="%EAM_OPERATION.ID:315" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="46" OPERATION_ID="%EAM_OPERATION.ID:316" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="47" OPERATION_ID="%EAM_OPERATION.ID:317" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="48" OPERATION_ID="%EAM_OPERATION.ID:318" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="49" OPERATION_ID="%EAM_OPERATION.ID:319" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="50" OPERATION_ID="%EAM_OPERATION.ID:320" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="52" OPERATION_ID="%EAM_OPERATION.ID:30" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="53" OPERATION_ID="%EAM_OPERATION.ID:31" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="54" OPERATION_ID="%EAM_OPERATION.ID:321" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="55" OPERATION_ID="%EAM_OPERATION.ID:322" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="56" OPERATION_ID="%EAM_OPERATION.ID:323" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="57" OPERATION_ID="%EAM_OPERATION.ID:324" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="58" OPERATION_ID="%EAM_OPERATION.ID:325" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="59" OPERATION_ID="%EAM_OPERATION.ID:326" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="60" OPERATION_ID="%EAM_OPERATION.ID:327" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="61" OPERATION_ID="%EAM_OPERATION.ID:328" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="62" OPERATION_ID="%EAM_OPERATION.ID:32" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="63" OPERATION_ID="%EAM_OPERATION.ID:400" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="64" OPERATION_ID="%EAM_OPERATION.ID:401" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="65" OPERATION_ID="%EAM_OPERATION.ID:402" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="66" OPERATION_ID="%EAM_OPERATION.ID:403" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="67" OPERATION_ID="%EAM_OPERATION.ID:404" ROLE_ID="%EAM_ROLE.ID:0"/>
+        <data CID="68" OPERATION_ID="%EAM_OPERATION.ID:412" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="69" OPERATION_ID="%EAM_OPERATION.ID:413" ROLE_ID="%EAM_ROLE.ID:0"/>
+    	  <data CID="70" OPERATION_ID="%EAM_OPERATION.ID:414" ROLE_ID="%EAM_ROLE.ID:0"/>
+    </table>
+
+    <!-- RESOURCE CREATOR ROLE DEFINITION STUFF. The entries here
+         create a role which has the authzResourceGroup (all the 
+         meta-entities for authz) and the basic createResource operation
+         . All users will implicitly be associated with this role so
+         as to guarantee their ability to create resources. -->
+    <!-- create the resource creator role -->
+    <table name="EAM_ROLE">
+        <data ID="1" CID="1" NAME="RESOURCE_CREATOR_ROLE" FSYSTEM="TRUE"/>
+    </table>
+
+    <!-- add the role resource -->
+    <table name="EAM_RESOURCE">
+        <data ID="9" CID="9" INSTANCE_ID="%EAM_ROLE.ID:1"
+            RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            SUBJECT_ID="%EAM_SUBJECT.ID:0"
+            FSYSTEM="TRUE"/>
+    </table>
+
+    <!-- sigh... set the foreign key resource id on the role entry -->
+    <table name="EAM_ROLE">
+        <data CID="1" RESOURCE_ID="%EAM_RESOURCE.ID:9"/>
+    </table>
+
+    <!-- add the authz resource group to the role -->
+    <table name="EAM_ROLE_RESOURCE_GROUP_MAP">
+        <data CID="2" ROLE_ID="%EAM_ROLE.ID:1" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"/>
+    </table>
+
+    <!-- add the root user to the creator role -->
+    <table name="EAM_SUBJECT_ROLE_MAP">
+        <data CID="1" ROLE_ID="%EAM_ROLE.ID:1" SUBJECT_ID="%EAM_SUBJECT.ID:1"/>
+    </table>
+
+     <!-- add the permissions to the creator role -->
+    <table name="EAM_ROLE_OPERATION_MAP">
+        <data CID="51" OPERATION_ID="%EAM_OPERATION.ID:0" ROLE_ID="%EAM_ROLE.ID:1"/>
+    </table>
+
+</Covalent.DBSetup>

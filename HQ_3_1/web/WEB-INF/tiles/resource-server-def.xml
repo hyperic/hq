@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!-- -*- Mode: XML; indent-tabs-mode: nil; -*- -->
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+
+<tiles-definitions>
+
+  <definition name=".page.title.resource.server"
+              extends=".page.title">
+    <put name="titleBgStyle" value="PageTitleServerBg"/>
+    <put name="titleImg" value="title_server.gif"/>
+  </definition>
+  
+  <definition name=".page.title.resource.server.full"
+              extends=".page.title.resource.server">
+    <put name="linkUrl"
+         value="/resource/server/inventory/ServerLinks.jsp"/>
+  </definition>
+  
+  <definition name=".page.title.resource.inventory.full"
+              extends=".page.title.resource.server">
+    <put name="linkUrl"
+         value="/resource/server/inventory/ServerLinks.jsp"/>
+  </definition>
+  
+  <definition name=".tabs.resource.server.inventory"
+              extends=".tabs.resource.server">                            
+   <put name="selectedIndex"  value="1" />
+   <putList name="subTabList">
+   </putList>
+  </definition>
+
+  <definition name=".tabs.resource.server.monitor.configVisibility.defaults"
+              path="/resource/common/ControlTab.jsp">
+     <put name="selectedIndex"  value="0" />
+     <putList name="tabList">
+       <item value="Monitor" link="XXX"
+             height="21" width="102"
+             classtype="org.hyperic.hq.ui.util.Tab"/>
+     </putList>
+  </definition>
+  
+  <definition name=".page.title.resource.server.new"
+              extends=".page.title">
+    <put name="titleKey" value="resource.server.inventory.NewServerPageTitle"/>
+    <put name="titleBgStyle" value="PageTitleServerBg"/>
+    <put name="titleImg" value="title_server.gif"/>
+  </definition>
+  
+  <!-- resource server portlets -->
+  <definition name=".resource.server.inventory.NewServer"
+              controllerUrl="/resource/server/inventory/NewServerFormPrepare.do"
+              path="/resource/server/inventory/NewServer.jsp">
+  </definition>
+
+  <definition name=".resource.server.inventory.EditGeneralProperties"
+              controllerUrl="/resource/server/inventory/EditGeneralFormPrepare.do"
+              path="/resource/server/inventory/EditGeneralProperties.jsp"/>
+  
+    <definition name=".resource.server.inventory.EditConfigProperties"
+              controllerUrl="/resource/server/inventory/EditConfigFormPrepare.do"
+              path="/resource/common/inventory/EditConfigPropertiesForm.jsp"/>
+  
+  <definition name=".resource.server.inventory.ViewServer"
+              controllerUrl="/resource/server/inventory/ViewServer.do"
+              path="/resource/server/inventory/ViewServer.jsp"/>
+
+  <definition name=".resource.server.inventory.EditTypeAndHostProperties"
+              controllerUrl="/resource/server/inventory/EditTypeHostFormPrepare.do"
+              path="/resource/server/inventory/EditTypeAndHostProperties.jsp"/>
+
+  <definition name=".resource.server.inventory.AddToGroups"
+              controllerUrl="/resource/common/inventory/AddResourceGroupsFormPrepare.do"
+              path="/resource/server/inventory/EditAddToGroups.jsp"/>
+
+  <definition name=".resource.server.monitor.visibility.platformHealth"
+              path="/resource/server/monitor/visibility/PlatformHealth.jsp"/>
+			  
+  <definition name=".resource.server.inventory.changeOwner"
+              controllerUrl="/resource/common/inventory/ChangeResourceOwnerFormPrepare.do"
+              path="/resource/server/inventory/ChangeOwner.jsp"/>
+
+  <definition name=".resource.server.inventory.generalProperties"
+              extends=".resource.common.inventory.generalProperties">
+    <put name="showLocation" value="true"/>
+  </definition>
+
+  <definition name=".tabs.resource.server" extends=".tabs.resource"> 
+    <put name="selectedIndex" value="0" />
+    <put name="resourceType" value="2" />
+    <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/server/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/server/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Alert" mode="list"
+            link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/server/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>
+
+  <definition name=".tabs.resource.server.nocontrol"
+      extends=".tabs.resource">
+    <putList name="tabList">
+       <item value="Monitor" mode="currentHealth"
+            link="/resource/server/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" link="/resource/server/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Alert" mode="list"
+            link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>     
+  </definition>    
+
+  <definition name=".tabs.resource.server.inventory.nocontrol"
+      extends=".tabs.resource.server.nocontrol">  
+   <put name="selectedIndex"  value="1" />
+   <putList name="subTabList">
+   </putList>
+  </definition>  
+
+  <!-- monitor subtabs --> 
+
+  <definition name=".tabs.resource.server.monitor.nocontrol"
+              extends=".tabs.resource.server.nocontrol">
+    <put name="selectedIndex"  value="0" />
+    <put name="subSectionName" value="Monitor"/>
+  </definition>  
+
+  <definition name=".tabs.resource.server.monitor.visibility.nocontrol"
+              extends=".tabs.resource.server.monitor.nocontrol">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.server.monitor.nocontrol">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.monitor"
+              extends=".tabs.resource.server">
+    <put name="selectedIndex"  value="0" />
+    <put name="subSectionName" value="Monitor"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.monitor.visibility"
+              extends=".tabs.resource.server.monitor">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.monitor.configVisibility"
+              extends=".tabs.resource.server.monitor">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".resource.server.inventory.services"
+              path="/resource/server/inventory/ListServices.jsp"/>
+  <definition name=".resource.server.inventory.serviceCounts"
+              path="/resource/server/inventory/ViewServiceCounts.jsp"/>   
+
+  <!-- resource server control tiles -->
+  <definition name=".tabs.resource.server.control"
+              extends=".tabs.resource.server">                                     
+   <put name="selectedIndex"  value="3" />
+   <putList name="subTabList">
+      <item value="Current" link="/resource/server/Control.do"
+            height="25" width="104" mode="view"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="History" link="/resource/server/Control.do"
+            height="25" width="104" mode="history"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList>
+   <put name="subSectionName" value="Control"/>
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.detail"
+              extends=".resource.common.control.list.detail">
+              <put name="section" value="server"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.history"
+              extends=".resource.common.control.list.history">
+              <put name="section" value="server"/>
+  </definition>
+
+  <definition name=".resource.server.control.list.scheduled"
+              extends=".resource.common.control.list.scheduled">
+              <put name="section" value="server"/>
+  </definition>
+    
+  <definition name=".resource.server.control.quickControl" 
+              extends=".resource.common.control.quickControl" >    
+              <put name="action" value="/resource/server/control/QuickControl"/>               
+  </definition>                                            
+
+  <definition name=".tabs.resource.server.control.list.detail"
+              extends=".tabs.resource.server.control">                            
+   <put name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".tabs.resource.server.control.list.history"
+              extends=".tabs.resource.server.control">                            
+   <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <!-- alert subtabs --> 
+
+  <definition name=".tabs.resource.server.alert.nocontrol"
+              extends=".tabs.resource.server.nocontrol">
+    <put name="selectedIndex"  value="2" />
+    <put name="subSectionName" value="Monitor"/>
+    <putList name="subTabList">
+      <item value="Alerts" mode="list"
+            link="/alerts/Alerts.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Configure" mode="list"
+            link="/alerts/Config.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+    </putList>
+  </definition>  
+
+  <definition name=".tabs.resource.server.alert"
+              extends=".tabs.resource.server">
+    <put name="selectedIndex"  value="2" />
+    <put name="subSectionName" value="Monitor"/>
+    <putList name="subTabList">
+      <item value="Alerts" mode="list"
+            link="/alerts/Alerts.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Configure" mode="list"
+            link="/alerts/Config.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+    </putList>
+  </definition>
+
+  <definition name=".tabs.resource.server.alert.alerts"
+              extends=".tabs.resource.server.alert">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.alert.configAlerts"
+              extends=".tabs.resource.server.alert">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.alert.alerts.nocontrol"
+              extends=".tabs.resource.server.alert.nocontrol">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
+  <definition name=".tabs.resource.server.alert.configAlerts.nocontrol"
+              extends=".tabs.resource.server.alert.nocontrol">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+  
+  <!-- monitor minitabs -->
+  <definition name=".resource.server.monitor.visibility.minitabs"
+              extends=".resource.common.monitor.visibility.minitabs">
+    <put name="tabUrl" value="/resource/server/monitor/Visibility.do"/>
+  </definition>
+
+  <!-- monitor config portals -->
+  <definition name=".resource.server.monitor.config.ConfigMetrics"
+              controllerUrl="/resource/server/monitor/config/ConfigMetricsFormPrepare.do"
+              path="/resource/common/monitor/config/ConfigMetrics.jsp" />
+              
+  <!-- monitor portals -->
+  <definition name=".resource.server.monitor.visibility.CurrentHealth"
+              controllerUrl="/resource/server/monitor/visibility/ServerCurrentHealth.do"
+              path="/resource/server/monitor/visibility/MainLayout.jsp"/>
+
+  <definition name=".resource.server.monitor.visibility.ServerMetrics"
+              controllerUrl="/resource/common/monitor/visibility/ResourceMetricsFormPrepare.do"
+              path="/resource/server/monitor/visibility/MainLayout.jsp"/>
+
+  <definition name=".resource.server.monitor.visibility.listchildresources"
+              extends=".resource.common.monitor.visibility.listchildresources"
+              controllerUrl="/resource/server/monitor/visibility/ListChildrenResources.do"/>
+
+</tiles-definitions>

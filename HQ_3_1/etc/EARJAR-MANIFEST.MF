@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Class-Path: lib/appdef-client.jar
+  lib/auth-client.jar
+  lib/authz-client.jar
+  lib/autoinventory-client.jar
+  lib/bizapp-client.jar
+  lib/common-client.jar
+  lib/control-client.jar
+  lib/hyperic-util.jar
+  lib/events-client.jar
+  lib/measurement-client.jar
+  lib/scheduler-client.jar
+

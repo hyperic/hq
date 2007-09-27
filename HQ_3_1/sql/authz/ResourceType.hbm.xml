@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+
+  <class name="ResourceType" table="EAM_RESOURCE_TYPE">
+    <cache usage="read-write"/>
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_RESOURCE_TYPE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_RESOURCE_TYPE_CID_IDX" not-null="false"/>
+    </property>
+
+    <many-to-one name="resource" class="Resource">
+      <column name="RESOURCE_ID" not-null="false" unique="true"/>
+    </many-to-one>
+
+    <property name="system" type="boolean">
+      <column name="FSYSTEM" not-null="false"/>
+    </property>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="operationsBag" table="EAM_OPERATION" lazy="false">
+      <cache usage="read-write"/>
+      <key on-delete="cascade" column="RESOURCE_TYPE_ID"/>
+      <one-to-many class="Operation"/>
+    </bag>
+
+  </class>
+
+</hibernate-mapping>

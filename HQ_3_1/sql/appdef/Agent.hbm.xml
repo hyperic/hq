@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef">
+
+  <class name="Agent" table="EAM_AGENT" >
+    <cache usage="read-write" include="all"/>
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_AGENT_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <properties name="agentId" unique="true">
+      <property name="address">
+        <column name="ADDRESS" not-null="true" length="255"/>
+      </property>
+      <property name="port">
+        <column name="PORT" not-null="true"/>
+      </property>
+    </properties>
+
+    <property name="authToken">
+      <column name="AUTHTOKEN" not-null="true" length="100"/>
+    </property>
+
+    <property name="agentToken">
+      <column name="AGENTTOKEN" not-null="true" length="100" unique="true"/>
+    </property>
+
+    <property name="version">
+      <column name="VERSION" length="20"/>
+    </property>
+
+    <property name="creationTime">
+      <column name="CTIME"/>
+    </property>
+
+    <property name="modifiedTime">
+      <column name="MTIME"/>
+    </property>
+
+    <many-to-one name="agentType">
+      <column name="AGENT_TYPE_ID" not-null="false"/>
+    </many-to-one>
+
+    <bag inverse="true" cascade="all" name="platforms" table="EAM_PLATFORM"> 
+      <key column="AGENT_ID"/>
+      <one-to-many class="org.hyperic.hq.appdef.server.session.Platform"/>
+    </bag>
+  </class>
+
+</hibernate-mapping>

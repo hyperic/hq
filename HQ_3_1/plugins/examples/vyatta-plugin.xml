@@ -1,0 +1,247 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+  <!-- for autoinventory plugin -->
+  <classpath>
+    <include name="pdk/plugins/netdevice-plugin.jar"/>
+  </classpath>
+
+  <platform name="Vyatta OFR">
+
+    <config include="snmp"/>
+
+    <properties>
+      <property name="sysContact"
+                description="Contact Name"/>
+      <property name="sysName"
+                description="Name"/>
+      <property name="sysLocation"
+                description="Location"/>
+      <property name="Version"
+                description="Version"/>
+      <property name="hrMemorySize"
+                description="RAM (KB)"/>
+    </properties>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.netdevice.NetworkDevicePlatformDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.SNMPMeasurementPlugin"/>
+
+    <property name="template" value="${snmp.template}:${alias}"/>
+
+    <metric name="Availability"
+            template="${snmp.template},Avail=true:sysUpTime"
+            indicator="true"/>
+
+    <metric name="Uptime"
+            alias="sysUpTime"
+            category="AVAILABILITY"
+            units="jiffys"
+            defaultOn="true"
+            collectionType="static"/>
+
+    <metric name="Processes"
+            alias="hrSystemProcesses"
+            indicator="true"/>
+
+    <metric name="Users"
+            alias="hrSystemNumUsers"/>
+
+    <metric name="IP In Receives"
+            alias="ipInReceives"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Header Errors"
+            alias="ipInHdrErrors"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Address Errors"
+            alias="ipInAddrErrors"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Forwards"
+            alias="ipForwDatagrams"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Unknown Protocol"
+            alias="ipInUnknownProtos"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Discards"
+            alias="ipInDiscards"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP In Delivers"
+            alias="ipInDelivers"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out Requests"
+            alias="ipOutRequests"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out Discards"
+            alias="ipOutDiscards"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Out No Routes"
+            alias="ipOutNoRoutes"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles Required"
+            alias="ipReasmReqds"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles OK"
+            alias="ipReasmOKs"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Reassembles Failed"
+            alias="ipReasmFails"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented OK"
+            alias="ipFragOKs"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented Failures"
+            alias="ipFragFails"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <metric name="IP Fragmented Creates"
+            alias="ipFragCreates"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+
+    <!-- index to get table data -->
+    <filter name="index"
+            value="snmpIndexName=${snmpIndexName},snmpIndexValue=%snmpIndexValue%"/>
+
+    <filter name="template"
+            value="${snmp.template}:${alias}:${index}"/>
+
+    <server>
+      <plugin type="autoinventory"
+              class="org.hyperic.hq.plugin.netdevice.NetworkDeviceDetector"/>
+
+      <service name="Interface">
+        <config>
+          <option name="snmpIndexValue"
+                  description="Interface Name"/>
+        </config>
+
+        <property name="snmpIndexName" value="ifName"/>
+        <property name="snmpDescription" value="ifDescr"/>
+
+        <plugin type="autoinventory"/>
+
+        <metric name="Availability"
+                template="${snmp.template},Avail=true:ifOperStatus:${index}"
+                indicator="true"/>
+
+        <metric name="Bytes Received"
+                alias="ifHCInOctets"
+                category="THROUGHPUT"
+                indicator="true"
+                units="B"
+                collectionType="trendsup"/>
+
+        <metric name="Inbound Packets"
+                alias="ifHCInUcastPkts"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+
+        <metric name="Inbound Multicast Packets"
+                alias="ifInNUcastPkts"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+
+        <metric name="Inbound Packet Discards"
+                alias="ifInDiscards"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
+
+        <metric name="Inbound Errors"
+                alias="ifInErrors"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+
+        <metric name="Bytes Sent"
+                alias="ifHCOutOctets"
+                category="THROUGHPUT"
+                indicator="true"
+                units="B"
+                collectionType="trendsup"/>
+
+         <metric name="Outbound Packets"
+                 alias="ifOutUcastPkts"
+                 category="THROUGHPUT"
+                 collectionType="trendsup"/>
+
+        <metric name="Outbound Multicast Packets"
+                alias="ifOutNUcastPkts"
+                category="THROUGHPUT"
+                indicator="true"
+                collectionType="trendsup"/>
+
+        <metric name="Outbound Packet Discards"
+                alias="ifOutDiscards"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+
+        <metric name="Outbound Errors"
+                alias="ifOutErrors"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+
+        <metric name="Outbound Packets Queues"
+                alias="ifOutQLen"
+                category="THROUGHPUT"
+                collectionType="trendsup"/>
+      </service>
+    </server>
+  </platform>
+</plugin>

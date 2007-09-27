@@ -1,0 +1,274 @@
+.BlockTitle {
+    font-family: arial, sans-serif;
+    font-size: 12px;
+    color: #ffffff;
+    font-weight: bold;
+    background-color: #60A5EA;
+    }
+
+#alertsCont table {
+    font-family: Lucida Grande, Verdana;
+    font-size: 11px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    cursor: default;
+}
+
+#alertsCont  table th {
+    font-weight: bold;
+    padding: 3px;
+    padding-left: 5px;
+    border-right: 1px solid #7bafff;
+    border-top: 1px solid #7bafff;
+}
+
+#alertsCont table td {
+    padding: 3px;
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+#alertsCont table thead td, table thead th {
+    background-image: url( "images/ft-head.gif" );
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+
+#alertsCont table thead td.selectedUp, table thead th.selectedUp {
+    background-image: url( "images/ft-headup.gif" );
+}
+
+#alertsCont  table thead td.selectedDown, table thead th.selectedDown {
+    background-image: url( "images/ft-headdown.gif" );
+}
+
+#alertsCont table tbody tr td {
+    border-bottom: 1px solid #ddd;
+}
+
+#alertsCont table tbody tr.alt td {
+    background: #eef4fc;
+}
+
+#alertsCont  table tbody tr.selected td {
+
+}
+
+#alertsCont table tbody tr:hover td {
+    background: #a6c2e7;
+}
+
+#alertsCont table tbody tr.selected:hover td {
+
+}
+
+
+
+
+#defsCont div table {
+    font-family: Lucida Grande, Verdana;
+    font-size: 11px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    cursor: default;
+}
+
+#defsCont table th {
+    font-weight: bold;
+    padding: 3px;
+    padding-left: 5px;
+    border-right: 1px solid #7bafff;
+    border-top: 1px solid #7bafff;
+}
+
+#defsCont table td {
+    padding: 3px;
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+#defsCont table thead td, table thead th {
+    background-image: url( "images/ft-head.gif" );
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+
+#defsCont table thead td.selectedUp, table thead th.selectedUp {
+    background-image: url( "images/ft-headup.gif" );
+}
+
+#defsCont table thead td.selectedDown, table thead th.selectedDown {
+    background-image: url( "images/ft-headdown.gif" );
+}
+
+#defsCont table tbody tr td {
+    border-bottom: 1px solid #ddd;
+}
+
+#defsCont table tbody tr.alt td {
+    background: #eef4fc;
+}
+
+#defsCont  table tbody tr.selected td {
+
+}
+
+#defsCont table tbody tr:hover td {
+    background: #a6c2e7;
+}
+
+#defsCont table tbody tr.selected:hover td {
+
+}
+
+
+
+
+#inputArea {
+    margin: 1em 0;
+    padding: 1em;
+    background-color: #eef;
+}
+
+#updateTestInput {
+    border: 1px solid #ccc;
+    width: 100%;
+    height: 80px;
+    font-family: serif;
+    font-size: 0.9em;
+    overflow: auto;
+}
+
+.pageCont {
+    padding-bottom: 5px;
+    padding-top: 5px;
+    background: #eff0f2;
+    border-top: 1px solid #D5D8DE;
+    border-right: 1px solid #D5D8DE;
+    border-left: 1px solid #D5D8DE;
+}
+
+.pageButtonCont {
+    display: block;
+    position: relative;
+    float: right;
+}
+
+#pageLeft {
+    position: relative;
+    width: 19px;
+    float: left;
+}
+
+.previousLeft {
+    background-position: top left;
+    background-image: url( "images/page_left.gif" );
+    cursor: pointer;
+}
+
+.noprevious {
+    background-position: top left;
+    background-image: url( "images/page_left_gray.gif" );
+}
+
+#pageRight {
+    position: relative;
+    width: 19px;
+    float: left;
+}
+
+.nextRight {
+    background-position: top left;
+    background-image: url( "images/page_right.gif" );
+    cursor: pointer;
+}
+
+.nonext {
+    background-position: top left;
+    background-image: url( "images/page_right_gray.gif" );
+}
+
+#pageNumbers {
+    position: relative;
+    display: block;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    float: left;
+}
+
+.alertHighlight {
+    background-color: #fad0c9;
+}
+
+.severityIcon {
+   padding-right:5px;vertical-align:bottom;
+}
+
+.boldText {
+    font-weight: bold;
+}
+
+.filterBox {
+padding:8px;
+}
+
+.dojoTab div {
+font-size:100%;
+font-weight:bold;
+}
+
+.filters {
+    background-color:#EFEFEF;
+    border: 1px solid #7bafff;
+}
+
+.tableTitleWrapper {
+    display:inline;
+    float:left;
+    width:325px;
+    white-space:nowrap;
+    padding-left:15px;top:7px;
+    font-weight:bold;
+    font-size:1.3em;
+}
+
+.alertInfo {
+    width:300px;
+    white-space:nowrap;
+    display:inline;
+    margin-left:20px;
+    border: 1px solid rgb(213, 216, 222);
+    padding:3px 15px 3px 15px;
+    font-family:arial,sans-serif;
+    font-size:11px;
+    font-weight:normal;
+    background-color: #DBE3F5;
+    border-top: solid #ABB1C7;
+    border-bottom: solid #C6CFE5;
+    border-width: 1px;
+}
+
+.refreshButton {
+    padding-right:15px;
+    padding-top:2px;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+}
+
+.acLoader {
+    visibility: hidden;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+    padding-right:15px;
+    background-image: url( "images/ajax-loader-blue.gif" );
+    background-repeat: no-repeat;
+}

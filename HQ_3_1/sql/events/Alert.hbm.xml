@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
+
+  <class name="Alert" table="EAM_ALERT">
+    <cache usage="read-write"/>
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_ALERT_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="true" index="ALERT_TIME_IDX"/>
+    </property>
+
+    <property name="fixed" type="boolean">
+      <column name="FIXED" not-null="true"/>
+    </property>
+
+    <many-to-one name="alertDefinition" class="AlertDefinition">
+      <column name="ALERT_DEFINITION_ID" not-null="true" index="ALERT_ALERTDEFINITION_IDX"/>
+    </many-to-one>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="actionLogBag" table="EAM_ALERT_ACTION_LOG" order-by="TIMESTAMP, ID">
+      <cache usage="read-write"/>
+      <key on-delete="cascade" column="ALERT_ID"/>
+      <one-to-many class="AlertActionLog"/>
+    </bag>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="conditionLogBag" order-by="id" table="EAM_ALERT_CONDITION_LOG">
+      <cache usage="read-write"/>
+      <key on-delete="cascade" column="ALERT_ID"/>
+      <one-to-many class="AlertConditionLog"/>
+    </bag>
+    
+    
+    <property name="stateId" formula="(select e.id from EAM_ESCALATION_STATE e where                          e.alert_id = id and e.alert_def_id = alert_definition_id                         and e.alert_type = -559038737)"/>
+    <property name="ackedBy" formula="(select e.acknowledged_by from EAM_ESCALATION_STATE e where                          e.alert_id = id and e.alert_def_id = alert_definition_id                         and e.alert_type = -559038737)"/>
+  </class>
+
+</hibernate-mapping>

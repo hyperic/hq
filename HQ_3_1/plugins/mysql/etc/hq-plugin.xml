@@ -1,0 +1,1397 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.mysql">
+  <classpath>
+    <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+  </classpath>
+
+  <!-- we use a dummy jmx object name -->
+  <filter name="domain" value="mysql"/>
+
+  <property name="DEFAULT_URL"
+            value="jdbc:mysql://localhost/mysql"/>
+
+  <!-- appended to each template by MeasurementInfoXML -->
+  <property name="template-config"
+            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+            
+  <!-- Process metrics -->
+  <metrics name="process">
+    <!-- XXX: We use the JDBC props here so that we validate both the PTQL and JDBC
+              options.  This can be torched when we move the validation of the metrics
+              into the measurement plugin -->
+    <metric name="Availability"
+            alias="Availability"
+            template="${domain}:Type=Server:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Number Of Databases"
+            template="${domain}:Type=Server:${alias}"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Virtual Memory Size"
+            alias="VirtualMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Memory Size"
+            alias="MemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <!-- Default to off, requires root access on linux -->
+    <metric name="Open File Descriptors"
+            alias="OpenFd"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="mysql-3">
+
+    <metric name="Availability"
+            alias="Availability"
+            template="${domain}:Type=Server:availability"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Aborted Clients"
+            alias="AbortedClients"
+            template="${domain}:Type=Server:Aborted_clients"
+            category="THROUGHPUT"
+            group="Connection"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Aborted Connects"
+            alias="AbortedConnects"
+            template="${domain}:Type=Server:Aborted_connects"
+            category="THROUGHPUT"
+            group="Connection"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Received"
+            alias="BytesReceived"
+            template="${domain}:Type=Server:Bytes_received"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Sent"
+            alias="BytesSent"
+            template="${domain}:Type=Server:Bytes_sent"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Data Length"
+            alias="DataLength"
+            template="${domain}:Type=Server:Data_length"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Index Length"
+            alias="IndexLength"
+            template="${domain}:Type=Server:Index_length"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Total Rows"
+            alias="TotalRows"
+            template="${domain}:Type=Server:Rows"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of admin commands"
+            alias="CmdAdminCommands"
+            template="${domain}:Type=Server:Com_admin_commands"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of alter table commands"
+            alias="CmdAlterTable"
+            template="${domain}:Type=Server:Com_alter_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of analyze commands"
+            alias="CmdAnalyze"
+            template="${domain}:Type=Server:Com_analyze"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of backup table commands"
+            alias="CmdBackupTable"
+            template="${domain}:Type=Server:Com_backup_table"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of begin commands"
+            alias="CmdBegin"
+            template="${domain}:Type=Server:Com_begin"
+            category="UTILIZATION"
+            group="Tx Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of change db commands"
+            alias="CmdChangeDb"
+            template="${domain}:Type=Server:Com_change_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of change master commands"
+            alias="CmdChangeMaster"
+            template="${domain}:Type=Server:Com_change_master"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of check commands"
+            alias="CmdCheck"
+            template="${domain}:Type=Server:Com_check"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of commit commands"
+            alias="CmdCommit"
+            template="${domain}:Type=Server:Com_commit"
+            category="UTILIZATION"
+            group="Tx Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of create db commands"
+            alias="CmdCreateDb"
+            template="${domain}:Type=Server:Com_create_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of create function commands"
+            alias="CmdCreateFunction"
+            template="${domain}:Type=Server:Com_create_function"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of create index commands"
+            alias="CmdCreateIndex"
+            template="${domain}:Type=Server:Com_create_index"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of create table commands"
+            alias="CmdCreateTable"
+            template="${domain}:Type=Server:Com_create_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of delete commands"
+            alias="CmdDelete"
+            template="${domain}:Type=Server:Com_delete"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of drop db commands"
+            alias="CmdDropDb"
+            template="${domain}:Type=Server:Com_drop_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of drop function commands"
+            alias="CmdDropFunction"
+            template="${domain}:Type=Server:Com_drop_function"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of drop index commands"
+            alias="CmdDropIndex"
+            template="${domain}:Type=Server:Com_drop_index"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of drop table commands"
+            alias="CmdDropTable"
+            template="${domain}:Type=Server:Com_drop_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of flush commands"
+            alias="CmdFlush"
+            template="${domain}:Type=Server:Com_flush"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of grant commands"
+            alias="CmdGrant"
+            template="${domain}:Type=Server:Com_grant"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of insert commands"
+            alias="CmdInsert"
+            template="${domain}:Type=Server:Com_insert"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of insert select commands"
+            alias="CmdInsertSelect"
+            template="${domain}:Type=Server:Com_insert_select"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of kill commands"
+            alias="CmdKill"
+            template="${domain}:Type=Server:Com_kill"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of load commands"
+            alias="CmdLoad"
+            template="${domain}:Type=Server:Com_load"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of load master table commands"
+            alias="CmdLoadMasterTable"
+            template="${domain}:Type=Server:Com_load_master_table"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of lock tables commands"
+            alias="CmdLockTables"
+            template="${domain}:Type=Server:Com_lock_tables"
+            category="UTILIZATION"
+            group="Tx Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of optimize commands"
+            alias="CmdOptimize"
+            template="${domain}:Type=Server:Com_optimize"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of purge commands"
+            alias="CmdPurge"
+            template="${domain}:Type=Server:Com_purge"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of rename table commands"
+            alias="CmdRenameTable"
+            template="${domain}:Type=Server:Com_rename_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of repair commands"
+            alias="CmdRepair"
+            template="${domain}:Type=Server:Com_repair"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of replace commands"
+            alias="CmdReplace"
+            template="${domain}:Type=Server:Com_replace"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of replace select commands"
+            alias="CmdReplaceSelect"
+            template="${domain}:Type=Server:Com_replace_select"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of reset commands"
+            alias="CmdReset"
+            template="${domain}:Type=Server:Com_reset"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of restore table commands"
+            alias="CmdRestoreTable"
+            template="${domain}:Type=Server:Com_restore_table"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of revoke commands"
+            alias="CmdRevoke"
+            template="${domain}:Type=Server:Com_revoke"
+            category="UTILIZATION"
+            group="DBA Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of rollback commands"
+            alias="CmdRollback"
+            template="${domain}:Type=Server:Com_rollback"
+            category="UTILIZATION"
+            group="Tx Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of select commands"
+            alias="CmdSelect"
+            template="${domain}:Type=Server:Com_select"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of set option commands"
+            alias="CmdSetOption"
+            template="${domain}:Type=Server:Com_set_option"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show binlogs commands"
+            alias="CmdShowBinlogs"
+            template="${domain}:Type=Server:Com_show_binlogs"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show databases commands"
+            alias="CmdShowDatabases"
+            template="${domain}:Type=Server:Com_show_databases"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show fields commands"
+            alias="CmdShowFields"
+            template="${domain}:Type=Server:Com_show_fields"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show grants commands"
+            alias="CmdShowGrants"
+            template="${domain}:Type=Server:Com_show_grants"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show keys commands"
+            alias="CmdShowKeys"
+            template="${domain}:Type=Server:Com_show_keys"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show logs commands"
+            alias="CmdShowLogs"
+            template="${domain}:Type=Server:Com_show_logs"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show master status commands"
+            alias="CmdShowMasterStatus"
+            template="${domain}:Type=Server:Com_show_master_status"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show open tables commands"
+            alias="CmdShowOpenTables"
+            template="${domain}:Type=Server:Com_show_open_tables"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show processlist commands"
+            alias="CmdShowProcesslist"
+            template="${domain}:Type=Server:Com_show_processlist"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show slave status commands"
+            alias="CmdShowSlaveStatus"
+            template="${domain}:Type=Server:Com_show_slave_status"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show status commands"
+            alias="CmdShowStatus"
+            template="${domain}:Type=Server:Com_show_status"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show innodb status commands"
+            alias="CmdShowInnodbStatus"
+            template="${domain}:Type=Server:Com_show_innodb_status"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show tables commands"
+            alias="CmdShowTables"
+            template="${domain}:Type=Server:Com_show_tables"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show variables commands"
+            alias="CmdShowVariables"
+            template="${domain}:Type=Server:Com_show_variables"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of slave start commands"
+            alias="CmdSlaveStart"
+            template="${domain}:Type=Server:Com_slave_start"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of slave stop commands"
+            alias="CmdSlaveStop"
+            template="${domain}:Type=Server:Com_slave_stop"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of truncate commands"
+            alias="CmdTruncate"
+            template="${domain}:Type=Server:Com_truncate"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of unlock table commands"
+            alias="CmdUnlockTables"
+            template="${domain}:Type=Server:Com_unlock_tables"
+            category="UTILIZATION"
+            group="Tx Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of update commands"
+            alias="CmdUpdate"
+            template="${domain}:Type=Server:Com_update"
+            category="UTILIZATION"
+            group="DML Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Connections"
+            alias="Connections"
+            template="${domain}:Type=Server:Connections"
+            category="THROUGHPUT"
+            group="Connection"
+            units="none"
+            collectionType="trendsup"/>
+ 
+    <metric name="Temporary Disk Tables Created"
+            alias="CreatedTmpDiskTables"
+            template="${domain}:Type=Server:Created_tmp_disk_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Temporary Memory Tables Created"
+            alias="CreatedTmpMemTables"
+            template="${domain}:Type=Server:Created_tmp_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Temporary Files Created"
+            alias="CreatedTmpFiles"
+            template="${domain}:Type=Server:Created_tmp_files"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+   <metric name="Delayed Insert Threads"
+            alias="DelayedInsertThreads"
+            template="${domain}:Type=Server:Delayed_insert_threads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Delayed Writes"
+            alias="DelayedWrites"
+            template="${domain}:Type=Server:Delayed_writes"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Delayed Errors"
+            alias="DelayedErrors"
+            template="${domain}:Type=Server:Delayed_errors"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Flush Commands"
+            alias="FlushCommands"
+            template="${domain}:Type=Server:Flush_commands"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Deleted"
+            alias="HandlerDelete"
+            template="${domain}:Type=Server:Handler_delete"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Read from First Index"
+            alias="HandlerReadFirst"
+            template="${domain}:Type=Server:Handler_read_first"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Read from Key"
+            alias="HandlerReadKey"
+            template="${domain}:Type=Server:Handler_read_key"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Next Rows Read in Key Order"
+            alias="HandlerReadNext"
+            template="${domain}:Type=Server:Handler_read_next"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Prev Rows Read in Key Order"
+            alias="HandlerReadPrev"
+            template="${domain}:Type=Server:Handler_read_prev"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Read from Fixed Position"
+            alias="HandlerReadRnd"
+            template="${domain}:Type=Server:Handler_read_rnd"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Next Rows Read from Datafile"
+            alias="HandlerReadRndNext"
+            template="${domain}:Type=Server:Handler_read_rnd_next"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Updated"
+            alias="HandlerUpdate"
+            template="${domain}:Type=Server:Handler_update"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Rows Inserted"
+            alias="HandlerWrite"
+            template="${domain}:Type=Server:Handler_write"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Key Blocks Used"
+            alias="KeyBlocksUsed"
+            template="${domain}:Type=Server:Key_blocks_used"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Key Read Requests"
+            alias="KeyReadRequests"
+            template="${domain}:Type=Server:Key_read_requests"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Key Reads"
+            alias="KeyReads"
+            template="${domain}:Type=Server:Key_reads"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Key Write Requests"
+            alias="KeyWriteRequests"
+            template="${domain}:Type=Server:Key_write_requests"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Key Writes"
+            alias="KeyWrites"
+            template="${domain}:Type=Server:Key_writes"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Max Used Connections"
+            alias="MaxUsedConnections"
+            template="${domain}:Type=Server:Max_used_connections"
+            category="THROUGHPUT"
+            group="Connection"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Not Flushed Delayed Rows"
+            alias="NotFlushedDelayedRows"
+            template="${domain}:Type=Server:Not_flushed_delayed_rows"
+            category="UTILIZATION"
+            group="I/O"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Open Tables"
+            alias="OpenTables"
+            template="${domain}:Type=Server:Open_tables"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Open Files"
+            alias="OpenFiles"
+            template="${domain}:Type=Server:Open_files"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Open Streams"
+            alias="OpenStreams"
+            template="${domain}:Type=Server:Open_streams"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Opened Tables"
+            alias="OpenedTables"
+            template="${domain}:Type=Server:Opened_tables"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Questions"
+            alias="Questions"
+            template="${domain}:Type=Server:Questions"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Select Full Join"
+            alias="SelectFullJoin"
+            template="${domain}:Type=Server:Select_full_join"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Select Full Range Join"
+            alias="SelectFullRangeJoin"
+            template="${domain}:Type=Server:Select_full_range_join"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Select Range"
+            alias="SelectRange"
+            template="${domain}:Type=Server:Select_range"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Select Range Check"
+            alias="SelectRangeCheck"
+            template="${domain}:Type=Server:Select_range_check"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Select Scan"
+            alias="SelectScan"
+            template="${domain}:Type=Server:Select_scan"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Slave Open Temp Tables"
+            alias="SlaveOpenTempTables"
+            template="${domain}:Type=Server:Slave_open_temp_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Slow Launch Threads"
+            alias="SlowLaunchThreads"
+            template="${domain}:Type=Server:Slow_launch_threads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Slow Queries"
+            alias="SlowQueries"
+            template="${domain}:Type=Server:Slow_queries"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Sort Merge Passes"
+            alias="SortMergePasses"
+            template="${domain}:Type=Server:Sort_merge_passes"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Sort Range"
+            alias="SortRange"
+            template="${domain}:Type=Server:Sort_range"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Sort Rows"
+            alias="SortRows"
+            template="${domain}:Type=Server:Sort_rows"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Table Locks Immediate"
+            alias="TableLocksImmediate"
+            template="${domain}:Type=Server:Table_locks_immediate"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Table Locks Waited"
+            alias="TableLocksWaited"
+            template="${domain}:Type=Server:Table_locks_waited"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Threads Cached"
+            alias="ThreadsCached"
+            template="${domain}:Type=Server:Threads_cached"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Threads Created"
+            alias="ThreadsCreated"
+            template="${domain}:Type=Server:Threads_created"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Threads Connected"
+            alias="ThreadsConnected"
+            template="${domain}:Type=Server:Threads_connected"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Threads Running"
+            alias="ThreadsRunning"
+            template="${domain}:Type=Server:Threads_running"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Up Time"
+            alias="Uptime"
+            template="${domain}:Type=Server:Uptime"
+            category="AVAILABILITY"
+            group="Reliability"
+            units="sec"
+            collectionType="static"/>
+  </metrics>
+
+  <metrics name="mysql-3-table">
+
+    <metric name="Availability"
+            alias="Availability"
+            template="${domain}:Type=Table,table=%table%:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Rows"
+            alias="Rows"
+            template="${domain}:Type=Table,table=%table%:Rows"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Average Row Length"
+            alias="AvgRowLength"
+            template="${domain}:Type=Table,table=%table%:Avg_row_length"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Data Length"
+            alias="DataLength"
+            template="${domain}:Type=Table,table=%table%:Data_length"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Max Data Length"
+            alias="MaxDataLength"
+            template="${domain}:Type=Table,table=%table%:Max_data_length"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Index Length"
+            alias="IndexLength"
+            template="${domain}:Type=Table,table=%table%:Index_length"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Data Free"
+            alias="DataFree"
+            template="${domain}:Type=Table,table=%table%:Data_free"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Indicies"
+            alias="NumIndicies"
+            template="${domain}:Type=Table,table=%table%:${alias}"
+            category="UTILIZATION"
+            group="Index Usage"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Average Index Cardinality"
+            alias="AvgCardinality"
+            template="${domain}:Type=Table,table=%table%:${alias}"
+            category="UTILIZATION"
+            group="Index Usage"
+            units="none"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <metrics name="mysql-4" include="mysql-3">
+
+    <metric name="Number of delete multi commands"
+            alias="CmdDeleteMulti"
+            template="${domain}:Type=Server:Com_delete_multi"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of ha close commands"
+            alias="CmdHaClose"
+            template="${domain}:Type=Server:Com_ha_close"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of ha open commands"
+            alias="CmdHaOpen"
+            template="${domain}:Type=Server:Com_ha_open"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of ha read commands"
+            alias="CmdHaRead"
+            template="${domain}:Type=Server:Com_ha_read"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of load master data commands"
+            alias="CmdLoadMasterData"
+            template="${domain}:Type=Server:Com_load_master_data"
+            category="UTILIZATION"
+            group="General Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show binlog events commands"
+            alias="CmdShowBinlogEvents"
+            template="${domain}:Type=Server:Com_show_binlog_events"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show new master commands"
+            alias="CmdShowNewMaster"
+            template="${domain}:Type=Server:Com_show_new_master"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of show slave hosts commands"
+            alias="CmdShowSlaveHosts"
+            template="${domain}:Type=Server:Com_show_slave_hosts"
+            category="UTILIZATION"
+            group="Show Command"
+            units="none"
+            collectionType="trendsup"/>
+
+  </metrics>
+
+  <metrics name="mysql-4-table" include="mysql-3-table" />
+
+  <!-- MySQL 3.x server and service definitions -->
+  <server name="MySQL Process"
+          version="3.x">
+
+    <plugin type="measurement"
+            class="MySQLMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="MySQLServerDetector"/>
+
+    <!-- Only filescan on 3.x for now -->
+    <scan type="file">
+      <include name="/**/bin/safe_mysqld"/>
+    </scan>
+
+    <metrics include="process"/>
+
+    <config>
+      <option name="process.query"
+              description="MySQL Process Query"/>
+      <option name="jdbcUrl"
+              description="JDBC Connection URL"
+              default="${DEFAULT_URL}"/>
+      <option name="jdbcUser"
+              description="JDBC User"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
+    </config>
+  </server>
+
+  <server name="MySQL"
+          version="3.x">
+  
+    <plugin type="measurement"
+            class="MySQLMeasurementPlugin"/>
+
+    <config>
+      <option name="jdbcUrl"
+              description="JDBC Connection URL"
+              default="${DEFAULT_URL}"/>
+      <option name="jdbcUser"
+              description="JDBC User"/>
+      <option name="jdbcPassword" type="secret"
+              description="JDBC Password"/>
+    </config>
+
+    <metrics include="mysql-3"/>
+  
+    <!-- Define table service -->
+    <service name="Table">
+      <plugin type="measurement"
+              class="MySQLMeasurementPlugin"/>
+
+      <plugin type="control"
+              class="MySQLControlPlugin"/>
+
+      <actions include="Analyze,Check,Optimize,Repair"/>
+
+      <config>
+        <option name="table"
+                description="Table Name"/>
+      </config>
+
+      <metrics include="mysql-3-table"/>
+    </service>
+
+  </server>
+
+  <!-- MySQL 4.x server and service definitions -->
+  <server name="MySQL Process"
+          version="4.x">
+
+    <plugin type="measurement"
+            class="MySQLMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="MySQLServerDetector"/>
+
+    <scan type="file">
+      <include name="/**/bin/mysqld_safe"/>
+    </scan>
+
+    <!-- Registry scan for 4.1 -->
+    <scan registry="SOFTWARE\MySQL AB\MySQL Server 4.1">
+      <include name="Location"/>
+    </scan>
+
+    <!-- Registry scan for 4.0 -->
+    <scan registry="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MySQL*">
+      <include name="UninstallString"/>
+    </scan>
+
+    <metrics include="process"/>
+
+    <config>
+      <option name="process.query"
+              description="MySQL Process Query"/>
+      <option name="jdbcUrl"
+              description="JDBC Connection URL"
+              default="${DEFAULT_URL}"/>
+      <option name="jdbcUser"
+              description="JDBC User"/>
+      <option name="jdbcPassword" type="secret"
+              description="JDBC Password"/>
+    </config>
+  </server>
+
+  <server name="MySQL"
+          version="4.x">
+  
+    <plugin type="measurement"
+            class="MySQLMeasurementPlugin"/>
+
+    <plugin type="log_track"
+            class="MySQLErrorLogTrackPlugin"/>
+
+    <metrics include="mysql-4"/>
+
+    <config>
+      <option name="jdbcUrl"
+              description="JDBC Connection URL"
+              default="${DEFAULT_URL}"/>
+      <option name="jdbcUser"
+              description="JDBC User"/>
+      <option name="jdbcPassword" type="secret"
+              description="JDBC Password"/>
+    </config>
+  
+    <!-- Define table service -->
+    <service name="Table">
+      <plugin type="measurement"
+              class="MySQLMeasurementPlugin"/>
+
+      <plugin type="control"
+              class="MySQLControlPlugin"/>
+
+      <actions include="Analyze,Check,Optimize,Repair"/>
+
+      <properties>
+        <!-- Prior to 4.1.2 this is "Type" -->
+        <property name="Engine"
+                  description="The storage engine for the table"/>
+      </properties>
+
+      <config>
+        <option name="table"
+                description="Table Name"/>
+      </config>
+
+      <metrics include="mysql-4-table"/>
+    </service>
+
+  </server>
+
+  <!-- Define 5.x server types -->
+  <server name="MySQL Process"
+          version="5.x"
+          include="4.x">
+
+    <!-- Registry scan for 5.0 -->
+    <scan registry="SOFTWARE\MySQL AB\MySQL Server 5.0">
+      <include name="Location"/>
+    </scan>
+  </server>
+
+  <server name="MySQL"
+          version="5.x"
+          include="4.x"/>
+
+  <help name="mysql">
+  <![CDATA[
+  <p>
+  <h3>Configure MySQL ${product.version} for Monitoring</h3>
+  </p>
+  <p>
+  The MySQL ${product.version} plugin monitors the MySQL server
+  using standard JDBC queries.  The only prerequisites for enabling
+  monitoring are:
+  </p>
+  <ul>
+    <li>You can connect to the MySQL server as ${jdbcUser} using
+        the JDBC URL ${jdbcUrl}</li>
+    <li>The user ${jdbcUser} is able to issue 'SHOW STATUS' commands
+        to MySQL</li>
+  </ul>
+  ]]>
+  </help>
+
+  <help name="mysql-process">
+  <![CDATA[
+  <p>
+  The process.query option is a PTQL statement that 
+  allows HQ to find a running MySQL server in the process table.  This 
+  value is determined during autodiscovery, and should not need to be 
+  changed.
+  </p>
+  <p>
+  <b>NOTE:</b> Auto-discovery for the MySQL Process Query server will
+  result in new servers being created for each database that is found
+  using the <b>SHOW DATABASES</b> query.  No services will be discovered
+  for the MySQL Process server type.
+  </p>
+  ]]>
+  </help>
+ 
+  <help name="MySQL 3.x" include="mysql">
+  <![CDATA[
+  <p>
+  <b>NOTE:</b> Only MySQL 3.23.x or greater is supported.  The 
+  plugin will work with 3.22.x, however the metric information on 
+  command counters cannot be collected.  MySQL introduced these 
+  counters with 3.23.x.
+  </p>
+  ]]>
+  </help>
+
+  <help name="MySQL Process 3.x" include="MySQL 3.x"
+        append="mysql-process"/>
+
+  <help name="MySQL 4.x" include="mysql"/>
+
+  <help name="MySQL Process 4.x" include="MySQL 4.x"
+        append="mysql-process"/>
+
+  <help name="MySQL 5.x" include="mysql"/>
+
+  <help name="MySQL Process 5.x" include="MySQL 5.x"
+        append="mysql-process"/>
+
+</plugin>
+

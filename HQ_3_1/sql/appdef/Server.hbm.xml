@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.appdef.server.session">
+  <class name="Server" table="EAM_SERVER">
+
+    <cache usage="read-write"/>
+
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_SERVER_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" unique="true" type="string">
+      <column name="NAME" not-null="true" length="200" index="EAM_SERVER_NAME_IDX"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" not-null="false"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="300"/>
+    </property>
+
+    <property name="creationTime" type="long">
+      <column name="CTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="false"/>
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" not-null="false" length="100"/>
+    </property>
+
+    <property name="owner" type="string">
+      <column name="OWNER" not-null="false" length="100"/>
+    </property>
+
+    <property name="location" type="string">
+      <column name="LOCATION" not-null="false" length="100"/>
+    </property>
+
+    <properties name="serverAiidIdx">
+      <many-to-one name="platform" class="Platform">
+        <column name="PLATFORM_ID" not-null="false" unique-key="EAM_SERVER_AIID_IDX" index="EAM_SERVER_PLATFORM_IDX"/>
+      </many-to-one>
+      <property name="autoinventoryIdentifier" type="string">
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" unique-key="EAM_SERVER_AIID_IDX"/>
+      </property>
+    </properties>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="200"/>
+    </property>
+
+    <property name="runtimeAutodiscovery" type="boolean">
+      <column name="RUNTIMEAUTODISCOVERY" not-null="false"/>
+    </property>
+
+    <property name="wasAutodiscovered" type="boolean">
+      <column name="WASAUTODISCOVERED" not-null="false"/>
+    </property>
+
+    <property name="servicesAutomanaged" type="boolean">
+      <column name="SERVICESAUTOMANAGED" not-null="false"/>
+    </property>
+
+    <property name="autodiscoveryZombie" type="boolean">
+      <column name="AUTODISCOVERY_ZOMBIE" not-null="false"/>
+    </property>
+
+    <property name="installPath" type="string">
+      <column name="INSTALLPATH" not-null="false" length="200"/>
+    </property>
+
+    <many-to-one name="serverType" class="ServerType">
+      <column name="SERVER_TYPE_ID" not-null="true"/>
+    </many-to-one>
+
+    <many-to-one name="configResponse" unique="true" class="org.hyperic.hq.appdef.ConfigResponseDB">
+      <column name="CONFIG_RESPONSE_ID" not-null="false"/>
+    </many-to-one>
+
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="services" table="EAM_SERVICE">
+      <cache usage="read-write"/>
+      <key on-delete="cascade" column="SERVER_ID"/>
+      <one-to-many class="Service"/>
+    </bag>
+
+  </class>
+
+</hibernate-mapping>

@@ -1,0 +1,400 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.sybase">
+  <classpath>
+    <include name="pdk/lib/jdbc/jconn3.jar"/>
+  </classpath>
+
+  <!-- we use a dummy jmx object name -->
+  <filter name="domain" value="sybase"/>
+
+  <!-- appended to each template by MeasurementInfoXML -->
+  <property name="template-config"
+            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+
+  <filter name="sysmon_script"
+          value="pdk/work/scripts/sybase/get_sysmon_stats.pl"/>
+
+  <filter name="template"
+          value="${domain}:Type=Server:${alias}"/>
+  <metrics name="ServerMetrics">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Type=Service,instance=%instance%:${alias}"/>
+  <metrics name="Sybase 12.x Instance">
+    <metric name="Availability"
+            alias="Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Transactions"
+            alias="NumTx"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of User Tables"
+            alias="NumUserTables"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Active Locks"
+            alias="NumActiveLocks"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Active Page Locks"
+            alias="NumActivePageLocks"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Active Table Locks"
+            alias="NumActiveTableLocks"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Servers"
+            alias="NumServers"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Active Users"
+            alias="ActiveUsers"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Local Transactions"
+            alias="NumLocalTransactions"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of External Transactions"
+            alias="NumExternalTransactions"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Instance Used Space"
+            alias="InstanceUsedSpace"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Instance Free Space"
+            alias="InstanceFreeSpace"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Instance Total Space"
+            alias="InstanceTotalSpace"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Up Time"
+            alias="UpTime"
+            category="AVAILABILITY"
+            units="ms"
+            collectionType="static"/>
+
+    <metric name="Number of Indexes"
+            alias="NumIndexes"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Tx Logs"
+            alias="NumTxLogs"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <filter name="template">
+    exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':${alias}
+  </filter>
+  <metrics name="SybaseAvailability">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            units="percentage"
+            indicator="true"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="sp_sysmon">
+    <metric name="Deadlocks"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="Avg Lock Contention"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="TDS Packets Sent"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="TDS Packets Received"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"/>
+    <metric name="Total Cache Misses Ratio"
+            category="THROUGHPUT"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    <metric name="Total Cache Hits Ratio"
+            category="THROUGHPUT"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <server name="Sybase"
+          version="12.x">
+    <plugin type="measurement"
+            class="SybaseMeasurementPlugin"/>
+    <plugin type="autoinventory"
+            class="SybaseServerDetector"/>
+    <metrics include="Sybase 12.x Instance"/>
+  </server>
+
+  <server name="Sybase"
+          version="12.5.x">
+    <plugin type="measurement"
+            class="SybaseMeasurementPlugin"/>
+    <plugin type="autoinventory"
+            class="SybaseServerDetector"/>
+    <metrics include="SybaseAvailability"/>
+    <metrics include="ServerMetrics"/>
+    <metrics include="sp_sysmon"/>
+
+    <properties>
+       <property name="version"
+                 description="Sybase Version"/>
+    </properties>
+
+    <config>
+      <option name="jdbcUrl"
+              description="JDBC Url (NOTE: localhost may not work)"
+              default="jdbc:sybase:Tds:&lt;hostname&gt;:4100/master"/>
+      <option name="jdbcUser"
+              description="JDBC User"
+              default="sa"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
+      <option name="serverName"
+              description="Sybase Server Name"
+              default="LOCALHOST"/>
+      <option name="interval"
+              description="sp_sysmon interval"
+              default="00:05:00"/>
+      <option name="timeout"
+              description="Timeout for sp_sysmon, must be greater than the interval"
+              default="3500"/>
+    </config>
+
+    <service name="sp_sysmonEngine">
+      <config>
+        <option name="engine"
+                description="Sybase Engine Stats"/>
+      </config>
+      <metrics include="SybaseAvailability"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%engine%.${alias}
+      </filter>
+      <metrics>
+        <metric name="Engine Utilization"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="storage">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="database"
+                description="Sybase Database"/>
+        <option name="segment"
+                description="Sybase Segment"/>
+        <option name="pagesize"
+                description="Sybase Server Pagesize"/>
+      </config>
+      <metrics include="SybaseAvailability"/>
+      <filter name="template">
+        ${domain}:Type=storage,database=%database%,segment=%segment%,pagesize=%pagesize%:${alias}
+      </filter>
+      <metrics>
+        <metric name="Storage Used"
+                category="UTILIZATION"
+                indicator="true"
+                units="MB"
+                collectionType="dynamic"/>
+        <metric name="Percent Used"
+                category="UTILIZATION"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="sp_sysmonCache">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="cachename"
+                description="Name of Cache"/>
+      </config>
+      <metrics include="SybaseAvailability"/>
+      <filter name="template">
+        exec:timeout=%timeout%,file=${sysmon_script},args=-s %serverName% -i %interval% -u %jdbcUser% -p '%jdbcPassword%':%cachename%.${alias}
+      </filter>
+      <metrics>
+        <metric name="Cache Hits Ratio"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="Cache Misses Ratio"
+                category="THROUGHPUT"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="sp_monitorconfig">
+      <plugin type="autoinventory"
+              class="SybaseServerDetector"/>
+      <plugin type="measurement"
+              class="SybaseMeasurementPlugin"/>
+      <config>
+        <option name="configoption"
+                description="Config Option"/>
+      </config>
+      <metrics include="SybaseAvailability"/>
+      <filter name="template">
+        ${domain}:Type=sp_monitorconfig,configoption=%configoption%:${alias}
+      </filter>
+      <metrics>
+        <metric name="Active"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Max Used"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="static"/>
+        <metric name="Free"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Reuse"
+                category="THROUGHPUT"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Utilization Ratio"
+                category="UTILIZATION"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+      </metrics>
+    </service>
+
+    <service name="DataServer Process Metrics">
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=dataserver"
+                description="PTQL for Sybase DataServer Process"/>
+      </config>
+      &multi-process-metrics;
+    </service>
+  </server>
+
+  <server name="Sybase"
+          version="15.x">
+          include="12.5.x"/>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Sybase">
+    <![CDATA[
+    <p>
+    <h3>Configure Sybase ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+      Please run the HQ agent on the local Sybase server as the sybase user.
+      <br>
+      This is neccessary to get the proper ENV vars setup in order to execute
+      <br>
+      the sp_sysmon procedure.
+    </p>
+    <p>
+      <b>NOTE:</b>  The jdbcUrl may not work using localhost.  Please 
+      specify the actual hostname.
+    </p>
+    ]]>
+  </help>
+  <help name="Sybase 12.x" include="Sybase"/>
+  <help name="Sybase 12.5.x" include="Sybase"/>
+  <help name="Sybase 15.x" include="Sybase"/>
+</plugin>

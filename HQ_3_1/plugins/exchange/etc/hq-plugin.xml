@@ -1,0 +1,1935 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="exchange">
+
+  <filter name="is.domain" value="\MSExchangeIS\" />
+  <filter name="mta.domain" value="\MSExchangeMTA\" />
+  <filter name="pop3.domain" value="\MSExchangePOP3(_Total)\" />
+  <filter name="imap4.domain" value="\MSExchangeIMAP4(_Total)\" />
+  <filter name="mbox.domain" value="\MSExchangeIS Mailbox(_Total)\" />
+  <filter name="web.domain" value="\MSExchange Web Mail(_Total)\" />
+
+  <!-- metrics for Exchange Information Store -->
+  <metrics name="exchange-is">
+    <metric name="Availability"
+            alias="Availability"
+            template="ServiceAvail:Platform=Win32:MSExchangeIS"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="RPC Packets"
+            alias="RPCPackets"
+            template="${is.domain}:Platform=Win32:RPC Packets/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RPC Operations"
+            alias="RPCOperations"
+            template="${is.domain}:Platform=Win32:RPC Operations/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Read Bytes RPC Clients"
+            alias="ReadBytesRPCClients"
+            template="${is.domain}:Platform=Win32:Read Bytes RPC Clients/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Write Bytes RPC Clients"
+            alias="WriteBytesRPCClients"
+            template="${is.domain}:Platform=Win32:Write Bytes RPC Clients/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RPC Averaged Latency"
+            alias="RPCAveragedLatency"
+            template="${is.domain}:Platform=Win32:RPC Averaged Latency"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="ms"/>
+
+    <metric name="RPC Num. Of Slow Packets"
+            alias="RPCNumOfSlowPackets"
+            template="${is.domain}:Platform=Win32:RPC Num. of Slow Packets"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Push Notifications Generated"
+            alias="PushNotificationsGenerated"
+            template="${is.domain}:Platform=Win32:Push Notifications Generated/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Push Notifications Skipped"
+            alias="PushNotificationsSkipped"
+            template="${is.domain}:Platform=Win32:Push Notifications Skipped/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RPC Requests"
+            alias="RPCRequests"
+            template="${is.domain}:Platform=Win32:RPC Requests"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"/>
+
+    <metric name="User Count"
+            alias="UserCount"
+            template="${is.domain}:Platform=Win32:User Count"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Active User Count"
+            alias="ActiveUserCount"
+            template="${is.domain}:Platform=Win32:Active User Count"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Maximum Users"
+            alias="MaximumUsers"
+            template="${is.domain}:Platform=Win32:Maximum Users"
+            category="THROUGHPUT"
+            collectionType="static"
+            units="none"/>
+
+    <metric name="Anonymous User Count"
+            alias="AnonymousUserCount"
+            template="${is.domain}:Platform=Win32:Anonymous User Count"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Active Anonymous User Count"
+            alias="ActiveAnonymousUserCount"
+            template="${is.domain}:Platform=Win32:Active Anonymous User Count"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Maximum Anonymous Users"
+            alias="MaximumAnonymousUsers"
+            template="${is.domain}:Platform=Win32:Maximum Anonymous Users"
+            category="THROUGHPUT"
+            collectionType="static"
+            units="none"/>
+
+    <metric name="Connection Count"
+            alias="ConnectionCount"
+            template="${is.domain}:Platform=Win32:Connection Count"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Active Connection Count"
+            alias="ActiveConnectionCount"
+            template="${is.domain}:Platform=Win32:Active Connection Count"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Maximum Connections"
+            alias="MaximumConnections"
+            template="${is.domain}:Platform=Win32:Maximum Connections"
+            category="UTILIZATION"
+            collectionType="static"
+            units="none"/>
+
+    <metric name="Push Notifications Cache Size"
+            alias="PushNotificationsCacheSize"
+            template="${is.domain}:Platform=Win32:Push Notifications Cache Size"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Single Appointments Created"
+            alias="SingleAppointmentsCreated"
+            template="${is.domain}:Platform=Win32:Single Appointments Created"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recurring Appointments Created"
+            alias="RecurringApptsCreated"
+            template="${is.domain}:Platform=Win32:Recurring Appointments Created"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Single Appointments Modified"
+            alias="SingleApptsModified"
+            template="${is.domain}:Platform=Win32:Single Appointments Modified"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recurring Appointments Modified"
+            alias="RecurringApptsModified"
+            template="${is.domain}:Platform=Win32:Recurring Appointments Modified"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Single Appointments Deleted"
+            alias="SingleApptsDeleted"
+            template="${is.domain}:Platform=Win32:Single Appointments Deleted"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recurring Appointments Deleted"
+            alias="RecurringApptsDeleted"
+            template="${is.domain}:Platform=Win32:Recurring Appointments Deleted"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recurring Master Appointments Expanded"
+            alias="RecurringMasterApptsExpanded"
+            template="${is.domain}:Platform=Win32:Recurring Master Appointments Expanded"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Instances Created"
+            alias="AppointmentInstancesCreated"
+            template="${is.domain}:Platform=Win32:Appointment Instances Created"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Instances Deleted"
+            alias="AppointmentInstancesDeleted"
+            template="${is.domain}:Platform=Win32:Appointment Instances Deleted"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="FB Publish Count"
+            alias="FBPublishCount"
+            template="${is.domain}:Platform=Win32:FB Publish Count"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Background Expansion Queue Length"
+            alias="BackgroundExpansionQueueLength"
+            template="${is.domain}:Platform=Win32:Background Expansion Queue Length"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Virus Scan Messages Processed"
+            alias="VscanMsgsProcessed"
+            template="${is.domain}:Platform=Win32:Virus Scan Messages Processed"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Messages Cleaned"
+            alias="VscanMsgsCleaned"
+            template="${is.domain}:Platform=Win32:Virus Scan Messages Cleaned"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Messages Quarantined"
+            alias="VscanMsgsQuarantined"
+            template="${is.domain}:Platform=Win32:Virus Scan Messages Quarantined"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Messages Deleted"
+            alias="VscanMsgsDeleted"
+            template="${is.domain}:Platform=Win32:Virus Scan Messages Deleted"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Files Scanned"
+            alias="VscanFilesScanned"
+            template="${is.domain}:Platform=Win32:Virus Scan Files Scanned"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Files Cleaned"
+            alias="VscanFilesCleaned"
+            template="${is.domain}:Platform=Win32:Virus Scan Files Cleaned"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Files Quarantined"
+            alias="VscanFilesQuarantined"
+            template="${is.domain}:Platform=Win32:Virus Scan Files Quarantined"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Bytes Scanned"
+            alias="VscanBytesScanned"
+            template="${is.domain}:Platform=Win32:Virus Scan Bytes Scanned"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Virus Scan Queue Length"
+            alias="VscanQueueLength"
+            template="${is.domain}:Platform=Win32:Virus Scan Queue Length"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Folders Scanned In Background"
+            alias="VscanFldrsInBackground"
+            template="${is.domain}:Platform=Win32:Virus Scan Folders Scanned in Background"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Virus Scan Messages Scanned In Background"
+            alias="VscanMsgsInBackground"
+            template="${is.domain}:Platform=Win32:Virus Scan Messages Scanned in Background"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="VM Largest Block Size"
+            alias="VMLargestBlockSize"
+            template="${is.domain}:Platform=Win32:VM Largest Block Size"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="VM Total Free Blocks"
+            alias="VMTotalFreeBlocks"
+            template="${is.domain}:Platform=Win32:VM Total Free Blocks"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="VM Total 16MB Free Blocks"
+            alias="VMTotal16MBFreeBlocks"
+            template="${is.domain}:Platform=Win32:VM Total 16MB Free Blocks"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="VM Total Large Free Block Bytes"
+            alias="VMTotalLargeFreeBlockBytes"
+            template="${is.domain}:Platform=Win32:VM Total Large Free Block Bytes"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="B"/>
+
+    <metric name="DL Membership Cache Entries Count"
+            alias="DLMembershipCacheEntriesCount"
+            template="${is.domain}:Platform=Win32:DL membership cache entries count"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="DL Membership Cache Size"
+            alias="DLMembershipCacheSize"
+            template="${is.domain}:Platform=Win32:DL membership cache size"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="DL Membership Cache Hits"
+            alias="DLMembershipCacheHits"
+            template="${is.domain}:Platform=Win32:DL membership cache hits"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="DL Membership Cache Misses"
+            alias="DLMembershipCacheMisses"
+            template="${is.domain}:Platform=Win32:DL membership cache misses"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RPC Clients Bytes Read"
+            alias="RPCClientsBytesRead"
+            template="${is.domain}:Platform=Win32:RPC Clients Bytes Read"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RPC Clients Bytes Written"
+            alias="RPCClientsBytesWritten"
+            template="${is.domain}:Platform=Win32:RPC Clients Bytes Written"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RPC Clients Uncompressed Bytes Read"
+            alias="RPCClientsUncmprBytesRead"
+            template="${is.domain}:Platform=Win32:RPC Clients Uncompressed Bytes Read"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RPC Clients Uncompressed Bytes Written"
+            alias="RPCClientsUncmprBytesWritten"
+            template="${is.domain}:Platform=Win32:RPC Clients Uncompressed Bytes Written"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Slow QP Threads"
+            alias="SlowQPThreads"
+            template="${is.domain}:Platform=Win32:Slow QP Threads"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Slow Search Threads"
+            alias="SlowSearchThreads"
+            template="${is.domain}:Platform=Win32:Slow Search Threads"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <metrics name="Web">
+    <metric name="Availability"
+            alias="Availability"
+            template="url.availability:hostname=localhost,port=80,protocol=http,timeout=30,path=/exchange:availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Attachments Deleted"
+            alias="AttachmentsDeleted"
+            template="${web.domain}:Platform=Win32:Attachments deleted (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message/Appointment Deletes"
+            alias="MessageAppointmentDeletes"
+            template="${web.domain}:Platform=Win32:Message/Appointment deletes* (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Moves/Copies"
+            alias="MessageMovesCopies"
+            template="${web.domain}:Platform=Win32:Message moves/copies* (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message/Appointment Saves"
+            alias="MessageAppointmentSaves"
+            template="${web.domain}:Platform=Win32:Message/Appointment saves (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Posts Submitted"
+            alias="PostsSubmitted"
+            template="${web.domain}:Platform=Win32:Posts submitted (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Names Checked"
+            alias="NamesChecked"
+            template="${web.domain}:Platform=Win32:Names checked (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recipients Edited"
+            alias="RecipientsEdited"
+            template="${web.domain}:Platform=Win32:Recipients edited (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Saves"
+            alias="MessageSaves"
+            template="${web.domain}:Platform=Win32:Message saves (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Recipients Saved"
+            alias="RecipientsSaved"
+            template="${web.domain}:Platform=Win32:Recipients saved (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Sends"
+            alias="MessageSends"
+            template="${web.domain}:Platform=Win32:Message sends (total)"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Edit Recurrence"
+            alias="AppointmentEditRecurrence"
+            template="${web.domain}:Platform=Win32:Appointment edit recurrence (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Updates"
+            alias="AppointmentUpdates"
+            template="${web.domain}:Platform=Win32:Appointment updates (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Resolve Free-Busy"
+            alias="AppointmentResolveFreeBusy"
+            template="${web.domain}:Platform=Win32:Appointment resolve Free-Busy (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Saves"
+            alias="AppointmentSaves"
+            template="${web.domain}:Platform=Win32:Appointment saves (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Sends"
+            alias="AppointmentSends"
+            template="${web.domain}:Platform=Win32:Appointment sends (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Save Recurrences"
+            alias="AppointmentSaveRecurrences"
+            template="${web.domain}:Platform=Win32:Appointment save recurrences (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Attachment Edits"
+            alias="MessageAttachmentEdits"
+            template="${web.domain}:Platform=Win32:Message attachment edits (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Attachment Edits"
+            alias="AppointmentAttachmentEdits"
+            template="${web.domain}:Platform=Win32:Appointment attachment edits (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Navigation Options Saves"
+            alias="NavigationOptionsSaves"
+            template="${web.domain}:Platform=Win32:Navigation options saves (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Folder Creates"
+            alias="FolderCreates"
+            template="${web.domain}:Platform=Win32:Folder creates* (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Folder Renames"
+            alias="FolderRenames"
+            template="${web.domain}:Platform=Win32:Folder renames* (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Authentications"
+            alias="Authentications"
+            template="${web.domain}:Platform=Win32:Authentications (total)"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Authentication Cache Hits"
+            alias="AuthenticationCacheHits"
+            template="${web.domain}:Platform=Win32:Authentication cache hits (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Forms Sent"
+            alias="FormsSent"
+            template="${web.domain}:Platform=Win32:Forms sent (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Get App Frame"
+            alias="GetAppFrame"
+            template="${web.domain}:Platform=Win32:Get app frame (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Get Nav Bar"
+            alias="GetNavBar"
+            template="${web.domain}:Platform=Win32:Get nav bar (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Folder Get Contents"
+            alias="FolderGetContents"
+            template="${web.domain}:Platform=Win32:Folder get contents (total)"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Folder Get View"
+            alias="FolderGetView"
+            template="${web.domain}:Platform=Win32:Folder get view* (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="New Item URL"
+            alias="NewItemURL"
+            template="${web.domain}:Platform=Win32:New item URL (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="New Folder Template Data"
+            alias="NewFolderTemplateData"
+            template="${web.domain}:Platform=Win32:New folder template data (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Data Retrieves"
+            alias="AppointmentDataRetrieves"
+            template="${web.domain}:Platform=Win32:Appointment data retrieves (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Accept/Decline"
+            alias="AppointmentAcceptDecline"
+            template="${web.domain}:Platform=Win32:Appointment accept/decline (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message/Appointment Opens"
+            alias="MessageAppointmentOpens"
+            template="${web.domain}:Platform=Win32:Message/Appointment opens (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Opens"
+            alias="MessageOpens"
+            template="${web.domain}:Platform=Win32:Message opens (total)"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Appointment Opens"
+            alias="AppointmentOpens"
+            template="${web.domain}:Platform=Win32:Appointment opens (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Views Of Calendars"
+            alias="ViewsOfCalendars"
+            template="${web.domain}:Platform=Win32:Views of Calendars (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Views Of Mail Folders"
+            alias="ViewsOfMailFolders"
+            template="${web.domain}:Platform=Win32:Views of Mail Folders (total)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Authentications in Cache"
+            alias="AuthenticationsinCache"
+            template="${web.domain}:Platform=Win32:Authentications (in cache)"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="MTA">
+    <metric name="Availability"
+            alias="Availability"
+            template="ServiceAvail:Platform=Win32:MSExchangeMTA"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Adjacent MTA Associations"
+            alias="AdjacentMTAAssociations"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Messages Processed"
+            alias="MessagesProcessed"
+            template="${mta.domain}:Platform=Win32:Messages/Sec"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Bytes"
+            alias="MessageBytes"
+            template="${mta.domain}:Platform=Win32:Message Bytes/Sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Free Buffer Elements"
+            alias="FreeBufferElements"
+            template="${mta.domain}:Platform=Win32:Free Elements"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Free Buffer Headers"
+            alias="FreeBufferHeaders"
+            template="${mta.domain}:Platform=Win32:Free Headers"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Admin Connections"
+            alias="AdminConnections"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Threads In Use"
+            alias="ThreadsInUse"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Work Queue Length"
+            alias="WorkQueueLength"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="PERFORMANCE"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="XAPI Gateways"
+            alias="XAPIGateways"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="XAPI Clients"
+            alias="XAPIClients"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Disk File Deletes"
+            alias="DiskFileDeletes"
+            template="${mta.domain}:Platform=Win32:Disk File Deletes/sec"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Disk File Syncs"
+            alias="DiskFileSyncs"
+            template="${mta.domain}:Platform=Win32:Disk File Syncs/sec"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Disk File Opens"
+            alias="DiskFileOpens"
+            template="${mta.domain}:Platform=Win32:Disk File Opens/sec"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Disk File Reads"
+            alias="DiskFileReads"
+            template="${mta.domain}:Platform=Win32:Disk File Reads/sec"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Disk File Writes"
+            alias="DiskFileWrites"
+            template="${mta.domain}:Platform=Win32:Disk File Writes/sec"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Directory Service Read Calls"
+            alias="DSReadCalls"
+            template="${mta.domain}:Platform=Win32:ExDS Read Calls/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="XAPI Receive Bytes"
+            alias="XAPIReceiveBytes"
+            template="${mta.domain}:Platform=Win32:XAPI Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="XAPI Transmit Bytes"
+            alias="XAPITransmitBytes"
+            template="${mta.domain}:Platform=Win32:XAPI Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Admin Interface Receive Bytes"
+            alias="AdminInterfaceReceiveBytes"
+            template="${mta.domain}:Platform=Win32:Admin Interface Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Admin Interface Transmit Bytes"
+            alias="AdminInterfaceTransmitBytes"
+            template="${mta.domain}:Platform=Win32:Admin Interface Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="LAN Receive Bytes"
+            alias="LANReceiveBytes"
+            template="${mta.domain}:Platform=Win32:LAN Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="LAN Transmit Bytes"
+            alias="LANTransmitBytes"
+            template="${mta.domain}:Platform=Win32:LAN Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RAS Receive Bytes"
+            alias="RASReceiveBytes"
+            template="${mta.domain}:Platform=Win32:RAS Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="RAS Transmit Bytes"
+            alias="RASTransmitBytes"
+            template="${mta.domain}:Platform=Win32:RAS Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="TCP/IP Receive Bytes"
+            alias="TCPIPReceiveBytes"
+            template="${mta.domain}:Platform=Win32:TCP/IP Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="TCP/IP Transmit Bytes"
+            alias="TCPIPTransmitBytes"
+            template="${mta.domain}:Platform=Win32:TCP/IP Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="TP4 Receive Bytes"
+            alias="TP4ReceiveBytes"
+            template="${mta.domain}:Platform=Win32:TP4 Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="TP4 Transmit Bytes"
+            alias="TP4TransmitBytes"
+            template="${mta.domain}:Platform=Win32:TP4 Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="X.25 Receive Bytes"
+            alias="X25ReceiveBytes"
+            template="${mta.domain}:Platform=Win32:X.25 Receive Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="X.25 Transmit Bytes"
+            alias="X25TransmitBytes"
+            template="${mta.domain}:Platform=Win32:X.25 Transmit Bytes/sec"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Deferred Delivery Messages"
+            alias="DeferredDeliveryMsgs"
+            template="${mta.domain}:Platform=Win32:Deferred Delivery Msgs"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Total Recipients Queued"
+            alias="TotalRecipientsQueued"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Total Successful Conversions"
+            alias="TotalSuccessfulConversions"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Total Failed Conversions"
+            alias="TotalFailedConversions"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Total Loops Detected"
+            alias="TotalLoopsDetected"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Inbound Messages Total"
+            alias="InboundMessagesTotal"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Outbound Messages Total"
+            alias="OutboundMessagesTotal"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Inbound Bytes Total"
+            alias="InboundBytesTotal"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Work Queue Bytes"
+            alias="WorkQueueBytes"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="B"/>
+
+    <metric name="Outbound Bytes Total"
+            alias="OutboundBytesTotal"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="B"/>
+
+    <metric name="Total Recipients Inbound"
+            alias="TotalRecipientsInbound"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Total Recipients Outbound"
+            alias="TotalRecipientsOutbound"
+            template="${mta.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="exchange-mbox">
+    <metric name="Send Queue Size"
+            alias="SendQueueSize"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            indicator="true"
+            units="none"/>
+
+    <metric name="Receive Queue Size"
+            alias="ReceiveQueueSize"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            indicator="true"
+            units="none"/>
+
+    <metric name="Categorization Count"
+            alias="CategorizationCount"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Messages Delivered"
+            alias="MessagesDelivered"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Message Recipients Delivered"
+            alias="MessageRecipientsDelivered"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Messages Sent"
+            alias="MessagesSent"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Messages Submitted"
+            alias="MessagesSubmitted"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Single Instance Ratio"
+            alias="SingleInstanceRatio"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Average Delivery Time"
+            alias="AverageDeliveryTime"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Total Size of Recoverable Items"
+            alias="TotalSizeofRecoverableItems"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Total Count of Recoverable Items"
+            alias="TotalCountofRecoverableItems"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Client Logons"
+            alias="ClientLogons"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Active Client Logons"
+            alias="ActiveClientLogons"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="dynamic"
+            units="none"/>
+<!--
+    <metric name="HTTP/DAV Current Subscriptions"
+            alias="HTTP/DAVCurrentSubscriptions"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Total Subscriptions Created"
+            alias="HTTP/DAVTotalSubscriptionsCreated"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Total Subscriptions Expired"
+            alias="HTTP/DAVTotalSubscriptionsExpired"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Current Pending Notifications"
+            alias="HTTP/DAVCurrentPendingNotifications"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Total Notify Requests"
+            alias="HTTP/DAVTotalNotifyRequests"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Current Transaction Locks"
+            alias="HTTP/DAVCurrentTransactionLocks"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="HTTP/DAV Total Locks Created"
+            alias="HTTP/DAVTotalLocksCreated"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+-->
+    <metric name="Local deliveries"
+            alias="Localdeliveries"
+            template="${mbox.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="IMAP4">
+    <metric name="Availability"
+            alias="Availability"
+            template="ServiceAvail:Platform=Win32:IMAP4Svc"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="APPEND Total"
+            alias="APPENDTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="APPEND Failures"
+            alias="APPENDFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="AUTHENTICATE Total"
+            alias="AUTHENTICATETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="AUTHENTICATE Failures"
+            alias="AUTHENTICATEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CAPABILITY Total"
+            alias="CAPABILITYTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CAPABILITY Failures"
+            alias="CAPABILITYFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CHECK Total"
+            alias="CHECKTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CHECK Failures"
+            alias="CHECKFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CLOSE Total"
+            alias="CLOSETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CLOSE Failures"
+            alias="CLOSEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="COPY Total"
+            alias="COPYTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="COPY Failures"
+            alias="COPYFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CREATE Total"
+            alias="CREATETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CREATE Failures"
+            alias="CREATEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="DELETE Total"
+            alias="DELETETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="DELETE Failures"
+            alias="DELETEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="EXAMINE Total"
+            alias="EXAMINETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="EXAMINE Failures"
+            alias="EXAMINEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="EXPUNGE Total"
+            alias="EXPUNGETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="EXPUNGE Failures"
+            alias="EXPUNGEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="FETCH Total"
+            alias="FETCHTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="FETCH Failures"
+            alias="FETCHFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LIST Total"
+            alias="LISTTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LIST Failures"
+            alias="LISTFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LOGIN Total"
+            alias="LOGINTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LOGIN Failures"
+            alias="LOGINFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LOGOUT Total"
+            alias="LOGOUTTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LOGOUT Failures"
+            alias="LOGOUTFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LSUB Total"
+            alias="LSUBTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LSUB Failures"
+            alias="LSUBFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NOOP Total"
+            alias="NOOPTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NOOP Failures"
+            alias="NOOPFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RENAME Total"
+            alias="RENAMETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RENAME Failures"
+            alias="RENAMEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RLIST Total"
+            alias="RLISTTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RLIST Failures"
+            alias="RLISTFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RLSUB Total"
+            alias="RLSUBTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RLSUB Failures"
+            alias="RLSUBFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SEARCH Total"
+            alias="SEARCHTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SEARCH Failures"
+            alias="SEARCHFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SELECT Total"
+            alias="SELECTTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SELECT Failures"
+            alias="SELECTFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STATUS Total"
+            alias="STATUSTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STATUS Failures"
+            alias="STATUSFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STORE Total"
+            alias="STORETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STORE Failures"
+            alias="STOREFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SUBSCRIBE Total"
+            alias="SUBSCRIBETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="SUBSCRIBE Failures"
+            alias="SUBSCRIBEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UID Total"
+            alias="UIDTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UID Failures"
+            alias="UIDFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UNSUBSCRIBE Total"
+            alias="UNSUBSCRIBETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UNSUBSCRIBE Failures"
+            alias="UNSUBSCRIBEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="IDLE Total"
+            alias="IDLETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="IDLE Failures"
+            alias="IDLEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NAMESPACE Total"
+            alias="NAMESPACETotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NAMESPACE Failures"
+            alias="NAMESPACEFailures"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Invalid Commands"
+            alias="InvalidCommands"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Total"
+            alias="ConnectionsTotal"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Current"
+            alias="ConnectionsCurrent"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Connections Failed"
+            alias="ConnectionsFailed"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Rejected"
+            alias="ConnectionsRejected"
+            template="${imap4.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="POP3">
+    <metric name="Availability"
+            alias="Availability"
+            template="ServiceAvail:Platform=Win32:POP3Svc"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="AUTH Total"
+            alias="AUTHTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="AUTH Failures"
+            alias="AUTHFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="PASS Total"
+            alias="PASSTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="PASS Failures"
+            alias="PASSFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="QUIT Total"
+            alias="QUITTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="QUIT Failures"
+            alias="QUITFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STAT Total"
+            alias="STATTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="STAT Failures"
+            alias="STATFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LIST Total"
+            alias="LISTTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LIST Failures"
+            alias="LISTFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RETR Total"
+            alias="RETRTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RETR Failures"
+            alias="RETRFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="DELE Total"
+            alias="DELETotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="DELE Failures"
+            alias="DELEFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NOOP Total"
+            alias="NOOPTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="NOOP Failures"
+            alias="NOOPFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RSET Total"
+            alias="RSETTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="RSET Failures"
+            alias="RSETFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="TOP Total"
+            alias="TOPTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="TOP Failures"
+            alias="TOPFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UIDL Total"
+            alias="UIDLTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="UIDL Failures"
+            alias="UIDLFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="USER Total"
+            alias="USERTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="USER Failures"
+            alias="USERFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LAST Total"
+            alias="LASTTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="LAST Failures"
+            alias="LASTFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Invalid Commands"
+            alias="InvalidCommands"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Total"
+            alias="ConnectionsTotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Current"
+            alias="ConnectionsCurrent"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Failed"
+            alias="ConnectionsFailed"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Connections Rejected"
+            alias="ConnectionsRejected"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CAPA Total"
+            alias="CAPATotal"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="CAPA Failures"
+            alias="CAPAFailures"
+            template="${pop3.domain}:Platform=Win32:${name}"
+            category="THROUGHPUT"
+            collectionType="trendsup"
+            units="none"/>
+  </metrics>
+
+  <metrics name="Exchange 2000" include="exchange-is,exchange-mbox"/>
+  <metrics name="Exchange 2003" include="exchange-is,exchange-mbox"/>
+  <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
+
+  <metrics name="Exchange 2000 POP3" include="POP3"/>
+  <metrics name="Exchange 2003 POP3" include="POP3"/>
+  <metrics name="Exchange 5.5 POP3" include="POP3"/>
+
+  <metrics name="Exchange 2000 IMAP4" include="IMAP4"/>
+  <metrics name="Exchange 2003 IMAP4" include="IMAP4"/>
+  <metrics name="Exchange 5.5 IMAP4" include="IMAP4"/>
+
+  <metrics name="Exchange 2000 MTA" include="MTA"/>
+  <metrics name="Exchange 2003 MTA" include="MTA"/>
+  <metrics name="Exchange 5.5 MTA" include="MTA"/>
+
+  <metrics name="Exchange 2000 Web" include="Web"/>
+  <metrics name="Exchange 2003 Web" include="Web"/>
+  <metrics name="Exchange 5.5 Web" include="Web"/>
+
+  <server name="Exchange"
+          description="Mail Server"
+          version="5.5"
+          platforms="Win32">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="ExchangeDetector"/>
+
+    <property name="EVENT_LOG_SOURCE_FILTER"
+              value="MSExchange"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
+
+    <properties>
+       <property name="version"
+                 description="Exchange Version"/>
+       <property name="build"
+                 description="Build Number"/>
+    </properties>
+
+    <service name="POP3" internal="true">
+      <plugin type="measurement"/>
+      <plugin type="log_track"/>
+      <property name="EVENT_LOG_SOURCE_FILTER" value="POP3SVC"/>
+    </service>
+
+    <service name="IMAP4" internal="true">
+      <plugin type="measurement"/>
+      <plugin type="log_track"/>
+      <property name="EVENT_LOG_SOURCE_FILTER" value="IMAP4SVC"/>
+    </service>
+
+    <service name="MTA" internal="true">
+      <plugin type="measurement"/>
+      <plugin type="log_track"/>
+      <property name="EVENT_LOG_SOURCE_FILTER" value="MSExchangeMTA"/>
+    </service>
+
+    <service name="Web">
+      <plugin type="measurement"/>
+    </service>
+  </server>
+
+  <server name="Exchange"
+          version="2000"
+          include="5.5">
+  </server>
+
+  <server name="Exchange"
+          version="2003"
+          include="2000">
+  </server>
+</plugin>

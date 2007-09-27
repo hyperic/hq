@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+      "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+      "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.hyperic.hq.galerts.server.session" 
+				   default-access="property">
+  <class name="GalertAuxLog" table="EAM_GALERT_AUX_LOGS">
+    <cache usage="read-write" />
+
+    <id name="id" type="integer">
+      <column name="ID" not-null="true" />
+      <generator class="sequence">
+        <param name="sequence">EAM_GALERT_AUX_LOGS_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name ="VERSION_COL" default="0" />
+    </version>
+    
+    <property name="timestamp">
+      <column name="TIMESTAMP" not-null="true"/>
+    </property>
+
+	<property name="auxType">
+	  <column name="AUXTYPE" not-null="true"/>
+	</property>
+
+	<property name="description">
+	  <column name="DESCRIPTION" not-null="true"/>
+	</property>
+	
+    <many-to-one name="alert">
+      <column name="GALERT_ID" not-null="true"/>
+    </many-to-one>
+
+    <many-to-one name="parent">
+      <column name="PARENT" not-null="false"/>
+    </many-to-one>
+    
+    <many-to-one name="alertDef">
+      <column name="DEF_ID" index="AUX_LOG_DEF_IDX" not-null="true"/>
+    </many-to-one>
+
+    <bag name="childrenBag" table="EAM_GALERT_AUX_LOGS" 
+         cascade="all-delete-orphan" inverse="true">
+      <cache usage="read-write" />
+      <key on-delete="cascade" column="PARENT" not-null="false"/>      
+      <one-to-many class="GalertAuxLog" />
+    </bag>
+    
+  </class>
+</hibernate-mapping>

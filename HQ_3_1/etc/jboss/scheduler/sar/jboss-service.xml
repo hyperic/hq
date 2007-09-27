@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  <mbean code="org.hyperic.hq.scheduler.server.mbean.SchedulerService"
+	 name="hyperic.jmx:type=Service,name=Scheduler">
+    <depends>jboss.jca:service=LocalTxCM,name=HypericDS</depends>
+
+    <attribute name="QuartzProperties">
+# scheduler factory config
+org.quartz.scheduler.instanceName = org.hyperic.hq.scheduler.server.mbean.SchedulerService
+org.quartz.scheduler.rmi.export = false
+org.quartz.scheduler.rmi.proxy = false
+
+# thread pool config
+org.quartz.threadPool.class = org.quartz.simpl.SimpleThreadPool
+org.quartz.threadPool.threadCount = 5
+org.quartz.threadPool.threadPriority = 4
+
+# database config
+org.quartz.jobStore.class = org.quartz.impl.jdbcjobstore.JobStoreCMT
+# The delegate class property is set at pack-time or installation time,
+# depending on the usage.
+org.quartz.jobStore.driverDelegateClass = @@@server.quartzDelegate@@@
+org.quartz.jobStore.useProperties = true
+org.quartz.jobStore.dataSource = HypericDS
+org.quartz.jobStore.nonManagedTXDataSource = HypericDS
+org.quartz.jobStore.instanceId = org.hyperic.hq.scheduler.server.mbean.SchedulerService
+org.quartz.dataSource.HypericDS.jndiURL = java:/HypericDS
+    </attribute>
+  </mbean>
+</server>

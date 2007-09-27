@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+<tiles-definitions>
+
+  <!-- list -->
+  <definition name=".events.config.list"
+        path="/resource/common/monitor/alerts/config/ListDefinitionsLayout.jsp"
+        controllerUrl="/alerts/ListDefinitions.do"/>
+
+  <definition name=".events.config.view.notifications"
+    path="/resource/common/monitor/alerts/config/ViewDefinitionNotifications.jsp"/>
+
+  <definition name=".events.config.view.notifications.tabs"
+    path="/resource/common/monitor/alerts/config/ViewDefinitionNotificationsTabs.jsp">
+   <putList name="tabList">
+      <item value="Escalation" link="viewEscalation"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Users" link="viewUsers"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Others" link="viewOthers"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+   </putList> 
+  </definition>
+
+  <definition name=".events.config.view.notifications.roles"
+        path="/resource/common/monitor/alerts/config/ListRoles.jsp"
+        controllerUrl="/alerts/ViewNotificationsRoles.do"/>
+
+  <definition name=".tabs.resource.events"
+            extends=".tabs.resource">
+        <putList name="tabList">
+            <item value="Monitor" link="/resource/server/Monitor.do"
+                height="21" width="102"
+                classtype="org.hyperic.hq.ui.util.Tab"/>
+            <item value="Inventory" link="/resource/server/Inventory.do"
+                height="21" width="102"
+                classtype="org.hyperic.hq.ui.util.Tab"/>
+        </putList>
+  </definition>
+
+  <definition name=".events.config.conditions.condition"
+      path="/resource/common/monitor/alerts/config/DefinitionCondition.jsp"/>
+
+  <definition name=".events.config.conditions.enablement"
+      path="/resource/common/monitor/alerts/config/DefinitionEnablement.jsp">
+    <putList name="enableList">
+      <add value=".events.config.conditions.enablement.frequency"/>
+      <add value=".events.config.conditions.enablement.disabling"/>
+    </putList>
+  </definition>
+
+  <definition name=".events.config.conditions"
+      path="/resource/common/monitor/alerts/config/DefinitionConditions.jsp"/>
+
+  <definition name=".events.alert.view"
+        path="/resource/common/monitor/alerts/ViewAlert.jsp"
+        controllerUrl="/alerts/ViewAlert.do">
+    <putList name="actionList">
+      <add value=".events.alert.view.notifications"/>
+      <add value=".events.alert.view.escalation"/>
+    </putList>
+  </definition>
+
+  <definition name=".events.config.view.definition"
+      path="/resource/common/monitor/alerts/config/ViewDefinition.jsp"/>
+
+  <definition name=".events.alert.view.notifications"
+        path="/resource/common/monitor/alerts/ViewAlertNotifications.jsp">
+    <putList name="notificationList">
+      <add value=".events.alert.view.notifications.users"/>
+      <add value=".events.alert.view.notifications.others"/>
+    </putList>
+  </definition>
+
+</tiles-definitions>

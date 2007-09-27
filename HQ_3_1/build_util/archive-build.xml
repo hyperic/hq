@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+
+<project name="archive-build" basedir="..">
+
+  <!-- Common targets for rolling release archives -->
+
+  <target name="roll-archives">
+    <property name="archive-dir" 
+              location="${archive.build.dir}/${archive.basename}" />
+
+    <!-- Copy jres out, repack with one jre at a time -->
+    <delete dir="${archive-dir}/installer-${version}/jres"/>
+    <mkdir dir="${archive-dir}/installer-${version}/jres"/>
+
+    <!-- Roll platform specific tarballs -->
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="amd64-linux-jre.tar.gz"/>
+      <param name="archive-suffix" value="amd64-linux"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value="amd64-linux-jre.tar.gz"/>
+      <param name="archive-suffix" value="amd64-linux"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="apple-darwin"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="apple-darwin"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="x86-linux-glibc2-jre.tar.gz"/>
+      <param name="archive-suffix" value="x86-linux"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value="x86-linux-glibc2-jre.tar.gz"/>
+      <param name="archive-suffix" value="x86-linux"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="hppa2.0-hp-hpux-11.x-jre.tar.gz"/>
+      <param name="archive-suffix" value="hpux-11"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value="hppa2.0-hp-hpux-11.x-jre.tar.gz"/>
+      <param name="archive-suffix" value="hpux-11"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="sparc-sun-solaris-jre.tar.gz"/>
+      <param name="archive-suffix" value="sparc-solaris"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value="sparc-sun-solaris-jre.tar.gz"/>
+      <param name="archive-suffix" value="sparc-solaris"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="x86-win32-jre.tar.gz"/>
+      <param name="archive-suffix" value="win32"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value="x86-win32-jre.exe"/>
+      <param name="archive-suffix" value="win32"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value="ppc-aix-jre.tar.gz"/>
+      <param name="archive-suffix" value="ppc-aix"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-pdk-bundle"/>
+  </target>
+
+  <target name="roll-platform-agent-bundle">
+    <copy todir="${build.dir}/${archive.basename}-agent-${version}">
+      <fileset dir="${agent.dir}"/>
+    </copy>
+    <if>
+      <equals arg1="${jre-file}" arg2=""/>
+      <then>
+         <delete dir="${build.dir}/${archive.basename}-agent-${version}/jre" 
+                 failonerror="false"/>
+      </then>
+    <else>
+      <delete dir="${build.dir}/${archive.basename}-agent-${version}/jre" 
+              failonerror="false"/>
+      <untar src="${jre.dir}/${jre-file}" 
+           dest="${build.dir}/${archive.basename}-agent-${version}"
+           compression="gzip"/>
+    </else>
+    </if>
+
+    <property name="connectors.dir" 
+              location="${build.dir}/${archive.basename}-agent-${version}/product_connectors"/>
+    
+    <!-- Copy Servlet connector -->
+    <mkdir dir="${connectors.dir}/servlet-${version}"/>
+    <copy toDir="${connectors.dir}/servlet-${version}">
+      <fileset dir="${build.dir}/native_plugins">
+        <include name="hyperic-hq/**" />
+        <include name="libs/**" />
+        <include name="sample-local/**" />
+        <include name="sample-global/**" />
+      </fileset>
+    </copy>
+
+    <!-- Copy SNMP and RT packages -->
+    <copy toDir="${connectors.dir}">
+      <fileset dir="${hq.bin}/product_connectors">
+        <include name="**" />
+      </fileset>
+    </copy>
+
+    <antcall target="compress-dir">
+      <param name="archive-dir" value="${build.dir}/${archive.basename}-agent-${version}"/>
+      <param name="archive-file" value="${build.dir}/${archive.basename}-agent-${version}-${build}-${archive-suffix}.${compress-mode}"/>
+      <param name="compress-mode" value="${compress-mode}"/>
+    </antcall>
+
+    <delete dir="${build.dir}/agent-${version}"/>
+  </target>
+
+  <target name="roll-platform-specific-archive">
+    <if>
+      <equals arg1="${jre-file}" arg2=""/>
+      <then>
+        <delete dir="${archive-dir}/installer-${version}/jres"/>
+      </then>
+      <else>
+        <delete>
+          <fileset dir="${archive-dir}/installer-${version}" includes="jres/**"/>
+        </delete>
+        <copy todir="${archive-dir}/installer-${version}/jres"
+              file="${jre.dir}/${jre-file}"/>
+      </else>
+    </if>
+
+    <!-- Is there a postgresql bundle available for this platform? -->
+    <available property="pgsql.available"
+               file="${pgsql.dir}/${archive-suffix}"/>
+    <delete dir="${archive-dir}/installer-${version}/data/hqdb"/>
+    <antcall target="bundle-pgsql"/>
+
+    <!-- include the license-info file -->
+    <copy file="${hq.home}/LICENSES.txt" toFile="${archive-dir}/LICENSES.txt"/>
+
+    <!-- Packup the whole thing -->
+    <antcall target="compress-dir">
+      <param name="archive-dir" value="${archive-dir}"/>
+      <param name="archive-file" value="${build.dir}/${archive.basename}-installer-${version}-${build}-${archive-suffix}.${compress-mode}"/>
+      <param name="compress-mode" value="${compress-mode}"/>
+    </antcall>
+  </target>
+
+  <target name="roll-pdk-bundle">
+    <antcall target="compress-dir">
+      <param name="archive-dir" value="${agent.dir}/pdk"/>
+      <param name="archive-file" value="${build.dir}/hyperic-pdk-${version}-${build}.zip"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+  </target>
+
+  <target name="bundle-pgsql" if="pgsql.available">
+    <mkdir dir="${archive-dir}/installer-${version}/data/hqdb"/>
+    <copy todir="${archive-dir}/installer-${version}/data/hqdb">
+      <fileset dir="${pgsql.dir}/${archive-suffix}">
+        <include name="*.sh"/>
+        <include name="*.bat"/>
+        <include name="pgsql.tar.gz"/>
+        <include name="pgsql.zip"/>
+      </fileset>
+    </copy>
+    <mkdir dir="${archive-dir}/installer-${version}/data/hqdb/conf"/>
+    <copy todir="${archive-dir}/installer-${version}/data/hqdb/conf">
+      <fileset dir="${pgsql.dir}/${archive-suffix}/conf" includes="**"/>
+    </copy>
+  </target>
+
+</project>

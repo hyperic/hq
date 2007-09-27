@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id: events-mq-service.xml,v 1.1.1.1 2004/10/05 19:18:06 rmorgan Exp $ -->
+
+<server>
+  <!-- Destination without a configured SecurityManager or without a 
+       a SecurityConf will default to role guest with read=true, write=true,
+       create=false.
+  -->
+  <loader-repository>jboss.messaging:loader=ScopedLoaderRepository
+   <loader-repository-config>java2ParentDelegation=false</loader-repository-config>
+  </loader-repository>
+
+  <mbean code="org.jboss.jms.server.destination.Topic"
+     name="jboss.messaging.destination:service=Topic,name=eventsTopic"
+     xmbean-dd="xmdesc/Topic-xmbean.xml">
+    <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+    <attribute name="FullSize">50000</attribute>
+  </mbean>
+
+  <mbean code="org.jboss.jms.server.destination.Queue"
+	 name="jboss.messaging.destination:service=Queue,name=agentScheduleQueue"
+   xmbean-dd="xmdesc/Queue-xmbean.xml">
+    <depends>jboss.messaging.destination:service=Topic,name=eventsTopic</depends>
+    <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+  </mbean>
+
+  <mbean code="org.jboss.jms.server.destination.Queue"
+	 name="jboss.messaging.destination:service=Queue,name=monitorAlarmQueue"
+   xmbean-dd="xmdesc/Queue-xmbean.xml">
+    <depends>jboss.messaging.destination:service=Topic,name=eventsTopic</depends>
+    <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+  </mbean>
+
+  <mbean code="org.jboss.jms.server.destination.Queue"
+         name="jboss.messaging.destination:service=Queue,name=monitorRtQueue"
+         xmbean-dd="xmdesc/Queue-xmbean.xml">
+    <depends>jboss.messaging.destination:service=Topic,name=eventsTopic</depends>
+    <depends optional-attribute-name="ServerPeer">jboss.messaging:service=ServerPeer</depends>
+  </mbean>
+
+</server>
+

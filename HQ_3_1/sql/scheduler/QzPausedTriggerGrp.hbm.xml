@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.scheduler">
+
+  <class name="QzPausedTriggerGrp" table="QRTZ_PAUSED_TRIGGER_GRPS">
+    <id name="triggerGroup" type="string">
+      <meta attribute="use-in-equals"><![CDATA[true]]></meta>
+      <column name="TRIGGER_GROUP" length="80" not-null="true"/>
+      <generator class="assigned"/>
+    </id>
+  </class>
+
+</hibernate-mapping>

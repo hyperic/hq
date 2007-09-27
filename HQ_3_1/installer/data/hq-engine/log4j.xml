@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  Log4j Configuration                                                  -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<!--
+   | For more configuration infromation and examples see the Jakarta Log4j
+   | owebsite: http://jakarta.apache.org/log4j
+ -->
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+  <!-- ================================= -->
+  <!-- Preserve messages in a local file -->
+  <!-- ================================= -->
+
+  <!-- A time/date based rolling appender -->
+  <appender name="FILE" class="org.jboss.logging.appender.DailyRollingFileAppender">
+    <param name="File" value="${server.home}/logs/server.log"/>
+    <param name="Append" value="true"/>
+    <param name="DatePattern" value="'.'yyyy-MM-dd"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d %-5p [%c] %m%n"/>
+    </layout>
+  </appender>
+  
+  <!-- A SYSLOG Appender for use with the SyslogAction class. 
+       To enable, make sure the syslogd on the box has been started
+       with '-r' so that it accepts network connections.
+       Separately, you'll need to enable the alert gui by setting
+       the SYSLOG_ALERTS_ENABLED attribute in the HQ database's
+       EAM_CONFIG_PROPS table to 'true'. 
+  <appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+     <errorHandler class="org.jboss.logging.util.OnlyOnceErrorHandler"/>
+     <param name="Facility" value="SYSLOG"/>
+     <param name="FacilityPrinting" value="true"/>
+     <param name="SyslogHost" value="localhost"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%c{1}[%r]: %m%n"/>
+    </layout>
+   </appender>
+   <category name="org.hyperic.hq.bizapp.server.action.log.SyslogAction">
+     <priority value="ERROR" />
+     <appender-ref ref="SYSLOG"/>
+  </category>
+  -->
+  
+  <!-- ============================== -->
+  <!-- Append messages to the console -->
+  <!-- ============================== -->
+
+  <!-- Provides Console Logging 
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="Threshold" value="INFO"/>
+    <param name="Target" value="System.out"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+    </layout>
+  </appender>
+  -->
+
+  <!-- ====================== -->
+  <!-- ASYNC Appender for all Logging -->
+  <!-- ====================== -->
+
+  <appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
+    <appender-ref ref="FILE"/>
+    <!--
+    <appender-ref ref="SMTP"/>
+    -->
+  </appender>
+
+  <!-- ================ -->
+  <!-- Limit categories -->
+  <!-- ================ -->
+
+  <!-- Turn off form validation messages -->  
+  <category name="org.apache.commons.validator.ValidatorResources">
+    <priority value="OFF"/>
+  </category>
+  
+  <!-- Turn off form struts messages -->  
+  <category name="org.apache.struts">
+    <priority value="OFF"/>
+  </category>
+
+  <category name="org.jboss.ejb.EJBDeployer.verifier">
+    <priority value="OFF"/>
+  </category>
+
+  <!-- Subsystem categories. Uncomment individual subsystems to see debug
+       messages. -->
+  <!--
+  <category name="org.hyperic.hq.auth">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.authz">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.appdef">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.agent">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.control">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.events">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.measurement">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.grouping">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.autoinventory">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.ui">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.pdk">
+    <priority value="DEBUG"/>
+  </category>
+  <category name="org.hyperic.hq.rt">
+    <priority value="DEBUG"/>
+  </category> 
+  -->
+  <!--
+      Use this category to DEBUG container managed SQL
+      WARNING: PRODUCES TONS OF MESSAGES!
+  -->
+  <!-- 
+  <category name="org.jboss.ejb.plugins.cmp">
+    <priority value="TRACE"/>
+  </category>
+  -->
+
+  <!-- Increase the priority threshold for the Datasource category
+       Useful for debugging connection leaks -->
+  <!--
+  <category name="HypericDS">
+    <priority value="DEBUG"/>
+  </category>
+  -->
+
+  <!-- ======================= -->
+  <!-- Setup the Root category -->
+  <!-- ======================= -->
+
+  <root>
+    <priority value="INFO"/>
+    <appender-ref ref="FILE"/>
+  </root>
+  
+</log4j:configuration>

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  <display-name>Hyperic HQ</display-name>
+  <context-param>
+    <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
+    <param-value>ApplicationResources</param-value>
+  </context-param>
+  <context-param>
+    <param-name>context-constants</param-name>
+    <param-value>org.hyperic.hq.ui.Constants</param-value>
+  </context-param>
+  <context-param>
+    <param-name>service-locator</param-name>
+    <param-value>org.hyperic.hq.ui.ServiceLocator</param-value>
+  </context-param>
+  <context-param>
+    <param-name>RtEnabled</param-name>
+    <param-value>false</param-value>
+  </context-param>
+  
+  <!-- Hibernate session filter -->
+  <filter>
+    <filter-name>Hibernate-Session-Filter</filter-name>
+    <filter-class>org.hyperic.hibernate.filter.SessionFilter</filter-class>
+  </filter>      
+  
+  <!-- authen filter -->
+  <filter>
+    <filter-name>Authentication-Filter</filter-name>
+    <filter-class>
+      org.hyperic.hq.ui.AuthenticationFilter
+    </filter-class>
+  </filter>  
+
+  <filter-mapping>
+    <filter-name>Hibernate-Session-Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>Authentication-Filter</filter-name>
+    <url-pattern>*.hqu</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>Authentication-Filter</filter-name>
+    <url-pattern>*.do</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>Authentication-Filter</filter-name>
+    <url-pattern>*.jsp</url-pattern>
+  </filter-mapping>  
+  <listener>
+    <listener-class>org.hyperic.hq.ui.Configurator</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>hqu</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.RenditServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>metricdata</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.MetricDataServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>availability</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.AvailabilityServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>availcolor</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.AvailabilityColorServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>navMapImage</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.NavMapImageServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>availHealthChart</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.AvailHealthChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>usageHealthChart</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.UsageHealthChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>utilizationHealthChart</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.UtilizationHealthChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>highLowChart</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.HighLowChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>metricChart</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.MetricChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>availStoplight</servlet-name>
+    <servlet-class>org.hyperic.hq.ui.servlet.AvailabilityStoplightChartServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+ <!-- Standard Action Servlet Configuration (with debugging) -->
+  <servlet>
+    <servlet-name>action</servlet-name>
+    <servlet-class>org.apache.struts.action.ActionServlet</servlet-class>
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>/WEB-INF/struts-config.xml,/WEB-INF/struts-config-ext.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>debug</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>detail</param-name>
+      <param-value>0</param-value>
+    </init-param>
+    <init-param>
+      <param-name>validate</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>mapping</param-name>
+      <param-value>org.hyperic.hq.ui.action.BaseActionMapping</param-value>
+    </init-param>      
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!-- Cactus Redirector -->
+  <servlet>
+    <servlet-name>ServletRedirector</servlet-name>
+    <servlet-class>org.apache.cactus.server.ServletTestRedirector</servlet-class>
+  </servlet>
+
+  <servlet>
+    <servlet-name>JspRedirector</servlet-name>
+    <jsp-file>/jspRedirector.jsp</jsp-file>
+  </servlet>
+  <!-- end cactus redirector -->
+
+<!-- BEGIN GENERATED JSPS -->
+<!--GENERATED_JSPS-->
+<!-- END GENERATED JSPS -->
+
+  <!-- Cactus Redirectory mapping -->
+  <servlet-mapping>
+    <servlet-name>ServletRedirector</servlet-name>
+    <url-pattern>/ServletRedirector</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>JspRedirector</servlet-name>
+    <url-pattern>/JspRedirector</url-pattern>
+  </servlet-mapping>
+  <!-- end cactus redirector mapping -->
+
+  <servlet-mapping>
+    <servlet-name>hqu</servlet-name>
+    <url-pattern>*.hqu</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>metricdata</servlet-name>
+    <url-pattern>/resource/MetricData</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>availability</servlet-name>
+    <url-pattern>/resource/Availability</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>availcolor</servlet-name>
+    <url-pattern>/resource/AvailColor</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>navMapImage</servlet-name>
+    <url-pattern>/resource/NavMapImage</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>availHealthChart</servlet-name>
+    <url-pattern>/resource/AvailHealthChart</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>usageHealthChart</servlet-name>
+    <url-pattern>/resource/UsageHealthChart</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>utilizationHealthChart</servlet-name>
+    <url-pattern>/resource/UtilizationHealthChart</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>highLowChart</servlet-name>
+    <url-pattern>/resource/HighLowChart</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>metricChart</servlet-name>
+    <url-pattern>/resource/MetricChart</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>availStoplight</servlet-name>
+    <url-pattern>/resource/AvailStoplight</url-pattern>
+  </servlet-mapping>
+  <!-- Standard Action Servlet Mapping -->
+  <servlet-mapping>
+    <servlet-name>action</servlet-name>
+    <url-pattern>*.rss</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>action</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  <!-- The Usual Welcome File List -->
+  <welcome-file-list>
+    <welcome-file>Dashboard.do</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <error-page>
+    <error-code>404</error-code>
+    <location>/common/GenericError.jsp</location>
+  </error-page>
+  <!-- Struts Tag Library Descriptors -->
+  <taglib>
+    <taglib-uri>struts-bean</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-bean.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>struts-html</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-html.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>struts-logic</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-logic.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>struts-nested</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-nested.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>struts-tiles</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-tiles.tld</taglib-location>
+  </taglib>
+<!--
+  <taglib>
+    <taglib-uri>struts-validator</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-validator.tld</taglib-location>
+  </taglib>
+-->
+  <taglib>
+    <taglib-uri>struts-html-el</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-html-el.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>struts-logic-el</taglib-uri>
+    <taglib-location>/WEB-INF/tld/struts-logic-el.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>jstl-c</taglib-uri>
+    <taglib-location>/WEB-INF/tld/c.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>jstl-c-rt</taglib-uri>
+    <taglib-location>/WEB-INF/tld/c-rt.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>jstl-fmt</taglib-uri>
+    <taglib-location>/WEB-INF/tld/fmt.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>hq</taglib-uri>
+    <taglib-location>/WEB-INF/tld/hq.tld</taglib-location>
+  </taglib>
+  <taglib>
+    <taglib-uri>display</taglib-uri>
+    <taglib-location>/WEB-INF/tld/display.tld</taglib-location>
+  </taglib>
+</web-app>

@@ -1,0 +1,792 @@
+--
+-- Sun ONE Web Server 6.1 MIB for SNMP
+-- Copyright (C) 2003 Sun Microsystems, Inc.  All rights reserved.
+-- SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+--
+
+IWS-MIB DEFINITIONS ::=
+BEGIN
+
+        IMPORTS OBJECT-TYPE
+                        FROM RFC-1212
+                TRAP-TYPE
+                        FROM RFC-1215
+                DisplayString
+                        FROM SNMPv2-TC
+                Counter, IpAddress, TimeTicks, enterprises
+                        FROM RFC1155-SMI;
+
+        sun OBJECT IDENTIFIER ::= { enterprises 42 }
+
+        http OBJECT IDENTIFIER ::= { sun 1 }
+
+        iws60 OBJECT IDENTIFIER ::= { http 60 }
+
+--
+-- Instances
+--
+
+        iwsInstanceTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsInstanceEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server instances"
+                ::= { iws60 1 }
+
+        iwsInstanceEntry OBJECT-TYPE
+                SYNTAX          IwsInstanceEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server instance"
+                INDEX           { iwsInstanceIndex }
+                ::= { iwsInstanceTable 1 }
+
+        IwsInstanceEntry ::= SEQUENCE {
+                iwsInstanceIndex        INTEGER,
+                iwsInstanceId           DisplayString,
+                iwsInstanceVersion      DisplayString,
+                iwsInstanceDescription  DisplayString,
+                iwsInstanceOrganization DisplayString,
+                iwsInstanceContact      DisplayString,
+                iwsInstanceLocation     DisplayString,
+                iwsInstanceStatus       INTEGER,
+                iwsInstanceUptime       TimeTicks,
+                iwsInstanceDeathCount   Counter,
+                iwsInstanceRequests     Counter,
+                iwsInstanceInOctets     Counter,
+                iwsInstanceOutOctets    Counter,
+                iwsInstanceCount2xx     Counter,
+                iwsInstanceCount3xx     Counter,
+                iwsInstanceCount4xx     Counter,
+                iwsInstanceCount5xx     Counter,
+                iwsInstanceCountOther   Counter,
+                iwsInstanceCount200     Counter,
+                iwsInstanceCount302     Counter,
+                iwsInstanceCount304     Counter,
+                iwsInstanceCount400     Counter,
+                iwsInstanceCount401     Counter,
+                iwsInstanceCount403     Counter,
+                iwsInstanceCount404     Counter,
+                iwsInstanceCount503     Counter,
+                iwsInstanceLoad1MinuteAverage      DisplayString,
+                iwsInstanceLoad5MinuteAverage      DisplayString,
+                iwsInstanceLoad15MinuteAverage      DisplayString,
+                iwsInstanceNetworkInOctets     INTEGER,
+                iwsInstanceNetworkOutOctets     INTEGER
+        }
+
+        iwsInstanceIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Server instance index"
+                ::= { iwsInstanceEntry 1 }
+
+        iwsInstanceId OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Server instance identifier"
+                ::= { iwsInstanceEntry 2 }
+
+        iwsInstanceVersion OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Server instance software version"
+                ::= { iwsInstanceEntry 3 }
+
+        iwsInstanceDescription OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Description of server instance"
+                ::= { iwsInstanceEntry 4 }
+
+        iwsInstanceOrganization OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Organization responsible for server instance"
+                ::= { iwsInstanceEntry 5 }
+
+        iwsInstanceContact OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Contact information for person(s) responsible for server instance"
+                ::= { iwsInstanceEntry 6 }
+
+        iwsInstanceLocation OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Location of server instance"
+                ::= { iwsInstanceEntry 7 }
+
+        iwsInstanceStatus OBJECT-TYPE
+                SYNTAX          INTEGER { down(0), running(1) }
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Server instance status"
+                ::= { iwsInstanceEntry 8 }
+
+        iwsInstanceUptime OBJECT-TYPE
+                SYNTAX          TimeTicks
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Server instance uptime"
+                ::= { iwsInstanceEntry 9 }
+
+        iwsInstanceDeathCount OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of times server instance processes have died"
+                ::= { iwsInstanceEntry 10 }
+
+        iwsInstanceRequests OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of requests processed"
+                ::= { iwsInstanceEntry 11 }
+
+        iwsInstanceInOctets OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets received"
+                ::= { iwsInstanceEntry 12 }
+
+        iwsInstanceOutOctets OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets transmitted"
+                ::= { iwsInstanceEntry 13 }
+
+        iwsInstanceCount2xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 200-level (Successful) responses issued"
+                ::= { iwsInstanceEntry 14 }
+
+        iwsInstanceCount3xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 300-level (Redirection) responses issued"
+                ::= { iwsInstanceEntry 15 }
+
+        iwsInstanceCount4xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 400-level (Client Error) responses issued"
+                ::= { iwsInstanceEntry 16 }
+
+        iwsInstanceCount5xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 500-level (Server Error) responses issued"
+                ::= { iwsInstanceEntry 17 }
+
+        iwsInstanceCountOther OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of other (neither 2xx, 3xx, 4xx, nor 5xx) responses issued"
+                ::= { iwsInstanceEntry 18 }
+
+        iwsInstanceCount200 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 200 (OK) responses issued"
+                ::= { iwsInstanceEntry 19 }
+
+        iwsInstanceCount302 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 302 (Moved Temporarily) responses issued"
+                ::= { iwsInstanceEntry 20 }
+
+        iwsInstanceCount304 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 304 (Not Modified) responses issued"
+                ::= { iwsInstanceEntry 21 }
+
+        iwsInstanceCount400 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 400 (Bad Request) responses issued"
+                ::= { iwsInstanceEntry 22 }
+
+        iwsInstanceCount401 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 401 (Unauthorized) responses issued"
+                ::= { iwsInstanceEntry 23 }
+
+        iwsInstanceCount403 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 403 (Forbidden) responses issued"
+                ::= { iwsInstanceEntry 24 }
+
+        iwsInstanceCount404 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 404 (Not Found) responses issued"
+                ::= { iwsInstanceEntry 25 }
+
+        iwsInstanceCount503 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 503 (Unavailable) responses issued"
+                ::= { iwsInstanceEntry 26 }
+
+        iwsInstanceLoad1MinuteAverage OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "System load average for 1 minute"
+                ::= { iwsInstanceEntry 27 }
+
+        iwsInstanceLoad5MinuteAverage OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "System load average for 5 minutes"
+                ::= { iwsInstanceEntry 28 }
+
+        iwsInstanceLoad15MinuteAverage OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "System load average for 15 minutes"
+                ::= { iwsInstanceEntry 29 }
+
+        iwsInstanceNetworkInOctets OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets transmitted on the network per second"
+                ::= { iwsInstanceEntry 30 }
+
+        iwsInstanceNetworkOutOctets OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets received on the network per second"
+                ::= { iwsInstanceEntry 31 }
+
+--
+-- Virtual servers
+--
+
+        iwsVsTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsVsEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server virtual servers"
+                ::= { iws60 2 }
+
+        iwsVsEntry OBJECT-TYPE
+                SYNTAX          IwsVsEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server virtual server"
+                INDEX           { iwsInstanceIndex, iwsVsIndex }
+                ::= { iwsVsTable 1 }
+
+        IwsVsEntry ::= SEQUENCE {  
+                iwsVsIndex              INTEGER,
+                iwsVsId                 DisplayString,
+                iwsVsRequests           Counter,
+                iwsVsInOctets           Counter,
+                iwsVsOutOctets          Counter,
+                iwsVsCount2xx           Counter,
+                iwsVsCount3xx           Counter,
+                iwsVsCount4xx           Counter,
+                iwsVsCount5xx           Counter,
+                iwsVsCountOther         Counter,
+                iwsVsCount200           Counter,
+                iwsVsCount302           Counter,
+                iwsVsCount304           Counter,
+                iwsVsCount400           Counter,
+                iwsVsCount401           Counter,
+                iwsVsCount403           Counter,
+                iwsVsCount404           Counter,
+                iwsVsCount503           Counter
+        }
+
+        iwsVsIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Virtual server index"
+                ::= { iwsVsEntry 1 }
+
+        iwsVsId OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Virtual server identifier"
+                ::= { iwsVsEntry 2 }
+
+        iwsVsRequests OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of requests processed"
+                ::= { iwsVsEntry 3 }
+
+        iwsVsInOctets OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets received"
+                ::= { iwsVsEntry 4 }
+
+        iwsVsOutOctets OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of octets transmitted"
+                ::= { iwsVsEntry 5 }
+
+        iwsVsCount2xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 200-level (Successful) responses issued"
+                ::= { iwsVsEntry 6 }
+
+        iwsVsCount3xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 300-level (Redirection) responses issued"
+                ::= { iwsVsEntry 7 }
+
+        iwsVsCount4xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 400-level (Client Error) responses issued"
+                ::= { iwsVsEntry 8 }
+
+        iwsVsCount5xx OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 500-level (Server Error) responses issued"
+                ::= { iwsVsEntry 9 }
+
+        iwsVsCountOther OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of other (neither 2xx, 3xx, 4xx, nor 5xx) responses issued"
+                ::= { iwsVsEntry 10 }
+
+        iwsVsCount200 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 200 (OK) responses issued"
+                ::= { iwsVsEntry 11 }
+
+        iwsVsCount302 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 302 (Moved Temporarily) responses issued"
+                ::= { iwsVsEntry 12 }
+
+        iwsVsCount304 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 304 (Not Modified) responses issued"
+                ::= { iwsVsEntry 13 }
+
+        iwsVsCount400 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 400 (Bad Request) responses issued"
+                ::= { iwsVsEntry 14 }
+
+        iwsVsCount401 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 401 (Unauthorized) responses issued"
+                ::= { iwsVsEntry 15 }
+
+        iwsVsCount403 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 403 (Forbidden) responses issued"
+                ::= { iwsVsEntry 16 }
+
+        iwsVsCount404 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 404 (Not Found) responses issued"
+                ::= { iwsVsEntry 17 }
+
+        iwsVsCount503 OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of 503 (Unavailable) responses issued"
+                ::= { iwsVsEntry 18 }
+
+--
+-- Processes
+--
+
+        iwsProcessTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsProcessEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server processes"
+                ::= { iws60 3 }
+
+        iwsProcessEntry OBJECT-TYPE
+                SYNTAX          IwsProcessEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server process"
+                INDEX           { iwsInstanceIndex, iwsProcessIndex }
+                ::= { iwsProcessTable 1 }
+
+        IwsProcessEntry ::= SEQUENCE {
+                iwsProcessIndex                         INTEGER,
+                iwsProcessId                            INTEGER,
+                iwsProcessThreadCount                   INTEGER,
+                iwsProcessThreadIdle                    INTEGER,
+                iwsProcessConnectionQueueCount          INTEGER,
+                iwsProcessConnectionQueuePeak           Counter,
+                iwsProcessConnectionQueueMax            INTEGER,
+                iwsProcessConnectionQueueTotal          Counter,
+                iwsProcessConnectionQueueOverflows      Counter,
+                iwsProcessKeepaliveCount                INTEGER,
+                iwsProcessKeepaliveMax                  INTEGER,
+                iwsProcessSizeVirtual                   INTEGER,
+                iwsProcessSizeResident                  INTEGER,
+                iwsProcessFractionSystemMemoryUsage     DisplayString
+        }
+
+        iwsProcessIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Process index"
+                ::= { iwsProcessEntry 1 }
+
+        iwsProcessId OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Operating system process identifier"
+                ::= { iwsProcessEntry 2 }
+
+        iwsProcessThreadCount OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of request processing threads"
+                ::= { iwsProcessEntry 3 }
+        
+        iwsProcessThreadIdle OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of request processing threads currently idle"
+                ::= { iwsProcessEntry 4 }
+        
+        iwsProcessConnectionQueueCount OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of connections currently in connection queue"
+                ::= { iwsProcessEntry 5 }
+
+        iwsProcessConnectionQueuePeak OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Largest number of connections that have been queued simultaneously"
+                ::= { iwsProcessEntry 6 }
+
+        iwsProcessConnectionQueueMax OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Maximum number of connections allowed in connection queue"
+                ::= { iwsProcessEntry 7 }
+
+        iwsProcessConnectionQueueTotal OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of connections that have been accepted"
+                ::= { iwsProcessEntry 8 }
+
+        iwsProcessConnectionQueueOverflows OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of connections rejected due to connection queue overflow"
+                ::= { iwsProcessEntry 9 }
+
+        iwsProcessKeepaliveCount OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of connections currently in keepalive queue"
+                ::= { iwsProcessEntry 10 }
+
+        iwsProcessKeepaliveMax OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Maximum number of connections allowed in keepalive queue"
+                ::= { iwsProcessEntry 11 }
+
+        iwsProcessSizeVirtual OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Process size in kbytes"
+                ::= { iwsProcessEntry 12 }
+
+        iwsProcessSizeResident OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Process resident size in kbytes"
+                ::= { iwsProcessEntry 13 }
+
+        iwsProcessFractionSystemMemoryUsage OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Fraction of process memory in system memory"
+                ::= { iwsProcessEntry 14 }
+
+--
+-- Listen sockets
+--
+
+        iwsListenTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsListenEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server listen sockets"
+                ::= { iws60 4 }
+
+        iwsListenEntry OBJECT-TYPE
+                SYNTAX          IwsListenEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server listen socket"
+                INDEX           { iwsInstanceIndex, iwsProcessIndex, iwsListenIndex }
+                ::= { iwsListenTable 1 }
+
+        IwsListenEntry ::= SEQUENCE {
+                iwsListenIndex          INTEGER,
+                iwsListenId             DisplayString,
+                iwsListenAddress        IpAddress,
+                iwsListenPort           INTEGER,
+                iwsListenSecurity       INTEGER
+        }
+
+        iwsListenIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Listen socket index"
+                ::= { iwsListenEntry 1 }
+
+        iwsListenId OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Listen socket identifier"
+                ::= { iwsListenEntry 2 }
+
+        iwsListenAddress OBJECT-TYPE
+                SYNTAX          IpAddress
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Address socket is listening on"
+                ::= { iwsListenEntry 3 }
+
+        iwsListenPort OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Port socket is listening on"
+                ::= { iwsListenEntry 4 }
+
+        iwsListenSecurity OBJECT-TYPE
+                SYNTAX          INTEGER { disabled(0), enabled(1) }
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Encryption support"
+                ::= { iwsListenEntry 5 }
+
+--
+-- Thread pools
+--
+
+        iwsThreadPoolTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsThreadPoolEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server thread pools"
+                ::= { iws60 5 }
+
+        iwsThreadPoolEntry OBJECT-TYPE
+                SYNTAX          IwsThreadPoolEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server thread pool"
+                INDEX           { iwsInstanceIndex, iwsProcessIndex, iwsThreadPoolIndex }
+                ::= { iwsThreadPoolTable 1 }
+
+        IwsThreadPoolEntry ::= SEQUENCE {
+                iwsThreadPoolIndex      INTEGER,
+                iwsThreadPoolId         DisplayString,
+                iwsThreadPoolCount      INTEGER,
+                iwsThreadPoolPeak       Counter,
+                iwsThreadPoolMax        INTEGER
+        }
+
+        iwsThreadPoolIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Thread pool index"
+                ::= { iwsThreadPoolEntry 1 }
+
+        iwsThreadPoolId OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Thread pool identifier"
+                ::= { iwsThreadPoolEntry 2 }
+
+        iwsThreadPoolCount OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Number of requests queued"
+                ::= { iwsThreadPoolEntry 3 }
+
+        iwsThreadPoolPeak OBJECT-TYPE
+                SYNTAX          Counter
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Largest number of requests that have been queued simultaneously"
+                ::= { iwsThreadPoolEntry 4 }
+
+        iwsThreadPoolMax OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Maximum number of requests allowed in queue"
+                ::= { iwsThreadPoolEntry 5 }
+
+--
+-- Cpus
+--
+
+        iwsCpuTable OBJECT-TYPE
+                SYNTAX          SEQUENCE OF IwsCpuEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server Cpus"
+                ::= { iws60 6 }
+
+        iwsCpuEntry OBJECT-TYPE
+                SYNTAX          IwsCpuEntry
+                ACCESS          not-accessible
+                STATUS          current
+                DESCRIPTION     "Sun ONE Web Server Cpu"
+                INDEX           { iwsInstanceIndex, iwsCpuIndex }
+                ::= { iwsCpuTable 1 }
+
+        IwsCpuEntry ::= SEQUENCE {  
+                iwsCpuIndex              INTEGER,
+                iwsCpuId                 DisplayString,
+                iwsCpuIdleTime           DisplayString,
+                iwsCpuUserTime           DisplayString,
+                iwsCpuKernelTime         DisplayString
+        }
+
+        iwsCpuIndex OBJECT-TYPE
+                SYNTAX          INTEGER
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Cpu index"
+                ::= { iwsCpuEntry 1 }
+
+        iwsCpuId OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Cpu identifier"
+                ::= { iwsCpuEntry 2 }
+
+        iwsCpuIdleTime OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Cpu Idle Time"
+                ::= { iwsCpuEntry 3 }
+
+        iwsCpuUserTime OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Cpu User Time"
+                ::= { iwsCpuEntry 4 }
+
+        iwsCpuKernelTime OBJECT-TYPE
+                SYNTAX          DisplayString
+                ACCESS          read-only
+                STATUS          current
+                DESCRIPTION     "Cpu Kernel Time"
+                ::= { iwsCpuEntry 5 }
+
+--
+--
+-- Traps
+--
+
+        iwsInstanceStatusChange TRAP-TYPE
+                ENTERPRISE      iws60
+                VARIABLES       { iwsInstanceIndex }
+                DESCRIPTION     "An iwsInstanceStatusChange trap signifies that iwsInstanceStatus has changed"
+                ::= 1
+
+END

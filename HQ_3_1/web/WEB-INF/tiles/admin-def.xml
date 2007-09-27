@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!-- -*- Mode: XML; indent-tabs-mode: nil; -*- -->
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+<tiles-definitions>
+  
+  <definition name=".admin.main.layout"
+              path="/admin/MainLayout.jsp">
+    <put name="titleImg" value="spacer.gif"/>
+  </definition>
+
+  <definition name=".admin.user.main.layout"
+              extends=".admin.main.layout">
+    <put name="titleBgStyle" value="PageTitleUserBg"/>
+    <put name="titleImg" value="title_user.gif"/>
+  </definition>
+
+  <definition name=".page.title.admin.user"
+              extends=".page.title">
+    <put name="titleKey" value="admin.user.ListUsers"/>  
+    <put name="titleBgStyle" value="PageTitleUserBg"/>
+    <put name="titleImg" value="title_user.gif"/>
+  </definition>
+
+  <definition name=".page.title.admin.user.view"
+              extends=".page.title">    
+    <put name="titleBgStyle" value="PageTitleUserBg"/>
+    <put name="titleImg" value="title_user.gif"/>
+  </definition>   
+  
+  <!--admin user portlets-->      
+  <definition name=".admin.user.List"
+              controllerUrl="/admin/user/List.do"
+              extends=".admin.user.main.layout">
+    <put name="titleKey" value="admin.user.ListUsers"/>  
+    <put name="configTile" value="/admin/user/ListUsers.jsp"/>
+  </definition>
+ 
+  <definition name=".admin.user.Edit"
+              controllerUrl="/admin/user/EditUserFormPrepare.do"
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.user.edit"/>  
+    <put name="configTile" value="/admin/user/EditUser.jsp"/>
+  </definition>
+  <definition name=".admin.user.New"
+              controllerUrl="/admin/user/NewFormPrepare.do"
+              extends=".admin.main.layout">
+    <put name="titleKey" value="admin.user.NewUser"/>  
+    <put name="configTile" value="/admin/user/NewUser.jsp"/>
+  </definition>
+
+  <!-- used to aggregate ViewProperties for a user -->
+  <definition name=".admin.user.ViewProperties"
+              path="/admin/user/ViewUserProperties.jsp"/>
+
+  <definition name=".admin.user.EditPassword"
+              controllerUrl="/admin/user/EditPasswordFormPrepare.do"
+              path="/admin/user/EditUserPassword.jsp">
+              <put name="administrator"      value="false"/>
+  </definition>
+
+  <definition name=".admin.user.RegisterUser"
+              controllerUrl="/admin/user/RegisterFormPrepare.do"
+              path="/admin/user/RegisterUser.jsp"/>
+
+  <definition name=".admin.alerts.List"
+              controllerUrl="/alerts/ListDefinitions.do"
+              path="/admin/config/ListDefinitions.jsp"/>
+
+  <definition name=".admin.config.EditEscalationConfig"
+              extends=".admin.main.layout"
+              controllerUrl="/EscalationHelp.do">
+    <put name="titleKey" value="admin.home.EscalationSchemes"/>
+    <put name="configTile" value="/admin/config/ListEscalationSchemes.jsp"/>
+  </definition>
+
+ </tiles-definitions>

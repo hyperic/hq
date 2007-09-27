@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<!-- MQSeries metrics -->
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.mqseries"
+        class="MQSeriesProductPlugin">
+
+  <metrics name="MQSeries 5.x">
+    <metric name="Availability"
+            alias="Availability"
+            template="mqseries:Type=Server:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="MQSeries 5.x Queue Manager">
+
+    <metric name="Availability"
+            alias="Availability"
+            template="mqseries-mgr:Mgr=%queue.manager.name%:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="MQSeries 5.x Queue">
+
+    <metric name="Availability"
+            alias="Availability"
+            template="mqseries-queue:Mgr=%queue.manager.name%,Queue=%queue.name%:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Current Depth"
+            alias="CurrentDepth"
+            template="mqseries-queue:Mgr=%queue.manager.name%,Queue=%queue.name%:CurrentDepth"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Open Input Count"
+            alias="OpenInputCount"
+            template="mqseries-queue:Mgr=%queue.manager.name%,Queue=%queue.name%:OpenInputCount"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+
+    <metric name="Open Output Count"
+            alias="OpenOutputCount"
+            template="mqseries-queue:Mgr=%queue.manager.name%,Queue=%queue.name%:OpenOutputCount"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+  </metrics>
+
+  <property name="mqseries.regkey"
+            value="SOFTWARE\IBM\MQSeries\CurrentVersion"/>
+
+  <server name="MQSeries"
+          version="5.x"
+          description="Messaging Server">
+
+    <plugin type="measurement"
+            class="MQSeriesServerMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="MQSeriesDetector"/>
+
+    <scan registry="${mqseries.regkey}">
+      <include name="FilePath"/>
+    </scan>
+
+    <scan>
+      <include name="/**/bin/runmqlsr"/>
+    </scan>
+
+    <service name="Queue Manager">
+      <config>
+        <option name="queue.manager.name"
+                description="Queue manager name"
+                default="MQ_hostname"/>
+      </config>
+
+      <plugin type="measurement"
+              class="MQSeriesMeasurementPlugin"/>
+    </service>
+
+    <service name="Queue">
+      <config>
+        <option name="queue.name"
+                description="Queue name"
+                default="default"/>
+      </config>
+
+      <plugin type="measurement"
+              class="MQSeriesMeasurementPlugin"/>
+
+    </service>
+   </server>
+</plugin>

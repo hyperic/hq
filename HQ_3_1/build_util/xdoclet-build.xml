@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<project name="xdoclet-build" basedir="..">
+
+  <!-- XDoclet common targets -->
+
+  <target name="xdoclet-check" >
+    <uptodate property="xdoclet.notrequired"
+              targetfile="${build.dir}/dd/tstamp">
+      <srcfiles dir="src">
+        <include name="**/entity/*.java"/>
+        <include name="**/session/*.java"/>
+        <include name="**/mdb/*.java"/>
+        <include name="**/mbean/*.java"/>
+      </srcfiles>
+    </uptodate>
+  </target>
+
+  <target name="xdoclet-clean" >
+    <delete dir="${build.dir}/src}" />
+    <delete dir="${build.dir}/dd}" />
+  </target>
+  
+  <target name="xdoclet-init">
+    <taskdef name="ejbdoclet" 
+             classname="xdoclet.modules.ejb.EjbDocletTask"
+             classpathref="alljars" />
+    <taskdef name="mbeandoclet" 
+             classname="xdoclet.modules.jmx.JMXDocletTask"
+             classpathref="alljars"/>
+  </target>
+   
+  <target name="xdoclet" depends="xdoclet-init,xdoclet-check" unless="xdoclet.notrequired" >
+    <mkdir dir="${build.dir}/dd/entity" />
+    <mkdir dir="${build.dir}/dd/session" />
+    <mkdir dir="${build.dir}/dd/agent-session" />
+    <mkdir dir="${build.dir}/dd/mdb" />
+    <mkdir dir="${build.dir}/src" />
+
+    <echo>starting xdoclet generation ... </echo>
+    <ejbdoclet ejbspec="2.0"
+               destdir="${build.dir}/src" 
+               verbose="true">
+      <packageSubstitution packages="server.session" substituteWith="shared"/>
+      <fileset dir="src" includes="**/session/*EJBImpl.java"/>
+      <valueobject/>
+      <remoteinterface pattern="{0}"/>
+      <localinterface pattern="{0}Local"/>
+      <localhomeinterface pattern="{0}LocalHome"/>
+      <homeinterface pattern="{0}Home"/>
+      <entitypk/>
+      <entitycmp/>
+      <entitybmp/>
+      <utilobject kind="physical" cacheHomes="true"/>
+      <deploymentdescriptor xmlencoding="UTF-8"
+                            destdir="${build.dir}/dd/session" />
+      <jboss version="3.0"
+             xmlencoding="UTF-8"
+             datasource="${hq.server.datasource}"
+             typemapping="${hq.server.ds-mapping}" 
+             destdir="${build.dir}/dd/session" />
+    </ejbdoclet>
+
+    <ejbdoclet ejbspec="2.0"
+               destdir="${build.dir}/src" 
+               verbose="true">
+      <packageSubstitution packages="server.session" substituteWith="shared"/>
+      <fileset dir="src" includes="**/session/AgentCallbackBossEJBImpl.java"/> 
+      <valueobject/>
+      <remoteinterface pattern="{0}"/>
+      <localinterface pattern="{0}Local"/>
+      <localhomeinterface pattern="{0}LocalHome"/>
+      <homeinterface pattern="{0}Home"/>
+      <entitypk/>
+      <entitycmp/>
+      <entitybmp/>
+      <utilobject kind="physical" cacheHomes="true"/>
+      <deploymentdescriptor xmlencoding="UTF-8"
+                            destdir="${build.dir}/dd/agent-session" />
+      <jboss version="3.0"
+             xmlencoding="UTF-8"
+             datasource="${hq.server.datasource}"
+             typemapping="${hq.server.ds-mapping}" 
+             destdir="${build.dir}/dd/agent-session" />
+    </ejbdoclet>
+
+    <ejbdoclet ejbspec="2.0"
+               destdir="${build.dir}/src" 
+               verbose="true">
+      <packageSubstitution packages="server.mdb" substituteWith="shared"/>
+      <fileset dir="src" includes="**/mdb/*EJBImpl.java"/>
+      <valueobject/>
+      <remoteinterface pattern="{0}"/>
+      <localinterface pattern="{0}Local"/>
+      <localhomeinterface pattern="{0}LocalHome"/>
+      <homeinterface pattern="{0}Home"/>
+      <entitypk/>
+      <entitycmp/>
+      <entitybmp/>
+      <utilobject kind="physical" cacheHomes="true"/>
+      <deploymentdescriptor xmlencoding="UTF-8"
+                            destdir="${build.dir}/dd/mdb" />
+      <jboss version="3.0"
+             xmlencoding="UTF-8"
+             datasource="${hq.server.datasource}"
+             typemapping="${hq.server.ds-mapping}" 
+             destdir="${build.dir}/dd/mdb" />
+    </ejbdoclet>
+
+    <!-- Generate mbean stuff.  -->
+    <mbeandoclet verbose="true"
+                 destdir="${build.dir}/src" >
+      <fileset dir="src" includes="**/mbean/*.java"/>
+      <mbeaninterface/>
+    </mbeandoclet>
+
+    <touch file="${build.dir}/dd/tstamp" />
+  </target>
+
+</project>

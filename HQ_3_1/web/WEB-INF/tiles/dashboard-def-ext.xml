@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+     "-//Apache Software Foundation//DTD Tiles Configuration 1.1//EN"
+     "http://jakarta.apache.org/struts/dtds/tiles-config_1_1.dtd">
+
+<tiles-definitions>
+
+  <definition name=".dashContent.addContent.wide"
+              controllerUrl="/dashboard/AddContent.do"
+              extends=".dash.portlets.multi"
+              path="/portlet/AddContentControl.jsp">  
+              <put name="wide"      value="true" />
+              <putList name="portlets">
+                <add value=".dashContent.autoDiscovery"/>
+                <add value=".dashContent.controlActions"/>
+                <add value=".dashContent.resourceHealth"/>
+                <add value=".dashContent.criticalAlerts"/>
+                <add value=".dashContent.metricViewer"/>
+              </putList>
+  </definition>  
+    
+</tiles-definitions>
+ 

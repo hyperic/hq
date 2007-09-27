@@ -1,0 +1,625 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="iplanet">
+
+  <filter name="iplanet.snmp"
+          value="iplanet:${snmp.config}"/>
+
+  <filter name="server.config.v4"
+	  value="snmpVarType=index,snmpIndexName=httpEntityPort,snmpIndexValue=%port%"/>
+
+  <filter name="server.config.v6"
+	   value="snmpVarType=index,snmpIndexName=iwsInstanceId,snmpIndexValue=%server.id%"/>
+
+  <filter name="thrpool.config"
+	  value="snmpVarType=index,snmpIndexName=iwsThreadPoolId,snmpIndexValue=%thrpool.id%"/>
+
+  <metrics name="iPlanet Admin 4.1">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="iPlanet 4.1">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <!-- XXX: a few others that sound useful commented in the MIBs:
+         InUnknowns, InBytes, OutBytes, TimeOuts -->
+
+    <metric name="Idle Threads"
+            alias="NumProcessIdle"
+            template="${iplanet.snmp}:httpStatisticsNumProcessIdle:${server.config.v4}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Active Threads"
+            alias="NumProcessProc"
+            template="${iplanet.snmp}:httpStatisticsNumProcessProc:${server.config.v4}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Active Threads Resolving DNS"
+            alias="NumProcessDns"
+            template="${iplanet.snmp}:httpStatisticsNumProcessDns:${server.config.v4}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Running Threads"
+            alias="ThreadNum"
+            template="${iplanet.snmp}:httpStatisticsThreadNum:${server.config.v4}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Running Processes"
+            alias="ProcessNum"
+            template="${iplanet.snmp}:httpStatisticsProcessNum:${server.config.v4}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Requests"
+            alias="Requests"
+            template="${iplanet.snmp}:httpStatisticsRequests:${server.config.v4}"
+            category="THROUGHPUT"
+            group="Throughput"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Error Requests"
+            alias="RequestError"
+            template="${iplanet.snmp}:httpStatisticsRequestError:${server.config.v4}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+  </metrics>
+
+  <metrics name="iPlanet 4.1 VHost">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <help name="iPlanet 6.0">
+  <![CDATA[
+  <p>
+  <b>NOTE</b>: iPlanet ${product.version} server types are configured via
+  AutoDiscovery.<br>
+  See <b>iPlanet Admin ${product.version}</b> server for product
+  setup information.
+  </p>
+  ]]>
+  </help>
+
+  <help name="iPlanet Admin 6.0">
+  <![CDATA[
+  <p>
+  <h3>Configure iPlanet for SNMP Monitoring</h3>
+  </p>
+  <ul>
+    <li>Open http://localhost:8888/</li>
+
+    <li>Select a Server, click [Manage]</li>
+
+    <li>Click [Monitor] tab
+    <ul>
+      <li>Activate Statistics/Profiling? (x) Yes</li>
+
+      <li>Click [OK]</li>
+    </ul>
+    </li>
+
+    <li>Click "SNMP Subagent Configuration"
+    <ul>
+      <li>Fill in Description, Organization, Location and Contact fields.</li>
+
+      <li>Enable SNMP Statistics Collection: (x) On</li>
+
+      <li>Click [OK]</li>
+    </ul>
+    </li>
+
+    <li>Click "SNMP Subagent Control"
+    <ul>
+      <li>Click [Start]
+      <ul>
+        <li>If master agent not running, click "Start SNMP Master Agent"</li>
+        <li>Click [Start]</li>
+        <li>Click "SNMP Subagent Control"</li>
+        <li>Click [Start]</li>
+      </ul>
+      </li>
+    </ul>
+    </li>
+
+    <li>Restart server</li>
+  </ul>
+  ]]>
+  </help>
+
+  <metrics name="iPlanet Admin 6.0">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="iPlanet 6.0">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Uptime"
+            alias="Uptime"
+            template="${iplanet.snmp}:iwsInstanceUptime:${server.config.v6}"
+            category="AVAILABILITY"
+            group="Reliability"
+            units="ms"
+            collectionType="static"/>
+
+    <!-- XXX could also be AVAILABILITY -->
+    <metric name="Status"
+            alias="Status"
+            template="${iplanet.snmp}:iwsInstanceStatus:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Deaths"
+            alias="DeathCount"
+            template="${iplanet.snmp}:iwsInstanceDeathCount:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Number of Requests"
+            alias="Requests"
+            template="${iplanet.snmp}:iwsInstanceRequests:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Received"
+            alias="InOctets"
+            template="${iplanet.snmp}:iwsInstanceInOctets:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Sent"
+            alias="OutOctets"
+            template="${iplanet.snmp}:iwsInstanceOutOctets:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+
+   <!-- XXX: unclear on what Network{In,Out}Octets are
+        always 0 on linux, seem to go up and down on solaris
+        on solaris, {In,Out}Octets above are always 0.  argh. -->
+
+    <metric name="Network Bytes Received"
+            alias="NetworkInOctets"
+            template="${iplanet.snmp}:iwsInstanceNetworkInOctets:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Network Bytes Sent"
+            alias="NetworkOutOctets"
+            template="${iplanet.snmp}:iwsInstanceNetworkOutOctets:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Success Responses"
+            alias="Count2xx"
+            template="${iplanet.snmp}:iwsInstanceCount2xx:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Redirect Responses"
+            alias="Count3xx"
+            template="${iplanet.snmp}:iwsInstanceCount3xx:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Client Error Responses"
+            alias="Count4xx"
+            template="${iplanet.snmp}:iwsInstanceCount4xx:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Server Error Responses"
+            alias="Count5xx"
+            template="${iplanet.snmp}:iwsInstanceCount5xx:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Bad Requests"
+            alias="Count400"
+            template="${iplanet.snmp}:iwsInstanceCount400:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Authentication Failures"
+            alias="Count401"
+            template="${iplanet.snmp}:iwsInstanceCount401:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Forbidden Errors"
+            alias="Count403"
+            template="${iplanet.snmp}:iwsInstanceCount403:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Not Found Errors"
+            alias="Count404"
+            template="${iplanet.snmp}:iwsInstanceCount404:${server.config.v6}"
+            category="THROUGHPUT"
+            group="Throughput"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- XXX: seems Load*MinuteAverage are only available on solaris -->
+    <metric name="Load Average 1 Minute"
+            alias="Load1MinuteAverage"
+            template="${iplanet.snmp}:iwsInstanceLoad1MinuteAverage:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Load Average 5 Minutes"
+            alias="Load5MinuteAverage"
+            template="${iplanet.snmp}:iwsInstanceLoad5MinuteAverage:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Load Average 15 Minutes"
+            alias="Load15MinuteAverage"
+            template="${iplanet.snmp}:iwsInstanceLoad15MinuteAverage:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Total Number of Threads"
+            alias="ThreadCount"
+            template="${iplanet.snmp}:iwsProcessThreadCount:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Idle Threads"
+            alias="ThreadIdle"
+            template="${iplanet.snmp}:iwsProcessThreadIdle:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Connection Queue Count"
+            alias="ConnectionQueueCount"
+            template="${iplanet.snmp}:iwsProcessConnectionQueueCount:${server.config.v6}"
+            category="UTILIZATION"
+            group="Connection Queue"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Connection Queue Peak"
+            alias="ConnectionQueuePeak"
+            template="${iplanet.snmp}:iwsProcessConnectionQueuePeak:${server.config.v6}"
+            category="UTILIZATION"
+            group="Connection Queue"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Connection Queue Max"
+            alias="ConnectionQueueMax"
+            template="${iplanet.snmp}:iwsProcessConnectionQueueMax:${server.config.v6}"
+            category="UTILIZATION"
+            group="Connection Queue"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Connection Queue Overflows"
+            alias="ConnectionQueueOverflows"
+            template="${iplanet.snmp}:iwsProcessConnectionQueueOverflows:${server.config.v6}"
+            category="UTILIZATION"
+            group="Connection Queue"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Keepalive Count"
+            alias="KeepaliveCount"
+            template="${iplanet.snmp}:iwsProcessKeepaliveCount:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Keepalive Max"
+            alias="KeepaliveMax"
+            template="${iplanet.snmp}:iwsProcessKeepaliveMax:${server.config.v6}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="static"/>
+
+    <!-- XXX: seems memory metrics are only available on solaris -->
+    <metric name="Process Virtual Size"
+            alias="SizeVirtual"
+            template="${iplanet.snmp}:iwsProcessSizeVirtual:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Process Resident Size"
+            alias="SizeResident"
+            template="${iplanet.snmp}:iwsProcessSizeResident:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Process System Memory Usage"
+            alias="FractionSystemMemoryUsage"
+            template="${iplanet.snmp}:iwsProcessFractionSystemMemoryUsage:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- XXX: seems cpu metrics are only available on solaris -->
+    <metric name="Idle Time"
+            alias="IdleTime"
+            template="${iplanet.snmp}:iwsCpuIdleTime:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="jiffys"
+            collectionType="trendsup"/>
+
+    <metric name="User Time"
+            alias="UserTime"
+            template="${iplanet.snmp}:iwsCpuUserTime:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="jiffys"
+            collectionType="trendsup"/>
+
+    <metric name="Kernel Time"
+            alias="KernelTime"
+            template="${iplanet.snmp}:iwsCpuKernelTime:${server.config.v6}"
+            category="UTILIZATION"
+            group="Process"
+            units="jiffys"
+            collectionType="trendsup"/>
+
+  </metrics>
+
+  <metrics name="iPlanet 6.0 VHost">
+    <metric name="Availability"
+            alias="Availability"
+            template="%protocol%:${url.config}:${alias}"
+            category="AVAILABILITY"
+            group="Availability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <metrics name="iPlanet 6.0 Thread Pool">
+    <!-- best we can do is make sure there is data for thread pool
+         with the given name.  so we just alias Count and check
+         avail=true in the plugin.
+    -->
+    <metric name="Thread Pool Availability"
+            alias="Availability"
+            template="${iplanet.snmp}:iwsThreadPoolCount:${thrpool.config},avail=true"
+            category="AVAILABILITY"
+            group="Availability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Thread Pool Count"
+            alias="Count"
+            template="${iplanet.snmp}:iwsThreadPoolCount:${thrpool.config}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Thread Pool Peak"
+            alias="PoolPeak"
+            template="${iplanet.snmp}:iwsThreadPoolPeak:${thrpool.config}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Thread Pool Max"
+            alias="PoolMax"
+            template="${iplanet.snmp}:iwsThreadPoolMax:${thrpool.config}"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            units="none"
+            collectionType="static"/>
+  </metrics>
+
+  <server name="iPlanet Admin"
+          description="Admin Server"
+          version="4.1"
+          platforms="Unix,Win32">
+
+    <plugin type="measurement"
+            class="iPlanetMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="iPlanetControlPlugin"/>
+
+    <actions include="start,stop,restart"/>
+
+    <plugin type="autoinventory"
+            class="iPlanet4Detector"/>
+
+    <config include="url,protocol">
+      <option name="server.id"
+              description="Server instance id"
+              default="https-admserv"/>
+    </config>
+
+    <config include="snmp" type="measurement"/>
+
+    <scan>
+      <include name="/**/https-admserv/config/obj.conf"/>
+    </scan>
+  </server>
+
+  <server name="iPlanet"
+          description="Web Server"
+          version="4.1"
+          platforms="Unix,Win32">
+
+    <config include="url,protocol">
+      <option name="server.id"
+              description="Server Instance Id"
+              default="https-hostname.domain"/>
+    </config>
+
+    <config include="snmp" type="measurement"/>
+
+    <plugin type="measurement"
+            class="iPlanetMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="iPlanetControlPlugin"/>
+
+    <actions include="start,stop,restart"/>
+
+    <service name="VHost">
+      <config include="url,protocol"/>
+
+      <plugin type="responsetime"
+              class="iPlanetRtPlugin"/>
+    </service>
+  </server>
+
+  <server name="iPlanet"
+          version="6.0"
+          include="4.1">
+
+    <service name="Thread Pool" internal="true">
+      <config>
+        <option name="thrpool.id"
+                description="Thread Pool Id"
+                default="NativePool"/>
+      </config>
+    </service>
+
+  </server>
+
+  <server name="iPlanet Admin"
+          version="6.0"
+          include="4.1">
+
+    <plugin type="autoinventory"
+            class="iPlanet6Detector"/>
+  </server>
+</plugin>

@@ -1,0 +1,518 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.tomcat" name="tomcat">
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+    <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
+    <include name="server/lib/commons-modeler-*.jar"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <metrics name="Thread Metrics">
+    <metric name="Thread Count"
+            alias="ThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="trendsup"/>
+    <metric name="Current Thread Cpu Time"
+            alias="CurrentThreadCpuTime"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Current Thread User Time"
+            alias="CurrentThreadUserTime"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Daemon Thread Count"
+            alias="DaemonThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Peak Thread Count"
+            alias="PeakThreadCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="static"/>
+  </metrics>
+
+  <metrics name="OS Metrics">
+    <metric name="Free Swap Space Size"
+            alias="FreeSwapSpaceSize"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="Free Physical Memory Size"
+            alias="FreePhysicalMemorySize"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="B"
+            collectionType="dynamic"/>
+    <metric name="Process Cpu Time"
+            alias="ProcessCpuTime"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="trendsup"/>
+    <metric name="Open File Descriptor Count"
+            alias="OpenFileDescriptorCount"
+            indicator="false"
+            template="${OBJECT_NAME}:${alias}"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="Runtime Metrics">
+    <metric name="UpTime"
+            alias="Uptime"
+            indicator="true"
+            template="${OBJECT_NAME}:${alias}"
+            units="ms"
+            collectionType="static"/>
+  </metrics>
+
+  <server name="Apache Tomcat"
+          version="5.5">
+
+    <property name="VERSION_FILE"
+              value="server/lib/catalina-storeconfig.jar"/>
+
+    <property name="domain"
+              value="Catalina"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Runtime"/>
+    <metrics include="Runtime Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=OperatingSystem"/>
+    <metrics include="OS Metrics"/>
+
+    <property name="OBJECT_NAME"
+              value="java.lang:type=Threading"/>
+    <metrics include="Thread Metrics"/>
+
+    <!-- derive installpath from -Dcatalina.base=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+
+    <property name="DEFAULT_CONF"
+              value="conf/server.xml"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="logs/catalina.out"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
+
+    <config>
+      <option name="jmx.url"
+              description="JMX URL to MBeanServer"
+              default="service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi"/>
+      <option name="jmx.username"
+              description="JMX username"
+              optional="true"
+              default="system"/>
+      <option name="jmx.password"
+              description="JMX password"
+              optional="true"
+              default="manager"
+              type="secret"/>
+      <option name="ptql"
+              description="PTQL for Tomcat Process"
+              default="State.Name.eq=java,Args.*.ct=catalina.home"/>
+    </config>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            indicator="true"/>
+
+    <service name="Web Module Stats">
+      <property name="OBJECT_NAME"
+                value="${domain}:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=*"/>
+      <plugin type="autoinventory"/>
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+      <actions include="stop,start,reload"/>
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="name"
+                description="Name Of Web Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="sec"/>
+    </service>
+
+    <service name="Thread Pools">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=ThreadPool,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+      <actions include="start,shutdown"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="name"
+                description="Listener Name"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Current Thread Count"
+              alias="currentThreadCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Current Thread Busy"
+              alias="currentThreadBusy"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+    </service>
+
+    <service name="Servlet Monitor">
+      <property name="OBJECT_NAME"
+                value="${domain}:j2eeType=Servlet,name=*,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="WebModule"
+                description="Deployed Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Class Load Time"
+              alias="classLoadTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Error Count"
+              alias="errorCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Load Time"
+              alias="loadTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Request Count"
+              alias="requestCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="JSP Monitor">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=JspMonitor,name=jsp,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="WebModule"
+                description="Deployed Module"
+                default=""/>
+        <option name="J2EEApplication"
+                description="J2EE Application"
+                default=""/>
+        <option name="J2EEServer"
+                description="J2EE Server"
+                default=""/>
+      </config>
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="JSP Count"
+              alias="jspCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="JSP Reload Count"
+              alias="jspReloadCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="Global Request Processor">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=GlobalRequestProcessor,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="name"
+                description="Listener Name"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Bytes Sent"
+              alias="bytesSent"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Bytes Received"
+              alias="bytesReceived"
+              indicator="false"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Error Count"
+              alias="errorCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Processing Time"
+              alias="processingTime"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Request Count"
+              alias="requestCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="Cache">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=Cache,host=*,path=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="path"
+                description="Context Path of Deployed Application"
+                default=""/>
+        <option name="host"
+                description="Hostname"
+                default=""/>
+                description="Associated Java Class"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Access Count"
+              alias="accessCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+      <metric name="Hits Count"
+              alias="hitsCount"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              collectionType="trendsup"
+              units="none"/>
+    </service>
+
+    <service name="DataSource Pool">
+      <property name="OBJECT_NAME"
+                value="${domain}:type=DataSource,path=*,host=*,class=*,name=*"/>
+
+      <plugin type="autoinventory"/>
+
+      <!-- listen for JMX notifications -->
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.jmx.MxNotificationPlugin"/>
+
+      <config>
+        <option name="path"
+                description="Context Path of Deployed Application"
+                default=""/>
+        <option name="host"
+                description="Hostname"
+                default=""/>
+        <option name="class"
+                description="Associated Java Class"
+                default=""/>
+        <option name="name"
+                description="Name of Attribute"
+                default=""/>
+      </config>
+
+      <metric name="Availability"
+              indicator="true"/>
+      <metric name="Idle DataSource Connections"
+              alias="numIdle"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+      <metric name="Active DataSource Connections"
+              alias="numActive"
+              indicator="true"
+              template="${OBJECT_NAME}:${alias}"
+              units="none"/>
+    </service>
+
+    <service name="Java Process Metrics">
+      <config>
+        <option name="process.query"
+                default="%ptql%"
+                description="PTQL for Tomcat Java Process"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="HTTP">
+      <config include="http"/>
+      <filter name="template"
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+  </server>
+
+  <server name="Apache Tomcat"
+          version="6.0"
+          include="5.5">
+    <property name="VERSION_FILE"
+              value="lib/catalina-ha.jar"/>
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Apache Tomcat">
+  <![CDATA[
+  <p>
+  <h3>Configure Apache Tomcat for JMX</h3>
+  </p>
+  To configure Tomcat for JMX monitoring see http://tomcat.apache.org/tomcat-${product.version}-doc/monitoring.html.
+  <br>
+  For a quick down and dirty method follow these instructions,
+  <br>
+  in <installpath>/bin/catalina.sh add:
+  <br>
+  JAVA_OPTS="-Dcom.sun.management.jmxremote \
+  <br>
+  -Dcom.sun.management.jmxremote.port=6969 \
+  <br>
+  -Dcom.sun.management.jmxremote.ssl=false \
+  <br>
+  -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTS"
+  <br>
+  export JAVA_OPTS
+  <br>
+  From there restart Tomcat and that is it.
+  </p>
+  ]]>
+  </help>
+  <help name="Apache Tomcat 5.5" include="Apache Tomcat"/>
+  <help name="Apache Tomcat 6.0" include="Apache Tomcat"/>
+</plugin>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
+
+  <class name="TriggerEvent" table="EAM_TRIGGER_EVENT">
+    <composite-id name="id" class="TriggerEventId">
+      <key-property name="triggerId" type="integer">
+        <column name="TRIGGER_ID" not-null="true"/>
+      </key-property>
+
+      <key-many-to-one name="eventId" class="Event">
+        <column name="EVENT_ID" not-null="true" index="TRIGGER_EVENT_ID_IDX"/>
+      </key-many-to-one>
+    </composite-id>
+
+    
+
+    <property name="expiration" type="long">
+      <column name="EXPIRATION"/>
+    </property>
+  </class>
+
+</hibernate-mapping>

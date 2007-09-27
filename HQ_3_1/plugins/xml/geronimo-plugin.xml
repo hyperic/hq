@@ -1,0 +1,232 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.geronimo" name="geronimo">
+
+  <classpath>
+    <include name="pdk/lib/mx4j"/>
+    <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
+    <include name="repository/org.apache.geronimo.specs/jars/geronimo-j2ee_1.4_spec-*.jar"/>
+    <include name="repository/geronimo/jars/geronimo-management-*.jar"/>
+    <include name="repository/geronimo/geronimo-management/1.1/geronimo-management-*.jar"/>
+    <include name="repository/geronimo/geronimo-management/1.1.1/geronimo-management-*.jar"/>
+    <include name="repository/org/apache/geronimo/specs/geronimo-j2ee_1.4_spec/1.1/geronimo-j2ee_1.4_spec-*.jar"/>
+  </classpath>
+
+  <filter name="template"
+          value="${OBJECT_NAME}:${alias}"/>
+
+  <server name="Geronimo"
+          version="1.0">
+
+    <property name="domain"
+              value="geronimo"/>
+
+    <property name="OBJECT_NAME"
+              value="${domain}:j2eeType=J2EEServer,name=geronimo"/>
+
+    <property name="JVM_OBJECT_NAME"
+              value="${domain}:j2eeType=JVM,J2EEServer=geronimo,name=JVM"/>
+
+    <!-- derive installpath from -Dorg.apache.geronimo.base.dir=... -->
+    <property name="PROC_HOME_PROPERTY"
+              value="org.apache.geronimo.base.dir"/>
+
+    <property name="DEFAULT_CONFIG_FILE"
+              value="var/conf/config.xml"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="var/log/geronimo.log"/>
+
+    <property name="DEFAULT_PROGRAM"
+              value="bin/geronimo.sh"/>
+
+    <config>
+      <option name="jmx.url"
+              description="JMX URL to MBeanServer"
+              default="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/JMXConnector"/>
+
+      <option name="jmx.username"
+              description="JMX username"
+              optional="true"
+              default="system"/>
+
+      <option name="jmx.password"
+              description="JMX password"
+              optional="true"
+              default="manager"
+              type="secret"/>
+    </config>
+
+    <properties>
+       <property name="serverVersion"
+                 description="Server Version"/>
+
+       <property name="serverVendor"
+                 description="Server Vendor"/>
+
+       <property name="${JVM_OBJECT_NAME}:javaVersion"
+                 description="Java Version"/>
+
+       <property name="${JVM_OBJECT_NAME}:javaVendor"
+                 description="Java Vendor"/>
+    </properties>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
+
+    <property name="stop.args"
+              value="--user %jmx.username% --password %jmx.password%"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="UpTime"
+            alias="UpTime"
+            indicator="true"
+            template="${JVM_OBJECT_NAME}:Stats.${alias}"
+            units="ms"
+            collectionType="static"/>
+
+    <metric name="JVM Heap Size"
+            alias="HeapSize"
+            indicator="true"
+            template="${JVM_OBJECT_NAME}:Stats.${alias}"
+            units="B"/>
+
+    <service name="Entity Bean">
+      <property name="OBJECT_NAME"
+                value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=geronimo,j2eeType=EntityBean,name=*"/>
+
+      <config>
+        <option name="EJBModule" 
+                description="EJB Module"
+                default=""/>
+        <option name="J2EEApplication" 
+                description="J2EE Application"
+                default=""/>
+        <option name="name" 
+                description="Name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+    </service>
+
+    <service name="Stateless Session Bean">
+      <property name="OBJECT_NAME"
+                value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=geronimo,j2eeType=StatelessSessionBean,name=*"/>
+
+      <config>
+        <option name="EJBModule" 
+                description="EJB Module"
+                default=""/>
+        <option name="J2EEApplication" 
+                description="J2EE Application"
+                default=""/>
+        <option name="name" 
+                description="Name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+    </service>
+
+    <service name="Stateful Session Bean">
+      <property name="OBJECT_NAME"
+                value="${domain}:EJBModule=*,J2EEApplication=*,J2EEServer=geronimo,j2eeType=StatefulSessionBean,name=*"/>
+
+      <config>
+        <option name="EJBModule" 
+                description="EJB Module"
+                default=""/>
+        <option name="J2EEApplication" 
+                description="J2EE Application"
+                default=""/>
+        <option name="name" 
+                description="Name"
+                default=""/>
+      </config>
+
+      <plugin type="autoinventory"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+    </service>
+
+    <service name="JCA Connection Factory">
+      <property name="OBJECT_NAME"
+                value="${domain}:J2EEApplication=*,J2EEServer=geronimo,JCAResource=*,j2eeType=JCAManagedConnectionFactory,name=*"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+      <actions include="setConfigProperty,getConfigProperty"/>
+
+      <config>
+        <option name="J2EEApplication" 
+                description="J2EE Application"
+                default=""/>
+        <option name="JCAResource" 
+                description="JCA Resource"
+                default=""/>
+        <option name="name" 
+                description="Name"
+                default=""/>
+      </config>
+
+      <properties>
+         <property name="connectionFactoryImplClass"
+                   description="Connection Factory Class"/>
+      </properties>
+
+      <plugin type="autoinventory"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+    </service>
+
+  </server>
+</plugin>

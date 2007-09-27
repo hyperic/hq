@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+  <!-- extracted to: pdk/work/scripts/qmail/hq-qmail-qstat -->
+  <script name="hq-qmail-qstat">
+#!/bin/sh
+
+#modified version of /var/qmail/bin/qmail-qstat
+#same logic, only the format of the two echo statements differ
+
+cd /var/qmail
+messdirs=`echo queue/mess/* | wc -w`
+messfiles=`find queue/mess/* -print | wc -w`
+tododirs=`echo queue/todo | wc -w`
+todofiles=`find queue/todo -print | wc -w`
+echo MessagesInQueue=`expr $messfiles - $messdirs`
+echo MessagesAwaitingPreprocessing=`expr $todofiles - $tododirs`
+  </script>
+
+  <server name="qmail" description="MTA">
+
+    <config>
+      <option name="process.query"
+              description="Process Query"
+              default="State.Name.eq=qmail-send"/>
+    </config>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <!-- process metrics -->
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+
+    &process-metrics;
+
+    <!-- qmail-qstat metrics -->
+    <filter name="template"
+            value="exec:file=pdk/work/scripts/qmail/hq-qmail-qstat,exec=sudo:${alias}"/>
+
+    <metric name="Messages In Queue"
+            indicator="true"/>
+
+    <metric name="Messages Awaiting Preprocessing"
+            indicator="true"/>
+
+    <!-- protocol services+metrics -->
+    <service name="SMTP">
+      <config>
+        <option name="hostname"
+                description="SMTP Hostname"
+                default="localhost"/>
+      </config>
+
+      <filter name="template"
+              value="SMTP:hostname=%hostname%:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
+    <service name="POP3">
+      <config>
+        <option name="hostname"
+                description="POP3 Hostname"
+                default="localhost"/>
+      </config>
+
+      <filter name="template"
+              value="POP3:hostname=%hostname%:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+
+  </server>
+
+</plugin>

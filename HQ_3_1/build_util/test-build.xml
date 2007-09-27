@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<project name="test-build" basedir="..">
+
+<target name="test" depends="init,init-taskdefs">
+    <mkdir dir="${junitResults.dir}"/>
+    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
+      <classpath>
+        <path refid="alljars"/>
+        <path refid="testjars"/>
+        <path location="${build.dir}/classes" />
+        <path location="${build.dir}/src" />            
+        <path>
+          <fileset dir="${thirdparty.lib}" includes="*.jar" />
+        </path>
+      </classpath>
+      <formatter type="xml"/>
+      <batchtest todir="${junitResults.dir}">
+        <fileset dir="src">
+          <include name="**/*Test.java"/>
+          <exclude name="**/*CactusTest.java"/>
+          <include name="**/*_test.java"/>			
+        </fileset>
+      </batchtest>
+      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
+      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
+      <sysproperty key="hq.server.ds-mapping" value="${hq.server.ds-mapping}"/>
+      <sysproperty key="hq.jdbc.url" value="${hq.jdbc.url}"/>
+      <sysproperty key="hq.jdbc.name" value="${hq.jdbc.name}"/>
+      <sysproperty key="hq.jdbc.user" value="${hq.jdbc.user}"/>
+      <sysproperty key="hq.jdbc.password" value="${hq.jdbc.password}"/>
+      <sysproperty key="hq.jdbc.server" value="${hq.jdbc.server}"/>
+    </junit>
+
+  </target>
+
+  <target name="cactus" depends="init,init-taskdefs">
+    <mkdir dir="${junitResults.dir}"/>
+    <junit reloading="no" fork="no" printsummary="yes" haltonerror="no">
+      <classpath>
+        <path refid="alljars"/>
+        <path refid="testjars"/>
+        <path location="${build.dir}/classes" />
+        <path location="${build.dir}/src" />
+        <path>
+          <fileset dir="${thirdparty.lib}" includes="*.jar" />
+        </path>
+      </classpath>
+      <formatter type="plain"/>
+      <batchtest todir="${junitResults.dir}">
+        <fileset dir="src">
+          <include name="**/*CactusTest.java"/>
+        </fileset>
+      </batchtest>
+      <sysproperty key="mockejb.cactus.mode" value="true"/>
+      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
+      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
+    </junit>
+
+  </target>
+
+
+  <!-- Instrument classes directory inplace with emma -->
+  <target name="instrument" depends="init,init-taskdefs">
+    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+
+    <emma>
+      <instr instrpath="${build.dir}/classes" mode="overwrite">
+        <!-- exclude tests -->
+        <filter excludes="*Test*" />
+      </instr>
+    </emma>
+  </target>
+
+  <target name="coverage">
+    <mkdir dir="${basedir}/coverage"/>
+
+    <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+    <emma>
+      <report sourcepath="${basedir}/src">
+        <infileset dir="." includes="coverage.*" />
+        <html />
+      </report>
+    </emma>
+  </target>
+
+</project>

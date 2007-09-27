@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.postfix">
+  <filter name="domain" value="postfix"/>
+
+  <!-- Process metrics -->
+  <metrics name="process">
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+
+    <metric name="Virtual Memory Size"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+            units="B"/>
+
+    <metric name="Resident Memory Size"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+            indicator="true"
+            units="percentage"/>
+
+    <metric name="Open File Descriptors"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"/>
+  </metrics>
+
+  <metrics name="queue">
+    <metric name="Availability"
+            template="queue:path=%path%:${alias}"
+            indicator="true"/>
+
+    <metric name="Queued Messages"
+            template="queue:path=%path%:${alias}"
+            indicator="true"/>
+
+    <metric name="Queue Size"
+            template="queue:path=%path%:${alias}"
+            units="B"/>
+  </metrics>
+
+  <help name="postfix">
+    <![CDATA[
+    <p>
+    <h3>Configure Postfix ${product.version} for Monitoring</h3>
+    </p>
+    <p>
+    The HQ Agent must be running as root or a user with sufficient privileges
+    to read the mail queues.
+    </p>
+    ]]>
+  </help>  
+
+  <server name="Postfix" 
+          version="2.x"
+          platforms="Unix">
+
+    <plugin type="measurement"
+            class="PostfixMeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="PostfixServerDetector"/>
+
+    <config>
+      <option name="process.query"
+              description="Process query for post master"
+              default="State.Name.eq=master"/>
+      <option name="postconf"
+              description="location of the postconf binary"
+              default="/usr/sbin/postconf"/>
+      <option name="configDir"
+              description="config directory (path to main.cf)"
+              default="/etc/postfix"/>
+    </config>
+
+    <metrics include="process"/>
+
+    <help include="postfix"/>
+
+    <service name="Queue">
+      <plugin type="measurement"
+              class="PostfixMeasurementPlugin"/>
+
+      <config>
+        <option name="queue"
+                description="Queue Name"/>
+        <option name="path"
+                description="full path to the queue"/>
+      </config>
+
+      <metrics include="queue"/>
+    </service>
+
+  </server>
+
+</plugin>

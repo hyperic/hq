@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+  <!-- include all drivers from this directory -->
+  <classpath>
+    <include name="pdk/lib/jdbc"/>
+  </classpath>
+
+  <!-- we use a dummy jmx object name -->
+  <filter name="domain" value="sqlquery"/>
+
+  <!-- appended to each template by MeasurementInfoXML -->
+  <property name="template-config"
+            value="jdbcDriver=%jdbcDriver%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+
+  <metrics name="sqlqueries">
+
+    <metric name="Availability"
+            alias="Availability"
+            template="${domain}:%jdbcQuery%:availability"
+            category="AVAILABILITY"
+            group="Reliability"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Query"
+            alias="Query"
+            template="${domain}:%jdbcQuery%:${alias}"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Query Execution Time"
+            alias="QueryExecTime"
+            template="${domain}:%jdbcQuery%:${alias}"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="ms"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <!-- Server Type -->
+  <server name="SQL Query">
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.plugin.sqlquery.SQLQueryMeasurementPlugin"/>
+
+    <metrics include="sqlqueries"/>
+
+    <config name="sql" type="global">
+      <option name="jdbcDriver" type="enum"
+              description="JDBC Driver Class Name"
+              default="org.postgresql.Driver">
+        <include name="org.postgresql.Driver"/>
+        <include name="oracle.jdbc.driver.OracleDriver"/>
+        <include name="com.microsoft.jdbc.sqlserver.SQLServerDriver"/>
+        <include name="com.mysql.jdbc.Driver"/>
+        <include name="com.ibm.db2.jcc.DB2Driver"/>
+        <include name="com.sybase.jdbc2.jdbc.SybDriver"/>
+      </option>
+      <option name="jdbcUrl"
+              description="JDBC Connection URL"/>
+              default="jdbc:postgresql://localhost:9432/hqdb"/>
+      <option name="jdbcUser"
+              description="JDBC User"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
+    </config>
+
+    <config type="measurement" include="sql">
+      <option name="jdbcQuery"
+              description="SQL query to run"/>
+    </config>
+
+  </server>
+
+  <help name="SQL Query">
+  <![CDATA[
+  <p>
+  If the <b>Oracle</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:oracle:thin:localhost:1521:TEST</i>
+  </p>
+
+  <p>
+  If the <b>MySQL</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:mysql://localhost/test</i>
+  </p>
+
+  <p>
+  If the <b>PostgreSQL</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:postgresql://localhost:5432/test</i>
+  </p>
+
+  <p>
+  If the <b>MS SQL 2000</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:microsoft:sqlserver://localhost:1433;databasename=test</i>
+  </p> 
+
+  <p>
+  If the <b>DB2</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:db2://localhost:50000/test</i>
+  </p> 
+
+  <p>
+  If the <b>Sybase</b> driver is selected, the JDBC URL syntax is: 
+  <i>jdbc:sybase:Tds:localhost:4100/test</i>
+  </p>
+  ]]>
+  </help>
+
+</plugin>
+

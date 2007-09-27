@@ -1,0 +1,107 @@
+Hyperic HQ includes a number of third-party open source components 
+in its distribution. The list below identifies the community or 
+organization and links to their appropriate license terms.
+
+The Hyperic engineering team would like to thank all the communities 
+of the projects listed below for their contributions. 
+---------------------------------------------------------------------
+
+- JBoss Group - 
+Information: http://www.jboss.org
+License: http://www.jboss.org/company/opensouce_aboutlgpl
+
+- Apache Struts - 
+Information: http://struts.apache.org
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+- PostgreSQL Development Group -
+Information: http://www.postgresql.org
+License: http://www.postgresql.org/licence.html
+
+- Apache Jakarta Project -
+Information: http://jakarta.apache.org
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+- Quartz Enterprise Job Scheduler - 
+Information: http://www.opensymphony.com/quartz/
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+- XDoclet -
+Information: http://xdoclet.sourceforge.net/
+License: http://xdoclet.sourceforge.net/xdoclet/licenses/xdoclet-license.html
+
+- JDOM -
+Information: http://www.jdom.org/
+License: http://www.jdom.org/docs/faq.html#a0030
+
+- MySQL Connector/J -
+Information: http://www.mysql.com/products/connector/j/
+License: http://www.gnu.org/licenses/gpl.txt
+
+- MX4j - 
+Information: http://www.mx4j.org
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+- dnsjava -
+Information: http://www.dnsjava.org/
+License: http://www.dnsjava.org/README
+
+- JSch -
+Information: http://www.jcraft.com/jsch
+License: http://www.jcraft.com/jsch/LICENSE.txt
+
+- SNMP4J -
+Information: http://www.snmp4j.org/index.html
+License: http://www.snmp4j.org/LICENSE-2_0.txt
+
+- Rico -
+Information: http://www.openrico.org
+License: http://www.apache.org/licenses/LICENSE-2.0.html
+
+- Prototype -
+Information: http://prototype.conio.net
+License: http://prototype.conio.net
+
+- script.aculo.us -
+Information: http://script.aculo.us
+License: http://script.aculo.us/downloads
+
+- InstantJ -
+Information: http://instantj.sourceforge.net/
+License: http://www.gnu.org/licenses/lgpl.txt
+
+- GNU getopt Java port -
+Information: http://www.urbanophile.com/arenn/hacking/download.html
+License: http://www.gnu.org/licenses/lgpl.txt
+
+- PrintfFormat.java -
+Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
+License: within src/org/hyperic/util/PrintfFormat.java 
+
+- JBoss Messaging -
+Information: http://labs.jboss.com/portal/jbossmessaging/
+License: http://www.jboss.org/company/opensouce_aboutlgpl
+
+- ANTLR 2 -
+Information: http://www.antlr.org
+License: http://www.antlr.org/license.html
+
+- Hibernate -
+Information: http://hibernate.org
+License: http://www.gnu.org/licenses/lgpl.txt
+
+- Dom4j -
+Information: http://www.dom4j.org
+License: http://www.dom4j.org/license.html
+
+- Prototype Window Class -
+Information: http://prototype-window.xilinus.com
+License: http://prototype-window.xilinus.com/index.html
+
+- bockport-util-concurrent -
+Information:  http://dcl.mathcs.emory.edu/util/backport-util-concurrent
+License: http://creativecommons.org/licenses/publicdomain
+
+- FAMFAMFAM -
+Information: http://www.famfamfam.com/lab/icons/silk/
+License: http://creativecommons.org/licenses/by/2.5/

@@ -1,0 +1,305 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY hibernate-build SYSTEM "setup-db-hibernate.xml">
+]>
+
+<project name="setup-db-common" default="direct-error" basedir=".">
+
+  &hibernate-build;
+
+  <target name="direct-error">
+    <fail>
+      This buildfile is used as a utility for other setup files.
+      Do not invoke it directly.
+    </fail>
+  </target>
+
+  <target name="dbsetup-process-file">
+    <property name="server.jdbc-url" value="${server.database-url}"/>
+
+    <echo message="using: ${server.jdbc-url}"/>
+    <dbsetup xmlFile="${dbsetupfile}"
+         jdbcUrl="${server.jdbc-url}"
+         jdbcUser="${server.database-user}"
+         jdbcPassword="${server.database-password}"
+         typeMap="${install.dir}/data/common-dbsetup-typemap.xml"
+         data="${data}"
+         noexec="false"
+         uninstall="${uninstall}"
+         appendToSqlFile="false" />
+  </target>
+
+  <!-- This only drops and re-sets-up the EAM_CONFIG_PROPS table,
+       which is all we need to do when using the builtin-db. -->
+  <target name="dbsetup-process-configonly">
+    <property name="server.jdbc-url" value="${server.database-url}"/>
+
+    <echo message="using: ${server.jdbc-url}"/>
+    <dbsetup xmlFile="${dbsetupfile}"
+         jdbcUrl="${server.jdbc-url}"
+         jdbcUser="${server.database-user}"
+         jdbcPassword="${server.database-password}"
+         typeMap="${install.dir}/data/common-dbsetup-typemap.xml"
+         data="true"
+         noexec="false"
+         table="EAM_CONFIG_PROPS"
+         delete="true"
+         appendToSqlFile="false" />
+
+    <dbsetup xmlFile="${dbsetupfile}"
+         jdbcUrl="${server.jdbc-url}"
+         jdbcUser="${server.database-user}"
+         jdbcPassword="${server.database-password}"
+         typeMap="${install.dir}/data/common-dbsetup-typemap.xml"
+         data="true"
+         noexec="false"
+         table="EAM_PRINCIPAL"
+         delete="true"
+         appendToSqlFile="false" />
+  </target>
+
+  <target name="subst-props">
+    <substProps src="${conf-dir}/hq-server.conf"/>
+  </target>
+
+  <target name="dbsetup" depends="hibernate-setup">
+    <antcall target="dbsetup-process-file">
+      <param name="dbsetupfile" value="${data.dir}/data.xml"/>
+      <param name="data"        value="true"/>
+      <param name="uninstall"   value="false"/>
+    </antcall>
+    <!-- Ensure CAM_SCHEMA_VERSION gets set properly --> 
+    <antcall target="upgrade-db"/>
+    <!-- TODO: only call this on fresh installs, not upgrades -->
+    <antcall target="subst-props"/>
+  </target>
+
+  <target name="set-multicast-props" if="server.multicast.addr">
+    <!-- Set multicast address and port explicitly -->
+    <sql driver="${server.database-driver}"
+         url="${server.database-url}"
+         userid="${server.database-user}"
+         password="${server.database-password}">
+      UPDATE EAM_CONFIG_PROPS SET PROPVALUE='${server.multicast.addr}'
+      WHERE PROPKEY='CAM_MULTICAST_ADDRESS';
+      UPDATE EAM_CONFIG_PROPS SET PROPVALUE='${server.multicast.port}'
+      WHERE PROPKEY='CAM_MULTICAST_PORT';
+    </sql>
+  </target>
+
+  <target name="upgrade-db" depends="hibernate-prep">
+    <ant antfile="${install.dir}/data/db-upgrade.xml"
+         target="upgrade"
+         inheritAll="true"
+         inheritRefs="true">
+      <property name="jdbc.url" value="${server.database-url}"/>
+      <property name="jdbc.user" value="${server.database-user}"/>
+      <property name="jdbc.password" value="${server.database-password}"/>
+      <property name="typemap.file" value="${install.dir}/data/common-dbsetup-typemap.xml"/>
+      <property name="schema.target" value="LATEST"/>
+    </ant>
+    <sql driver="${server.database-driver}"
+         url="${server.database-url}"
+         userid="${server.database-user}"
+         password="${server.database-password}">
+      update EAM_CONFIG_PROPS SET PROPVALUE='${version}'
+      where PROPKEY='CAM_SERVER_VERSION';
+    </sql>
+     
+    <antcall target="set-multicast-props"/>
+
+  </target>
+
+  <target name="external-db-dependencies">
+    <fail unless="server.database-user">
+      No server.database-user property specified.
+    </fail>
+    <fail unless="server.database-password">
+      No server.database-password property specified.
+    </fail>
+    <fail unless="server.database-url">
+      No server.database-url property specified.
+    </fail>
+  </target>
+
+  <target name="replace-dbservice-values">
+    <echo>using url: ${server.database-url} </echo>
+    <property name="server.deploy"
+              value="${server.installdir}/server-${version}/hq-engine/server/default/deploy"/>
+    <property name="server.installed-ear"
+              value="${server.deploy}/${hyperic.ear.tag}"/>
+    <replace file="${server.deploy}/${hyperic.db-service.tag}">
+      <replacefilter token="@@@JDBC_URL@@@" value="${server.database-url}"/>
+      <replacefilter token="@@@JDBC_DRIVER@@@" value="${server.database-driver}"/>
+      <replacefilter token="@@@JDBC_USER@@@" value="${server.database-user}"/>
+      <replacefilter token="@@@JDBC_PASSWORD@@@" value="${server.database-password}"/>
+    </replace>
+
+    <crypto value="${server.admin.password}" property="server.admin.password.encrypted"/>
+
+    <!-- replace the admin info in dbsetup data file -->
+    <delete file="${data.dir}/data.xml"/>
+    <copy file="${install.dir}/data/data-orig.xml"
+          tofile="${data.dir}/data.xml"/>
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@VERSION@@@" value="${hq.version}" />
+      <replacefilter token="@@@ADMINUSERNAME@@@" value="${server.admin.username}"/>
+      <replacefilter token="@@@ADMINPASSWORD@@@" value="${server.admin.password.encrypted}"/>
+      <replacefilter token="@@@ADMINEMAIL@@@" value="${server.admin.email}"/>
+      <replacefilter token="@@@BASEURL@@@" value="${server.webapp.baseurl}"/>
+      <replacefilter token="@@@MAILHOST@@@" value="${server.mail.host}"/>
+      <replacefilter token="@@@MAILSENDER@@@" value="${server.mail.sender}"/>
+      <replacefilter token="@@@MULTICAST_ADDR@@@" value="${server.multicast.addr}"/>
+      <replacefilter token="@@@MULTICAST_PORT@@@" value="${server.multicast.port}"/>
+    </replace>
+    <antcall target="replace-schema-version"/>
+
+    <!-- replace jaas info in dbsetup data file -->
+
+     <condition property="server.jaas.provider.jdbc">
+       <equals arg1="${server.jaas.provider}" arg2="HQ database" trim="true" casesensitive="false"/>
+     </condition>
+
+     <condition property="server.jaas.provider.ldap">
+       <equals arg1="${server.jaas.provider}" arg2="LDAP" trim="true" casesensitive="false"/>
+     </condition>
+
+    <antcall target="replace-jaas-provider-jdbc"/>
+    <antcall target="replace-jaas-provider-ldap"/>
+
+    <!-- replace ldap info in dbsetup data file -->
+
+     <condition property="server.ldap.protocol.ssl">
+       <equals arg1="${server.ldap.protocol}" arg2="Yes" trim="true" casesensitive="false"/>
+     </condition>
+
+     <condition property="server.ldap.protocol.none">
+       <equals arg1="${server.ldap.protocol}" arg2="No" trim="true" casesensitive="false"/>
+     </condition>
+
+    <antcall target="replace-ldap-url-set"/>
+    <antcall target="replace-ldap-url-unset"/>
+    <antcall target="replace-ldap-loginProperty-set"/>
+    <antcall target="replace-ldap-loginProperty-unset"/>
+    <antcall target="replace-ldap-baseDN-set"/>
+    <antcall target="replace-ldap-baseDN-unset"/>
+    <antcall target="replace-ldap-bindDN-set"/>
+    <antcall target="replace-ldap-bindDN-unset"/>
+    <antcall target="replace-ldap-bindPW-set"/>
+    <antcall target="replace-ldap-bindPW-unset"/>
+    <antcall target="replace-ldap-protocol-ssl"/>
+    <antcall target="replace-ldap-protocol-none"/>
+    <antcall target="replace-ldap-searchFilter-set"/>
+    <antcall target="replace-ldap-searchFilter-unset"/>
+  </target>
+
+  <target name="check-replace-schema-version" if="using.builtin.db">
+    <available property="force-schema-version"
+               file="${data.dir}/force-schema-version.properties"/>
+  </target>
+  <target name="replace-schema-version"
+          depends="check-replace-schema-version"
+          if="force-schema-version">
+    <property file="${data.dir}/force-schema-version.properties"/>
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@CAM_SCHEMA_VERSION@@@" value="${force.cam.schema.version}"/>
+    </replace>
+  </target>
+
+  <target name="replace-jaas-provider-jdbc" if="server.jaas.provider.jdbc">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@JAASPROVIDER@@@" value="JDBC"/>
+    </replace>
+  </target>
+
+  <target name="replace-jaas-provider-ldap" if="server.jaas.provider.ldap">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@JAASPROVIDER@@@" value="LDAP"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-url-set" if="server.ldap.url">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPURL@@@" value="${server.ldap.url}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-url-unset" unless="server.ldap.url">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPURL@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-loginProperty-set" if="server.ldap.loginProperty">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPLOGINPROP@@@" value="${server.ldap.loginProperty}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-loginProperty-unset" unless="server.ldap.loginProperty">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPLOGINPROP@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-baseDN-set" if="server.ldap.baseDN">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBASEDN@@@" value="${server.ldap.baseDN}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-baseDN-unset" unless="server.ldap.baseDN">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBASEDN@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-bindDN-set" if="server.ldap.bindDN">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBINDDN@@@" value="${server.ldap.bindDN}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-bindDN-unset" unless="server.ldap.bindDN">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBINDDN@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-bindPW-set" if="server.ldap.bindPW">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBINDPW@@@" value="${server.ldap.bindPW}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-bindPW-unset" unless="server.ldap.bindPW">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPBINDPW@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-protocol-ssl" if="server.ldap.protocol.ssl">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPPROTOCOL@@@" value="ssl"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-protocol-none" if="server.ldap.protocol.none">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPPROTOCOL@@@" value=""/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-searchFilter-set" if="server.ldap.searchFilter">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPSEARCHFILTER@@@" value="${server.ldap.searchFilter}"/>
+    </replace>
+  </target>
+
+  <target name="replace-ldap-searchFilter-unset" unless="server.ldap.searchFilter">
+    <replace file="${data.dir}/data.xml">
+      <replacefilter token="@@@LDAPSEARCHFILTER@@@" value=""/>
+    </replace>
+  </target>
+</project>

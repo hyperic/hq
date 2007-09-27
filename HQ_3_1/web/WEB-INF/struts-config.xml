@@ -1,0 +1,2330 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
+          "http://struts.apache.org/dtds/struts-config_1_2.dtd">
+<!--
+  Default configuration file for examples application.
+  Each module also has its own struts-config under: /WEB-INF/$MODULE/
+  @version $Revision: 1.79 $ $Date: 2006/02/03 19:41:09 $
+-->
+<struts-config>
+  <data-sources />
+  <form-beans>
+        <form-bean  name="LoginForm"
+                    type="org.hyperic.hq.ui.action.authentication.LogonForm"/>
+
+        <!--simple toolbar form-->            
+        <form-bean  name="ToolbarForm"
+                    type="org.hyperic.hq.ui.action.BaseValidatorForm"/>
+
+       <!-- ADMIN USER FORMS-->
+        <form-bean name="EditUserForm"
+                 type="org.hyperic.hq.ui.action.admin.user.EditForm"/>
+
+        <form-bean name="NewUserForm"
+                 type="org.hyperic.hq.ui.action.admin.user.NewForm"/>
+
+        <form-bean name="RegisterUserForm"
+                 type="org.hyperic.hq.ui.action.admin.user.EditForm"/>
+
+        <form-bean name="EditPasswordForm"
+                 type="org.hyperic.hq.ui.action.admin.user.EditPasswordForm"/>
+
+        <form-bean name="RemoveUserForm"
+                 type="org.hyperic.hq.ui.action.admin.user.RemoveForm"/>
+
+        <!-- / -->
+                 
+        <!-- DASHBOARD FORMS -->
+        <form-bean name="LayoutForm"
+                   type="org.hyperic.hq.ui.action.portlet.admin.PortalPropertiesForm"/>                   
+        <form-bean name="AddPortletForm"
+                   type="org.hyperic.hq.ui.action.portlet.addcontent.PropertiesForm"/>
+        <!-- this is used when rendering the AI portlet and processing the queue -->
+        <form-bean name="AIQueueForm"
+                   type="org.hyperic.hq.ui.action.portlet.autoDisc.AIQueueForm"/>
+        <!-- this is for configuring the AI portlet -->
+        <form-bean name="AutoDiscoveryForm"
+                   type="org.hyperic.hq.ui.action.portlet.autoDisc.PropertiesForm"/>
+        <form-bean name="SummaryCountsForm"
+                   type="org.hyperic.hq.ui.action.portlet.summaryCounts.PropertiesForm"/>  
+        <form-bean name="SavedQueriesForm"
+                   type="org.hyperic.hq.ui.action.portlet.savedqueries.PropertiesForm"/>  
+        <form-bean name="ResourceHealthForm"
+                   type="org.hyperic.hq.ui.action.portlet.resourcehealth.PropertiesForm"/>
+        <form-bean name="RecentlyApprovedForm"
+                   type="org.hyperic.hq.ui.action.portlet.recentlyApproved.PropertiesForm"/> 
+        <form-bean name="CriticalAlertsForm"
+                   type="org.hyperic.hq.ui.action.portlet.criticalalerts.PropertiesForm"/>  
+        <form-bean name="DashboardAddResourceHealthForm"
+                   type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesForm"/>  
+        <form-bean name="AvailSummaryForm"
+                   type="org.hyperic.hq.ui.action.portlet.availsummary.PropertiesForm"/>
+        <form-bean name="MetricViewerForm"
+                   type="org.hyperic.hq.ui.action.portlet.metricviewer.PropertiesForm"/>
+
+      <!-- RESOURCE CONTROL FORMS -->
+        <form-bean name="ControlActionsForm"
+                   type="org.hyperic.hq.ui.action.portlet.controlactions.PropertiesForm"/>
+
+        <form-bean name="QuickControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.QuickControlForm"/>
+
+        <form-bean name="RemoveControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryForm"/>
+
+        <form-bean name="RemoveControlJobsForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsForm"/>
+        
+        <!-- / -->
+    
+        <!-- RESOURCE GROUP CONTROL FORMS -->           
+        <form-bean name="GroupControlForm"
+                   type="org.hyperic.hq.ui.action.resource.group.control.GroupControlForm"/>
+                   
+        <!-- / -->  
+
+        <!-- RESOURCE COMMON FORMS -->
+        <form-bean name="ResourceForm"
+                   type="org.hyperic.hq.ui.action.resource.ResourceForm"/>
+
+         <form-bean name="RemoveResourceForm"
+                    type="org.hyperic.hq.ui.action.resource.RemoveResourceForm"/>
+         <form-bean name="RemoveResourceGroupsForm"
+                    type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm"/>
+
+         <form-bean name="ChangeResourceOwnerForm"
+                    type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerForm"/>
+
+         <form-bean name="AddResourceGroupsForm"
+                    type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsForm"/>
+         <form-bean name="AddApplicationServicesForm"
+                    type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServicesForm"/>
+                
+        <form-bean name="CommonConfigForm"
+                    type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigForm"/>
+
+        <form-bean name="IndicatorViewsForm"
+                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorViewsForm"/>
+
+        <form-bean name="ProblemMetricsDisplayForm"
+                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ProblemMetricsDisplayForm"/>
+
+        <form-bean name="MetricsFilterForm"
+                    type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsFilterForm"/>
+
+        <!-- RESOURCE HUB FORMS -->
+        <form-bean name="ResourceHubForm"
+                   type="org.hyperic.hq.ui.action.resource.hub.ResourceHubForm"/>
+
+        <!-- RESOURCE PLATFORM FORMS -->
+        <form-bean name="PlatformForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
+        <form-bean name="NewPlatformForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
+        <form-bean name="EditPlatformGeneralPropertiesForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
+        <form-bean name="EditPlatformTypeNetworkPropertiesForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
+        <form-bean name="RemoveServersForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.inventory.RemoveServersForm"/>
+                   
+         <!-- / -->
+
+        <form-bean name="PlatformAutoDiscoveryForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.PlatformAutoDiscoveryForm"/>
+        <form-bean name="AutoDiscoveryResultsForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.AutoDiscoveryResultsForm"/>
+
+        <!-- uniquely identify the AIPlatformResultsForm -->
+        <form-bean name="AIPlatformResultsForm"
+                   type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.AutoDiscoveryResultsForm"/>
+                   
+        <!-- RESOURCE SERVER FORMS -->
+        <form-bean name="GeneralServerForm"
+                   type="org.hyperic.hq.ui.action.resource.server.inventory.ServerForm"/>
+
+        <form-bean name="ServerForm"
+                   type="org.hyperic.hq.ui.action.resource.server.inventory.ServerForm"/>
+                                   
+        <form-bean name="ServerHostTypeForm"
+                   type="org.hyperic.hq.ui.action.resource.server.inventory.ServerForm"/>
+                   
+         <!-- / -->
+
+        <!-- RESOURCE SERVICE FORMS -->
+        <form-bean name="ServiceForm"
+                   type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceForm"/>
+                   
+        <!-- APPLICATION SERVICE FORMS -->
+        <form-bean name="ApplicationForm"
+                   type="org.hyperic.hq.ui.action.resource.application.ApplicationForm"/>
+        <form-bean name="EditGeneralApplicationForm"
+                   type="org.hyperic.hq.ui.action.resource.application.ApplicationForm"/>
+        <form-bean name="EditApplicationForm"
+                   type="org.hyperic.hq.ui.action.resource.application.ApplicationForm"/>
+        <form-bean name="ListServiceDependenciesForm"
+                    type="org.hyperic.hq.ui.action.resource.application.inventory.ListServiceDependenciesForm"/>
+        <form-bean name="RemoveAppServicesForm"
+                    type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveAppServicesForm"/>
+                   
+        <!-- RESOURCE GROUP FORMS -->
+        <form-bean name="GroupForm"
+                   type="org.hyperic.hq.ui.action.resource.group.inventory.GroupForm"/>
+          <form-bean name="AddGroupResourcesForm"
+                   type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesForm"/>
+
+          <form-bean name="RemoveGroupResourcesForm"
+                   type="org.hyperic.hq.ui.action.resource.group.inventory.RemoveGroupResourcesForm"/>
+                           
+        <!-- / -->
+                          
+        <!-- EVENT FORMS -->
+        <form-bean name="RemoveConfigForm"
+            type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionForm"/>
+
+        <form-bean name="FixAlertsForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.RemoveForm"/>
+
+        <form-bean name="RemoveNotificationsForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveNotificationsForm"/>
+
+        <form-bean name="EditAlertDefinitionSyslogActionForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.SyslogActionForm"/>
+
+        <form-bean name="AddAlertUsersForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsersForm" />
+        
+        <form-bean name="AddAlertOthersForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersForm" />
+
+        <form-bean name="EscalationSchemeForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeForm" />
+
+        <form-bean name="EscalationForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EscalationSchemeForm" />
+
+         <!-- / -->  
+
+        <!-- resource monitor forms -->
+        
+        <form-bean name="MonitoringConfigForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm"/>
+
+        <form-bean name="GroupMonitoringConfigForm"
+                   type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupMonitoringConfigForm"/>
+                           
+        <form-bean name="MetricsDisplayForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayForm"/>
+
+        <form-bean name="MetricDisplayRangeForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRangeForm"/>
+
+        <form-bean name="MetricsControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlForm"/>
+
+        <form-bean name="ViewChartForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm"/>
+
+        <form-bean name="CompareMetricsForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsForm"/>
+
+        <form-bean name="MetricMetadataForm"
+                   type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricMetadataForm"/>
+
+        <!-- RESOURCE SERVER CONTROL FORMS -->
+        <form-bean name="ServerControlForm"
+                   type="org.hyperic.hq.ui.action.resource.common.control.ControlForm"/>
+
+       <!-- / -->
+
+  </form-beans>
+
+<!-- ================================= Global Exception Definitions -->
+  <global-exceptions>
+        <exception
+            key="exception.ParameterNotFoundException"
+            type="org.hyperic.hq.ui.exception.ParameterNotFoundException"                  
+            path="/common/GenericError.jsp"/>
+            
+        <exception
+            key="exception.ObjectNotFoundException"
+            type="org.hyperic.hq.common.ObjectNotFoundException"                  
+            path="/common/GenericError.jsp"/>
+            
+        <exception
+            key="exception.DuplicateObjectException"
+            type="org.hyperic.hq.common.DuplicateObjectException"                  
+            path="/common/GenericError.jsp"/>
+
+        <exception
+            key="exception.javax.ejb.CreateException"
+            type="javax.ejb.CreateException"                  
+            path="/common/GenericError.jsp"/>            
+        
+        <exception
+            key="exception.CreateFailedException"
+            type="org.hyperic.hq.common.CreateFailedException"                  
+            path="/common/GenericError.jsp"/>
+            
+        <exception
+            key="exception.PermissionException"
+            type="org.hyperic.hq.authz.shared.PermissionException"                  
+            path="/common/NoRights.jsp"/>   
+
+        <exception
+            key="exception.SessionNotFoundException"
+            type="org.hyperic.hq.auth.shared.SessionException"
+            path="/Login.do"/>
+            
+        <exception
+            key="exception.SessionInvalidatedException"
+            type="org.hyperic.hq.ui.exception.SessionInvalidatedException"
+            path="/Login.do"/>
+                                         
+        <exception
+            key="exception.SystemException"
+            type="org.hyperic.hq.common.SystemException"                  
+            path="/common/GenericError.jsp"/>
+            
+        <exception
+            key="resource.common.error.ResourceNotFound"
+            type="org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException"
+            path="/common/GenericError.jsp"/>        
+
+        <exception
+            key="exception.InvalidOptionException"
+            type="org.hyperic.util.config.InvalidOptionException"
+            path="/common/GenericError.jsp"/>
+        
+        <exception
+            key="org.hyperic.util.config.InvalidOptionValueException"
+            type="org.hyperic.util.config.InvalidOptionException"
+            path="/common/GenericError.jsp"/>    
+        <exception
+            key="resource.application.inventory.error.RemoveServices"
+            type="org.hyperic.hq.appdef.shared.ApplicationNotFoundException"
+            path="/common/GenericError.jsp"/>    
+        
+        <exception
+            key="resource.application.inventory.error.RemoveServices"
+            type="org.hyperic.hq.product.ConfigFetchException"
+            path="/common/GenericError.jsp"/>
+        
+        <exception
+            key="resource.common.error.ControlNotEnabled"
+            type="org.hyperic.hq.product.ControlPluginException"
+            path="/common/GenericError.jsp"/>
+        
+        <exception
+            key="resource.common.error.PluginNotFound"
+            type="org.hyperic.hq.product.PluginNotFoundException"
+            path="/common/GenericError.jsp"/>                                        
+            
+        <exception
+            key="resource.common.error.ConfigError"
+            type="org.hyperic.hq.product.ProductPluginException"
+            path="/common/GenericError.jsp"/>    
+            
+        <exception
+            key="resource.common.error.ConfigError"
+            type="org.hyperic.util.config.EncodingException"
+            path="/common/GenericError.jsp"/>
+            
+        <exception
+            key="exception.Exception"
+            type="java.lang.Exception"
+            path="/common/GenericError.jsp"/>        
+  </global-exceptions>
+        
+<!-- =================================== Global Forward Definitions -->
+
+    <global-forwards>
+      <forward name="invalid.session" path="/Logout.do" redirect="true"/>
+      <forward name="rss.feed" path="/common/RSSFormat.jsp"/>
+      <forward name="ajax" path="/common/AJAXResponse.jsp"/>
+    </global-forwards>
+
+<!-- =================================== Action Mapping Definitions -->
+
+  <action-mappings type="org.hyperic.hq.ui.action.BaseActionMapping">
+      <action path="/NoRights" 
+              forward="/common/NoRights.jsp">
+        <set-property property="title" value="0.5"/>  
+      </action>
+                          
+      <!--authentication -->
+      <action path="/j_security_check"                             
+              type="org.hyperic.hq.ui.action.authentication.AuthenticateUserAction"
+              name="LoginForm"
+              scope="request"
+              validate="true"
+              input="/Login.do">
+              <!-- do not redirect here or login error messages will not show up -->
+              <forward name="bad" path="/Login.do"/>
+      </action>    
+
+      <action path="/Logout" 
+              type="org.hyperic.hq.ui.action.authentication.LogoutAction">              
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>
+      
+      <action path="/Login" 
+              forward="/common/Login.jsp">
+        <set-property property="title" value="Login"/>  
+      </action>
+
+      <!--======================================================= --> 
+      <!-- Admin --> 
+      <!-- ======================================================= --> 
+      <!-- The standard administrative actions available with Tiles --> 
+      <!-- These would be either omitted or protected by security --> 
+      <!-- in a real application deployment --> 
+      <action path="/admin/tiles/reload" 
+              type="org.apache.struts.tiles.actions.ReloadDefinitionsAction"/>
+    
+      <action path="/admin/tiles/view" 
+              type="org.apache.struts.tiles.actions.ViewDefinitionsAction"/>
+    
+      <action path="/NothingAction"
+              name="ToolbarForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.BaseAction">
+      </action>
+
+      <!-- admin portal controller -->
+      <action path="/Admin"
+              forward=".admin.layout">
+      </action>
+
+      <action path="/admin/home/AdminHomePortal"
+              input="/Admin.do"
+              type="org.hyperic.hq.ui.action.admin.home.AdminHomePortalAction">
+        <set-property property="title" value="Admin"/>
+      </action>
+        
+      <!--USER ADMINISTRATION -->
+      <action path="/admin/user/UserAdmin"              
+              forward=".admin.user.layout">
+      </action>
+                  
+      <action path="/admin/user/UserAdminPortal"
+              parameter="mode"
+              input="/admin/user/UserAdmin.do"
+              type="org.hyperic.hq.ui.action.admin.user.UserAdminPortalAction">
+      </action>
+      
+      <action path="/admin/user/List"
+              name="RemoveUserForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.ListAction">
+        <set-property property="title" value="Admin.User.List"/>
+      </action>
+      
+      <action path="/admin/user/View"
+              type="org.hyperic.hq.ui.action.admin.user.ViewAction">
+        <set-property property="title" value="Admin.User"/>
+      </action>
+
+      <action path="/admin/user/EditUserFormPrepare"
+              name="EditUserForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.EditUserFormPrepareAction">
+        <set-property property="workflow" value="user/View"/>
+        <set-property property="title" value="Admin.Edit"/>
+      </action>
+
+      <action path="/admin/user/EditPasswordFormPrepare"
+              type="org.hyperic.hq.ui.action.admin.user.EditPasswordPrepareAction">        
+              <set-property property="title" value="Admin.User.Password"/>
+      </action>
+
+
+      <action path="/admin/user/Edit" 
+              type="org.hyperic.hq.ui.action.admin.user.EditAction"
+              name="EditUserForm"
+              scope="request"
+              input="/admin/user/UserAdmin.do?mode=edit"> 
+              <set-property property="workflow" value="user/View"/>
+              <forward name="failure" path="/admin/user/UserAdmin.do?mode=edit" />
+              <forward name="success" path="/admin/user/UserAdmin.do?mode=view" />
+              <forward name="cancel" path="/admin/user/UserAdmin.do?mode=view"
+                       redirect="true" />
+              <forward name="reset" path="/admin/user/UserAdmin.do?mode=edit"
+                       redirect="true"/>
+      </action>
+
+      <action path="/admin/user/NewFormPrepare"
+              name="NewUserForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
+        <set-property property="workflow" value="user/New"/>
+        <set-property property="title" value="Admin.User.New"/>
+      </action>
+
+      <action path="/admin/user/Remove" 
+              type="org.hyperic.hq.ui.action.admin.user.RemoveAction"
+              name="RemoveUserForm"
+              scope="request"
+              input="/admin/user/UserAdmin.do?mode=list">
+              <exception key="exception.cant.remove"
+                         type="javax.ejb.RemoveException"
+                         path="/common/GenericError.jsp"/>             
+              <forward name="success" path="/admin/user/UserAdmin.do?mode=list"/>
+      </action>
+
+      <action path="/admin/user/EditPassword"
+              type="org.hyperic.hq.ui.action.admin.user.EditPasswordAction"
+              name="EditPasswordForm"
+              scope="request"
+              input="/admin/user/UserAdmin.do?mode=editPass">              
+              <set-property property="workflow" value="user/View"/>
+              <forward name="success" path="/admin/user/UserAdmin.do?mode=view" redirect="true"/>
+              <forward name="failure" path="/admin/user/UserAdmin.do?mode=editPass"/>
+              <forward name="cancel" path="/admin/user/UserAdmin.do?mode=view"
+                       redirect="true"/>
+              <forward name="reset" path="/admin/user/UserAdmin.do?mode=editPass"
+                       redirect="true"/>
+      </action>      
+
+      <action path="/admin/user/Register*"
+              name="RegisterUserForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.user.Register{1}Action"
+              input="/admin/user/UserAdmin.do?mode=register">
+        <set-property property="workflow" value="user/Register"/>
+        <set-property property="title" value="4.1.1.3"/>
+        <exception key="exception.user.alreadyExists"
+                   type="javax.ejb.CreateException"
+                   path="/admin/user/UserAdmin.do?mode=register"/>
+        <forward name="success" path="/Dashboard.do"/>
+        <forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
+        <forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
+        <forward name="logout" path="/Logout.do"/>
+      </action>
+      <!-- end user admin actions / -->
+
+      <!--CONFIG -->
+      <action path="/admin/config/Config"
+              forward=".admin.config.layout">
+      </action>
+
+      <action path="/admin/config/EditConfigPrep"
+              name="SystemConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction">
+        <set-property property="title" value="Admin.HQServer"/>
+      </action>
+
+      <action path="/admin/config/EditDefaults"
+              forward=".admin.config.monitor.defaults.layout">
+      </action>
+
+      <action path="/admin/config/EditResourceTypeDefaults"
+              type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
+              scope="request"
+              parameter="mode">
+      </action>
+      
+      <action path="/admin/config/*Escalation"
+              type="org.hyperic.hq.ui.action.admin.config.{1}EscalationAction">
+        <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
+      </action>
+
+      <action path="/MonitorDefaultsHelp"
+              type="org.hyperic.hq.ui.action.BaseAction">
+        <set-property property="title" value="Admin.Monitor"/>
+      </action>
+
+      <action path="/EscalationHelp"
+              type="org.hyperic.hq.ui.action.BaseAction">
+        <set-property property="title" value="Admin.Escalation"/>
+      </action>
+
+      <!--end admin CONFIG -->
+      
+      <!-- resource hub -->
+      <action path="/ResourceHub"
+              name="ResourceHubForm"
+              scope="request"
+              forward=".resource.hub.layout"/>
+      
+      <action path="/Resource"
+              type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
+              <forward name="platform" path="/resource/platform/monitor/Visibility.do?mode=currentHealth"/>
+              <forward name="application" path="/resource/application/monitor/Visibility.do?mode=currentHealth"/>
+              <forward name="server" path="/resource/server/monitor/Visibility.do?mode=currentHealth"/>
+              <forward name="service" path="/resource/service/monitor/Visibility.do?mode=currentHealth"/>
+              <forward name="compatGroup" path="/resource/group/monitor/Visibility.do?mode=currentHealth"/>
+              <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
+              <forward name="autogroup" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
+      </action>
+
+      <!-- resource hub -->
+      <action path="/resource/hub/*"
+              name="ResourceHubForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.hub.{1}Action"
+              input="/ResourceHub.do">
+        <set-property property="title" value="Resources"/>
+        <forward name="failure" path="/ResourceHub.do"/>
+        <forward name="success" path="/ResourceHub.do"/>
+        <forward name="newgroup" path="/resource/group/Inventory.do?mode=new" redirect="true"/>
+      </action>
+           
+      <!-- resource common inventory actions -->
+      <action path="/resource/common/inventory/EditResourceGeneralPropertiesFormPrepare"
+              name="ResourceForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.EditResourceGeneralPropertiesFormPrepareAction">
+        <set-property property="workflow" value="resource/GeneralProperties"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/> 
+      </action>
+
+      <action path="/resource/common/inventory/ChangeResourceOwnerFormPrepare"
+              name="ChangeResourceOwnerForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerFormPrepareAction">
+        <set-property property="workflow" value="resource/ChangeOwner"/>  
+        <set-property property="title" value="Inventory.Owner"/>
+      </action>
+
+      <action path="/resource/common/inventory/AddResourceGroupsFormPrepare"
+              name="AddResourceGroupsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
+        <set-property property="title" value="Group.AddResource"/>
+      </action>
+
+      <!-- resource common control -->
+      <action path="/ResourceControlHistory"
+              type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
+              <forward name="platform" path="/resource/platform/Control.do?mode=history"/>
+              <forward name="application" path="/resource/application/Control.do?mode=history"/>
+              <forward name="server" path="/resource/server/Control.do?mode=history"/>
+              <forward name="service" path="/resource/service/Control.do?mode=history"/>
+              <forward name="compatGroup" path="/resource/group/Control.do?mode=history"/>
+              <forward name="adhocGroup" path="/resource/group/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/common/control/List*"
+              name="RemoveControlJobsForm"
+              scope="request"               
+              type="org.hyperic.hq.ui.action.resource.common.control.List{1}Action" >
+      </action>
+      
+      <action path="/resource/*/control/QuickControl*" 
+              name="QuickControlForm"
+              scope="request"
+              input="/resource/{1}/Control.do?mode=view"          
+              type="org.hyperic.hq.ui.action.resource.common.control.QuickControl{2}Action" >
+        <forward name="new" path="/resource/{1}/Control.do?mode=new"/>              
+        <forward name="failure" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <action path="/resource/common/control/*Status"
+              type="org.hyperic.hq.ui.action.resource.common.control.{1}StatusAction"> 
+        <forward name="success" path="/resource/common/control/CurrentStatusAJAX.jsp"/>
+      </action>
+
+      <!-- resource platform actions -->      
+      <action path="/resource/platform/InventoryPortal"
+              parameter="mode"
+              input="/resource/platform/Inventory.do"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.PlatformInventoryPortalAction">
+      </action>
+
+      <action path="/resource/platform/inventory/NewPlatformFormPrepare"
+              name="NewPlatformForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformFormPrepareAction">
+        <set-property property="title" value="Inventory.Platform.New"/>
+      </action>
+
+      <action path="/resource/platform/inventory/NewPlatform"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformAction"
+              name="NewPlatformForm"
+              scope="request"
+              validate="true"
+              input="/resource/platform/Inventory.do?mode=new">
+        <set-property property="title" value=" Inventory.Platform.New"/>
+        
+        <forward name="cancel" path="/ResourceHub.do" redirect="true"/>
+        <forward name="reset" path="/resource/platform/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="add" path="/resource/platform/Inventory.do?mode=new"/>
+        <forward name="remove" path="/resource/platform/Inventory.do?mode=new"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=new"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/platform/inventory/ViewPlatform"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.ViewPlatformAction">
+        <set-property property="title" value="Inventory.Platform"/>
+      </action>
+
+      <action path="/resource/platform/inventory/EditPlatformGeneralProperties"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformGeneralPropertiesAction"
+              name="ResourceForm"
+              scope="request"
+              input="/resource/platform/Inventory.do?mode=edit">
+        <set-property property="workflow" value="resource/GeneralProperties"/>
+        <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/platform/Inventory.do?mode=edit"                   redirect="true"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=edit"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/platform/inventory/ChangePlatformOwner"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
+              name="ChangeResourceOwnerForm"
+              scope="request"
+              input="/resource/platform/Inventory.do?mode=changeOwner">
+        <set-property property="title" value="Inventory.Owner"/>
+        <set-property property="workflow" value="resource/ChangeOwner"/>  
+        <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/platform/Inventory.do?mode=changeOwner"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=changeOwner"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+        <forward name="lostRights" path="/ResourceHub.do"/>
+      </action>
+
+      <action path="/resource/platform/inventory/EditPlatformTypeNetworkProperties*"
+              name="EditPlatformTypeNetworkPropertiesForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkProperties{1}Action"
+              input="/resource/platform/Inventory.do?mode=editType">
+        <set-property property="title" value="Inventory.Platform.Properties"/> 
+        <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/platform/Inventory.do?mode=editType"
+                 redirect="true"/>
+        <forward name="add" path="/resource/platform/Inventory.do?mode=editType"/>
+        <forward name="remove" path="/resource/platform/Inventory.do?mode=editType"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=editType"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/platform/inventory/RemoveServers" 
+              type="org.hyperic.hq.ui.action.resource.platform.inventory.RemoveServersAction"
+              name="RemoveServersForm"
+              scope="request"
+              input="/resource/platform/inventory.do?mode=view">
+        <set-property property="title" value="Inventory.Server"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=view"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/platform/inventory/EditConfigProperties"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+              name="CommonConfigForm"
+              scope="request"
+              input="/resource/platform/Inventory.do?mode=editConfig">
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/platform/Inventory.do?mode=editConfig"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/platform/Inventory.do?mode=editConfig"/>
+        <forward name="dash"  path="/Dashboard.do" redirect="true"/>
+      </action>
+
+      <!-- / -->
+
+      <!-- resource platform autodiscovery actions -->
+      <action path="/resource/platform/AutoDiscovery"
+              forward=".resource.platform.autodiscovery.layout">
+      </action>
+
+      <action path="/resource/platform/AutoDiscoveryPortal"
+              parameter="mode"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.PlatformAutoDiscoveryAction"
+          input="/resource/platform/AutoDiscovery.do?mode=new">
+        <set-property property="workflow" value="autodiscovery/ViewResults"/>
+        <forward name="dash"  path="/Dashboard.do" redirect="true"/>
+      </action>
+
+      <action path="/resource/platform/autodiscovery/NewAutoDiscovery*"
+              name="PlatformAutoDiscoveryForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscovery{1}Action"
+              input="/resource/platform/AutoDiscovery.do?mode=new">
+        <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
+        <set-property property="title" value="Inventory.AutoDiscovery"/>
+        <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view" redirect="true"/>
+        <forward name="scanMethodChange"   path="/resource/platform/AutoDiscovery.do?mode=new"/>
+        <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=new"
+                                     redirect="true"/>
+        <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=new"/>
+        <forward name="success" path="/resource/platform/Inventory.do?mode=view"/>
+        <forward name="dash"  path="/Dashboard.do" redirect="true"/>
+      </action>
+      
+      <action path="/resource/platform/autodiscovery/EditAutoDiscovery*"
+              name="PlatformAutoDiscoveryForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscovery{1}Action"
+              input="/resource/platform/AutoDiscovery.do?mode=edit">
+        <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
+        <set-property property="title" value=" Dashboard.AutoDiscovery"/>
+        <forward name="cancel"  path="/resource/platform/AutoDiscovery.do?mode=view" redirect="true"/>
+        <forward name="reset"   path="/resource/platform/AutoDiscovery.do?mode=edit" redirect="true"/>
+        <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=edit"/>
+        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+      </action>
+      
+      <action path="/resource/platform/autodiscovery/ViewAutoDiscovery"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewAutoDiscoveryAction">
+        <set-property property="title" value="Auto-Discovery"/>
+      </action>
+      
+      <action path="/resource/platform/autodiscovery/ViewResultsPrep"
+              name="AutoDiscoveryResultsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewResultsPrepAction">
+        <set-property property="workflow" value="autodiscovery/ViewResults"/>
+        <set-property property="title" value="Auto-Discovery"/>
+      </action>
+
+      <action path="/resource/platform/autodiscovery/ScanControl*"
+              scope="request"
+              name="ResourceForm"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ScanControl{1}Action"
+              input="/resource/platform/AutoDiscovery.do?mode=view">
+        <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+      </action>
+      
+      <action path="/resource/platform/autodiscovery/ImportAIResources"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ImportAIResourcesAction"
+              name="AutoDiscoveryResultsForm"
+              scope="request"
+              input="/resource/platform/AutoDiscovery.do?mode=results">
+        <set-property property="workflow" value="autodiscovery/ViewResults"/>
+        <forward name="cancel"  path="/Dashboard.do" redirect="true"/>
+        <forward name="failure" path="/Dashboard.do" redirect="true"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>
+
+      <action path="/resource/platform/autodiscovery/RemoveSchedule"
+              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.RemoveScheduleAction"
+              name="RemoveResourceForm"
+              scope="request">
+        <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+        <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
+      </action>
+      
+      <!-- / -->
+          
+      <!-- common monitoring actions -->
+      <action path="/resource/*/monitor/Visibility"
+              forward=".resource.{1}.monitor.visibility.layout">
+      </action>
+
+      <action path="/resource/*/monitor/VisibilityPortal"
+              parameter="mode"
+              input="/resource/{1}/monitor/Visibility.do"
+              type="org.hyperic.hq.ui.action.resource.{1}.monitor.VisibilityPortalAction">
+      </action>
+
+      <action path="/resource/*/monitor/Config"
+              forward=".resource.{1}.monitor.config.layout">
+      </action>
+
+      <action path="/resource/*/monitor/ConfigPortal"
+              parameter="mode"
+              type="org.hyperic.hq.ui.action.resource.{1}.monitor.ConfigPortalAction"
+              input="/resource/{1}/monitor/Config.do?mode=configure">
+      </action>      
+     
+      <action path="/resource/common/monitor/visibility/MetricDisplayRange*"
+              name="MetricDisplayRangeForm"
+              scope="request"
+              input="/resource/common/monitor/Visibility.do?mode=editRange"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRange{1}Action">
+        <set-property property="workflow" value="visibility/MetricDisplayRange"/>
+        <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
+        <forward name="reset" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
+        <forward name="success" path="/Resource.do"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/MetricsControlFormPrepareAction"
+              name="MetricsControlForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlFormPrepareAction"/>
+
+      <action path="/resource/common/monitor/visibility/CompareMetricsFormPrepare"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsFormPrepareAction"
+              name="CompareMetricsForm"
+              scope="request">
+        <set-property property="workflow" value="visibility/MetricDisplayRange"/>
+        <set-property property="title" value="Monitor.Group.Compare"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/ViewMetricMetadata"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewMetricMetadataAction"
+              name="MetricMetadataForm"
+              scope="request">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+        <forward name="success" path="/resource/common/monitor/Visibility.do?mode=metricMetadata"/>
+      </action>
+      
+      <action path="/resource/common/monitor/visibility/CompareMetrics"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsAction"
+              name="CompareMetricsForm"
+              scope="request"
+              input="/resource/common/monitor/Visibility.do?mode=compareMetrics">
+        <set-property property="workflow" value="visibility/MetricDisplayRange"/>
+        <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
+        <forward name="success" path="/resource/common/monitor/CompareMetrics.jsp"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/ViewDesignatedChart"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewDesignatedChartAction">
+        <forward name="redraw" path="/resource/common/monitor/Visibility.do"
+                 redirect="true"/>
+      </action>
+
+      <!-- platform monitoring actions -->      
+      <action path="/resource/platform/monitor/visibility/PlatformCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              input="/resource/platform/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+      </action>
+
+      <action path="/resource/platform/monitor/visibility/FilterPlatformMetrics"
+              name="MetricsFilterForm"
+              scope="request"
+              forward="/resource/platform/monitor/Visibility.do?mode=resourceMetrics"/>
+
+      <action path="/resource/platform/monitor/visibility/ListChildrenResources"
+              type="org.hyperic.hq.ui.action.resource.platform.monitor.visibility.ListChildrenAction">
+      </action>
+
+      <!-- platform monitoring config -->    
+      <action path="/resource/platform/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+ 
+      <action path="/resource/platform/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/platform/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              <forward name="remove" path="/resource/platform/monitor/Config.do?mode=configure"/>
+              <forward name="failure" path="/resource/platform/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/platform/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <!-- / -->
+      
+      <!-- server monitoring actions -->      
+      <action path="/resource/server/monitor/visibility/ServerCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              input="/resource/server/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+      </action>
+
+      <action path="/resource/server/monitor/visibility/ListChildrenResources"
+              type="org.hyperic.hq.ui.action.resource.server.monitor.visibility.ListChildrenAction">
+      </action>
+
+      <action path="/resource/server/monitor/visibility/FilterServerMetrics"
+              name="MetricsFilterForm"
+              scope="request"
+              forward="/resource/server/monitor/Visibility.do?mode=resourceMetrics"/>
+
+      <action path="/resource/server/monitor/visibility/ServerServicesMetricsFormPrepare"
+              name="MetricsDisplayForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.server.monitor.visibility.ServerServicesMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+
+      <!-- / -->
+
+      <!-- server monitoring config -->    
+      <action path="/resource/server/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+ 
+      <action path="/resource/server/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/server/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              <forward name="remove" path="/resource/server/monitor/Config.do?mode=configure"/>              
+              <forward name="failure" path="/resource/server/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/server/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <!-- / -->
+            
+      <!-- application monitoring -->
+       <!-- application monitoring visibility -->
+      <action path="/resource/application/monitor/visibility/ApplicationCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              input="/resource/application/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+      </action>
+
+      <action path="/resource/application/monitor/visibility/ListChildrenResources"
+              type="org.hyperic.hq.ui.action.resource.application.monitor.visibility.ListChildrenAction">
+      </action>
+
+      <action path="/resource/application/monitor/visibility/ApplicationServicesFormPrepare"
+              name="MetricsDisplayForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.monitor.visibility.ApplicationServicesFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+
+      <!-- application monitoring config -->      
+      <action path="/resource/application/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
+      </action>
+ 
+      <action path="/resource/application/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/application/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              <forward name="remove" path="/resource/application/monitor/Config.do?mode=configure"/>
+              <forward name="failure" path="/resource/application/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/application/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <!--  /application monitoring config -->
+          
+      <!-- resource server actions -->
+      <action path="/resource/server/InventoryPortal"
+              parameter="mode"
+              input="/resource/server/Inventory.do"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.ServerInventoryPortalAction">
+      </action>
+          
+      <action path="/resource/server/inventory/NewServerFormPrepare"
+              name="ServerForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.NewServerFormPrepareAction">
+        <set-property property="workflow" value="server/New"/>
+        <set-property property="title" value="Inventory.Server.New"/>
+      </action>
+
+      <action path="/resource/server/inventory/NewServer"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.NewServerAction"
+              name="ServerForm"
+              scope="request"
+              input="/resource/server/Inventory.do?mode=new">
+        <set-property property="workflow" value="server/New"/>        
+        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/platform/Inventory.do?mode=view"                 redirect="true"/>
+        <forward name="reset"   path="/resource/server/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Inventory.do?mode=new"/>
+      </action>
+
+      <action path="/resource/server/inventory/ViewServer"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.ViewServerAction">
+        <set-property property="title" value="Inventory.Server"/>
+      </action>
+
+      <action path="/resource/*/inventory/RemoveServices" 
+              name="RemoveResourceForm"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
+              scope="request" input="/resource/server/inventory/ViewServer.jsp">
+              <forward name="success" path="/resource/{1}/Inventory.do?mode=view" redirect="true" />
+      </action>
+
+      <action path="/resource/server/inventory/EditGeneralFormPrepare"
+              name="GeneralServerForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.ServerGeneralFormPrepareAction">
+        <set-property property="workflow" value="server/EditGeneralProperties"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/>
+      </action>
+          
+      <action path="/resource/server/inventory/EditGeneralProperties"
+                          type="org.hyperic.hq.ui.action.resource.server.inventory.EditGeneralAction"
+                          name="GeneralServerForm"
+                          scope="request"
+                          input="/resource/server/Inventory.do?mode=edit">
+        <set-property property="workflow" value="server/EditGeneralProperties"/>
+        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/server/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/server/Inventory.do?mode=edit"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Inventory.do?mode=edit"/>
+      </action>
+          
+      <action path="/resource/server/inventory/EditTypeHostFormPrepare"
+              name="ServerHostTypeForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.EditTypeHostPrepareAction">
+        <set-property property="title" value="Inventory.Server.Properties"/>
+      </action>
+
+      <action path="/resource/server/inventory/EditTypeHostProperties"
+                          type="org.hyperic.hq.ui.action.resource.server.inventory.EditTypeHostAction"
+                          name="ServerHostTypeForm"
+                          scope="request"
+                      input="/resource/server/Inventory.do?mode=editType">
+        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/server/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/server/Inventory.do?mode=editType"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Inventory.do?mode=editType"/>
+    </action>
+
+    <action path="/resource/server/inventory/EditConfigProperties"
+        type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+                          name="CommonConfigForm"
+                          scope="request"
+                      input="/resource/server/Inventory.do?mode=editConfig">
+        <forward name="success" path="/resource/server/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/server/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/server/Inventory.do?mode=editConfig"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Inventory.do?mode=editConfig"/>
+        <forward name="dash"  path="/Dashboard.do" redirect="true"/>
+      </action>
+      
+      <action path="/resource/server/inventory/RemoveService" 
+              name="RemoveResourceForm"
+              type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
+              scope="request" input="/resource/server/inventory/ViewServer.jsp">
+              <forward name="success" path="/resource/server/Inventory.do?mode=view" redirect="true"/>
+      </action>
+
+      <!-- / -->
+
+      <!-- resource server control -->
+      <action path="/resource/server/Control"
+              forward=".resource.server.control.layout">
+      </action>
+      
+      <action path="/resource/server/ServerController" 
+              parameter="mode"
+              input="/resource/server/Control.do"
+              type="org.hyperic.hq.ui.action.resource.server.control.ServerControllerAction" >
+        <set-property property="title" value="Control"/>
+      </action>
+
+      <action path="/resource/server/control/NewFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction">
+        <set-property property="title" value="Control.New"/>
+      </action>
+
+      <action path="/resource/server/control/New"   
+              type="org.hyperic.hq.ui.action.resource.common.control.NewAction"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=new">
+        <forward name="add" path="/resource/server/Control.do?mode=new"/>
+        <forward name="remove" path="/resource/server/Control.do?mode=new"/>
+        <forward name="cancel" path="/resource/server/Control.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/server/Control.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/server/Control.do?mode=new" />
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
+      </action>
+
+      <action path="/resource/server/control/EditFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction">
+        <set-property property="title" value="Control"/>
+      </action>
+
+      <action path="/resource/server/control/Edit"
+              type="org.hyperic.hq.ui.action.resource.common.control.EditAction"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=edit">
+        <forward name="add" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="remove" path="/resource/server/Control.do?mode=edit"/>              
+        <forward name="cancel" path="/resource/server/Control.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="failure" path="/resource/server/Control.do?mode=edit"/>
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <action path="/resource/server/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=history">
+        <forward name="failure" path="/resource/server/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/server/Control.do?mode=history" redirect="true" />
+      </action>
+      
+      <action path="/resource/server/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/server/Control.do?mode=view">
+        <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
+      </action>
+     
+      <action path="/resource/server/control/EditAddToGroups"
+              scope="request"
+              type="org.apache.struts.tiles.actions.TilesAction"/>
+
+      <action path="/resource/*/control/RemoveControlJobs"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
+              name="RemoveControlJobsForm"
+              scope="request"
+              input="/resource/{1}/Control.do?mode=view">
+        <forward name="failure" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+        <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
+      </action>
+
+      <!-- / end resource server control -->
+
+      <!-- resource service actions -->
+      <action path="/resource/service/InventoryPortal"
+              parameter="mode"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceInventoryPortalAction"
+              input="/resource/service/Inventory.do">
+      </action>
+          
+      <action path="/resource/service/inventory/NewServiceFormPrepare"
+              name="ServiceForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.NewServiceFormPrepareAction">
+        <set-property property="workflow" value="inventory/NewService"/>
+        <set-property property="title" value="Inventory.Service.New"/>
+      </action>
+
+      <action path="/resource/service/inventory/NewService"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.NewServiceAction"
+              name="ServiceForm"
+              scope="request"
+              input="/resource/service/Inventory.do?mode=new">
+        <set-property property="workflow" value="inventory/NewService"/>
+        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/server/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/service/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/service/Inventory.do?mode=new"/>
+      </action>
+
+      <action path="/resource/service/inventory/EditGeneralFormPrepare"
+              name="ServiceForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceGeneralFormPrepareAction">
+        <set-property property="workflow" value="service/EditGeneralProperties"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/>
+      </action>
+          
+      <action path="/resource/service/inventory/EditGeneralProperties"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.EditGeneralAction"
+              name="ServiceForm"
+              scope="request"
+              input="/resource/service/Inventory.do?mode=edit">
+        <set-property property="workflow" value="service/EditGeneralProperties"/>              
+        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/service/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/service/Inventory.do?mode=edit"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/service/Inventory.do?mode=edit"/>
+      </action>
+
+      <action path="/resource/service/inventory/RemoveApp" 
+              name="RemoveResourceForm"
+              type="org.hyperic.hq.ui.action.resource.service.inventory.RemoveAppAction"
+              scope="request" 
+                          input="/resource/service/inventory/ViewService.jsp">
+              <forward name="success" path="/resource/service/Inventory.do?mode=view" redirect="true"/>
+      </action>
+          
+      <action path="/resource/service/inventory/EditConfigProperties"
+        type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+                          name="CommonConfigForm"
+                          scope="request"
+                          input="/resource/service/Inventory.do?mode=editConfig">
+        <forward name="success" path="/resource/service/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/service/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/service/Inventory.do?mode=editConfig"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/service/Inventory.do?mode=editConfig"/>
+        <forward name="dash"  path="/Dashboard.do" redirect="true"/>
+      </action>
+
+      <!-- service monitoring -->
+      <action path="/resource/service/monitor/visibility/ServiceCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              input="/resource/service/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/ListVirtualResources"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ListVirtualsAction">
+      </action>
+
+      <action path="/resource/service/monitor/visibility/FilterServiceMetrics"
+              name="MetricsFilterForm"
+              scope="request"
+              forward="/resource/service/monitor/Visibility.do?mode=resourceMetrics"/>
+
+      <!-- application service config -->      
+      <action path="/resource/service/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+ 
+      <action path="/resource/service/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/service/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              <forward name="remove" path="/resource/service/monitor/Config.do?mode=configure"/>
+              <forward name="failure" path="/resource/service/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/service/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <action path="/resource/service/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/service/Control.do?mode=history">
+        <forward name="failure" path="/resource/service/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/service/Control.do?mode=history" redirect="true" />
+     </action>
+
+     <action path="/resource/service/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/service/Control.do?mode=view">
+        <forward name="failure" path="/resource/service/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/service/Control.do?mode=view" redirect="true" />
+      </action>
+     
+      <!-- resource service control. this reuses the forms, action classes, and
+           jsp's for server control, it just makes them available at different
+           urls.  -->
+      <action path="/resource/service/Control"
+              forward=".resource.service.control.layout">
+      </action>
+      
+      <action path="/resource/service/ServiceController" 
+              parameter="mode"
+              input="/resource/service/Control.do"
+              type="org.hyperic.hq.ui.action.resource.service.control.ServiceControllerAction" >
+        <set-property property="title" value="Control"/>
+      </action>
+      <!-- / -->
+
+      <!-- application actions -->
+      <action path="/resource/application/InventoryPortal"
+              parameter="mode"
+              input="/resource/application/Inventory.do"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.ApplicationInventoryPortalAction">
+      </action>
+          
+      <action path="/resource/application/inventory/ViewApplication"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.ViewApplicationAction">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+      </action>
+          
+      <action path="/resource/application/inventory/NewApplicationFormPrepare"
+              name="ApplicationForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.NewApplicationFormPrepareAction">
+        <set-property property="title" value="Inventory.Application.New"/>
+      </action>
+
+      <action path="/resource/application/inventory/NewApplication"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.NewApplicationAction"
+              name="ApplicationForm"
+              scope="request"
+              input="/resource/application/Inventory.do?mode=new">
+        <forward name="success" path="/resource/application/Inventory.do?mode=view" redirect="true"/>
+        <forward name="cancel"  path="/ResourceHub.do" redirect="true"/>
+        <forward name="reset"   path="/resource/application/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/application/Inventory.do?mode=new"/>
+      </action>
+
+      <action path="/resource/application/inventory/EditGeneralFormPrepare"
+              name="EditGeneralApplicationForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.EditGeneralPropertiesFormPrepareAction">
+        <set-property property="workflow" value="application/EditGeneralProperties"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/>
+      </action>
+          
+      <action path="/resource/application/inventory/EditGeneralProperties"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.EditGeneralPropertiesAction"
+              name="EditGeneralApplicationForm"
+              scope="request"
+              input="/resource/application/Inventory.do?mode=edit">
+        <set-property property="workflow" value="application/EditGeneralProperties"/>               
+        <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/application/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/application/Inventory.do?mode=edit"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/application/Inventory.do?mode=edit"/>
+      </action>
+
+      <action path="/resource/application/inventory/EditApplicationFormPrepare"
+              name="EditApplicationForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.EditApplicationPropertiesFormPrepareAction">
+        <set-property property="title" value="Inventory.Application"/>
+      </action>
+          
+      <action path="/resource/application/inventory/EditApplicationProperties"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.EditApplicationPropertiesAction"
+              name="EditApplicationForm"
+              scope="request"
+              input="/resource/application/Inventory.do?mode=editResource">
+        <forward name="success" path="/resource/application/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/application/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/application/Inventory.do?mode=editResource"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/application/Inventory.do?mode=editResource"/>
+      </action>
+
+      <action path="/resource/application/inventory/RemoveServices" 
+              name="RemoveAppServicesForm"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveServicesAction"
+              scope="request" input="/resource/application/inventory/ViewApplication.jsp">
+              <forward name="success" path="/resource/application/Inventory.do?mode=view" />
+      </action>
+
+      <!-- XXX -->
+
+      <action path="/resource/application/inventory/ListServiceDependencies" 
+              name="ListServiceDependenciesForm"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.ListServiceDependenciesAction"
+              scope="request">
+        <set-property property="title" value="Inventory.Application"/>
+      </action>
+
+      <action path="/resource/application/inventory/AddServiceDependenciesFormPrepare"
+              name="AddApplicationServicesForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.AddServiceDependenciesFormPrepareAction">
+        <set-property property="title" value="Inventory.Application"/>
+      </action>
+
+      <action path="/resource/application/inventory/AddServiceDependencies" 
+              name="AddApplicationServicesForm"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.AddServiceDependenciesAction"
+              scope="request" input="/resource/application/inventory/ViewApplicationServices.jsp">
+        <forward name="cancel"  
+              path="/resource/application/Inventory.do?mode=listServiceDependencies"
+              redirect="true"/>
+        <forward name="reset"   
+              path="/resource/application/Inventory.do?mode=addDependencies"
+              redirect="true"/>
+        <forward name="add"     
+              path="/resource/application/Inventory.do?mode=addDependencies"/>
+        <forward name="remove"  
+              path="/resource/application/Inventory.do?mode=addDependencies"/>
+        <forward name="failure" 
+              path="/resource/application/Inventory.do?mode=addDependencies"/>
+        <forward name="success" 
+              path="/resource/application/Inventory.do?mode=listServiceDependencies"
+              redirect="true"/>
+      </action>
+
+      <action path="/resource/application/inventory/RemoveServiceDependencies" 
+              name="RemoveResourceForm"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveServiceDependenciesAction"
+              scope="request" input="/resource/application/inventory/ViewApplicationServices.jsp">
+        <forward name="success" 
+              path="/resource/application/Inventory.do?mode=listServiceDependencies"
+              redirect="true"/>
+        <forward name="failure" 
+              path="/resource/application/Inventory.do?mode=listServiceDependencies"
+              redirect="true"/>
+      </action>
+
+      <action path="/resource/application/inventory/AddApplicationServiceFormPrepare"
+              name="AddApplicationServicesForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServiceFormPrepareAction">
+        <set-property property="title" value="Inventory.Application"/>
+      </action>
+
+
+      <action path="/resource/application/inventory/AddApplicationServices"
+              type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServiceAction"
+              name="AddApplicationServicesForm"
+              scope="request"
+              input="/resource/application/Inventory.do?mode=addServices">
+        <forward name="cancel"  
+              path="/resource/application/Inventory.do?mode=view"
+              redirect="true"/>
+        <forward name="reset"   
+              path="/resource/application/Inventory.do?mode=addServices"
+              redirect="true"/>
+        <forward name="add"     
+              path="/resource/application/Inventory.do?mode=addServices"/>
+        <forward name="remove"  
+              path="/resource/application/Inventory.do?mode=addServices"/>
+        <forward name="failure" 
+              path="/resource/application/Inventory.do?mode=addServices"/>
+        <forward name="success" 
+              path="/resource/application/Inventory.do?mode=view"
+              redirect="true"/>
+      </action>
+
+      <!-- resource group actions -->
+      <action path="/resource/group/inventory/NewGroupFormPrepare"
+              name="GroupForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupFormPrepareAction">
+        <set-property property="workflow" value="group/NewGroup"/>
+        <set-property property="title" value="Inventory.Group.New"/>
+      </action>
+      
+      <action path="/resource/group/inventory/EditGeneralFormPrepare"
+              name="ResourceForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction">
+        <set-property property="workflow" value="group/EditGeneralProperties"/>
+        <set-property property="title" value="Inventory.GeneralProperties"/>
+       </action>
+      
+      <action path="/resource/group/inventory/EditGeneralProperties"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.EditGeneralAction"
+              name="ResourceForm"
+              scope="request"
+              input="/resource/group/Inventory.do?mode=edit">
+        <set-property property="workflow" value="group/EditGeneralProperties"/>               
+        <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
+        <forward name="cancel"  path="/resource/group/Inventory.do?mode=view" redirect="true"/>
+        <forward name="reset"   path="/resource/group/Inventory.do?mode=edit" redirect="true"/>
+        <forward name="failure" path="/resource/group/Inventory.do?mode=edit"/>
+      </action>
+      
+      <action path="/resource/group/inventory/NewGroup"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction"
+              name="GroupForm"
+              scope="request"
+              input="/resource/group/Inventory.do?mode=new">
+        <set-property property="workflow" value="group/NewGroup"/>                  
+        <forward name="success"  path="/resource/group/Inventory.do?mode=view"/>
+        <forward name="okassign" path="/resource/group/Inventory.do?mode=addResources"/>
+        <forward name="cancel"   path="/ResourceHub.do" redirect="true"/>
+        <forward name="reset"    path="/resource/group/Inventory.do?mode=new" redirect="true"/>
+        <forward name="failure"  path="/resource/group/Inventory.do?mode=new"/>
+      </action>
+
+      <action path="/resource/group/inventory/ViewGroup"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.ViewGroupAction">
+        <set-property property="title" value="Inventory.Group"/>
+      </action>
+
+      <action path="/resource/group/inventory/AddGroupResourcesFormPrepare"
+              name="AddGroupResourcesForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction">
+        <set-property property="title" value="Group.AddResource"/>
+      </action>
+
+      <action path="/resource/group/inventory/AddGroupResources"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesAction"
+              name="AddGroupResourcesForm"
+              scope="request"
+              input="/resource/group/Inventory.do?mode=addResources">
+        <forward name="cancel"  path="/resource/group/Inventory.do?mode=view" />
+        <forward name="reset"   path="/resource/group/Inventory.do?mode=addResources" redirect="true"/>
+        <forward name="new"     path="/resource/group/Inventory.do?mode=new" redirect="true"/>
+        <forward name="add"     path="/resource/group/Inventory.do?mode=addResources"/>
+        <forward name="remove"  path="/resource/group/Inventory.do?mode=addResources"/>
+        <forward name="failure" path="/resource/group/Inventory.do?mode=addResources"/>
+        <forward name="success" path="/resource/group/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/group/inventory/RemoveApp" 
+              name="RemoveGroupResourcesForm"
+              type="org.hyperic.hq.ui.action.resource.group.inventory.RemoveAction"
+              scope="request" 
+              input="/resource/service/Inventory.do?mode=view">
+              <forward name="success" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
+      </action>
+
+      <!-- / -->
+
+      <!-- group monitoring actions -->          
+      <action path="/resource/group/monitor/visibility/GroupCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              input="/resource/group/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+        <forward name="success" path="/resource/group/monitor/Visibility.do?mode=currentHealth"/>
+        <forward name="compare" path="/resource/common/monitor/Visibility.do?mode=compareMetrics"/>
+        <forward name="chart" path="/resource/common/monitor/Visibility.do?mode=chartMultiMetricSingleResource" redirect="true"/>
+      </action>
+
+      <action path="/resource/group/monitor/visibility/FilterGroupMetrics"
+              name="MetricsFilterForm"
+              scope="request"
+              forward="/resource/group/monitor/Visibility.do?mode=resourceMetrics"/>
+
+      <action path="/resource/common/monitor/visibility/GroupMetricsFormPrepare"
+              name="MetricsDisplayForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.monitor.visibility.GroupMetricsFormPrepareAction">
+        <set-property property="title" value="2.5.2.1.2"/>
+      </action>
+
+      <!-- group monitoring config -->    
+      <action path="/resource/group/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+ 
+      <action path="/resource/group/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/group/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupConfigMetricsAction">
+              <forward name="remove" path="/resource/group/monitor/Config.do?mode=configure"/>
+              <forward name="failure" path="/resource/group/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/group/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <action path="/resource/group/monitor/config/EditAvailabilityFormPrepare"
+              name="GroupMonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.monitor.config.EditAvailabilityFormPrepareAction">
+              <forward name="failure" path="/resource/group/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/group/monitor/Config.do?mode=configure"/>   
+      </action>
+      
+      <action path="/resource/group/monitor/config/EditAvailability"
+              name="GroupMonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.group.monitor.config.EditAvailabilityAction">
+              <forward name="cancel" path="/resource/group/monitor/Config.do?mode=configure" redirect="true"/>
+              <forward name="reset" path="/resource/group/monitor/Config.do?mode=edit" redirect="true"/>
+              <forward name="failure" path="/resource/group/monitor/Config.do?mode=edit"/>
+              <forward name="success" path="/resource/group/monitor/Config.do?mode=configure"/>     
+      </action>        
+      <!-- / end group monitoring config -->
+      
+      <!-- resource group control -->
+      <action path="/resource/group/Control"
+              forward=".resource.group.control.layout">
+      </action>
+      
+      <action path="/resource/group/GroupController"
+              parameter="mode"
+              input="/resource/group/Control.do" 
+              type="org.hyperic.hq.ui.action.resource.group.control.GroupControllerAction" >
+      </action>
+      
+      <action path="/resource/group/control/RemoveHistory"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/group/Control.do?mode=history">
+        <forward name="failure" path="/resource/group/Control.do?mode=history" redirect="true" />
+        <forward name="success" path="/resource/group/Control.do?mode=history" redirect="true" />
+     </action>
+ 
+     <action path="/resource/group/control/RemoveCurrentStatus"
+              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              name="RemoveControlForm"
+              scope="request"
+              input="/resource/group/Control.do?mode=view">
+        <forward name="failure" path="/resource/group/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/group/Control.do?mode=view" redirect="true" />
+      </action>
+              
+      <action path="/resource/group/control/ListDetail"       
+              type="org.hyperic.hq.ui.action.resource.group.control.ListDetailAction" >
+        <set-property property="title" value="Inventory.Group"/>
+      </action>
+            
+      <!-- / end resource group control -->
+
+      <!-- autogroup monitoring actions -->          
+      <action path="/resource/autogroup/monitor/visibility/AutoGroupCurrentHealth"
+              name="IndicatorViewsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupCurrentHealthAction"
+              input="/resource/autogroup/monitor/Visibility.do?mode=currentHealth">
+        <set-property property="title" value="Monitor.CurrentHealth"/>
+        <forward name="success" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
+        <forward name="compare" path="/resource/common/monitor/Visibility.do?mode=compareMetrics"/>
+        <forward name="chart" path="/resource/common/monitor/Visibility.do?mode=chartMultiMetricSingleResource" redirect="true"/>
+      </action>
+
+      <action path="/resource/autogroup/monitor/visibility/ListChildrenResources"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.ListChildrenAction"/>
+
+      <action path="/resource/autogroup/monitor/visibility/FilterAutoGroupMetrics"
+              name="MetricsFilterForm"
+              scope="request"
+              forward="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics"/>
+
+      <action path="/dashboard/ReorderPortlets" 
+              type="org.hyperic.hq.ui.action.portlet.ReorderAction">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>
+
+      <!-- autogroup monitoring config -->    
+      <action path="/resource/autogroup/monitor/config/ConfigMetricsFormPrepare"
+              name="MonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.AutoGroupConfigMetricsFormPrepareAction">
+        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+      </action>
+ 
+      <action path="/resource/autogroup/monitor/config/ConfigMetrics"
+              name="MonitoringConfigForm"
+              scope="request"
+              input="/resource/autogroup/monitor/Config.do?mode=configure"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.AutoGroupConfigMetricsAction">
+              <forward name="remove" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
+              <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/> 
+      </action>
+           
+      <action path="/resource/autogroup/monitor/config/EditAvailabilityFormPrepare"
+              name="GroupMonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.EditAvailabilityFormPrepareAction">
+              <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
+              <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/>   
+      </action>
+      
+      <action path="/resource/autogroup/monitor/config/EditAvailability"
+              name="GroupMonitoringConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.EditAvailabilityAction">
+              <forward name="cancel" path="/resource/autogroup/monitor/Config.do?mode=configure" redirect="true"/>
+              <forward name="reset" path="/resource/autogroup/monitor/Config.do?mode=edit" redirect="true"/>
+              <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=edit"/>
+              <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/>     
+      </action>        
+      <!-- / end autogroup monitoring config -->
+
+      <!-- DASHBOARD ACTIONS -->           
+      <action path="/DashboardController"
+              type="org.hyperic.hq.ui.action.portlet.DisplayDashboardAction">
+        <set-property property="title" value="Dashboard"/> 
+      </action>
+      
+      <action path="/Dashboard"
+              forward=".portal.dash.layout">   
+      </action>
+
+      <action path="/dashboard/Admin"
+              forward=".dashboard.admin.layout">
+      </action>
+      
+      <action path="/dashboard/AddContent"
+              type="org.hyperic.hq.ui.action.portlet.addcontent.ViewAction">
+      </action> 
+      
+      <action path="/dashboard/RemovePortlet"
+              type="org.hyperic.hq.ui.action.portlet.admin.RemovePortletAction">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>
+      <action path="/dashboard/AddPortlet"
+              type="org.hyperic.hq.ui.action.portlet.addcontent.AddPortletAction"
+              name="AddPortletForm"
+              scope="request"
+              input="/Dashboard.do">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>                 
+      
+      <action path="/dashboard/SearchHubPrepare"
+              type="org.hyperic.hq.ui.action.portlet.search.ViewAction"
+              name="ResourceHubForm"
+              scope="request"
+              input="/dashboard/SearchHubPrepare.do">  
+              <forward name="success" path="/ResourceHub.do"/>      
+      </action>
+      
+      <action path="/dashboard/*SavedQueries"
+              type="org.hyperic.hq.ui.action.portlet.savedqueries.{1}Action"
+              name="SavedQueriesForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=savedQueries">
+          <set-property property="title" value="Dashboard.Charts"/>
+          <forward name="success" path="/Dashboard.do" redirect="true"/>   
+          <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+          <forward name="reset" path="/dashboard/Admin.do?mode=savedQueries"/>
+          <forward name="remove" path="/dashboard/Admin.do?mode=savedQueries"/>
+      </action>
+      
+      <action path="/dashboard/ViewAutoDiscovery"
+              name="AIQueueForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.autoDisc.ViewAction">
+      </action>
+      <action path="/dashboard/ProcessAutoDiscovery"
+              name="AIQueueForm"
+              scope="request"
+              input="/dashboard/ViewAutoDiscovery"
+              type="org.hyperic.hq.ui.action.portlet.autoDisc.ProcessQueueAction">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>   
+      </action>
+      <action path="/dashboard/EditAutoDiscovery"
+              type="org.hyperic.hq.ui.action.portlet.autoDisc.PrepareAction"
+              name="AutoDiscoveryForm"
+              scope="request">
+          <set-property property="title" value="Dashboard.AutoDiscovery"/>
+      </action>      
+      <action path="/dashboard/ModifyAutoDiscovery"
+              type="org.hyperic.hq.ui.action.portlet.autoDisc.ModifyAction"
+              name="AutoDiscoveryForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=autoDiscovery">               
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+              <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+              <forward name="reset" path="/dashboard/Admin.do?mode=autoDiscovery"/>             
+      </action>
+
+      <action path="/rss/ViewResourceHealth"
+              type="org.hyperic.hq.ui.action.portlet.resourcehealth.RSSAction"/>
+
+      <action path="/dashboard/*ResourceHealth"
+              name="ResourceHealthForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.resourcehealth.{1}Action"
+              input="/dashboard/EditResourceHealth">               
+        <set-property property="title" value="Dashboard.FavoriteResources"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>   
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=resourceHealth"/>
+        <forward name="remove" path="/dashboard/Admin.do?mode=resourceHealth"/>
+        <forward name="review" path="/dashboard/Admin.do?mode=resourceHealth"/>
+      </action>
+  
+      <action path="/dashboard/ViewRecentResources"
+              type="org.hyperic.hq.ui.action.portlet.recentresources.ViewAction"/>
+
+      <action path="/dashboard/ViewRecentlyApproved"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ViewAction">
+      </action>
+
+      <action path="/dashboard/EditRecentlyApproved"
+              name="RecentlyApprovedForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.PrepareAction">
+        <set-property property="title" value="Dashboard.RecentlyAdded"/>
+      </action>
+      <action path="/dashboard/ModifyRecentlyApproved"
+              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ModifyAction"
+              name="RecentlyApprovedForm"
+              scope="request"
+              input="/dashboard/EditRecentlyApproved">
+              <forward name="success" path="/Dashboard.do" redirect="true"/>
+              <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+              <forward name="reset" path="/dashboard/Admin.do?mode=recentlyApproved"/>
+              <forward name="remove" path="/dashboard/Admin.do?mode=recentlyApproved"/>
+              <forward name="review" path="/dashboard/Admin.do?mode=recentlyApproved"/>
+      </action>
+
+      <action path="/rss/ViewCriticalAlerts"
+              type="org.hyperic.hq.ui.action.portlet.criticalalerts.RSSAction"/>
+
+      <action path="/dashboard/*CriticalAlerts"
+              name="CriticalAlertsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.criticalalerts.{1}Action"
+              input="/dashboard/EditCriticalAlerts">               
+        <set-property property="title" value="Dashboard.Alerts"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>   
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=criticalAlerts"/>
+        <forward name="remove" path="/dashboard/Admin.do?mode=criticalAlerts"/>
+        <forward name="review" path="/dashboard/Admin.do?mode=criticalAlerts"/>
+      </action>
+      
+      <action path="/dashboard/*SummaryCounts"
+              type="org.hyperic.hq.ui.action.portlet.summaryCounts.{1}Action"
+              name="SummaryCountsForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=summaryCounts">
+        <set-property property="title" value="Dashboard.Summary"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>   
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=summaryCounts"/>
+      </action>            
+      
+      <action path="/resource/common/QuickFavorites*"
+              type="org.hyperic.hq.ui.action.resource.common.QuickFavorites{1}Action">
+        <set-property property="workflow" value="resource/QuickFavorites"/>
+        <forward name="success" path="/Dashboard.do"/>
+        <forward name="failure" path="/common/GenericError.jsp"/>
+      </action>
+
+      <action path="/rss/ViewControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.RSSAction"/>
+
+      <action path="/dashboard/*ControlActions"
+              type="org.hyperic.hq.ui.action.portlet.controlactions.{1}Action"
+              name="ControlActionsForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode=controlActions">               
+        <set-property property="title" value="Dashboard.Control"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>    
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=controlActions"/>
+        <forward name="remove" path="/dashboard/Admin.do?mode=controlActions"/>
+      </action>      
+      
+      <action path="/dashboard/*AvailSummary"
+              type="org.hyperic.hq.ui.action.portlet.availsummary.{1}Action"
+              name="AvailSummaryForm"
+              input="/dashboard/EditAvailSummary">               
+        <forward name="success" path="/Dashboard.do" redirect="true"/>
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=availSummary"/>
+        <forward name="remove" path="/dashboard/Admin.do?mode=availSummary"/>
+        <forward name="review" path="/dashboard/Admin.do?mode=availSummary"/>
+      </action>
+
+      <action path="/dashboard/*MetricViewer"
+              type="org.hyperic.hq.ui.action.portlet.metricviewer.{1}Action"
+              name="MetricViewerForm"
+              scope="request"
+              input="/dashboard/EditMetricViewer">
+        <set-property property="title" value="Dashboard.Availability"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>
+        <forward name="cancel" path="/Dashboard.do" redirect="true"/>
+        <forward name="reset" path="/dashboard/Admin.do?mode=metricViewer"/>
+        <forward name="remove" path="/dashboard/Admin.do?mode=metricViewer"/>
+        <forward name="review" path="/dashboard/Admin.do?mode=metricViewer"/>
+      </action>
+
+      <action path="/dashboard/AddResourcesPrepareAction"
+              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction"
+              name="DashboardAddResourceHealthForm"
+              scope="request">
+        <set-property property="title" value="Dashboard.FavoriteResources.Add"/>
+      </action>
+
+      <action path="/dashboard/*/AddResourcesAction"
+              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
+              name="DashboardAddResourceHealthForm"
+              scope="request"
+              input="/dashboard/Admin.do?mode={1}AddResources">              
+        <forward name="cancel"  path="/dashboard/Admin.do?mode={1}"/>
+        <forward name="reset"   path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="add"     path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="remove"  path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="failure" path="/dashboard/Admin.do?mode={1}AddResources"/>
+        <forward name="success" path="/dashboard/Admin.do?mode={1}"/>
+      </action>
+
+      <!-- / -->
+            
+      <!-- BEGIN: events actions -->      
+      <action path="/alerts/New"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionAction"
+              name="NewAlertDefinitionForm"
+              scope="request"
+              validate="true"
+              input="/alerts/Config.do?mode=new">
+        <forward name="cancel" path="/alerts/Config.do?mode=list"
+                 redirect="true"/>
+        <forward name="reset" path="/alerts/Config.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/alerts/Config.do?mode=new"/>
+        <forward name="success" path="/alerts/Config.do?mode=viewDefinition"/>
+        <forward name="add" path="/alerts/Config.do?mode=new"/>
+        <forward name="remove" path="/alerts/Config.do?mode=new"/>
+      </action>
+      
+      <action path="/alerts/ListDefinitions"
+              name="RemoveConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
+        <set-property property="title" value="Alert.ListDefinition"/>
+      </action>
+
+      <action path="/alerts/RemoveConfig" 
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionAction" 
+              name="RemoveConfigForm"
+              scope="request"
+              input="/alerts/Config.do?mode=list"> 
+              <forward name="success" path="/alerts/Config.do?mode=list" redirect="true"/>
+              <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
+      </action>
+      
+      <action path="/alerts/ViewDefinition"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionAction">
+        <set-property property="title" value="Alert.Edit"/>
+      </action>
+
+      <action path="/alerts/ConfigEscalation"
+              scope="request"
+              name="EscalationSchemeForm"
+              forward=".events.config.layout">
+      </action>
+
+      <action path="/alerts/ViewDefinitionEscalation"
+              scope="request"
+              name="EscalationSchemeForm"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewEscalationAction">
+        <set-property property="title" value="Alert.Edit"/>
+      </action>
+
+      <action path="/alerts/ViewSyslogAction"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionSyslogActionAction"/>
+
+      <action path="/alerts/ViewNotifications*"
+              name="RemoveNotificationsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotifications{1}Action">
+        <set-property property="title" value="Alert.Edit"/>
+      </action>
+              
+      <action path="/alerts/Remove*"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.Remove{1}Action" 
+              name="RemoveNotificationsForm"
+              scope="request"
+              input="/alerts/Config.do?mode=view{1}">
+              <forward name="success" path="/alerts/Config.do?mode=view{1}" redirect="true"/>
+              <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
+      </action>
+      
+      <action path="/alerts/*Escalation"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.{1}EscalationAction"
+              name="EscalationForm"
+              scope="request"
+              input="/alerts/Config.do?mode=viewEscalation">
+        <set-property property="title" value="Admin.Escalation"/>
+              <forward name="success" path="/alerts/Config.do?mode=viewEscalation" redirect="true"/>
+              <forward name="failure" path="/alerts/Config.do?mode=list" redirect="true"/>
+      </action>
+      
+      <action path="/alerts/ListAlerts"
+              name="FixAlertsForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ListAlertAction">
+        <set-property property="title" value="Alert.List"/>        
+      </action>
+
+      <action   path="/alerts/RemoveAlerts" 
+                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.RemoveAction" 
+                name="FixAlertsForm"
+                scope="request"
+                input="/alerts/Alerts.do?mode=list">
+              <forward name="cancel" path="/alerts/Alerts.do?mode=list" redirect="true"/>
+              <!-- for viewing an alert for a deleted resource -->
+              <forward name="noresource" path="/Dashboard.do" redirect="true"/>
+              <forward name="success" path="/alerts/Alerts.do?mode=list" />
+              <!-- we need this here in case we're coming from the alerts list page -->
+              <forward name="remove" path="/alerts/Alerts.do?mode=list" />
+              <forward name="failure" path="/alerts/Alerts.do?mode=list" />
+      </action>
+
+      <action path="/alerts/EditPropertiesFormPrepare"
+              name="EditAlertDefinitionPropertiesForm"
+              scope="request"
+              validate="true"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesFormPrepareAction">
+        <set-property property="title" value="Alert.Properties"/>
+      </action>
+
+      <action path="/alerts/EditSyslogActionFormPrepare"
+              name="EditAlertDefinitionSyslogActionForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionSyslogActionFormPrepareAction">
+      </action>
+
+      <action path="/alerts/Alerts"
+              name="FixAlertsForm"
+              scope="request"
+              forward=".events.alerts.layout">
+      </action>
+
+      <action path="/alerts/config/AddUsers*"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsers{1}Action"
+              name="AddAlertUsersForm"
+              scope="request"
+              input="/alerts/Config.do?mode=addUsers">
+          <set-property property="title" value="Alert.Notification"/>
+          <forward name="cancel" path="/alerts/Config.do?mode=viewUsers"
+                   redirect="true"/>
+          <forward name="reset" path="/alerts/Config.do?mode=addUsers"
+                   redirect="true"/>
+          <forward name="add" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="remove" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="failure" path="/alerts/Config.do?mode=addUsers"/>
+          <forward name="success" path="/alerts/Config.do?mode=viewUsers"/>
+      </action>
+
+    <action path="/alerts/config/AddOthersFormPrepare"
+                name="AddAlertOthersForm"
+                scope="request"
+                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersFormPrepareAction">
+      <set-property property="title" value="Alert.Notification"/>
+    </action>
+
+      <action path="/alerts/config/AddOthers"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersAction"
+              name="AddAlertOthersForm"
+              scope="request"
+              input="/alerts/Config.do?mode=addOthers">
+          <set-property property="title" value="Alert.Notification"/>
+          <forward name="cancel" path="/alerts/Config.do?mode=viewOthers"
+                   redirect="true"/>
+          <forward name="reset" path="/alerts/Config.do?mode=addOthers"
+                   redirect="true"/>
+          <forward name="failure" path="/alerts/Config.do?mode=addOthers"/>
+          <forward name="success" path="/alerts/Config.do?mode=viewOthers"/>
+      </action>
+
+      <action path="/alerts/AlertsPortal"
+              parameter="mode"
+              input="/alerts/Alerts.do"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.PortalAction"/>
+
+      <action path="/alerts/Config"
+              forward=".events.config.layout">
+      </action>
+
+      <action path="/admin/alerts/Config"
+              forward=".admin.alerts.layout">
+      </action>
+
+      <action path="/admin/alerts/RemoveConfig" 
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionAction" 
+              name="RemoveConfigForm"
+              scope="request"
+              input="/admin/alerts/Config.do?mode=list"> 
+              <forward name="success" path="/admin/alerts/Config.do?mode=list" redirect="true"/>
+              <forward name="failure" path="/admin/alerts/Config.do?mode=list" redirect="true"/>
+      </action>
+
+      <action path="/alerts/EnableAlerts"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AlertEnablerAction">
+            <set-property property="workflow" value="/alerts/EnableAlerts"/>
+            <forward name="success" path="/alerts/Config.do"/>
+            <forward name="failure" path="/common/GenericError.jsp"/>
+      </action>
+
+      <action path="/alerts/EditProperties"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesAction"
+              name="EditAlertDefinitionPropertiesForm"
+              scope="request"
+              validate="true"
+              input="/alerts/Config.do?mode=editProperties">
+        <forward name="cancel" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+        <forward name="reset" path="/alerts/Config.do?mode=editProperties" redirect="true"/>
+        <forward name="failure" path="/alerts/Config.do?mode=editProperties"/>
+        <forward name="success" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+      </action>
+      
+      <action path="/alerts/EditConditions"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionConditionsAction"
+              name="EditAlertDefinitionConditionsForm"
+              scope="request"
+              input="/alerts/Config.do?mode=editConditions">
+        <forward name="cancel" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+        <forward name="reset" path="/alerts/Config.do?mode=editConditions" redirect="true"/>
+        <forward name="success" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+        <forward name="failure" path="/alerts/Config.do?mode=editConditions"/>
+        <forward name="add" path="/alerts/Config.do?mode=editConditions"/>
+        <forward name="remove" path="/alerts/Config.do?mode=editConditions"/>
+      </action>
+      
+      <action path="/alerts/EditSyslogAction"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionSyslogActionAction"
+              name="EditAlertDefinitionSyslogActionForm"
+              scope="request"
+              input="/alerts/Config.do?mode=editSyslogAction">
+        <forward name="cancel" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+        <forward name="reset" path="/alerts/Config.do?mode=editSyslogAction" redirect="true"/>
+        <forward name="failure" path="/alerts/Config.do?mode=editSyslogAction"/>
+        <forward name="success" path="/alerts/Config.do?mode=viewDefinition" redirect="true"/>
+      </action>
+      
+      <!-- END: events actions -->
+
+      <action path="/resource/common/monitor/visibility/SelectResources"
+              name="ProblemMetricsDisplayForm"
+              scope="request"
+              forward="/Resource.do"/>
+
+      <action path="/resource/common/monitor/visibility/IndicatorCharts"
+              name="IndicatorViewsForm"
+              scope="request"
+              parameter="action"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorChartsAction">
+        <forward name="success" path="/resource/common/monitor/visibility/DashCharts.jsp"/>
+        <forward name="failure" path="/Dashboard.do" redirect="true"/>
+        <forward name="currentHealth" path="/Resource.do?mode=currentHealth"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/MetricsControl"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
+              name="MetricsControlForm"
+              input="/Resource.do?mode=currentHealth"
+              validate="true"
+              scope="request">
+        <set-property property="workflow" value="monitor/range"/>
+        <forward name="success" path="/Resource.do?mode=currentHealth"/>
+        <forward name="failure" path="/Resource.do?mode=currentHealth"/>
+        <forward name="editRange" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
+      </action>
+
+      <action path="/resource/common/monitor/visibility/Timeline"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.TimelineAction" >
+      </action>
+
+      <action path="/resource/common/monitor/visibility/EventDetails"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.EventDetailsAction" >
+        <forward name="success" path="/common/AJAXResponse.jsp"/>
+      </action>
+
+      <action path="/resource/*/inventory/RemoveGroups" 
+              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
+              name="RemoveResourceGroupsForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=view">
+        <set-property property="title" value="Inventory.Group"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=view"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/resource/*/Inventory"
+              forward=".resource.{1}.inventory.layout">
+      </action>
+      
+      <action path="/resource/*/inventory/ChangeOwner"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
+              name="ChangeResourceOwnerForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=changeOwner">
+        <set-property property="workflow" value="resource/ChangeOwner"/>                
+        <forward name="cancel" path="/resource/{1}/Inventory.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/{1}/Inventory.do?mode=changeOwner"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=changeOwner"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
+        <forward name="lostRights" path="/ResourceHub.do"/>
+      </action>
+
+      <action path="/resource/*/inventory/Add*Groups"
+              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
+              name="AddResourceGroupsForm"
+              scope="request"
+              input="/resource/{1}/Inventory.do?mode=addGroups">
+        <forward name="cancel"  path="/resource/{1}/Inventory.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset"   path="/resource/{1}/Inventory.do?mode=addGroups"
+                 redirect="true"/>
+        <forward name="new"     path="/resource/group/Inventory.do?mode=new"
+                 redirect="true"/>
+        <forward name="add"     path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="remove"  path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="failure" path="/resource/{1}/Inventory.do?mode=addGroups"/>
+        <forward name="success" path="/resource/{1}/Inventory.do?mode=view"/>
+      </action>
+
+      <action path="/welcome" forward="/welcome.jsp" >
+        <set-property property="title" value="EXAMPLE" />
+      </action>
+
+      <!-- JSON APIs for escalation -->
+      <action path="/escalation/save*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Save{1}"
+              />
+
+      <action path="/escalation/update*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Update{1}"
+              />
+
+      <action path="/escalation/remove*/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.crud.Remove{1}"
+              parameter="{2}"
+              />
+
+      <action path="/escalation/jsonBy*/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.JsonBy{1}"
+              parameter="{2}"/>
+
+      <action path="/escalation/listAll*Name"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAll{1}Name"
+              parameter="{2}"/>
+
+      <action path="/escalation/json*ByAlertDefId/*"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}ByAlertDefId"
+              parameter="{2}"/>
+
+      <action path="/escalation/ListAllEscalationName"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAllEscalationName"/>
+
+      <action path="/escalation/ListActiveEscalations"
+              scope="request"
+              type="org.hyperic.hq.ui.json.action.escalation.finder.ListActiveEscalations"/>
+
+      <action path="/mastheadAttach"
+              forward=".attach.layout"/>
+
+      <action path="/attach/Masthead"
+              type="org.hyperic.hq.ui.action.attach.MastheadAction"/>
+
+  </action-mappings>
+
+<!-- ===================================== Controller Configuration -->
+    <controller
+       processorClass="org.hyperic.hq.ui.action.BaseRequestProcessor"
+       inputForward="false"/>
+
+<!-- ================================ Message Resources Definitions -->
+    <message-resources parameter="ApplicationResources" null="false"/>    
+
+</struts-config>

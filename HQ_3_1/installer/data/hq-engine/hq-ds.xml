@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!-- HQ Datasource configuration                                           -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<datasources>
+  <local-tx-datasource>
+    <jndi-name>HypericDS</jndi-name>
+    <connection-url>@@@server.database-url@@@</connection-url>
+    <driver-class>@@@server.database-driver@@@</driver-class>
+    <user-name>@@@server.database-user@@@</user-name>
+    <password>@@@server.database-password@@@</password>
+    <!-- you can include connection properties that will get passed in 
+     the DriverManager.getConnection(props) call-->
+    <!-- look at your Driver docs to see what these might be -->
+    <connection-property name="char.encoding">UTF-8</connection-property>
+    <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+
+    <!--pooling parameters-->
+    <min-pool-size>5</min-pool-size>
+    <max-pool-size>500</max-pool-size>
+    <blocking-timeout-millis>5000</blocking-timeout-millis>
+    <idle-timeout-minutes>15</idle-timeout-minutes>
+    <prepared-statement-cache-size>75</prepared-statement-cache-size>
+
+  </local-tx-datasource>
+
+</datasources>

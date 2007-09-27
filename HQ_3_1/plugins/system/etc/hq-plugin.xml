@@ -1,0 +1,1054 @@
+<?xml version="1.0"?> 
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="system" class="SystemPlugin"> 
+
+  <filter name="unix.config_files"
+          value="/etc/hosts"/>
+
+  <property name="Win32.DEFAULT_CONFIG_FILE"
+            value="C:\WINDOWS\system32\drivers\etc\hosts"/>
+
+  <property name="Linux.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <property name="Solaris.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <property name="HPUX.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <property name="AIX.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <property name="FreeBSD.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <property name="MacOSX.DEFAULT_CONFIG_FILE"
+            value="${unix.config_files}"/>
+
+  <!-- experimental, none defaultOn -->
+  <metrics name="tcp">
+    <metric name="Tcp Inbound Connections"
+            template="sigar:Type=NetStat:TcpInboundTotal"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Outbound Connections"
+            template="sigar:Type=NetStat:TcpOutboundTotal"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State ESTABLISHED"
+            template="sigar:Type=NetStat:TcpEstablished"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State SYN_SENT"
+            template="sigar:Type=NetStat:TcpSynSent"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State SYN_RECV"
+            template="sigar:Type=NetStat:TcpSynRecv"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State FIN_WAIT1"
+            template="sigar:Type=NetStat:TcpFinWait1"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State FIN_WAIT2"
+            template="sigar:Type=NetStat:TcpFinWait2"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State TIME_WAIT"
+            template="sigar:Type=NetStat:TcpTimeWait"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State CLOSE"
+            template="sigar:Type=NetStat:TcpClose"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State CLOSE_WAIT"
+            template="sigar:Type=NetStat:TcpCloseWait"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State LAST_ACK"
+            template="sigar:Type=NetStat:TcpLastAck"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State LISTEN"
+            template="sigar:Type=NetStat:TcpListen"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp State CLOSING"
+            template="sigar:Type=NetStat:TcpClosing"
+            category="THROUGHPUT"/>
+  </metrics>
+
+  <!-- metrics common to all platforms -->
+  <metrics name="system-common">
+    <!-- we always return 1, no url get -->
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=Platform:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Free Memory"
+            alias="MemFree"
+            template="sigar:Type=Mem:Free"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Total Memory"
+            alias="MemTotal"
+            template="sigar:Type=Mem:Total"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Used Memory"
+            alias="MemUsed"
+            template="sigar:Type=Mem:Used"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Number of CPUs"
+            alias="NumCPUs"
+            template="sigar.ext:Type=CpuInfo:Total"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="User Cpu"
+            alias="CpuUser"
+            template="sigar:Type=CpuPerc:User"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="System Cpu"
+            alias="CpuSys"
+            template="sigar:Type=CpuPerc:Sys"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="User Cpu Time"
+            alias="CpuUserSec"
+            template="sigar:Type=Cpu:User"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="System Cpu Time"
+            alias="CpuSysSec"
+            template="sigar:Type=Cpu:Sys"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="Cpu Idle Time"
+            alias="CpuIdleSec"
+            template="sigar:Type=Cpu:Idle"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="Swap Free"
+            alias="SwapFree"
+            template="sigar:Type=Swap:Free"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Swap Used"
+            alias="SwapUsed"
+            template="sigar:Type=Swap:Used"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Swap Total"
+            alias="SwapTotal"
+            template="sigar:Type=Swap:Total"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="System Uptime"
+            alias="Uptime"
+            template="sigar:Type=Uptime:Uptime"
+            category="AVAILABILITY"
+            collectionType="static"
+            units="sec"/>
+    <metric name="Running Processes"
+            alias="ProcTotal"
+            template="sigar:Type=ProcStat:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <!-- metrics common to all unix platforms -->
+  <metrics name="system-common-unix" include="system-common">
+    <metric name="Load Average 1 Minute"
+            alias="LoadAverage0"
+            template="sigar:Type=LoadAverage:0"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Load Average 5 Minutes"
+            alias="LoadAverage1"
+            template="sigar:Type=LoadAverage:1"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Load Average 15 Minutes"
+            alias="LoadAverage2"
+            template="sigar:Type=LoadAverage:2"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="none"/>
+    <metric name="Cpu Nice"
+            alias="CpuNice"
+            template="sigar:Type=CpuPerc:Nice"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Cpu Idle"
+            alias="CpuIdle"
+            template="sigar:Type=CpuPerc:Idle"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Cpu Usage"
+            alias="CpuUsage"
+            template="sigar:Type=CpuPerc:Combined"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+  </metrics>
+
+  <metrics name="cpu-wait">
+    <metric name="Cpu Wait"
+            alias="CpuWait"
+            template="sigar:Type=CpuPerc:Wait"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <metric name="Cpu Wait Time"
+            alias="CpuWaitSec"
+            template="sigar:Type=Cpu:Wait"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="Linux" include="system-common-unix,cpu-wait,tcp">
+    <metric name="Free Memory (+ buffers/cache)"
+            alias="ActualMemFree"
+            template="sigar:Type=Mem:ActualFree"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="B"/>
+    <metric name="Used Memory (- buffers/cache)"
+            alias="ActualMemUsed"
+            template="sigar:Type=Mem:ActualUsed"
+            category="UTILIZATION"
+            collectionType="dynamic"
+            units="B"/>
+  </metrics>
+
+  <metrics name="Solaris"
+           include="system-common-unix,cpu-wait,tcp"/>
+
+  <metrics name="HPUX"
+           include="system-common-unix,cpu-wait,tcp"/>
+
+  <metrics name="AIX"
+           include="system-common-unix,cpu-wait"/>
+
+  <metrics name="MacOSX" include="system-common-unix,tcp"/>
+
+  <metrics name="FreeBSD" include="system-common-unix,tcp"/>
+
+  <metrics name="Win32" include="system-common,tcp">
+    <metric name="Cpu Usage"
+            alias="CpuUsage"
+            template="sigar:Type=CpuPerc:Combined"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+
+    <!-- Script to check for available updates (8 hour interval) -->
+    <metric name="Available Updates"
+            category="Availability"
+            interval="28800000"
+            script="pdk/scripts/windows_updates.vbs"
+            template="exec:file=${script}:ResultValue"/>
+  </metrics>
+
+  <metrics name="FileServer Mount">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=MountedFileSystemUsage,Arg=%mount%:UsePercent"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Use Percent"
+            alias="UsePercent"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:UsePercent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Total Bytes Used"
+            alias="TotFsUsed"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:Used"
+            category="UTILIZATION"
+            units="KB"
+            collectionType="dynamic"/>
+
+    <metric name="Capacity"
+            alias="Capacity"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:Total"
+            category="UTILIZATION"
+            units="KB"
+            collectionType="static"/>
+
+    <metric name="Total Bytes Free"
+            alias="TotFsFree"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:Free"
+            category="UTILIZATION"
+            indicator="true"
+            units="KB"
+            collectionType="dynamic"/>
+
+    <metric name="Total Bytes Avail"
+            alias="TotFsAvail"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:Avail"
+            category="UTILIZATION"
+            units="KB"
+            collectionType="dynamic"/>
+
+    <metric name="Disk Reads"
+            alias="DiskReads"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskReads"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Disk Writes"
+            alias="DiskWrites"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskWrites"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Disk Read Bytes"
+            alias="DiskReadBytes"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskReadBytes"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Disk Write Bytes"
+            alias="DiskWriteBytes"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskWriteBytes"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Disk Queue"
+            alias="DiskQueue"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskQueue"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- Win32 does not have inodes, rendering these metric two useless -->
+    <metric name="Free Files"
+            alias="FreeFiles"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:FreeFiles"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Total Files"
+            alias="Files"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:Files"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="file-common">
+    <metric name="Last Modified Time"
+            alias="LastModified"
+            template="sigar:Type=FileInfo,Arg=%path%:Mtime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Last Change Time"
+            alias="LastChange"
+            template="sigar:Type=FileInfo,Arg=%path%:Ctime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Last Access Time"
+            alias="LastAccess"
+            template="sigar:Type=FileInfo,Arg=%path%:Atime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Permissions"
+            alias="Permissions"
+            template="sigar:Type=FileInfo,Arg=%path%:Mode"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Owner User Id"
+            alias="Uid"
+            template="sigar:Type=FileInfo,Arg=%path%:Uid"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Owner Group Id"
+            alias="Gid"
+            template="sigar:Type=FileInfo,Arg=%path%:Gid"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+  <!-- type, inode, device, nlink -->
+  </metrics>
+
+  <metrics name="FileServer File" include="file-common">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=FileInfo,Arg=%path%:Mtime"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <!-- not useful for a directory -->
+    <metric name="Size"
+            alias="Size"
+            template="sigar:Type=FileInfo,Arg=%path%:Size"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="FileServer Directory" include="file-common">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=FileInfo,Arg=%path%:Type"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Regular Files"
+            alias="Files"
+            template="sigar:Type=DirStats,Arg=%path%:Files"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Subdirectories"
+            alias="Subdirs"
+            template="sigar:Type=DirStats,Arg=%path%:Subdirs"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Symbolic Links"
+            alias="Symlinks"
+            template="sigar:Type=DirStats,Arg=%path%:Symlinks"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Character Devices"
+            alias="Chrdevs"
+            template="sigar:Type=DirStats,Arg=%path%:Chrdevs"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Block Devices"
+            alias="Blkdevs"
+            template="sigar:Type=DirStats,Arg=%path%:Blkdevs"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Sockets"
+            alias="Sockets"
+            template="sigar:Type=DirStats,Arg=%path%:Sockets"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Total"
+            alias="Total"
+            template="sigar:Type=DirStats,Arg=%path%:Total"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Disk Usage"
+            template="sigar:Type=DirUsage,Arg=%path%:DiskUsage"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <filter name="template"
+          value="sigar:Type=DirUsage,Arg=%path%:${alias}"/>
+
+  <metrics name="FileServer Directory Tree">
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Regular Files"
+            alias="Files"
+            indicator="true"/>
+
+    <metric name="Subdirectories"
+            alias="Subdirs"
+            indicator="true"/>
+
+    <metric name="Symbolic Links"
+            alias="Symlinks"/>
+
+    <metric name="Character Devices"
+            alias="Chrdevs"/>
+
+    <metric name="Block Devices"
+            alias="Blkdevs"/>
+
+    <metric name="Sockets"/>
+
+    <metric name="Total"/>
+ 
+    <metric name="Disk Usage"
+            units="B"
+            indicator="true"/>
+  </metrics>
+
+  <filter name="script.args"
+          value="exec=%prefix%,file=%path%,args=%args%,timeout=%timeout%"/>
+
+  <metrics name="Script">
+    <metric name="Availability"
+            alias="Availability"
+            template="exec:${script.args}:Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Execution Time"
+            alias="ExecTime"
+            template="exec:${script.args}:ExecTime"
+            category="THROUGHPUT"
+            indicator="true"
+            units="ms"
+            collectionType="dynamic"/>
+
+    <metric name="Result Value"
+            template="exec:${script.args}:ResultValue"
+            category="UTILIZATION"
+            indicator="true"/>
+  </metrics>
+
+  <metrics name="NetworkServer Interface">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=NetIfconfig,Arg=%interface%:Flags"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Bits Received"
+            alias="BitsIn"
+            template="sigar:Type=NetIfstat,Arg=%interface%:RxBytes"
+            category="THROUGHPUT"
+            indicator="true"
+            units="bytesToBits"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Received"
+            alias="BytesIn"
+            template="sigar:Type=NetIfstat,Arg=%interface%:RxBytes"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Packets Received"
+            alias="PacketsIn"
+            template="sigar:Type=NetIfstat,Arg=%interface%:RxPackets"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Transmitted"
+            alias="BytesOut"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxBytes"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bits Transmitted"
+            alias="BitsOut"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxBytes"
+            category="THROUGHPUT"
+            indicator="true"
+            units="bytesToBits"
+            rate="1s"
+            collectionType="trendsup"/>
+
+    <metric name="Packets Transmitted"
+            alias="PacketsOut"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxPackets"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transmit Errors"
+            alias="TxErrors"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxErrors"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Receive Errors"
+            alias="RxErrors"
+            template="sigar:Type=NetIfstat,Arg=%interface%:RxErrors"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transmit Packets Dropped"
+            alias="TxDropped"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxDropped"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Receive Packets Dropped"
+            alias="RxDropped"
+            template="sigar:Type=NetIfstat,Arg=%interface%:RxDropped"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transmit Collisions"
+            alias="TxCollisions"
+            template="sigar:Type=NetIfstat,Arg=%interface%:TxCollisions"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="CPU">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=CpuPercList,Arg=%cpu%:Idle"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+    <metric name="User Cpu"
+            alias="CpuUser"
+            template="sigar:Type=CpuPercList,Arg=%cpu%:User"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="System Cpu"
+            alias="CpuSys"
+            template="sigar:Type=CpuPercList,Arg=%cpu%:Sys"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Cpu Idle"
+            alias="CpuIdle"
+            template="sigar:Type=CpuPercList,Arg=%cpu%:Idle"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="Cpu Usage"
+            alias="CpuUsage"
+            template="sigar:Type=CpuPercList,Arg=%cpu%:Combined"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="dynamic"
+            units="percentage"/>
+    <metric name="User Cpu Time"
+            alias="CpuUserSec"
+            template="sigar:Type=CpuList,Arg=%cpu%:User"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="System Cpu Time"
+            alias="CpuSysSec"
+            template="sigar:Type=CpuList,Arg=%cpu%:Sys"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="Cpu Idle Time"
+            alias="CpuIdleSec"
+            template="sigar:Type=CpuList,Arg=%cpu%:Idle"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+    <metric name="Cpu Wait Time"
+            alias="CpuWaitSec"
+            template="sigar:Type=CpuList,Arg=%cpu%:Wait"
+            category="UTILIZATION"
+            collectionType="trendsup"
+            units="ms"/>
+  </metrics>
+
+  <metrics name="Process">
+    <metric name="Availability"
+            alias="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Virtual Memory Size"
+            alias="VirtualMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar:Type=ProcMem,Arg=%process.query%:Resident"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=ProcCpu,Arg=%process.query%:Percent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Start Time"
+            alias="StartTime"
+            template="sigar:Type=ProcTime,Arg=%process.query%:StartTime"
+            category="AVAILABILITY"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Open File Descriptors"
+            alias="OpenFd"
+            template="sigar:Type=ProcFd,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Threads"
+            template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
+  </metrics>
+
+  <metrics name="MultiProcess">
+    <metric name="Availability"
+            alias="Availability"
+            template="system.avail:Type=MultiProcCpu,Arg=%process.query%:Processes"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Number of Processes"
+            alias="NumProcesses"
+            template="sigar:Type=MultiProcCpu,Arg=%process.query%:Processes"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Memory Size"
+            alias="MemSize"
+            template="sigar:Type=MultiProcMem,Arg=%process.query%:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar:Type=MultiProcMem,Arg=%process.query%:Resident"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=MultiProcCpu,Arg=%process.query%:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=MultiProcCpu,Arg=%process.query%:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=MultiProcCpu,Arg=%process.query%:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=MultiProcCpu,Arg=%process.query%:Percent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <filter name="service.ptql"
+          value="Pid.Service.eq=%service_name%"/>
+  
+  <metrics name="Windows Service">
+    <metric name="Availability"
+            alias="Availability"
+            template="ServiceAvail:Platform=Win32:%service_name%"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Memory Size"
+            alias="MemSize"
+            template="sigar:Type=ProcMem,Arg=${service.ptql}:Size"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Resident Memory Size"
+            alias="ResidentMemSize"
+            template="sigar:Type=ProcMem,Arg=${service.ptql}:Resident"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Cpu System Time"
+            alias="SystemTime"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:Sys"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu User Time"
+            alias="UserTime"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:User"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Total Time"
+            alias="TotalTime"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:Total"
+            category="UTILIZATION"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Cpu Usage"
+            alias="Usage"
+            template="sigar:Type=ProcCpu,Arg=${service.ptql}:Percent"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Start Time"
+            alias="StartTime"
+            template="sigar:Type=ProcTime,Arg=${service.ptql}:StartTime"
+            category="AVAILABILITY"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Open Handles"
+            alias="OpenHandles"
+            template="sigar:Type=ProcFd,Arg=${service.ptql}:Total"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Threads"
+            template="sigar:Type=ProcState,Arg=${service.ptql}:Threads"/>
+  </metrics>
+
+  <help name="AIX">
+  <![CDATA[
+  <p>
+  <b>NOTE:</b> The agent must have read access to /dev/kmem
+  </p>
+  ]]>
+  </help>
+
+  <help name="Nagios Plugin">
+  <![CDATA[
+  The Nagios Plugin Service is designed to be able to execute 
+  any locally accessible Nagios Plugin available on this system.
+  The user running the Hyperic agent must have permission to execute 
+  the nagios plugin in order for the Nagios Plugins service to work
+  correctly.
+  <br>
+  The Nagios Plugin Service will execute the configured plugin with
+  the specified arguments and return availability based on the succesful
+  execution of the plugin, the return code of the plugin invocation, 
+  the time it took to execute, and more.
+  <br>
+  <b>Path</b> is the absolute path to the nagios plugin binary.
+  <b>Args</b> is any string argument you want to pass into the plugin
+  ]]>
+  </help>
+
+  <help name="Process">
+  <![CDATA[
+  <p>
+  Monitoring of an individual process or group of processes requires a 
+  process query to differentiate them from other system processes.  This 
+  is achieved using <b>P</b>rocess <b>T</b>able <b>Q</b>uery <b>L</b>anguage, 
+  or <b>PTQL</b>, a simple query language for finding processes based based 
+  on their attributes.
+  </p>
+  <p>
+  PTQL Queries must be in the following format:
+  <pre>
+    Class.Attribute.operator=value
+  </pre>
+  Where:
+  </p>
+  <ul>
+  <li> <b>Class</b> is the name of the Sigar class minus the Proc prefix. </li>
+  <li> <b>Attribute</b> is an attribute of the given <b>Class</b>,
+  index into an array or key in a Map class.</li>
+  <li> <b>operator</b> is one of the following for String values:
+    <ul>
+     <li> <b>eq</b> - Equal to <b>value</b> </li>
+     <li> <b>ne</b> - Not Equal to <b>value</b> </li>
+     <li> <b>ew</b> - Ends with <b>value</b> </li>
+     <li> <b>sw</b> - Starts with <b>value</b> </li>
+     <li> <b>ct</b> - Contains <b>value</b> (substring) </li>
+     <li> <b>re</b> - Regular expression <b>value</b> matches </li>
+    </ul>
+  </li>
+  <li> <b>operator</b> is one of the following for numeric values:
+    <ul>
+     <li> <b>eq</b> - Equal to <b>value</b> </li>
+     <li> <b>ne</b> - Not Equal to <b>value</b> </li>
+     <li> <b>gt</b> - Greater than <b>value</b> </li>
+     <li> <b>ge</b> - Greater than or equal <b>value</b> </li>
+     <li> <b>lt</b> - Less than <b>value</b> </li>
+     <li> <b>le</b> - Less than or equal <b>value</b> </li>
+   </ul>
+  </li>
+  </ul>
+  <p>
+  Multiple queries must delimited by a comma.
+  </p>
+  <p>
+  <b>Examples:</b>
+  </p>
+  <p>
+  Find JBoss using process name
+  <pre>
+    State.Name.eq=java,Args.*.eq=org.jboss.Main
+  </pre>
+  </p>
+  <p>
+  Find SSHd using a pid file
+  <pre>
+    Pid.PidFile.eq=/var/run/sshd.pid<br>
+  </pre>
+  </p>
+  <p>
+  For more examples see the pdk/lib/.sigar_shellrc file included in the HQ agent distribution and the
+  Sigar <a href="http://support.hyperic.com/confluence/display/SIGAR/PTQL">PTQL Documentation</a>.
+  </p>
+  ]]>
+  </help>
+
+  <help name="MultiProcess" include="Process"/>
+
+</plugin>

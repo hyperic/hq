@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+
+  <class name="ResourceGroup" table="EAM_RESOURCE_GROUP">
+    <cache usage="read-write"/>
+    <id name="id" type="integer">
+      <meta attribute="scope-set"><![CDATA[private]]></meta>
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_RESOURCE_GROUP_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
+    <property name="name" type="string">
+      <column name="NAME" not-null="true" length="100" unique="true"/>
+    </property>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_RES_GROUP_CID_IDX" not-null="false"/>
+    </property>
+
+    <property name="sortName" type="string">
+      <column name="SORT_NAME" not-null="false" length="100"/>
+    </property>
+
+    <property name="description" type="string">
+      <column name="DESCRIPTION" not-null="false" length="100"/>
+    </property>
+
+    <property name="location" type="string">
+      <column name="LOCATION" not-null="false" length="100"/>
+    </property>
+
+    <property name="system" type="boolean">
+      <column name="FSYSTEM" not-null="false"/>
+    </property>
+
+    <property name="groupType" type="integer">
+      <column name="GROUPTYPE" not-null="false" default="11"/>
+    </property>
+
+    <property name="groupEntType" type="integer">
+      <column name="GROUP_ENT_TYPE" not-null="false" default="-1"/>
+    </property>
+
+    <property name="groupEntResType" type="integer">
+      <column name="GROUP_ENT_RES_TYPE" not-null="false" default="-1"/>
+    </property>
+
+    <property name="clusterId" type="integer">
+      <column name="CLUSTER_ID" not-null="false" default="-1"/>
+    </property>
+
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="false" default="0"/>
+    </property>
+
+    <property name="mtime" type="long">
+      <column name="MTIME" default="0"/>
+    </property>
+
+    <property name="modifiedBy" type="string">
+      <column name="MODIFIED_BY" length="100"/>
+    </property>
+
+    <many-to-one name="resource">
+      <column name="RESOURCE_ID" not-null="true"/>
+    </many-to-one>
+
+    <set name="resourceSet" table="EAM_RES_GRP_RES_MAP" optimistic-lock="false">
+      <cache usage="read-write"/>
+      <key column="RESOURCE_GROUP_ID"/>
+      <many-to-many class="Resource" column="RESOURCE_ID"/>
+    </set>
+
+    <set name="roles" table="EAM_ROLE_RESOURCE_GROUP_MAP">
+      <cache usage="read-write"/>
+      <key column="RESOURCE_GROUP_ID"/>
+      <many-to-many class="Role" column="ROLE_ID"/>
+    </set>
+  </class>
+
+  <class name="ResGrpResMap" table="EAM_RES_GRP_RES_MAP">
+    <cache usage="read-write"/>
+    <composite-id name="id" class="ResGrpResMapId">
+      <key-many-to-one name="resource" class="Resource">
+        <column name="RESOURCE_ID" not-null="true"/>
+      </key-many-to-one>
+
+      <key-many-to-one name="resourceGroup" class="ResourceGroup">
+        <column name="RESOURCE_GROUP_ID" not-null="true"/>
+      </key-many-to-one>
+    </composite-id>
+
+    <property name="cid" type="integer">
+      <column name="CID" index="EAM_RESGRP_RESMAP_CID_IDX"/>
+    </property>
+  </class>
+
+</hibernate-mapping>

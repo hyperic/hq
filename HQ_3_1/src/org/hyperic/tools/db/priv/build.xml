@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<project name="test" default="succeed" basedir=".">
+    <property environment="ENV" />
+    <path id="taskpath" >
+      <fileset dir="${ENV.SPIDER_MAIN}/java-util/lib/oracle_jdbc" includes="*.jar" />
+      <fileset dir="${ENV.SPIDER_MAIN}/java-util/lib/pointbase" includes="*.jar" />
+      <path location="${ENV.SPIDER_MAIN}/fast-build/classes" />
+    </path>
+    <taskdef name="checker" 
+        classname="org.hyperic.tools.ant.DBPrivCheckTask"
+        classpathref="taskpath" />
+    <target name="succeed">
+        <echo>ready to check...</echo>
+        <checker jdbcUrl="jdbc:oracle:thin:@doc.sfo.covalent.net:1521:CMP" jdbcUser="iank_spider" jdbcPassword="iank_spider" />
+        <echo>succeeded!</echo>
+    </target>
+    <target name="fail">
+        <echo>ready to check...</echo>
+        <checker jdbcUrl="jdbc:oracle:thin:@doc.sfo.covalent.net:1521:CMP" jdbcUser="loser" jdbcPassword="loser" />
+        <echo>failed to fail, uh oh</echo>
+    </target>
+</project>

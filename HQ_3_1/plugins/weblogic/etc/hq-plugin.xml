@@ -1,0 +1,1321 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="weblogic" class="WeblogicProductPlugin">
+
+  <classpath>
+    <!-- look for service pack jar as weblogic does in their scripts. -->
+    <include name="server/lib/weblogic_sp.jar"/>
+    <include name="server/lib/weblogic.jar"/>
+    <include name="server/lib/wlcipher.jar"/>
+    <include name="server/lib/webservices.jar"/>
+    <!-- 9.x+ssl -->
+    <include name="server/lib/jsafe.jar"/>
+    <!-- 6.1 -->
+    <include name="lib/weblogic.jar"/>
+  </classpath>
+
+  <!-- appended to every template -->
+  <property name="template-config"
+            value="admin.url=%admin.url%,admin.username=%admin.username%,admin.password=%admin.password%"/>
+
+  <!-- ObjectName templates for each MBean -->
+  <filter name="UserLockoutManager"
+	  value="Security:Name=%realm%UserLockoutManager"/>
+
+  <filter name="TimeServiceRuntime"
+	  value="${RuntimeLocation}Name=TimeEventGenerator,Type=TimeServiceRuntime"/>
+
+  <filter name="JMSRuntime"
+	  value="${RuntimeLocation}Name=%server%.jms,Type=JMSRuntime"/>
+
+  <filter name="JMSServerRuntime"
+	  value="${RuntimeLocation}Name=%jms.server%,Type=JMSServerRuntime"/>
+
+  <filter name="JTARuntime"
+	  value="${RuntimeLocation}Name=JTARuntime,Type=JTARuntime"/>
+
+  <filter name="ApplicationConfig"
+	  value="${Location}Name=%application%,Type=ApplicationConfig"/>
+
+  <filter name="ExecuteQueueRuntime"
+	  value="${RuntimeLocation}Name=%exq%,Type=ExecuteQueueRuntime"/>
+
+  <!-- the following MBeans contain seemingly random numbers/name in the name,
+       but useful attributes:
+       ServletRuntime:
+       - PoolMaxCapacity, ExecutionTimeLow, ExecutionTimeHigh,
+         ExecutionTimeTotal, ExecutionTimeAverage, ReloadTotalCount,
+         InvocationTotalCount
+
+       JMSConnectionRuntime:
+       - SessionsHighCount, SessionsCurrentCount,
+         SessionsCurrentCount, SessionsTotalCount
+
+       JMSConsumerRuntime:
+       - BytesPendingCount, BytesReceivedCount
+         MessagesPendingCount, MessagesReceivedCount
+
+       JMSSessionRuntime:
+       - BytesPendingCount, BytesReceivedCount, BytesSentCount,
+         ConsumersCurrentCount, ConsumersHighCount, ConsumersTotalCount, 
+         MessagesPendingCount, MessagesReceivedCount, MessagesSentCount,
+         ProducersCurrentCount, ProducersHighCount, ProducersTotalCount
+  -->
+
+  <!-- the following MBeans dont have any useful metric attributes:
+       WLECConnectionServiceRuntimeMBean,
+       ApplicationRuntime, ApplicationConfig,
+       SecurityConfiguration, SecurityConfig, PasswordPolicyConfig,
+       PasswordPolicy, LogBroadcasterRuntime,
+       DomainLogFilterConfig, DomainLogHandlerRuntime,
+       IIOP, IIOPConfig, RealmConfig, SNMPAgentConfig,
+       JMSQueueConfig, JMSTopicConfig, JMSServerConfig, JMSJDBCStore,
+       JMSQueue, JMSTopic, 
+       J2EEApplicationDescriptor, ApplicationDescriptor,
+       EJBModule, EJBComponent, EJBComponentConfig,
+       JTA, JTAConfig, JTARecoveryRuntime,
+       JDBCTxDataSource, JDBCTxDataSourceConfig,
+       JTAMigratableTargetConfig, MigratableServiceCoordinatorRuntime,
+       FileRealmConfig, AdminServer, WebModule, Repository,
+       JDBCConnectionPool, JDBCConnectionPoolConfig,
+       DeployerRuntime (used for service control),
+       WebServer, WebServerRuntime, SSL,
+       DomainConfig, DomainRuntime, Domain,
+       ShutdownClass, ShutdownClassConfig, StartServerConfig,
+       CustomMBeanType, EmbeddedLDAPConfig,
+       KernelDebug, ServerDebug,
+       MBeanServerDelegate, MLet, MailSession, COM
+  -->
+
+  <metrics name="server-summary">
+    <metric name="JMS Active Connections"
+            alias="JMSConnActive"
+            template="${JMSRuntime}:ConnectionsCurrentCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="JMS Total Connections"
+            alias="JMSConnTotal"
+            template="${JMSRuntime}:ConnectionsTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JMS Active Servers"
+            alias="JMSSrvActive"
+            template="${JMSRuntime}:JMSServersCurrentCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="JMS Total Servers"
+            alias="JMSSrvTotal"
+            template="${JMSRuntime}:JMSServersTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="JTA Seconds Active"
+            alias="JTASecActive"
+            template="${JTARuntime}:SecondsActiveTotalCount"
+            category="UTILIZATION"
+            units="sec"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Transactions Rolled Back"
+            alias="JTATxRolledBack"
+            template="${JTARuntime}:TransactionRolledBackTotalCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA System Transactions Rolled Back"
+            alias="JTATxSysRolledBack"
+            template="${JTARuntime}:TransactionRolledBackSystemTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA App Transactions Rolled Back"
+            alias="JTATxAppRolledBack"
+            template="${JTARuntime}:TransactionRolledBackAppTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Resource Transactions Rolled Back"
+            alias="JTATxResRolledBack"
+            template="${JTARuntime}:TransactionRolledBackResourceTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Transaction Heuristics"
+            alias="JTATxHeuristics"
+            template="${JTARuntime}:TransactionHeuristicsTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Transactions Abandoned"
+            alias="JTATxAbandoned"
+            template="${JTARuntime}:TransactionAbandonedTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Total Transactions"
+            alias="JTATxTotal"
+            template="${JTARuntime}:TransactionTotalCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Transaction Rollback Timeouts"
+            alias="JTATxRollbackTimeouts"
+            template="${JTARuntime}:TransactionRolledBackTimeoutTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Active Transactions"
+            alias="JTATxActive"
+            template="${JTARuntime}:ActiveTransactionsTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JTA Committed Transactions"
+            alias="JTATxCommitted"
+            template="${JTARuntime}:TransactionCommittedTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="server-runtime">
+    <metric name="Server Availability"
+            alias="Availability"
+            template="${ServerRuntime}:StateVal"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Time Service Exception Count"
+            alias="TimeSvcExceptions"
+            template="${TimeServiceRuntime}:ExceptionCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Time Service Excecutions Per Minute"
+            alias="TimeSvcExPerMin"
+            template="${TimeServiceRuntime}:ExecutionsPerMinute"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Time Service Scheduled Triggers"
+            alias="TimeSvcTriggers"
+            template="${TimeServiceRuntime}:ScheduledTriggerCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Connector Service Total Pools"
+            alias="ConnSvcPoolsTotal"
+            template="${ConnectorServiceRuntime}:ConnectionPoolsTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Connector Service Active Pools"
+            alias="ConnSvcPoolsActive"
+            template="${ConnectorServiceRuntime}:ConnectionPoolCurrentCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="User Lockout Total"
+            alias="NumUserLockout"
+            template="${ServerSecurityRuntime}:UserLockoutTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Unlocked Users"
+            alias="UnlockedUsers"
+            template="${ServerSecurityRuntime}:UnlockedUsersTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Login Attempts While Locked"
+            alias="LoginAttemptsWhileLocked"
+            template="${ServerSecurityRuntime}:LoginAttemptsWhileLockedTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Invalid Login Attempts"
+            alias="InvalidLogins"
+            template="${ServerSecurityRuntime}:InvalidLoginAttemptsTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+<!--
+    <metric name="Activation Time"
+            alias="ActivationTime"
+            template="${ServerRuntime}:${alias}"
+            category="AVAILABILITY"
+            units="epoch-millis"
+            collectionType="static"/>
+-->
+
+    <metric name="Sockets Open"
+            alias="SocketsOpen"
+            template="${ServerRuntime}:OpenSocketsCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Sockets Opened"
+            alias="SocketsOpened"
+            template="${ServerRuntime}:SocketsOpenedTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Restarts"
+            alias="Restarts"
+            template="${ServerRuntime}:RestartsTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="JVM Free Memory"
+            alias="FreeMemory"
+            template="${JVMRuntime}:HeapFreeCurrent"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="JVM Total Memory"
+            alias="TotalMemory"
+            template="${JVMRuntime}:HeapSizeCurrent"
+            category="UTILIZATION"
+            units="B"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="jrockit">
+    <metric name="JVM Total Garbage Collection Count"
+            template="${JVMRuntime}:TotalGarbageCollectionCount"
+            category="UTILIZATION"
+            collectionType="trendsup"/>
+
+    <metric name="JVM Total Garbage Collection Time"
+            template="${JVMRuntime}:TotalGarbageCollectionTime"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="JVM Total Nursery Size"
+            alias="TotalMemory"
+            template="${JVMRuntime}:TotalNurserySize"
+            category="UTILIZATION"
+            units="B"/>
+
+    <metric name="JVM Number Of Daemon Threads"
+            template="${JVMRuntime}:NumberOfDaemonThreads"
+            category="UTILIZATION"/>
+  </metrics>
+
+  <metrics name="ejb-tx-runtime">
+    <metric name="Transactions Rolled Back"
+            template="${EJBTransactionRuntime}:TransactionsRolledBackTotalCount"  
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Transactions Committed"
+            template="${EJBTransactionRuntime}:TransactionsCommittedTotalCount"  
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Transactions Timed Out"
+            template="${EJBTransactionRuntime}:TransactionsTimedOutTotalCount"  
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="ejb-pool-runtime">
+    <metric name="Pool Accesses"
+            template="${EJBPoolRuntime}:AccessTotalCount"
+            collectionType="trendsup"/>
+
+    <metric name="Pool Misses"
+            template="${EJBPoolRuntime}:MissTotalCount"
+            collectionType="trendsup"/>
+
+    <metric name="Pool Beans Destroyed"
+            template="${EJBPoolRuntime}:DestroyedTotalCount"
+            collectionType="trendsup"/>
+
+    <metric name="Pool Beans Idle"
+            template="${EJBPoolRuntime}:IdleBeansCount"
+            collectionType="dynamic"/>
+
+    <metric name="Pool Beans Available"
+            template="${EJBPoolRuntime}:PooledBeansCurrentCount"
+            collectionType="dynamic"/>
+
+    <metric name="Pool Beans In Use"
+            template="${EJBPoolRuntime}:BeansInUseCount"
+            collectionType="dynamic"/>
+
+    <metric name="Pool Waiters"
+            template="${EJBPoolRuntime}:WaiterTotalCount"
+            collectionType="dynamic"/>
+
+    <metric name="Pool Timeouts"
+            template="${EJBPoolRuntime}:TimeoutTotalCount"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="ejb-cache-runtime">
+    <metric name="Cached Beans"
+            template="${EJBCacheRuntime}:CachedBeansCurrentCount"
+            collectionType="dynamic"/>
+
+    <metric name="Cache Hits"
+            template="${EJBCacheRuntime}:CacheHitCount"
+            collectionType="trendsup"/>
+
+    <metric name="Cache Misses"
+            template="${EJBCacheRuntime}:CacheMissCount"
+            collectionType="trendsup"/>
+
+    <metric name="Activates"
+            template="${EJBCacheRuntime}:ActivationCount"
+            collectionType="trendsup"/>
+
+    <metric name="Passivates"
+            template="${EJBCacheRuntime}:PassivationCount"
+            collectionType="trendsup"/>
+  </metrics>
+
+ <metrics name="connection-pool">
+    <metric name="Leaked Connections"
+            alias="Leaked"
+            template="${JDBCConnectionPoolRuntime}:LeakedConnectionCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Total Connections"
+            alias="Total"
+            template="${JDBCConnectionPoolRuntime}:ConnectionsTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Active Connections"
+            alias="Active"
+            template="${JDBCConnectionPoolRuntime}:ActiveConnectionsCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Max Connections"
+            alias="MaxCapacity"
+            template="${JDBCConnectionPoolRuntime}:MaxCapacity"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Waiting For Connection Current Count"
+            alias="WaitersCurrent"
+            template="${JDBCConnectionPoolRuntime}:WaitingForConnectionCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Failures to Reconnect"
+            alias="ReconnectFailures"
+            template="${JDBCConnectionPoolRuntime}:FailuresToReconnectCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+<!-- gone in 9.1
+    <metric name="Prepared Statement Cache Misses"
+            alias="PrepStmtCacheMiss"
+            template="${JDBCConnectionPoolRuntime}:PrepStmtCacheMissCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Prepared Statement Cache Hits"
+            alias="PrepStmtCacheHits"
+            template="${JDBCConnectionPoolRuntime}:PrepStmtCacheHitCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+-->
+    <metric name="JDBC Pool Availability"
+            alias="Availability"
+            template="${JDBCConnectionPoolRuntime}:PoolState"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <metrics name="exec-queue">
+    <metric name="Serviced Requests"
+            alias="Requests"
+            template="${ExecuteQueueRuntime}:ServicedRequestTotalCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Idle Threads"
+            alias="IdleThreads"
+            template="${ExecuteQueueRuntime}:ExecuteThreadCurrentIdleCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Pending Requests"
+            alias="PendingRequests"
+            template="${ExecuteQueueRuntime}:PendingRequestCurrentCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+<!--
+    <metric name="Pending Request Oldest Time"
+            alias="PendingRequestOldestTime"
+            template="${ExecuteQueueRuntime}:${alias}"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="dynamic"/>
+-->
+
+    <metric name="Exq Availability"
+            alias="Availability"
+            template="${ExecuteQueueRuntime}:Name"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+  </metrics>
+
+  <metrics name="webapp">
+    <metric name="Sessions Created"
+            alias="SessionsCreated"
+            template="${WebAppComponentRuntime}:SessionsOpenedTotalCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Current Active Sessions"
+            alias="SessionsActive"
+            template="${WebAppComponentRuntime}:OpenSessionsCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Webapp Availability"
+            alias="Availability"
+            template="${WebAppComponentRuntime}:Status"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+  </metrics>
+
+  <metrics name="jms-server">
+    <!-- XXX HealthState -->
+    <metric name="JMS Server Availability"
+            alias="Availability"
+            template="${JMSServerRuntime}:Name"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Current"
+            alias="BytesCurrent"
+            template="${JMSServerRuntime}:BytesCurrentCount"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Pending"
+            alias="BytesPending"
+            template="${JMSServerRuntime}:BytesPendingCount"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Received"
+            alias="BytesReceived"
+            template="${JMSServerRuntime}:BytesReceivedCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Threshold Time"
+            alias="BytesThresholdTime"
+            template="${JMSServerRuntime}:BytesThresholdTime"
+            category="PERFORMANCE"
+            indicator="true"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Destinations Current"
+            alias="DestinationsCurrent"
+            template="${JMSServerRuntime}:DestinationsCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Destinations Total"
+            alias="DestinationsTotal"
+            template="${JMSServerRuntime}:DestinationsTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Current"
+            alias="MessagesCurrent"
+            template="${JMSServerRuntime}:MessagesCurrentCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Messages Pending"
+            alias="MessagesPending"
+            template="${JMSServerRuntime}:MessagesPendingCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Messages Received"
+            alias="MessagesReceived"
+            template="${JMSServerRuntime}:MessagesReceivedCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Threshold"
+            alias="MessagesThresholdTime"
+            template="${JMSServerRuntime}:MessagesThresholdTime"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Session Pools Current"
+            alias="SessionPoolsCurrent"
+            template="${JMSServerRuntime}:SessionPoolsCurrentCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Session Pools Total"
+            alias="SessionPoolsTotal"
+            template="${JMSServerRuntime}:SessionPoolsTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="jms-destination">
+    <!-- XXX HealthState -->
+    <metric name="JMS Destination Availability"
+            alias="Availability"
+            template="${JMSDestinationRuntime}:Name"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Current"
+            alias="BytesCurrent"
+            template="${JMSDestinationRuntime}:BytesCurrentCount"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Pending"
+            alias="BytesPending"
+            template="${JMSDestinationRuntime}:BytesPendingCount"
+            category="THROUGHPUT"
+            units="B"
+            collectionType="dynamic"/>
+
+    <metric name="Bytes Received"
+            alias="BytesReceived"
+            template="${JMSDestinationRuntime}:BytesReceivedCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Bytes Threshold Time"
+            alias="BytesThresholdTime"
+            template="${JMSDestinationRuntime}:BytesThresholdTime"
+            category="PERFORMANCE"
+            indicator="true"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <metric name="Consumers Current"
+            alias="ConsumersCurrent"
+            template="${JMSDestinationRuntime}:ConsumersCurrentCount"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Consumers Total"
+            alias="ConsumersTotal"
+            template="${JMSDestinationRuntime}:ConsumersTotalCount"
+            category="UTILIZATION"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Current"
+            alias="MessagesCurrent"
+            template="${JMSDestinationRuntime}:MessagesCurrentCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Messages Pending"
+            alias="MessagesPending"
+            template="${JMSDestinationRuntime}:MessagesPendingCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="dynamic"/>
+
+    <metric name="Messages Received"
+            alias="MessagesReceived"
+            template="${JMSDestinationRuntime}:MessagesReceivedCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Messages Threshold"
+            alias="MessagesThresholdTime"
+            template="${JMSDestinationRuntime}:MessagesThresholdTime"
+            category="PERFORMANCE"
+            units="ms"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <metrics name="jta-resource">
+    <!-- XXX HealthState -->
+    <metric name="JTA Resource Availability"
+            alias="Availability"
+            template="${TxResourceRuntime}:Name"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Transactions Committed"
+            alias="TxCommitted"
+            template="${TxResourceRuntime}:TransactionCommittedTotalCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transaction Heuristic Commits"
+            alias="TxHeuristicCommits"
+            template="${TxResourceRuntime}:TransactionHeuristicCommitTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transaction Heuristic Hazard Total"
+            alias="TxHeuristicHazard"
+            template="${TxResourceRuntime}:TransactionHeuristicHazardTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transaction Heuristic Mixed Total"
+            alias="TxHeuristicMixed"
+            template="${TxResourceRuntime}:TransactionHeuristicMixedTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transaction Heuristic Rollbacks"
+            alias="TxHeuristicRollbacks"
+            template="${TxResourceRuntime}:TransactionHeuristicRollbackTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transaction Heuristics Total"
+            alias="TxHeuristics"
+            template="${TxResourceRuntime}:TransactionHeuristicsTotalCount"
+            category="THROUGHPUT"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transactions Rolled Back"
+            alias="TxRolledBack"
+            template="${TxResourceRuntime}:TransactionRolledBackTotalCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+    <metric name="Transactions Total"
+            alias="TxTotal"
+            template="${TxResourceRuntime}:TransactionTotalCount"
+            category="THROUGHPUT"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <help name="weblogic-admin">
+  <![CDATA[
+    <p>
+    <b>weblogic.installpath</b> may need to be configured in agent.properties,
+    for example:
+    </p>
+    <pre>   weblogic.installpath=${weblogic.prefix}${FILE.sep.esc}${PRODUCT_DIR}
+    </pre>
+    <p>
+    The plugin will auto-configure this value using the Windows
+    registry or process table if WebLogic is already running.
+    </p>
+    <p>
+    Optional SSL support requires the following properties in
+    agent.properties:
+    </p>
+    <pre>
+    weblogic.security.TrustKeyStore=DemoTrust
+    weblogic.security.CustomTrustKeyStoreFileName=${installpath.escaped}${FILE.sep.esc}DemoTrust.jks
+    weblogic.security.SSL.ignoreHostnameVerification=true
+    </pre>
+  ]]>
+  </help>
+
+  <help name="weblogic-node">
+  <![CDATA[
+  <p>
+  <b>NOTE:</b> Weblogic ${product.version} server types are configured via
+  AutoDiscovery.<br>
+  See <b>Weblogic Admin ${product.version}</b> server for product
+  setup information.
+  </p>
+  ]]>
+  </help>
+
+  <help name="webapp-rt">
+  <![CDATA[
+    <p><h4>Enable Webapp Response Time</h4></p>
+
+    <ul>
+    <li>Edit ${webapp.dir}${FILE.sep}WEB-INF${FILE.sep}web.xml, adding:</li>
+    </ul>
+
+<pre>
+  &lt;filter&gt;
+    &lt;filter-name&gt;CovalentJMXFilter&lt;/filter-name&gt;
+ 
+    &lt;filter-class&gt;org.hyperic.hq.plugin.servlet.filter.JMXFilter&lt;/filter-class&gt;
+    &lt;init-param&gt;
+      &lt;param-name&gt;responseTimeLogDir&lt;/param-name&gt;
+ 
+      &lt;param-value&gt;${installpath}&lt;/param-value&gt;
+    &lt;/init-param&gt;
+  &lt;/filter&gt;
+  
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;CovalentJMXFilter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;
+</pre>
+    
+    <ul>
+    <li>Add the filter jar:</li>
+    </ul>
+
+<pre>
+  ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.sep}servlet${FILE.sep}libs${FILE.sep}hq-filter.jar \
+    ${webapp.dir}${FILE.sep}WEB-INF${FILE.sep}lib
+</pre>
+   
+    <ul>
+    <li>Redeploy the webapp or restart the WebLogic server.</li>
+    </ul>
+
+  ]]>
+  </help>
+
+  <config name="admin-server">
+    <option name="admin.url"
+            description="Admin URL"
+            default="t3://localhost:7001"/>
+
+    <option name="admin.username"
+            description="Admin username"
+            default="weblogic"/>
+
+    <option name="admin.password"
+            description="Admin password"
+            default="weblogic"
+            optional="true"
+            type="secret"/>
+
+    <option name="server"
+            description="Admin Server name"
+            default="admin"/>
+  </config>
+
+  <config name="domain" include="admin-server">
+    <option name="domain"
+            description="Domain"
+            default="medrec"/>
+  </config>
+
+  <config name="node" include="domain">
+    <option name="server.url"
+            description="Node URL"
+            default="t3://localhost:9001"/>
+  </config>
+
+  <config name="jvm">
+    <option name="jvm.runtime"
+            description="JVM Runtime"
+            type="enum">
+      <include name="JRockitRuntime"/>
+      <include name="JVMRuntime"/>
+    </option>
+  </config>
+
+  <config name="application">
+    <option name="application"
+            description="Application name"
+            default="petstore"/>
+  </config>
+
+  <config name="ejb" include="application">
+    <option name="ejb"
+            description="EJB name"
+            default="cartEjb"/>
+
+    <option name="ejb.component"
+            description="EJB component name"
+            default="cartEjbs"/>
+  </config>
+
+  <config name="jms-server">
+    <option name="jms.server"
+            description="JMS Server name"
+            default="examplesJMSServer"/>
+  </config>
+
+  <server name="Weblogic"
+          version="6.1"
+          description="Application Server Node"
+          platforms="Unix,Win32">
+
+    <config include="node"/>
+
+    <help include="weblogic-node"/>
+
+    <metrics include="server-summary,server-runtime"/>
+
+    <plugin type="measurement"
+            class="WeblogicMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="WeblogicNodeControl"/>
+
+    <plugin type="log_track"
+            class="WeblogicLogFileTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="WeblogicConfigTrackPlugin"/>
+
+    <properties>
+      <property name="ServerVersion"
+                description="Server Version"/>
+
+      <property name="JavaVersion"
+                description="Java Version"/>
+
+      <property name="JavaVendor"
+                description="Java Vendor"/>
+    </properties>
+
+    <service name="JDBC Connection Pool"
+             internal="true">
+
+      <config include="application">
+        <option name="jdbc.conn"
+                description="JDBC Connection Pool name"
+                default="petstorePool"/>
+      </config>
+
+      <metrics include="connection-pool"/>
+
+      <plugin type="control"
+              class="JDBCConnectionPoolControl"/>
+
+      <plugin type="config_track"
+              class="WeblogicConfigTrackPlugin"/>
+
+      <properties>
+        <property name="URL"
+                  description="JDBC URL"/>
+
+        <property name="DriverName"
+                  description="JDBC Driver Name"/>
+      </properties>
+    </service>
+
+    <service name="Execute Queue"
+             internal="true">
+
+      <config>
+        <option name="exq"
+                description="Execute Queue name"
+                default="default"/>
+      </config>
+
+      <metrics include="exec-queue"/>
+    </service>
+
+    <service name="JMS Server"
+             internal="true">
+
+      <config include="jms-server"/>
+
+      <metrics include="jms-server"/>
+    </service>
+
+    <service name="JMS Destination">
+
+      <config include="jms-server">
+        <option name="jms.destination"
+                description="JMS Destination"
+                default="INVOICE_MDB_TOPIC"/>
+      </config>
+
+      <metrics include="jms-destination"/>
+    </service>
+
+    <service name="JTA Resource"
+             internal="true">
+
+      <config>
+        <option name="jta.resource"
+                description="JTA Resource name"
+                default="weblogic.jdbc.jts.Connection"/>
+      </config>
+
+      <metrics include="jta-resource"/>
+    </service>
+
+    <service name="Application">
+
+      <config include="application"/>
+
+      <metric name="Application Availability"
+              alias="Availability"
+              template="${Application}:Deployed"
+              category="AVAILABILITY"
+              indicator="true"
+              units="percentage"
+              collectionType="dynamic"/>
+
+      <plugin type="control"
+              class="WeblogicApplicationControl"/>
+    </service>
+
+    <service name="Webapp">
+
+      <config include="application">
+        <option name="webapp"
+                description="WebApp name"
+                default="petstore"/>
+
+        <option name="webapp.dir"
+                description="WebApp directory"
+                optional="true"/>
+      </config>
+
+      <metrics include="webapp"/>
+
+      <help include="webapp-rt"/>
+
+      <plugin type="control"
+              class="WeblogicWebappControl"/>
+
+      <plugin type="responsetime"
+              class="WeblogicRtPlugin"/>
+
+      <properties>
+        <property name="ContextRoot"
+                  description="Context Root"/>
+      </properties>
+
+    </service>
+
+    <service name="Entity EJB">
+
+      <config include="ejb"/>
+
+      <metrics include="ejb-tx-runtime,ejb-pool-runtime,ejb-cache-runtime">
+
+        <metric name="Availability"
+                template="${EntityEJBRuntime}:Name"
+                indicator="true"/>
+      </metrics>
+
+      <plugin type="control"
+              class="WeblogicEJBControl"/>
+    </service>
+
+    <service name="Message Driven EJB">
+
+      <config include="ejb"/>
+
+      <metrics include="ejb-tx-runtime,ejb-pool-runtime">
+
+        <metric name="Availability"
+                template="${MessageDrivenEJBRuntime}:Name"
+                indicator="true"/>
+      </metrics>
+
+      <plugin type="control"
+              class="WeblogicEJBControl"/>
+    </service>
+
+    <service name="Stateless EJB">
+
+      <config include="ejb"/>
+
+      <metrics include="ejb-tx-runtime,ejb-pool-runtime">
+
+        <metric name="Availability"
+                template="${StatelessEJBRuntime}:Name"
+                indicator="true"/>
+      </metrics>
+
+      <plugin type="control"
+              class="WeblogicEJBControl"/>
+    </service>
+
+    <service name="Stateful EJB">
+
+      <config include="ejb"/>
+
+      <metrics include="ejb-tx-runtime,ejb-cache-runtime">
+
+        <metric name="Availability"
+                template="${StatefulEJBRuntime}:Name"
+                indicator="true"/>
+      </metrics>
+
+      <plugin type="control"
+              class="WeblogicEJBControl"/>
+    </service>
+
+  </server>
+
+  <server name="Weblogic Admin"
+          include="Weblogic 6.1"
+          version="6.1"
+          description="Application Server Node"
+          platforms="Unix,Win32">
+
+    <config include="domain"/>
+
+    <property name="PRODUCT_DIR" value="wlserver6.1"/>
+
+    <help include="weblogic-admin"/>
+
+    <plugin type="autoinventory"
+            class="WeblogicDetector"/>
+
+    <plugin type="control"
+            class="WeblogicControlPlugin"/>
+
+    <plugin type="control"
+            platform="Win32"
+            class="WeblogicControlWin32Plugin"/>
+
+    <scan>
+      <include name="/**/.wlstaging/console.war"/>
+    </scan>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="6.1"
+          description="Node Manager Agent" 
+          platforms="Unix,Win32">
+
+    <config include="admin-server">
+      <option name="nodemgr.address"
+              description="Node Manager address"
+              default="localhost"/>
+
+      <option name="nodemgr.port"
+              description="Node Manager port"
+              default="5555"
+              type="port"/>
+    </config>
+
+    <!-- XXX convert to netservices TCP Socket check -->
+    <metric name="Availability"
+            template="url.availability:hostname=%nodemgr.address%,port=%nodemgr.port%,protocol=ping,timeout=60:availability"
+            indicator="true"/>
+
+    <plugin type="measurement"
+            class="WeblogicMeasurementPlugin"/>
+
+  </server>
+
+  <server name="Weblogic"
+          version="7.0"
+          include="6.1">
+  </server>
+
+  <server name="Weblogic Admin"
+          version="7.0"
+          include="6.1">
+
+    <property name="PRODUCT_DIR" value="weblogic700"/>
+
+    <scan>
+      <include name="/**/.internal/console.war"/>
+    </scan>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="7.0"
+          include="6.1">
+  </server>
+
+  <server name="Weblogic"
+          version="8.1"
+          include="7.0">
+  </server>
+
+  <server name="Weblogic Admin"
+          version="8.1"
+          include="7.0">
+
+    <property name="PRODUCT_DIR" value="weblogic81"/>
+
+    <scan>
+      <include name="/**/.internal/console.war"/>
+    </scan>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="8.1"
+          include="7.0">
+  </server>
+
+  <server name="Weblogic"
+          version="9.1"
+          include="8.1">
+
+    <config include="node,jvm"/>
+
+    <metrics include="jrockit"/>
+  </server>
+
+  <server name="Weblogic Admin"
+          version="9.1"
+          include="8.1">
+
+    <config include="domain,jvm"/>
+
+    <metrics include="jrockit"/>
+
+    <property name="PRODUCT_DIR" value="weblogic91"/>
+
+    <scan>
+      <include name="/**/data/console/ConsolePreferences.xml"/>
+    </scan>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="9.1"
+          include="8.1">
+  </server>
+
+  <server name="Weblogic"
+          version="9.2"
+          include="9.1">
+  </server>
+
+  <server name="Weblogic Admin"
+          version="9.2"
+          include="9.1">
+
+    <property name="PRODUCT_DIR" value="weblogic92"/>
+  </server>
+
+  <server name="Weblogic NodeManager"
+          version="9.2"
+          include="9.1">
+  </server>
+</plugin>
+

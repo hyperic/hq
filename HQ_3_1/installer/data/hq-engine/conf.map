@@ -1,0 +1,17 @@
+# DO NOT MODIFY THIS FILE
+
+# General properties
+deploy=${ENGINE}/server/default/deploy
+conf=${ENGINE}/server/default/conf
+
+# File mappings
+hq-ds.xml=${deploy}/
+jbossmq-service.xml=${deploy}/jms/jbossmq-service.xml
+server.xml=${deploy}/jbossweb-tomcat55.sar/
+jboss-service-events.xml=${deploy}/hq.ear/events-mbeans.sar/${META}
+scheduler-service.xml=${deploy}/hq.ear/scheduler-mbeans.sar/${META}
+jboss-service.xml=${conf}/
+standardjboss.xml=${conf}/
+standardjbosscmp-jdbc.xml=${conf}/
+log4j.xml=${conf}/
+hq.properties=${deploy}/hq.ear/hq.war/WEB-INF/
