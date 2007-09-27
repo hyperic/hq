@@ -60,6 +60,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.util.ConfigPropertyException;
@@ -291,7 +292,16 @@ public class EmailFilter {
 
             // If priority not null, set it in body
             if (priority != null) {
-                m.addHeader("X-Priority", priority.toString());
+                switch (priority.intValue()) {
+                case EventConstants.PRIORITY_HIGH:
+                    m.addHeader("X-Priority", "1");
+                    break;
+                case EventConstants.PRIORITY_MEDIUM:
+                    m.addHeader("X-Priority", "2");
+                    break;
+                default:
+                    break;
+                }
             }
             
             // Send to each recipient individually (for D.B. SMS)
