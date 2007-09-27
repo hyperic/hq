@@ -262,10 +262,10 @@ public class DatabaseInitializer {
 
             try {
                 stmt = conn.createStatement();
-                stmt.execute(createHqSeqMemTable);
                 stmt.execute(getNextHqSeqval);
                 stmt.execute(getNextMemSeqval);
                 stmt.execute(nextseqval);
+                stmt.execute(createHqSeqMemTable);
             } catch (SQLException e) {
                 // Function + Procedure already exist, continue
                 if (log.isDebugEnabled()) {
