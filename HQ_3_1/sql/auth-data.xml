@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Covalent.DBSetup name="appdef-custom-properties.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
-
-    <table name="EAM_PRINCIPAL">
-        <data id="1" PRINCIPAL="@@@ADMINUSERNAME@@@" PASSWORD="@@@ADMINPASSWORD@@@"/>
-    </table>
-</Covalent.DBSetup>
