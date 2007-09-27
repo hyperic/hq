@@ -55,7 +55,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.server.session.ControlHistory;
-import org.hyperic.hq.control.shared.ControlHistoryValue;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
@@ -63,9 +62,9 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.quartz.SchedulerException;
 
 /** 
  * @ejb:bean name="ControlBoss"
@@ -137,7 +136,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      */
     public void doAction(int sessionId, AppdefEntityID id,
                          String action, ScheduleValue schedule)
-        throws PluginException, ScheduleWillNeverFireException,
+        throws PluginException, SchedulerException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, ApplicationException
@@ -160,7 +159,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public void doGroupAction(int sessionId, AppdefEntityID groupEnt,
                               String action, int[] orderSpec, 
                               ScheduleValue schedule)
-        throws PluginException, ScheduleWillNeverFireException,
+        throws PluginException, SchedulerException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, ApplicationException
@@ -328,7 +327,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     /**
      * Remove all of the scheduled jobs for an appdef entity.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeScheduledJobs(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -386,7 +384,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      * Remove an entry from the control history
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      *
      * @TODO Authz integration
      */
@@ -480,7 +477,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      * Delete a ControlJob based on an id
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      * @param ids Array of job ids to be deleted
      */
     public void deleteControlJob(int sessionId, Integer[] ids)
@@ -564,7 +560,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     *
     * @return    List of entities that are control authorized.
     * @ejb:interface-method
-    * @ejb:transaction type="Required"
     */
     public List batchCheckControlPermissions(int sessionId,
                                              AppdefEntityID[] entities)

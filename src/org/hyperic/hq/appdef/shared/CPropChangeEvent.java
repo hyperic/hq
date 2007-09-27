@@ -34,6 +34,8 @@ import org.hyperic.hq.events.ResourceEventInterface;
 public class CPropChangeEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface {
 
+    private static final long serialVersionUID = -856543980977047083L;
+    
     private AppdefEntityID resource;
     private String key;
     private String oldValue;

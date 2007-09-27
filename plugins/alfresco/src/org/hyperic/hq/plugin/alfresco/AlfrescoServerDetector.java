@@ -70,7 +70,7 @@ public class AlfrescoServerDetector
     private static Log log = LogFactory.getLog("AlfrescoServerDetector");
 
     private static final String PTQL_QUERY =
-        "State.Name.re=java,Args.*.re=/alfresco/";
+        "State.Name.eq=java,Args.*.ct=alfresco";
 
     private static final String ENGINE_QUERY = "select engine from sysengines";
 

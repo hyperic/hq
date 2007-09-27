@@ -384,4 +384,8 @@ public class Util {
             Hibernate.initialize(i.next());
         }
     }
+
+    public static Iterator getTableMappings() {
+        return configuration.getTableMappings();
+    }
 }

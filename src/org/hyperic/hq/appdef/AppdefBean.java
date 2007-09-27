@@ -29,6 +29,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 import java.io.Serializable;
 
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 
 /**
@@ -37,7 +38,7 @@ import org.hyperic.hibernate.PersistedObject;
  */
 public abstract class AppdefBean 
     extends PersistedObject
-    implements Serializable
+    implements ContainerManagedTimestampTrackable, Serializable
 {
     // XXX -- Can we make these private?  We have accessors.  -- JMT
     protected Long creationTime;
@@ -54,6 +55,22 @@ public abstract class AppdefBean
     {
         super();
         setId(id);
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
 
     public long getCreationTime()

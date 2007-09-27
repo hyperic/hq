@@ -31,7 +31,8 @@ public class MetricAuxLog
     }
 
     public String getURL() {
-        return "/resource/common/monitor/Visibility.do?m=" + _metric.getId() +
+        return "/resource/common/monitor/Visibility.do?m=" +
+               _metric.getTemplate().getId() +
                "&eid=" + _metric.getEntityId().toString() + 
                "&mode=chartSingleMetricSingleResource";
     }

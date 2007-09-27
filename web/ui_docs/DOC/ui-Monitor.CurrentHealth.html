@@ -15,13 +15,13 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 31, 2007 by <font color="#0050B2">clee</font>.
+					    This page last changed on Aug 17, 2007 by <font color="#0050B2">mbartelt</font>.
 				    </div>
 
 				    <h1><a name="ui-Monitor.CurrentHealth-CurrentHealthofaResource"></a>Current Health of a Resource</h1>
-<table cellpadding='5' width='85%' cellspacing='8px' class='noteMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><em>This help page is under construction. Please check back later for updates.</em></td></tr></table>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
 
-<p>This screen presents an overview of the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resource's</a> current health, as well as the current health of its related resources (for example, in the case of a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-group">group</a>, other group members; in the case of a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-server">server</a>, the hosting <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a> and the hosted <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-service">services</a>). The Current Health page is also a work area where users can analyze and compare the metrics of the resource and its related resources.</p>
+<p>This screen presents an overview of the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resource's</a> current health, as well as the current health of its related resources (for example, in the case of a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-group">group</a>, other group members; in the case of a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-server">server</a>, the hosting <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a> and the hosted <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-service">services</a>). The Current Health page is also a work area where users can analyze and compare the metrics of the resource and its related resources. Metric data is displayed in both numerical and graphical formats.</p>
 
 <ul>
 	<li><a href="#ui-Monitor.CurrentHealth-Tasks">Tasks</a> available on this screen</li>
@@ -145,7 +145,7 @@ The title of the portlet will specify the relationship described above.</li>
 
 <p><b>Indicator Charts and Views</b></p>
 
-<p>Indicator charts graph only those metrics indicated as <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-indicator">indicator metrics</a> for the resource or, optionally, metrics selected from the "Problem Metrics" or "All Metrics" portlets in the <img src="../16117/minitab_resources_on.png" align="absmiddle" border="0" /> tab. The indicator are displayed as column charts: the area of each column indicates the value range (the high and low values) of the metric. The average value of the metric is indicated by the cross in the column. The charts are stacked vertically so that their X-axis (time) values line up. This works in conjunction with the verticle highlight from the availability and timeline bars to analyze the metric data across multiple metrics for a specific time. This is especially useful when trying to diagnose a problem at a specific time by correlating the important metrics and their metric values.</p>
+<p>Indicator charts graph only those metrics indicated as <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-indicator">indicator metrics</a> for the resource or, optionally, metrics selected from the "Problem Metrics" or "All Metrics" portlets in the <img src="../16117/minitab_resources_on.png" align="absmiddle" border="0" /> tab. The indicator are displayed as column charts: the area of each column indicates the value range (the high and low values) of the metric. The average value of the metric is indicated by the cross in the column. The charts are stacked vertically so that their X-axis (time) values line up. This works in conjunction with the vertical highlight from the availability and timeline bars to analyze the metric data across multiple metrics for a specific time. This is especially useful when trying to diagnose a problem at a specific time by correlating the important metrics and their metric values. Arrangements of charts for selected metrics can be saved as a "view" so that users can easily always compare the same metric data and therefore understand the interaction between different resources.</p>
 
 <p><b>To view a full-page chart:</b></p>
 <ul>
@@ -154,7 +154,7 @@ The "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHeal
 </ul>
 
 
-<p><b>To change the display of charts:</b></p>
+<p><b>To change the chart views:</b></p>
 <ul>
 	<li>To change the display order of the charts, click <img src="../16117/chart_up_button.png" align="absmiddle" border="0" /> and <img src="../16117/chart_down_button.png" align="absmiddle" border="0" /> at the upper-right-hand corner of each chart.</li>
 	<li>To remove a chart from display, click <img src="../16117/chart_close_button.png" align="absmiddle" border="0" /> at the upper-right-hand corner of the chart.</li>
@@ -178,9 +178,10 @@ The "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHeal
 
 <p><a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">Learn more</a> about enabling and configuring log tracking.</p>
 
+<p><a name="ui-Monitor.CurrentHealth-range"></a></p>
 <h4><a name="ui-Monitor.CurrentHealth-MetricDisplayRange"></a>Metric Display Range</h4>
 
-<p>This section displays the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-range">metric display range</a> used in this, all all Monitoring, screens. Users can change the display range.</p>
+<p>This section displays the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-range">metric display range</a> used in this, and all Monitoring, screens. Users can change the display range.</p>
 
 <p><b><a name="ui-Monitor.CurrentHealth-display"></a>To change the metric display range:</b></p>
 <ul>
@@ -204,7 +205,7 @@ The metric charts on the screen automatically refresh to reflect the new display
 
 <p><a name="ui-Monitor.CurrentHealth-Navigating"></a></p>
 <h3><a name="ui-Monitor.CurrentHealth-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-<p>Main screens in Hyperic contain the same menu in the masthead. Users can navigate to the following parts of HQ using this menu:</p>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'><b>Dashboard</b></td>
@@ -219,18 +220,24 @@ The metric charts on the screen automatically refresh to reflect the new display
 <td class='confluenceTd'>Takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system</td>
 </tr>
 <tr>
+<td class='confluenceTd'><b>Report Center</b> <font color="red">*</font></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Report.Center.html" title="ui-Report.Center">Report Center</a>, where they can generate all reports available in HQ.</td>
+</tr>
+<tr>
 <td class='confluenceTd'><b>Administration</b></td>
 <td class='confluenceTd'>Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration screen</a>, where they can manage the system-wide settings</td>
 </tr>
 <tr>
 <td class='confluenceTd'><b>Recent Resources</b></td>
-<td class='confluenceTd'>Provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource.</td>
+<td class='confluenceTd'>Provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource.</td>
 </tr>
 <tr>
 <td class='confluenceTd'><b>Help</b></td>
 <td class='confluenceTd'>Opens screen-sensitive online help in a secondary window</td>
 </tr>
 </tbody></table>
+
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
 
 <p><em><a href="#ui-Monitor.CurrentHealth-top">back to top</a></em></p>
 
@@ -318,7 +325,7 @@ The metric charts on the screen automatically refresh to reflect the new display
 				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 31, 2007 18:19</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 05, 2007 11:52</font></td>
 		    </tr>
 	    </table>
     </body>

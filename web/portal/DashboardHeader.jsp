@@ -26,7 +26,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+<script language="JavaScript1.2">
+var autoLogout = false;
+</script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitleBar"> 

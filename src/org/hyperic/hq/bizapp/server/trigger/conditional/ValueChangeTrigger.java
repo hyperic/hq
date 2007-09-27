@@ -103,7 +103,7 @@ public class ValueChangeTrigger extends AbstractTrigger
      *
      * @param tval  Configuration data for the trigger
      *
-     * @throws org.hyperic.hq.bizapp.server.trigger.InvalidTriggerDataException indicating that the trigger config
+     * @throws InvalidTriggerDataException indicating that the trigger config
      *                                     was invalid.
      *
      */
@@ -155,24 +155,21 @@ public class ValueChangeTrigger extends AbstractTrigger
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { measurementId };
     }
-
+    
     /** 
      * Process an event from the dispatcher.
      * @param event the Event to process
-     * @throws org.hyperic.hq.events.ext.ActionExecuteException if an action throws an exception
+     * @throws ActionExecuteException if an action throws an exception
      */
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException
     {
-        MeasurementEvent me;
-        Collection events;
-
         // If we didn't fulfill the condition, then don't fire
         if(!(event instanceof MeasurementEvent))
             throw new EventTypeException(
                 "Invalid event type passed, expected MeasurementEvent");
-
-        me = (MeasurementEvent) event;
+        
+        MeasurementEvent me = (MeasurementEvent) event;
         if(!me.getInstanceId().equals(measurementId))
             throw new EventTypeException(
                 "Invalid instance ID passed (" + me.getInstanceId() +
@@ -195,20 +192,20 @@ public class ValueChangeTrigger extends AbstractTrigger
             if (last == null) {
                 try {
                     // Now find out if there was a previous event
-                    events =
+                    Collection events =
                         eTracker.getReferencedEventStreams(getId());
 
                     if (events.size() > 0) {
                         // We only need the first event
                         ObjectInputStream p =
                             (ObjectInputStream) events.iterator().next();
-                
-                        // Deserialize the event
-                        last = (MeasurementEvent) p.readObject();
+                        
+                        last = (MeasurementEvent) deserializeEventFromStream(p, true);
                     }
                 } catch(Exception exc){
                     throw new ActionExecuteException(
-                        "Failed to get referenced streams: " + exc);
+                        "Failed to get referenced streams for trigger id="+
+                         getId()+" : " + exc);
                 }
             }
             
@@ -224,8 +221,8 @@ public class ValueChangeTrigger extends AbstractTrigger
                     throw new ActionExecuteException
                         ("Error adding event reference.", e);
                 }
-            }
-            else if (last.getValue().getValue() != me.getValue().getValue()) {
+            } else if (last.getValue().getValue() != me.getValue().getValue() && 
+                       last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
                 // Get ready to fire                
                 myEvent = new TriggerFiredEvent(getId(), event);
                 double values[] = { me.getValue().getValue(),
@@ -238,8 +235,7 @@ public class ValueChangeTrigger extends AbstractTrigger
                 myEvent.setMessage( sb.toString() );
 
                 try {
-                    eTracker.updateReference(getId(), last.getId(),
-                                                  me, 0);
+                    eTracker.updateReference(getId(), last.getId(), me);
                     last = me;      // Update the last reference
                 } catch (IOException e) {
                     throw new ActionExecuteException

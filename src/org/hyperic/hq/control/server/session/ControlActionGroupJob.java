@@ -55,6 +55,7 @@ import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.dao.DAOFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -62,7 +63,6 @@ import org.quartz.Trigger;
 
 /**
  * A quartz job class for handling control actions on a group entity
- *
  */
 public class ControlActionGroupJob extends ControlJob {
 
@@ -74,9 +74,8 @@ public class ControlActionGroupJob extends ControlJob {
 
     protected Log log = 
         LogFactory.getLog(ControlActionGroupJob.class.getName());    
-       
-    // Public interface for quartz
-    public void execute(JobExecutionContext context)
+
+    public void executeInSession(JobExecutionContext context)
         throws JobExecutionException
     {
         // Job configuration
@@ -89,7 +88,7 @@ public class ControlActionGroupJob extends ControlJob {
         
         String action     = dataMap.getString(PROP_ACTION);
         String args = dataMap.getString(PROP_ARGS);
-        Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
+        Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
         
         int[] order   = getOrder(dataMap.getString(PROP_ORDER));
         String description = dataMap.getString(PROP_DESCRIPTION);
@@ -150,12 +149,12 @@ public class ControlActionGroupJob extends ControlJob {
                 jobIds.add(jobId);
 
                 // If the job is ordered, synchronize the commands
-                if (order != null) {
+                if (order.length > 0) {
                     waitForJob(jobId, timeout);
                 }
             }
 
-            if (order == null) {
+            if (order.length == 0) {
                 waitForAllJobs(jobIds, longestTimeout);
             }               
 
@@ -223,27 +222,20 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManagerLocal cLocal;
-        
-        try {
-            cLocal = ControlScheduleManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        ControlScheduleManagerLocal cMan = ControlScheduleManagerEJBImpl.getOne();
 
         long start = System.currentTimeMillis();
         
         while (System.currentTimeMillis() < start + timeout) {
-            ControlHistory cValue = cLocal.getJobHistoryValue(jobId);
-            String status = cValue.getStatus();
+            ControlHistory hist = cMan.getJobHistoryValue(jobId);
+            refresh(hist);
+            String status = hist.getStatus();
             if (status.equals(ControlConstants.STATUS_COMPLETED))
                 return;
 
             if (status.equals(ControlConstants.STATUS_FAILED)) {
                 String err = "Job id " + jobId + " failed: " +
-                             cValue.getMessage();
+                             hist.getMessage();
                 throw new ControlActionTimeoutException(err);
             }
 
@@ -261,15 +253,7 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManagerLocal cLocal;
-
-        try {
-            cLocal = ControlScheduleManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        ControlScheduleManagerLocal cMan = ControlScheduleManagerEJBImpl.getOne();
 
         long start = System.currentTimeMillis();
 
@@ -285,8 +269,9 @@ public class ControlActionGroupJob extends ControlJob {
             for (Iterator i = ids.iterator(); i.hasNext(); ) {
                 Integer jobId = (Integer)i.next();
                 
-                ControlHistory cValue = cLocal.getJobHistoryValue(jobId);
-                String status = cValue.getStatus();
+                ControlHistory hist = cMan.getJobHistoryValue(jobId);
+                refresh(hist);
+                String status = hist.getStatus();
                     
                 if (status.equals(ControlConstants.STATUS_COMPLETED)) {
                     i.remove();
@@ -294,7 +279,7 @@ public class ControlActionGroupJob extends ControlJob {
                 }
 
                 if (status.equals(ControlConstants.STATUS_FAILED)) {
-                    String err = cValue.getMessage();
+                    String err = hist.getMessage();
                     throw new ControlActionTimeoutException(err);
                 }
             }
@@ -314,22 +299,11 @@ public class ControlActionGroupJob extends ControlJob {
      */
     private int getTimeout(AuthzSubjectValue subject, AppdefEntityID id)
     {
-        ConfigResponse config;
+        ControlManagerLocal cMan = ControlManagerEJBImpl.getOne();
 
-        // Get the control manager
-        if (this.manager == null) {
-            try { 
-                manager = ControlManagerUtil.getLocalHome().create();
-            } catch (Exception e) {
-                this.log.error("Unable to get control manager, using default " +
-                               "timeout value of " + DEFAULT_TIMEOUT);
-                return DEFAULT_TIMEOUT;
-            }
-        }
-     
         int timeout;
         try {
-            config = manager.getConfigResponse(subject, id);
+            ConfigResponse config = cMan.getConfigResponse(subject, id);
             String strTimeout = config.getValue(ControlPlugin.PROP_TIMEOUT);
             if (strTimeout == null)
                 return DEFAULT_TIMEOUT;
@@ -339,5 +313,10 @@ public class ControlActionGroupJob extends ControlJob {
         }
 
         return timeout * 1000;
-    }    
+    }
+
+    private void refresh(ControlHistory hist) {
+        ControlHistoryDAO dao = DAOFactory.getDAOFactory().getControlHistoryDAO();
+        dao.getSession().refresh(hist);
+    }
 }

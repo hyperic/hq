@@ -65,6 +65,10 @@ public class NetifDetector
                 continue;
             }
 
+            if (NetFlags.isAnyAddress(ifconfig.getAddress())) {
+                continue;
+            }
+
             long flags = ifconfig.getFlags();
 
             String type;
@@ -119,7 +123,7 @@ public class NetifDetector
             for (int j=0; j<addrs.length; j++) {
                 String key = addrs[j][0];
                 String val = addrs[j][1];
-                if (val.equals("0.0.0.0")) {
+                if (NetFlags.isAnyAddress(val)) {
                     continue;
                 }
                 cprops.setValue(key, val);

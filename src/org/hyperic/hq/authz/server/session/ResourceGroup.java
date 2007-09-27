@@ -30,10 +30,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
 public class ResourceGroup extends AuthzNamedBean
+    implements ContainerManagedTimestampTrackable
 {
     private Integer _cid;
     private String _description;
@@ -58,6 +60,22 @@ public class ResourceGroup extends AuthzNamedBean
 
     ResourceGroup(ResourceGroupValue val) {
         setResourceGroupValue(val);
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
 
     public Integer getCid() {
@@ -180,7 +198,7 @@ public class ResourceGroup extends AuthzNamedBean
     }
 
     public void addResource(Resource resource) {
-        resource.getResourceGroups().add(this);
+        resource.getResourceGroups().add(resource);
         _resourceSet.add(resource);
     }
 

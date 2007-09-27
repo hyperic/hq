@@ -25,7 +25,8 @@
 
 package org.hyperic.hibernate.dialect;
 
-import java.util.List;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 /**
  *
@@ -51,4 +52,24 @@ public interface HQDialect
      *               may be table percentage or random number
      */
     public String getOptimizeStmt(String table, int cost);
+
+    /*
+     * Returns true if the database supports a multi insert stmt.
+     */
+    public boolean supportsMultiInsertStmt();
+
+    /*
+     * Returns true if the database contains the specified viewName
+     */
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException;
+    
+    /**
+     * Returns the limit string.
+     * 
+     * @param num The number of rows to limit by.
+     * @return The limit string.
+     */
+    public String getLimitString(int num);
+    
 }

@@ -108,6 +108,30 @@ public abstract class AlertDefSortField
         }
     };
 
+    public static final AlertDefSortField LAST_FIRED = 
+        new AlertDefSortField(6, "Last Fired", "alertDef.sortField.lastFired") 
+    {
+        public boolean isSortable() {
+            return true;
+        }
+        
+        String getSortString(String def, String resource) {
+            return def + ".lastFired";
+        }
+    };
+
+    public static final AlertDefSortField ESCALATION  = 
+        new AlertDefSortField(7, "Escalation", "alertDef.sortField.escalation") 
+    {
+        public boolean isSortable() {
+            return false;
+        }
+        
+        String getSortString(String def, String resource) {
+            return def + ".escalation.name";
+        }
+    };
+
     private AlertDefSortField(int code, String desc, String localeProp) {
         super(AlertDefSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));

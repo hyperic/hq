@@ -33,6 +33,7 @@ import org.hibernate.Query;
 public class PageInfo {
     private int       _pageNum;
     private int       _pageSize;
+    private boolean   _isAll;
     private SortField _sort;
     private boolean   _ascending;
     
@@ -41,8 +42,15 @@ public class PageInfo {
     {
         _pageNum   = pageNum;
         _pageSize  = pageSize;
+        _isAll     = false;
         _sort      = sort;
         _ascending = ascending; 
+    }
+    
+    private PageInfo(SortField sort, boolean ascending) {
+        _isAll     = true;
+        _sort      = sort;
+        _ascending = ascending;
     }
     
     /**
@@ -76,6 +84,10 @@ public class PageInfo {
     public boolean isAscending() {
         return _ascending;
     }
+    
+    public boolean isAll() {
+        return _isAll;
+    }
 
     /**
      * Modifies a Hibernate query to conform to the paging specs in this
@@ -83,8 +95,10 @@ public class PageInfo {
      * page offset and result count.  Sort order must be dealt with elsewhere.
      */
     public Query pageResults(Query q) {
-        q.setFirstResult(getStartRow());
-        q.setMaxResults(getPageSize());
+        if (!_isAll) {
+            q.setFirstResult(getStartRow());
+            q.setMaxResults(getPageSize());
+        }
         return q;
     }
     
@@ -92,5 +106,12 @@ public class PageInfo {
                                   boolean ascending) 
     {
         return new PageInfo(pageNum, pageSize, sort, ascending);
+    }
+    
+    /**
+     * Returns a page control which will return all elements (not paged)
+     */
+    public static PageInfo getAll(SortField sort, boolean ascending) {
+        return new PageInfo(sort, ascending);
     }
 }

@@ -6,15 +6,7 @@
     background-color: #60A5EA;
     }
 
-#alertsTable {
-    padding-bottom:15px;
-}
-
-#groupalertsTable {
-    padding-bottom:15px;
-}
-
-#alertsTable table {
+#alertsCont table {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
     width: 100%;
@@ -23,7 +15,7 @@
     cursor: default;
 }
 
-#alertsTable table th {
+#alertsCont  table th {
     font-weight: bold;
     padding: 3px;
     padding-left: 5px;
@@ -31,47 +23,50 @@
     border-top: 1px solid #7bafff;
 }
 
-#alertsTable	table td {
+#alertsCont table td {
     padding: 3px;
     font-weight: normal;
     padding-left: 5px;
 }
 
-#alertsTable	table thead td, table thead th {
+#alertsCont table thead td, table thead th {
     background-image: url( "images/ft-head.gif" );
     background-repeat: no-repeat;
     background-position: top right;
 }
 
-#alertsTable	table thead td.selectedUp, table thead th.selectedUp {
+#alertsCont table thead td.selectedUp, table thead th.selectedUp {
     background-image: url( "images/ft-headup.gif" );
 }
 
-#alertsTable	table thead td.selectedDown, table thead th.selectedDown {
+#alertsCont  table thead td.selectedDown, table thead th.selectedDown {
     background-image: url( "images/ft-headdown.gif" );
 }
 
-#alertsTable	table tbody tr td {
+#alertsCont table tbody tr td {
     border-bottom: 1px solid #ddd;
 }
 
-#alertsTable	table tbody tr.alt td {
+#alertsCont table tbody tr.alt td {
     background: #eef4fc;
 }
 
-#alertsTable	table tbody tr.selected td {
+#alertsCont  table tbody tr.selected td {
 
 }
 
-#alertsTable	table tbody tr:hover td {
+#alertsCont table tbody tr:hover td {
     background: #a6c2e7;
 }
 
-#alertsTable	table tbody tr.selected:hover td {
+#alertsCont table tbody tr.selected:hover td {
 
 }
 
-#groupalertsTable	table {
+
+
+
+#defsCont div table {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
     width: 100%;
@@ -80,7 +75,7 @@
     cursor: default;
 }
 
-#groupalertsTable table th {
+#defsCont table th {
     font-weight: bold;
     padding: 3px;
     padding-left: 5px;
@@ -88,44 +83,48 @@
     border-top: 1px solid #7bafff;
 }
 
-#groupalertsTable	table td {
+#defsCont table td {
     padding: 3px;
     font-weight: normal;
     padding-left: 5px;
 }
 
-#groupalertsTable	table thead td, table thead th {
+#defsCont table thead td, table thead th {
     background-image: url( "images/ft-head.gif" );
     background-repeat: no-repeat;
     background-position: top right;
 }
 
-#groupalertsTable	table thead td.selectedUp, table thead th.selectedUp {
+#defsCont table thead td.selectedUp, table thead th.selectedUp {
     background-image: url( "images/ft-headup.gif" );
 }
 
-#groupalertsTable	table thead td.selectedDown, table thead th.selectedDown {
+#defsCont table thead td.selectedDown, table thead th.selectedDown {
     background-image: url( "images/ft-headdown.gif" );
 }
 
-#groupalertsTable	table tbody tr td {
+#defsCont table tbody tr td {
     border-bottom: 1px solid #ddd;
 }
 
-#groupalertsTable	table tbody tr.alt td {
+#defsCont table tbody tr.alt td {
     background: #eef4fc;
 }
 
-#groupalertsTable	table tbody tr.selected td {
+#defsCont  table tbody tr.selected td {
+
 }
 
-#groupalertsTable	table tbody tr:hover td {
+#defsCont table tbody tr:hover td {
     background: #a6c2e7;
 }
 
-#groupalertsTable	table tbody tr.selected:hover td {
+#defsCont table tbody tr.selected:hover td {
 
 }
+
+
+
 
 #inputArea {
     margin: 1em 0;
@@ -212,4 +211,64 @@
     font-weight: bold;
 }
 
+.filterBox {
+padding:8px;
+}
 
+.dojoTab div {
+font-size:100%;
+font-weight:bold;
+}
+
+.filters {
+    background-color:#EFEFEF;
+    border: 1px solid #7bafff;
+}
+
+.tableTitleWrapper {
+    display:inline;
+    float:left;
+    width:325px;
+    white-space:nowrap;
+    padding-left:15px;top:7px;
+    font-weight:bold;
+    font-size:1.3em;
+}
+
+.alertInfo {
+    width:300px;
+    white-space:nowrap;
+    display:inline;
+    margin-left:20px;
+    border: 1px solid rgb(213, 216, 222);
+    padding:3px 15px 3px 15px;
+    font-family:arial,sans-serif;
+    font-size:11px;
+    font-weight:normal;
+    background-color: #DBE3F5;
+    border-top: solid #ABB1C7;
+    border-bottom: solid #C6CFE5;
+    border-width: 1px;
+}
+
+.refreshButton {
+    padding-right:15px;
+    padding-top:2px;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+}
+
+.acLoader {
+    visibility: hidden;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+    padding-right:15px;
+    background-image: url( "images/ajax-loader-blue.gif" );
+    background-repeat: no-repeat;
+}

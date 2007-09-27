@@ -63,10 +63,15 @@ class DojoUtil {
      * Spit out a table, and appropriate <script> tags to enable AJAXification.
      *
      * 'params' is a map of key/vals for configuration, which include:
+     *          (* denotes an optional parameter)
      *    
      *   id:       The HTML ID for the table.   
      *   url:      URL to contact to get data to populate the table
+     *   title*:   A title to display above the table
+     *   titleHtml*:  Additional HTML to place in the header of the table
      *   numRows:  Number of rows to display
+     *   refresh*:  If specified, the table will refresh at the passed # of
+     *              seconds.
      *   schema:   The schema is a map which contains information on how to
      *             retrieve data for the rows, how to format them, etc.  The
      *             following keys for the schema are used:
@@ -76,10 +81,11 @@ class DojoUtil {
      *       defaultSort:  A class implementing SortField, which is the 
      *                     default column to sort on
      *       defaultSortOrder: 0 to sort by descending, 1 by ascending
-     *       rowId:  A closure which takes a single object (an element as
-     *               returned from the getData() call), and must return an
-     *               ID for the row.  This ID is used to map the row to the
-     *               object.
+     *       rowId:  (optional) A closure which takes a single object (an 
+     *               element as returned from the getData() call), and must 
+     *               return an ID for the row.  This ID is used to map the row 
+     *               to the object.  By default this calls the object.getId()
+     *               
      *       styleClass (optional):  A closure which takes an element returned
      *                               from getData and returns a String to use
      *                               as the styleclass for that row.  If it 
@@ -92,15 +98,22 @@ class DojoUtil {
      *                   information about sortability, column header,
      *           label:  a closure which takes an element returned by getData
      *                   and returns a string which will be the cell text
+     *           width (optional):  Specifies the width of the column.  
+     *                              For instance: '10%' will ensure that the 
+     *                              column is 10% of the table width
      */
     static String dojoTable(params) {
         def id           = "${params.id}"
+        def tableTitle   = params.get('title', '')
+        def titleHtml    = params.get('titleHtml', '')
 	    def idVar        = "_hqu_${params.id}"
 	    def tableVar     = "${idVar}_table" 
 	    def sortFieldVar = "${idVar}_sortField"
 	    def pageNumVar   = "${idVar}_pageNum"
 	    def lastPageVar  = "${idVar}_lastPage"
 	    def sortOrderVar = "${idVar}_sortOrder"
+	    def urlXtraVar   = "${idVar}_urlXtra"
+	    def ajaxCountVar = "${idVar}_ajaxCountVar"
 	    def res      = new StringBuffer(""" 
 	    <script type="text/javascript">
         
@@ -108,6 +121,8 @@ class DojoUtil {
         var ${pageNumVar}  = 0;
         var ${lastPageVar} = false;
         var ${sortOrderVar};
+        var ${urlXtraVar} = [];
+        var ${ajaxCountVar} = 0;
 
 	    dojo.addOnLoad(function() {
 	        ${tableVar} = dojo.widget.createWidget("dojo:FilteringTable",
@@ -115,8 +130,14 @@ class DojoUtil {
                                                     valueField: "id"},
 	                                               dojo.byId("${id}"));
             ${tableVar}.createSorter = function(a) { return null; };
-            ${idVar}_refreshTable();
+            ${id}_refreshTable();
 	    });    
+
+        // Allows the caller to specify a callback which will return 
+        // additional query parameters (in the form of a map)
+        function ${id}_addUrlXtraCallback(fn) {
+            ${urlXtraVar}.push(fn);
+        }
 
         function ${idVar}_makeQueryStr() {
             var res = '?pageNum=' + ${pageNumVar};
@@ -128,6 +149,16 @@ class DojoUtil {
             if (${sortOrderVar} != null)
                 res += '&sortOrder=' + ${sortOrderVar};
 
+            var callbacks = ${urlXtraVar};
+            for (var i=0; i<callbacks.length; i++) {
+                var cb = callbacks[i];
+
+                var cbmap = cb("${id}");
+                for (var v in cbmap) {
+                    if (v == 'extend') continue;
+                    res += '&' + v + '=' + cbmap[v];
+                }
+            }
             return res;
         }
 
@@ -147,11 +178,15 @@ class DojoUtil {
             ${tableVar}.sortInformation[0] = {index:el.getAttribute('colidx'),
                                               direction:${sortOrderVar}};
             ${pageNumVar}   = 0;
-            ${idVar}_refreshTable();
+            ${id}_refreshTable();
         }
 
-        function ${idVar}_refreshTable() {
+        function ${id}_refreshTable() {
             var queryStr = ${idVar}_makeQueryStr();
+            ${ajaxCountVar}++;
+            if (${ajaxCountVar} > 0) {
+                dojo.byId("${idVar}_loadMsg").style.visibility = 'visible';
+            }
             dojo.io.bind({
                 url: '${params.url}' + queryStr,
                 method: "get",
@@ -177,6 +212,10 @@ class DojoUtil {
                     ${lastPageVar} = data.lastPage;
                     ${idVar}_setupPager();
                     ${idVar}_highlightRow(data.data);
+                    ${ajaxCountVar}--;
+                    if (${ajaxCountVar} == 0) {
+                        dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
+                    }
                 }
             });
         }
@@ -222,40 +261,53 @@ class DojoUtil {
         function ${idVar}_nextPage() {
             if (${lastPageVar} == false)  {
                 ${pageNumVar}++;
-                ${idVar}_refreshTable();
+                ${id}_refreshTable();
             }
         }
 
         function ${idVar}_previousPage() {
             if (${pageNumVar} != 0) {
                 ${pageNumVar}--;
-                ${idVar}_refreshTable();
+                ${id}_refreshTable();
             }
         }
-	    </script>
         """)
+
+        if (params.refresh) {
+            res << """
+            function ${idVar}_autoRefresh() {
+                setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+                ${id}_refreshTable();
+            }
+
+            setTimeout("${idVar}_autoRefresh()", ${params.refresh * 1000});
+            """   
+        }
+	    
+	    res << "</script>"
 	    
 	    res << """
 	    <div class="pageCont">
-	    <div style="position:absolute;padding-left:10px;font-size:13px;padding-top:2px;font-weight:bold;">${params.id}</div>
-	        <div class="boldText" style="position:relative;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
-	         <div class="pageButtonCont">
-                 <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;"
-                      class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-                 <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
-                 <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;"
-                      class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+	    <div class="tableTitleWrapper">
+          <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
+          ${titleHtml}
+        </div>
+          <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+	      <div class="pageButtonCont">
+            <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+            <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
+            <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
 
-             </div>
-
-             <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-
-             <div style="clear: both;"></div>
+         </div>
+         <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
+         <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/></div>
+         <div class="acLoader" id="${idVar}_loadMsg"></div>
+           <div style="clear: both;"></div>
          </div>
         
-          <table id='${id}'>
-            <thead>
-              <tr>
+         <table id='${id}'>
+           <thead>
+             <tr>
         """
         
         def colIdx = 0;
@@ -264,7 +316,16 @@ class DojoUtil {
 	        def label     = field.value
 	        def fieldName = field.description 
 
-	        res << """<th field='${fieldName}' align='left' nosort='true'  nowrap='true'
+	        if (label == null && field['getValue'] != null) {
+				label = field.getValue()
+	        }
+	        
+	        def widthvar = ""
+	        if (c.width != null) {
+	            widthvar="width=\"${c.width}\""   
+	        }
+	        res << """<th ${widthvar} field='${fieldName}' align='left' 
+                          nosort='true'  nowrap='true'
 	                      onclick='${idVar}_setSortField(this);'
                           colidx="${colIdx}" """
             if (!field.sortable) {
@@ -321,18 +382,27 @@ class DojoUtil {
 		   we aren't on the last page */
 		def pageInfo = PageInfo.create(pageNum, pageSize + 1, sortColumn, 
 		                               sortOrder)
-        def data     = schema.getData(pageInfo)
+        def data     = schema.getData(pageInfo, params)
         def lastPage = (data.size() <= pageSize)
 
         if (data.size() == pageSize + 1)
             data = data[0..-2]
 		
 		JSONArray jsonData = new JSONArray()
+        def rowId = schema.rowId
+        if (rowId == null) {
+            rowId = { it -> it.getId() }
+        }
         for (d in data) {
             def val = [:]
-            val.id = schema.rowId(d)
+            val.id = rowId(d)
             for (c in schema.columns) {
-                val[c.field.description] = c.label(d)
+                def v = c.label(d)
+                
+                if (v == null || v.trim() == '') {
+                    v = '&nbsp;' // We need this to get the bottom border on <td>
+                }
+                val[c.field.description] = v
             }
 
             // Optionally define a styleClass attribute if the schema defines

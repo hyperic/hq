@@ -33,8 +33,6 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
-
 <script type="text/javascript">
 function requestMetricsResponse<c:out value="${portlet.token}"/>() {
 var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>"

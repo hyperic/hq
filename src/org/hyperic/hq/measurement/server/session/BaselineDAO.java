@@ -49,8 +49,8 @@ public class BaselineDAO extends HibernateDAO {
     }
 
     public Baseline create(DerivedMeasurement dm, long computeTime,
-                           boolean userEntered, double mean,
-                           double minExpectedValue, double maxExpectedValue) {
+                           boolean userEntered, Double mean,
+                           Double minExpectedValue, Double maxExpectedValue) {
         Baseline b = new Baseline(dm, computeTime, userEntered, mean,
                                   minExpectedValue, maxExpectedValue);
         dm.setBaseline(b);

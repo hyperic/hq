@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
@@ -117,6 +118,13 @@ public class EditGeneralAction extends BaseAction {
             RequestUtils
                 .setError(request,
                           Constants.ERR_RESOURCE_ID_FOUND);
+            return returnFailure(request, mapping);
+        }
+        catch (GroupDuplicateNameException ex) {
+            log.debug("group creation failed:", ex);
+            RequestUtils
+                .setError(request,
+                          "resource.group.inventory.error.DuplicateGroupName");
             return returnFailure(request, mapping);
         }
     }

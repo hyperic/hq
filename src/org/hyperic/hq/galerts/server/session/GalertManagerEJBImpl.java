@@ -149,8 +149,10 @@ public class GalertManagerEJBImpl
         }
         
         if (seriousUpdate) {
+            def.setMtime(System.currentTimeMillis());
             GalertProcessor.getInstance().loadReloadOrUnload(def);
         } else if (updateName) {
+            def.setMtime(System.currentTimeMillis());
             GalertProcessor.getInstance().alertDefUpdated(def, name);
         }
     }
@@ -161,9 +163,14 @@ public class GalertManagerEJBImpl
      */
     public void update(GalertDef def, Escalation escalation) {
         def.setEscalation(escalation);
+        def.setMtime(System.currentTimeMillis());
         
         // End any escalation we were previously doing.
         EscalationManagerEJBImpl.getOne().endEscalation(def);
+        // If the alert def was in the middle of an escalation, ending the 
+        // escalation will prevent users from being aware that the alert def 
+        // has fired. Thus, they might not fix the alert and reset the triggers. 
+        // We'll reload the alert def so that the triggers are reset forcefully.
         GalertProcessor.getInstance().loadReloadOrUnload(def);
     }
     
@@ -182,6 +189,22 @@ public class GalertManagerEJBImpl
     public PageList findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
         return pager.seek(_defDAO.findAll(g), pc);
+    }
+
+    /**
+     * Find all group alert definitions.
+     * 
+     * @param minSeverity Minimum severity for returned defs
+     * @param enabled     If non-null specifies the nature of the 'enabled'
+     *                    flag for the results.
+     * @param pInfo       Paging information.  Must contain a sort field from
+     *                    {@link GalertDefSortField}
+     * @ejb:interface-method  
+     */
+    public List findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
+                              Boolean enabled, PageInfo pInfo)  
+    {
+        return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
     }
 
     /**
@@ -246,6 +269,7 @@ public class GalertManagerEJBImpl
             if (provider != null)
                 provider.save(gAuxLog.getId().intValue(), auxLog);
         }
+        def.setLastFired(new Long(System.currentTimeMillis()));
         return newLog;
     }
     

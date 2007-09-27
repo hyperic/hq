@@ -836,10 +836,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
-            rrp.processRuntimeReport(subject, agentToken, crrr, aiMgr, platformMgr,
-                                     serverMgr, serviceMgr, 
+            rrp.processRuntimeReport(subject, agentToken, crrr, aiMgr, 
+                                     platformMgr, serverMgr, serviceMgr, 
                                      configMgr, cpropMgr, subjectMgr);
-            serverConfigMgr.vacuumAppdef();
         } catch (CreateException e) {
             throw new SystemException(e);
         }

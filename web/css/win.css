@@ -1,4 +1,4 @@
-c/* GENERAL */
+/* GENERAL */
 BODY {background-color: #ffffff;}
 BODY, FORM {margin: 0px;}
 BODY, P, TD, TH, OPTION, INPUT, TEXTAREA, SELECT {font-size: 11px; color: #000000; font-family: arial, sans-serif;}
@@ -1081,6 +1081,7 @@ border-left:1px solid #D5D8DE;
 }
 .headTopNav {
     height:38px;
+    width:100%;
 }
 
 .headUsrName {
@@ -1123,13 +1124,23 @@ a.headUsrName {
  white-space:nowrap;
 }
 
+.recentText {
+float:left;
+display:inline;
+width:85px;
+padding-top:5px;
+}
+
 #recentAlerts {
-    float:left;
-    display:inline;
+    position:absolute;
+    top:0px;
+    padding-left:80px;
     padding-top:1px;
     font-weight:bold;
     color:black;
-    white-space: nowrap ;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 #navigationTbl  {
@@ -1139,6 +1150,7 @@ a.headUsrName {
 position:relative;
  color: #ffffff;
 font-weight: bold;
+white-space: nowrap;
 }
 
 #navigationTbl .navText {
@@ -1150,6 +1162,24 @@ font-weight: bold;
 }
 
 #navigationTbl a {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
+#navigationTbl a:visited {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
+#navigationTbl a:hover {
+ color: #ffffff;
+ text-decoration:none;
+ font-weight: bold;
+}
+
+#navigationTbl a:active {
  color: #ffffff;
  text-decoration:none;
  font-weight: bold;

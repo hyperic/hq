@@ -340,10 +340,23 @@ public class PermissionManagerImpl
                 "d.priority >= :priority ";
     }
 
+    public String getAlertDefsHQL() {
+        return "select d from AlertDefinition d " +
+               "join d.resource r " +
+         "where d.priority >= :priority";
+    }
+
     public String getGroupAlertsHQL() {
         return "select a from GalertLog a " +
                "join a.alertDef d " +
          "where a.timestamp between :begin and :end " + 
            "and d.severityEnum >= :priority ";
+    }
+
+    public String getGroupAlertDefsHQL() {
+        return "select d from GalertDef d " +
+               "join d.group g " +
+               "join d.escalation e " +
+         "where d.severityEnum >= :priority ";
     }
 }

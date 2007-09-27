@@ -24,11 +24,11 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
@@ -102,20 +102,61 @@ public class EventLogDAO extends HibernateDAO {
             .list();
     }
 
-    void deleteLogs(long begin, long end) {
-        String sql = "from EventLog l " + 
-            "where l.timestamp between :beg and :end";
-
-        Collection c = getSession().createQuery(sql)
-            .setLong("beg", begin)
-            .setLong("end", end)
-            .list();
-        
-        for (Iterator i=c.iterator(); i.hasNext(); ) {
-            EventLog l = (EventLog)i.next();
-            
-            remove(l);
+    List findByCtime(long begin, long end, String[] eventTypes) {
+        Criteria c = createCriteria()
+            .add(Expression.between("timestamp", new Long(begin),
+                                    new Long(end)));
+        if (eventTypes != null && eventTypes.length > 0) {
+            c.add(Expression.in("type", eventTypes));
         }
+        c.addOrder(Order.desc("timestamp"));
+        return c.list();
+    }
+    
+    /**
+     * Retrieve the minimum timestamp amongst all event logs.
+     * 
+     * @return The minimum timestamp or <code>-1</code> if there are no 
+     *         event logs.
+     */
+    long getMinimumTimeStamp() {
+        String sql = "select min(l.timestamp) from EventLog l";
+        
+        Long min = (Long)getSession().createQuery(sql).uniqueResult();
+        
+        if (min == null) {
+            return -1;
+        } else {
+            return min.longValue();
+        }
+    }
+    
+    /**
+     * Delete event logs in chunks.
+     * 
+     * @param from The timestamp to delete from.
+     * @param to The timestamp to delete to.
+     * @param interval The timestamp interval (delta) by which the deletes 
+     *                 are chunked.
+     * @return The number of event logs deleted.
+     */
+    int deleteLogs(long from, long to, long interval) {
+        String sql = "delete EventLog l where " +
+                     "l.timestamp >= :timeStart and l.timestamp <= :timeEnd";
+
+        int rowsDeleted = 0;
+        Session session = getSession();
+        Query query = session.createQuery(sql);
+        
+        for (long cursor = from; cursor < to; cursor += interval) {
+            long end = Math.min(to, cursor + interval);
+            query.setLong("timeStart", cursor);
+            query.setLong("timeEnd", end);
+            rowsDeleted += query.executeUpdate();
+            session.flush();
+        }
+        
+        return rowsDeleted;
     }
     
     void remove(EventLog l) {

@@ -30,22 +30,22 @@ package org.hyperic.hq.ui.beans;
  */
 public class TimelineBean {
     private long time;
-    private int events;
+    private boolean eventsExist;
 
     /**
-     * Constructor taking in time and events
+     * Constructor taking in time and whether or not events exist
      */
-    public TimelineBean(long time, int events) {
+    public TimelineBean(long time, boolean eventsExist) {
         this.time = time;
-        this.events = events;
+        this.eventsExist = eventsExist;
     }
 
-    public int getEvents() {
-        return events;
+    public boolean isEventsExist() {
+        return eventsExist;
     }
     
-    public void setEvents(int events) {
-        this.events = events;
+    public void setEventsExist(boolean exist) {
+        this.eventsExist = exist;
     }
     
     public long getTime() {

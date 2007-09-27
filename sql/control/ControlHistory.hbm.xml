@@ -9,6 +9,10 @@
       </generator>
     </id>
 
+    <version name="_version_" type="long">
+      <column name="VERSION_COL" default="0"/>
+    </version>
+
     <property name="groupId" type="integer">
       <column name="GROUP_ID"/>
     </property>

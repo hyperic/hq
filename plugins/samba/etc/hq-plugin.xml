@@ -30,6 +30,42 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.samba">
+  <!-- extracted to: pdk/work/scripts/samba/hq-samba-stat -->
+  <script name="hq-samba-stat">
+#!/usr/bin/perl
+
+use strict;
+
+my @lines = `smbstatus -L 2>/dev/null| egrep -v '^Pid|^---|^Locked|^\$'`;
+my @rd_only = grep /RDONLY/, @lines;
+my @wr_only = grep /WRONLY/, @lines;
+my @rd_wr = grep /RDWR/, @lines;
+my @excl_batch_oplock = grep /EXCLUSIVE\+BATCH/, @lines;
+my @excl_oplock = grep /EXCLUSIVE/, @lines;
+my @batch_oplock = grep /BATCH/, @lines;
+my @level_2_oplock = grep /LEVEL_II/, @lines;
+my @none_oplock = grep /NONE/, @lines;
+my @deny_none = grep /DENY_NONE/, @lines;
+my @deny_all = grep /DENY_ALL/, @lines;
+my @deny_dos = grep /DENY_DOS/, @lines;
+my @deny_read = grep /DENY_READ/, @lines;
+my @deny_write = grep /DENY_WRITE/, @lines;
+my @deny_fcb = grep /DENY_FCB/, @lines;
+print "RD_ONLY_LOCKS=".@rd_only."\n";
+print "WR_ONLY_LOCKS=".@wr_only."\n";
+print "RD_WR_LOCKS=".@rd_wr."\n";
+print "EXCLUSIVE_BATCH_OPLOCKS=".@excl_batch_oplock."\n";
+print "EXCLUSIVE_OPLOCKS=".@excl_oplock."\n";
+print "BATCH_OPLOCKS=".@batch_oplock."\n";
+print "LEVEL_2_OPLOCKS=".@level_2_oplock."\n";
+print "NONE_OPLOCKS=".@none_oplock."\n";
+print "DENY_NONE=".@deny_none."\n";
+print "DENY_ALL=".@deny_all."\n";
+print "DENY_DOS=".@deny_dos."\n";
+print "DENY_READ=".@deny_read."\n";
+print "DENY_WRITE=".@deny_write."\n";
+print "DENY_FCB=".@deny_fcb."\n";
+  </script>
   <server name="Samba"
           version="3.x">
     <config>
@@ -46,10 +82,102 @@
                  description="Samba Version"/>
     </properties>
 
+    <plugin type="autoinventory"
+            class="SambaServerDetector"/>
     <property name="DEFAULT_LOG_FILE"
-              value="%logfile%"
+              value="%logfile%"/>
     <plugin type="log_track"
             class="SambaErrorLogPlugin"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <filter name="template"
+            value="exec:file=pdk/work/scripts/samba/hq-samba-stat:${alias}"/>
+
+    <metric name="Read Only Locks"
+            alias="RD_ONLY_LOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Write Only Locks" 
+            alias="WR_ONLY_LOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Read Write Locks" 
+            alias="RD_WR_LOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Exclusive Batch OpLocks" 
+            alias="EXCLUSIVE_BATCH_OPLOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Exclusive OpLocks" 
+            alias="EXCLUSIVE_OPLOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Batch OpLocks" 
+            alias="BATCH_OPLOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="Level 2 OpLocks" 
+            alias="LEVEL_2_OPLOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="NONE OpLocks" 
+            alias="NONE_OPLOCKS"
+            category="UTILIZATION"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="NONE Deny Mode" 
+            alias="DENY_NONE"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="ALL Deny Mode" 
+            alias="DENY_ALL"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="DOS Deny Mode" 
+            alias="DENY_DOS"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="READ Deny Mode" 
+            alias="DENY_READ"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="WRITE Deny Mode" 
+            alias="DENY_WRITE"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
+    <metric name="FCB Deny Mode" 
+            alias="DENY_FCB"
+            category="UTILIZATION"
+            indicator="false"
+            units="none"
+            collectionType="dynamic"/>
 
     &multi-process-metrics;
   </server>

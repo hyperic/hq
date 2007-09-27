@@ -25,20 +25,14 @@
 
 package org.hyperic.image;
 
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.image.IndexColorModel;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 
-import java.util.Arrays;
-import java.awt.image.DataBuffer;
-import java.awt.image.WritableRaster;
-import java.util.Hashtable;
+import javax.imageio.ImageIO;
 
 public class ImageUtil
 {
@@ -103,9 +97,9 @@ public class ImageUtil
                     break;
                 }
             }
-            
+            /*
             if(i == r.length)
-                System.out.println("Missing Color");
+                System.out.println("Missing Color");*/
         }
         
         dstRaster.setPixels(0, 0, dstRaster.getWidth(), dstRaster.getHeight(), dstPixels);

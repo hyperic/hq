@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -56,12 +57,17 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.GroupChangeCallback;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -475,9 +481,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppService appSvc = (AppService)i.next();
                 AppdefEntityID anId = null;
                 if(appSvc.getIsCluster()) {
-                    Integer groupId = appSvc.getServiceCluster().getGroupId();
+                    ResourceGroup group = appSvc.getServiceCluster().getGroup();
                     anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                              groupId.intValue());
+                                              group.getId());
                 } else {
                     anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
                                               appSvc.getService().getId().intValue());
@@ -785,22 +791,46 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private void createAuthzApplication(Application app,
                                         AuthzSubjectValue subject)
-        throws CreateException, FinderException, PermissionException {
-        
-            log.debug("Begin Authz CreateApplication");
-            checkPermission(subject, getRootResourceType(),
-                AuthzConstants.rootResourceId,
-                AuthzConstants.appOpCreateApplication);
-            log.debug("User has permission to create application. " + 
-                "Adding authzresource");
-        try {
-            createAuthzResource(subject, getApplicationResourceType(),
-                                app.getId(), app.getName());
-        } catch (CreateException e) {
-            throw e;
-        }
+        throws CreateException, FinderException, PermissionException 
+    {
+        log.debug("Begin Authz CreateApplication");
+        checkPermission(subject, getRootResourceType(),
+                        AuthzConstants.rootResourceId,
+                        AuthzConstants.appOpCreateApplication);
+        log.debug("User has permission to create application. " + 
+                  "Adding authzresource");
+        createAuthzResource(subject, getApplicationResourceType(),
+                            app.getId(), app.getName());
     }
 
+    private class GroupDeleteWatcher 
+        implements ClusterDeleteCallback
+    {
+        public void preDelete(ServiceCluster c) throws VetoException {
+            ResourceBundle b = 
+                ResourceBundle.getBundle("org.hyperic.hq.appdef.Resources");
+
+            Collection apps = getApplicationDAO().findUsingCluster(c);
+            
+            if (apps.size() != 0) {
+                throw new VetoException(b.getString("cluster.inUse"));
+            } 
+        }
+
+        public void groupMembersChanged(ResourceGroup g) {
+        }
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        log.info("Application manager starting up!");
+        
+        HQApp.getInstance().registerCallbackListener(ClusterDeleteCallback.class,
+                                                     new GroupDeleteWatcher());
+    }
+    
     public static ApplicationManagerLocal getOne() {
         try {
             return ApplicationManagerUtil.getLocalHome().create();

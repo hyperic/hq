@@ -6571,6 +6571,89 @@ has already been defined.
           <statement targetDB="oracle" fail="false">ALTER TABLE EAM_ALERT_ACTION_LOG MODIFY DETAIL NULL</statement>
         </schema-directSQL>
     </schemaSpec>
+
+    <schemaSpec version="3.46">
+      <schema-addColumn table="EAM_ALERT_DEFINITION" column="LAST_FIRED" 
+                        columnType="LONG"/>
+    </schemaSpec>
+
+    <schemaSpec version="3.47">
+      <schema-addColumn table="EAM_GALERT_DEFS" column="LAST_FIRED" 
+                        columnType="LONG"/>
+    </schemaSpec>
+    
+    <schemaSpec version="3.48">
+      <schema-directSQL>
+        <statement>
+          update eam_gtrigger_types set type_class = 'org.hyperic.hq.measurement.galerts.MeasurementGtriggerType'
+                 where type_class = 'org.hyperic.hq.galerts.triggers.measurement.MeasurementGtriggerType'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.49">
+      <metricDataUpgrade/>
+    </schemaSpec>
+
+    <schemaSpec version="3.50">
+        <schema-addColumn table="EAM_CONTROL_HISTORY"
+                          column="VERSION_COL" columnType="LONG">
+           <initializer>
+             UPDATE EAM_CONTROL_HISTORY SET VERSION_COL=0
+           </initializer>
+         </schema-addColumn>
+    </schemaSpec>
+
+    <schemaSpec version="3.51">
+      <schema-directSQL>
+        <statement targetDB="oracle" fail="false">
+            ALTER TABLE EAM_GALERT_AUX_LOGS RENAME COLUMN "timestamp" TO "TIMESTAMP"
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.51.1">
+      <schema-directSQL>
+        <statement>
+          ALTER TABLE eam_svc_cluster
+            ADD CONSTRAINT fk39da6ecdcce79ab8 FOREIGN KEY (group_id) 
+            REFERENCES eam_resource_group(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.51.2">
+      <schema-directSQL>
+        <statement>
+			    CREATE INDEX EVENT_CTIME_IDX ON EAM_EVENT ( CTIME )
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
+    <schemaSpec version="3.51.3">
+      <schema-directSQL>
+        <statement targetDB="oracle">
+             CREATE SEQUENCE eam_metric_aux_log_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NOMAXVALUE
+                NOCYCLE
+                CACHE 10
+        </statement>
+        <statement targetDB="oracle">
+            DROP SEQUENCE eam_metric_aux_logs_id_seq
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+	
+	<schemaSpec version="3.51.4">
+        <schema-directSQL>
+		  <statement desc="Create new index for timestamp in eam_event_log for faster deletion of old event logs.">
+			CREATE INDEX EVENT_LOG_TIMESTAMP_IDX ON EAM_EVENT_LOG ( TIMESTAMP )
+		  </statement>			
+        </schema-directSQL>
+    </schemaSpec>   
+
 </dbupgrade>
 </target>
 

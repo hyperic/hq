@@ -55,9 +55,14 @@
   --%>
 <tiles:importAttribute name="showAddToListBtn" ignore="true"/>
 
-<c:if test="${empty showAddToListBtn}">
+<c:if test="${empty showAddToListBtn || showAddToListBtn}">
   <c:set var="showAddToListBtn" value="true"/>
   <tiles:importAttribute name="addToListUrl"/>
+</c:if>
+
+<tiles:importAttribute name="showRemoveBtn" ignore="true"/>
+<c:if test="${empty showRemoveBtn}">
+  <c:set var="showRemoveBtn" value="true"/>
 </c:if>
 
 <%-- the unique name of the list widget to which this toolbar is
@@ -125,10 +130,12 @@
 <!--  ADD TO LIST TOOLBAR -->
 <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">
   <tr>
-    <c:if test="${showAddToListBtn == true}">
+    <c:if test="${showAddToListBtn}">
         <td width="40"><html:link href="${addToListUrl}"><html:img page="/images/tbb_addtolist.gif" width="85" height="16" border="0"/></html:link></td>
     </c:if>
+    <c:if test="${showRemoveBtn}">
     <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><html:image page="${removeImg}" border="0" property="remove"/></div></td>
+    </c:if>
 
 <c:if test="${not empty showIntervalControls and showIntervalControls}">
   <td class="BoldText" nowrap><fmt:message key="resource.common.monitor.visibility.config.CollectionIntervalForSelectedLabel"/></td>

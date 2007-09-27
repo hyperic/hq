@@ -286,6 +286,9 @@ public class ZeventManager {
                     _log.warn("Interrupted while enqueueing events");
                 }
             }
+
+            public void beforeCommit() {
+            }
         });
     }
     

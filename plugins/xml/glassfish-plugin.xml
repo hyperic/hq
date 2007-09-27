@@ -115,6 +115,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=GlobalRequestProcessor,name=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Bytes Sent"
               alias="bytesSent"
               indicator="false"
@@ -152,6 +154,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=Manager,path=*,host=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Active Sessions"
               alias="activeSessions"
               indicator="false"
@@ -189,6 +193,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=PWCConnectionQueue,name=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Queued 5 Min Average"
               alias="countQueued5MinuteAverage"
               indicator="true"
@@ -230,6 +236,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=PWCFileCache,name=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Info Hits"
               alias="countInfoHits"
               indicator="false"
@@ -271,6 +279,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=PWCKeepAlive,name=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Connections"
               alias="countConnections"
               indicator="false"
@@ -302,6 +312,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:j2eeType=Servlet,name=*,WebModule=*,J2EEApplication=*,J2EEServer=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Processing Time"
               alias="processingTimeMillis"
               indicator="false"
@@ -346,6 +358,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:j2eeType=WebModule,name=*,J2EEApplication=*,J2EEServer=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Time To Start Servlet"
               alias="startTimeMillis"
               indicator="true"
@@ -369,6 +383,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:name=class-loading-system,type=*,category=*,server=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Unloaded Class Count"
               alias="unloadedclasscount-count"
               indicator="true"
@@ -390,6 +406,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:name=compilation-system,type=*,category=*,server=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Total Compilation Time"
               alias="totalcompilationtime-count"
               indicator="true"
@@ -402,6 +420,8 @@
       <plugin type="autoinventory"/>
       <property name="OBJECT_NAME"
                 value="com.sun.appserv:type=connection-queue,category=*,server=*"/>
+      <metric name="Availability"
+              indicator="true"/>
       <metric name="Queued 15 Min Average"
               alias="countqueued15minuteaverage-count"
               indicator="true"

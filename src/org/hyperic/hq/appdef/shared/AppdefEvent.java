@@ -36,6 +36,8 @@ import org.apache.commons.logging.LogFactory;
 public class AppdefEvent extends AbstractEvent implements java.io.Serializable,
         ResourceEventInterface {
 
+    private static final long serialVersionUID = -7397655604166961233L;
+
     public static final int ACTION_CREATE = 0;
 
     public static final int ACTION_UPDATE = 1;

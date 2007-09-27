@@ -61,6 +61,7 @@ import org.hyperic.util.thread.LoggingThreadGroup;
  *      local-jndi-name="LocalUpdateBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="REQUIRED"
  */
 public class UpdateBossEJBImpl 
     extends BizappSessionEJB
@@ -119,7 +120,6 @@ public class UpdateBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void startup() {
         LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
@@ -150,6 +150,9 @@ public class UpdateBossEJBImpl
         addResourceProperties(req, plats, "hq.rsrc.plat.");
         addResourceProperties(req, svrs,  "hq.rsrc.svr.");
         addResourceProperties(req, svcs,  "hq.rsrc.svc.");
+        
+        req.putAll(SysStats.getCpuMemStats());
+        req.putAll(SysStats.getDBStats());
         return req;
     }
     
@@ -167,7 +170,6 @@ public class UpdateBossEJBImpl
      * Meant to be called internally by the fetching thread
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void fetchReport() {
         UpdateStatus status = getOrCreateStatus();
@@ -254,7 +256,6 @@ public class UpdateBossEJBImpl
      * the string status report
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public String getUpdateReport() {
         UpdateStatus status = getOrCreateStatus();
@@ -271,7 +272,6 @@ public class UpdateBossEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setUpdateMode(UpdateStatusMode mode) {
         UpdateStatus status = getOrCreateStatus();
@@ -286,7 +286,6 @@ public class UpdateBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public UpdateStatusMode getUpdateMode() {
         return getOrCreateStatus().getMode();
@@ -294,7 +293,6 @@ public class UpdateBossEJBImpl
     
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void ignoreUpdate() {
         UpdateStatus status = getOrCreateStatus();

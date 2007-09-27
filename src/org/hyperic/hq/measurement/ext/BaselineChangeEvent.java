@@ -40,6 +40,8 @@ public class BaselineChangeEvent
 	extends AbstractEvent
 	implements Serializable, ResourceEventInterface {
 
+    private static final long serialVersionUID = 5372484742600800619L;
+
     /** Creates a new instance of MeasurementEvent */
     public BaselineChangeEvent(Integer bid) {
         // set the instance id to the baseline id 

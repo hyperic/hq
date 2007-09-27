@@ -43,8 +43,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
-import org.hyperic.hq.events.ActionExecuteException;
-import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerChangeCallback;
@@ -53,13 +51,15 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.collection.IntHashMap;
 
-public class RegisteredTriggers {
+public class RegisteredTriggers {    
     private final static Log log =
         LogFactory.getLog(RegisteredTriggers.class.getName());
     
     public static final Integer KEY_ALL = new Integer(0);
     
     private static RegisteredTriggers singleton = new RegisteredTriggers();
+    
+    private final Object lock = new Object();
     
     /** Holds value of property initialized. */
     private boolean initialized = false;
@@ -77,7 +77,13 @@ public class RegisteredTriggers {
     /** Initializes the cache.
      * @return true if it actually initializes, false otherwise
      */
-    private synchronized boolean init() {
+    private boolean init() {
+        synchronized (lock) {
+            return doInitUnsynchronized();
+        }
+    }
+    
+    private boolean doInitUnsynchronized() {
         if (isInitialized())
             return false;
         
@@ -132,7 +138,7 @@ public class RegisteredTriggers {
                 setInitialized(false);
         }
         
-        return true;
+        return true;                   
     }
     
     public static void reinitialize() {
@@ -281,7 +287,9 @@ public class RegisteredTriggers {
      *
      */
     public boolean isInitialized() {
-        return this.initialized;
+        synchronized (lock) {
+            return this.initialized;            
+        }
     }
     
     /** Setter for property initialized.
@@ -289,7 +297,9 @@ public class RegisteredTriggers {
      *
      */
     public void setInitialized(boolean initialized) {
-        this.initialized = initialized;
+        synchronized (lock) {
+            this.initialized = initialized;            
+        }
     }
     
     /** Getter for property keyedByType.

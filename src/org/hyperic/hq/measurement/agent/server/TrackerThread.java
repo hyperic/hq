@@ -39,17 +39,12 @@ import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.hq.product.TrackEventPluginManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 class TrackerThread implements Runnable {
-
-    // Default poll period. 
-    private static final int   POLL_PERIOD = 60 * 1000; // 1 minute
-
-    private static final String PROP_POLLPERIOD  = 
-        "net.hyperic.agent.tracker.pollPeriod";
 
     private static final String CONFIGTRACK_LISTNAME = "configtrack_spool";
     private static final String LOGTRACK_LISTNAME    = "logtrack_spool";
@@ -83,7 +78,7 @@ class TrackerThread implements Runnable {
         this.myThread    = null;
         this.interrupter = new Object();
         this.client      = setupClient();
-        this.waitTime    = TrackerThread.POLL_PERIOD;
+        this.waitTime    = TrackEventPluginManager.DEFAULT_INTERVAL;
         this.log         = LogFactory.getLog(TrackerThread.class);
     }
 
@@ -193,21 +188,6 @@ class TrackerThread implements Runnable {
     public void run() 
     {
         this.myThread = Thread.currentThread();
-
-        // Check for a configured poll period
-        String pollPeriod = 
-            (String)this.props.get(TrackerThread.PROP_POLLPERIOD);
-        if (pollPeriod != null) {
-            
-            try {
-                this.waitTime = Integer.parseInt(pollPeriod) * 1000;
-                this.log.debug("Setting poll period to " + pollPeriod);
-
-            } catch (NumberFormatException e) {
-                this.log.error("Ignoring invalid poll period: " +
-                               pollPeriod);
-            }
-        }
 
         while(this.shouldDie == false) {
             // Flush log track events

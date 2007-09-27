@@ -1,6 +1,5 @@
 package org.hyperic.hq.dao;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,6 +16,8 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -50,13 +51,11 @@ public class ServiceClusterDAO extends HibernateDAO {
         super(ServiceCluster.class, f);
     }
 
-    public ServiceCluster findById(Integer id)
-    {
+    public ServiceCluster findById(Integer id) {
         return (ServiceCluster)super.findById(id);
     }
 
-    public void save(ServiceCluster entity)
-    {
+    public void save(ServiceCluster entity) {
         super.save(entity);
     }
 
@@ -77,12 +76,14 @@ public class ServiceClusterDAO extends HibernateDAO {
         super.remove(entity);
     }
 
-    public ServiceCluster create(ServiceClusterValue scv, List serviceIds)
-    {
+    public ServiceCluster create(ServiceClusterValue scv, List serviceIds) {
         ServiceCluster sc = new ServiceCluster();
+        
+        ResourceGroup rg = new ResourceGroupDAO(DAOFactory.getDAOFactory())
+            .findById(scv.getGroupId());
         sc.setName(scv.getName());
         sc.setDescription(scv.getDescription());
-        sc.setGroupId(scv.getGroupId());
+        sc.setGroup(rg);
 
         Set services = new HashSet(serviceIds.size());
         ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
@@ -123,6 +124,15 @@ public class ServiceClusterDAO extends HibernateDAO {
         return (ServiceCluster)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
+    }
+
+    public Collection findUsing(ResourceGroup g) {
+        String sql = "from ServiceCluster sc " +
+            " where sc.group = :group";
+
+        return getSession().createQuery(sql)
+            .setParameter("group", g)
+            .list();
     }
 
     /**
@@ -177,8 +187,17 @@ public class ServiceClusterDAO extends HibernateDAO {
         // reassociate service cluster
         ServiceCluster sc = findById(serviceCluster.getId());
 
+        ResourceGroupDAO rdao = 
+            new ResourceGroupDAO(DAOFactory.getDAOFactory());
+        
         // first deal with the stuff from the value objects..
         sc.setServiceClusterValue(serviceCluster);
+
+        if (serviceCluster.getGroupId() != null) {
+            ResourceGroup rg = rdao.findById(serviceCluster.getGroupId());
+            sc.setGroup(rg);
+        }
+        
         // now create a new set of service objects for the cluster
         Set services = new HashSet();
         for(int i = 0; i < serviceIds.size(); i++) {

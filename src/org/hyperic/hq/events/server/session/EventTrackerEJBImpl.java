@@ -114,7 +114,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
 
                     // Insert into Event table first
                     int i = 1;
-                    stmt.setInt(i++, event.getId().intValue());
+                    stmt.setLong(i++, event.getId().longValue());
                     stmt.setBytes(i++, ostream.toByteArray());
                     stmt.setLong(i++, event.getTimestamp());
                     stmt.execute();
@@ -161,8 +161,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param tid the Trigger ID
      * @param event the referenced Event
      */
-    public void updateReference(Integer tid, Long eid, AbstractEvent event,
-                                long expiration)
+    public void updateReference(Integer tid, Long eid, AbstractEvent event)
         throws SQLException, IOException {
         Connection conn = null;
         PreparedStatement stmt = null;

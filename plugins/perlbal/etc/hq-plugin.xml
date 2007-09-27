@@ -56,10 +56,10 @@
             value="perlbal:${sockaddr.config}:${alias}"/>
 
     <metric name="Requests"
-				        category="THROUGHPUT"
+            category="THROUGHPUT"
             alias="requests"
             indicator="true"
-												collectionType="trendsup"
+            collectionType="trendsup"
             units="none"/>
 
     <metric name="Availability"

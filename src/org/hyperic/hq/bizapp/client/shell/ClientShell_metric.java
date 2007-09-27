@@ -47,20 +47,6 @@ public class ClientShell_metric
 
         super.init(commandName, shell);
 
-        handler = new ClientShell_metric_list(this.shell);
-        registerSubHandler("list", handler);
-        handler = new ClientShell_metric_view(this.shell);
-        registerSubHandler("view", handler);
-        handler = new ClientShell_metric_enable(this.shell);
-        registerSubHandler("enable", handler);
-        handler = new ClientShell_metric_disable(this.shell);
-        registerSubHandler("disable", handler);
-        handler = new ClientShell_metric_configure(this.shell);
-        registerSubHandler("configure", handler);
-        handler = new ClientShell_metric_create(this.shell);
-        registerSubHandler("create", handler);
-        handler = new ClientShell_metric_delete(this.shell);
-        registerSubHandler("delete", handler);
         handler = new ClientShell_metric_compact(this.shell);
         registerSubHandler("compact", handler);
     }

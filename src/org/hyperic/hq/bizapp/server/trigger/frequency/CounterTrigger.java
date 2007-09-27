@@ -210,7 +210,8 @@ public class CounterTrigger extends AbstractTrigger
             events = eTracker.getReferencedEventStreams(getId());
         } catch(Exception exc){
             throw new ActionExecuteException("Failed to get referenced " +
-                                             "streams: " + exc);
+                                             "streams for trigger id="+
+                                             getId()+" : " + exc);
         }
 
         /* Make sure we only write once (either delete or add) in this function
@@ -221,8 +222,9 @@ public class CounterTrigger extends AbstractTrigger
                 // Get ready to fire, reset EventTracker
                 eTracker.deleteReference(getId());
             } catch(Exception exc){
-                throw new ActionExecuteException("Failed to delete referenced" +
-                                                 " events: " + exc);
+                throw new ActionExecuteException("Failed to delete referenced " +
+                                                 "events for trigger id="+
+                                                 getId()+" : " + exc);
             }
 
             TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
@@ -243,7 +245,8 @@ public class CounterTrigger extends AbstractTrigger
                 eTracker.addReference(getId(), tfe, timeRange);
             } catch(Exception exc){
                 throw new ActionExecuteException(
-                    "Error adding event reference: " + exc);
+                    "Error adding event reference for trigger id="+
+                    getId()+" : " + exc);
             }
             
             // Now send a NotFired event

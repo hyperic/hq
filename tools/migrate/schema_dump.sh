@@ -2,7 +2,7 @@
 
 DB=hq
 USER=hqadmin
-PG_DUMP=/usr/local/postgresql/bin/pg_dump
+PG_DUMP=/Users/jtravis/dev/postgres/bin/pg_dump
 
 if [ $# -ne 1 ] ; then
 	echo "Syntax:  $0 outDir"

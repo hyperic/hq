@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
@@ -38,7 +39,7 @@ import org.hyperic.util.units.FormattedNumber;
 
 public class MeasurementTemplate 
     extends PersistedObject
-    implements Serializable 
+    implements ContainerManagedTimestampTrackable, Serializable 
 {
     private Integer _cid;
     private String  _name;
@@ -60,6 +61,22 @@ public class MeasurementTemplate
     private Collection      _rawMeasurementArgs = new ArrayList();
 
     public MeasurementTemplate() {
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
    
     public Integer getCid() {

@@ -26,13 +26,32 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 
 public class AppdefStartupListener
     implements StartupListener
 {
+    private static final Object LOCK = new Object();
+    
+    private static ClusterDeleteCallback _callbacks;
+    
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
         ResourceAuxLogProvider.class.toString();
+
+        HQApp app = HQApp.getInstance();
+
+        synchronized (LOCK) {
+            _callbacks = (ClusterDeleteCallback)
+                app.registerCallbackCaller(ClusterDeleteCallback.class);
+        }
+        ApplicationManagerEJBImpl.getOne().startup();
+    }
+    
+    static ClusterDeleteCallback getClusterDeleteCallback() {
+        synchronized (LOCK) {
+            return _callbacks;
+        }
     }
 }

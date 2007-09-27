@@ -38,12 +38,10 @@ class RunnableTrackThread implements Runnable {
     private static Log log =
         LogFactory.getLog(RunnableTrackThread.class.getName());
 
-    public static final int DEFAULT_INTERVAL = 60 * 5 * 1000;
-
     private Thread thread = null;
     private static RunnableTrackThread instance = null;
     private boolean shouldDie = false;
-    private long interval = DEFAULT_INTERVAL;
+    private long interval = TrackEventPluginManager.DEFAULT_INTERVAL;
     private Set watchers =
         Collections.synchronizedSet(new HashSet());
 

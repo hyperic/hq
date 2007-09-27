@@ -1180,6 +1180,7 @@ function saveAddEscalation() {
     </table>
 </div>
 
+<c:if test="${useroperations['modifyEscalation']}">
 <div class="ListHeaderInactive"
      style="border: 1px solid rgb(213, 216, 222); margin-bottom: 10px;">
     <table cellspacing="0" cellpadding="3" border="0">
@@ -1193,6 +1194,7 @@ function saveAddEscalation() {
         </tbody>
     </table>
 </div>
+</c:if>
 
 <form action='<html:rewrite action="/escalation/saveEscalation"/>'
       name="EscalationForm" id="EscalationForm" onchange="hideExample();"><input

@@ -52,8 +52,8 @@ public class DataPurgeJob implements Job {
 
     private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
 
-    private static long HOUR = MeasurementConstants.HOUR;
-    private static long MINUTE = MeasurementConstants.MINUTE;
+    static long HOUR = MeasurementConstants.HOUR;
+    static long MINUTE = MeasurementConstants.MINUTE;
 
     // We create a private static class, in case the DataPurgeJob is 
     // dynamically proxied (which would result in multiple instances of
@@ -119,26 +119,14 @@ public class DataPurgeJob implements Job {
         long time_start = System.currentTimeMillis();
         
         try {
-            boolean ten_past = false;
-            // We'll only do the compress if it's 10 past the hour
-            Calendar cal = Calendar.getInstance();
-            long voodooTime = TimingVoodoo.roundDownTime(time_start, MINUTE);
-            cal.setTime(new java.util.Date(voodooTime));
-            if (cal.get(Calendar.MINUTE) != 10)
-                ten_past = false;
-            else
-                ten_past = true;
-        
             // Announce
             _log.info("Data compression starting at " +
                       TimeUtil.toString(time_start));
-            
+
             runDBAnalyze(serverConfig);
-    
-            if (!ten_past)
-                return;
 
             dataCompress.compressData();
+            
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
         } finally {
@@ -157,27 +145,23 @@ public class DataPurgeJob implements Job {
     private static void runDBAnalyze(ServerConfigManagerLocal serverConfig)
     {
         // First check if we are already running
-        synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK)
-        {
+        synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
             if (DataPurgeLockHolder.analyzeRunning) {
                 _log.info("Not starting db analyze. (Already running)");
                 return;
             } else {
                 DataPurgeLockHolder.analyzeRunning = true;
             }
-        }
-        try
-        {
-            // We want to analyze the current and previous hq_metric_data 
-            // tables every hour
+        } try {
             long analyzeStart = System.currentTimeMillis();
             _log.info("Performing database analyze");
-            serverConfig.analyze();
+            // Analyze the current and previous hq_metric_data table
+            serverConfig.analyzeHqMetricTables();
+            // Analyze all non-metric tables
+            serverConfig.analyzeNonMetricTables();
             long secs = (System.currentTimeMillis()-analyzeStart)/1000;
-            _log.info("Completed database analyze "+secs+" secs");
-        }
-        finally
-        {
+            _log.info("Completed database analyze " + secs + " secs");
+        } finally {
             synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
                 DataPurgeLockHolder.analyzeRunning = false;
             }
@@ -260,13 +244,14 @@ public class DataPurgeJob implements Job {
         EventLogManagerLocal eventLogManager =
             EventLogManagerUtil.getLocalHome().create();
 
-        _log.info("Purging events older than " +
+        _log.info("Purging event logs older than " +
             TimeUtil.toString(now - purgeEventLog));
         try {
-            eventLogManager.deleteLogs(0, now - purgeEventLog);
-            _log.info("Done (Deleting events)");
-        } catch (RemoveException e) {
-            _log.error("Unable to delete events: " + e.getMessage(), e);
+            int rowsDeleted = 
+                eventLogManager.deleteLogs(-1, now - purgeEventLog);
+            _log.info("Done (Deleted " + rowsDeleted + " event logs)");
+        } catch (Exception e) {
+            _log.error("Unable to delete event logs: " + e.getMessage(), e);
         }
     }
 }

@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
@@ -86,7 +87,7 @@ public class RemoveResourceAction extends BaseAction {
 
     private void removeResources(HttpServletRequest request,
                                  String[] resourceItems)
-        throws SessionNotFoundException, ApplicationException, 
+        throws SessionNotFoundException, ApplicationException, VetoException,
                RemoteException, ServletException {
 
         Integer sessionId = RequestUtils.getSessionId(request);
@@ -159,6 +160,15 @@ public class RemoveResourceAction extends BaseAction {
                        } catch (AppdefEntityNotFoundException e) {
                            log.trace("Removing resource  " + resourceId +
                                      " failed");
+                       } catch (Exception e) {
+                           // Still referenced by an application.  Application
+                           // throws VetoException when in same web application.
+                           // However, it's JBossTransactionRollbackException
+                           // through the remote interface.
+                           if (resourceId.isGroup()) {
+                               RequestUtils.setError(request,
+                                   "resource.group.remove.ReferencedByApp");
+                           }
                        }
                         break;
                     default :

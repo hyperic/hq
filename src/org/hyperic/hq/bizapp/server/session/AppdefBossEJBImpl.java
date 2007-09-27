@@ -138,6 +138,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.Validator;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -1147,7 +1148,6 @@ public class AppdefBossEJBImpl
      * @return A PageList of all registered appdef resource types
      * of a particular entity type.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public PageList findAllResourceTypes(int sessionId, int entType,
                                          PageControl pc)
@@ -1218,7 +1218,6 @@ public class AppdefBossEJBImpl
      * @param platTypePK - the type of platform
      * @return PlatformValue - the saved Value object
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public PlatformValue createPlatform(int sessionID,
                                         PlatformValue platformVal,
@@ -1388,7 +1387,6 @@ public class AppdefBossEJBImpl
      * @param serverTypePK - the type of server
      * @return ServerValue - the saved server
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
                                     Integer platformPK,
@@ -1414,7 +1412,6 @@ public class AppdefBossEJBImpl
      * @param cProps - the map with Custom Properties for the server
      * @return ServerValue - the saved server
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal,
                                     Integer platformPK,
@@ -1471,7 +1468,6 @@ public class AppdefBossEJBImpl
      * @param aeid - the appdef entity ID
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID, ServiceValue serviceVal,
                                       Integer serviceTypePK,
@@ -1512,7 +1508,6 @@ public class AppdefBossEJBImpl
      *            the server host
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID,
                                       ServiceValue serviceVal,
@@ -1539,7 +1534,6 @@ public class AppdefBossEJBImpl
      * @param cProps - the map with Custom Properties for the service
      * @return ServiceValue - the saved ServiceValue
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ServiceValue createService(int sessionID,
                                       ServiceValue serviceVal,
@@ -1578,7 +1572,6 @@ public class AppdefBossEJBImpl
      * Remove a platform.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removePlatform(int sessionId, Integer platformId)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1669,7 +1662,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer)
         throws NamingException, FinderException, ValidationException,
@@ -1690,7 +1682,6 @@ public class AppdefBossEJBImpl
      * Update a server with cprops.
      * @param cProps - the map with Custom Properties for the server
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer,
                                     Map cProps)
@@ -1759,7 +1750,6 @@ public class AppdefBossEJBImpl
      * Update a service with cProps.
      * @param cProps - the map with Custom Properties for the service
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService,
                                       Map cProps)
@@ -1850,7 +1840,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ApplicationValue updateApplication(int sessionId,
                                               ApplicationValue app)
@@ -1878,7 +1867,6 @@ public class AppdefBossEJBImpl
      * Set the services used by an application
      * indicate whether the service is an entry point
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setApplicationServices(int sessionId, Integer appId,
                                        List entityIds)
@@ -1919,7 +1907,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setAppDependencyTree(int sessionId, DependencyTree depTree)
         throws ApplicationException, PermissionException 
@@ -1940,7 +1927,6 @@ public class AppdefBossEJBImpl
      * Remove a Server from the inventory.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeServer(int sessionId, Integer serverId)
         throws PermissionException, ServerNotFoundException,
@@ -2010,7 +1996,6 @@ public class AppdefBossEJBImpl
      * Remove a Service from the inventory.
      *  
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeService(int sessionId, Integer serviceId)
         throws ApplicationException 
@@ -2049,7 +2034,6 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeApplication(int sessionId, Integer appId)
         throws ApplicationException, PermissionException, 
@@ -2077,7 +2061,6 @@ public class AppdefBossEJBImpl
      * Remove an application service.
      * @param appId         - The application identifier.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void removeAppService (int sessionId, Integer appId,
                                   Integer serviceId)
@@ -2111,7 +2094,6 @@ public class AppdefBossEJBImpl
         Validator.validate(data);
         helper = new ImportHelper(subject, data);
         String result = helper.process();
-        getServerConfigManager().vacuumAppdef();
         return result;
     }
 
@@ -2167,7 +2149,6 @@ public class AppdefBossEJBImpl
      * @param location    - Location of group (optional)
      * @return AppdefGroupValue object
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(int sessionId, String name,
                                         String description, String location)
@@ -2194,7 +2175,6 @@ public class AppdefBossEJBImpl
      * @param location    - Location of group (optional)
      * @return AppdefGroupValue object
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(int sessionId, int adType,
                                         String name, String description, 
@@ -2221,7 +2201,6 @@ public class AppdefBossEJBImpl
      * @param description - A description of the group contents. (optional)
      * @param location    - Location of group (optional)
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public AppdefGroupValue createGroup(int sessionId, int adType, 
                                         int adResType, String name, 
@@ -2559,14 +2538,13 @@ public class AppdefBossEJBImpl
     /**
      * Save a group back to persistent storage.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void saveGroup(int sessionID, AppdefGroupValue gv)
         throws GroupNotCompatibleException, GroupModificationException,
                GroupDuplicateNameException, 
                AppSvcClustDuplicateAssignException,
                SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+               PermissionException, VetoException 
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionID);
@@ -3129,12 +3107,11 @@ public class AppdefBossEJBImpl
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteGroup(int sessionId, AppdefEntityID entity)
         throws  AppdefGroupNotFoundException, SessionTimeoutException,
                 SessionNotFoundException, PermissionException,
-                SystemException 
+                VetoException 
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
@@ -3146,12 +3123,11 @@ public class AppdefBossEJBImpl
     }
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteGroup(int sessionId, Integer groupId)
         throws AppdefGroupNotFoundException, SessionTimeoutException,
                SessionNotFoundException, PermissionException,
-               SystemException 
+               VetoException
     {
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
@@ -3169,7 +3145,6 @@ public class AppdefBossEJBImpl
      * @param entityId object to be added.
      * @param groupIds identifier array
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void batchGroupAdd(int sessionId, AppdefEntityID entityId,
                               Integer[] groupIds)
@@ -3177,7 +3152,7 @@ public class AppdefBossEJBImpl
                GroupModificationException, GroupDuplicateNameException,
                AppSvcClustDuplicateAssignException, PermissionException,
                SessionTimeoutException, SessionNotFoundException,
-               SystemException 
+               SystemException, VetoException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
@@ -3195,7 +3170,6 @@ public class AppdefBossEJBImpl
      * orphaned in the UI due to its display restrictions. This method
      * should only get called before a user is about to be deleted
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void resetResourceOwnership(int sessionId,
                                        AuthzSubjectValue currentOwner)
@@ -3236,9 +3210,15 @@ public class AppdefBossEJBImpl
                                                 root);
                 }
                 if(resType.equals(AuthzConstants.groupResType)) {
-                    // change group owner
-                    getAppdefGroupManager()
-                        .changeGroupOwner(root, aRes.getInstanceId(), root);
+                    try {
+                        // change group owner
+                        getAppdefGroupManager()
+                            .changeGroupOwner(root, aRes.getInstanceId(), root);
+                    } catch (AppdefGroupNotFoundException e) {
+                        // Group may not be an appdef group
+                        log.info("Group " + aRes.getInstanceId() +
+                                 " not appdef group, ownership unchanged");
+                    }
                 }
             }
         } catch (CreateException e) {
@@ -3251,7 +3231,6 @@ public class AppdefBossEJBImpl
      * @param entityId object to be removed
      * @param groupIds identifier array
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void batchGroupRemove(int sessionId, AppdefEntityID entityId,
                                  Integer[] groupIds)
@@ -3259,7 +3238,7 @@ public class AppdefBossEJBImpl
                GroupModificationException, AppSvcClustDuplicateAssignException,
                GroupDuplicateNameException, PermissionException,
                SessionTimeoutException, SessionNotFoundException,
-               SystemException 
+               VetoException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
@@ -3368,7 +3347,6 @@ public class AppdefBossEJBImpl
      * @param val Value to assicate with the key.  If the value is null,
      *            then the value will simply be removed.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setCPropValue(int sessionId, AppdefEntityID id,
                               String key, String val)
@@ -3444,7 +3422,6 @@ public class AppdefBossEJBImpl
      * @param key Key to create
      * @throws CPropKeyExistsException if the key already exists
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addCPropKey(int sessionId, CPropKeyValue key)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -3462,7 +3439,6 @@ public class AppdefBossEJBImpl
      * @param appdefTypeId The ID of the resource type
      * @param key          Key to remove
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void deleteCPropKey(int sessionId, int appdefType,
                                int appdefTypeId, String key)
@@ -3514,7 +3490,6 @@ public class AppdefBossEJBImpl
     /**
      * Get the appdef inventory summary visible to a user
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public AppdefInventorySummary getInventorySummary(int sessionId,
                                                       boolean countTypes)
@@ -3561,7 +3536,6 @@ public class AppdefBossEJBImpl
     * @param allConfigsRollback The configuation to rollback to if an error 
     *                           occurs.
     * @ejb:interface-method
-    * @ejb:transaction type="REQUIRED"
     */
     public void setAllConfigResponses(int sessionInt, 
                                       AllConfigResponses allConfigs,

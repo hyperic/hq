@@ -114,7 +114,8 @@ public class EscalateTrigger extends AbstractTrigger
                     // Only need to look at the first event
                     Iterator i = events.iterator();
                     ObjectInputStream p = (ObjectInputStream) i.next();
-                    tracked = (TriggerFiredEvent) p.readObject();
+                    tracked = 
+                        (TriggerFiredEvent) deserializeEventFromStream(p, true);
 
                     if ((tracked.getTimestamp() + getAfter()) >
                         event.getTimestamp())

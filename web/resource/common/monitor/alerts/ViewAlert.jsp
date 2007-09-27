@@ -61,19 +61,19 @@
 
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.common.alert.action.fix.header"/>
-</tiles:insert>
+</tiles:insert>                                                                                                                           
 <table cellpadding="10" cellspacing="0" border="0" width="100%" id="fixedSection">
 <tr>
 <c:choose>
 <c:when test="${not alert.fixed}">
-  <td class="BlockContent" colspan="3" align="middle">
+  <td class="BlockContent"  align="middle" valign="top">
     <c:if test="${not empty fixedNote}">
-      <div style="padding: 4px;">
         <span class="BoldText"><fmt:message key="resource.common.alert.previousFix"/></span>
         <c:out value="${fixedNote}"/>
-      </div>
     </c:if>
-    <html:textarea property="fixedNote" cols="70" rows="5"/>
+    </td>
+     <td colspan="2" class="BlockContent">
+    <span class="BoldText"><fmt:message key="resource.common.alert.fixedNote"/></span><br><html:textarea property="fixedNote" cols="70" rows="5"/>
   </td>
 </tr>
 <tr>

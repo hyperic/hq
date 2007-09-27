@@ -26,9 +26,12 @@
 package org.hyperic.hq.product.servlet.client;
 
 import java.net.URL;
-import java.net.HttpURLConnection;
 
 import java.io.InputStream;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * Talk to jmx servlet over http.
@@ -36,6 +39,10 @@ import java.io.InputStream;
 public class JMXProtocolHttp extends JMXProtocolRequest {
 
     public void shutdown() {
+    }
+
+    protected boolean isSSL() {
+        return false;
     }
 
     public InputStream openStream(String host, int port,
@@ -47,20 +54,29 @@ public class JMXProtocolHttp extends JMXProtocolRequest {
             path=path + "?" + query;
         }
 
-        //XXX cache
-        URL url=new URL("http", host, port, path);
+        String scheme = isSSL() ? "https" : "http";
+        URL url = new URL(scheme, host, port, path);
 
-        HttpURLConnection conn=(HttpURLConnection)url.openConnection();
+        HttpClient client = new HttpClient();
+        final int timeout = 1 * 1000; //1min
+        client.setTimeout(timeout);
+        client.setConnectionTimeout(timeout);
+
+        GetMethod get = new GetMethod(url.toString());
 
         if (user != null) {
-            String auth = user + ":" + pass;
-            
-            // Easiest - but may not be very portable.
-            auth = new sun.misc.BASE64Encoder().encode(auth.getBytes());
+            UsernamePasswordCredentials credentials =
+                new UsernamePasswordCredentials(user, pass);
 
-            conn.setRequestProperty("Authorization", "Basic " + auth);
+            client.getState().setCredentials(host,
+                                             host,
+                                             credentials);
+                    
+            get.setDoAuthentication(true);
         }
-        
-        return conn.getInputStream();
+
+        client.executeMethod(get);
+
+        return get.getResponseBodyAsStream();
     }
 }

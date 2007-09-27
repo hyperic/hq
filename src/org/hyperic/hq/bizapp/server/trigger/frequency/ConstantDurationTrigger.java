@@ -210,9 +210,9 @@ public class ConstantDurationTrigger extends AbstractTrigger
                     if (events.size() > 0) {
                         // We only need the first event
                         ObjectInputStream p = (ObjectInputStream) events.get(0);
-                        // Deserialize the event
+
                         TriggerFiredEvent last =
-                            (TriggerFiredEvent) p.readObject();
+                            (TriggerFiredEvent) deserializeEventFromStream(p, true);
 
                         // Let's see if we have a chance to fire
                         long duration =
@@ -229,7 +229,8 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 }
             } catch (Exception exc) {
                 throw new ActionExecuteException(
-                    "Failed to get referenced " + "streams: " + exc);
+                        "Failed to get referenced streams for trigger id="+
+                         getId()+" : " + exc);                
             }
 
             if (myEvent == null) {            

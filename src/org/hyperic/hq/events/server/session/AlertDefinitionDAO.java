@@ -34,7 +34,9 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
@@ -44,6 +46,12 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinitionDAO extends HibernateDAO {
+    private static final String[] MANAGE_ALERTS_OPS = new String[] { 
+        AuthzConstants.platformOpManageAlerts,
+        AuthzConstants.serverOpManageAlerts,
+        AuthzConstants.serviceOpManageAlerts 
+    };
+
     public AlertDefinitionDAO(DAOFactory f) {
         super(AlertDefinition.class, f);
     }
@@ -133,15 +141,33 @@ public class AlertDefinitionDAO extends HibernateDAO {
                 session.setFlushMode(FlushMode.MANUAL);                
             }
             
-            return this.findChildAlertDef(ent, parentId);
+            return findChildAlertDef(ent, parentId);
         } finally {
             session.setFlushMode(oldFlushMode);
         } 
-
     }
 
     public AlertDefinition findById(Integer id) {
         return (AlertDefinition)super.findById(id);
+    }
+    
+    /** 
+     * Find an alert definition by Id, loading from the session.
+     * 
+     * @param id The alert definition Id.
+     * @param refresh <code>true</code> to force the alert def state to be 
+     *                to be re-read from the database; <code>false</code> to 
+     *                allow the persistence engine to return a cached copy.
+     * @throws ObjectNotFoundException if no alert definition with the give Id exists.
+     */
+    public AlertDefinition findById(Integer id, boolean refresh) {
+        AlertDefinition def = findById(id);
+        
+        if (refresh) {
+            getSession().refresh(def);
+        }
+        
+        return def;
     }
     
     public List findByAppdefEntityTypeSortByCtime(AppdefEntityID id,
@@ -273,25 +299,58 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     List findDefinitions(AuthzSubjectValue subj, AlertSeverity minSeverity, 
+                         Boolean enabled, boolean excludeTypeBased, 
                          PageInfo pInfo)
     {
-        AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
-        String sql = "select d from AlertDefinition d " +
-                     "join d.resource r " +
-                     "where " +
-                     "    d.priority >= :priority ";
+        String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
         
-        sql += " order by " + sort.getSortString("d", "r") + 
-               (pInfo.isAscending() ? "" : " DESC");
-
-        if (!sort.equals(AlertDefSortField.CTIME)) {
-            sql += ", " + AlertDefSortField.CTIME.getSortString("d", "r") +
-                   " DESC";
+        sql += " and d.deleted = false";
+        if (enabled != null) {
+            sql += " and d.enabled = " + 
+                   (enabled.booleanValue() ? "true" : "false");
         }
+        
+        if (excludeTypeBased) {
+            sql += " and d.parent is null";
+        }
+
+        sql += getOrderByClause(pInfo);
                
         Query q = getSession().createQuery(sql)
-                              .setInteger("priority", minSeverity.getCode());
+            .setInteger("priority", minSeverity.getCode());
 
+        if (sql.indexOf("subj") > 0) {
+            q.setInteger("subj", subj.getId().intValue())
+             .setParameterList("ops", MANAGE_ALERTS_OPS);
+        }
+        
+        return pInfo.pageResults(q).list();
+    }
+
+    private String getOrderByClause(PageInfo pInfo) {
+        AlertDefSortField sort = (AlertDefSortField)pInfo.getSort();
+        String res = " order by " + sort.getSortString("d", "r") + 
+            (pInfo.isAscending() ? "" : " DESC");
+        
+        if (!sort.equals(AlertDefSortField.CTIME)) {
+            res += ", " + AlertDefSortField.CTIME.getSortString("d", "r") + 
+                   " DESC";
+        }
+        return res;
+    }
+    
+    List findTypeBased(Boolean enabled, PageInfo pInfo) {
+        String sql = "from AlertDefinition d " + 
+            "where d.deleted = false and d.parent.id = 0 ";
+        
+        if (enabled != null) {
+            sql += " and d.enabled = " + 
+                (enabled.booleanValue() ? "true" : "false");
+        }
+        sql += getOrderByClause(pInfo);
+                   
+        Query q = getSession().createQuery(sql);
+        
         return pInfo.pageResults(q).list();
     }
 }

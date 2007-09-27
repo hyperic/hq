@@ -34,6 +34,7 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 public interface PerformsEscalations { 
     Integer getId();
     String getName();
+    boolean isDeleted();
     EscalationAlertType getAlertType();
     Escalation getEscalation();
     AlertDefinitionInterface getDefinitionInfo();

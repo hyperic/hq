@@ -146,11 +146,6 @@ public class RawMeasurementManagerEJBImpl
         MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
         List templates = dao.findDefaultsByMonitorableType(mType, id.getType());
-        if (templates.size() == 0) {
-            String msg = "No default templates for monitorable type " + mType;
-            log.error(msg);
-        }
-
         List dsnList = new ArrayList(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;

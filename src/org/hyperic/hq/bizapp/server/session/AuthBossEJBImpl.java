@@ -53,6 +53,7 @@ import org.hyperic.util.ConfigPropertyException;
  *      local-jndi-name="LocalAuthBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
@@ -73,7 +74,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception NamingException If we can't find AuthManagerLocalHome
      * @exception CreateException If we can't create an AuthManager
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public int login ( String username,
                        String password ) 
@@ -90,7 +90,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Logout a user.
      * @param sessionID The session id for the current user
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void logout (int sessionID) {
         manager.invalidate(sessionID);
@@ -101,7 +100,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The name of the user.
      * @return a boolean| true if logged in and false if not.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean isLoggedIn(String username) {
         boolean loggedIn = false;
@@ -126,7 +124,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception CreateExceptoin If we try to add a duplicate user
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void addUser(int sessionID, String username, String password)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -147,7 +144,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param password The new password for the user
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void changePassword(int sessionID, String username, String password) 
         throws FinderException, PermissionException,
@@ -163,7 +159,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean isUser(int sessionID, String username)
         throws SessionTimeoutException, SessionNotFoundException
@@ -179,7 +174,6 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @exception FinderException
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Collection getAllUsers(int sessionID)
         throws FinderException, 

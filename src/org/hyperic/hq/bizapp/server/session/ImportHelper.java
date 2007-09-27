@@ -98,6 +98,7 @@ import org.hyperic.hq.bizapp.shared.resourceImport.XmlServerValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlServiceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
@@ -993,6 +994,8 @@ class ImportHelper
 
         try {
             _groupMan.saveGroup(_subject, aGroup);
+        } catch(VetoException exc) {
+            throw new BatchImportException(ERR_BEGIN + exc.getMessage());
         } catch(GroupNotCompatibleException exc){
             throw new BatchImportException(ERR_BEGIN + exc.getMessage());
         } catch(GroupModificationException exc){

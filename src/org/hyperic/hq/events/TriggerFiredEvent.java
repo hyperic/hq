@@ -30,7 +30,9 @@ import java.util.Arrays;
 
 public class TriggerFiredEvent extends AbstractEvent
     implements java.io.Serializable {
-    
+
+    private static final long serialVersionUID = -2813854367589382845L;
+
     /** Holds value of property value. */
     private AbstractEvent[] events;
     

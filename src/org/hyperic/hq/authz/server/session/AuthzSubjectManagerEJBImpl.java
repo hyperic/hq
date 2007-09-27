@@ -199,6 +199,11 @@ public class AuthzSubjectManagerEJBImpl
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_removeSubject);
         }
+        
+        // Reassign all resources to the root user before deleting
+        getResourceDAO()
+            .reassignResources(subject.intValue(),
+                               AuthzConstants.rootSubjectId.intValue());
 
         dao.remove(toDelete);
     }

@@ -54,6 +54,7 @@ import org.hyperic.util.ConfigPropertyException;
  *      local-jndi-name="LocalConfigBoss"
  *      view-type="both"
  *      type="Stateless"
+ * @ejb:transaction type="Required"
  */
 public class ConfigBossEJBImpl 
     extends BizappSessionEJB
@@ -64,7 +65,6 @@ public class ConfigBossEJBImpl
     /**
      * Get the top-level configuration properties
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Properties getConfig() throws ConfigPropertyException {
         return ServerConfigManagerEJBImpl.getOne().getConfig();
@@ -73,7 +73,6 @@ public class ConfigBossEJBImpl
     /**
      * Get the configuration properties for a specified prefix
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException
     {
@@ -83,7 +82,6 @@ public class ConfigBossEJBImpl
     /**
      * Set the top-level configuration properties
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(Properties props) 
         throws ApplicationException, ConfigPropertyException  
@@ -94,7 +92,6 @@ public class ConfigBossEJBImpl
     /**
      * Set the configuration properties for a prefix
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void setConfig(String prefix, Properties props) 
         throws ApplicationException, ConfigPropertyException 
@@ -105,7 +102,6 @@ public class ConfigBossEJBImpl
     /**
      * Restart the config Service
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public void restartConfig() {
         try {

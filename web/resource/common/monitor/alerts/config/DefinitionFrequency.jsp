@@ -78,7 +78,6 @@
     <tr>
       <td class="BlockLabel">&nbsp;</td>
       <td class="<c:out value='${ntClass}'/>">
-      <span class="InactiveText">
       <html:radio property="whenEnabled" onchange="javascript:checkEnable();"
         value="${enableNumTimesInPeriod}"/>
         <fmt:message key="alert.config.props.CB.Content.NT1"/>
@@ -98,6 +97,5 @@
         <html:errors property="howLongNT"/>
         </span>
         </c:if>
-      </span>
       </td>
     </tr>

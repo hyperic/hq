@@ -32,33 +32,59 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 /**
  * Basically a wrapper around the classloader and associated groovy 
  * artifacts.
+ * 
+ * This class sets up the rendit_sys directory as a member of the classloader
+ * hierarchy.  In addition, any jars contained in pluginDir/lib will be
+ * added to the classloader.
  */
 public class PluginWrapper {
+    private static final Log _log = LogFactory.getLog(PluginWrapper.class);
+    
     private       File              _pluginDir;
     private final File              _sysDir;
     private final GroovyClassLoader _loader;
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
         URLClassLoader urlLoader;
+        List urls = new ArrayList();
         URL[] u;
 
         _sysDir    = sysDir;
         _pluginDir = pluginDir;
 
         try {
-            u = new URL[] {
-                sysDir.toURL(),
-            };
+            File libDir = new File(_pluginDir, "lib");
+            
+            if (libDir.isDirectory()) {
+                File[] files = libDir.listFiles();
+                
+                for (int i=0; i<files.length; i++) {
+                    if (files[i].isFile() && 
+                        files[i].getName().endsWith(".jar"))
+                    {
+                        urls.add(files[i].toURL());
+                    }
+                }
+            }
+            
+            urls.add(sysDir.toURL());
+            u = (URL[])urls.toArray(new URL[urls.size()]);
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        
+
+        _log.info("Loading plugin in [" + pluginDir + "] with loaders for: " +
+                  urls);
         urlLoader = URLClassLoader.newInstance(u, parentLoader);
         _loader = new GroovyClassLoader(urlLoader);
     }

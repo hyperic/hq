@@ -36,7 +36,12 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -45,6 +50,8 @@ import org.hyperic.util.jdbc.DBUtil;
 public class DatabaseInitializer {
     private String logCtx = DatabaseInitializer.class.getName();
     private Log log = LogFactory.getLog(logCtx);
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
+                                MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
     public static void init() {
         new DatabaseInitializer();
@@ -122,22 +129,22 @@ public class DatabaseInitializer {
                 "SELECT * FROM HQ_METRIC_DATA_8D_1S";
             
             final String HQ_METRIC_DATA_VIEW =
-                "CREATE VIEW HQ_METRIC_DATA AS " + UNION_BODY;
+                "CREATE VIEW "+MEAS_VIEW+" AS " + UNION_BODY;
                         
             final String EAM_METRIC_DATA_VIEW =
-                "CREATE VIEW EAM_MEASUREMENT_DATA AS " + UNION_BODY +
+                "CREATE VIEW "+TAB_DATA+" AS " + UNION_BODY +
                 " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
 
             Statement stmt = null;
             try {
+                HQDialect dialect = Util.getHQDialect();
                 stmt = conn.createStatement();
-                stmt.execute(HQ_METRIC_DATA_VIEW);
-                stmt.execute(EAM_METRIC_DATA_VIEW);
+                if (!dialect.viewExists(stmt, TAB_DATA))
+                    stmt.execute(EAM_METRIC_DATA_VIEW);
+                if (!dialect.viewExists(stmt, MEAS_VIEW))
+                    stmt.execute(HQ_METRIC_DATA_VIEW);
             } catch (SQLException e) {
-                // View was pre-existing, continue
-                if (log.isDebugEnabled()) {
-                    log.debug("Common Routines SQLException", e);
-                }
+                log.error("Error Creating Metric Data Views", e);
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }

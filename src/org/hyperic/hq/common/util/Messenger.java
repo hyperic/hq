@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.common.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
@@ -45,6 +43,9 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Messenger {
     private static Log _log = LogFactory.getLog(Messenger.class);
@@ -78,6 +79,34 @@ public class Messenger {
     public Messenger(TopicConnection tConn, TopicSession tSession) {
         _tConn    = tConn;
         _tSession = tSession;
+    }
+    
+    /**
+     * Reset the thread local queue.
+     */
+    public static void resetThreadLocalQueue() {
+        ThreadLocalQueue.getInstance().clearEnqueuedObjects();
+    }
+    
+    /**
+     * Enqueue a message on the thread local.
+     * 
+     * @param sObj The message.
+     */
+    public static void enqueueMessage(Serializable sObj) {
+        ThreadLocalQueue.getInstance().enqueueObject(sObj);
+    }
+    
+    /**
+     * Drain the thread local of its enqueued messages.
+     * 
+     * @return The enqueued messages.
+     */
+    public static List drainEnqueuedMessages() {
+        ThreadLocalQueue queue = ThreadLocalQueue.getInstance();
+        List enqueued = queue.getEnqueuedObjects();
+        queue.clearEnqueuedObjects();
+        return enqueued;
     }
 
     /**

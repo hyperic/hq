@@ -7,6 +7,7 @@ import org.hyperic.hq.hqu.rendit.InvocationBindings
 import org.hyperic.hq.hqu.rendit.PluginLoadException
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AlertCategory
+import org.hyperic.hq.hqu.rendit.metaclass.EscalationCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MetricCategory
 import org.hyperic.hq.hqu.rendit.metaclass.ResourceCategory
@@ -29,8 +30,9 @@ class Dispatcher {
     final int API_MINOR = 1
     
     private final CATEGORIES = [AuthzSubjectCategory, AlertCategory,
-                                MapCategory, MetricCategory, ResourceCategory, 
-                                ResourceGroupCategory, StringCategory]  
+                                EscalationCategory, MapCategory, MetricCategory, 
+                                ResourceCategory, ResourceGroupCategory, 
+                                StringCategory]   
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 

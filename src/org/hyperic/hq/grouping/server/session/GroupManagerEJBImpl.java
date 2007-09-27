@@ -53,6 +53,7 @@ import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
@@ -453,18 +454,13 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
      * @ejb:transaction type="Required"
      */
     public void deleteGroup (AuthzSubjectValue subject, Integer groupId)
-        throws GroupNotFoundException, PermissionException 
+        throws GroupNotFoundException, PermissionException, VetoException 
     {
-        try {
-            ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
+        ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
 
-            ResourceGroupValue rgVo = new ResourceGroupValue();
-            rgVo.setId(groupId);
-            rgmLoc.removeResourceGroup(subject,rgVo);
-            
-        } catch (PermissionException pe) {
-            throw pe;
-        }
+        ResourceGroupValue rgVo = new ResourceGroupValue();
+        rgVo.setId(groupId);
+        rgmLoc.removeResourceGroup(subject,rgVo);
     }
 
     /**

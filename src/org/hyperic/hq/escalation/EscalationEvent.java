@@ -38,6 +38,8 @@ import org.hyperic.hq.product.LogTrackPlugin;
 public class EscalationEvent extends AbstractEvent
     implements Serializable, ResourceEventInterface, LoggableInterface {
 
+    private static final long serialVersionUID = -1512758076642974170L;
+
     private AppdefEntityID _aeid;
     private String _msg;
     private String _alertName;

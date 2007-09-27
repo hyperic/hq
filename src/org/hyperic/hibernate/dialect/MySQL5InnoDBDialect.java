@@ -26,6 +26,11 @@
 package org.hyperic.hibernate.dialect;
 
 import org.hibernate.MappingException;
+import org.hyperic.util.jdbc.DBUtil;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 /**
  * HQ's version of MySQL5InnoDBDialect to create pseudo sequences
@@ -34,6 +39,7 @@ public class MySQL5InnoDBDialect
     extends org.hibernate.dialect.MySQL5InnoDBDialect
     implements HQDialect
 {
+    private static final String logCtx = MySQL5InnoDBDialect.class.getName();
 
     /*
      * Database table and function to support sequences.  It is assumed that
@@ -113,4 +119,35 @@ public class MySQL5InnoDBDialect
     public String getQuerySequencesString() {
         return "SELECT " + SEQUENCE_TABLE + " FROM " + SEQUENCE_TABLE;
     }
+
+    public boolean supportsMultiInsertStmt() {
+        return true;
+    }
+
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            //no need to lower case here
+            String sql = "SHOW TABLES";
+            rs = stmt.executeQuery(sql);
+            while (rs.next())
+            {
+                String objName = rs.getString(1);
+                if (objName.equalsIgnoreCase(viewName))
+                    return true;
+            }
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+    
+    public String getLimitString(int num) {
+        return "LIMIT "+num;
+    }
+    
 }

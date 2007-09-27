@@ -32,7 +32,9 @@ import org.hyperic.hq.events.ResourceEventInterface;
 
 public class ControlEvent extends AbstractEvent
     implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
-    
+        
+    private static final long serialVersionUID = -1075300624374755881L;
+
     /** Holds value of property action. */
     private String action;
 

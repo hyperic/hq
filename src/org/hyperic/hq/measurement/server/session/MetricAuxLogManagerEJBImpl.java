@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -101,9 +104,11 @@ public class MetricAuxLogManagerEJBImpl
      * @ejb:interface-method
      */
     public void metricDeleted(DerivedMeasurement m) {
-        MetricAuxLogPojo p = getDAO().find(m);
+        Collection metAuxLogs = getDAO().find(m);
  
-        if (p != null) {
+        for (Iterator i=metAuxLogs.iterator(); i.hasNext(); ) {
+            MetricAuxLogPojo p = (MetricAuxLogPojo)i.next();
+            
             getDAO().remove(p);
             GalertManagerEJBImpl.getOne().resetLogLink(p.getAuxLog());
         }

@@ -27,10 +27,11 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 
 public abstract class Measurement extends PersistedObject 
-    implements Serializable 
+    implements ContainerManagedTimestampTrackable, Serializable 
 {
     private Integer             _instanceId;
     private MeasurementTemplate _template;
@@ -43,6 +44,22 @@ public abstract class Measurement extends PersistedObject
     public Measurement(Integer instanceId, MeasurementTemplate template) {
         _instanceId = instanceId;
         _template   = template;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>false</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return false;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
    
     public Integer getInstanceId() {

@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.plugin.coldfusion;
+package org.hyperic.hq.plugin.samba;
 
 import org.hyperic.hq.product.LogFileTailPlugin;
 import org.hyperic.hq.product.TrackEvent;
@@ -43,7 +43,7 @@ public class SambaErrorLogPlugin extends LogFileTailPlugin
                                  error = Pattern.compile("error",
                                                 Pattern.CASE_INSENSITIVE),
                                  beginLine =
-                                    Pattern.compile("[\\d{4}\\/\\d{2}\\/\\d{2}");
+                                Pattern.compile("\\[\\d{4}\\/\\d{2}\\/\\d{2}");
 
     private static final String FATAL  = "Fatal",
                                 ERROR  = "Error",
@@ -53,7 +53,7 @@ public class SambaErrorLogPlugin extends LogFileTailPlugin
 
     private String myBegin = "";
     private static final String[] LOG_LEVELS = {
-        FATAL, ERROR, FAILED, INFO, DEBUG
+        FATAL, ERROR+","+FAILED, INFO, DEBUG
     };
 
     public String[] getLogLevelAliases() {

@@ -300,7 +300,6 @@ public class GalertBossEJBImpl
      * DAO finder convention
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                     long end, PageControl pc)
@@ -339,6 +338,8 @@ public class GalertBossEJBImpl
                 .put("time", date)
                 .put("name", alert.getAlertDefinitionInterface().getName())
                 .put("defId", alert.getAlertDefinitionInterface().getId())
+                .put("priority",
+                     alert.getAlertDefinitionInterface().getPriority())
                 .put("reason", alert.getShortReason())
                 .put("fixed", alert.isFixed())
                 .put("acknowledgeable", alert.isAcknowledgeable()));

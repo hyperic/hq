@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
@@ -723,7 +722,7 @@ public class ControlScheduleManagerEJBImpl
         for (int i = 0; i < ids.length; i++) {
             try {
                 cScheduleLocal = cScheduleLocalHome.findById(ids[i]);
-                this._scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
+                _scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
                 cScheduleLocalHome.remove(cScheduleLocal);
             } catch (Exception e) {
                 log.error("Unable to remove job: " + e.getMessage());
@@ -750,7 +749,7 @@ public class ControlScheduleManagerEJBImpl
         for (Iterator i = jobs.iterator(); i.hasNext();) {
             ControlSchedule cScheduleLocal = (ControlSchedule)i.next();
             try {
-                this._scheduler.deleteJob(cScheduleLocal.getJobName(),
+                _scheduler.deleteJob(cScheduleLocal.getJobName(),
                                          GROUP);
             } catch (SchedulerException e) {
                 log.error("Unable to remove job " +
@@ -796,7 +795,7 @@ public class ControlScheduleManagerEJBImpl
         try {
             log.debug("Scheduling job for immediate execution: " + 
                            jobDetail);
-            this._scheduler.scheduleJob(jobDetail, trigger);
+            _scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             log.error("Unable to schedule job: " + e.getMessage(), e);
         }
@@ -812,7 +811,7 @@ public class ControlScheduleManagerEJBImpl
                                   AuthzSubjectValue subject, String action,
                                   ScheduleValue schedule,
                                   int[] order)
-        throws PluginException
+        throws PluginException, SchedulerException
     {
         // Scheduled jobs are persisted in the control subsystem
         ControlScheduleDAO cScheduleLocalHome;
@@ -843,16 +842,16 @@ public class ControlScheduleManagerEJBImpl
 
         // Single scheduled actions do not have cron strings
         if (cronStr == null) {
-            try {
-                SimpleTrigger trigger = new SimpleTrigger(triggerName, 
-                                                          GROUP, 
-                                                          schedule.getStart());
-                this._scheduler.scheduleJob(jobDetail, trigger);
-                Date nextFire = trigger.getFireTimeAfter(new Date());
-                if (nextFire == null) {
-                    throw new ScheduleWillNeverFireException();
-                }
+            SimpleTrigger trigger = new SimpleTrigger(triggerName, 
+                                                      GROUP, 
+                                                      schedule.getStart());
+            _scheduler.scheduleJob(jobDetail, trigger);
+            Date nextFire = trigger.getFireTimeAfter(new Date());
+            if (nextFire == null) {
+                throw new SchedulerException();
+            }
 
+            try {
                 cScheduleLocalHome.create(id,
                                           subject.getName(),
                                           action, schedule,
@@ -872,7 +871,7 @@ public class ControlScheduleManagerEJBImpl
                 trigger.setMisfireInstruction(CronTrigger.
                     MISFIRE_INSTRUCTION_DO_NOTHING);
 
-                this._scheduler.scheduleJob(jobDetail, trigger);
+                _scheduler.scheduleJob(jobDetail, trigger);
 
                 // Quartz used to throw an exception on scheduleJob if the
                 // job would never fire.  Guess that is not the case anymore

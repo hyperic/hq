@@ -496,6 +496,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Find a ServerType by id
+     * @ejb:interface-method
+     */
+    public ServerType findServerType(Integer id) {
+        return getServerTypeDAO().findById(id); 
+    }
+    
+    /**
      * Find a server type by name
      * @param name - the name of the server
      * @return ServerTypeValue

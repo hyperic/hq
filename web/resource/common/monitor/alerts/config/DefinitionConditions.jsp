@@ -29,7 +29,7 @@
   USA.
  --%>
 
-
+ <!--<input type="hidden" name="remove.x" id="remove.x"/>-->
 <tiles:importAttribute name="formName"/>
 
 <!-- Content Block Title -->

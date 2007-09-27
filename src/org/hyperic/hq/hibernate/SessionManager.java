@@ -85,7 +85,7 @@ public class SessionManager {
                 cleanupSessionInternal(flush);
         }
     }
-    
+
     private boolean setupSessionInternal(String dbgTxt) {
         Session s = (Session)_sessions.get();
         
@@ -99,7 +99,7 @@ public class SessionManager {
                            Thread.currentThread().getName() + "]");
             }
             
-            s = _factory.openSession(null, false, false, 
+            s = _factory.openSession(null, true, false, 
                                      ConnectionReleaseMode.AFTER_STATEMENT);
             
             // Start out sessions as read-only.  They can be upgraded to
@@ -137,6 +137,13 @@ public class SessionManager {
     
     private void cleanupSessionInternal(boolean flush) {
         Session s = (Session)_sessions.get();
+
+        if (s == null) {
+            // No session -- someone else must have closed it.  This can happen
+            // when we create a session at the web layer, and a transaction
+            // fails, blowing it away.
+            return;
+        }
         
         try {
             if (_log.isDebugEnabled()) {
@@ -149,10 +156,10 @@ public class SessionManager {
             if (s.getFlushMode().equals(FlushMode.MANUAL)) {
                 _log.debug("Completed read-only session for " +
                            Thread.currentThread().getName() + "]");
-            } else {
-                if (flush)
-                    s.flush();
+            } else if (flush) {
+                s.flush();
             }
+            
             s.close();
         } catch(HibernateException e) {
             _log.warn("Error closing session", e);

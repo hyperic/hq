@@ -86,7 +86,7 @@ public final class ClassicEscalationAlertType
 
     public PerformsEscalations findDefinition(Integer defId) {
         try {
-            return getDefMan().getByIdNoCheck(defId);
+            return getDefMan().getByIdNoCheck(defId, false);
         } catch(FinderException e) {
             return null;
         }
@@ -95,13 +95,16 @@ public final class ClassicEscalationAlertType
     protected void setEscalation(Integer defId, Escalation escalation) {
         try {
             AlertDefinitionManagerLocal defMan = getDefMan();
-            AlertDefinition def = defMan.getByIdNoCheck(defId);
+            AlertDefinition def = defMan.getByIdNoCheck(defId, false);
             def.setEscalation(escalation);
+            long mtime = System.currentTimeMillis();
+            def.setMtime(mtime);
             
             Collection children = def.getChildren();
             for (Iterator it = children.iterator(); it.hasNext(); ) {
                 def = (AlertDefinition) it.next();
                 def.setEscalation(escalation);
+                def.setMtime(mtime);
             }
 
         } catch(FinderException e) {

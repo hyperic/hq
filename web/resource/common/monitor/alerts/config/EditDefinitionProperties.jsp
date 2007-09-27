@@ -50,6 +50,10 @@
   </c:otherwise>
 </c:choose>
 
+<c:if test="${not empty EditAlertDefinitionPropertiesForm.aetid}">
+<html:hidden property="aetid" value="${EditAlertDefinitionPropertiesForm.aetid}"/>
+</c:if>
+
 <tiles:insert definition=".events.config.properties"/>
 
 <tiles:insert definition=".form.buttons"/>

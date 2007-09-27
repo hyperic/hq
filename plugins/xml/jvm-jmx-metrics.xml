@@ -65,6 +65,8 @@ USA.
   <plugin type="autoinventory"/>
   <property name="OBJECT_NAME"
             value="java.lang:type=GarbageCollector,name=*"/>
+  <metric name="Availability"
+          indicator="true"/>
   <metric name="Collection Count"
           indicator="false"
           category="THROUGHPUT"

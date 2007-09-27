@@ -199,10 +199,6 @@ public abstract class AIJob extends BaseJob {
         return aimanager;
     }
 
-    // Public interface for quartz
-    public abstract void execute(JobExecutionContext context)
-        throws JobExecutionException;
-
     /**
      * loads the scan config object
      */

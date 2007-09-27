@@ -111,7 +111,9 @@ public class ActionManagerEJBImpl implements SessionBean {
      */
     public Action createAction(AlertDefinition def, ActionValue val,
                                Action parent) {
-        return def.createAction(val, parent);
+        Action action = def.createAction(val, parent);
+        def.setMtime(System.currentTimeMillis());
+        return action;
     }
 
     /**
@@ -125,6 +127,14 @@ public class ActionManagerEJBImpl implements SessionBean {
             
         action.setActionValue(val);
         setParentAction(val, action);
+        long mtime = System.currentTimeMillis();
+        
+        // HQ 942: We have seen orphaned actions on upgrade from 
+        // 3.0.5 to 3.1.1 where the action has no associated alert def.
+        // Prevent the NPE.
+        if (action.getAlertDefinition() != null) {
+            action.getAlertDefinition().setMtime(mtime);            
+        }
 
         // Then find and update the child actions.
 
@@ -137,6 +147,13 @@ public class ActionManagerEJBImpl implements SessionBean {
             Action act = (Action) i.next();
             act.setActionValue(val);
             setParentAction(val, act);
+            
+            // HQ 942: We have seen orphaned actions on upgrade from 
+            // 3.0.5 to 3.1.1 where the action has no associated alert def.
+            // Prevent the NPE.
+            if (act.getAlertDefinition() != null) {
+                act.getAlertDefinition().setMtime(mtime);                
+            }
         }
         
         return action.getActionValue();
@@ -186,7 +203,7 @@ public class ActionManagerEJBImpl implements SessionBean {
         if (val.getParentId() == null) {
             action.setParent(null);
         } else {
-            action.setParent(_actDAO.findById(val.getId()));
+            action.setParent(_actDAO.findById(val.getParentId()));
         }
     }
     

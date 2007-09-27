@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -134,12 +135,11 @@ public class AlertDefinitionManagerEJBImpl
             watch.markTimeEnd("delete children");
         }
         
-        // Disassociate from Resource
-        alertdef.setResource(null);
-        
-        // Disassociate from parent, too
-        alertdef.setParent(null);
-        
+        if (force) {
+            // Disassociate from Resource so that the Resource can be deleted
+            alertdef.setResource(null);
+        }
+                
         // Get rid of their triggers first
         watch.markTimeBegin("removeTriggers");
         TriggerDAO tdao = getTriggerDAO();
@@ -148,7 +148,7 @@ public class AlertDefinitionManagerEJBImpl
 
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
-        if (alertdef.getEscalation() != null) {
+        if (alertdef.getEscalation() != null && !alertdef.isResourceTypeDefinition()) {
             EscalationManagerEJBImpl.getOne().endEscalation(alertdef);
         }
         // Disassociated from escalations
@@ -166,6 +166,11 @@ public class AlertDefinitionManagerEJBImpl
             act.getChildrenBag().clear();
         }
         
+        // Disassociate from parent
+        // This must be at the very end since we use the parent to determine 
+        // whether or not this is a resource type alert definition.
+        alertdef.setParent(null);
+        
         watch.markTimeEnd("mark deleted");
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinition: " + watch);
@@ -173,7 +178,7 @@ public class AlertDefinitionManagerEJBImpl
 
         return true;
     }
-
+    
     /** 
      * Create a new alert definition
      * @ejb:interface-method
@@ -192,6 +197,11 @@ public class AlertDefinitionManagerEJBImpl
             canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
                                                      a.getAppdefId()));
         }
+        
+        // HHQ-1054: since the alert definition mtime is managed explicitly, 
+        // let's initialize it
+        a.initializeMTimeToNow();
+        
         AlertDefinition res = new AlertDefinition();
         TriggerDAO tDAO = getTriggerDAO();
         ActionDAO aDAO = getActionDAO();
@@ -257,7 +267,7 @@ public class AlertDefinitionManagerEJBImpl
         adDAO.save(res);
         return res.getAlertDefinitionValue();
     }
-
+    
     /**
      * Update just the basics
      * @throws PermissionException 
@@ -380,11 +390,10 @@ public class AlertDefinitionManagerEJBImpl
                                              Integer[] ids, boolean enable)
         throws FinderException, PermissionException 
     {
-        AlertDefinitionDAO aDAO = getAlertDefDAO();
         List alertdefs = new ArrayList();
         
         for (int i = 0; i < ids.length; i++) {
-            AlertDefinition alert = aDAO.findById(ids[i]);
+            AlertDefinition alert = badFindById(ids[i]);
 
             alertdefs.add(alert);
             
@@ -413,6 +422,46 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /** 
+     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * does not need to be reset on each update.
+     * 
+     * @return <code>true</code> if the enable/disable succeeded.
+     * @ejb:interface-method
+     */
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                       AlertDefinition def, 
+                                                       boolean enable)
+        throws PermissionException {
+        
+        boolean succeeded = false;
+        
+        if (def.isEnabled() != enable) {
+            canManageAlerts(subj, def);
+            def.setEnabled(enable);
+            succeeded = true;
+        }
+        
+        return succeeded;
+    }
+    
+    /** 
+     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * does not need to be reset on each update.
+     * 
+     * @return <code>true</code> if the enable/disable succeeded.
+     * @ejb:interface-method
+     */
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubjectValue subj,
+                                                       Integer defId, 
+                                                       boolean enable)
+        throws FinderException, PermissionException {
+        
+        AlertDefinition def = badFindById(defId);
+        
+        return updateAlertDefinitionInternalEnable(subj, def, enable);
+    }
+    
+    /** 
      * Set the escalation on the alertdefinition
      * 
      * @ejb:interface-method
@@ -428,6 +477,7 @@ public class AlertDefinitionManagerEJBImpl
             EscalationManagerEJBImpl.getOne().findById(escId);
 
         def.setEscalation(escl);
+        def.setMtime(System.currentTimeMillis());
     }
 
     /** 
@@ -543,6 +593,16 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
     
+    private AlertDefinition badFindById(Integer id, boolean refresh) 
+    throws FinderException
+    {
+        try {
+            return getAlertDefDAO().findById(id, refresh);
+        } catch(ObjectNotFoundException e) {
+            throw new FinderException("Couldn't find AlertDefinition#" + id);
+        }
+    }
+    
     /** Find an alert definition and return a value object
      * @throws PermissionException if user does not have permission to manage
      * alerts
@@ -571,10 +631,16 @@ public class AlertDefinitionManagerEJBImpl
     
     /** Find an alert definition and return a basic value.  This is called by
      * the abstract trigger, so it does no permission checking.
+     * 
+     * @param id The alert def Id.
+     * @param refresh <code>true</code> to force the alert def state to be 
+     *                to be re-read from the database; <code>false</code> to 
+     *                allow the persistence engine to return a cached copy.
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdNoCheck(Integer id) throws FinderException {
-        return badFindById(id);
+    public AlertDefinition getByIdNoCheck(Integer id, boolean refresh) 
+        throws FinderException {
+        return badFindById(id, refresh);
     }
     
     /** 
@@ -743,20 +809,43 @@ public class AlertDefinitionManagerEJBImpl
      * 
      * @param minSeverity  Specifies the minimum severity that the defs should
      *                     be set for
+     * @param enabled      If non-null, specifies the nature of the returned
+     *                     definitions (i.e. only return enabled or disabled
+     *                     defs)
+     * @param excludeTypeBased  If true, exclude any alert definitions 
+     *                          associated with a type-based def.
      * @param pInfo        Paging information.  The sort field must be a 
      *                     value from {@link AlertDefSortField}
      * 
      * @ejb:interface-method
      */
     public List findAlertDefinitions(AuthzSubjectValue subj, 
-                                     AlertSeverity minSeverity,
-                                     PageInfo pInfo)
+                                     AlertSeverity minSeverity, Boolean enabled,
+                                     boolean excludeTypeBased, PageInfo pInfo)
     {
-        return getAlertDefDAO().findDefinitions(subj, minSeverity, pInfo);
+        return getAlertDefDAO().findDefinitions(subj, minSeverity, enabled, 
+                                                excludeTypeBased, pInfo);
+    }
+    
+    /** 
+     * Get the list of type-based alert definitions.
+     *
+     * @param enabled If non-null, specifies the nature of the returned defs.
+     * @param pInfo Paging information.  The sort field must be a value from
+     *              {@link AlertDefSortField}
+     * @ejb:interface-method
+     */
+    public List findTypeBasedDefinitions(AuthzSubjectValue subj, 
+                                         Boolean enabled, PageInfo pInfo) 
+        throws PermissionException
+    {
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj)) {
+            throw new PermissionException("Only administrators can do this");
+        }
+        return getAlertDefDAO().findTypeBased(enabled, pInfo);
     }
 
     /** 
-     * Get list of alert conditions for a resource
      * @ejb:interface-method
      */
     public PageList findAlertDefinitions(AuthzSubjectValue subj,

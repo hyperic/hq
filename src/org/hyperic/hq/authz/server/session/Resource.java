@@ -112,10 +112,6 @@ public class Resource extends AuthzNamedBean {
         _system = fsystem;
     }
 
-    public Collection getResourceGroups() {
-        return _resourceGroups;
-    }
-
     public Collection getVirtuals() {
         return _virtuals;
     }
@@ -124,9 +120,12 @@ public class Resource extends AuthzNamedBean {
         _virtuals = virtuals;
     }
 
-    protected void setResourceGroups(Collection val)
-    {
+    protected void setResourceGroups(Collection val) {
         _resourceGroups = val;
+    }
+
+    protected Collection getResourceGroups() {
+        return _resourceGroups;
     }
 
     /**

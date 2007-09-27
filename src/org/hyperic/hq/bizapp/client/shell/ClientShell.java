@@ -124,15 +124,11 @@ public class ClientShell
             
         // Register command handlers
         registerCommandHandler("alert",        new ClientShell_alert(this));
-        registerCommandHandler("alertdef",     new ClientShell_alertdef(this));
-        registerCommandHandler("autoinventory",new ClientShell_autoinventory(this));
         registerCommandHandler("cache",        new ClientShell_cache(this));
-        registerCommandHandler("control",      new ClientShell_control(this));
         registerCommandHandler("get",          new ClientShell_get(this));
         registerCommandHandler("login",        loginCommand);
         registerCommandHandler("metric",       new ClientShell_metric(this));
         registerCommandHandler("resource",     new ClientShell_resource(this));
-        registerCommandHandler("resourcetype", new ClientShell_resourcetype(this));
         registerCommandHandler("set",          new ClientShell_set(this));
         registerCommandHandler("scheduler",    new ClientShell_scheduler(this));
         registerCommandHandler("time",         new ClientShell_time(this));

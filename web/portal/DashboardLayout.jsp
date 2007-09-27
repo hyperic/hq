@@ -160,7 +160,7 @@
    onloads.push(refreshPortlets);
 
 </script>
-
+<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
 
 <%
   String divStart;

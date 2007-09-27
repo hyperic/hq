@@ -15,14 +15,14 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 31, 2007 by <font color="#0050B2">clee</font>.
+					    This page last changed on Sep 04, 2007 by <font color="#0050B2">mbartelt</font>.
 				    </div>
 
 				    <p><a name="ui-Alert.Center-top"></a></p>
 <h1><a name="ui-Alert.Center-AlertCenter"></a>Alert Center</h1>
 <p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
 
-<p>This screen allows users to view all the triggered alerts across the entire HQ deployment, sorted by date and time, in backwards chronological order. Users can view either regular alerts or group<font color="red">*</font> alerts.</p>
+<p>This screen allows users to centrally view <em>all</em> the triggered alerts and <em>all</em> the alert definitions across the entire HQ deployment. Users can view <a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts" title="Defining Alerts">single-resource</a>, <a href="http://support.hyperic.com/confluence/display/DOC/Resource-Type+Alerts" title="Resource-Type Alerts">resource-type</a><font color="red">*</font>, or <a href="http://support.hyperic.com/confluence/display/DOC/Group+Alerts" title="Group Alerts">group</a><font color="red">*</font> alerts and alert definitions. The screen automatically refreshes every three minutes, but users can also refresh it manually.</p>
 
 <ul>
 	<li><a href="#ui-Alert.Center-Tasks">Tasks</a> available on this screen</li>
@@ -38,28 +38,78 @@
 
 <p>On this screen, users can do the following tasks:</p>
 
-<p><b>To view regular or group<font color="red">*</font> alerts:</b></p>
+<p><b>To refresh the list:</b></p>
 <ul>
-	<li>Select "Alerts" or "Group Alerts" in <ins>Select alert type</ins>.</li>
+	<li>Click <img src="../1048949/arrow_refresh.gif" align="absmiddle" border="0" /> at the top right.</li>
+</ul>
+
+
+<p><b>To sort the list:</b></p>
+<ul>
+	<li>Click any column heading in the list at right.<br/>
+When viewing triggered alerts, the sort will apply to all alert data from the database, not just the alerts currently displayed on the screen.</li>
+</ul>
+
+
+<h4><a name="ui-Alert.Center-AlertsTab"></a>Alerts Tab</h4>
+
+<p><b>To view alerts for single resources or groups<font color="red">*</font>:</b></p>
+<ul>
+	<li>On the "Alerts" tab, select "Resource" (alerts triggered on an individual resource, from either a resource-specific alert definition or a resource-type alert definition) or "Group" (alerts triggered on a group) in <ins>Alert Type</ins>.<br/>
+The list at the right is automatically filtered. </li>
+</ul>
+
+
+<p><b>To filter the list of displayed alerts:</b></p>
+<ul>
+	<li>On the "Alerts" tab, select a filter value in "Alert Filter":
+	<ul>
+		<li><ins>Minimum Priority</ins>: The minimum <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-priority">priority</a> the alert must have</li>
+		<li><ins>In the last</ins>: The length of time, dating back from now, in which to search for triggered alerts<br/>
+The list at the right is automatically filtered. </li>
+	</ul>
+	</li>
 </ul>
 
 
 <p><b>To view details of a triggered alert:</b></p>
 <ul>
-	<li>Click the alert name in the "Alert" column.</li>
+	<li>On the "Alerts" tab, click the alert name in the "Alert Definition" column.</li>
 </ul>
 
 
-<p><b>To view a specific resource that has an alert:</b></p>
+<p><b>To view the resource for which an alert was triggered:</b></p>
 <ul>
-	<li>Click the resource's name in the "Resource" column.</li>
+	<li>On the "Alerts" tab, click the resource's name in the "Resource" column.</li>
 </ul>
 
 
-<p><b>To sort the list of alerts:</b></p>
+<h4><a name="ui-Alert.Center-DefinitionsTab"></a>Definitions Tab</h4>
+
+<p><b>To view alert definitions for single resources, resource types<font color="red">*</font>, or groups<font color="red">*</font>:</b></p>
 <ul>
-	<li>Click any column heading.<br/>
-The sort will apply to all alert data from the database, not just the alerts currently displayed on the screen.</li>
+	<li>On the "Definitions" tab, select "Resource," "Resource Type," or "Group" in <ins>Definition Type</ins>.<br/>
+The list at the right is automatically filtered. </li>
+</ul>
+
+
+<p><b>To view only those alert definitions that are disabled:</b></p>
+<ul>
+	<li>On the "Definitions" tab, check <ins>Only show disabled definitions</ins>.<br/>
+The list at the right is automatically filtered. </li>
+</ul>
+
+
+<p><b>To exclude resource-type alert definitions:</b></p>
+<ul>
+	<li>On the "Definitions" tab, check <ins>Exclude type-based definitions</ins>.<br/>
+The list at the right is automatically filtered. </li>
+</ul>
+
+
+<p><b>To view details of the last alert triggered from this alert definition:</b></p>
+<ul>
+	<li>On the "Definitions" tab, click the date and time in the "Last Alert" column.</li>
 </ul>
 
 
@@ -68,21 +118,45 @@ The sort will apply to all alert data from the database, not just the alerts cur
 <p><a name="ui-Alert.Center-Sections"></a></p>
 <h3><a name="ui-Alert.Center-SectionsonThisScreen"></a>Sections on This Screen</h3>
 
-<p>For each listed alert, the screen lists:<br/>
-<ins>Date</ins>: The date and time the alert was triggered<br/>
-<ins>Alert</ins>: The name of the triggered alert<br/>
-<ins>Resource</ins>: The resource the alert was triggered on<br/>
-<ins>Fixed</ins>: Whether or not the alert was fixed<br/>
-<ins>Acked by</ins>: The name of the user who <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-ack">acknowledged</a> the alert<br/>
-<ins>Priority</ins>: The alert's <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-priority">priority</a></p>
+<h4><a name="ui-Alert.Center-AlertsTab"></a>Alerts Tab</h4>
 
-<p>All alerts that have no yet been fixed are highlighted in pink.</p>
+<p>This section lists all the alerts (<a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts" title="Defining Alerts">resource alerts</a> and <a href="http://support.hyperic.com/confluence/display/DOC/Group+Alerts" title="Group Alerts">group alerts</a>) triggered across the HQ deployment, in a flat hierarchy, sorted by triggered date and time, in backwards chronological order. (Alerts that get generated from resource-type alert definitions are considered resource alerts.) In the "Alert Filter" section, users can filter the list of triggered alerts displayed at the right.</p>
+
+<p>For each listed alert, the screen lists:</p>
+<ul>
+	<li><ins>Date</ins>: The date and time the alert was triggered</li>
+	<li><ins>Alert Definition</ins>: The name of the alert definition that prompted the alert</li>
+	<li><ins>Resource</ins>: The resource the alert was triggered on</li>
+	<li><ins>Fixed</ins>: Whether or not the alert was fixed</li>
+	<li><ins>Acked by</ins>: The name of the user who <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-ack">acknowledged</a> the alert</li>
+	<li><ins>Priority</ins>: The alert's <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-priority">priority</a></li>
+</ul>
+
+
+<p>All alerts that have not yet been fixed are highlighted in pink. <a href="http://support.hyperic.com/confluence/display/DOC/Alerts+Overview#AlertsOverview-ack">Learn more</a> about fixing alerts.</p>
+
+<h4><a name="ui-Alert.Center-DefinitionsTab"></a>Definitions Tab</h4>
+
+<p>This section lists all the alerts (<a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts" title="Defining Alerts">single resource alerts</a>, <a href="http://support.hyperic.com/confluence/display/DOC/Resource-Type+Alerts" title="Resource-Type Alerts">resource-type alerts</a>, and <a href="http://support.hyperic.com/confluence/display/DOC/Group+Alerts" title="Group Alerts">group alerts</a>) defined across the HQ deployment, regardless of whether it has been triggered or not, sorted by creation date and time, in backwards chronological order. In the "Definition Filter" section, users can filter the list of alert definitions displayed at the right.</p>
+
+<p>For each listed alert definition, the screen lists:</p>
+<ul>
+	<li><ins>Name</ins>: The alert definition's name</li>
+	<li><ins>Created</ins>: Date and time the alert was defined</li>
+	<li><ins>Modified</ins>: Date and time the alert was modified (if at all)</li>
+	<li><ins>Enabled</ins>: Whether or not the alert definition is enabled (able to generate alerts) or not</li>
+	<li><ins>Last Alert</ins>: Date and time the alert was last triggered</li>
+	<li><ins>Resource</ins> or <ins>Resource Type</ins> or <ins>Group</ins>: The resource, resource type, or group for which the alert was defined, respectively</li>
+	<li><ins>Escalation</ins>: The name of the <a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">escalation scheme</a> assigned to the alert definition</li>
+	<li><ins>Priority</ins>: The alert definition's <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-priority">priority</a></li>
+</ul>
+
 
 <p><em><a href="#ui-Alert.Center-top">back to top</a></em></p>
 
 <p><a name="ui-Alert.Center-Navigating"></a></p>
 <h3><a name="ui-Alert.Center-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-<p>Main screens in Hyperic contain the same menu in the masthead. Users can navigate to the following parts of HQ using this menu:</p>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'><b>Dashboard</b></td>
@@ -94,7 +168,11 @@ The sort will apply to all alert data from the database, not just the alerts cur
 </tr>
 <tr>
 <td class='confluenceTd'><b>Alert Center</b></td>
-<td class='confluenceTd'>Takes users to the <a href="" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system</td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system</td>
+</tr>
+<tr>
+<td class='confluenceTd'><b>Report Center</b> <font color="red">*</font></td>
+<td class='confluenceTd'>Takes users to the <a href="ui-Report.Center.html" title="ui-Report.Center">Report Center</a>, where they can generate all reports available in HQ.</td>
 </tr>
 <tr>
 <td class='confluenceTd'><b>Administration</b></td>
@@ -110,6 +188,8 @@ The sort will apply to all alert data from the database, not just the alerts cur
 </tr>
 </tbody></table>
 
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
 <p><em><a href="#ui-Alert.Center-top">back to top</a></em></p>
 
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
@@ -123,6 +203,16 @@ The sort will apply to all alert data from the database, not just the alerts cur
 
 <h5><a name="ui-Alert.Center-ReturntotheUIReference."></a>Return to the <a href="UI Reference.html" title="UI Reference">UI Reference</a>.</h5>
 
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../1048949/arrow_refresh.gif">arrow_refresh.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
 				    
                     			    </td>
 		    </tr>
@@ -132,7 +222,7 @@ The sort will apply to all alert data from the database, not just the alerts cur
 				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 31, 2007 18:19</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 05, 2007 11:52</font></td>
 		    </tr>
 	    </table>
     </body>

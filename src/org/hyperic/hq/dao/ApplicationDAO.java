@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -41,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 
 public class ApplicationDAO extends HibernateDAO
 {
@@ -416,6 +418,27 @@ public class ApplicationDAO extends HibernateDAO
                    ", a.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, pid.intValue())
+            .list();
+    }
+    
+    public Collection findUsingCluster(ServiceCluster c) {
+        String sql = "select a from Application a " + 
+                     "join fetch a.appServices s " + 
+                     "where s.serviceCluster = :cluster";
+                     
+        return getSession().createQuery(sql)
+            .setParameter("cluster", c)
+            .list();
+    }
+
+    public Collection findUsingGroup(ResourceGroup g) {
+        String sql = "select a from Application a " + 
+                     "join a.appServices s " +
+                     "join s.serviceCluster c " +
+                     "where c.group = :group";
+                     
+        return getSession().createQuery(sql)
+            .setParameter("group", g)
             .list();
     }
 }

@@ -63,9 +63,8 @@ public class AIScanGroupJob extends AIJob {
 
     protected Log log = 
         LogFactory.getLog(AIScanGroupJob.class.getName());    
-       
-    // Public interface for quartz
-    public void execute(JobExecutionContext context)
+
+    public void executeInSession(JobExecutionContext context)
         throws JobExecutionException
     {
         // Job configuration
