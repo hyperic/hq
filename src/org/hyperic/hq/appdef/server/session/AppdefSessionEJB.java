@@ -46,8 +46,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEvent;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
@@ -59,19 +57,18 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -109,14 +106,8 @@ public abstract class AppdefSessionEJB
         TreeSet resTypes = new TreeSet(
             new Comparator() {
                 private String getName(Object obj) {
-                    if (obj instanceof PlatformType)
-                        return ((PlatformType) obj).getSortName();
-                    
-                    if (obj instanceof ServerType)
-                        return ((ServerType) obj).getSortName();
-                    
-                    if (obj instanceof ServiceType)
-                        return ((ServiceType) obj).getSortName();
+                    if (obj instanceof AppdefResourceType)
+                        return ((AppdefResourceType) obj).getSortName();
 
                     return "";
                 }
@@ -186,23 +177,16 @@ public abstract class AppdefSessionEJB
      * table
      */
     protected void updateAuthzResource(ResourceValue rv)
-        throws NamingException, UpdateException 
-    {
-        try {
-            ResourceManagerUtil.getLocalHome().create().saveResource(rv); 
-        } catch (CreateException e) {
-            throw new UpdateException(e);
-        }
+        throws UpdateException {
+        getResourceManager().saveResource(rv);
     }
 
     /**
      * Retrieve the ResourceValue object for a given Appdef Object
      */
     protected ResourceValue getAuthzResource(ResourceType rtV, Integer id)
-        throws FinderException 
-    {
-        ResourceManagerLocal rm = getResourceManager();
-        return rm.findResourceByInstanceId(rtV, id);
+        throws FinderException {
+        return getResourceManager().findResourceByInstanceId(rtV, id);
     }
 
     /**
@@ -289,7 +273,7 @@ public abstract class AppdefSessionEJB
      */
     protected ApplicationType findApplicationTypeByPK(Integer pk)
         throws FinderException, NamingException {
-            return getApplicationTypeDAO().findById(pk);
+        return getApplicationTypeDAO().findById(pk);
     }
 
     /**
@@ -314,12 +298,7 @@ public abstract class AppdefSessionEJB
     protected AppdefGroupValue findGroupById(AuthzSubjectValue subject,
                                              Integer groupId)
         throws AppdefGroupNotFoundException, PermissionException {
-        try {
-           return getAppdefGroupManagerLocalHome()
-                   .create().findGroup(subject,groupId);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return getAppdefGroupManagerLocal().findGroup(subject,groupId);
     }
 
     /**
@@ -329,8 +308,7 @@ public abstract class AppdefSessionEJB
      * @param id - the id of the object
      * @param operation - the name of the operation to perform
      */
-    protected void checkPermission(AuthzSubjectValue subject, 
-                                   ResourceType rtV,
+    protected void checkPermission(AuthzSubjectValue subject, ResourceType rtV,
                                    Integer id, String operation)
         throws PermissionException 
     {
@@ -339,9 +317,7 @@ public abstract class AppdefSessionEJB
                   " Id: " + id + " Subject: " + subject.getName());
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         Integer opId = getOpIdByResourceType(rtV, operation);
-        Integer subjId = subject.getId();
-        Integer typeId = rtV.getId();
-        permMgr.check(subjId, typeId, id, opId);
+        permMgr.check(subject.getId(), rtV.getId(), id, opId);
     }
 
     /**
@@ -447,8 +423,7 @@ public abstract class AppdefSessionEJB
                 opName = AuthzConstants.groupOpViewResourceGroup;
                 break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
         checkPermission(subject, id, opName);
@@ -515,8 +490,7 @@ public abstract class AppdefSessionEJB
                 opName = AuthzConstants.groupOpRemoveResourceGroup;
                 break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
         checkPermission(subject, id, opName);
@@ -549,8 +523,7 @@ public abstract class AppdefSessionEJB
                 opName = AuthzConstants.groupOpMonitorResourceGroup;
                 break;
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
         checkPermission(subject, id, opName);
@@ -583,8 +556,7 @@ public abstract class AppdefSessionEJB
                 opName = AuthzConstants.groupOpManageAlerts;
                 break;                
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
         checkPermission(subject, id, opName);
@@ -1163,8 +1135,8 @@ public abstract class AppdefSessionEJB
      * AuthzConstants.groupOpViewResourceGroup
      */
     protected List getViewableGroups(AuthzSubjectValue whoami) 
-        throws FinderException, NamingException, 
-               AppdefGroupNotFoundException,PermissionException {
+        throws FinderException, AppdefGroupNotFoundException,
+               PermissionException {
         log.debug("Checking viewable groups for subject: " + whoami.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op =
@@ -1174,9 +1146,10 @@ public abstract class AppdefSessionEJB
                                                      PageControl.PAGE_ALL);
 
         List valueList = new ArrayList(idList.size());
-        AppdefGroupManagerLocal agMan = AppdefGroupManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
         for (int i = 0; i < idList.size(); i++) {
-            valueList.add(agMan.findGroup(whoami, (Integer) idList.get(i)));
+            valueList.add(rgMan.findResourceGroupById(whoami,
+                                                      (Integer) idList.get(i)));
         }
         return valueList;
     } 
@@ -1239,21 +1212,5 @@ public abstract class AppdefSessionEJB
         } catch (NamingException e) {
             throw new SystemException(e);
         }
-    }
-
-    /**
-     * Send an Appdef event
-     *
-     * @ejb:transaction type="Required"
-     * @ejb:interface-method
-     */
-    public void sendAppdefEvent(AuthzSubjectValue subject,
-                                AppdefEntityID id, int eventType)
-        throws NamingException
-    {
-        AppdefEvent event = new AppdefEvent(subject, id, eventType);
-        // Now publish the event
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 }

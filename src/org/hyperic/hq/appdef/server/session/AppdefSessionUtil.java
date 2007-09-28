@@ -41,8 +41,6 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocalHome;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -55,16 +53,12 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.TypeInfo;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.naming.NamingException;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal         aiqManagerLocal;
-    private AppdefGroupManagerLocalHome grpMgrLHome;
     private ConfigManagerLocal          configMgrL;
     private ResourceManagerLocal        rmLocal;
     private CPropManagerLocal           cpropLocal;
@@ -87,23 +81,8 @@ public abstract class AppdefSessionUtil {
         return ApplicationManagerEJBImpl.getOne();
     }
 
-    protected AppdefGroupManagerLocalHome getAppdefGroupManagerLocalHome() {
-        try {
-            if (grpMgrLHome == null) {
-                grpMgrLHome = AppdefGroupManagerUtil.getLocalHome();
-            }
-            return grpMgrLHome;
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-    }
-
     protected AppdefGroupManagerLocal getAppdefGroupManagerLocal() {
-        try {
-            return getAppdefGroupManagerLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        return AppdefGroupManagerEJBImpl.getOne();
     }
 
     protected PlatformManagerLocal getPlatformMgrLocal() {

@@ -68,6 +68,7 @@ import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -232,10 +233,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         List services = new ArrayList();
         for (int i = 0; i < numServices; i++) {
             Service sLocal = (Service)serviceLocals.get(i);
-            ServiceValue sValue = sLocal.getServiceValue();
             try {
-                checkViewPermission(subject, sValue.getEntityId());
-                services.add(sValue);
+                checkViewPermission(subject, sLocal.getEntityId());
+                services.add(sLocal.getServiceValue());
             } catch (PermissionException e) {
                 //Ok, won't be added to the list
             }
@@ -524,19 +524,19 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             case SortAttribute.RESOURCE_NAME:
                 if(pc != null) {
                     services =
-                        getServiceDAO().findAll_orderName(!pc.isDescending());
+                        getServiceDAO().findAll_orderName(pc.isAscending());
                 }
                 break;
             case SortAttribute.SERVICE_NAME:
                 if(pc != null) {
                     services =
-                        getServiceDAO().findAll_orderName(!pc.isDescending());
+                        getServiceDAO().findAll_orderName(pc.isAscending());
                 }
                 break;
             case SortAttribute.CTIME:
                 if(pc != null) {
                     services =
-                        getServiceDAO().findAll_orderCtime(!pc.isDescending());
+                        getServiceDAO().findAll_orderCtime(pc.isAscending());
                 }
                 break;
             default:
@@ -574,13 +574,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 case SortAttribute.RESOURCE_NAME:
                     if(pc != null) {
                         services = getServiceDAO()
-                            .findAllClusterUnassigned_orderName(!pc.isDescending());
+                            .findAllClusterUnassigned_orderName(pc.isAscending());
                     }
                     break;
                 case SortAttribute.SERVICE_NAME:
                     if(pc != null) {
                         services = getServiceDAO()
-                            .findAllClusterUnassigned_orderName(!pc.isDescending());
+                            .findAllClusterUnassigned_orderName(pc.isAscending());
                     }
                     break;
                 default:
@@ -624,13 +624,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 case SortAttribute.RESOURCE_NAME:
                     if(pc != null) {
                         services = getServiceDAO()
-                            .findAllClusterAppUnassigned_orderName(!pc.isDescending());
+                            .findAllClusterAppUnassigned_orderName(pc.isAscending());
                     }
                     break;
                 case SortAttribute.SERVICE_NAME:
                     if(pc != null) {
                         services = getServiceDAO()
-                            .findAllClusterAppUnassigned_orderName(!pc.isDescending());
+                            .findAllClusterAppUnassigned_orderName(pc.isAscending());
                     }
                     break;
                 default:
@@ -1082,7 +1082,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         List services = new ArrayList();
         while ( i.hasNext() ) {
             appService = (AppService) i.next();
-            if ( appService.getIsCluster() ) {
+            if ( appService.isIsCluster() ) {
                 services.add(appService.getServiceCluster());
             } else {
                 services.add(appService.getService());
@@ -1098,7 +1098,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     * representing all of the services that the given subject is allowed to view.
     */
    public PageList getServiceInventoryByApplication(AuthzSubjectValue subject,
-                                            Integer appId, PageControl pc ) 
+                                                    Integer appId,
+                                                    PageControl pc ) 
         throws ApplicationNotFoundException, ServiceNotFoundException,
                PermissionException {
         return getServiceInventoryByApplication(subject, appId,
@@ -1346,8 +1347,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 service.updateService(existing);
                 return getServiceById(subject, existing.getId());
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             throw new ServiceNotFoundException(existing.getEntityId());
         }
@@ -1528,8 +1527,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
                 // Now create the service type
                 ServiceType stlocal = stLHome.create(stype);
-                ServiceTypeValue stvo = stlocal.getServiceTypeValue();
-
+                
                 // Lookup the server type
                 ServerType servTypeEJB;
                 if (serverTypes.containsKey(sinfo.getServerName()))
@@ -1692,56 +1690,51 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServiceClusterValue objects representing all of the
      * services that the given subject is allowed to view.
      */
-    public PageList getAllServiceClusters(AuthzSubjectValue subject, PageControl pc)
+    public PageList getAllServiceClusters(AuthzSubjectValue subject,
+                                          PageControl pc)
         throws FinderException, PermissionException {
+        ServiceClusterDAO clusterLocalHome = getServiceClusterDAO();
+
+        Collection clusters = null;
+        Collection toBePaged = new ArrayList();
+
+        // get list of group value objects user can view
+        List viewableGroups = null;
         try {
-            ServiceClusterDAO clusterLocalHome = getServiceClusterDAO();
+            viewableGroups = getViewableGroups(subject);
+        } catch (AppdefGroupNotFoundException e) {
+            viewableGroups = new ArrayList(0);
+        }
 
-            Collection clusters = null;
-            Collection toBePaged = new ArrayList();
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
-            // get list of group value objects user can view
-            List viewableGroups = null;
-            try {
-                viewableGroups = getViewableGroups(subject);
-            } catch (AppdefGroupNotFoundException e) {
-                viewableGroups = new ArrayList();
-            }
-
-            pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-            switch( pc.getSortattribute() ) {
-                case SortAttribute.RESOURCE_NAME:
-                    clusters =
-                        clusterLocalHome.findAll_orderName(!pc.isDescending());
-                    break;
-                case SortAttribute.SERVICE_NAME:
-                    clusters =
-                        clusterLocalHome.findAll_orderName(!pc.isDescending());
-                    break;
-                default:
-                    clusters = clusterLocalHome.findAll();
-                    break;
-            }
-            // only page cluster if id is assigned to viewable (service) group
-            for(Iterator i = clusters.iterator(); i.hasNext();) {
-                ServiceCluster aCluster = (ServiceCluster)i.next();
-                // only page cluster if it is viewable.
-                for (int x=0;x<viewableGroups.size();x++) {
-                    AppdefGroupValue thisGroup = 
-                        (AppdefGroupValue)viewableGroups.get(x);
-                    if (thisGroup.getClusterId() == 
-                        aCluster.getId().intValue()) {
-                        toBePaged.add(aCluster);
-                    }
+        switch( pc.getSortattribute() ) {
+            case SortAttribute.RESOURCE_NAME:
+                clusters =
+                    clusterLocalHome.findAll_orderName(pc.isAscending());
+                break;
+            case SortAttribute.SERVICE_NAME:
+                clusters =
+                    clusterLocalHome.findAll_orderName(pc.isAscending());
+                break;
+            default:
+                clusters = clusterLocalHome.findAll();
+                break;
+        }
+        // only page cluster if id is assigned to viewable (service) group
+        for (Iterator i = clusters.iterator(); i.hasNext();) {
+            ServiceCluster aCluster = (ServiceCluster) i.next();
+            // only page cluster if it is viewable.
+            for (int x = 0; x < viewableGroups.size(); x++) {
+                ResourceGroup thisGroup = (ResourceGroup) viewableGroups.get(x);
+                if (thisGroup.getClusterId().equals(aCluster.getId())) {
+                    toBePaged.add(aCluster);
                 }
             }
-            // valuePager converts local/remote interfaces to value objects
-            // as it pages through them.
-            return valuePager.seek(toBePaged, pc);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(toBePaged, pc);
     }
 
     /**
