@@ -155,37 +155,14 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public void configureDashboard(AuthzSubject me, UserDashboardConfig cfg, 
+    public void configureDashboard(AuthzSubject me, DashboardConfig cfg, 
                                    ConfigResponse newCfg)
         throws PermissionException
     {
-        PermissionManager permMan = PermissionManagerFactory.getInstance();
-        
-        if (!me.equals(cfg.getUser()) && 
-            !permMan.hasAdminPermission(me.getAuthzSubjectValue()))
-        {
+        if (!cfg.isEditable(me)) {
             throw new PermissionException("You are unauthorized to modify " + 
                                           "this dashboard");
         }
-        
-        CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
-    }
-    
-    /**
-     * Reconfigure a user's dashboard
-     * 
-     * @ejb:interface-method
-     */
-    public void configureDashboard(AuthzSubject me, RoleDashboardConfig cfg, 
-                                   ConfigResponse newCfg)
-        throws PermissionException
-    {
-        PermissionManager permMan = PermissionManagerFactory.getInstance();
-        Role r = cfg.getRole();
-        
-        permMan.check(me.getId(), r.getResource().getResourceType(),
-                      r.getId(), AuthzConstants.roleOpModifyRole);
-
         CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
     }
     
