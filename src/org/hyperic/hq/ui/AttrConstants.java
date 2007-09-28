@@ -63,6 +63,15 @@ public interface AttrConstants {
     public static final String DEF_USER_PREFS = "userPrefs";
 
     /**
+     * The session scope attribute under which the default role dashboard preferences live 
+     */
+    public static final String DEF_ROLE_DASH_PREFS = "roleDashPrefs";
+
+    /**
+     * The session scope attribute under which the defualt user dashboard preferences live
+     */
+    public static final String DEF_USER_DASH_PREFS = "userDashPrefs";
+    /**
      * The session scope attribute under which the ids of users
      * pending association with a role are stored.
      */
@@ -917,4 +926,7 @@ public interface AttrConstants {
      * XLib present
      */
     public static final String XLIB_INSTALLED = "xlib";
+    
+    public static final String USER_DASHBOARD_CONFIG = "user_dashboard_config";
+    public static final String ROLE_DASHBOARD_CONFIG = "role_dashboard_config";
 }
