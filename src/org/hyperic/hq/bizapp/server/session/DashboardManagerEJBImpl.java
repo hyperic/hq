@@ -159,7 +159,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
                                    ConfigResponse newCfg)
         throws PermissionException
     {
-        if (!cfg.isEditable(me)) {
+        if (!isEditable(me, cfg)) {
             throw new PermissionException("You are unauthorized to modify " + 
                                           "this dashboard");
         }
