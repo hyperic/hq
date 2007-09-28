@@ -58,6 +58,8 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
@@ -66,7 +68,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -90,11 +91,11 @@ public abstract class AppdefSessionEJB
     protected Log log = LogFactory.getLog(AppdefSessionEJB.class);
 
     /**
-     * Get the authz resource type value 
+     * Get the authz resource type 
      * @param resType - the constant indicating the resource type
      * (from AuthzConstants)
      */
-    protected ResourceTypeValue getResourceType(String resType) 
+    protected ResourceType getResourceType(String resType) 
     	throws FinderException {
         return getResourceManager().findResourceTypeByName(resType);
     }
@@ -158,13 +159,10 @@ public abstract class AppdefSessionEJB
      * @param resTypeVal - the type
      * @param id - the id of the object
      */
-    protected void createAuthzResource(AuthzSubjectValue who, 
-                                       ResourceTypeValue resTypeVal, 
-                                       Integer id, 
-                                       String name) 
-        throws CreateException 
-    {
-        createAuthzResource(who, resTypeVal, id, name, false);
+    protected void createAuthzResource(AuthzSubjectValue who,
+                                       ResourceType resType, 
+                                       Integer id,  String name) {
+        createAuthzResource(who, resType, id, name, false);
     }
     
     /**
@@ -177,19 +175,16 @@ public abstract class AppdefSessionEJB
      * @param fsystem - true if the resource should be non-visible
      */
     protected void createAuthzResource(AuthzSubjectValue who, 
-    								   ResourceTypeValue resTypeVal, 
+    								   ResourceType resType, 
 									   Integer id, 
 									   String name,
-                                       boolean fsystem) 
-    	throws CreateException
-    {
-        getResourceManager().createResource(who, resTypeVal, id,
-                                            name, fsystem);
+                                       boolean fsystem) {
+        getResourceManager().createResource(who, resType, id, name, fsystem);
     }
 
     /**
-     * Update the authz resource. Used to update the name in the authz
-     * resource table
+     * Update the authz resource. Used to update the name in the authz resource
+     * table
      */
     protected void updateAuthzResource(ResourceValue rv)
         throws NamingException, UpdateException 
@@ -204,8 +199,7 @@ public abstract class AppdefSessionEJB
     /**
      * Retrieve the ResourceValue object for a given Appdef Object
      */
-    protected ResourceValue getAuthzResource(ResourceTypeValue rtV,
-    										 Integer id)
+    protected ResourceValue getAuthzResource(ResourceType rtV, Integer id)
         throws FinderException 
     {
         ResourceManagerLocal rm = getResourceManager();
@@ -215,7 +209,7 @@ public abstract class AppdefSessionEJB
     /**
      * Get the authz resource type by AppdefEntityId
      */
-    protected ResourceTypeValue getAuthzResourceType(AppdefEntityID id)
+    protected ResourceType getAuthzResourceType(AppdefEntityID id)
         throws FinderException {
         int type = id.getType();
         switch(type) {
@@ -337,7 +331,7 @@ public abstract class AppdefSessionEJB
      * @param operation - the name of the operation to perform
      */
     protected void checkPermission(AuthzSubjectValue subject, 
-                                   ResourceTypeValue rtV,
+                                   ResourceType rtV,
                                    Integer id, String operation)
         throws PermissionException 
     {
@@ -358,7 +352,7 @@ public abstract class AppdefSessionEJB
                                    AppdefEntityID id, String operation) 
         throws PermissionException 
     {
-        ResourceTypeValue rtv = null;            
+        ResourceType rtv = null;            
         try {
             // get the resource type
             rtv = getAuthzResourceType(id);
@@ -369,7 +363,7 @@ public abstract class AppdefSessionEJB
         // never wrap permission exception unless absolutely necessary
         Integer instanceId = id.getId();
         // now call the protected method
-        this.checkPermission(subject, rtv, instanceId, operation);
+        checkPermission(subject, rtv, instanceId, operation);
     } 
     
     /**
@@ -458,7 +452,7 @@ public abstract class AppdefSessionEJB
                     type);
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
 
     /**
@@ -492,7 +486,7 @@ public abstract class AppdefSessionEJB
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
     
     /**
@@ -526,7 +520,7 @@ public abstract class AppdefSessionEJB
                     type);
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
 
     /**
@@ -560,7 +554,7 @@ public abstract class AppdefSessionEJB
                     type);
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     } 
 
     /**
@@ -594,7 +588,7 @@ public abstract class AppdefSessionEJB
                     type);
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
     
     /**
@@ -767,7 +761,7 @@ public abstract class AppdefSessionEJB
                     type + " does not support child resource creat operations");
         }
         // now check
-        this.checkPermission(subject, id, opName);
+        checkPermission(subject, id, opName);
     }
     
     /**
@@ -842,7 +836,7 @@ public abstract class AppdefSessionEJB
      * resourceType
      * @return rootResTypeValue - the root resource type
      */
-    protected ResourceTypeValue getRootResourceType() 
+    protected ResourceType getRootResourceType() 
         throws FinderException
     {
         return getResourceType(AuthzConstants.rootResType);
@@ -854,12 +848,13 @@ public abstract class AppdefSessionEJB
      * @return operationId 
      * @throws PermissionException - if the op is not found
      */
-    private Integer getOpIdByResourceType(ResourceTypeValue rtV, String opName)
+    private Integer getOpIdByResourceType(ResourceType rtV, String opName)
         throws PermissionException {
-            OperationValue[] ops = rtV.getOperationValues();
-            for(int i=0; i < ops.length; i++) {
-                if(ops[i].getName().equals(opName)) {
-                    return ops[i].getId();
+            Collection ops = rtV.getOperations();
+            for(Iterator it = ops.iterator(); it.hasNext(); ) {
+                Operation op = (Operation) it.next();
+                if(op.getName().equals(opName)) {
+                    return op.getId();
                 }
             }
             throw new PermissionException("Operation: " + opName 
@@ -869,14 +864,15 @@ public abstract class AppdefSessionEJB
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected OperationValue getOperationByName(ResourceTypeValue rtV,
+    protected Operation getOperationByName(ResourceType rtV,
                                                 String opName)
         throws PermissionException
     {
-        OperationValue[] ops = rtV.getOperationValues();
-        for(int i=0; i < ops.length; i++) {
-            if(ops[i].getName().equals(opName)) {
-                return ops[i];
+        Collection ops = rtV.getOperations();
+        for(Iterator it = ops.iterator(); it.hasNext(); ) {
+            Operation op = (Operation) it.next();
+            if(op.getName().equals(opName)) {
+                return op;
             }
         }
         throw new PermissionException("Operation: " + opName +
@@ -888,7 +884,7 @@ public abstract class AppdefSessionEJB
      * Get the platform resource type
      * @return platformResType
      */
-    protected ResourceTypeValue getPlatformResourceType() 
+    protected ResourceType getPlatformResourceType() 
     	throws FinderException {
         return getResourceType(AuthzConstants.platformResType);
     }
@@ -897,7 +893,7 @@ public abstract class AppdefSessionEJB
      * Get the application resource type
      * @return applicationResType
      */
-    protected ResourceTypeValue getApplicationResourceType() 
+    protected ResourceType getApplicationResourceType() 
     	throws FinderException {
         return getResourceType(AuthzConstants.applicationResType);
     }
@@ -906,7 +902,7 @@ public abstract class AppdefSessionEJB
      * Get the Server Resource Type
      * @return ResourceTypeValye
      */
-    protected ResourceTypeValue getServerResourceType() 
+    protected ResourceType getServerResourceType() 
     	throws FinderException {
         return getResourceType(AuthzConstants.serverResType);
     }
@@ -915,7 +911,7 @@ public abstract class AppdefSessionEJB
      * Get the Service Resource Type
      * @return ResourceTypeValye
      */
-    protected ResourceTypeValue getServiceResourceType() 
+    protected ResourceType getServiceResourceType() 
     	throws FinderException {
         return getResourceType(AuthzConstants.serviceResType);
     }
@@ -928,15 +924,14 @@ public abstract class AppdefSessionEJB
      */
     public ResourceValue getServerResourceValue(Integer pk)
         throws NamingException, FinderException, CreateException {
-        return this.getAuthzResource(getServerResourceType(),
-                                     pk);
+        return getAuthzResource(getServerResourceType(), pk);
     }
  
     /**
      * Get the Authz Resource Type for a Group
      * @return ResourceTypeValue
      */
-     public ResourceTypeValue getGroupResourceType()
+     public ResourceType getGroupResourceType()
          throws FinderException {
          return getResourceType(AuthzConstants.groupResourceTypeName);
      }
@@ -984,11 +979,11 @@ public abstract class AppdefSessionEJB
         throws FinderException, NamingException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        OperationValue opVal = 
+        Operation op = 
             getOperationByName(getServiceResourceType(),
                                AuthzConstants.serviceOpViewService);
         List idList = 
-            pm.findOperationScopeBySubject(whoami, opVal.getId(),
+            pm.findOperationScopeBySubject(whoami, op.getId(),
                                            PageControl.PAGE_ALL);
         
         List keyList = new ArrayList(idList.size());
@@ -1035,11 +1030,11 @@ public abstract class AppdefSessionEJB
         throws FinderException, NamingException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        OperationValue opVal = 
+        Operation op = 
             getOperationByName(getApplicationResourceType(),
                                AuthzConstants.appOpViewApplication);
         List idList = 
-            pm.findOperationScopeBySubject(whoami, opVal.getId(),
+            pm.findOperationScopeBySubject(whoami, op.getId(),
                                            PageControl.PAGE_ALL);
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
@@ -1060,11 +1055,11 @@ public abstract class AppdefSessionEJB
         log.debug("Checking viewable servers for subject: " +
                   whoami.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        OperationValue opVal =
+        Operation op =
             getOperationByName(getServerResourceType(), 
                                AuthzConstants.serverOpViewServer);
         List idList = 
-            pm.findOperationScopeBySubject(whoami, opVal.getId(),
+            pm.findOperationScopeBySubject(whoami, op.getId(),
                                            PageControl.PAGE_ALL);
 
         log.debug("There are: " + idList.size() + " viewable servers");
@@ -1083,12 +1078,12 @@ public abstract class AppdefSessionEJB
     {
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         List res = new ArrayList();
-        ResourceTypeValue type;
-        OperationValue opVal;
+        ResourceType type;
+        Operation op;
         
         try {
             type  = getServerResourceType();
-            opVal = getOperationByName(type, AuthzConstants.serverOpViewServer);
+            op = getOperationByName(type, AuthzConstants.serverOpViewServer);
         } catch(Exception e) {
             throw new SystemException("Internal error", e);
         }
@@ -1099,7 +1094,7 @@ public abstract class AppdefSessionEJB
             Server s = (Server)i.next();
 
             try {
-                permMgr.check(who.getId(), typeId, s.getId(), opVal.getId());
+                permMgr.check(who.getId(), typeId, s.getId(), op.getId());
                 res.add(s);
             } catch(PermissionException e) {
                 // Ok
@@ -1158,11 +1153,11 @@ public abstract class AppdefSessionEJB
         throws FinderException, PermissionException, NamingException {
         // now get a list of all the viewable items
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        OperationValue opVal =
+        Operation op =
             getOperationByName(getPlatformResourceType(),
                                AuthzConstants.platformOpViewPlatform);
         List idList =
-            pm.findOperationScopeBySubject(who, opVal.getId(),
+            pm.findOperationScopeBySubject(who, op.getId(),
                                            PageControl.PAGE_ALL);
 
         List pkList = new ArrayList(idList.size());
@@ -1184,11 +1179,11 @@ public abstract class AppdefSessionEJB
                AppdefGroupNotFoundException,PermissionException {
         log.debug("Checking viewable groups for subject: " + whoami.getName());
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        OperationValue opVal =
+        Operation op =
             getOperationByName(getGroupResourceType(), 
                                AuthzConstants.groupOpViewResourceGroup);
         List idList =
-            pm.findOperationScopeBySubject(whoami, opVal.getId(),
+            pm.findOperationScopeBySubject(whoami, op.getId(),
                                            PageControl.PAGE_ALL);
 
         List valueList = new ArrayList(idList.size());
@@ -1199,30 +1194,25 @@ public abstract class AppdefSessionEJB
         return valueList;
     } 
 
-    protected AppdefResourceValue getResource(AppdefEntityID id)
+    protected AppdefResource getResource(AppdefEntityID id)
         throws AppdefEntityNotFoundException
     {
         Integer intID = id.getId();
 
         try {
-            switch(id.getType()){
+            switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = 
-                    getPlatformMgrLocal().findPlatformById(intID);
-                return plat.getPlatformValue();
-            
+                Platform plat = getPlatformMgrLocal().findPlatformById(intID);
+                return plat;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv =
-                    getServerMgrLocal().findServerById(intID);
-                return serv.getServerValue();
+                Server serv = getServerMgrLocal().findServerById(intID);
+                return serv;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service =
-                    getServiceMgrLocal().findServiceById(intID);
-                return service.getServiceValue();
+                Service service = getServiceMgrLocal().findServiceById(intID);
+                return service;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                Application app =
-                    findApplicationByPK(intID);
-                return app.getApplicationValue();
+                Application app = findApplicationByPK(intID);
+                return app;
             default:
                 throw new IllegalArgumentException("The passed entity type " +
                                                    "does not have a base of " +

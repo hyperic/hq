@@ -25,14 +25,11 @@
 
 package org.hyperic.hq.grouping.server.session;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
@@ -41,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -49,7 +47,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
@@ -492,7 +489,7 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
     }
 
     /* Get the authz resource type value  */
-    protected ResourceTypeValue getResourceType(String resType)
+    protected ResourceType getResourceType(String resType)
         throws FinderException 
     {
         return getResourceManager().findResourceTypeByName(resType);

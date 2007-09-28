@@ -215,7 +215,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @throws FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
      */
-    public ResourceTypeValue findResourceTypeByName(String name)
+    public ResourceType findResourceTypeByName(String name)
         throws FinderException {
         ResourceType rt =
             DAOFactory.getDAOFactory().getResourceTypeDAO().findByName(name);
@@ -223,7 +223,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         if (rt == null)
             throw new FinderException("ResourceType " + name + " not found");
         
-        return rt.getResourceTypeValue();
+        return rt;
     }
 
     /**
@@ -233,14 +233,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @ejb:transaction type="REQUIRED"
      */
     public Resource createResource(AuthzSubjectValue whoami,
-                                   ResourceTypeValue rtv, Integer instanceId,
+                                   ResourceType rt, Integer instanceId,
                                    String name, boolean system) 
     {
         long start = System.currentTimeMillis();
         AuthzSubject owner =
-            getSubjectDAO().findByAuth(whoami.getName(),
-                                       whoami.getAuthDsn());
-        ResourceType rt = getResourceTypeDAO().findById(rtv.getId()); 
+            getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
 
         Resource res = getResourceDAO().create(rt, name, owner, instanceId, 
                                                system);
@@ -268,7 +266,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return The value-object of the Resource of the given ID.
      * @ejb:interface-method
      */
-    public ResourceValue findResourceByInstanceId(ResourceTypeValue type,
+    public ResourceValue findResourceByInstanceId(ResourceType type,
                                                   Integer instanceId) {
         Resource resource = getResourceDAO().findByInstanceId(type.getId(),
                                                               instanceId);

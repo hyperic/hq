@@ -59,7 +59,6 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -142,7 +141,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public Application createApplication(AuthzSubjectValue subject,
                                          ApplicationValue newApp,
                                          Collection services)
-        throws CreateException, ValidationException, PermissionException,
+        throws ValidationException, PermissionException, CreateException,
                AppdefDuplicateNameException
     {
         if(log.isDebugEnabled()) {
@@ -182,8 +181,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to find dependent object", e);
             throw new CreateException("Unable to find dependent object: " +
                                       e.getMessage());
-        } catch (CreateException e) {
-            throw e;
         } catch (ValidationException e) {
             throw e;
         }
@@ -362,11 +359,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param name - name of app
      * @ejb:interface-method
      */
-    public ApplicationValue findApplicationByName(
-        AuthzSubjectValue subject, String name)
-        throws ApplicationNotFoundException,
-               PermissionException {
-
+    public ApplicationValue findApplicationByName(AuthzSubjectValue subject,
+                                                  String name)
+        throws ApplicationNotFoundException, PermissionException {
         Application app = getApplicationDAO().findByName(name);
         if (app == null) {
             throw new ApplicationNotFoundException(name);
@@ -382,8 +377,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public ApplicationValue getApplicationById(AuthzSubjectValue subject, 
                                                Integer id) 
-        throws ApplicationNotFoundException,
-               PermissionException {
+        throws ApplicationNotFoundException, PermissionException {
         try {
             Application app = getApplicationDAO().findById(id);
             checkViewPermission(subject, app.getEntityId());
@@ -481,13 +475,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             for(Iterator i = app.getAppServices().iterator();i.hasNext();) {
                 AppService appSvc = (AppService)i.next();
                 AppdefEntityID anId = null;
-                if(appSvc.getIsCluster()) {
+                if(appSvc.isIsCluster()) {
                     ResourceGroup group = appSvc.getServiceCluster().getGroup();
                     anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                               group.getId());
                 } else {
                     anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                              appSvc.getService().getId().intValue());
+                                              appSvc.getService().getId());
                 }
                 if(!entityIds.contains(anId)) {
                     i.remove();
@@ -611,7 +605,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
-        ServiceValue service = (ServiceValue) getResource(
+        Service service = (Service) getResource(
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
         
         boolean cluster = service.getServiceCluster() != null;
@@ -792,16 +786,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private void createAuthzApplication(Application app,
                                         AuthzSubjectValue subject)
-        throws CreateException, FinderException, PermissionException 
-    {
+        throws FinderException, PermissionException {
         log.debug("Begin Authz CreateApplication");
         checkPermission(subject, getRootResourceType(),
                         AuthzConstants.rootResourceId,
                         AuthzConstants.appOpCreateApplication);
         log.debug("User has permission to create application. " + 
                   "Adding authzresource");
-        createAuthzResource(subject, getApplicationResourceType(),
-                            app.getId(), app.getName());
+        createAuthzResource(subject, getApplicationResourceType(), app.getId(),
+                            app.getName());
     }
 
     private class GroupDeleteWatcher 
