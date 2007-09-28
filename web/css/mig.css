@@ -1,0 +1,38 @@
+.messagePanel {
+	padding: 5px 2px 5px 5px;
+	margin-bottom: 9px;
+	background-color: #FFFD99;
+}
+
+.dashboard {
+	border-top: 1px solid gray;
+	border-bottom: 1px solid gray;
+	background-color: #DBE3F5;
+	margin: 0px 0px 6px 0px;
+	font-size: 12px;
+}
+
+.info {
+	border: 1px solid red;
+	background-color: #FFFD99;
+}
+
+.warning {
+	
+}
+
+.error {
+	border: 1px solid red;
+}
+
+.rowSpanLeft {
+	border-right: 1px solid gray;
+}
+
+.rowSpanRight {
+	border-left: 1px solid gray;
+}
+
+.hidden {
+	display: none;
+}
