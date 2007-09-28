@@ -47,11 +47,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEvent;
+import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -62,7 +62,6 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -1033,9 +1032,8 @@ public abstract class AppdefSessionEJB
         Operation op = 
             getOperationByName(getApplicationResourceType(),
                                AuthzConstants.appOpViewApplication);
-        List idList = 
-            pm.findOperationScopeBySubject(whoami, op.getId(),
-                                           PageControl.PAGE_ALL);
+        List idList = pm.findOperationScopeBySubject(whoami, op.getId(),
+                                                     PageControl.PAGE_ALL);
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
             keyList.add(idList.get(i));
@@ -1058,9 +1056,8 @@ public abstract class AppdefSessionEJB
         Operation op =
             getOperationByName(getServerResourceType(), 
                                AuthzConstants.serverOpViewServer);
-        List idList = 
-            pm.findOperationScopeBySubject(whoami, op.getId(),
-                                           PageControl.PAGE_ALL);
+        List idList =  pm.findOperationScopeBySubject(whoami, op.getId(),
+                                                      PageControl.PAGE_ALL);
 
         log.debug("There are: " + idList.size() + " viewable servers");
         List keyList = new ArrayList(idList.size());
@@ -1125,11 +1122,11 @@ public abstract class AppdefSessionEJB
             switch (attr) {
                 case SortAttribute.RESOURCE_NAME:
                     platforms =
-                        getPlatformDAO().findAll_orderName(!pc.isDescending());
+                        getPlatformDAO().findAll_orderName(pc.isAscending());
                     break;
                 case SortAttribute.CTIME:
                     platforms =
-                        getPlatformDAO().findAll_orderCTime(!pc.isDescending());
+                        getPlatformDAO().findAll_orderCTime(pc.isAscending());
                     break;
                 default:
                     throw new FinderException("Invalid sort attribute: "+attr);
@@ -1153,19 +1150,10 @@ public abstract class AppdefSessionEJB
         throws FinderException, PermissionException, NamingException {
         // now get a list of all the viewable items
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        Operation op =
-            getOperationByName(getPlatformResourceType(),
-                               AuthzConstants.platformOpViewPlatform);
-        List idList =
-            pm.findOperationScopeBySubject(who, op.getId(),
-                                           PageControl.PAGE_ALL);
-
-        List pkList = new ArrayList(idList.size());
-        for(int i=0; i < idList.size(); i++) {
-            Integer id = (Integer)idList.get(i);
-            pkList.add(id);
-        }
-        return pkList;
+        Operation op = getOperationByName(getPlatformResourceType(),
+                                          AuthzConstants.platformOpViewPlatform);
+        return pm.findOperationScopeBySubject(who, op.getId(),
+                                              PageControl.PAGE_ALL);
     }
 
     /**
@@ -1182,14 +1170,13 @@ public abstract class AppdefSessionEJB
         Operation op =
             getOperationByName(getGroupResourceType(), 
                                AuthzConstants.groupOpViewResourceGroup);
-        List idList =
-            pm.findOperationScopeBySubject(whoami, op.getId(),
-                                           PageControl.PAGE_ALL);
+        List idList = pm.findOperationScopeBySubject(whoami, op.getId(),
+                                                     PageControl.PAGE_ALL);
 
         List valueList = new ArrayList(idList.size());
-        for(int i=0; i < idList.size(); i++) {
-            AppdefGroupValue agv = findGroupById(whoami,(Integer)idList.get(i));
-            valueList.add(agv);
+        AppdefGroupManagerLocal agMan = AppdefGroupManagerEJBImpl.getOne();
+        for (int i = 0; i < idList.size(); i++) {
+            valueList.add(agMan.findGroup(whoami, (Integer) idList.get(i)));
         }
         return valueList;
     } 
@@ -1197,22 +1184,16 @@ public abstract class AppdefSessionEJB
     protected AppdefResource getResource(AppdefEntityID id)
         throws AppdefEntityNotFoundException
     {
-        Integer intID = id.getId();
-
         try {
             switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = getPlatformMgrLocal().findPlatformById(intID);
-                return plat;
+                return getPlatformMgrLocal().findPlatformById(id.getId());
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = getServerMgrLocal().findServerById(intID);
-                return serv;
+                return getServerMgrLocal().findServerById(id.getId());
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service = getServiceMgrLocal().findServiceById(intID);
-                return service;
+                return getServiceMgrLocal().findServiceById(id.getId());
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                Application app = findApplicationByPK(intID);
-                return app;
+                return findApplicationByPK(id.getId());
             default:
                 throw new IllegalArgumentException("The passed entity type " +
                                                    "does not have a base of " +
@@ -1252,7 +1233,8 @@ public abstract class AppdefSessionEJB
 
     protected InitialContext getInitialContext() {
         try {
-            if (_ic == null) _ic = new InitialContext();
+            if (_ic == null)
+                _ic = new InitialContext();
             return _ic;
         } catch (NamingException e) {
             throw new SystemException(e);
