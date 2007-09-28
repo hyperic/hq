@@ -28,16 +28,6 @@ public class ConfigurationProxy {
 		return _configProxy;
 	}
 
-	/**
-	 * 
-	 * @param session
-	 * @param user
-	 * @param boss
-	 * @param key
-	 * @param value
-	 * @throws ApplicationException
-	 * @throws RemoteException
-	 */
 	public void setPreference(HttpSession session, WebUser user,
 			AuthzBoss boss, String key, String value)
 			throws ApplicationException, RemoteException {
@@ -68,17 +58,6 @@ public class ConfigurationProxy {
 		}
 	}
 
-	/**
-	 * 
-	 * @param dashConfigResp
-	 * @param boss
-	 * @param user
-	 * @param session
-	 * @throws SessionNotFoundException
-	 * @throws SessionTimeoutException
-	 * @throws PermissionException
-	 * @throws RemoteException
-	 */
 	public void setDashboardPreferences(HttpSession session, WebUser user,
 			AuthzBoss boss, ConfigResponse dashConfigResp)
 			throws SessionNotFoundException, SessionTimeoutException,
@@ -97,15 +76,6 @@ public class ConfigurationProxy {
 		}
 	}
 
-	/**
-	 * 
-	 * @param session
-	 * @param user
-	 * @param boss
-	 * @param userPrefs
-	 * @throws ApplicationException
-	 * @throws RemoteException
-	 */
 	public void setUserPreferences(HttpSession session, WebUser user,
 			AuthzBoss boss, ConfigResponse userPrefs)
 			throws ApplicationException, RemoteException {
@@ -114,17 +84,6 @@ public class ConfigurationProxy {
 				.getPreferences());
 	}
 
-	/**
-	 * 
-	 * @param userPrefs
-	 * @param boss
-	 *            TODO
-	 * @param sessionId
-	 *            TODO
-	 * @param user
-	 * @throws ApplicationException
-	 * @throws RemoteException
-	 */
 	public void setUserDashboardPreferences(ConfigResponse userPrefs,
 			AuthzBoss boss, WebUser user) throws ApplicationException,
 			RemoteException {
@@ -136,14 +95,6 @@ public class ConfigurationProxy {
 				dashManager.getUserDashboard(me, me), userPrefs);
 	}
 
-	/**
-	 * 
-	 * @param preferences
-	 * @param boss
-	 * @param user
-	 * @throws ApplicationException
-	 * @throws RemoteException
-	 */
 	public void setRoleDashboardPreferences(ConfigResponse preferences,
 			AuthzBoss boss, WebUser user, Role role)
 			throws ApplicationException, RemoteException {
