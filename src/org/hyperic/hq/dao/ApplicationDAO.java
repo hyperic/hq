@@ -183,6 +183,7 @@ public class ApplicationDAO extends HibernateDAO
 
     public void setApplicationValue(Application a, ApplicationValue appV) {
         a.setName( appV.getName() );
+        a.setSortName( appV.getName().toUpperCase() );
         a.setSortName( appV.getSortName() );
         a.setModifiedBy( appV.getModifiedBy() );
         a.setOwner( appV.getOwner() );
@@ -230,29 +231,13 @@ public class ApplicationDAO extends HibernateDAO
         return app;
     }
 
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_asc() {
-        return findAll_orderName(true);
-    }
-
-    /**
-     * @deprecated use findAll_orderName()
-     * @return
-     */
-    public Collection findAll_orderName_desc() {
-        return findAll_orderName(false);
-    }
-
     public Collection findAll_orderName(boolean asc) {
         String sql="from Application order by sortName "+(asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
     }
 
     public Application findByName(String name) {
-        String sql="from Application where sortName=?";
+        String sql="from Application where upper(name) = ?";
         return (Application)getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .uniqueResult();
@@ -281,22 +266,6 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findByServerId_orderName()
-     * @return
-     */
-    public Collection findByServerId_orderName_asc(Integer serverId) {
-        return findByServerId_orderName(serverId, true);
-    }
-
-    /**
-     * @deprecated use findByServerId_orderName()
-     * @return
-     */
-    public Collection findByServerId_orderName_desc(Integer serverId) {
-        return findByServerId_orderName(serverId, false);
-    }
-
     public Collection findByServerId_orderName(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
@@ -306,22 +275,6 @@ public class ApplicationDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, serverId.intValue())
             .list();
-    }
-
-    /**
-     * @deprecated use findByPlatformId_orderName()
-     * @return
-     */
-    public Collection findByPlatformId_orderName_asc(Integer platformId) {
-        return findByPlatformId_orderName(platformId, true);
-    }
-
-    /**
-     * @deprecated use findByPlatformId_orderName()
-     * @return
-     */
-    public Collection findByPlatformId_orderName_desc(Integer platformId) {
-        return findByPlatformId_orderName(platformId, false);
     }
 
     public Collection findByPlatformId_orderName(Integer pid, boolean asc) {
@@ -336,22 +289,6 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findByServiceId_orderOwner()
-     * @return
-     */
-    public Collection findByServiceId_orderOwner_asc(Integer serviceId) {
-        return findByServiceId_orderOwner(serviceId, true);
-    }
-
-    /**
-     * @deprecated use findByServiceId_orderOwner()
-     * @return
-     */
-    public Collection findByServiceId_orderOwner_desc(Integer serviceId) {
-        return findByServiceId_orderOwner(serviceId, false);
-    }
-
     public Collection findByServiceId_orderOwner(Integer serviceId, boolean asc)
     {
         String sql="select a from Application a " +
@@ -364,22 +301,6 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findByServerId_orderOwner()
-     * @return
-     */
-    public Collection findByServerId_orderOwner_asc(Integer serverId) {
-        return findByServerId_orderOwner(serverId, true);
-    }
-
-    /**
-     * @deprecated use findByServerId_orderOwner()
-     * @return
-     */
-    public Collection findByServerId_orderOwner_desc(Integer serverId) {
-        return findByServerId_orderOwner(serverId, false);
-    }
-
     public Collection findByServerId_orderOwner(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
@@ -390,22 +311,6 @@ public class ApplicationDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, serverId.intValue())
             .list();
-    }
-
-    /**
-     * @deprecated use findByPlatformId_orderOwner()
-     * @return
-     */
-    public Collection findByPlatformId_orderOwner_asc(Integer platformId) {
-        return findByPlatformId_orderOwner(platformId, true);
-    }
-
-    /**
-     * @deprecated use findByPlatformId_orderOwner()
-     * @return
-     */
-    public Collection findByPlatformId_orderOwner_desc(Integer platformId) {
-        return findByPlatformId_orderOwner(platformId, false);
     }
 
     public Collection findByPlatformId_orderOwner(Integer pid, boolean asc) {
