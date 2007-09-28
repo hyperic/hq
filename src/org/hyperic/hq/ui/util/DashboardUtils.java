@@ -63,7 +63,7 @@ public class DashboardUtils {
 
         return resources;
     }
-
+    
     public static List listAsEntityIds(List list) {
         ArrayList resources = new ArrayList();
         Iterator i = list.iterator();
@@ -90,11 +90,28 @@ public class DashboardUtils {
             .getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
         return listAsResources(resourceList, ctx, user);
     }
+    
+    public static List preferencesAsResources(String key, ServletContext ctx,
+			WebUser user, ConfigResponse config) throws Exception {
+		List resourceList = config.getPreferenceAsList(key,
+				Constants.DASHBOARD_DELIMITER);
+		return listAsResources(resourceList, ctx, user);
+	}
 
     public static List preferencesAsEntityIds(String key, WebUser user) {
         try {
             List resourceList = 
                 user.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+            return listAsEntityIds(resourceList);
+        } catch (InvalidOptionException e) {
+            return new ArrayList(0);
+        }
+    }
+    
+    public static List preferencesAsEntityIds(String key, ConfigResponse userConfig) {
+        try {
+            List resourceList = 
+                userConfig.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
             return listAsEntityIds(resourceList);
         } catch (InvalidOptionException e) {
             return new ArrayList(0);
@@ -144,8 +161,50 @@ public class DashboardUtils {
             user.setPreferences(prefs);
         }
     }
+    
+	public static void removePortlet(ConfigResponse config, String portlet)
+	    throws InvalidOptionException, InvalidOptionValueException {
+	    String first = config.getValue(Constants.USER_PORTLETS_FIRST) +
+	                   Constants.DASHBOARD_DELIMITER;
+	    String second = config.getValue(Constants.USER_PORTLETS_SECOND) +
+	                   Constants.DASHBOARD_DELIMITER;
+	
+	    first =
+	        StringUtil.remove(first,  portlet + Constants.DASHBOARD_DELIMITER);
+	    second =
+	        StringUtil.remove(second, portlet + Constants.DASHBOARD_DELIMITER);
+	
+	    first = StringUtil.replace(first,  Constants.EMPTY_DELIMITER,
+	                               Constants.DASHBOARD_DELIMITER);
+	    second = StringUtil.replace(second,Constants.EMPTY_DELIMITER,
+	                                Constants.DASHBOARD_DELIMITER);
+	
+	    config.setValue(Constants.USER_PORTLETS_FIRST, first);
+	    config.setValue(Constants.USER_PORTLETS_SECOND, second);
+	    
+	    // Need to clear out the preferences for multiple portlets
+	    int index;
+	    if ((index = portlet.lastIndexOf(MULTI_PORTLET_TOKEN)) > -1) {
+	        String token = portlet.substring(index);
+	        
+	        // If there are other portlets with the same token, then we can't
+	        // arbitrarily delete preferences
+	        if (first.indexOf(token) > -1 || second.indexOf(token) > -1) {
+	            return;
+	        }
+	        
+	        // Look through preferences for the token
+	        String[] keys = (String[]) config.getKeys().toArray(new String[0]);
+	        for (int i = 0; i < keys.length; i++) {
+	            if (keys[i].indexOf(token) > -1) {
+	            	config.unsetValue(keys[i]);
+	            }
+	        }
+	        
+	    }
+	}
 
-    public static void removeResources(String[] ids, String key, WebUser user)
+	public static void removeResources(String[] ids, String key, WebUser user)
         throws Exception {
         String resources = user.getPreference(key);
 
@@ -157,6 +216,21 @@ public class DashboardUtils {
         }
 
         user.setPreference(key, resources);
+    }
+    
+    public static void removeResources(String[] ids, String key, 
+    		ConfigResponse userConfg)
+    	throws Exception {
+	    String resources = userConfg.getValue(key);
+	
+	    for (int i = 0; i < ids.length; i++) {
+	        String resource = ids[i];
+	        resources = StringUtil.remove(resources, resource);
+	        resources = StringUtil.replace(resources, Constants.EMPTY_DELIMITER,
+	                                       Constants.DASHBOARD_DELIMITER);
+	    }
+
+	    userConfg.setValue(key, resources);
     }
 
     public static void verifyResources(String key, ServletContext ctx,
@@ -183,6 +257,29 @@ public class DashboardUtils {
                                    user.getPreferences());
         }
     }
+    public static void verifyResources(String key, ServletContext ctx,
+			ConfigResponse config, WebUser user) throws Exception {
+		List resourcelist = preferencesAsEntityIds(key, config);
+		AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+		AuthzBoss authzboss = ContextUtils.getAuthzBoss(ctx);
+		ArrayList toRemove = new ArrayList();
+		for (Iterator i = resourcelist.iterator(); i.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) i.next();
+			try {
+				appdefBoss.findById(user.getSessionId().intValue(), entityID);
+			} catch (Exception e) {
+				String entityid = entityID.getAppdefKey();
+				toRemove.add(entityid);
+			}
+		}
+
+		if (toRemove.size() > 0) {
+			String[] ids = (String[]) toRemove.toArray(new String[0]);
+			removeResources(ids, key, config);
+			authzboss.setUserPrefs(user.getSessionId(), user.getId(), user
+					.getPreferences());
+		}
+	}
     
     public static void addEntityToPreferences(String key, WebUser user,
                                               AppdefEntityID newId, int max)
@@ -203,4 +300,22 @@ public class DashboardUtils {
                         StringUtil.listToString(existing,
                                                 Constants.DASHBOARD_DELIMITER));
     }
+    
+    public static void addEntityToPreferences(String key, ConfigResponse userConfig,
+			AppdefEntityID newId, int max) throws Exception {
+		List existing = preferencesAsEntityIds(key, userConfig);
+		for (Iterator it = existing.iterator(); it.hasNext();) {
+			AppdefEntityID entityID = (AppdefEntityID) it.next();
+			if (entityID.equals(newId))
+				it.remove();
+		}
+
+		// Now add the new one
+		existing.add(newId);
+		if (max < Integer.MAX_VALUE && existing.size() > max)
+			existing.remove(0);
+
+		userConfig.setValue(key, StringUtil.listToString(existing,
+				Constants.DASHBOARD_DELIMITER));
+	}
 }
