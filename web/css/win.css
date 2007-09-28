@@ -197,7 +197,7 @@ td.MastheadBgTop .MastheadContent{color: #ffffff;}
 .FooterSmall {font-size: 8px; font-weight: normal; padding: 3px;}
 
 /* DASHBOARD */
-.DashboardPadding {padding: 5px;} /* only in /portal/MultiColumnLayout.jsp */
+.DashboardPadding {padding: 5px 10px 5px 5px;} /* only in /portal/MultiColumnLayout.jsp */
 .DashboardControlActionsContainer {background-color: #EBEDF2; padding: 10px; border-left:1px solid #D5D8DE;border-right:1px solid #D5D8DE;border-bottom:1px solid #D5D8DE;}
 
 .FormLabel {font-weight: bold; text-align: left;}
