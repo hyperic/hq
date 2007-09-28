@@ -29,6 +29,7 @@
     }
     else {
       var div = $('eventDetailTable');
+      detail.innerHTML=unescape(detail.innerHTML);
       if (div.style.display == 'none')
         new Effect.Appear(div);
     }
