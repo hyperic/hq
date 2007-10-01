@@ -30,6 +30,11 @@ package org.hyperic.hq.ui;
  * Constant values used as keys in maps
  */
 public interface KeyConstants {
+	
+	public static final String DASHBOARD_NAME = ".dashboard.name";
+	
+	public static final String DASHBOARD_ID = ".dashboard.id";
+	
     public static final String USERPREF_KEY_PROBLEMS_IGNORELIST = ".dashContent.problems.ignoreList";
 
     public static final String USERPREF_KEY_PROBLEMS_SHOWIGNORED = ".dashContent.problems.showIgnored";
@@ -48,7 +53,7 @@ public interface KeyConstants {
     /**
      * The key that holds the user's recent resources
      */
-    public static final String USERPREF_KEY_RECENT_RESOURCES = ".dashContent.recent.resources";
+    public static final String USERPREF_KEY_RECENT_RESOURCES = ".userPref.recent.resources";
 
     /**
      * The key that holds the user's chart queries
@@ -72,6 +77,11 @@ public interface KeyConstants {
         
     public static final String LOGON_URL_KEY = "forwardURL";
     
+    public static final String SELECTED_DASHBOARD_ID = ".user.dashboard.selected.id";
+    
+    public static final String SELECTED_DASHBOARD = ".user.dashboard.selected";
+    
+    public static final String DEFAULT_DASHBOARD_ID = ".user.dashboard.default.id";
     /*
      * The top level tab controls for the monitoring screen link to the "Current
      * Health" view
