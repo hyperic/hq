@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.hyperic.util.GenericValueMap;
+import org.hyperic.util.StringUtil;
 
 public class ConfigResponse implements GenericValueMap, Serializable  {
 
@@ -348,5 +349,16 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
 
     public int hashCode() {
         return this.toProperties().hashCode();
+    }
+    
+    /**
+     * Break the named preference  
+     * @param delimiter the delimeter to break it up by
+     * @param key the name of the preference
+     * @return <code>List</code> of <code>String</code> tokens
+     */
+    public List getPreferenceAsList(String key, String delimiter)
+        throws InvalidOptionException {
+        return StringUtil.explode(getValue(key), delimiter);
     }
 }
