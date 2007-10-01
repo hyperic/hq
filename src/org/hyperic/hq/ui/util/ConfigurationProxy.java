@@ -67,13 +67,8 @@ public class ConfigurationProxy {
 				.getSubject().getId());
 		DashboardConfig dashConfig = (DashboardConfig) session
 				.getAttribute(Constants.SELECTED_DASHBOARD);
-		if (dashConfig.isUserConfig()) {
-			dashManager.configureDashboard(me,
-					(UserDashboardConfig) dashConfig, dashConfigResp);
-		} else {
-			dashManager.configureDashboard(me,
-					(RoleDashboardConfig) dashConfig, dashConfigResp);
-		}
+		dashManager.configureDashboard(me, dashConfig,
+				dashConfigResp);
 	}
 
 	public void setUserPreferences(HttpSession session, WebUser user,
