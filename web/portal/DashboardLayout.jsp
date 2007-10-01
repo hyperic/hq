@@ -1,6 +1,7 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="struts-html-el" prefix="html" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%--
@@ -28,7 +29,9 @@
   USA.
  --%>
 
+<script language="JavaScript" src="<html:rewrite page="/js/dash.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
+<script language="JavaScript" src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
 <script language="JavaScript" src="<html:rewrite page='/js/requests.js'/>" type="text/javascript" id="requests"></script>
 <script src="<html:rewrite page="/js/dashboard.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
@@ -157,7 +160,22 @@
         }
     }
 
-   onloads.push(refreshPortlets);
+    function fixSelect(){
+        dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
+    }
+    onloads.push(refreshPortlets);
+    dojo.require("dojo.widget.Dialog");
+	dojo.event.connect(window, "onload", function(){
+	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
+	    dialogWidget.setShowControl("openDialog");
+	    dialogWidget.setCloseControl("closeDialog");
+	    dialogWidget.setCloseControl("selectDashboard");
+	    if(<c:out value="${DashboardForm.popDialog}"/>){
+	       dialogWidget.show();
+	    }
+	    fixSelect();
+	    
+	});
 
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="visibility:hidden;"></html:link>
@@ -170,7 +188,7 @@
   String agent = request.getHeader("USER-AGENT");
   
   if (null != agent && -1 !=agent.indexOf("MSIE")) {
-    divStart = "";
+    divStart = ""; 
     divEnd = "";
     narrowWidth = "width='25%'";
   }
@@ -188,9 +206,53 @@
   <tr>
     <td colspan="<c:out value="${headerColspan}"/>"><tiles:insert page="/portal/DashboardHeader.jsp"/></td>
   </tr>
+  <tr> <!-- Role based config dashboard area -->
+    <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+    <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+    <td colspan="2">
+        <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
+        <div class="messagePanel dashboard">
+            
+            <span style="font-weight: bold; margin-right: 4px;"><fmt:message key="dash.home.SelectDashboard"/></span>
+            <html:select property="selectedDashboardId" name="selectedDashboardId" value="selectedDashboardId" onchange="changeDashboard('DashboardForm');" styleId="dashSelect">
+                <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
+            </html:select>
+           <a href="#" id="openDialog">Open Dialog</a>
+             <span>
+            </span>
+        </div>
+        <div id="dashboardSelectDialog" class="hidden">
+		    <div style="background-color:white;width:300px;height:235px">
+		        <div class="BlockTitle"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
+		        <div style="padding:8px;">
+		            <div id="dashboardSelectionErrorPanel" class="hidden">
+		                <span class="ErrorBlock"><img width="10" height="11" border="0" alt="" src="/images/tt_error.gif"/></span>
+		                <span class="ErrorBlock"><fmt:message key="dash.home.DashboardSelectionDialogError"/></span>            
+		            </div>
+		            <div class="fieldSetStacked" style="margin-bottom:8px;">
+		                <span style="vertical-align:top"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
+		                <select size="12" style="width:285px" id="selectedResources">
+		                <c:forEach items="${DashboardForm.dashboards}" var="dashboard">
+		                   <option value='<c:out value="${dashboard.id}"/>'><c:out value="${dashboard.name}"/></option>
+		                </c:forEach>
+		                </select>
+		            </div>
+		        </div>
+		        <div style="height:26px;background-color:#efefef;bottom:0px;position:absolute;width:294px;padding:5px 3px 0px 3px;">
+		           <div style="float:right">
+		            <img id="closeDialog" src="/images/fb_cancel.gif" onmouseover="javscript:this.src='/images/fb_cancel_over.gif'" onmouseout="javscript:this.src='/images/fb_cancel.gif'" onmousedown="javascript:this.src='/images/fb_cancel_down.gif'" style="margin-right:4px;"/>
+		            <img id="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard(dojo.byId('selectedResources'));"/>
+		           </div>
+		        </div>
+		    </div>
+		</div>
+        </html:form>
+    </td>
+    <td class="rowSpanRight"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+  </tr>
   <tr>
     <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-      <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+      <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
 <%-- Multi-columns Layout
   This layout render lists of tiles in multi-columns. Each column renders its tiles
   vertically stacked.  
@@ -284,9 +346,18 @@
   
 </c:forEach>
 
-  <td><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+  <td class="rowSpanRight"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
 </tr>
-</table> 
+<tr>
+    <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+    <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+    <td colspan="2">
+        <div style="border-top:1px solid gray;width:100%;"></div>
+    </td>
+    <td class="rowSpanRight"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
+</tr>
+</table>
+
 </div>
 <!-- /Content Block --> 
 
