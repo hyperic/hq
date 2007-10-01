@@ -41,12 +41,17 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.bizapp.server.session.UserDashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.DashboardManagerLocal;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -179,6 +184,33 @@ public class AuthenticateUserAction extends TilesAction {
         session = request.getSession(true);              
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+
+		// Set the user and role dashboard defaults and merge into one
+		try {
+			DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+					.getOne();
+			ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
+					.getAttribute(Constants.DEF_USER_DASH_PREFS);
+			AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+					.findSubjectById(webUser.getSubject().getId());
+			UserDashboardConfig userDashboard = dashManager.getUserDashboard(
+					me, me);
+			if (userDashboard == null) {
+				userDashboard = dashManager.createUserDashboard(me, me, webUser.getName());
+			}
+			ConfigResponse userDashobardConfig = userDashboard.getConfig();
+			userDashobardConfig.merge(defaultUserDashPrefs, false);
+			session.setAttribute(Constants.USER_DASHBOARD_CONFIG,
+					userDashobardConfig);
+			dashManager.configureDashboard(me, userDashboard, userDashobardConfig);
+		} catch (PermissionException e) {
+			e.printStackTrace();
+		} 
+		// Set the default dashboard prefs in the session
+		ConfigResponse defaultRoleDashPrefs = (ConfigResponse) ctx
+				.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
+		session.setAttribute(Constants.ROLE_DASHBOARD_CONFIG,
+				defaultRoleDashPrefs);
 
         if (needsRegistration) {
             // will be cleaned out during registration
