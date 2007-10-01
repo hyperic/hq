@@ -30,16 +30,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 public class ModifyAction extends BaseAction {
 
@@ -50,12 +53,17 @@ public class ModifyAction extends BaseAction {
         throws Exception {
 
         ServletContext ctx = getServlet().getServletContext();
+        Integer sessionId = RequestUtils.getSessionId(request);
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
+        
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
-
+ 
         String forwardStr = Constants.SUCCESS_URL;
 
         String token = pForm.getToken();
@@ -71,7 +79,7 @@ public class ModifyAction extends BaseAction {
         }
 
         if(pForm.isRemoveClicked()){
-            DashboardUtils.removeResources(pForm.getIds(), resKey, user);
+            DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
             forwardStr = "review";
         }
 
@@ -82,11 +90,11 @@ public class ModifyAction extends BaseAction {
         }
 
         Integer numberToShow = pForm.getNumberToShow();
-        user.setPreference(numKey, numberToShow.toString());
-        user.setPreference(titleKey, pForm.getTitle());
-
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
-                          user.getPreferences());
+      
+        dashPrefs.setValue(numKey, numberToShow.toString());
+        dashPrefs.setValue(titleKey, pForm.getTitle());
+        
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 

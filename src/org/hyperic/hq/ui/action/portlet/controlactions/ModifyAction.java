@@ -34,12 +34,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -69,7 +72,7 @@ public class ModifyAction extends BaseAction {
         
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-
+        Integer sessionId = RequestUtils.getSessionId(request);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
@@ -90,20 +93,24 @@ public class ModifyAction extends BaseAction {
         String useNextScheduled = String.valueOf( pForm.isUseNextScheduled() );
         String past             = String.valueOf(pForm.getPast());
 
-        user.setPreference(".dashContent.controlActions.lastCompleted", lastCompleted );
-        user.setPreference(".dashContent.controlActions.mostFrequent", mostFrequent );
-        user.setPreference(".dashContent.controlActions.nextScheduled", nextScheduled );
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
+        dashPrefs.setValue(".dashContent.controlActions.lastCompleted", lastCompleted );
+        dashPrefs.setValue(".dashContent.controlActions.mostFrequent", mostFrequent );
+        dashPrefs.setValue(".dashContent.controlActions.nextScheduled", nextScheduled );
 
-        user.setPreference(".dashContent.controlActions.useLastCompleted", useLastCompleted );
-        user.setPreference(".dashContent.controlActions.useMostFrequent", useMostFrequent );
-        user.setPreference(".dashContent.controlActions.useNextScheduled", useNextScheduled );
-        user.setPreference(".dashContent.controlActions.past", past);
-
+        dashPrefs.setValue(".dashContent.controlActions.useLastCompleted", useLastCompleted );
+        dashPrefs.setValue(".dashContent.controlActions.useMostFrequent", useMostFrequent );
+        dashPrefs.setValue(".dashContent.controlActions.useNextScheduled", useNextScheduled );
+        dashPrefs.setValue(".dashContent.controlActions.past", past);
+        
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in controlactions/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );            
+            " user.prefs = " + dashPrefs.getKeys().toString());
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         return mapping.findForward(Constants.SUCCESS_URL);

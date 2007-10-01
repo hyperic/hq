@@ -38,10 +38,13 @@ import org.apache.struts.action.ActionMapping;
 
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -81,13 +84,7 @@ public class ModifyAction extends BaseAction {
             return forward;
         }
 
-        user.setPreference(".dashContent.autoDiscovery.range", range );            
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in autoDisc/ModifyAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );            
-        session.removeAttribute(Constants.USERS_SES_PORTAL);
+        ConfigurationProxy.getInstance().setPreference(session, user, boss, ".dashContent.autoDiscovery.range", range );
         
         
         return mapping.findForward("success");

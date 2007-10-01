@@ -25,26 +25,26 @@
 
 package org.hyperic.hq.ui.action.portlet.summaryCounts;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.util.StringUtil;
-
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -75,7 +75,7 @@ public class ModifyAction extends BaseAction {
         Log log = LogFactory.getLog(ModifyAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-
+        Integer sessionId = RequestUtils.getSessionId(request);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
 
@@ -86,28 +86,31 @@ public class ModifyAction extends BaseAction {
         }
 
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
+        
         String application = Boolean.toString( pForm.isApplication() );
         String platform = Boolean.toString( pForm.isPlatform() );
         String cluster = Boolean.toString( pForm.isCluster() );
         String server = Boolean.toString( pForm.isServer() );
         String service = Boolean.toString( pForm.isService() );
 
-        user.setPreference(".dashContent.summaryCounts.application", application );
-        user.setPreference(".dashContent.summaryCounts.platform", platform );
-        user.setPreference(".dashContent.summaryCounts.group.cluster", cluster );           
-        user.setPreference(".dashContent.summaryCounts.server", server );
-        user.setPreference(".dashContent.summaryCounts.service", service );
+        dashPrefs.setValue(".dashContent.summaryCounts.application", application );
+        dashPrefs.setValue(".dashContent.summaryCounts.platform", platform );
+        dashPrefs.setValue(".dashContent.summaryCounts.group.cluster", cluster );           
+        dashPrefs.setValue(".dashContent.summaryCounts.server", server );
+        dashPrefs.setValue(".dashContent.summaryCounts.service", service );
 
         String groupMixed= Boolean.toString( pForm.isGroupMixed() );            
         String groupGroups = Boolean.toString( pForm.isGroupGroups() );  
         String groupPlatServerService = Boolean.toString( pForm.isGroupPlatServerService() );            
         String groupApplication = Boolean.toString( pForm.isGroupApplication() );           
 
-        user.setPreference(".dashContent.summaryCounts.group.mixed", groupMixed);
-        user.setPreference(".dashContent.summaryCounts.group.groups", groupGroups);
-        user.setPreference(".dashContent.summaryCounts.group.plat.server.service", groupPlatServerService);
-        user.setPreference(".dashContent.summaryCounts.group.application", groupApplication);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.mixed", groupMixed);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.groups", groupGroups);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.plat.server.service", groupPlatServerService);
+        dashPrefs.setValue(".dashContent.summaryCounts.group.application", groupApplication);
 
         String applicationTypes = StringUtil.arrayToString( pForm.getApplicationTypes() );
         String platformTypes    = StringUtil.arrayToString( pForm.getPlatformTypes() );
@@ -115,17 +118,17 @@ public class ModifyAction extends BaseAction {
         String serverTypes      = StringUtil.arrayToString( pForm.getServerTypes() );
         String serviceTypes     = StringUtil.arrayToString( pForm.getServiceTypes() );
 
-        user.setPreference(".dashContent.summaryCounts.serviceTypes", serviceTypes );
-        user.setPreference(".dashContent.summaryCounts.serverTypes", serverTypes );
-        user.setPreference(".dashContent.summaryCounts.group.clusterTypes", clusterTypes );
-        user.setPreference(".dashContent.summaryCounts.platformTypes", platformTypes);
-        user.setPreference(".dashContent.summaryCounts.applicationTypes", applicationTypes);
+        dashPrefs.setValue(".dashContent.summaryCounts.serviceTypes", serviceTypes );
+        dashPrefs.setValue(".dashContent.summaryCounts.serverTypes", serverTypes );
+        dashPrefs.setValue(".dashContent.summaryCounts.group.clusterTypes", clusterTypes );
+        dashPrefs.setValue(".dashContent.summaryCounts.platformTypes", platformTypes);
+        dashPrefs.setValue(".dashContent.summaryCounts.applicationTypes", applicationTypes);
 
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in summaryCounts/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );            
+            " user.prefs = " + dashPrefs.getKeys().toString());
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward("success");
 

@@ -25,12 +25,16 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -53,16 +57,19 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
+        Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user = (WebUser)
-            session.getAttribute(Constants.WEBUSER_SES_ATTR);
+            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
 
         String forwardStr = Constants.SUCCESS_URL;
-
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         if(pForm.isRemoveClicked()){
             DashboardUtils
                 .removeResources(pForm.getIds(),
                                  PropertiesForm.RESOURCES,
-                                 user);
+                                 dashPrefs);
             forwardStr = "review";
         }
 
@@ -99,21 +106,21 @@ public class ModifyAction extends BaseAction {
         // If the selected resource type does not match the previous value,
         // clear out the resources
         try {
-            if (!resourceType.equals(user.getPreference(resTypeKey))) {
+            if (!resourceType.equals(dashPrefs.getValue(resTypeKey))) {
                 user.setPreference(resKey, "");
             }
         } catch (InvalidOptionException e) {
             // Ok, not set yet..
         }
 
-        user.setPreference(resTypeKey, resourceType);
-        user.setPreference(numKey, numberToShow.toString());
-        user.setPreference(metricKey, metric);
-        user.setPreference(descendingKey, descending);
-        user.setPreference(titleKey, pForm.getTitle());
+        dashPrefs.setValue(resTypeKey, resourceType);
+        dashPrefs.setValue(numKey, numberToShow.toString());
+        dashPrefs.setValue(metricKey, metric);
+        dashPrefs.setValue(descendingKey, descending);
+        dashPrefs.setValue(titleKey, pForm.getTitle());
 
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
-                          user.getPreferences());
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         if (!pForm.isOkClicked()) {

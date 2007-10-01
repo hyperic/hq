@@ -40,7 +40,10 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -75,6 +78,7 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
@@ -84,7 +88,7 @@ public class ModifyAction extends BaseAction {
             DashboardUtils.
                 removeResources(pForm.getIds(),
                                 Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                user);
+                                userDashPrefs);
             forwardStr = "review";
         }
 
@@ -102,16 +106,14 @@ public class ModifyAction extends BaseAction {
             orderTK.nextToken();
             resources.add(orderTK.nextToken());
         }
-        user.setPreference(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+        ConfigurationProxy.getInstance().setPreference(session, user, boss, Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                            StringUtil.listToString(resources, StringConstants
                                                    .DASHBOARD_DELIMITER));
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in resourcehealth/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
-                          user.getPreferences() );
+            " user.prefs = " + userDashPrefs.getKeys().toString());
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);

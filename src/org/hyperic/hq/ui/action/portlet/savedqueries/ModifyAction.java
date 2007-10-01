@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.portlet.savedqueries;
 
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -35,20 +36,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.StringConstants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.util.StringUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -80,7 +83,10 @@ public class ModifyAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-
+        Integer sessionId = RequestUtils.getSessionId(request);
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         PropertiesForm pForm = (PropertiesForm) form;
         ActionForward forward = checkSubmit(request, mapping, form);
         String returnString = "success";
@@ -91,17 +97,18 @@ public class ModifyAction extends BaseAction {
         String[] charts = pForm.getCharts();
         if (charts != null && pForm.isDeleteClicked()) {                
             String userCharts =
-                user.getPreference(Constants.USER_DASHBOARD_CHARTS);
+            	dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
 
             for(int i = 0; i < charts.length; i++){
                 userCharts = StringUtil.remove(userCharts, charts[i]);                
             }
-            user.setPreference(Constants.USER_DASHBOARD_CHARTS, userCharts);
+            dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
             returnString = "remove";
         } else {
             // Sort by order
-            List chartList = user.getPreferenceAsList(
-                Constants.USER_DASHBOARD_CHARTS, StringConstants.DASHBOARD_DELIMITER);
+            List chartList = new ArrayList();
+            chartList.add(dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS));
+            chartList.add(dashPrefs.getValue(StringConstants.DASHBOARD_DELIMITER));
             
             for (Iterator it = chartList.iterator(); it.hasNext(); ) {
                 if ("null".equals(it.next()))
@@ -118,16 +125,17 @@ public class ModifyAction extends BaseAction {
                 orderedCharts[i] = (String) chartList.get(index - 1);
             }
             
-            user.setPreference(Constants.USER_DASHBOARD_CHARTS,
+            dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS,
                 StringUtil.arrayToString(orderedCharts, StringConstants
                                          .DASHBOARD_DELIMITER.charAt(0)));
         }
 
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs );
+        
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in savedqueries/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );            
+            " user.prefs = " + dashPrefs.getKeys().toString());
         return mapping.findForward(returnString);
 
     }
