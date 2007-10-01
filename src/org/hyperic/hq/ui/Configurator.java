@@ -57,6 +57,14 @@ public class Configurator implements ServletContextListener {
         return Constants.PROPS_USER_PREFS;
     }
 
+    protected String getRoleDashboardPreferenceFile(){
+    	return "/WEB-INF/DefaultRoleDashboardPreferences.properties";
+    }
+    
+    protected String getUserDashboardPreferenceFile(){
+    	return "/WEB-INF/DefaultUserDashboardPreferences.properties";
+    }
+    
     /**
      * Respond to the <em>context initialized</em> container event by
      * loading the application properties file and the portals
@@ -131,8 +139,11 @@ public class Configurator implements ServletContextListener {
     
     private void loadPreferences(ServletContext ctx){
         ConfigResponse userPrefs = new ConfigResponse();
+        ConfigResponse userDashPrefs = new ConfigResponse();
+        ConfigResponse roleDashPrefs = new ConfigResponse();
         
-        try{            
+        try{
+        	// Load User Preferences
             Properties userProps =
                 ContextUtils.loadProperties(ctx, getPreferenceFile()); 
             Enumeration keys = userProps.keys();
@@ -140,8 +151,25 @@ public class Configurator implements ServletContextListener {
                 String key = (String) keys.nextElement();
                 userPrefs.setValue( key, userProps.getProperty(key) );
             }
-            
             ctx.setAttribute(Constants.DEF_USER_PREFS, userPrefs);
+            
+            // Load User Dashboard Preferences
+            Properties userDashProps = ContextUtils.loadProperties(ctx, getUserDashboardPreferenceFile());
+            keys = userDashProps.keys();
+            while(keys.hasMoreElements()){
+            	String key = (String) keys.nextElement();
+            	userDashPrefs.setValue(key, userDashProps.getProperty(key));
+            }
+            ctx.setAttribute(Constants.DEF_USER_DASH_PREFS, userDashPrefs);
+            
+            // Load Role Dashboard Preferences
+            Properties roleDashProps = ContextUtils.loadProperties(ctx, getRoleDashboardPreferenceFile());
+            keys = roleDashProps.keys();
+            while(keys.hasMoreElements()){
+            	String key = (String) keys.nextElement();
+            	roleDashPrefs.setValue(key, roleDashProps.getProperty(key));
+            }
+            ctx.setAttribute(Constants.DEF_ROLE_DASH_PREFS, roleDashPrefs);
         } 
         catch (Exception e) {
             error("loading table properties file " + Constants.PROPS_TAGLIB + "failed: ", e);
