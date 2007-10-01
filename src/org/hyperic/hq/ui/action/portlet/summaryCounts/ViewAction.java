@@ -25,30 +25,26 @@
 
 package org.hyperic.hq.ui.action.portlet.summaryCounts;
 
-import java.io.IOException;
-import java.util.List;
-
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-
-import org.hyperic.util.StringUtil;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
-
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -70,33 +66,36 @@ public class ViewAction extends TilesAction {
         StopWatch timer = new StopWatch();
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);            
-        WebUser user = (WebUser) request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
+        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);   
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
         AppdefInventorySummary summary = appdefBoss.getInventorySummary( 
                                             user.getSessionId().intValue(), true );
 
         context.putAttribute("summary", summary);            
 
         //get all the displayed subtypes
-        context.putAttribute("application", new Boolean( user.getPreference(".dashContent.summaryCounts.application") ) );
-        context.putAttribute("applicationTypes", StringUtil.explode( user.getPreference(".dashContent.summaryCounts.applicationTypes"), "," ) );
+        context.putAttribute("application", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.application") ) );
+        context.putAttribute("applicationTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.applicationTypes"), "," ) );
 
-        context.putAttribute("platform", new Boolean( user.getPreference(".dashContent.summaryCounts.platform") ) ); 
-        context.putAttribute("platformTypes", StringUtil.explode( user.getPreference(".dashContent.summaryCounts.platformTypes"), "," ) );                        
+        context.putAttribute("platform", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.platform") ) ); 
+        context.putAttribute("platformTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.platformTypes"), "," ) );                        
 
-        context.putAttribute("server", new Boolean( user.getPreference(".dashContent.summaryCounts.server") ) );
-        context.putAttribute("serverTypes", StringUtil.explode( user.getPreference(".dashContent.summaryCounts.serverTypes"), "," ) );
+        context.putAttribute("server", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.server") ) );
+        context.putAttribute("serverTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.serverTypes"), "," ) );
 
-        context.putAttribute("service", new Boolean( user.getPreference(".dashContent.summaryCounts.service") ) );
-        context.putAttribute("serviceTypes", StringUtil.explode( user.getPreference(".dashContent.summaryCounts.serviceTypes"), "," ) );            
+        context.putAttribute("service", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.service") ) );
+        context.putAttribute("serviceTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.serviceTypes"), "," ) );            
 
-        context.putAttribute("cluster", new Boolean( user.getPreference(".dashContent.summaryCounts.group.cluster" ) ) );
-        context.putAttribute("clusterTypes", StringUtil.explode( user.getPreference(".dashContent.summaryCounts.group.clusterTypes"), "," ) );
+        context.putAttribute("cluster", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.cluster" ) ) );
+        context.putAttribute("clusterTypes", StringUtil.explode( dashPrefs.getValue(".dashContent.summaryCounts.group.clusterTypes"), "," ) );
 
-        context.putAttribute("groupMixed", new Boolean( user.getPreference(".dashContent.summaryCounts.group.mixed") ) );
-        context.putAttribute("groupGroups", new Boolean( user.getPreference(".dashContent.summaryCounts.group.groups") ) );
-        context.putAttribute("groupPlatServerService", new Boolean( user.getPreference(".dashContent.summaryCounts.group.plat.server.service") ) );
-        context.putAttribute("groupApplication", new Boolean( user.getPreference(".dashContent.summaryCounts.group.application") ) );
+        context.putAttribute("groupMixed", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.mixed") ) );
+        context.putAttribute("groupGroups", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.groups") ) );
+        context.putAttribute("groupPlatServerService", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service") ) );
+        context.putAttribute("groupApplication", new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.application") ) );
 
         timingLog.trace("SummaryCounts - timing ["+timer.toString()+"]");
         return null;

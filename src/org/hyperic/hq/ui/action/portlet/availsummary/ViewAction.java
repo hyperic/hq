@@ -25,44 +25,47 @@
 
 package org.hyperic.hq.ui.action.portlet.availsummary;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletContext;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.product.MetricValue;
-import org.json.JSONObject;
-
-import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeSet;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.json.JSONObject;
 
 /**
  * This action class is used by the Availability Summary portlet.  It's main
@@ -80,6 +83,9 @@ public class ViewAction extends BaseAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser)
             request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         String token;
@@ -101,12 +107,11 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
 
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
-
-        int count = Integer.parseInt(user.getPreference(numKey, "10"));
+        int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         int sessionId = user.getSessionId().intValue();
 
         CacheEntry[] ents = new CacheEntry[arrayIds.length];
@@ -181,7 +186,7 @@ public class ViewAction extends BaseAction {
         } else {
             availSummary.put("token", JSONObject.NULL);
         }
-        availSummary.put("title", user.getPreference(titleKey, ""));
+        availSummary.put("title", dashPrefs.getValue(titleKey, ""));
         
         response.getWriter().write(availSummary.toString());
 
@@ -191,7 +196,7 @@ public class ViewAction extends BaseAction {
         if (toRemove.size() > 0) {
             _log.debug("Removing " + toRemove.size() + " missing resources.");
             DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
-                                           resKey, user);
+                                           resKey, dashPrefs);
         }
 
         return null;

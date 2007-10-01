@@ -25,6 +25,11 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -43,6 +48,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.units.FormattedNumber;
@@ -65,6 +71,7 @@ import java.util.ArrayList;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 
 /**
  * This action class is used by the Metric Viewer portlet.  It's main
@@ -83,8 +90,12 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
+        
         int sessionId = user.getSessionId().intValue();
         long ts = System.currentTimeMillis();
         String token;
@@ -118,16 +129,16 @@ public class ViewAction extends BaseAction {
             res.put("token", JSONObject.NULL);
         }
 
-        res.put("title", user.getPreference(titleKey, ""));
+        res.put("title", dashPrefs.getValue(titleKey, ""));
         
         // Load resources
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
-        int count = Integer.parseInt(user.getPreference(numKey, "10"));
-        String metric = user.getPreference(metricKey, "");
+        int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
+        String metric = dashPrefs.getValue(metricKey, "");
         boolean isDescending =
-            Boolean.valueOf(user.getPreference(descendingKey, "true")).booleanValue();
+            Boolean.valueOf(dashPrefs.getValue(descendingKey, "true")).booleanValue();
 
         // Validate
         if (arrayIds.length == 0 || count == 0 || metric.length() == 0) {
@@ -143,7 +154,7 @@ public class ViewAction extends BaseAction {
         MeasurementTemplateValue template =
             (MeasurementTemplateValue)metricTemplates.get(0);
 
-        String resource = user.getPreference(resTypeKey);
+        String resource = dashPrefs.getValue(resTypeKey);
         AppdefEntityTypeID typeId = new AppdefEntityTypeID(resource);
         AppdefResourceTypeValue typeVal =
             appdefBoss.findResourceTypeById(sessionId, typeId);
@@ -207,7 +218,7 @@ public class ViewAction extends BaseAction {
         if (toRemove.size() > 0) {
             _log.debug("Removing " + toRemove.size() + " missing resources.");
             DashboardUtils.removeResources((String[])toRemove.toArray(new String[0]),
-                                           resKey, user);
+                                           resKey, dashPrefs);
         }
 
         return null;

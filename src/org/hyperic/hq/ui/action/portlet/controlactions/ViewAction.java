@@ -30,6 +30,7 @@ import java.util.Iterator;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.control.shared.ControlScheduleValue;
@@ -46,7 +48,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.DashboardControlBean;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 
@@ -68,31 +70,34 @@ public class ViewAction extends TilesAction {
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         ServletContext ctx = getServlet().getServletContext();
         ControlBoss boss = ContextUtils.getControlBoss(ctx);        
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) request.getSession().getAttribute( 
                                                    Constants.WEBUSER_SES_ATTR );
         int sessionId = user.getSessionId().intValue();
 
-        Boolean lastCompleted = Boolean.valueOf(user
-                .getPreference(".dashContent.controlActions.useLastCompleted",
+        Boolean lastCompleted = Boolean.valueOf(dashPrefs.
+        		getValue(".dashContent.controlActions.useLastCompleted",
                                Boolean.TRUE.toString()));
         context.putAttribute("displayLastCompleted", lastCompleted);
 
-        Boolean mostFrequent = new Boolean(user
-                .getPreference(".dashContent.controlActions.useMostFrequent",
+        Boolean mostFrequent = new Boolean(dashPrefs.
+        		getValue(".dashContent.controlActions.useMostFrequent",
                                Boolean.FALSE.toString()));
         context.putAttribute("displayMostFrequent", mostFrequent);
 
-        Boolean nextScheduled = new Boolean(user
-                .getPreference(".dashContent.controlActions.useNextScheduled",
+        Boolean nextScheduled = new Boolean(dashPrefs.
+        		getValue(".dashContent.controlActions.useNextScheduled",
                                Boolean.TRUE.toString()));
         context.putAttribute("displayNextScheduled", nextScheduled);
 
         if (lastCompleted.booleanValue()) {
-            int rows = Integer.parseInt(user
-                    .getPreference(".dashContent.controlActions.lastCompleted",
+            int rows = Integer.parseInt(dashPrefs.
+            		getValue(".dashContent.controlActions.lastCompleted",
                                    "5"));
-            long past = Long.parseLong(user
-                    .getPreference(".dashContent.controlActions.past",
+            long past = Long.parseLong(dashPrefs.
+            		getValue(".dashContent.controlActions.past",
                                    "604800000"));
             PageList pageList = boss.getRecentControlActions(sessionId, rows,
                                                              past);
@@ -100,8 +105,8 @@ public class ViewAction extends TilesAction {
         }
         
         if (nextScheduled.booleanValue()) {
-            int rows = Integer.parseInt(user
-                    .getPreference(".dashContent.controlActions.nextScheduled",
+            int rows = Integer.parseInt(dashPrefs.
+            		getValue(".dashContent.controlActions.nextScheduled",
                                    "5"));                                 
             PageList pageList = boss.getPendingControlActions(sessionId, rows);                
             AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);  
@@ -128,9 +133,10 @@ public class ViewAction extends TilesAction {
             context.putAttribute("nextScheduled", pendingList);                
         }
         
-        if (mostFrequent.booleanValue()) {  
+        if (mostFrequent.booleanValue()) {
+        	
             int size = Integer.parseInt( 
-                user.getPreference(".dashContent.controlActions.mostFrequent"));
+            		dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
             PageList pageList = boss.getOnDemandControlFrequency(sessionId, 
                                                                  size);                
             context.putAttribute("mostFrequent", pageList);                

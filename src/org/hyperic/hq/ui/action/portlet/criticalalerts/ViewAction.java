@@ -34,6 +34,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -44,8 +45,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.escalation.server.session.Escalatable;
-import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -54,6 +55,7 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONObject;
 
 /**
@@ -73,6 +75,9 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) request.getSession().getAttribute(
             Constants.WEBUSER_SES_ATTR);
         
@@ -101,14 +106,14 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
-        int count = Integer.parseInt(user.getPreference(countKey));
-        int priority = Integer.parseInt(user.getPreference(priorityKey));
-        long timeRange = Long.parseLong(user.getPreference(timeKey));
-        boolean all = "all".equals(user.getPreference(selOrAllKey));
+        int count = Integer.parseInt(dashPrefs.getValue(countKey));
+        int priority = Integer.parseInt(dashPrefs.getValue(priorityKey));
+        long timeRange = Long.parseLong(dashPrefs.getValue(timeKey));
+        boolean all = "all".equals(dashPrefs.getValue(selOrAllKey));
 
         int sessionID = user.getSessionId().intValue();
 
@@ -162,7 +167,7 @@ public class ViewAction extends BaseAction {
             alerts.put("token", JSONObject.NULL);
         }
 
-        alerts.put("title", user.getPreference(titleKey, ""));
+        alerts.put("title", dashPrefs.getValue(titleKey, ""));
         
         response.getWriter().write(alerts.toString());
 

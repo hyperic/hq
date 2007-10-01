@@ -25,30 +25,32 @@
 
 package org.hyperic.hq.ui.action.portlet.resourcehealth;
 
-import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 import org.json.JSONObject;
 
 /**
@@ -66,12 +68,14 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
         EventsBoss eBoss = ContextUtils.getEventsBoss(ctx);
-        
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser)
-            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+            session.getAttribute(Constants.WEBUSER_SES_ATTR);
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
-        List entityIds =  DashboardUtils.preferencesAsEntityIds(key, user);
+        List entityIds =  DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
@@ -81,7 +85,7 @@ public class ViewAction extends BaseAction {
             list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
                                                    arrayIds);
         } catch(Exception e) {
-            DashboardUtils.verifyResources(key, ctx, user);
+            DashboardUtils.verifyResources(key, ctx, dashPrefs, user);
             list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
                                                    arrayIds);
         }

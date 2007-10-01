@@ -31,6 +31,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,13 +40,13 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.sigar.pager.SortAttribute;
-import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -64,12 +65,14 @@ public class ViewAction extends TilesAction {
         Log log = LogFactory.getLog(ViewAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        
-        WebUser user = (WebUser) request.getSession().
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        WebUser user = (WebUser) session.
             getAttribute(Constants.WEBUSER_SES_ATTR);
         int sessionId = user.getSessionId().intValue();
 
-        Integer range = new Integer(user.getPreference(PropertiesForm.RANGE));
+        Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));
 
         try {
             // Hard code to look for platforms created in the last two days

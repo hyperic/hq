@@ -31,6 +31,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -39,6 +40,8 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -65,14 +68,17 @@ public class ViewAction extends TilesAction {
         String userPortlets = new String();
 
         Boolean wide = new Boolean((String) context.getAttribute("wide"));
-
+        HttpSession session = request.getSession();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         List multi;
         if( wide.booleanValue() ){
-            userPortlets = user.getPreference( Constants.USER_PORTLETS_SECOND );
+            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_SECOND );
             multi = (List) context.getAttribute("multi.wide");
         }
         else{
-            userPortlets = user.getPreference( Constants.USER_PORTLETS_FIRST );
+            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_FIRST );
             multi = (List) context.getAttribute("multi.narrow");
         }
         

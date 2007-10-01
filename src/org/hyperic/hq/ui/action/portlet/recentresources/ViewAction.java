@@ -25,20 +25,14 @@
 
 package org.hyperic.hq.ui.action.portlet.recentresources;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.util.timer.StopWatch;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +41,14 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code> identified by the
@@ -69,27 +71,32 @@ public class ViewAction extends TilesAction {
 
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        HttpSession session = request.getSession();
         WebUser user = (WebUser)
-            request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+            session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        ConfigResponse userPrefs = user.getPreferences();
         String key = Constants.USERPREF_KEY_RECENT_RESOURCES;
-
-        List list;
-        try {
-            list = getStuff(key, boss, user);
-        } catch (Exception e) {
-            DashboardUtils.verifyResources(key, ctx, user);
-            list = getStuff(key, boss, user);
+        if(userPrefs.getValue(key, null) != null){
+	        List list;
+	        try {
+	            list = getStuff(key, boss, user, userPrefs);
+	        } catch (Exception e) {
+	            DashboardUtils.verifyResources(key, ctx, userPrefs, user);
+	            list = getStuff(key, boss, user, userPrefs);
+	        }
+	
+	        context.putAttribute("resources", list);
+        }else{
+        	context.putAttribute("resources", new ArrayList());
         }
-
-        context.putAttribute("resources", list);
-
+        
         _log.debug("ViewRecentResources - timing [" + timer.toString() + "]");
         return null;
     }
 
-    private List getStuff(String key, AppdefBoss boss, WebUser user)
+    private List getStuff(String key, AppdefBoss boss, WebUser user, ConfigResponse dashPrefs)
         throws Exception {
-        List entityIds = DashboardUtils.preferencesAsEntityIds(key, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
         Collections.reverse(entityIds);     // Most recent on top
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];

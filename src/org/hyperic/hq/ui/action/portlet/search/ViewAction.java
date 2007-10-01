@@ -28,15 +28,16 @@ package org.hyperic.hq.ui.action.portlet.search;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
-
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
+import org.hyperic.hq.ui.util.ContextUtils;
 
 /**
  * An <code>TilesAction</code> that sets up for searching the Resource Hub portal.

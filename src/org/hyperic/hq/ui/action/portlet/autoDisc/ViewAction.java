@@ -31,20 +31,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.bizapp.shared.AIBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.BizappUtils;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +42,21 @@ import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionMessages;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.autoinventory.ScanStateCore;
+import org.hyperic.hq.bizapp.shared.AIBoss;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 /**
  */
@@ -70,6 +72,7 @@ public class ViewAction extends TilesAction {
         throws Exception {
         
         ServletContext ctx = getServlet().getServletContext();
+        HttpSession session = request.getSession();
         AIBoss boss = ContextUtils.getAIBoss(ctx);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         WebUser user = SessionUtils.getWebUser(request.getSession());
@@ -77,8 +80,10 @@ public class ViewAction extends TilesAction {
         AIQueueForm queueForm = (AIQueueForm) form;
 
         PageControl page = new PageControl();
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt( 
-                         user.getPreference(".dashContent.autoDiscovery.range") ) );
+        		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
 
         // always show ignored platforms and already-processed platforms
         PageList aiQueue = boss.getQueue(sessionId, true, false, true,
