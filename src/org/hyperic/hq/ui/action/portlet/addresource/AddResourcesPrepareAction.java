@@ -46,6 +46,7 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -135,6 +136,7 @@ public class AddResourcesPrepareAction extends Action {
         HttpSession session = request.getSession();            
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser) session.getAttribute( 
                                             Constants.WEBUSER_SES_ATTR );
 
@@ -158,7 +160,7 @@ public class AddResourcesPrepareAction extends Action {
             log.debug("get avalable resources from user preferences");
             try {
                 pendingResourcesIds =
-                    user.getPreferenceAsList(addForm.getKey(),
+                	userDashPrefs.getPreferenceAsList(addForm.getKey(),
                                              StringConstants.DASHBOARD_DELIMITER);
             } catch (InvalidOptionException e) {
                 // Then we don't have any pending resources

@@ -38,12 +38,15 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -74,6 +77,8 @@ public class AddPortletAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user =
             (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
 
         if( pForm.getPortlet() == null || "bad".equals( pForm.getPortlet() ) ) {
@@ -88,7 +93,7 @@ public class AddPortletAction extends BaseAction {
             prefKey = Constants.USER_PORTLETS_FIRST;
         }
 
-        String userPrefs = user.getPreference(prefKey);
+        String userPrefs = dashPrefs.getValue(prefKey);
         
         String portlet = pForm.getPortlet();
         while (userPrefs.indexOf(portlet) > -1) {
@@ -107,17 +112,16 @@ public class AddPortletAction extends BaseAction {
         String preferences = Constants.DASHBOARD_DELIMITER + portlet +
                              Constants.DASHBOARD_DELIMITER;
         // Clean up the delimiters
-        preferences = StringUtil.replace(preferences, Constants.EMPTY_DELIMITER,
-                                         Constants.DASHBOARD_DELIMITER);
+		preferences = StringUtil.replace(preferences,
+				Constants.EMPTY_DELIMITER, Constants.DASHBOARD_DELIMITER);
 
-        user.setPreference(prefKey, userPrefs + preferences);
+		LogFactory.getLog("user.preferences").trace(
+				"Invoking setUserPrefs" + " in AddPortletAction " + " for "
+						+ user.getId() + " at " + System.currentTimeMillis()
+						+ " user.prefs = " + userPrefs);
+		ConfigurationProxy.getInstance().setPreference(session, user, boss,
+				prefKey, userPrefs + preferences);
         
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in AddPortletAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
-                          user.getPreferences() );
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 

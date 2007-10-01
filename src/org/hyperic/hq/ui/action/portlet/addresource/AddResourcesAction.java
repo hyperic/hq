@@ -27,11 +27,17 @@ package org.hyperic.hq.ui.action.portlet.addresource;
 
 import java.util.Iterator;
 import java.util.List;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
@@ -41,12 +47,8 @@ import org.hyperic.hq.ui.action.BaseValidatorForm;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An Action that adds resources to a dashboard widget
@@ -102,8 +104,8 @@ public class AddResourcesAction extends BaseAction {
         }
 
         ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);            
-
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        
         log.trace("getting pending resources list");
         List pendingResourceIds = SessionUtils.getListAsListStr(
                                     request.getSession(),
@@ -120,13 +122,13 @@ public class AddResourcesAction extends BaseAction {
 
         RequestUtils.setConfirmation(request, "admin.user.confirm.AddResource");
 
-        user.setPreference(addForm.getKey(), resourcesAsString);
+        ConfigurationProxy.getInstance().setPreference(session, user, boss,
+        		addForm.getKey(), resourcesAsString.toString());
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in AddResourcesAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(),
-                          user.getPreferences() );
+            " user.prefs = " + userDashPrefs.getKeys().toString());
 
         return returnSuccess(request, mapping);
 
