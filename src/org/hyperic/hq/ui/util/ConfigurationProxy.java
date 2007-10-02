@@ -11,8 +11,6 @@ import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.bizapp.server.session.RoleDashboardConfig;
-import org.hyperic.hq.bizapp.server.session.UserDashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.DashboardManagerLocal;
 import org.hyperic.hq.common.ApplicationException;
@@ -41,15 +39,8 @@ public class ConfigurationProxy {
 					.getAttribute(Constants.SELECTED_DASHBOARD);
 			ConfigResponse dashboardConfigResp = dashboardConfig.getConfig();
 			dashboardConfigResp.setValue(key, value);
-			if (dashboardConfig.isUserConfig()) {
-				dashManager.configureDashboard(me,
-						(UserDashboardConfig) dashboardConfig,
-						dashboardConfigResp);
-			} else {
-				dashManager.configureDashboard(me,
-						(RoleDashboardConfig) dashboardConfig,
-						dashboardConfigResp);
-			}
+            dashManager.configureDashboard(me, dashboardConfig,
+                                           dashboardConfigResp);
 		} else {
 			// User preference
 			user.setPreference(key, value);
