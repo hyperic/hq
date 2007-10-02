@@ -117,26 +117,6 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * legacy EJB finder
-     * @deprecated use finaAll_orderName(boolean)
-     * @return
-     */
-    public Collection findAll_orderName_asc()
-    {
-        return findAll_orderName(true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaAll_orderName(boolean)
-     * @return
-     */
-    public Collection findAll_orderName_desc()
-    {
-        return findAll_orderName(false);
-    }
-
     public Collection findAll_orderName(boolean asc)
     {
         return getSession()
@@ -145,26 +125,6 @@ public class ServiceDAO extends HibernateDAO
             .setCacheable(true)
             .setCacheRegion("Service.findAll_orderName")
             .list();
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaAll_orderCtime(boolean)
-     * @return
-     */
-    public Collection findAll_orderCtime_asc()
-    {
-        return findAll_orderCtime(true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaAll_orderCtime(boolean)
-     * @return
-     */
-    public Collection findAll_orderCtime_desc()
-    {
-        return findAll_orderCtime(false);
     }
 
     public Collection findAll_orderCtime(boolean asc)
@@ -191,26 +151,6 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * legacy EJB finder
-     * @deprecated use finaByPlatform_orderName(boolean)
-     * @return
-     */
-    public Collection findByPlatform_orderName_asc(Integer id)
-    {
-        return findByPlatform_orderName(id, true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaByPlatform_orderName(boolean)
-     * @return
-     */
-    public Collection findByPlatform_orderName_desc(Integer id)
-    {
-        return findByPlatform_orderName(id, false);
-    }
-
     public Collection findByPlatform_orderName(Integer id, boolean asc)
     {
         String sql="select sv from Service sv " +
@@ -222,26 +162,6 @@ public class ServiceDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaByPlatform_orderType(boolean)
-     * @return
-     */
-    public Collection findByPlatform_orderType_asc(Integer id)
-    {
-        return findByPlatform_orderType(id, true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use finaByPlatform_orderType(boolean)
-     * @return
-     */
-    public Collection findByPlatform_orderType_desc(Integer id)
-    {
-        return findByPlatform_orderType(id, false);
     }
 
     public Collection findByPlatform_orderType(Integer id, boolean asc)
@@ -329,52 +249,12 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * legacy EJB finder
-     * @deprecated use findAllClusterUnassigned_orderName(boolean)
-     * @return
-     */
-    public Collection findAllClusterUnassigned_orderName_asc()
-    {
-        return findAllClusterUnassigned_orderName(true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use findAllClusterUnassigned_orderName(boolean)
-     * @return
-     */
-    public Collection findAllClusterUnassigned_orderName_desc()
-    {
-        return findAllClusterUnassigned_orderName(false);
-    }
-
     public Collection findAllClusterUnassigned_orderName(boolean asc)
     {
         String sql="from Service where serviceCluster is null " +
                    "order by sortName " +
                    (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use findAllClusterUnassigned_orderName(boolean)
-     * @return
-     */
-    public Collection findAllClusterAppUnassigned_orderName_asc()
-    {
-        return findAllClusterAppUnassigned_orderName(true);
-    }
-
-    /**
-     * legacy EJB finder
-     * @deprecated use findAllClusterUnassigned_orderName(boolean)
-     * @return
-     */
-    public Collection findAllClusterAppUnassigned_orderName_desc()
-    {
-        return findAllClusterAppUnassigned_orderName(false);
     }
 
     public Collection findAllClusterAppUnassigned_orderName(boolean asc)

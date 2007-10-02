@@ -176,26 +176,26 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
         AppdefEntityValue aev = new AppdefEntityValue(entity, subject);
 
         switch (_groupType) {
-        case (GROUP_ADHOC_APP):
-        case (GROUP_ADHOC_GRP):
-        case (GROUP_ADHOC_PSS):
+        case GROUP_ADHOC_APP:
+        case GROUP_ADHOC_GRP:
+        case GROUP_ADHOC_PSS:
             arv = aev.getLiteResourceValue();
             return isGroupAdhoc((AppdefGroupValue) arv);
-        case (GROUP_COMPAT_PS):
+        case GROUP_COMPAT_PS:
             if (groupSelected)
                 return isResourceCompatible(entity);
             else {
                 arv = aev.getLiteResourceValue();
                 return isGroupResourceCompatible(arv);
             }
-        case (GROUP_COMPAT_SVC):
+        case GROUP_COMPAT_SVC:
             if (groupSelected)
                 return isResourceCompatible(entity);
             else {
                 arv = aev.getLiteResourceValue();
                 return isGroupResourceCompatible(arv);
             }
-        case (UNDEFINED):
+        case UNDEFINED:
             if (_resourceType == UNDEFINED) {
                 arv = aev.getLiteResourceValue();
                 return isEntityCompatible(arv);
@@ -203,7 +203,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 return isResourceCompatible(entity);
             }
         default:
-                return false;      // unsupported group type?
+            return false;      // unsupported group type?
         }
     }
     

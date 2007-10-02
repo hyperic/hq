@@ -197,7 +197,7 @@ class ImportHelper
         typeName = platform.getType();
 
         try {
-            pType = this.findPlatformTypeByName(typeName);
+            pType = findPlatformTypeByName(typeName);
         } catch(PlatformNotFoundException exc){
             throw new BatchImportException("Platform '" + name + "' " +
                                            "depends on platform type '" + 
@@ -297,7 +297,7 @@ class ImportHelper
         name = platform.getName();
         create = false;
         try {
-            aPlatform = this.findPlatformByName(name);
+            aPlatform = findPlatformByName(name);
         } catch(PlatformNotFoundException exc){
             // New platform -- create it!
             create = true;
@@ -354,7 +354,7 @@ class ImportHelper
         aiid     = server.getAutoinventoryIdentifier();
 
         try {
-            sType = this.findServerTypeByName(typeName);
+            sType = findServerTypeByName(typeName);
         } catch(ServerNotFoundException exc){
             throw new BatchImportException("Server '" + name + "' " +
                                            "depends on server type '" + 
@@ -416,7 +416,7 @@ class ImportHelper
         name = server.getName();
 
         try {
-            aServers = this.findServersByName(name);
+            aServers = findServersByName(name);
             if (aServers.length > 1) {
                 throw new BatchImportException("Multiple matches for " + name);
             }
@@ -455,7 +455,7 @@ class ImportHelper
         typeName = service.getType();
 
         try {
-            sType = this.findServiceTypeByName(typeName);
+            sType = findServiceTypeByName(typeName);
         } catch(ServiceNotFoundException exc){
             throw new BatchImportException("Service '" + name + "' " +
                                            "depends on service type '" + 
@@ -473,7 +473,7 @@ class ImportHelper
             ServiceValue[] parentServices;
 
             try {
-                parentServices = this.findServicesByName(parentServiceName);
+                parentServices = findServicesByName(parentServiceName);
             } catch(ServiceNotFoundException exc){
                 throw new BatchImportException("Error creating service" +
                                       " '" + name + "':  It depends on the " +
@@ -597,13 +597,13 @@ class ImportHelper
             AppServiceValue addSvc;
 
             svc = (XmlApplicationServiceValue)i.next();
-            addSvc = this.findAppServiceForAdd(aApp, svc.getName());
+            addSvc = findAppServiceForAdd(aApp, svc.getName());
 
             for(Iterator j=svc.getDependencies().iterator(); j.hasNext(); ){
                 String depName = (String)j.next();
                 AppServiceValue childSvc;
 
-                childSvc = this.findAppServiceForAdd(aApp, depName);
+                childSvc = findAppServiceForAdd(aApp, depName);
                 
                 dt.addNode(addSvc, childSvc);
             }
@@ -660,7 +660,7 @@ class ImportHelper
             appSvc      = (XmlApplicationServiceValue)i.next();
             serviceName = appSvc.getName().toLowerCase();
             try {
-                services = this.findServicesByName(serviceName);
+                services = findServicesByName(serviceName);
             } catch(ServiceNotFoundException exc){
                 throw new BatchImportException("Failed to create application "+
                                                "'" + name + "'.  It relies " +
@@ -717,7 +717,7 @@ class ImportHelper
         name = app.getName();
         create = false;
         try {
-            aApp = this.findApplicationByName(name);
+            aApp = findApplicationByName(name);
         } catch(ApplicationNotFoundException exc){
             create = true;
         } catch(PermissionException exc){
@@ -891,11 +891,11 @@ class ImportHelper
                 String mTypeName = group.getMemberTypeName();
 
                 if(memberType.equals(XmlGroupValue.N_PLATFORM)){
-                    resVal = this.findPlatformTypeByName(mTypeName);
+                    resVal = findPlatformTypeByName(mTypeName);
                 } else if(memberType.equals(XmlGroupValue.N_SERVER)){
-                    resVal = this.findServerTypeByName(mTypeName);
+                    resVal = findServerTypeByName(mTypeName);
                 } else if(memberType.equals(XmlGroupValue.N_SERVICE)){
-                    resVal = this.findServiceTypeByName(mTypeName);
+                    resVal = findServiceTypeByName(mTypeName);
                 } else {
                     throw new IllegalStateException("Unhandled member type, '"+
                                                     memberType + "'");
@@ -952,23 +952,23 @@ class ImportHelper
 
             try {
                 if(type.equals(XmlGroupValue.N_PLATFORM)) {
-                    resource = this.findPlatformByName(entName);
+                    resource = findPlatformByName(entName);
                     aGroup.addAppdefEntity(resource.getEntityId());
                 } else if(type.equals(XmlGroupValue.N_SERVER)) {
-                    resources = this.findServersByName(entName);
+                    resources = findServersByName(entName);
                     for (int j=0; j<resources.length; j++) {
                         aGroup.addAppdefEntity(resources[j].getEntityId());
                     }
                 } else if(type.equals(XmlGroupValue.N_SERVICE)) {
-                    resources = this.findServicesByName(entName);
+                    resources = findServicesByName(entName);
                     for (int j=0; j<resources.length; j++) {
                         aGroup.addAppdefEntity(resources[j].getEntityId());
                     }
                 } else if(type.equals(XmlGroupValue.N_APP)) {
-                    resource = this.findApplicationByName(entName);
+                    resource = findApplicationByName(entName);
                     aGroup.addAppdefEntity(resource.getEntityId());
                 } else if(type.equals(XmlGroupValue.N_GROUP)) {
-                    resource = this.findGroupByName(entName);
+                    resource = findGroupByName(entName);
                     aGroup.addAppdefEntity(resource.getEntityId());
                 } else {
                     throw new IllegalStateException("Unhandled member type, '"+
@@ -1026,7 +1026,7 @@ class ImportHelper
         name   = group.getCapName();
         create = false;
         try {
-            aGroup = this.findGroupByName(name);
+            aGroup = findGroupByName(name);
         } catch(AppdefGroupNotFoundException exc){
             create = true;
         } catch(PermissionException exc){

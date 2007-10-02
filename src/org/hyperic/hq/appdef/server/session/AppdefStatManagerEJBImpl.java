@@ -1385,13 +1385,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         throws AppdefEntityNotFoundException {
         switch (entityType) {
             case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
-                return getPlatformMgrLocal().findPlatformTypeById(resType);
+                return getPlatformMgrLocal().findPlatformType(resType);
             case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
                 return getServerMgrLocal().findServerType(resType);
             case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
                 return getServiceMgrLocal().findServiceType(resType);
+            default:
+                return null;
         }
-        return null;
     }
 
     private ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubjectValue

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.PlatformDAO;
@@ -64,10 +65,10 @@ public abstract class AppdefSessionUtil {
     private CPropManagerLocal           cpropLocal;
 
     protected CPropManagerLocal getCPropMgrLocal(){
-        if(this.cpropLocal == null){
-            this.cpropLocal = CPropManagerEJBImpl.getOne();
+        if(cpropLocal == null){
+            cpropLocal = CPropManagerEJBImpl.getOne();
         }
-        return this.cpropLocal;
+        return cpropLocal;
     }
 
     protected ConfigManagerLocal getConfigMgrLocal() {
@@ -170,38 +171,26 @@ public abstract class AppdefSessionUtil {
         Integer id = new Integer(appdefTypeId);
 
         if(appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
-            PlatformManagerLocal pmLocal;
-
-            pmLocal = this.getPlatformMgrLocal();
-            return pmLocal.findPlatformTypeValueById(id);
+            return getPlatformMgrLocal().findPlatformTypeValueById(id);
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER){
-            ServerManagerLocal smLocal;
-
-            smLocal = this.getServerMgrLocal();
             try {
-                return smLocal.findServerTypeById(id);
-            } catch(FinderException exc){
+                return getServerMgrLocal().findServerTypeById(id);
+            } catch(ObjectNotFoundException exc){
                 throw new ServerNotFoundException("Server type id=" +
                                                   appdefTypeId + 
                                                   " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
-            ServiceManagerLocal vmLocal;
-
-            vmLocal = this.getServiceMgrLocal();
             try {
-                return vmLocal.findServiceTypeById(id);
-            } catch(FinderException exc){
+                return getServiceMgrLocal().findServiceTypeById(id);
+            } catch(ObjectNotFoundException exc){
                 throw new ServiceNotFoundException("Service type id=" +
                                                    appdefTypeId +
                                                    " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            ApplicationManagerLocal amLocal;
-            
-            amLocal = this.getApplicationMgrLocal();
             try {
-                return amLocal.findApplicationTypeById(id);
+                return getApplicationMgrLocal().findApplicationTypeById(id);
             } catch(FinderException exc){
                 throw new ApplicationNotFoundException("App type id=" +
                                                        appdefTypeId + 

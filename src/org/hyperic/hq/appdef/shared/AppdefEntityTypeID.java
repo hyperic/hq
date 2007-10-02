@@ -27,16 +27,20 @@ package org.hyperic.hq.appdef.shared;
 
 import java.io.Serializable;
 
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 
 /**
  * 
- * An object to represent an appdef catalog type such as a ServerType or ServiceType
+ * An object to represent an appdef catalog type such as a ServerType or
+ * ServiceType
  * 
  */
 public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
 
-    
     public AppdefEntityTypeID(String id) {
         super(id);
     }
@@ -49,23 +53,22 @@ public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
         super(entityType, entityID);
     }
 
-    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+    public AppdefResourceType getAppdefResourceType() {
         try {
             // GROOOAAAN
-            Integer idInteger = new Integer(entityID);
-            switch(this.entityType) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return PlatformManagerUtil.getLocalHome().create()
-                                .findPlatformTypeValueById(idInteger);
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return ServerManagerUtil.getLocalHome().create()
-                                .findServerTypeById(idInteger);
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return ServiceManagerUtil.getLocalHome().create()
-                                .findServiceTypeById(idInteger);
-                default:
-                    throw new IllegalArgumentException("Invalud AppdefType: " +
-                            this.toString());
+            Integer idInteger = getId();
+            switch (getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return PlatformManagerEJBImpl.getOne()
+                        .findPlatformType(idInteger);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return ServerManagerEJBImpl.getOne().findServerType(idInteger);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return ServiceManagerEJBImpl.getOne()
+                        .findServiceType(idInteger);
+            default:
+                throw new IllegalArgumentException("Invalid AppdefType: " +
+                                                   this);
             }
         } catch (Exception e) {
             throw new SystemException(e);

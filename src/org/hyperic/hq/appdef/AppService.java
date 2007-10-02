@@ -194,8 +194,8 @@ public class AppService extends AppdefBean
      */
     public AppServiceValue getAppServiceValue()
     {
-        appServiceValue.setIsCluster(getIsCluster());
-        appServiceValue.setIsEntryPoint(getIsEntryPoint());
+        appServiceValue.setIsCluster(isIsCluster());
+        appServiceValue.setIsEntryPoint(isEntryPoint());
         appServiceValue.setId(getId());
         appServiceValue.setMTime(getMTime());
         appServiceValue.setCTime(getCTime());

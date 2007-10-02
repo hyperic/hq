@@ -166,18 +166,17 @@ public class AppServiceDAO extends HibernateDAO
             " OR " +
             "(r.instanceId=a.service.id and " +
             "r.resourceType.id=t.id AND t.name='covalentEAMService')))";
-
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
     }
 
-    public List findByApplication_orderType(Integer id)
+    public List findByApplication_orderType(Integer id, boolean asc)
     {
         String sql="select distinct a from AppService a " +
                    " join fetch a.serviceType st " +
                    "where a.application.id=? " +
-                   "order by st.name";
+                   "order by st.name " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();

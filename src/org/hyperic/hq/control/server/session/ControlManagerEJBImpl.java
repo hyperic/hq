@@ -297,7 +297,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      */
     public List getActions(AuthzSubjectValue subject, AppdefEntityTypeID aetid)
         throws PluginNotFoundException {
-        String pluginName = aetid.getAppdefResourceTypeValue().getName();        
+        String pluginName = aetid.getAppdefResourceType().getName();        
         return _controlManager.getActions(pluginName);
     }
 
@@ -350,9 +350,9 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public boolean isControlSupported (AuthzSubjectValue subject,
-                                       AppdefResourceTypeValue resType) {
+                                       String resType) {
         try {
-            _controlManager.getPlugin(resType.getName());
+            _controlManager.getPlugin(resType);
             return true;
         } catch (PluginNotFoundException e) {
             return false;

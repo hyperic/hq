@@ -241,13 +241,10 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public boolean isControlSupported (int sessionId, AppdefResourceValue res)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject;
-        
-        subject = sessionManager.getSubject(sessionId);
-
+        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
         return getControlManager().
             isControlSupported(subject,
-                               res.getAppdefResourceTypeValue());
+                               res.getAppdefResourceTypeValue().getName());
     }
 
     /**
@@ -257,17 +254,14 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     public boolean isControlSupported (int sessionId, AppdefEntityTypeID tid)
         throws SessionNotFoundException, SessionTimeoutException               
     {
-        AuthzSubjectValue subject;
-        
-        subject = sessionManager.getSubject(sessionId);
-
+        AuthzSubjectValue subject = sessionManager.getSubject(sessionId);
         return getControlManager().
-            isControlSupported(subject,
-                               tid.getAppdefResourceTypeValue());
+            isControlSupported(subject, tid.getAppdefResourceType().getName());
     }
 
     /**
      * Check if anything has been enabled for control
+     * 
      * @ejb:interface-method
      */
     public boolean isControlEnabled(int sessionId)

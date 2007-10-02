@@ -139,8 +139,8 @@ public class AIConversionUtil {
                                                          ServiceManagerLocal serviceMgr) 
         throws FinderException {
 
-        ServiceTypeValue stValue;
-        stValue = serviceMgr.findServiceTypeByName(aiservice.getServiceTypeName());
+        ServiceTypeValue stValue =
+            serviceMgr.findServiceTypeByName(aiservice.getServiceTypeName());
 
         ServiceValue service = new ServiceValue();
         service.setDescription(aiservice.getDescription());

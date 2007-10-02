@@ -229,7 +229,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                        Integer[] tids)
         throws TemplateNotFoundException, SessionTimeoutException,
                SessionNotFoundException {
-        String typeName = aetid.getAppdefResourceTypeValue().getName();
+        String typeName = aetid.getAppdefResourceType().getName();
         getTemplateManager().setDesignatedTemplates(typeName, tids);
     }
 
@@ -254,7 +254,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        String typeName = typeId.getAppdefResourceTypeValue().getName();
+        String typeName = typeId.getAppdefResourceType().getName();
         return getTemplateManager().findTemplates(typeName, category,
                                                   new Integer[] {}, pc);
     }

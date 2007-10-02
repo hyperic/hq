@@ -40,8 +40,8 @@ import org.hyperic.util.StringUtil;
 public class AppdefEntityID 
     implements Serializable
 { 
-    protected int entityType;   // APPDEF_TYPE_* from AppdefEntityConstants
-    protected int entityID;     // ID from the database
+    private int _entityType;   // APPDEF_TYPE_* from AppdefEntityConstants
+    private int _entityID;     // ID from the database
     
     /**
      * build an AppdefEntityID from a string key of the form:
@@ -61,22 +61,22 @@ public class AppdefEntityID
                 throw new InvalidAppdefTypeException("Invalid entity type: " +
                                                      id);
         
-            this.entityType = new Integer((String)typeList.get(0)).intValue();
-            this.entityID   = new Integer((String)typeList.get(1)).intValue();
+            _entityType = new Integer((String)typeList.get(0)).intValue();
+            _entityID   = new Integer((String)typeList.get(1)).intValue();
         } catch (NumberFormatException e) {
             throw new InvalidAppdefTypeException("Invalid entity type: " +
                                                  id);
         }
 
-        if(!AppdefEntityConstants.typeIsValid(entityType)){
+        if(!AppdefEntityConstants.typeIsValid(_entityType)){
             throw new InvalidAppdefTypeException("Invalid entity type: " +
-                                               entityType);
+                                               _entityType);
         }
     }
 
     public AppdefEntityID(int entityType, int entityID){
-        this.entityType = entityType;
-        this.entityID   = entityID;
+        _entityType = entityType;
+        _entityID   = entityID;
 
         if(!AppdefEntityConstants.typeIsValid(entityType)){
             throw new IllegalArgumentException("Invalid entity type: " +
@@ -90,21 +90,21 @@ public class AppdefEntityID
 
     public AppdefEntityID(ResourceValue rv) {
         String rtName = rv.getResourceTypeValue().getName();
-        this.entityID = rv.getInstanceId().intValue();
+        _entityID = rv.getInstanceId().intValue();
         if(rtName.equals(AuthzConstants.platformResType)) {
-            this.entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         }
         else if(rtName.equals(AuthzConstants.serverResType)) {
-            this.entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
         }
         else if(rtName.equals(AuthzConstants.serviceResType)) {
-            this.entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         }
         else if(rtName.equals(AuthzConstants.applicationResType)) {
-            this.entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
         }
         else if(rtName.equals(AuthzConstants.groupResType)) {
-            this.entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+            _entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
         } 
         else {
             throw new IllegalArgumentException(rtName + 
@@ -113,23 +113,23 @@ public class AppdefEntityID
     }
 
     public int getType(){
-        return this.entityType;
+        return _entityType;
     }
 
     public String getTypeName(){
-        return AppdefEntityConstants.typeToString(this.entityType);
+        return AppdefEntityConstants.typeToString(_entityType);
     }
 
     public int getID(){
-        return this.entityID;
+        return _entityID;
     }
 
     public Integer getId(){
-        return new Integer(this.entityID);
+        return new Integer(_entityID);
     }
 
     public String getAppdefKey(){
-        return this.entityType + ":" + this.entityID;
+        return _entityType + ":" + _entityID;
     }
 
     /**
@@ -179,46 +179,46 @@ public class AppdefEntityID
      * @return true if this entity refers to a platform, false otherwise.
      */
     public boolean isPlatform () { 
-        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM; 
+        return getType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM; 
     }
 
     /** Convenience method to check if this is a server
      * @return true if this entity refers to a server, false otherwise. */
     public boolean isServer () { 
-        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER; 
+        return getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER; 
     }
 
     /** Convenience method to check if this is a service
      * @return true if this entity refers to a service, false otherwise. */
     public boolean isService () { 
-        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE; 
+        return getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE; 
     }
 
     /** Convenience method to check if this is a application
      * @return true if this entity refers to a application, false otherwise. */
     public boolean isApplication () { 
-        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+        return getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
     }
 
     /** Convenience method to check if this is a group
      * @return true if this entity refers to a group, false otherwise. */
     public boolean isGroup () { 
-        return this.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP; 
+        return getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP; 
     }
 
     public String toString(){
-        return this.getAppdefKey();
+        return getAppdefKey();
     }
 
     public boolean equals(Object other){
         AppdefEntityID othObj = (AppdefEntityID)other;
 
-        return (othObj.entityType == this.entityType &&
-                othObj.entityID   == this.entityID);
+        return (othObj._entityType == _entityType &&
+                othObj._entityID   == _entityID);
     }
 
     public int hashCode(){
-        return this.entityType * this.entityID;
+        return _entityType * _entityID;
     }
 
     public static AppdefEntityID newPlatformID(int id) {
@@ -227,13 +227,11 @@ public class AppdefEntityID
     }
 
     public static AppdefEntityID newServerID(int id) {
-        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, 
-                                  id);
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, id);
     }
 
     public static AppdefEntityID newServiceID(int id) {
-        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, 
-                                  id);
+        return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,id);
     }
 
     public static AppdefEntityID newAppID(int id) {

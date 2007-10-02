@@ -56,7 +56,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.IpValue;
-import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -92,13 +91,11 @@ import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
@@ -130,24 +127,19 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Find a PlatformType by id
      * @ejb:interface-method
      */
-    public PlatformType findPlatformTypeById(Integer id)
-        throws PlatformNotFoundException 
-    {
-        PlatformType res = getPlatformTypeDAO().get(id); 
-
-        if (res == null)
-            throw new PlatformNotFoundException(id);
-        return res;
+    public PlatformType findPlatformType(Integer id)
+        throws ObjectNotFoundException {
+        return getPlatformTypeDAO().findById(id); 
     }
 
     /**
      * Find a PlatformTypeValue by id.
-     * @deprecated Use findPlatformTypeById instead.
+     * @deprecated Use findPlatformType instead.
      * @ejb:interface-method
      */
     public PlatformTypeValue findPlatformTypeValueById(Integer id)
-        throws PlatformNotFoundException {
-        return findPlatformTypeById(id).getPlatformTypeValue();
+        throws ObjectNotFoundException {
+        return findPlatformType(id).getPlatformTypeValue();
     }
 
     /**
@@ -215,7 +207,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public String getPlatformPluginName(AppdefEntityID id) 
         throws AppdefEntityNotFoundException 
     {
-        PlatformLightValue pv;
+        Platform p;
         String typeName;
 
         if (id.isService()) {
@@ -225,7 +217,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if (service == null)
                 throw new ServiceNotFoundException(id);
                 
-            pv = service.getServer().getPlatform().getPlatformLightValue();
+            p = service.getServer().getPlatform();
             typeName = service.getServiceType().getName();
         } else if (id.isServer()) {
             // look up the server
@@ -233,12 +225,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             if (server == null)
                 throw new ServerNotFoundException(id);
-            pv = server.getPlatform().getPlatformLightValue();
+            p = server.getPlatform();
             typeName = server.getServerType().getName();
         } else if (id.isPlatform()) {
-            Platform platform = findPlatformById(id.getId());
-            pv = platform.getPlatformLightValue();    
-            typeName = pv.getPlatformType().getName();
+            p = findPlatformById(id.getId());
+            typeName = p.getPlatformType().getName();
         } else if(id.isGroup()) {
             try {
                 AppdefGroupValue agv = AppdefGroupManagerEJBImpl.getOne()
@@ -256,7 +247,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if (id.isPlatform()) {
             return typeName;
         } else {
-            return typeName + " " + pv.getPlatformType().getName();
+            return typeName + " " + p.getPlatformType().getName();
         }
     }
 
@@ -440,7 +431,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                   AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
-        this.counter.addCPUs(aipValue.getCpuCount().intValue());
+        counter.addCPUs(aipValue.getCpuCount().intValue());
 
         PlatformTypeDAO ptDAO = 
             DAOFactory.getDAOFactory().getPlatformTypeDAO();
@@ -553,13 +544,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get platform light value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public PlatformLightValue getPlatformLightValue(AuthzSubjectValue subject,
-                                                    Integer id)
+    public Platform getPlatformById(AuthzSubjectValue subject, Integer id)
         throws PlatformNotFoundException, PermissionException 
     {
         Platform platform = findPlatformById(id);
         checkViewPermission(subject, platform.getEntityId());
-        return platform.getPlatformLightValue();
+        return platform;
     }
 
     /**
@@ -635,10 +625,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new PlatformNotFoundException("platform " + name +
                                                 " not found");
         }
-        PlatformValue platformValue = p.getPlatformValue();
         // now check if the user can see this at all
-        checkViewPermission(subject, platformValue.getEntityId());
-        return platformValue;
+        checkViewPermission(subject, p.getEntityId());
+        return p.getPlatformValue();
     }
 
     /**
@@ -701,7 +690,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public Collection getPlatformPksByAgentToken(AuthzSubjectValue subject,
-                                                String agentToken)
+                                                 String agentToken)
         throws PlatformNotFoundException
     {
         Collection platforms = getPlatformDAO().findByAgentToken(agentToken);
@@ -734,10 +723,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new PlatformNotFoundException(
                 "platform for service " + serviceId + " not found");
         }
-        PlatformValue platformValue = p.getPlatformValue();
         // now check if the user can see this at all
-        checkViewPermission(subject, platformValue.getEntityId());
-        return platformValue;
+        checkViewPermission(subject, p.getEntityId());
+        return p.getPlatformValue();
     }
     
     /**
@@ -778,9 +766,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
 
         Platform p = server.getPlatform();
-        PlatformValue platformValue = p.getPlatformValue();
-        checkViewPermission(subject, platformValue.getEntityId());
-        return platformValue;
+        checkViewPermission(subject, p.getEntityId());
+        return p.getPlatformValue();
     }
 
     /**
@@ -879,7 +866,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         while (it != null && it.hasNext()) {
             AppService appService = (AppService) it.next();
 
-            if (appService.getIsCluster()) {
+            if (appService.isIsCluster()) {
                 Collection services =
                     appService.getServiceCluster().getServices();
 
@@ -1018,7 +1005,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     existing.getId(), AuthzConstants.platformOpModifyPlatform);
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
-            this.trimStrings(existing);
+            trimStrings(existing);
 
             Platform plat = getPlatformDAO().findById(existing.getId());
 
@@ -1034,7 +1021,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 int newCount = existing.getCpuCount().intValue();
                 int prevCpuCount = plat.getCpuCount().intValue();
                 if (newCount > prevCpuCount) {
-                    this.counter.addCPUs(newCount - prevCpuCount);
+                    counter.addCPUs(newCount - prevCpuCount);
                 }
                 
                 if( !(existing.getName().equals(plat.getName()))) { 
@@ -1191,15 +1178,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * has the createPlatform permission.
      * @param subject - the user creating
      */
-    private void createAuthzPlatform(String platName,
-                                     Integer platId,
+    private void createAuthzPlatform(String platName, Integer platId,
                                      AuthzSubjectValue subject)
         throws CreateException, NamingException, FinderException,
                PermissionException {
         _log.debug("Begin Authz CreatePlatform");
         // check to make sure the user has createPlatform permission
         // on the root resource type
-        this.checkCreatePlatformPermission(subject);
+        checkCreatePlatformPermission(subject);
         _log.debug("User has permission to create platform. Adding AuthzResource");
         createAuthzResource(subject, getPlatformResourceType(),platId,
                             platName);
@@ -1264,7 +1250,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
                     // Remove all services
                     for (Iterator pltIt = ptlocal.getPlatforms().iterator();
-                    pltIt.hasNext(); ) {
+                         pltIt.hasNext();) {
                         Platform pltLocal = (Platform) pltIt.next();
                         try {
                             removePlatform(overlord, pltLocal);
@@ -1341,8 +1327,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         int prevCpuCount = pLocal.getCpuCount().intValue();
         Integer count = aiplatform.getCpuCount();
         if ((count != null) && (count.intValue() > prevCpuCount)) {
-            this.counter.addCPUs(
-                aiplatform.getCpuCount().intValue() - prevCpuCount);
+            counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
         pLocal.updateWithAI(aiplatform, owner);
     }

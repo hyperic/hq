@@ -32,8 +32,13 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -137,18 +142,15 @@ public class AppdefEntityValue {
 
     private AppdefResourceValue getPlatform(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(platform == null){
-            Integer aId = _id.getId();
-
+        if (platform == null) {
             if (full) {
-                platform =
-                    getPlatformManager().getPlatformValueById(_subject,
-                                                                   aId);
+                Platform p = getPlatformManager().getPlatformById(_subject,
+                                                                  _id.getId());
+                platform = p.getPlatformValue();
             }
             else {
-                return
-                    getPlatformManager().getPlatformLightValue(_subject,
-                                                                    aId);
+                Platform p = getPlatformManager().findPlatformById(_id.getId());
+                return p.getPlatformLightValue();
             }
         } 
         return platform;
@@ -159,24 +161,15 @@ public class AppdefEntityValue {
                PermissionException {
         if(application == null){
             Integer aId = _id.getId();
-
-            application = 
-                getApplicationManager().getApplicationById(
-                    _subject, aId);
+            application = getApplicationManager().getApplicationById(_subject,
+                                                                     aId);
         } 
         return application;
     }
     
     private ServerManagerLocal getServerManager() {
         if(serverManagerLocal == null){
-            try {
-                serverManagerLocal = 
-                    ServerManagerUtil.getLocalHome().create();
-            } catch (CreateException e) {
-                throw new SystemException(e);
-            } catch (NamingException e) {
-                throw new SystemException(e);
-            }
+            serverManagerLocal = ServerManagerEJBImpl.getOne();
         }
         return serverManagerLocal;
     }
@@ -188,33 +181,25 @@ public class AppdefEntityValue {
 
     private AppdefResourceValue getServer(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
-        if(server == null){
-            Integer aId = _id.getId();
-
+        if (server == null) {
             if (full) {
-                server = 
-                    getServerManager().getServerById(_subject, aId);
+                Server s = getServerManager().getServerPOJOById(_subject,
+                                                                _id.getId());
+                server = s.getServerValue();
             }
             else {
-                return getServerManager().getServerLightValue(_subject,
-                                                                   aId);
+                Server s = getServerManager().findServerById(_id.getId());
+                return s.getServerLightValue();
             }
         } 
         return server;
     }
 
     private ServiceManagerLocal getServiceManager() {
-        try {
-            if(serviceManagerLocal == null){
-                serviceManagerLocal = 
-                    ServiceManagerUtil.getLocalHome().create();
-            }
-            return serviceManagerLocal;
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        if(serviceManagerLocal == null){
+            serviceManagerLocal = ServiceManagerEJBImpl.getOne();
         }
+        return serviceManagerLocal;
     }
 
     private ServiceType getServiceType()
@@ -225,15 +210,12 @@ public class AppdefEntityValue {
     private AppdefResourceValue getService(boolean full)
         throws AppdefEntityNotFoundException, PermissionException {
         if(service == null){
-            Integer aId = _id.getId();
-
+            Service s = getServiceManager().getServiceById(_id.getId());
             if (full) {
-                service = 
-                    getServiceManager().getServiceById(_subject, aId);
+                service = s.getServiceValue();
             }
             else {
-                return getServiceManager().getServiceLightValue(_subject,
-                                                                     aId);
+                return s.getServiceLightValue();
             }
         } 
         return service;

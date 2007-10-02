@@ -1763,14 +1763,14 @@ public class AppdefBossEJBImpl
         try {
             AuthzSubjectValue subject = manager.getSubject(sessionId);
 
-            ServiceValue updated
+            Service updated
                 = getServiceManager().updateService(subject, aService);
 
             if(cProps != null ) {
                 AppdefEntityID entityId = aService.getEntityId();
                 setCPropValues(subject, entityId, cProps);
             }
-            return updated;
+            return updated.getServiceValue();
         } catch (Exception e) {
             log.error("Error updating service: " + aService.getId());
             this.rollback();
