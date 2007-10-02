@@ -38,7 +38,6 @@
         <!-- DASHBOARD FORMS -->
         <form-bean name="DashboardForm"
                    type="org.hyperic.hq.ui.action.portlet.DashboardForm"/>
-
         <form-bean name="LayoutForm"
                    type="org.hyperic.hq.ui.action.portlet.admin.PortalPropertiesForm"/>                   
         <form-bean name="AddPortletForm"
@@ -1179,8 +1178,8 @@
 
       <action path="/resource/server/control/RemoveHistory"
               type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
-              name="RemoveControlForm"
               scope="request"
+              name="RemoveControlForm"
               input="/resource/server/Control.do?mode=history">
         <forward name="failure" path="/resource/server/Control.do?mode=history" redirect="true" />
         <forward name="success" path="/resource/server/Control.do?mode=history" redirect="true" />
@@ -1752,12 +1751,21 @@
       <action path="/DashboardController"
               name="DashboardForm"
               scope="request"
+              input="/Dashboard.do"
               type="org.hyperic.hq.ui.action.portlet.DisplayDashboardAction">
         <set-property property="title" value="Dashboard"/> 
       </action>
       
       <action path="/Dashboard"
-              forward=".portal.dash.layout">   
+              forward=".portal.dash.layout">  
+      </action>
+      
+      <action path="/SetDashboard"
+            type="org.hyperic.hq.ui.action.portlet.SetDashboardAction"
+            name="DashboardForm"
+            scope="request"
+            input="/Dashboard.do">
+            <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
 
       <action path="/dashboard/Admin"
