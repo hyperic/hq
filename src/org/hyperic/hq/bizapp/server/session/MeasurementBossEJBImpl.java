@@ -42,6 +42,7 @@ import java.util.TreeMap;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
+import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -53,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
@@ -69,6 +71,7 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
@@ -2967,14 +2970,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public List findAGPlatformsCurrentHealthByType(int sessionId,
                                                    Integer platTypeId)
         throws SessionTimeoutException, SessionNotFoundException,
-               InvalidAppdefTypeException, AppdefEntityNotFoundException,
-               PermissionException {
+               InvalidAppdefTypeException, PermissionException,
+               AppdefEntityNotFoundException {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
-        PageList platforms;
-        PageControl pc = PageControl.PAGE_ALL;
-        
-        platforms = getPlatformManager()
-            .findPlatformsByType(subject, platTypeId, pc);
+        PlatformManagerLocal platMan = getPlatformManager();
+        PlatformType pt = platMan.findPlatformType(platTypeId);
+        PageList platforms = platMan.getPlatformsByType(subject, pt.getName());
         
         // Return a paged list of current health        
         return getResourcesCurrentHealth(subject, platforms);

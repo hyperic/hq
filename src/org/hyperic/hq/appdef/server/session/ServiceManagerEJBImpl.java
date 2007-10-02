@@ -752,10 +752,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public List getServicesByType(AuthzSubjectValue subject, String svcName) 
-        throws PermissionException, FinderException {
+        throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = getServiceTypeDAO().findByName(svcName);
         if (st == null) {
-            throw new FinderException("service type not found: "+ svcName);
+            throw new InvalidAppdefTypeException("service type not found: " +
+                                                 svcName);
         }
     
         try {

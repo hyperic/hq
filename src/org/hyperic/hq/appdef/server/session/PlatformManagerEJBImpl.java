@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -939,12 +940,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList findPlatformsByType(AuthzSubjectValue subject,
-                                        Integer platTypeId,
-                                        PageControl pc)
-        throws PermissionException {
+    public PageList getPlatformsByType(AuthzSubjectValue subject, String type)
+        throws PermissionException, InvalidAppdefTypeException {
         try {
-            Collection platforms = getPlatformDAO().findByType(platTypeId);
+            PlatformType ptype = getPlatformTypeDAO().findByName(type);
+            if (ptype == null) {
+                throw new InvalidAppdefTypeException("name not found: " + type);
+            }
+
+            Collection platforms = getPlatformDAO().findByType(ptype.getId());
             if (platforms.size() == 0) {
                 // There are no viewable platforms
                 return new PageList();
@@ -961,7 +965,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 }
             }
         
-            return valuePager.seek(platforms, pc);
+            return valuePager.seek(platforms, PageControl.PAGE_ALL);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (FinderException e) {

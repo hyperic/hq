@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -860,10 +861,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public List getServersByType( AuthzSubjectValue subject, Integer typeId)
-        throws PermissionException {
+    public List getServersByType( AuthzSubjectValue subject, String name)
+        throws PermissionException, InvalidAppdefTypeException {
         try {
-            Collection servers = getServerDAO().findByType(typeId);
+            ServerType ejb = getServerTypeDAO().findByName(name);
+            if (ejb == null) {
+                throw new InvalidAppdefTypeException("name not found: " + name);
+            }
+            
+            Collection servers = getServerDAO().findByType(ejb.getId());
 
             List authzPks = getViewableServers(subject);        
             for(Iterator i = servers.iterator(); i.hasNext();) {
