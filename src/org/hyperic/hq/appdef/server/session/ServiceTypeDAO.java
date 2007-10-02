@@ -30,7 +30,6 @@ import java.util.Collection;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ServiceTypeDAO extends HibernateDAO
@@ -54,32 +53,11 @@ public class ServiceTypeDAO extends HibernateDAO
         super.remove(entity);        
     }
 
-    private ServiceType createServiceType(ServiceTypeValue stv) {
-        ServiceType st = new ServiceType();
-        st.setName(stv.getName());
-        st.setDescription(stv.getDescription());
-        st.setIsInternal(stv.getIsInternal());
-        st.setPlugin(stv.getPlugin());
-        return st;
-    }
-
     ServiceType create(ServiceType st) {
         save(st);
         return st;
     }
     
-    /**
-     * Create a service type for this server type
-     */
-    ServiceType createServiceType(ServerType srvtp, ServiceTypeValue stv) {
-        // first create the service type
-        ServiceType st = createServiceType(stv);
-        // now set the server type to this
-        st.setServerType(srvtp);
-        save(st);
-        return st;
-    }
-
     public ServiceType findByName(String name) {
         String sql="from ServiceType where sortName=?";
         return (ServiceType)getSession().createQuery(sql)

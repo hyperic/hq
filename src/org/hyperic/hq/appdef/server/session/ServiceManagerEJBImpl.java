@@ -54,7 +54,6 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -288,32 +287,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
         serviceList.setTotalSize(serviceIds.length);
         return serviceList;
-    }
-
-    /**
-     * Create a service type supported by a specific server type
-     * @ejb:interface-method
-     */
-    public Integer createServiceType(AuthzSubjectValue subject,
-        ServiceTypeValue stv, ServerTypeValue serverType) 
-        throws CreateException, ValidationException {
-        try {
-            if(log.isDebugEnabled()) {
-                log.debug("Begin createServiceType: " +  stv);
-            }
-            validateNewServiceType(stv, serverType);
-            // first look up the parent server
-            ServerType servType =
-                getServerTypeDAO().findById(serverType.getId());
-
-            // now create the service type on it
-            ServiceType stype =
-                getServiceTypeDAO().createServiceType(servType, stv);
-            return stype.getId();
-        } catch (ObjectNotFoundException e) {
-            throw new CreateException("Unable to find Parent Server Type: " +
-                                      e.getMessage());
-        }
     }
 
     /**
@@ -1315,24 +1288,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             service.setModifiedBy(who.getName());
         } catch (NamingException e) {
             throw new SystemException(e);
-        }
-    }
-
-
-    private void validateNewServiceType(ServiceTypeValue stv,
-                                        ServerTypeValue serverType) 
-        throws ValidationException {
-
-        String msg = null;
-        // check if its new
-        if(stv.idHasBeenSet()) {
-            msg = "This ServiceType is not new. It has id: " + stv.getId();
-        }
-        else {
-            // insert validation here
-        }
-        if(msg != null) {
-            throw new ValidationException(msg);
         }
     }
 
