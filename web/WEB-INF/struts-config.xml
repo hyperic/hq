@@ -36,6 +36,9 @@
         <!-- / -->
                  
         <!-- DASHBOARD FORMS -->
+        <form-bean name="DashboardForm"
+                   type="org.hyperic.hq.ui.action.portlet.DashboardForm"/>
+
         <form-bean name="LayoutForm"
                    type="org.hyperic.hq.ui.action.portlet.admin.PortalPropertiesForm"/>                   
         <form-bean name="AddPortletForm"
@@ -1747,6 +1750,8 @@
 
       <!-- DASHBOARD ACTIONS -->           
       <action path="/DashboardController"
+              name="DashboardForm"
+              scope="request"
               type="org.hyperic.hq.ui.action.portlet.DisplayDashboardAction">
         <set-property property="title" value="Dashboard"/> 
       </action>
