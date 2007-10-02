@@ -36,7 +36,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,10 +67,11 @@ public class PrepareAction extends TilesAction {
         Log log = LogFactory.getLog(PrepareAction.class.getName());
         log.trace("getting saved charts associated with user ");
 
+        ConfigResponse userDashPrefs = (ConfigResponse) request.getSession().getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser)
             request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
         List chartList = StringUtil.explode(
-            user.getPreference(Constants.USER_DASHBOARD_CHARTS), 
+        		userDashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 
             StringConstants.DASHBOARD_DELIMITER);
 
         ArrayList charts = new ArrayList();

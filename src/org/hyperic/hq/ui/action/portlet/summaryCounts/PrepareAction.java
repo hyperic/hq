@@ -46,6 +46,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -79,18 +80,19 @@ public class PrepareAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx); 
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         HttpSession session = request.getSession();
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
 
-        boolean application = new Boolean( user.getPreference(".dashContent.summaryCounts.application")).booleanValue();
-        boolean platform =  new Boolean( user.getPreference(".dashContent.summaryCounts.platform")).booleanValue();             
-        boolean server = new Boolean( user.getPreference(".dashContent.summaryCounts.server")).booleanValue();
-        boolean service = new Boolean( user.getPreference(".dashContent.summaryCounts.service")).booleanValue();
-        boolean cluster = new Boolean( user.getPreference(".dashContent.summaryCounts.group.cluster")).booleanValue();
+        boolean application = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
+        boolean platform =  new Boolean(userDashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();             
+        boolean server = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
+        boolean service = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
+        boolean cluster = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
 
-        boolean groupMixed= new Boolean( user.getPreference(".dashContent.summaryCounts.group.mixed")).booleanValue();
-        boolean groupGroups = new Boolean( user.getPreference(".dashContent.summaryCounts.group.groups")).booleanValue();
-        boolean groupPlatServerService = new Boolean( user.getPreference(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
-        boolean groupApplication = new Boolean( user.getPreference(".dashContent.summaryCounts.group.application")).booleanValue();
+        boolean groupMixed= new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
+        boolean groupGroups = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
+        boolean groupPlatServerService = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
+        boolean groupApplication = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.application")).booleanValue();
 
 
         pForm.setApplication(application);
@@ -104,11 +106,11 @@ public class PrepareAction extends BaseAction {
         pForm.setGroupPlatServerService(groupPlatServerService);
         pForm.setGroupApplication(groupApplication);
 
-        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", user);            
-        String[] platformTypes =    getStringArray(".dashContent.summaryCounts.platformTypes", user);            
-        String[] serverTypes =      getStringArray(".dashContent.summaryCounts.serverTypes", user);
-        String[] serviceTypes =     getStringArray(".dashContent.summaryCounts.serviceTypes", user );
-        String[] clusterTypes =     getStringArray(".dashContent.summaryCounts.group.clusterTypes", user);
+        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", userDashPrefs);            
+        String[] platformTypes =    getStringArray(".dashContent.summaryCounts.platformTypes", userDashPrefs);            
+        String[] serverTypes =      getStringArray(".dashContent.summaryCounts.serverTypes", userDashPrefs);
+        String[] serviceTypes =     getStringArray(".dashContent.summaryCounts.serviceTypes", userDashPrefs);
+        String[] clusterTypes =     getStringArray(".dashContent.summaryCounts.group.clusterTypes", userDashPrefs);
 
 
         pForm.setApplicationTypes(applicationTypes);
@@ -126,8 +128,8 @@ public class PrepareAction extends BaseAction {
 
     }
     
-    private String[] getStringArray(String preference, WebUser user) throws Exception{
-        List preferences = StringUtil.explode(user.getPreference(preference), "," );
+    private String[] getStringArray(String preference, ConfigResponse config) throws Exception{
+        List preferences = StringUtil.explode(config.getValue(preference), "," );
         
         int element;
         Iterator i;

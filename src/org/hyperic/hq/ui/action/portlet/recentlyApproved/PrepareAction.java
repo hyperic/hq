@@ -36,6 +36,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends BaseAction {
 
@@ -48,10 +49,11 @@ public class PrepareAction extends BaseAction {
         PropertiesForm pForm = (PropertiesForm) form;
 
         HttpSession session = request.getSession();
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser) 
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
 
-        Integer range = new Integer(user.getPreference(PropertiesForm.RANGE));
+        Integer range = new Integer(userDashPrefs.getValue(PropertiesForm.RANGE));
 
         pForm.setRange(range);
 

@@ -51,6 +51,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -70,6 +71,7 @@ public class PrepareAction extends TilesAction {
 
         HttpSession session = request.getSession();
         int sessionId = RequestUtils.getSessionId(request).intValue();
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user =
             (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
         PropertiesForm pForm = (PropertiesForm) form;
@@ -95,18 +97,18 @@ public class PrepareAction extends TilesAction {
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
-        Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
-        String resourceType = user.getPreference(resTypeKey, "");
-        String metric = user.getPreference(metricKey, "");
-        String descending = user.getPreference(descendingKey, "true");
+        Integer numberToShow = new Integer(userDashPrefs.getValue(numKey, "10"));
+        String resourceType = userDashPrefs.getValue(resTypeKey, "");
+        String metric = userDashPrefs.getValue(metricKey, "");
+        String descending = userDashPrefs.getValue(descendingKey, "true");
         
-        pForm.setTitle(user.getPreference(titleKey, ""));
+        pForm.setTitle(userDashPrefs.getValue(titleKey, ""));
 
         pForm.setNumberToShow(numberToShow);
         pForm.setMetric(metric);
         pForm.setDescending(descending);
         
-        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, user);        
+        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, userDashPrefs);        
         AppdefEntityID[] aeids = (AppdefEntityID[])
             resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 

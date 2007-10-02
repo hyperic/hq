@@ -44,6 +44,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 
 import org.apache.struts.action.ActionForm;
@@ -70,6 +71,7 @@ public class PrepareAction extends TilesAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user =
             (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         PageList resources = new PageList();
         
         String token = pForm.getToken();
@@ -102,41 +104,41 @@ public class PrepareAction extends TilesAction {
         String priority;
         String selectedOrAll;
 
-        pForm.setTitle(user.getPreference(titleKey, ""));
+        pForm.setTitle(userDashPrefs.getValue(titleKey, ""));
         
         try {
-            numberOfAlerts = new Integer(user.getPreference(countKey));
+            numberOfAlerts = new Integer(userDashPrefs.getValue(countKey));
         } catch (InvalidOptionException e) {
             numberOfAlerts =
-                new Integer(user.getPreference(PropertiesForm.ALERT_NUMBER)); 
+                new Integer(userDashPrefs.getValue(PropertiesForm.ALERT_NUMBER)); 
         }
 
         try {
-            past = Long.parseLong(user.getPreference(timeKey));
+            past = Long.parseLong(userDashPrefs.getValue(timeKey));
         } catch (InvalidOptionException e) {
-            past = Long.parseLong(user.getPreference(PropertiesForm.PAST));
+            past = Long.parseLong(userDashPrefs.getValue(PropertiesForm.PAST));
         }
 
         try {
-            priority = user.getPreference(priorityKey);
+            priority = userDashPrefs.getValue(priorityKey);
         } catch (InvalidOptionException e) {
-            priority = user.getPreference(PropertiesForm.PRIORITY);
+            priority = userDashPrefs.getValue(PropertiesForm.PRIORITY);
         }
 
         try {
-            selectedOrAll = user.getPreference(selOrAllKey);
+            selectedOrAll = userDashPrefs.getValue(selOrAllKey);
         } catch (InvalidOptionException e) {
-            selectedOrAll = user.getPreference(PropertiesForm.SELECTED_OR_ALL);
+            selectedOrAll = userDashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL);
         }
 
-        DashboardUtils.verifyResources(resKey, ctx, user);
+        DashboardUtils.verifyResources(resKey, ctx, userDashPrefs, user);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
         pForm.setPriority(priority);
         pForm.setSelectedOrAll(selectedOrAll);
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, user);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, userDashPrefs);
         AppdefEntityID[] aeids = (AppdefEntityID[])
             entityIds.toArray(new AppdefEntityID[entityIds.size()]);
 

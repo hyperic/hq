@@ -35,6 +35,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends BaseAction {
 
@@ -57,24 +58,25 @@ public class PrepareAction extends BaseAction {
 
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
+        
         Integer lastCompleted = new Integer(
-                user.getPreference(".dashContent.controlActions.lastCompleted"));
+        		userDashPrefs.getValue(".dashContent.controlActions.lastCompleted"));
         Integer mostFrequent = new Integer(
-                user.getPreference(".dashContent.controlActions.mostFrequent"));
+        		userDashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
         Integer nextScheduled = new Integer(
-                user.getPreference(".dashContent.controlActions.nextScheduled"));
-        boolean useLastCompleted = Boolean.valueOf(user.
-            getPreference(".dashContent.controlActions.useLastCompleted")).
+        		userDashPrefs.getValue(".dashContent.controlActions.nextScheduled"));
+        boolean useLastCompleted = Boolean.valueOf(userDashPrefs.
+        		getValue(".dashContent.controlActions.useLastCompleted")).
             booleanValue();
-        boolean useMostFrequent = Boolean.valueOf(user.
-            getPreference(".dashContent.controlActions.useMostFrequent")).
+        boolean useMostFrequent = Boolean.valueOf(userDashPrefs.
+        		getValue(".dashContent.controlActions.useMostFrequent")).
             booleanValue();
-        boolean useNextScheduled = Boolean.valueOf(user.
-            getPreference(".dashContent.controlActions.useNextScheduled")).
+        boolean useNextScheduled = Boolean.valueOf(userDashPrefs.
+        		getValue(".dashContent.controlActions.useNextScheduled")).
             booleanValue();
         long past = Long.parseLong(
-            user.getPreference(".dashContent.controlActions.past"));
+        	userDashPrefs.getValue(".dashContent.controlActions.past"));
 
         pForm.setLastCompleted(lastCompleted);
         pForm.setMostFrequent(mostFrequent);

@@ -47,6 +47,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -82,12 +83,13 @@ public class PrepareAction extends TilesAction {
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
-        Integer numberToShow = new Integer(user.getPreference(numKey, "10"));
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
+        Integer numberToShow = new Integer(userDashPrefs.getValue(numKey, "10"));
         pForm.setNumberToShow(numberToShow);
 
-        pForm.setTitle(user.getPreference(titleKey, ""));
+        pForm.setTitle(userDashPrefs.getValue(titleKey, ""));
         
-        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, user);        
+        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, userDashPrefs);        
         AppdefEntityID[] aeids = (AppdefEntityID[])
             resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 

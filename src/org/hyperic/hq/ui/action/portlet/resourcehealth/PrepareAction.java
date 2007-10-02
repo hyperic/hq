@@ -36,6 +36,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -57,16 +58,16 @@ public class PrepareAction extends TilesAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
+        ConfigResponse userDashPrefs = (ConfigResponse) request.getSession().getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
-        DashboardUtils.verifyResources(key, ctx, user);
+        DashboardUtils.verifyResources(key, ctx, userDashPrefs, user);
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-
-        List resources = DashboardUtils.preferencesAsResources(key, ctx, user);
+        List resources = DashboardUtils.preferencesAsResources(key, ctx, user, userDashPrefs);
 
         Pager pendingPager = Pager.getDefaultPager();
         PageList viewableResourses = pendingPager.seek(resources,
