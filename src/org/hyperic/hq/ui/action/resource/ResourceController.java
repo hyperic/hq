@@ -180,15 +180,14 @@ public abstract class ResourceController extends BaseDispatchAction {
                 
                 // Add this resource to the recently used preference
                 WebUser user = SessionUtils.getWebUser(request.getSession());
-                HttpSession session = request.getSession(false);
                 ConfigResponse userPrefs = user.getPreferences();
                 
-                String origPref = userPrefs.getValue(Constants.USERPREF_KEY_RECENT_RESOURCES);
-                DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_RECENT_RESOURCES, userPrefs, entityId, 10);
-                String postPref = userPrefs.getValue(Constants.USERPREF_KEY_RECENT_RESOURCES);
-                if (!origPref.equals(postPref)) {
+                if (DashboardUtils.addEntityToPreferences(
+                        Constants.USERPREF_KEY_RECENT_RESOURCES, userPrefs,
+                        entityId, 10)) {
                 	AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-                	boss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), userPrefs);
+                	boss.setUserPrefs(user.getSessionId(),
+                                      user.getSubject().getId(), userPrefs);
                 }
             } catch (AppdefEntityNotFoundException aenf) {
                 RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);

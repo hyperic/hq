@@ -108,10 +108,12 @@ public class DashboardUtils {
         }
     }
     
-    public static List preferencesAsEntityIds(String key, ConfigResponse userConfig) {
+    public static List preferencesAsEntityIds(String key,
+                                              ConfigResponse userConfig) {
         try {
             List resourceList = 
-                userConfig.getPreferenceAsList(key, Constants.DASHBOARD_DELIMITER);
+                userConfig.getPreferenceAsList(key,
+                                               Constants.DASHBOARD_DELIMITER);
             return listAsEntityIds(resourceList);
         } catch (InvalidOptionException e) {
             return new ArrayList(0);
@@ -301,21 +303,37 @@ public class DashboardUtils {
                                                 Constants.DASHBOARD_DELIMITER));
     }
     
-    public static void addEntityToPreferences(String key, ConfigResponse userConfig,
-			AppdefEntityID newId, int max) throws Exception {
+    public static boolean addEntityToPreferences(String key,
+                                                 ConfigResponse userConfig,
+                                                 AppdefEntityID newId,
+                                                 int max) {
 		List existing = preferencesAsEntityIds(key, userConfig);
-		for (Iterator it = existing.iterator(); it.hasNext();) {
-			AppdefEntityID entityID = (AppdefEntityID) it.next();
-			if (entityID.equals(newId))
-				it.remove();
-		}
+        
+        int lastIdx = existing.lastIndexOf(newId);
+        if (existing.size() > 0 && lastIdx == (existing.size() - 1)) {
+            return false;       // Already the last one
+        }
+        
+        // Now add the new one
+        existing.add(newId);
 
-		// Now add the new one
-		existing.add(newId);
-		if (max < Integer.MAX_VALUE && existing.size() > max)
-			existing.remove(0);
+        if (lastIdx > -1) {
+            for (Iterator it = existing.iterator(); it.hasNext();) {
+                AppdefEntityID entityID = (AppdefEntityID) it.next();
+                if (entityID.equals(newId)) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        else {
+            if (max < Integer.MAX_VALUE && existing.size() > max)
+                existing.remove(0);    
+        }
 
 		userConfig.setValue(key, StringUtil.listToString(existing,
 				Constants.DASHBOARD_DELIMITER));
+        
+        return true;
 	}
 }

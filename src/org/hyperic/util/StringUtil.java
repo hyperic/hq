@@ -283,12 +283,14 @@ public class StringUtil {
 
     public static List explode(String s, String delim) {
         ArrayList res = new ArrayList();
-        StringTokenizer tok = new StringTokenizer(s, delim);
+        if (s != null) {
+            StringTokenizer tok = new StringTokenizer(s, delim);
 
-        while(tok.hasMoreTokens()) {
-            res.add(tok.nextToken());
+            while(tok.hasMoreTokens()) {
+                res.add(tok.nextToken());
+            }
         }
-
+        
         return res;
     }
 
