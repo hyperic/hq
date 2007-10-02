@@ -35,13 +35,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
+import org.hyperic.util.config.ConfigResponse;
 
 public class RemovePortletAction extends BaseAction {
 
@@ -59,15 +61,18 @@ public class RemovePortletAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
         String portletName = (String) request.getParameter(Constants.REM_PORTLET_PARAM) ;
-
-        DashboardUtils.removePortlet( user, portletName);
-
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
+        DashboardUtils.removePortlet( dashPrefs, portletName);
+        
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in RemovePortletAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + user.getPreferences());
-        boss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences() );
-
+            " user.prefs = " + dashPrefs.getKeys().toString());
+        
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 
         return mapping.findForward(Constants.AJAX_URL);

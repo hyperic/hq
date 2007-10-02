@@ -35,12 +35,17 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
+
 
 public class ReorderAction extends BaseAction {
 
@@ -54,6 +59,7 @@ public class ReorderAction extends BaseAction {
         WebUser user = SessionUtils.getWebUser(session);
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        Integer sessionId = RequestUtils.getSessionId(request);
         String narrowPortlets =
             request.getParameter("narrowList_true[]");
         String widePortlets =
@@ -83,12 +89,12 @@ public class ReorderAction extends BaseAction {
             ordPortlets.append(Constants.DASHBOARD_DELIMITER);
             ordPortlets.append(token);
         }
-        
+        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         // tokenize and reshuffle
-        if (!user.getPreference(columnKey).equals(ordPortlets.toString())) {
-            user.setPreference(columnKey, ordPortlets.toString());
-            boss.setUserPrefs(user.getSessionId(), user.getId(), 
-                              user.getPreferences());
+        if (!dashPrefs.getValue(columnKey).equals(ordPortlets.toString())) {
+        	dashPrefs.setValue(columnKey, ordPortlets.toString());
+        	ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
             session.removeAttribute(Constants.USERS_SES_PORTAL);
         }
         return mapping.findForward(Constants.AJAX_URL);

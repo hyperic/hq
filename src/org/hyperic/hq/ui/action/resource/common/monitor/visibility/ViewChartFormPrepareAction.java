@@ -77,9 +77,11 @@ import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -163,9 +165,10 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         // This was probably a bad favorites chart
         String query = request.getQueryString();
         HttpSession session = request.getSession();
+        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user =
             (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        String userCharts = user.getPreference(Constants.USER_DASHBOARD_CHARTS);
+        String userCharts = userDashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
         List chartList =
             StringUtil.explode(userCharts, Constants.DASHBOARD_DELIMITER);
         for (Iterator i = chartList.iterator(); i.hasNext();) {
@@ -176,9 +179,9 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 // Remove this and direct user to dash
                 userCharts = StringUtil.remove(userCharts, chart);
 
-                user.setPreference(Constants.USER_DASHBOARD_CHARTS, userCharts);
-                boss.setUserPrefs(user.getSessionId(), user.getId(),
-                                  user.getPreferences());
+                userDashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
+                
+                ConfigurationProxy.getInstance().setUserDashboardPreferences(userDashPrefs, boss, user );
                 request.setAttribute("toDashboard", "true");
                 return null;
             }

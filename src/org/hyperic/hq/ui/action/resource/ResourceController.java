@@ -32,11 +32,11 @@ import java.util.Properties;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -52,11 +53,13 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ActionUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.hq.ui.util.UIUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An abstract subclass of <code>BaseDispatchAction</code> that
@@ -95,7 +98,6 @@ public abstract class ResourceController extends BaseDispatchAction {
         ServletContext ctx = getServlet().getServletContext();            
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-
         AppdefEntityTypeID aetid = null;
         if (null == entityId || entityId instanceof AppdefEntityTypeID) {
             // this can happen if we're an auto-group of platforms
@@ -178,16 +180,15 @@ public abstract class ResourceController extends BaseDispatchAction {
                 
                 // Add this resource to the recently used preference
                 WebUser user = SessionUtils.getWebUser(request.getSession());
-                String origPref =
-                    user.getPreference(Constants.USERPREF_KEY_RECENT_RESOURCES);
-                DashboardUtils.addEntityToPreferences(
-                    Constants.USERPREF_KEY_RECENT_RESOURCES, user, entityId,
-                    10);
-                String postPref =
-                    user.getPreference(Constants.USERPREF_KEY_RECENT_RESOURCES);
+                HttpSession session = request.getSession(false);
+                ConfigResponse userPrefs = user.getPreferences();
+                
+                String origPref = userPrefs.getValue(Constants.USERPREF_KEY_RECENT_RESOURCES);
+                DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_RECENT_RESOURCES, userPrefs, entityId, 10);
+                String postPref = userPrefs.getValue(Constants.USERPREF_KEY_RECENT_RESOURCES);
                 if (!origPref.equals(postPref)) {
-                    authzBoss.setUserPrefs(sessionId, user.getId(),
-                                           user.getPreferences());
+                	AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+                	boss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), userPrefs);
                 }
             } catch (AppdefEntityNotFoundException aenf) {
                 RequestUtils.setError(request, Constants.ERR_RESOURCE_NOT_FOUND);
