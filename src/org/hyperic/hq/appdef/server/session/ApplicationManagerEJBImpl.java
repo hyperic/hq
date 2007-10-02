@@ -194,41 +194,36 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public ApplicationValue updateApplication(AuthzSubjectValue subject,
                                               ApplicationValue newValue)
-        throws ApplicationNotFoundException, 
-               PermissionException, UpdateException, 
-               AppdefDuplicateNameException, FinderException {
-        try {
-            Application app = getApplicationDAO().findById(newValue.getId());
-            checkModifyPermission(subject, app.getEntityId());
-            newValue.setModifiedBy(subject.getName());
-            newValue.setMTime(new Long(System.currentTimeMillis()));
-            trimStrings(newValue);
-            if(!newValue.getName().equals(app.getName())) {
-                // name has changed. check for duplicate and update authz 
-                // resource table
-                try {
-                    findApplicationByName(subject, newValue.getName());
-                    // duplicate found, throw a duplicate object exception
-                    throw new AppdefDuplicateNameException("there is already "
-                                                           + "an app named: '" 
-                                                           + app.getName() 
-                                                           + "'");
-                } catch (ApplicationNotFoundException e) {
-                    // ok
-                } catch (PermissionException e) {
-                    // fall through, will catch this later
-                }
-
-                ResourceValue rv = getAuthzResource(getApplicationResourceType(),
-                        newValue.getId());
-                rv.setName(newValue.getName());
-                updateAuthzResource(rv);
+        throws ApplicationNotFoundException, PermissionException,
+               UpdateException,  AppdefDuplicateNameException, FinderException {
+        Application app = getApplicationDAO().findById(newValue.getId());
+        checkModifyPermission(subject, app.getEntityId());
+        newValue.setModifiedBy(subject.getName());
+        newValue.setMTime(new Long(System.currentTimeMillis()));
+        trimStrings(newValue);
+        if(!newValue.getName().equals(app.getName())) {
+            // name has changed. check for duplicate and update authz 
+            // resource table
+            try {
+                findApplicationByName(subject, newValue.getName());
+                // duplicate found, throw a duplicate object exception
+                throw new AppdefDuplicateNameException("there is already "
+                                                       + "an app named: '" 
+                                                       + app.getName() 
+                                                       + "'");
+            } catch (ApplicationNotFoundException e) {
+                // ok
+            } catch (PermissionException e) {
+                // fall through, will catch this later
             }
-            getApplicationDAO().setApplicationValue(app, newValue);
-            return getApplicationById(subject, app.getId());
-        } catch (NamingException e) {
-            throw new SystemException(e);
+
+            ResourceValue rv = getAuthzResource(getApplicationResourceType(),
+                                                newValue.getId());
+            rv.setName(newValue.getName());
+            updateAuthzResource(rv);
         }
+        getApplicationDAO().setApplicationValue(app, newValue);
+        return getApplicationById(subject, app.getId());
     }
 
     /**
