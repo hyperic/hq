@@ -75,18 +75,19 @@ public class AppServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public AppService create(Integer spk, Integer apk,
-                             boolean entryPoint)
-    {
+    public AppService create(Integer spk, Integer apk, boolean entryPoint) {
         // reassociate service
-        Service s = DAOFactory.getDAOFactory().getServiceDAO()
-            .findById(spk);
+        Service s = new ServiceDAO(DAOFactory.getDAOFactory()).findById(spk);
+        return create(s, apk, entryPoint);
+    }
+
+    public AppService create(Service s, Integer apk, boolean entryPoint) {
         // reassociate application
-        Application ap = DAOFactory.getDAOFactory().getApplicationDAO()
+        Application ap = new ApplicationDAO(DAOFactory.getDAOFactory())
             .findById(apk);
 
         AppService a = new AppService();
-        a.setIsEntryPoint(entryPoint);
+        a.setEntryPoint(entryPoint);
         a.setService(s);
         a.setServiceType(s.getServiceType());
         a.setApplication(ap);
@@ -191,26 +192,6 @@ public class AppServiceDAO extends HibernateDAO
             .list();
     }
 
-    /**
-     * @deprecated use findByApplication_orderSvcName()
-     * @param id
-     * @return
-     */
-    public Collection findByApplication_orderSvcName_asc(Integer id)
-    {
-        return findByApplication_orderSvcName(id, true);
-    }
-
-    /**
-     * @deprecated use findByApplication_orderSvcName()
-     * @param id
-     * @return
-     */
-    public Collection findByApplication_orderSvcName_desc(Integer id)
-    {
-        return findByApplication_orderSvcName(id, false);
-    }
-
     public Collection findByApplication_orderSvcName(Integer id, boolean asc)
     {
         String sql=
@@ -221,26 +202,6 @@ public class AppServiceDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
-    }
-
-    /**
-     * @deprecated use findByApplication_orderSvcType()
-     * @param id
-     * @return
-     */
-    public Collection findByApplication_orderSvcType_asc(Integer id)
-    {
-        return findByApplication_orderSvcType(id, true);
-    }
-
-    /**
-     * @deprecated use findByApplication_orderSvcType()
-     * @param id
-     * @return
-     */
-    public Collection findByApplication_orderSvcType_desc(Integer id)
-    {
-        return findByApplication_orderSvcType(id, false);
     }
 
     public Collection findByApplication_orderSvcType(Integer id, boolean asc)
@@ -288,125 +249,27 @@ public class AppServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public AppSvcDependency addDependentService(Service s,
-                                                Integer appPK,
+    public AppSvcDependency addDependentService(Integer appSvcPK,
                                                 Integer depPK)
     {
-        // look for the app service for **this** Service
-        AppService appSvc = findByAppAndService(appPK, s.getId());
-        if (appSvc == null) {
-            // didnt find it... create it.
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK + " Service: " + s.getId());
-            appSvc =create(s.getId(), appPK, true);
-        }
-        // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndService(appPK, depPK);
-        if (depSvc == null) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK + " Service: " + s.getId());
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc = create(depPK, appPK, false);
-        }
-        // now we add the dependency
         AppSvcDependencyDAO depdao =
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        return depdao.create(appSvc, depSvc);
-    }
-
-    public AppSvcDependency addDependentServiceCluster(Service s,
-                                                       Integer appPK,
-                                                       Integer depPK)
-    {
-        // first we see if we can find an existing AppService object
-        // if we cant, we add it
+        
+        // Make sure there isn't already a dependency
+        AppSvcDependency depEJB =
+            depdao.findByDependentAndDependor(appSvcPK, depPK);
+        
+        if (depEJB != null) {
+            return depEJB;
+        }
 
         // look for the app service for **this** Service
-        AppService appSvc = findByAppAndService(appPK, s.getId());
-        if (appSvc == null) {
-            // didnt find it... create it.
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK + " Service: " + s.getId());
-            appSvc = create(s.getId(), appPK, true);
-        }
-        // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndCluster(appPK, depPK);
-        if (depSvc == null) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK + " ServiceCluster: " + s.getId());
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc = create(depPK, appPK);
-        }
-        // now we add the dependency
-        AppSvcDependencyDAO depdao =
-            DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        return depdao.create(appSvc, depSvc);
-    }
+        AppService appSvc = findById(appSvcPK);
 
-    /**
-     * add a dependent service of this cluster
-     */
-    public AppSvcDependency addDependentService(
-        ServiceCluster sc, Integer appPK, Integer depPK)
-    {
-        // look for the app service for **this** cluster
-        AppService appSvc = findByAppAndCluster(appPK, sc.getId());
-        if (appSvc == null) {
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK + " ServiceCluster: " + sc.getId());
-            appSvc = create(sc.getId(), appPK);
-        }
         // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndService(appPK, depPK);
-        if (depSvc == null) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK + " Service: " + depPK);
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc = create(depPK, appPK, false);
-        }
-        // now we add the dependency
-        AppSvcDependencyDAO depdao =
-            DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        return depdao.create(appSvc, depSvc);
-    }
+        AppService depSvc = findById(depPK);
 
-    /**
-     * add a dependent cluster of this cluster
-     */
-    public AppSvcDependency addDependentServiceCluster(
-        ServiceCluster sc, Integer appPK, Integer depPK)
-    {
-        // look for the app service for **this** cluster
-        AppService appSvc = findByAppAndCluster(appPK, sc.getId());
-        if (appSvc == null) {
-            // didnt find it... create it.
-            log.debug(
-                "Creating new app service object for Application: "
-                + appPK + " ServiceCluster: " + sc.getId());
-            appSvc = create(sc.getId(), appPK);
-        }
-        // try to find the app service for the dependent service
-        AppService depSvc = findByAppAndCluster(appPK, depPK);
-        if (depSvc == null) {
-            log.debug(
-                "Creating new dependent app service object for Application: "
-                + appPK+ " ServiceCluster: " + depPK);
-            // dependent services are not allowed to be entry points
-            // at least not here ;)
-            depSvc = create(depPK, appPK);
-        }
         // now we add the dependency
-        AppSvcDependencyDAO depdao =
-            DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
         return depdao.create(appSvc, depSvc);
     }
 }

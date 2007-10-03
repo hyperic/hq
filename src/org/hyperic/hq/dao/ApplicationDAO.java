@@ -117,10 +117,15 @@ public class ApplicationDAO extends HibernateDAO
         List nodes = newTree.getNodes();
         AppSvcDependencyDAO adao =
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        for(int i=0; i < nodes.size(); i++) {
-            DependencyNode aNode = (DependencyNode)nodes.get(i);
+        ServiceClusterDAO scdao =
+            DAOFactory.getDAOFactory().getServiceClusterDAO();
+        ServiceDAO sdao = DAOFactory.getDAOFactory().getServiceDAO();
+        AppServiceDAO asdao = DAOFactory.getDAOFactory().getAppServiceDAO();
+
+        for (int i = 0; i < nodes.size(); i++) {
+            DependencyNode aNode = (DependencyNode) nodes.get(i);
             // first deal with the removed dependencies for this node
-            for(int j=0; j < aNode.getRemovedChildren().size(); j++) {
+            for (int j = 0; j < aNode.getRemovedChildren().size(); j++) {
                 AppServiceValue removedAsv =
                     (AppServiceValue)aNode.getRemovedChildren().get(j);
                 // this dep has been removed
@@ -135,19 +140,13 @@ public class ApplicationDAO extends HibernateDAO
             }
             // now iterate over the new and existing deps
 
-            ServiceClusterDAO scdao =
-                DAOFactory.getDAOFactory().getServiceClusterDAO();
-            ServiceDAO sdao =
-                DAOFactory.getDAOFactory().getServiceDAO();
-            AppServiceDAO asdao =
-                DAOFactory.getDAOFactory().getAppServiceDAO();
             AppServiceValue nodeAsv = aNode.getAppService();
-            for(int j=0; j < aNode.getChildren().size(); j++) {
+            for (int j = 0; j < aNode.getChildren().size(); j++) {
                 AppServiceValue depAsv =
-                    (AppServiceValue)aNode.getChildren().get(j);
+                    (AppServiceValue) aNode.getChildren().get(j);
+                
                 // new dependency
                 if(nodeAsv.getIsCluster()) {
-
                     if(depAsv.getIsCluster()) {
                         scdao.findById(
                             aNode.getServiceClusterPK()).addDependentServiceCluster(
@@ -160,24 +159,15 @@ public class ApplicationDAO extends HibernateDAO
                                 depAsv.getService().getId());
                     }
                 } else {
-                    if(depAsv.getIsCluster()) {
-                        Service s = sdao.findById(aNode.getServicePK());
-                        asdao.addDependentServiceCluster(s,
-                                newTree.getAppPK(),
-                                depAsv.getServiceCluster().getId());
-                    } else {
-                        Service s = sdao.findById(aNode.getServicePK());
-                        asdao.addDependentService(s,
-                                newTree.getAppPK(),
-                                depAsv.getService().getId());
-                    }
+                    asdao.addDependentService(aNode.getAppService().getId(),
+                                              depAsv.getId());
                 }
             }
+            
             // finally set the entry point flag on the AppService
             boolean isEntryPoint = newTree.isEntryPoint(aNode.getAppService());
-            DAOFactory.getDAOFactory().getAppServiceDAO().findById(
-                aNode.getAppService().getId())
-                    .setIsEntryPoint(isEntryPoint);
+            asdao.findById(aNode.getAppService().getId())
+                    .setEntryPoint(isEntryPoint);
         }
     }
 
