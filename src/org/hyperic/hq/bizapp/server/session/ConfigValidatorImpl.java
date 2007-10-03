@@ -41,6 +41,9 @@ import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManagerUtil;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -56,6 +59,11 @@ public class ConfigValidatorImpl
         if(type.equals(ProductPlugin.TYPE_PRODUCT) || 
            type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
             updateMeasurementConfigs(subject, ids);
+        }
+
+        if(type.equals(ProductPlugin.TYPE_PRODUCT) ||
+           type.equals(ProductPlugin.TYPE_CONTROL)) {
+            updateControlConfigs(subject, ids);
         }
     }
 
@@ -141,6 +149,35 @@ public class ConfigValidatorImpl
                 throw new InvalidConfigException("Unable to modify config " +
                                                  "track config: " +
                                                  e.getMessage(), e);
+            }
+        }
+    }
+
+    private void updateControlConfigs(AuthzSubjectValue subject,
+                                      AppdefEntityID[] ids)
+        throws PermissionException, ConfigFetchException, EncodingException,
+               InvalidConfigException
+    {
+        ControlManagerLocal cLocal;
+
+        try {
+            cLocal = ControlManagerUtil.getLocalHome().create();
+        } catch(Exception exc){
+            throw new SystemException(exc);
+        }
+
+        for (int i=0; i<ids.length; i++) {
+            try {
+                cLocal.checkControlEnabled(subject, ids[i]);
+            } catch (PluginException e) {
+                // Not configured for control
+                continue;
+            }
+
+            try {
+                cLocal.configureControlPlugin(subject, ids[i]);
+            } catch (Exception e) {
+                throw new InvalidConfigException(e.getMessage());
             }
         }
     }
