@@ -925,6 +925,10 @@
 
     <hqplugin name="mysql"/>
 
+    <hqplugin name="generic"/>
+
+    <hqplugin name="samba"/>
+
     <hqplugin name="sybase"/>
 
     <hqplugin name="coldfusion"/>
