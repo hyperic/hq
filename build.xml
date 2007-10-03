@@ -203,7 +203,8 @@
              classpathref="alljars"/>
     <taskdef resource="org/hyperic/tools/ant/ant-tools.properties"
              classpathref="custom-ant-tasks.path"/>
-      
+    <taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc"
+             classpathref="custom-ant-tasks.path"/>
     <property name="init-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -1762,4 +1763,11 @@
     </javadoc>
   </target>
 
+  <target name="hqu-doc" depends="init,init-taskdefs">
+    <groovydoc destdir="${build.dir}/hqudoc"
+               sourcepath="${build.dir}/hq.ear/rendit_sys"
+               use="true"
+               windowtitle="groovydoc"
+               private="false"/>    
+  </target>
 </project>
