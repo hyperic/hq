@@ -39,7 +39,10 @@ import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
+import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManagerUtil;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
@@ -128,6 +131,14 @@ public class TrackerManagerEJBImpl
             throw new PluginException("Agent error: " + e.getMessage());
         } catch (AgentRemoteException e) {
             throw new PluginException("Agent error: " + e.getMessage());
+        }
+    }
+
+    public static TrackerManagerLocal getOne() {
+        try {
+            return TrackerManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 }
