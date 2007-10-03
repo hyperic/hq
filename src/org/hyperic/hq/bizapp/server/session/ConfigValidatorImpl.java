@@ -32,13 +32,10 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.product.ConfigTrackPlugin;
-import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
@@ -119,32 +116,7 @@ public class ConfigValidatorImpl
             // Metric configuration has been validated, check if we need
             // to enable or disable log and config tracking.
             try {
-                if(ConfigTrackPlugin.isEnabled(responses[i], 
-                                               ids[i].getType())) {
-                    trackerMan.trackPluginAdd(subject, ids[i],
-                                              ProductPlugin.TYPE_CONFIG_TRACK,
-                                              responses[i]);
-                } else {
-                    trackerMan.trackPluginRemove(subject, ids[i],
-                                                 ProductPlugin.
-                                                 TYPE_CONFIG_TRACK);
-                }
-            } catch (PluginException e) {
-                throw new InvalidConfigException("Unable to modify log " +
-                                                 "track config: " +
-                                                 e.getMessage(), e);
-            }
-
-            try {
-                if(LogTrackPlugin.isEnabled(responses[i], ids[i].getType())) {
-                    trackerMan.trackPluginAdd(subject, ids[i],
-                                              ProductPlugin.TYPE_LOG_TRACK,
-                                              responses[i]);
-                } else {
-                    trackerMan.trackPluginRemove(subject, ids[i],
-                                                 ProductPlugin.
-                                                 TYPE_LOG_TRACK);
-                }
+                trackerMan.toggleTrackers(subject, ids[i], responses[i]);
             } catch (PluginException e) {
                 throw new InvalidConfigException("Unable to modify config " +
                                                  "track config: " +

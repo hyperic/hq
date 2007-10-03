@@ -32,10 +32,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.util.config.ConfigResponse;
 
 class MeasurementEnabler 
     implements ZeventListener
@@ -45,6 +50,8 @@ class MeasurementEnabler
     public void processEvents(List events) {
         DerivedMeasurementManagerLocal dm = 
             DerivedMeasurementManagerEJBImpl.getOne();
+        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
+        TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
 
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             ResourceZevent z = (ResourceZevent)i.next();
@@ -58,6 +65,16 @@ class MeasurementEnabler
                 if (!isUpdate || dm.getEnabledMetricsCount(subject, id) == 0) {
                     _log.info("Enabling default metrics for [" + id + "]");
                     dm.enableDefaultMetrics(subject, id);
+
+                    // On initial creation of the service check if log or config
+                    // tracking is enabled.  If so, enable it.  We don't auto
+                    // enable log or config tracking for update events since
+                    // in the callback we don't know if that flag has changed.
+                    ConfigResponse c = 
+                        cm.getMergedConfigResponse(subject,
+                                                   ProductPlugin.TYPE_MEASUREMENT,
+                                                   id, true);
+                    tm.enableTrackers(subject, id, c);
                 } else {
                     _log.info("Rescheduling metric schedule for [" + id + "]");
                     dm.reschedule(id);

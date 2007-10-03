@@ -117,8 +117,6 @@ import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementArgValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.product.ConfigTrackPlugin;
-import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -3335,16 +3333,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     
         try {
-            if(ConfigTrackPlugin.isEnabled(response, id.getType())) {
-                trackManager.trackPluginRemove(subject, id,
-                                               ProductPlugin.
-                                               TYPE_CONFIG_TRACK);
-            }
-    
-            if(LogTrackPlugin.isEnabled(response, id.getType())) {
-                trackManager.trackPluginRemove(subject, id,
-                                               ProductPlugin.TYPE_LOG_TRACK);
-            }
+            trackManager.disableTrackers(subject, id, response);
         } catch (PluginException e) {
             // Not much we can do.. plugins will be removed on next
             // agent restart.
