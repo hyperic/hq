@@ -60,6 +60,8 @@ public class AppSvcDependencyDAO extends HibernateDAO
         a.setAppService(appSvc);
         a.setDependentService(depSvc);
         save(a);
+        
+        appSvc.getAppSvcDependencies().add(depSvc);
         return a;
     }
 
