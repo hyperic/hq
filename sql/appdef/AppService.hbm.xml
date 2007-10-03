@@ -42,7 +42,7 @@
       <column name="MODIFIED_BY" not-null="false" length="100"/>
     </property>
 
-    <property name="isEntryPoint" type="boolean">
+    <property name="entryPoint" type="boolean">
       <column name="FENTRY_POINT" not-null="true"/>
     </property>
 

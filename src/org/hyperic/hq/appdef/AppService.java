@@ -95,15 +95,6 @@ public class AppService extends AppdefBean
         return this.isCluster;
     }
 
-    /**
-     * @deprecated use isIsCluster()
-     * @return
-     */
-    public boolean getIsCluster()
-    {
-        return isIsCluster();
-    }
-
     public void setIsCluster(boolean isCluster)
     {
         this.isCluster = isCluster;
@@ -124,16 +115,7 @@ public class AppService extends AppdefBean
         return this.isEntryPoint;
     }
 
-    /**
-     * @deprecated use isEntryPoint()
-     * @return
-     */
-    public boolean getIsEntryPoint()
-    {
-        return isEntryPoint();
-    }
-
-    public void setIsEntryPoint(boolean entryPoint)
+    public void setEntryPoint(boolean entryPoint)
     {
         this.isEntryPoint = entryPoint;
     }
@@ -219,7 +201,7 @@ public class AppService extends AppdefBean
 
     public void setAppServiceValue(AppServiceValue value) {
         setIsCluster( value.getIsCluster() );
-        setIsEntryPoint( value.getIsEntryPoint() );
+        setEntryPoint( value.getIsEntryPoint() );
 
         if (value.getService() != null) {
             Integer i = value.getService().getId();

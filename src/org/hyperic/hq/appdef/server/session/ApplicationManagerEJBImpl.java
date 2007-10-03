@@ -339,8 +339,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         Integer pk = depTree.getApplication().getId();
         try {
             // find the app
-            Application app = getApplicationDAO()
-                .findById(pk);
+            Application app = getApplicationDAO().findById(pk);
             checkModifyPermission(subject, app.getEntityId());
             getApplicationDAO().setDependencyTree(app, depTree);
         } catch (ObjectNotFoundException e) {
