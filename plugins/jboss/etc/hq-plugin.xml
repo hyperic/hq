@@ -2,7 +2,6 @@
 
 <!DOCTYPE plugin [
   <!ENTITY hibernate-plugin SYSTEM "/etc/hibernate-plugin.xml">
-  <!ENTITY jgroups-plugin   SYSTEM "/etc/jgroups-plugin.xml">
 ]>
 
 <!--
@@ -470,6 +469,48 @@
   <metrics name="JBoss 4.0 Message Driven EJB"
            include="JBoss 3.2 Message Driven EJB"/>
 
+  <metrics name="jchannel">
+    <metric name="Availability"
+            template="${JCHANNEL_OBJECT_NAME}:Connected"
+            indicator="true"/>
+
+    <metric name="Number of Messages"
+            template="${JCHANNEL_OBJECT_NAME}:NumMessages"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Sent Messages"
+            template="${JCHANNEL_OBJECT_NAME}:SentMessages"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Sent Bytes"
+            template="${JCHANNEL_OBJECT_NAME}:SentBytes"
+            category="THROUGHPUT"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+    <metric name="Received Bytes"
+            template="${JCHANNEL_OBJECT_NAME}:ReceivedBytes"
+            category="THROUGHPUT"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="JCHANNEL_OBJECT_NAME"
+          value="JGroups:channel=%channel%"/>
+
+  <metrics name="JBoss 4.0 JGroups Channel" include="jchannel"/>
+
+  <filter name="JCHANNEL_OBJECT_NAME"
+          value="jboss.jgroups:type=channel,cluster=%cluster%"/>
+
+  <metrics name="JBoss 4.2 JGroups Channel" include="jchannel"/>
+
   <help name="header">
   <![CDATA[
     <p>
@@ -577,7 +618,19 @@
     </scan>
 
     &hibernate-plugin;
-    &jgroups-plugin;
+
+    <service name="JGroups Channel">
+      <property name="OBJECT_NAME"
+                value="JGroups:channel=%channel%"/>
+
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="channel"
+                description="Channel Name"
+                default=""/>
+      </config>
+    </service>
 
     <service name="Stateless Session EJB">
       <config include="EJB"/>
@@ -793,5 +846,17 @@
           version="4.2"
           include="4.0">
 
+    <service name="JGroups Channel">
+      <property name="OBJECT_NAME"
+                value="jboss.jgroups:type=channel,cluster=%cluster%"/>
+
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="cluster"
+                description="Cluster Name"
+                default="DefaultCluster"/>
+      </config>
+    </service>
   </server>
 </plugin>
