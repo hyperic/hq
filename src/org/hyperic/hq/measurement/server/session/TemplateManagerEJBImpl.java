@@ -261,11 +261,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     
         // Check filter types
         for (Iterator it = mts.iterator(); it.hasNext(); ) {
-            MeasurementTemplate tmpl = (MeasurementTemplate)it.next();
+            MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
 
             // First, keyword
             if (keyword != null && keyword.length() > 0) {
-                if (tmpl.getName().indexOf(keyword) < 0) {
+                if (tmpl.getName().toLowerCase().indexOf(keyword.toLowerCase())
+                        < 0) {
                     it.remove();
                     continue;
                 }
