@@ -114,7 +114,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         else {
             mtids = (Integer[]) tmpls.toArray(mtids);
             try {
-                mtVals = this.getTemplateManager()
+                mtVals = getTemplateManager()
                              .getTemplates(mtids, PageControl.PAGE_ALL);
             } catch (TemplateNotFoundException e) {
                 // Well, if we don't find it, *shrug*
@@ -163,7 +163,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         timer.reset();
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = this.getDataMan().getAggregateData(mtids, eids, begin, 
+        Map datamap = getDataMan().getAggregateData(mtids, eids, begin, 
                                                          end);
         
         if (log.isTraceEnabled()) {
@@ -173,8 +173,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     
         // Get the intervals, keyed by template ID's as well
         Map intervals = showNoCollect == null ? new HashMap() :
-            getDerivedMeasurementManager().findMetricIntervals(subject, aeids,
-                                                               mtids);
+            getMetricManager().findMetricIntervals(subject, aeids, mtids);
 
         for (it = mtVals.iterator(); it.hasNext(); ) {
             MeasurementTemplateValue tmpl =
@@ -203,7 +202,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     
             // Now create a MetricDisplaySummary and add it to the list
             MetricDisplaySummary summary =
-                this.getMetricDisplaySummary(tmpl, interval, begin, end,
+                getMetricDisplaySummary(tmpl, interval, begin, end,
                                              data, total);
 
             summaries.add(summary);
@@ -227,12 +226,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                      boolean showNoCollect)
         throws AppdefCompatException {
         // Need to get the templates for this type
-        List tmpls = this.getTemplateManager()
-            .findTemplates(resourceType, filters, keyword);
+        List tmpls = getTemplateManager().findTemplates(resourceType, filters,
+                                                        keyword);
     
         // Look up the metric summaries of associated servers
-        return this.getResourceMetrics(subject, resources, tmpls, begin, end,
-                                       new Boolean(showNoCollect));
+        return getResourceMetrics(subject, resources, tmpls, begin, end,
+                                  new Boolean(showNoCollect));
     }
 
     protected MetricDisplaySummary
@@ -306,7 +305,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                   AppdefEntityID parentAid,
                                   AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
-        return this.getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
+        return getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
     }
 
     protected List getAGMemberIds(AuthzSubjectValue subject,
@@ -367,7 +366,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         if (midMap.size() > 0) {
             Integer[] mids =
                 (Integer[]) midMap.values().toArray(new Integer[0]);
-            data = this.getDataMan().getLastDataPoints(mids, acceptable);
+            data = getDataMan().getLastDataPoints(mids, acceptable);
         }
     
         // Organize by agent
@@ -427,8 +426,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                                         AppdefEntityID id)
     {
         try {
-            return getDerivedMeasurementManager()
-                .getAvailabilityMeasurement(subject, id);
+            return getMetricManager().getAvailabilityMeasurement(subject, id);
         } catch (MeasurementNotFoundException e) {
             return null;
         }
@@ -437,26 +435,25 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected AppdefEntityID[] toAppdefEntityIDArray(List entities) {
         AppdefEntityID[] result = new AppdefEntityID[entities.size()];
         int idx = 0;
-        for (Iterator iter = entities.iterator();  iter.hasNext();) {
+        for (Iterator iter = entities.iterator(); iter.hasNext();) {
             Object thisThing = iter.next();
             if (thisThing instanceof AppdefResourceValue) {
-                result[idx++] = ((AppdefResourceValue)thisThing).getEntityId();                
+                result[idx++] = ((AppdefResourceValue) thisThing).getEntityId();
                 continue;
-            }             
-            result[idx++] = (AppdefEntityID)thisThing;
+            }
+            result[idx++] = (AppdefEntityID) thisThing;
         }
-        return result;        
+        return result;
     }
 
     /**
-     * Given an array of AppdefEntityID's, disqulifies their aggregate 
-     * availability (with the disqualifying status) for all of them if any are 
-     * down or unknown, otherwise the aggregate is deemed
-     * available
+     * Given an array of AppdefEntityID's, disqulifies their aggregate
+     * availability (with the disqualifying status) for all of them if any are
+     * down or unknown, otherwise the aggregate is deemed available
      * 
-     * If there's nothing in the array, then aggregate is not populated.
-     * Ergo, the availability shall be disqualified as unknown i.e. the
-     * (?) representation
+     * If there's nothing in the array, then aggregate is not populated. Ergo,
+     * the availability shall be disqualified as unknown i.e. the (?)
+     * representation
      */
     protected double getAggregateAvailability(AuthzSubjectValue subject,
                                               AppdefEntityID[] ids)
@@ -506,9 +503,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
         AppdefEntityID[] entIds = new AppdefEntityID[] { entId };
-        return this.findMetrics(sessionId, entIds,
-                                MeasurementConstants.FILTER_NONE, null,
-                                begin, end, false);
+        return findMetrics(sessionId, entIds, MeasurementConstants.FILTER_NONE,
+                           null, begin, end, false);
     }
 
     protected Map findMetrics(int sessionId, AppdefEntityID[] entIds,
@@ -551,9 +547,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         String monitorableType = rv.getMonitorableType();
     
         // Look up the metric summaries of associated servers
-        return this.getResourceMetrics(subject, entArr, monitorableType,
-                                       filters, keyword, begin, end,
-                                       showNoCollect);
+        return getResourceMetrics(subject, entArr, monitorableType, filters,
+                                  keyword, begin, end, showNoCollect);
     }
 
     protected Map findMetrics(int sessionId, AppdefEntityID entId, List mtids,
@@ -598,22 +593,20 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Look up the metric summaries of all associated resources
         Map results = new HashMap();
         if (platforms != null)
-            results.putAll(this.getResourceMetrics(subject, platforms,
-                                                   mtids, begin, end,
-                                                   Boolean.TRUE));
+            results.putAll(getResourceMetrics(subject, platforms, mtids,
+                                              begin, end, Boolean.TRUE));
         if (servers != null)
-            results.putAll(this.getResourceMetrics(subject, servers,
-                                                   mtids, begin, end,
-                                                   Boolean.TRUE));
+            results.putAll(getResourceMetrics(subject, servers, mtids,
+                                              begin, end, Boolean.TRUE));
         if (services != null)
-            results.putAll(this.getResourceMetrics(subject, services,
-                                                   mtids, begin, end,
-                                                   Boolean.TRUE));
+            results.putAll(getResourceMetrics(subject, services, mtids,
+                                              begin, end, Boolean.TRUE));
         return results;
     }
 
     protected List findAllMetrics(int sessionId, AppdefEntityID aeid,
-                                  AppdefEntityTypeID ctype, long begin, long end)
+                                  AppdefEntityTypeID ctype,
+                                  long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException {
@@ -692,12 +685,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     " is not a platform type");
         }
         Integer[] platIds = 
-            this.getPlatformManager().getPlatformIds(subject, ctype.getId());
+            getPlatformManager().getPlatformIds(subject, ctype.getId());
         List entIds = new ArrayList(platIds.length);
         for(int i = 0; i < platIds.length; i++) {
             entIds.add(
-                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                       platIds[i]));
+                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                                   platIds[i]));
         }
         return entIds;
     }
@@ -712,16 +705,16 @@ public class MetricSessionEJB extends BizappSessionEJB {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
     
         // Get the member IDs
-        List platforms = this.getPlatformAG(subject, platTypeId);
+        List platforms = getPlatformAG(subject, platTypeId);
         
         // Get resource type name
         PlatformTypeValue platType =
-            this.getPlatformManager().findPlatformTypeValueById(platTypeId.getId());
+            getPlatformManager().findPlatformTypeValueById(platTypeId.getId());
     
         // Look up the metric summaries of platforms
-        return this.getResourceMetrics(subject, platforms, platType.getName(),
-                                       MeasurementConstants.FILTER_NONE, null,
-                                       begin, end, showAll);
+        return getResourceMetrics(subject, platforms, platType.getName(),
+                                  MeasurementConstants.FILTER_NONE, null,
+                                  begin, end, showAll);
     }
     
     protected Map findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
@@ -746,7 +739,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     // Get the associated services
                     group.addAll(rv.getAssociatedServices(typeId.getId(),
-                                                      PageControl.PAGE_ALL));
+                                                          PageControl.PAGE_ALL));
                     break;
                 default:
                     break;
@@ -758,7 +751,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         String resourceType = resource.getAppdefResourceTypeValue().getName();
     
         // Look up the metric summaries of associated servers
-        return this.getResourceMetrics(subject, group, resourceType,
-                                       filters, keyword, begin, end, showAll);
+        return getResourceMetrics(subject, group, resourceType, filters,
+                                  keyword, begin, end, showAll);
     }
 }

@@ -353,7 +353,7 @@ public abstract class BizappSessionEJB {
         return tmLocal;
     }
 
-    public DerivedMeasurementManagerLocal getDerivedMeasurementManager() {
+    public DerivedMeasurementManagerLocal getMetricManager() {
         if(dmmLocal == null){
             try {
                 dmmLocal = 

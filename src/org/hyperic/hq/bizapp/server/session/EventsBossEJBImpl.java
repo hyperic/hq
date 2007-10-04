@@ -365,8 +365,8 @@ public class EventsBossEJBImpl
                     // since changes to the DerivedMeasurement aren't cascaded 
                     // on saving the AlertCondition.
                     DerivedMeasurementValue dmv =
-                        getDerivedMeasurementManager().findMeasurement(subject, 
-                                             tid, id.getId(), true);
+                        getMetricManager().findMeasurement(subject, tid,
+                                                           id.getId(), true);
                     clone.setMeasurementId(dmv.getId().intValue());
                     break;
                 case EventConstants.TYPE_ALERT:

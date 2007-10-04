@@ -79,8 +79,8 @@ public class ConfigValidatorImpl
         ConfigResponse[] responses;
         ConfigManagerLocal cman;
 
-        rmMan     = this.getRawMeasurementManager();
-        cman      = this.getConfigManager();
+        rmMan     = getRawMeasurementManager();
+        cman      = getConfigManager();
         responses = new ConfigResponse[ids.length];
 
         for(int i=0; i<ids.length; i++){
@@ -96,8 +96,8 @@ public class ConfigValidatorImpl
             } 
         }
 
-        dmMan = this.getDerivedMeasurementManager();
-        trackerMan = this.getTrackerManager();
+        dmMan = getMetricManager();
+        trackerMan = getTrackerManager();
         
         for(int i=0; i<ids.length; i++){
             if(responses[i] == null){

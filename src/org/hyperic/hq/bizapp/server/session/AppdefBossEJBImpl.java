@@ -1625,7 +1625,7 @@ public class AppdefBossEJBImpl
 
             // now remove the measurements
             // First remove all the Derived Measurements
-            getDerivedMeasurementManager()
+            getMetricManager()
                 .removeMeasurements(subject, plat.getEntityId(), toDeleteIds);
             
             // Then remove the Raw Measurements
@@ -1896,8 +1896,7 @@ public class AppdefBossEJBImpl
     {
         try {
             AuthzSubjectValue caller = manager.getSubject(sessionId);
-            return getApplicationManager()
-                .getServiceDepsForApp(caller, appId);
+            return getApplicationManager().getServiceDepsForApp(caller, appId);
         } catch (PermissionException e) {
             this.rollback();
             throw e;
