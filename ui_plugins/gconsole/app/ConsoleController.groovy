@@ -68,7 +68,8 @@ class ConsoleController extends BaseController {
 		                                 Thread.currentThread().contextClassLoader)
 		def res
 		try {
-			res = eng.run(tmp.absolutePath, new Binding())
+			//'file:/' spec required for windows
+			res = eng.run('file:/' + tmp.absolutePath, new Binding())
 			log.info "Result: [${res}]"
 		} catch(Exception e) {
 		    log.info "Exception thrown", e
