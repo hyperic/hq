@@ -139,6 +139,7 @@ public final class AuthzConstants {
     public static final String authzResourceGroupName =
         "covalentAuthzResourceGroup";
     public static final String escalationResourceTypeName = "EscalationScheme";
+    public static final String hqSystemResourceTypeName = "HQSystem";
         
     public static final String rootOpCAMAdmin = "administerCAM";
 
@@ -172,6 +173,7 @@ public final class AuthzConstants {
     public static final Integer     authzService        =  new Integer(305);
     public static final Integer     authzApplication    =  new Integer(308);
     public static final Integer     authzEscalation     =  new Integer(401);
+    public static final Integer     authzHQSystem       =  new Integer(501);
     public static final Integer     authzLocation       =  new Integer(309);
 
     public static boolean isOverlord(Integer subject) {

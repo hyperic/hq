@@ -6759,6 +6759,15 @@ has already been defined.
       </schema-directSQL>                        
     </schemaSpec>
 
+    <schemaSpec version="3.56">
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, VERSION_COL, RESOURCE_TYPE_ID, INSTANCE_ID, CID, SUBJECT_ID, FSYSTEM) VALUES (501, 0, 0, 501, 501, 0, %%FALSE%%)"/>
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (501, 0, 'HQSystem', 501, 501, %%FALSE%%)"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 501, 7)"/>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 

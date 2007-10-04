@@ -38,6 +38,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
              In order to avoid CID conflicts, all Events CID's
              will start with 4xx -->
         <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
+        <data ID="501" CID="501" NAME="HQSystem" FSYSTEM="FALSE"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -80,6 +81,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"    
               FSYSTEM="TRUE"/>
+        <data ID="501" CID="501" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:501"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
     </table>
 
     <table name="EAM_RESOURCE_GROUP">
@@ -98,6 +103,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="2" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
         <data CID="3" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
         <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+        <data CID="501" RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -120,6 +126,8 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
                       RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
         <data CID="6" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
                       RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+        <data CID="7" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
     </table>
 
     <table name="EAM_OPERATION">
