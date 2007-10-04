@@ -166,7 +166,8 @@ public class AppServiceDAO extends HibernateDAO
             "SELECT id FROM ServiceCluster c where c.group.id = r.instanceId)"+
             " OR " +
             "(r.instanceId=a.service.id and " +
-            "r.resourceType.id=t.id AND t.name='covalentEAMService')))";
+            "r.resourceType.id=t.id AND t.name='covalentEAMService'))) " +
+            "order by r.name";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
