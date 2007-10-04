@@ -169,7 +169,6 @@
 	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
 	    dialogWidget.setShowControl("openDialog");
 	    dialogWidget.setCloseControl("closeDialog");
-	    dialogWidget.setCloseControl("selectDashboard");
 	    if(<c:out value="${DashboardForm.popDialog}"/>){
 	       dialogWidget.show();
 	    }
@@ -198,8 +197,15 @@
     narrowWidth = "width='100%'";
   }
 %>
-
+<c:choose>
+<c:when test="${portal.columns ne null}">
 <c:set var="headerColspan" value="${portal.columns + 3}"/>
+</c:when>
+<c:otherwise>
+<c:set var="headerColspan" value="${5}"/>
+</c:otherwise>
+</c:choose>
+
 
 <div class="effectsContainer ">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -218,8 +224,7 @@
                 <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
             </html:select>
            <a href="#" id="openDialog">Open Dialog</a>
-             <span>
-            </span>
+           <input type="hidden" name="defaultDashboard" id="defaultDashboard"/>
         </div>
         <div id="dashboardSelectDialog" class="hidden">
 		    <div style="background-color:white;width:300px;height:235px">
@@ -231,17 +236,14 @@
 		            </div>
 		            <div class="fieldSetStacked" style="margin-bottom:8px;">
 		                <span style="vertical-align:top"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
-		                <select size="12" style="width:285px" id="selectedResources">
-		                <c:forEach items="${DashboardForm.dashboards}" var="dashboard">
-		                   <option value='<c:out value="${dashboard.id}"/>'><c:out value="${dashboard.name}"/></option>
-		                </c:forEach>
-		                </select>
+		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="12" style="width:285px" styleId="defaultDash">
+                            <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
+                        </html:select>
 		            </div>
 		        </div>
 		        <div style="height:26px;background-color:#efefef;bottom:0px;position:absolute;width:294px;padding:5px 3px 0px 3px;">
 		           <div style="float:right">
-		            <img id="closeDialog" src="/images/fb_cancel.gif" onmouseover="javscript:this.src='/images/fb_cancel_over.gif'" onmouseout="javscript:this.src='/images/fb_cancel.gif'" onmousedown="javascript:this.src='/images/fb_cancel_down.gif'" style="margin-right:4px;"/>
-		            <img id="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard(dojo.byId('selectedResources'));"/>
+		            <html:image property="ok" styleId="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"></html:image>
 		           </div>
 		        </div>
 		    </div>

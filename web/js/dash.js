@@ -2,15 +2,14 @@ function changeDashboard(formId){
     document.getElementById(formId).submit();
 }
 
-function selectDefaultDashboard(selectBox, url){
+function selectDefaultDashboard(selectBoxId, formId){
+    selectBox = document.getElementById(selectBoxId);
 	var index = selectBox.selectedIndex;
 	var options = selectBox.options;
 	if(index >= 0){
-	    alert(options[index].value);
+	    document.getElementById('defaultDashboard').value = options[index].value;
+	    document.getElementById(formId).submit();
 	}else{
         dojo.byId("dashboardSelectionErrorPanel").style.display="block";
-	    //validation error
-	    //show message
-	    alert("nothingSelected");
 	}
 }
