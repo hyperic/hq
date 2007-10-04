@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,9 +27,9 @@ package org.hyperic.hq.appdef.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -42,37 +42,37 @@ import java.util.NoSuchElementException;
 public class DependencyTree implements Serializable {
     
     // all the entry point nodes
-    private List nodes;
+    private List _nodes;
     // the application to which this tree applies
-    private ApplicationValue appValue;
+    private ApplicationValue _appValue;
 
     // an empty tree
     public DependencyTree(ApplicationValue appValue) {
-        this.appValue = appValue;
-        nodes = new ArrayList();
+        _appValue = appValue;
+        _nodes = new ArrayList();
     }
 
     // get the app value
     public ApplicationValue getApplication() {
-        return this.appValue;
+        return _appValue;
     }
 
     public Integer getAppPK() {
-        return this.getApplication().getId();
+        return getApplication().getId();
     }
 
     /**
      * Adds a top level DependencyNode
      */
     private void addNode(DependencyNode aNode) {
-        nodes.add(aNode);
+        _nodes.add(aNode);
     }
 
     /**
      * Returns a List of top level DependencyNodes
      */
     public List getNodes() {
-        return this.nodes;
+        return _nodes;
     }
 
     /**
@@ -89,7 +89,7 @@ public class DependencyTree implements Serializable {
             // looks like we need to create the node and add it to the list
             aNode = new DependencyNode(appSvc, new ArrayList());
             // only add the node if its a new one
-            this.addNode(aNode);
+            addNode(aNode);
         }
         aNode.addChild(depSvc);
     }
@@ -104,76 +104,36 @@ public class DependencyTree implements Serializable {
         } catch (NoSuchElementException e) {
             // not there, add it
             DependencyNode aNode = new DependencyNode(appSvc, null);
-            this.addNode(aNode);
+            addNode(aNode);
         }
     }
 
     /**
      * Returns a top level DependencyNode
      */
-    public DependencyNode findAppService(AppServiceValue aService) throws 
-        NoSuchElementException {
+    public DependencyNode findAppService(AppServiceValue aService)
+        throws NoSuchElementException {
         // iterate over the nodes in the list, match by app service, 
         // since a single app service should exist only once at the top level
-        for(int i=0; i < nodes.size(); i++) {
-            DependencyNode aNode = (DependencyNode)nodes.get(i);
-            if(aNode.getAppService().equals(aService)) {
+        for (int i = 0; i < _nodes.size(); i++) {
+            DependencyNode aNode = (DependencyNode) _nodes.get(i);
+            if (aNode.getAppService().equals(aService)) {
                 return aNode;
             }
         }
         throw new NoSuchElementException(aService + " was not found in tree");
     }
 
-    public DependencyNode findAppService(ServiceValue aService) throws
-        NoSuchElementException {
-            // iterate over nodes in the list
-            for(int i=0; i < nodes.size(); i++) {
-                DependencyNode aNode = (DependencyNode)nodes.get(i);
-                AppServiceValue appSvc = aNode.getAppService();
-                if(!appSvc.getIsCluster() &&
-                   aNode.getAppService().getService().getId()
-                    .equals(aService.getId())) {
-                   return aNode;
-                }
+    public DependencyNode findAppService(AppdefResourceValue aResource)
+        throws NoSuchElementException {
+        // iterate over nodes in the list
+        for (int i = 0; i < _nodes.size(); i++) {
+            DependencyNode aNode = (DependencyNode) _nodes.get(i);
+            if (aNode.getEntityId().equals(aResource.getEntityId())) {
+                return aNode;
             }
-            throw new NoSuchElementException(aService + " was not found in tree");
-    }
-
-    public DependencyNode findAppService(AppdefResourceValue aResource) throws
-        NoSuchElementException {
-            // iterate over nodes in the list
-            for(int i=0; i < nodes.size(); i++) {
-                DependencyNode aNode = (DependencyNode)nodes.get(i);
-                AppServiceValue appSvc = aNode.getAppService();
-                boolean isCluster = appSvc.getIsCluster();
-                if(!isCluster && (aResource instanceof ServiceValue) &&
-                   aNode.getAppService().getService().getId()
-                    .equals(((ServiceValue)aResource).getId())) {
-                   return aNode;
-                }
-                else if(isCluster && (aResource instanceof AppdefGroupValue) && 
-                   aNode.getAppService().getServiceCluster().getId()
-                    .intValue() == ((AppdefGroupValue)aResource).getClusterId()) {
-                   return aNode;
-                }
-
-            }
-            throw new NoSuchElementException(aResource + " was not found in tree");
-    }
-
-    public DependencyNode findAppService(ServiceClusterValue aCluster) throws
-        NoSuchElementException {
-            // iterate over nodes in the list
-            for(int i=0; i < nodes.size(); i++) {
-                DependencyNode aNode = (DependencyNode)nodes.get(i);
-                AppServiceValue appSvc = aNode.getAppService();
-                if(appSvc.getIsCluster() &&
-                   appSvc.getServiceCluster().getId()
-                    .equals(aCluster.getId())) {
-                   return aNode;
-                }
-            }
-            throw new NoSuchElementException(aCluster + " was not found in tree");
+        }
+        throw new NoSuchElementException(aResource + " was not found in tree");
     }
 
     public List getDependencies(AppServiceValue aService) throws
@@ -188,11 +148,11 @@ public class DependencyTree implements Serializable {
      * dependee in any point in the tree
      * @return int
      */
-    public boolean isEntryPoint(AppServiceValue aService) throws
-        NoSuchElementException {
+    public boolean isEntryPoint(AppServiceValue aService)
+        throws NoSuchElementException {
         boolean isEntry = true;
-        for(int i = 0; i < this.getTopLevelCount(); i++) {
-            DependencyNode aNode = (DependencyNode)this.getNodes().get(i);
+        for(int i = 0; i < getTopLevelCount(); i++) {
+            DependencyNode aNode = (DependencyNode)getNodes().get(i);
             // if any of the children include the appservice in question,
             // we know its not an entry point
             if(aNode.getChildren().contains(aService)) {
@@ -203,16 +163,16 @@ public class DependencyTree implements Serializable {
     }
 
     public int getTopLevelCount() {
-        return nodes.size();
+        return _nodes.size();
     }
     
     public String toString() {
         StringBuffer sb = new StringBuffer(DependencyTree.class.getName());
         sb.append("[");
-        sb.append(" parentAppId=").append(appValue.getId());
-        sb.append(" parentAppName=").append(appValue.getName());
+        sb.append(" parentAppId=").append(_appValue.getId());
+        sb.append(" parentAppName=").append(_appValue.getName());
         sb.append(" nodes={\n");
-        for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+        for (Iterator iter = _nodes.iterator(); iter.hasNext();) {
             DependencyNode node = (DependencyNode) iter.next();
             sb.append(node.toString());
         }
@@ -235,7 +195,7 @@ public class DependencyTree implements Serializable {
     }
 
     private HashSet comparable() {
-        return new HashSet(nodes);
+        return new HashSet(_nodes);
     }
 
     public static boolean nodeHasChild(DependencyNode node, Integer appSvcId) {
@@ -247,7 +207,8 @@ public class DependencyTree implements Serializable {
         return false;
     }
 
-    public static DependencyNode findAppServiceById(DependencyTree tree, Integer appSvcId) {
+    public static DependencyNode findAppServiceById(DependencyTree tree,
+                                                    Integer appSvcId) {
         List children = tree.getNodes();
         DependencyNode returnNode = null;
         for (Iterator iter = children.iterator(); iter.hasNext();) {
@@ -260,7 +221,8 @@ public class DependencyTree implements Serializable {
         return returnNode;
     }
 
-    public static DependencyNode findServiceById(DependencyTree tree, Integer serviceId) {
+    public static DependencyNode findServiceById(DependencyTree tree,
+                                                 Integer serviceId) {
         List children = tree.getNodes();
         DependencyNode returnNode = null;
         for (Iterator iter = children.iterator(); iter.hasNext();) {
@@ -274,9 +236,11 @@ public class DependencyTree implements Serializable {
     }
 
     public static Map mapServices(List services) {
-        Map serviceMap = new HashMap();
-        for (Iterator serviceIter = services.iterator(); serviceIter.hasNext();) {
-            AppdefResourceValue service = (AppdefResourceValue) serviceIter.next();
+        Map serviceMap = new LinkedHashMap();
+        for (Iterator serviceIter = services.iterator(); serviceIter.hasNext();)
+        {
+            AppdefResourceValue service =
+                (AppdefResourceValue) serviceIter.next();
             serviceMap.put(service.getEntityId(), service);                
         }
         return serviceMap;  
@@ -296,23 +260,22 @@ public class DependencyTree implements Serializable {
                                      List services) {
         List returnList = new ArrayList();
         Map serviceMap = DependencyTree.mapServices(services);
-        for (Iterator iter = appSvcNode.getChildren().iterator(); iter.hasNext();) {
+        for (Iterator iter = appSvcNode.getChildren().iterator();
+             iter.hasNext();) {
             AppServiceValue appSvc = (AppServiceValue) iter.next();
             AppdefEntityID contained ;
             if(appSvc.getIsCluster())
-                contained = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, appSvc.getServiceCluster().getGroupId().intValue());
+                contained =
+                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                                       appSvc.getServiceCluster().getGroupId());
             else
                 contained = appSvc.getService().getEntityId();
 
              if (serviceMap.containsKey(contained)) {
-                 DependencyNode node = DependencyTree.findAppServiceById(tree, appSvc.getId());
-                 if(node.isCluster()) 
-                    returnList.add(new AppServiceNodeBean(
-                        (AppdefResourceValue)serviceMap.get(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, appSvc.getServiceCluster().getGroupId().intValue())),node));
-                 else {
-                    returnList.add(new AppServiceNodeBean(
-                        (AppdefResourceValue)serviceMap.get(appSvc.getService().getEntityId()),node));
-                }
+                DependencyNode node =
+                    DependencyTree.findAppServiceById(tree, appSvc.getId());
+                returnList.add(new AppServiceNodeBean(
+                    (AppdefResourceValue) serviceMap.get(contained), node));
              }                    
         }
         return returnList;        
@@ -375,12 +338,13 @@ public class DependencyTree implements Serializable {
      * @param services
      * @return
      */
-    public static List findPotentialDependees(DependencyTree tree, DependencyNode currentNode, List services) {
-        
+    public static List findPotentialDependees(DependencyTree tree,
+                                              DependencyNode currentNode,
+                                              List services) {
         // id of the current node's AppService
         Integer appSvcId = currentNode.getAppService().getId();
-        // any DependencyNodes left in this list when we're done disqualify candidates
-        // is what we'll return
+        // any DependencyNodes left in this list when we're done disqualify
+        // candidates is what we'll return
         List candidateNodes = new ArrayList(tree.getNodes());
     
         // disqualify self
@@ -395,8 +359,10 @@ public class DependencyTree implements Serializable {
         for (Iterator iter = candidateNodes.iterator(); iter.hasNext();) {
             DependencyNode aNode= (DependencyNode) iter.next();
             Integer anAppSvcId = aNode.getAppService().getId();
-            for (Iterator appSvcIter = currentNode.getChildren().iterator(); appSvcIter.hasNext();) {
-                AppServiceValue currentDependeeAppSvc = (AppServiceValue) appSvcIter.next();
+            for (Iterator appSvcIter = currentNode.getChildren().iterator();
+                 appSvcIter.hasNext();) {
+                AppServiceValue currentDependeeAppSvc =
+                    (AppServiceValue) appSvcIter.next();
                 if (currentDependeeAppSvc.getId().equals(anAppSvcId))  {
                     //iter.remove();
                     filtered.add(aNode);
@@ -406,7 +372,7 @@ public class DependencyTree implements Serializable {
         candidateNodes.removeAll(filtered);
         filtered.clear();
         // build a map of the nodes keyed on the AppService's id
-        Map nodeMap = new HashMap();
+        Map nodeMap = new LinkedHashMap();
         for (Iterator iter = candidateNodes.iterator(); iter.hasNext();) {
             DependencyNode aNode= (DependencyNode) iter.next();
             nodeMap.put(aNode.getAppService().getId(), aNode);
@@ -415,21 +381,24 @@ public class DependencyTree implements Serializable {
         for (Iterator iter = candidateNodes.iterator(); iter.hasNext();) {
             DependencyNode aNode= (DependencyNode) iter.next();
             // see if the node directly or indirectly depends on the currentNode
-            for (Iterator appSvcIter = aNode.getChildren().iterator(); appSvcIter.hasNext();) {
+            for (Iterator appSvcIter = aNode.getChildren().iterator();
+                 appSvcIter.hasNext();) {
                 AppServiceValue anAppSvc = (AppServiceValue) appSvcIter.next();
                 // see if the node directly depends on the currentNode
                 if (appSvcId.equals(anAppSvc.getId()))  {
-                    // disqualify the candidate for directly depending on the currentNode
+                    // disqualify the candidate for directly depending on the
+                    // currentNode
                     filtered.add(aNode);
                     //iter.remove();
                     break;
                 }
-                // now see if the node indirectly depends on the currentNode by checking it's
-                // children (with this data structure, we only need to check two levels instead of
-                // a fully recursive check)
-                DependencyNode aNodesDepender = (DependencyNode)nodeMap.get(anAppSvc.getId());
-                for (Iterator childAppSvcIter = aNode.getChildren().iterator(); childAppSvcIter .hasNext();) {
-                    AppServiceValue childAppSvc = (AppServiceValue) childAppSvcIter .next();
+                // now see if the node indirectly depends on the currentNode by
+                // checking it's children (with this data structure, we only
+                // need to check two levels instead of a fully recursive check)
+                for (Iterator childAppSvcIter = aNode.getChildren().iterator();
+                     childAppSvcIter .hasNext();) {
+                    AppServiceValue childAppSvc =
+                        (AppServiceValue) childAppSvcIter .next();
                     // see if the node directly depends on the currentNode
                     if (appSvcId.equals(childAppSvc.getId()))  {
                         filtered.add(aNode);
