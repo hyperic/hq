@@ -195,6 +195,10 @@ public class VisibilityPortalAction extends ResourceController {
         Portal portal = Portal.createPortal(TITLE_CHART, PORTLET_CHART_MMSR);
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);
+
+        String returnURL = SessionUtils.getReturnPath(request.getSession());
+        if (returnURL != null)
+            request.setAttribute(Constants.BACK_URL, returnURL);
         return null;
     }
 
