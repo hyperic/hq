@@ -84,121 +84,115 @@ public class DisplayDashboardAction extends TilesAction {
 		String currentDashboard = dForm.getSelectedDashboardId();
 		boolean dashboardSelectionChanged = false;
 		
-		if(selectedDashboard != null && currentDashboard != null){
-			dashboardSelectionChanged = Integer.parseInt(selectedDashboard) != Integer.parseInt(currentDashboard);
-		}
-		if (dashboardSelectionChanged || portal == null) {
 			portal = new Portal();
-			portal.setName("dashboard.template.title");
-			portal.setColumns(2);
-	
-			// Set dashboard string list for the dashboard select list
-			List dashboards = new ArrayList();
-			ArrayList dashboardCollection;
-			dashboardCollection = (ArrayList) dashManager.getDashboards(me);
-			Iterator i = dashboardCollection.iterator();
-			while (i.hasNext()) {
-				Dashboard dashboard = new Dashboard();
-				DashboardConfig config = (DashboardConfig) i.next();
-				dashboard.setId(config.getId());
-				dashboard.set_name(config.getName());
-				dashboards.add(dashboard);
-			}
-			if (dashboards.size() > 0) {
-				dForm.setDashboards(dashboards);
-			} else {
-				dashboards.add(new Dashboard(""));	
-				dForm.setDashboards(dashboards);
-			}
-	
-			// Check if there is a default dashboard, selected dashboard or none of
-			// the above
-			String defaultDashboard = user.getPreference(
-					Constants.DEFAULT_DASHBOARD_ID, null);
-			DashboardConfig dashboardConfig = null;
-			if (defaultDashboard != null) {
-				// TODO grab the default dash by id
-				// if it doesn't exist pop dialog
-				dashboardConfig = findDashboard(dashboardCollection, Integer
-						.valueOf(defaultDashboard));
-				if (dashboardConfig == null) {
-					dForm.setPopDialog(true);
-					return null;
-				} else {
-					session.setAttribute(Constants.SELECTED_DASHBOARD,
-							dashboardConfig);
-					session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-							dashboardConfig.getId());
-					dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
-				}
-			} else if (selectedDashboard != null) {
-				// TODO grab the selected dash by id
-				// if it doesn't exist pop dialog
-				dashboardConfig = findDashboard(dashboardCollection, Integer
-						.valueOf(selectedDashboard));
-				if (dashboardConfig == null) {
-					dForm.setPopDialog(true);
-					return null;
-				} else {
-					session.setAttribute(Constants.SELECTED_DASHBOARD,
-							dashboardConfig);
-					dForm.setSelectedDashboardId(dashboardConfig.getId()
-							.toString());
-				}
-			} else if (dashboardCollection.size() == 1) {
-				// No need to select a default - only one available
-				dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-				session.setAttribute(Constants.SELECTED_DASHBOARD,
-						dashboardConfig);
-				dForm.setSelectedDashboardId(dashboardConfig.getId()
-						.toString());
-			} else {
-				//many dashboards and no default or selected - pop default dialog
-				dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-				session.setAttribute(Constants.SELECTED_DASHBOARD,
-						dashboardConfig);
-				dForm.setSelectedDashboardId(dashboardConfig.getId()
-						.toString());
+		portal.setName("dashboard.template.title");
+		portal.setColumns(2);
+
+		// Set dashboard string list for the dashboard select list
+		List dashboards = new ArrayList();
+		ArrayList dashboardCollection;
+		dashboardCollection = (ArrayList) dashManager.getDashboards(me);
+		Iterator i = dashboardCollection.iterator();
+		while (i.hasNext()) {
+			Dashboard dashboard = new Dashboard();
+			DashboardConfig config = (DashboardConfig) i.next();
+			dashboard.setId(config.getId());
+			dashboard.set_name(config.getName());
+			dashboards.add(dashboard);
+		}
+		if (dashboards.size() > 0) {
+			dForm.setDashboards(dashboards);
+		} else {
+			dashboards.add(new Dashboard(""));
+			dForm.setDashboards(dashboards);
+		}
+
+		// Check if there is a default dashboard, selected dashboard or none of
+		// the above
+		String defaultDashboard = user.getPreference(
+				Constants.DEFAULT_DASHBOARD_ID, null);
+		DashboardConfig dashboardConfig = null;
+		if (defaultDashboard != null) {
+			// TODO grab the default dash by id
+			// if it doesn't exist pop dialog
+			dashboardConfig = findDashboard(dashboardCollection, Integer
+					.valueOf(defaultDashboard));
+			if (dashboardConfig == null) {
 				dForm.setPopDialog(true);
 				return null;
+			} else {
+				session.setAttribute(Constants.SELECTED_DASHBOARD,
+						dashboardConfig);
+				session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
+						dashboardConfig.getId());
+				dForm
+						.setSelectedDashboardId(dashboardConfig.getId()
+								.toString());
 			}
-
-			// Dashboard exists, display it
-			ConfigResponse dashPrefs = dashboardConfig.getConfig();
-			portal.addPortletsFromString(dashPrefs
-					.getValue(Constants.USER_PORTLETS_FIRST), 1);
-			portal.addPortletsFromString(dashPrefs
-					.getValue(Constants.USER_PORTLETS_SECOND), 2);
-
-			// Go through the portlets and see if they have descriptions
-			for (Iterator pit = portal.getPortlets().iterator(); pit.hasNext();) {
-				Collection portlets = (Collection) pit.next();
-				for (Iterator it = portlets.iterator(); it.hasNext();) {
-					Portlet portlet = (Portlet) it.next();
-					String titleKey = portlet.getUrl()
-							+ ".title"
-							+ (portlet.getToken() != null ? portlet.getToken() : "");
-					portlet.setDescription(dashPrefs.getValue(titleKey, ""));
-				}
+		} else if (selectedDashboard != null) {
+			// TODO grab the selected dash by id
+			// if it doesn't exist pop dialog
+			dashboardConfig = findDashboard(dashboardCollection, Integer
+					.valueOf(selectedDashboard));
+			if (dashboardConfig == null) {
+				dForm.setPopDialog(true);
+				return null;
+			} else {
+				session.setAttribute(Constants.SELECTED_DASHBOARD,
+						dashboardConfig);
+				dForm
+						.setSelectedDashboardId(dashboardConfig.getId()
+								.toString());
 			}
-
-			session.setAttribute(Constants.USERS_SES_PORTAL, portal);
-
-			// Make sure there's a valid RSS auth token
-			String rssToken;
-			try {
-				rssToken = dashPrefs.getValue(Constants.RSS_TOKEN);
-			} catch (InvalidOptionException e) {
-				rssToken = String.valueOf(session.hashCode());
-
-				// Now store the RSS auth token
-
-				ConfigurationProxy.getInstance().setPreference(session, user,
-						boss, Constants.RSS_TOKEN, rssToken);
-			}
-			session.setAttribute("rssToken", rssToken);
-
+		} else if (dashboardCollection.size() == 1) {
+			// No need to select a default - only one available
+			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
+			session.setAttribute(Constants.SELECTED_DASHBOARD, dashboardConfig);
+			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+		} else {
+			// many dashboards and no default or selected - pop default dialog
+			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
+			session.setAttribute(Constants.SELECTED_DASHBOARD, dashboardConfig);
+			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+			dForm.setPopDialog(true);
+			return null;
 		}
+
+		// Dashboard exists, display it
+		ConfigResponse dashPrefs = dashboardConfig.getConfig();
+		portal.addPortletsFromString(dashPrefs
+				.getValue(Constants.USER_PORTLETS_FIRST), 1);
+		portal.addPortletsFromString(dashPrefs
+				.getValue(Constants.USER_PORTLETS_SECOND), 2);
+
+		// Go through the portlets and see if they have descriptions
+		for (Iterator pit = portal.getPortlets().iterator(); pit.hasNext();) {
+			Collection portlets = (Collection) pit.next();
+			for (Iterator it = portlets.iterator(); it.hasNext();) {
+				Portlet portlet = (Portlet) it.next();
+				String titleKey = portlet.getUrl()
+						+ ".title"
+						+ (portlet.getToken() != null ? portlet.getToken() : "");
+				portlet.setDescription(dashPrefs.getValue(titleKey, ""));
+			}
+		}
+
+		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
+
+		// Make sure there's a valid RSS auth token
+		String rssToken;
+		try {
+			rssToken = dashPrefs.getValue(Constants.RSS_TOKEN);
+		} catch (InvalidOptionException e) {
+			rssToken = String.valueOf(session.hashCode());
+
+			// Now store the RSS auth token
+
+			ConfigurationProxy.getInstance().setPreference(session, user, boss,
+					Constants.RSS_TOKEN, rssToken);
+		}
+		session.setAttribute("rssToken", rssToken);
+
 		request.setAttribute(Constants.PORTAL_KEY, portal);
 
 		Map userOpsMap = (Map) session
