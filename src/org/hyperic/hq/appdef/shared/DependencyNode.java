@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,39 +31,42 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.Serializable;
 
-public class DependencyNode implements Serializable {
+public class DependencyNode implements Serializable, Comparable {
 
-    private List childNodes;
-    private List removedNodes;
-    private AppServiceValue appService;
+    private List _childNodes;
+    private List _removedNodes;
+    private AppServiceValue _appService;
 
     public DependencyNode(AppServiceValue appService, List deps) {
-        this.appService = appService;
-        this.childNodes = deps;
-        this.removedNodes = new ArrayList();
+        _appService = appService;
+        _childNodes = deps;
+        _removedNodes = new ArrayList();
     }
 
     public boolean hasChildren() {
-        if (childNodes == null) return false;
-        else return childNodes.size() > 0;
+        if (_childNodes == null)
+            return false;
+        else
+            return _childNodes.size() > 0;
     }
 
     public List getChildren() {
-        if (childNodes == null) {
+        if (_childNodes == null)
             // return an empty list
             return new ArrayList();
-        } else {
-            return childNodes;
-        }
+        else
+            return _childNodes;
     }
         
     public int getChildCount() {
-        if (childNodes == null) return 0;
-        else return childNodes.size();
+        if (_childNodes == null)
+            return 0;
+        else
+            return _childNodes.size();
     }
 
     public AppServiceValue getAppService() {
-        return this.appService;
+        return _appService;
     }
 
     public boolean isCluster() {
@@ -82,72 +85,73 @@ public class DependencyNode implements Serializable {
         if (isCluster()) {
             return getAppService().getServiceCluster().getGroupId();
         } else {
-            return this.appService.getService().getId();
+            return getAppService().getService().getId();
         }
     }
 
     public ServiceLightValue getService() {
-        return this.appService.getService();
+        return getAppService().getService();
     }
 
     public AppdefEntityID getEntityId() {
         if(isCluster())
-            return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, this.getAppService().getServiceCluster().getGroupId().intValue());
+            return new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
+                            getAppService().getServiceCluster().getGroupId());
         else
-            return this.getAppService().getService().getEntityId();
+            return getAppService().getService().getEntityId();
     }
 
     public String getName() {
-        if(isCluster())
-            return this.getAppService().getServiceCluster().getName();
+        if (isCluster())
+            return getAppService().getServiceCluster().getName();
         else
-            return this.getAppService().getService().getName();
+            return getAppService().getService().getName();
     }
 
     public String getDescription() {
         if(isCluster())
-            return this.getAppService().getServiceCluster().getDescription();
+            return getAppService().getServiceCluster().getDescription();
         else
-            return this.getAppService().getService().getDescription();
+            return getAppService().getService().getDescription();
     }
 
     public boolean isEntryPoint() {
-        return this.appService.getIsEntryPoint();
+        return getAppService().getIsEntryPoint();
     }
 
     public void addChild(AppServiceValue aDep) {
-        if (childNodes == null) {
-            childNodes = new ArrayList();
+        if (_childNodes == null) {
+            _childNodes = new ArrayList();
         }
         // Fix for 5958. Dont add the child dep twice
-        if(!childNodes.contains(aDep)) {
-            childNodes.add(aDep);
+        if(!_childNodes.contains(aDep)) {
+            _childNodes.add(aDep);
         }
     }
 
     public List getRemovedChildren() {
-        if(this.removedNodes == null) {
-            removedNodes = new ArrayList();
+        if(_removedNodes == null) {
+            _removedNodes = new ArrayList();
         }
-        return removedNodes;
+        return _removedNodes;
     }
 
     public void removeChild(AppServiceValue aDep) {
-        this.getChildren().remove(aDep);
-        this.getRemovedChildren().add(aDep);
+        getChildren().remove(aDep);
+        getRemovedChildren().add(aDep);
     }
     
     public String toString() {
         StringBuffer sb = new StringBuffer(DependencyNode.class.getName());
         sb.append("[");
-        sb.append(" appServiceId=").append(appService.getId());
+        sb.append(" appServiceId=").append(_appService.getId());
         if(!isCluster()) {
-            sb.append(" serviceId=").append(appService.getService().getId());
-            sb.append(" serviceName=").append(appService.getService().getName());
+            sb.append(" serviceId=").append(_appService.getService().getId());
+            sb.append(" serviceName=").append(_appService.getService().getName());
         }
         else  {
-            sb.append(" serviceClusterId=").append(appService.getServiceCluster().getGroupId());
-            sb.append(" serviceClusterName=").append(appService.getServiceCluster().getName());
+            sb.append(" serviceClusterId=").append(_appService.getServiceCluster().getGroupId());
+            sb.append(" serviceClusterName=").append(_appService.getServiceCluster().getName());
         }
 
         if (hasChildren()) {
@@ -184,10 +188,14 @@ public class DependencyNode implements Serializable {
     private HashSet compChildren() {
         HashSet childSet = new HashSet();
         for (Iterator i = getChildren().iterator(); i.hasNext();) {
-                AppServiceValue child = (AppServiceValue) i.next();
-                childSet.add(child.getId());            
+            AppServiceValue child = (AppServiceValue) i.next();
+            childSet.add(child.getId());
         }
         return childSet;        
+    }
+
+    public int compareTo(Object arg0) {
+        return getName().compareTo(((DependencyNode) arg0).getName());
     }
 
 }
