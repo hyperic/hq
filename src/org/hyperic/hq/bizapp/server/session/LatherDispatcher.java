@@ -47,22 +47,22 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -97,7 +97,6 @@ import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
@@ -291,10 +290,9 @@ public class LatherDispatcher
      * the connection info used to make further connections.
      */
     private RegisterAgent_result cmdRegisterAgent(LatherContext ctx, 
-                                                  LatherValue lArgs)
+                                                  RegisterAgent_args args)
         throws LatherRemoteException
     {
-        RegisterAgent_args args = (RegisterAgent_args)lArgs;
         AgentValue agentVal;
         String agentToken, errRes, agentIP, version;
         int port;
@@ -419,10 +417,9 @@ public class LatherDispatcher
      * token is kept.
      */
     private UpdateAgent_result cmdUpdateAgent(LatherContext ctx,
-                                              LatherValue lArgs)
+                                              UpdateAgent_args args)
         throws LatherRemoteException
     {
-        UpdateAgent_args args = (UpdateAgent_args)lArgs;
         AgentValue agentVal;
         String errRes;
 
@@ -464,10 +461,8 @@ public class LatherDispatcher
      * Command to make sure that a user is valid.  
      */
     private UserIsValid_result cmdUserIsValid(LatherContext ctx, 
-                                              LatherValue lArg)
+                                              UserIsValid_args arg)
     {
-        UserIsValid_args arg = (UserIsValid_args)lArg;
-
         try {
             getAuthManager().getSessionId(arg.getUser(), arg.getPword());
         } catch(Exception exc){
@@ -482,14 +477,12 @@ public class LatherDispatcher
      * Command to process measurements received from the agent.
      */
     private MeasurementSendReport_result 
-        cmdMeasurementSendReport(LatherValue lArg)
+        cmdMeasurementSendReport(MeasurementSendReport_args args)
         throws LatherRemoteException
     {
-        MeasurementSendReport_args args;
         MeasurementSendReport_result res =
             new MeasurementSendReport_result();
 
-        args = (MeasurementSendReport_args)lArg;
         getReportProcessor().handleMeasurementReport(args.getReport());
 
         res.setTime(System.currentTimeMillis());
@@ -500,10 +493,9 @@ public class LatherDispatcher
      * Called by agents to report platforms, servers, and services
      * detected via autoinventory scans.
      */
-    private NullLatherValue cmdAiSendReport(LatherValue lArg)
+    private NullLatherValue cmdAiSendReport(AiSendReport_args args)
         throws LatherRemoteException
     {
-        AiSendReport_args args = (AiSendReport_args)lArg;
         AutoinventoryManagerLocal aiManagerLocal;
         ScanStateCore core;
 
@@ -524,10 +516,9 @@ public class LatherDispatcher
      * Called by agents to report resources detected via runtime autoinventory 
      * scans, using the monitoring interfaces to a server.
      */
-    private NullLatherValue cmdAiSendRuntimeReport(LatherValue lArg)
+    private NullLatherValue cmdAiSendRuntimeReport(AiSendRuntimeReport_args arg)
         throws LatherRemoteException
     {
-        AiSendRuntimeReport_args arg = (AiSendRuntimeReport_args)lArg;
         AutoinventoryManagerLocal aiManagerLocal;
 
         aiManagerLocal = getAutoInventoryManager();
@@ -545,17 +536,16 @@ public class LatherDispatcher
      * Get config information about all the entities which an agent
      * is servicing.
      */
-    private MeasurementGetConfigs_result cmdMeasurementGetConfigs(LatherValue lArgs)
+    private MeasurementGetConfigs_result
+        cmdMeasurementGetConfigs(MeasurementGetConfigs_args args)
         throws LatherRemoteException
     {
         MeasurementGetConfigs_result res;
-        MeasurementGetConfigs_args args;
         MeasurementConfigList cList;
         ResourceTree tree;
         AuthzSubjectValue overlord;
         ArrayList ents;
 
-        args = (MeasurementGetConfigs_args)lArgs;
         overlord = getOverlord();
         try {
             tree = getAgentManager().getEntitiesForAgent(overlord,
@@ -655,10 +645,8 @@ public class LatherDispatcher
     /**
      * Called by agents to report log statements
      */
-    private NullLatherValue cmdTrackLogMessage(LatherValue lArg)
+    private NullLatherValue cmdTrackLogMessage(TrackSend_args args)
         throws LatherRemoteException {
-
-        TrackSend_args args = (TrackSend_args) lArg;
         TrackEventReport report = args.getEvents();
 
         TrackEvent[] events = report.getEvents();
@@ -676,10 +664,8 @@ public class LatherDispatcher
     /**
      * Called by agents to report config changes
      */
-    private NullLatherValue cmdTrackConfigChange(LatherValue lArg)
+    private NullLatherValue cmdTrackConfigChange(TrackSend_args args)
         throws LatherRemoteException {
-
-        TrackSend_args args = (TrackSend_args) lArg;
         TrackEventReport report = args.getEvents();
 
         TrackEvent[] events = report.getEvents();
@@ -719,27 +705,28 @@ public class LatherDispatcher
         if(method.equals(CommandInfo.CMD_PING)){
             return cmdPing(arg);
         } else if(method.equals(CommandInfo.CMD_USERISVALID)){
-            return cmdUserIsValid(ctx, arg);
+            return cmdUserIsValid(ctx, (UserIsValid_args) arg);
         } else if(method.equals(CommandInfo.CMD_MEASUREMENT_SEND_REPORT)){
-            return cmdMeasurementSendReport(arg);
+            return cmdMeasurementSendReport((MeasurementSendReport_args) arg);
         } else if(method.equals(CommandInfo.CMD_MEASUREMENT_GET_CONFIGS)){
-            return cmdMeasurementGetConfigs(arg);
+            return cmdMeasurementGetConfigs((MeasurementGetConfigs_args) arg);
         } else if(method.equals(CommandInfo.CMD_REGISTER_AGENT)){
-            return cmdRegisterAgent(ctx, arg);
+            return cmdRegisterAgent(ctx, (RegisterAgent_args)arg);
         } else if(method.equals(CommandInfo.CMD_UPDATE_AGENT)){
-            return cmdUpdateAgent(ctx, arg);
+            return cmdUpdateAgent(ctx, (UpdateAgent_args) arg);
         } else if(method.equals(CommandInfo.CMD_AI_SEND_REPORT)){
-            return cmdAiSendReport(arg);
+            return cmdAiSendReport((AiSendReport_args) arg);
         } else if(method.equals(CommandInfo.CMD_AI_SEND_RUNTIME_REPORT)){
-            return cmdAiSendRuntimeReport(arg);
+            return cmdAiSendRuntimeReport((AiSendRuntimeReport_args) arg);
         } else if(method.equals(CommandInfo.CMD_TRACK_SEND_LOG)){
-            return cmdTrackLogMessage(arg);
+            return cmdTrackLogMessage((TrackSend_args) arg);
         } else if(method.equals(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE)){
-            return cmdTrackConfigChange(arg);
+            return cmdTrackConfigChange((TrackSend_args) arg);
         } else if(method.equals(CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG)){
-            return cmdControlGetPluginConfig(arg);
+            return cmdControlGetPluginConfig((ControlGetPluginConfig_args) arg);
         } else if(method.equals(CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT)){
-            return cmdControlSendCommandResult(arg);
+            return cmdControlSendCommandResult((ControlSendCommandResult_args)
+                                               arg);
         } else {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +
                      "' which could not be found");
@@ -754,14 +741,12 @@ public class LatherDispatcher
      * Send an agent a plugin configuration.  This is needed when agents
      * restart, since they do not persist control plugin configuration.
      */
-    private ControlGetPluginConfig_result cmdControlGetPluginConfig(LatherValue lArgs)
+    private ControlGetPluginConfig_result
+        cmdControlGetPluginConfig(ControlGetPluginConfig_args args)
         throws LatherRemoteException {
         ControlGetPluginConfig_result res;
-        ControlGetPluginConfig_args args;
         ControlManagerLocal cLocal;
         byte[] cfg;
-    
-        args = (ControlGetPluginConfig_args)lArgs;
     
         cLocal = getControlManager();
         try {
@@ -784,16 +769,12 @@ public class LatherDispatcher
     /**
      * Receive status information about a previous control action
      */
-    private NullLatherValue cmdControlSendCommandResult(LatherValue lArgs) {
-        ControlSendCommandResult_args args;
-        ControlManagerLocal cLocal;
-        DerivedMeasurementManagerLocal dmLocal = getDerivedMeasurementManager();
-    
-        args = (ControlSendCommandResult_args)lArgs;
-        cLocal = getControlManager();
-        cLocal.sendCommandResult(args.getId(), args.getResult(), 
-                                 args.getStartTime(), 
-                                 args.getEndTime(), args.getMessage());
+    private NullLatherValue
+        cmdControlSendCommandResult(ControlSendCommandResult_args args) {
+        getControlManager().sendCommandResult(args.getId(), args.getResult(), 
+                                              args.getStartTime(), 
+                                              args.getEndTime(),
+                                              args.getMessage());
     
         //Get live measurements on the resource
         String name = args.getName();
@@ -801,7 +782,7 @@ public class LatherDispatcher
             log.info("Getting live measurements for " + name);
             AppdefEntityID id = new AppdefEntityID(name);
             try {
-                dmLocal.getLiveMeasurementValues(getOverlord(), id);
+                getMetricManager().getLiveMeasurementValues(getOverlord(), id);
             } catch (Exception e) {
                 log.error("Unable to fetch live measurements: " + e, e);
             }
