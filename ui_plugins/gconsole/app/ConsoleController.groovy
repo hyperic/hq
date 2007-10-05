@@ -1,5 +1,6 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.application.HQApp
+import org.hyperic.hq.product.GenericPlugin
 
 class ConsoleController extends BaseController { 
 	def ConsoleController() {
@@ -68,8 +69,15 @@ class ConsoleController extends BaseController {
 		                                 Thread.currentThread().contextClassLoader)
 		def res
 		try {
-			//'file:/' spec required for windows
-			res = eng.run('file:/' + tmp.absolutePath, new Binding())
+			def script
+			if (GenericPlugin.isWin32()) {
+				//'file:/' spec required for windows
+				script = 'file:/' + tmp.absolutePath
+			}
+			else {
+				script = tmp.absolutePath
+			}
+			res = eng.run(script, new Binding())
 			log.info "Result: [${res}]"
 		} catch(Exception e) {
 		    log.info "Exception thrown", e
