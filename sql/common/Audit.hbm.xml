@@ -80,7 +80,7 @@
     <many-to-one name="resource">
       <column name="RESOURCE_ID" index="RESOURCE_ID_IDX" not-null="true"/>
     </many-to-one>
-
+   
     <many-to-one name="subject">
       <column name="SUBJECT_ID" index="SUBJECT_ID_IDX" not-null="true"/>
     </many-to-one>
@@ -96,8 +96,5 @@
               discriminator-value="sysConfig"/>
     <subclass name="org.hyperic.hq.product.server.session.PluginAudit"
               discriminator-value="plugin"/>
-    <subclass name="org.hyperic.hq.measurement.server.session.MetricAudit"
-              discriminator-value="metric"/>
-
   </class>
 </hibernate-mapping>

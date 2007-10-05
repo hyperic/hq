@@ -377,9 +377,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
 
-            MetricAudit.enableAllCollection(template, subject, 
-                                            (int)(interval / 1000));
-            
             List metrics = dmDao.findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
@@ -427,13 +424,6 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
             template.setDefaultOn(on);
 
-            if (on) {
-                int numSecs = (int)(template.getDefaultInterval() / 1000);
-                MetricAudit.enableAllCollection(template, subject, numSecs);
-            } else {
-                MetricAudit.disableAllCollection(template, subject);
-            }
-                
             List metrics = dmDao.findByTemplate(templIds[i]);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
