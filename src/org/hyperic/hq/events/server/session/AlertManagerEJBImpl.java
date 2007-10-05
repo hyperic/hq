@@ -358,7 +358,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             // Permission checking included
             PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
                                              false);
-            List alerts = findAlerts(subj.getId(), priority, endTime- timeRange,
+            List alerts = findAlerts(subj.getId(), priority, timeRange,
                                      endTime, pInfo);
             if (alerts.size() == 0)
                 break;

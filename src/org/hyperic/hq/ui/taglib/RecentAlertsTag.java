@@ -39,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -135,8 +135,7 @@ public class RecentAlertsTag extends TagSupport {
 
             ArrayList alertArr = new ArrayList();
             Iterator it = userAlerts.iterator();
-            AuthzSubjectValue subject = 
-                ab.getCurrentSubject(sessionId).getAuthzSubjectValue(); 
+            AuthzSubject subject = ab.getCurrentSubject(sessionId); 
             for (int i = 0; i < maxAlerts && it.hasNext(); i++) {
                 Escalatable alert = (Escalatable)it.next();
                 AlertDefinitionInterface defInfo = 
@@ -158,8 +157,7 @@ public class RecentAlertsTag extends TagSupport {
                                         alert.getAlertInfo().isFixed()));
             }
 
-            RecentAlertBean[] recentAlerts =
-                (RecentAlertBean[]) alertArr.toArray(new RecentAlertBean[0]);
+            Object[] recentAlerts = alertArr.toArray(new RecentAlertBean[0]);
 
             request.setAttribute(var, recentAlerts);
             request.setAttribute(sizeVar, new Integer(recentAlerts.length) );

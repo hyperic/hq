@@ -32,6 +32,7 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -40,6 +41,7 @@ import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -74,22 +76,17 @@ public class AppdefEntityValue {
         _subject = subject;
     }
     
+    public AppdefEntityValue(AppdefEntityID id, AuthzSubject subject) {
+        _id      = id;
+        _subject = subject.getAuthzSubjectValue();
+    }
+    
     public AppdefEntityID getID() {
         return _id;
     }
 
     private AppdefGroupManagerLocal getGroupManager() {
-        try {
-            if(groupManagerLocal == null){
-                groupManagerLocal = 
-                    AppdefGroupManagerUtil.getLocalHome().create();
-            }
-            return groupManagerLocal;
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        return AppdefGroupManagerEJBImpl.getOne();
     }
 
     private PlatformManagerLocal getPlatformManager() {
