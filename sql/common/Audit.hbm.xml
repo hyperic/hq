@@ -7,8 +7,6 @@
 <hibernate-mapping package="org.hyperic.hq.common.server.session">
   <class name="Audit" table="EAM_AUDIT">
 
-    <cache usage="read-write" />
-
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
       <generator class="sequence">
@@ -72,7 +70,6 @@
 
     <bag name="childrenBag" table="EAM_AUDIT" cascade="all-delete-orphan"
          inverse="true">
-      <cache usage="read-write"/>
       <key column="PARENT_ID" />
       <one-to-many class="Audit"/>
     </bag>
