@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
 import org.hyperic.hq.product.PluginException;
@@ -313,7 +314,18 @@ public class SigarPlatformDetector extends PlatformDetector {
         cprops.setValue("vendorVersion", os.getVendorVersion());
 
         platform.setCustomProperties(cprops);
-        
+
+        ConfigResponse mconfig = new ConfigResponse();
+        if (isWin32()) {
+            WindowsLogTrackPlugin.setDefaultConfig(mconfig);
+        }
+        else {
+            UnixLogTrackPlugin.setDefaultConfig(mconfig);
+        }
+
+        platform.setMeasurementConfig(mconfig,
+                                      LogTrackPlugin.LOGLEVEL_WARN,
+                                      true);
         return platform;
     }
 }

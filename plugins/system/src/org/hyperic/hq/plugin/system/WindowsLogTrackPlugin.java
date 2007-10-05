@@ -68,6 +68,11 @@ public class WindowsLogTrackPlugin
         super.shutdown();
     }
 
+    static void setDefaultConfig(ConfigResponse config) {
+        config.setValue(Win32EventLogNotification.PROP_EVENT_LOGS,
+                        EventLog.SYSTEM);
+    }
+
     public ConfigSchema getConfigSchema(TypeInfo info,
                                         ConfigResponse config) {
         ConfigSchema schema =

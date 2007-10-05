@@ -47,4 +47,7 @@ public class UnixLogTrackPlugin extends LogFileTailPlugin {
         }
         super.shutdown();
     }
+
+    static void setDefaultConfig(ConfigResponse config) {
+    }
 }
