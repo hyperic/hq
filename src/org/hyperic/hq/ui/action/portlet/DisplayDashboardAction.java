@@ -155,7 +155,6 @@ public class DisplayDashboardAction extends TilesAction {
 			session.setAttribute(Constants.SELECTED_DASHBOARD, dashboardConfig);
 			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 			dForm.setPopDialog(true);
-			return null;
 		}
 
 		// Dashboard exists, display it
