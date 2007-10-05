@@ -854,17 +854,11 @@ function showViewEscResponse(originalRequest) {
 </table>
 </div>
 
-<div style="margin-bottom:10px;border:1px solid #D5D8DE;" class="ListHeaderInactive">
-     <table cellpadding="3" cellspacing="0" border="0">
-         <tr>
-             <td>
-             <fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" />
-             <c:if test="${not useroperations['createEscalation']}">
-               <fmt:message key="inform.config.escalation.scheme.select" />
-             </c:if>
-             </td>
-         </tr>
-      </table>
+<div style="margin-bottom:10px;border:1px solid #D5D8DE;padding: 3px;" class="ListHeaderInactive">
+       <fmt:message key="inform.config.escalation.scheme.newescalation.escalationexplanation" />
+         <c:if test="${not useroperations['createEscalation']}">
+           <fmt:message key="inform.config.escalation.scheme.select" />
+         </c:if>
  </div>
 
 <c:if test="${useroperations['createEscalation']}">
