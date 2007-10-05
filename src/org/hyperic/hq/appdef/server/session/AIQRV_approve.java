@@ -147,19 +147,18 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 }
             }
             
-            if (aiplatformValue.isPlatformDevice()) {
-                try {
-                    configMgr.
-                        configureResource(subject,
-                                          existingPlatform.getEntityId(),
-                                          aiplatform.getProductConfig(),
-                                          aiplatform.getMeasurementConfig(),
-                                          aiplatform.getControlConfig(),
-                                          null, null, false);
-                } catch (Exception e) {
-                    _log.warn("Error configuring platform: " + e, e);
-                }
+            try {
+                configMgr.
+                    configureResource(subject,
+                                      existingPlatform.getEntityId(),
+                                      aiplatform.getProductConfig(),
+                                      aiplatform.getMeasurementConfig(),
+                                      aiplatform.getControlConfig(),
+                                      null, null, false);
+            } catch (Exception e) {
+                _log.warn("Error configuring platform: " + e, e);
             }
+
             _log.info("Created platform (" + aiplatformValue.getId() + "): "
                       + aiplatformValue);
             break;
