@@ -78,6 +78,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
         throws AIQApprovalException, PermissionException {
 
         Integer id = aiplatform.getId();
+        AppdefEntityID aid = null;
 
         _log.info("Visiting platform: " + id + " fqdn=" + aiplatform.getFqdn());
         AIPlatformValue aiplatformValue = aiplatform.getAIPlatformValue();
@@ -108,7 +109,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 Platform platform =
                     pmLocal.createPlatform(subject,
                                            aiplatform.getAIPlatformValue());
-
+                aid = platform.getEntityId();
                 setCustomProperties(aiplatform, platform, cpropMgr);
                 createdResources.add(platform.getEntityId());
             } catch (PermissionException e) {
@@ -150,7 +151,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 configMgr.
                     configureResource(subject,
-                                      existingPlatform.getEntityId(),
+                                      aid,
                                       aiplatform.getProductConfig(),
                                       aiplatform.getMeasurementConfig(),
                                       aiplatform.getControlConfig(),
