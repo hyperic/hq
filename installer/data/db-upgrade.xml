@@ -6768,6 +6768,94 @@ has already been defined.
                      insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 501, 7)"/>
     </schemaSpec>
 
+    <schemaSpec version="3.57">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+            CREATE TABLE eam_audit (
+                id integer NOT NULL,
+                klazz character varying(20) NOT NULL,
+                version_col bigint DEFAULT 0 NOT NULL,
+                start_time bigint NOT NULL,
+                end_time bigint NOT NULL,
+                nature integer NOT NULL,
+                purpose integer NOT NULL,
+                importance integer NOT NULL,
+                original boolean NOT NULL,
+                field character varying(30),
+                old_val character varying(1000),
+                new_val character varying(1000),
+                message character varying(1000) NOT NULL,
+                parent_id integer,
+                resource_id integer NOT NULL,
+                subject_id integer NOT NULL
+            )
+        </statement>
+        <statement targetDB="postgresql">
+            CREATE SEQUENCE eam_audit_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NO MAXVALUE
+                NO MINVALUE
+                CACHE 1
+        </statement>
+        <statement targetDB="oracle">
+            CREATE TABLE eam_audit (
+                id integer NOT NULL,
+                klazz VARCHAR2(20) NOT NULL,
+                version_col NUMBER(19, 0) NOT NULL,
+                start_time NUMBER(19, 0) NOT NULL,
+                end_time NUMBER(19, 0) NOT NULL,
+                nature integer NOT NULL,
+                purpose integer NOT NULL,
+                importance integer NOT NULL,
+                original boolean NOT NULL,
+                field VARCHAR2(30),
+                old_val VARCHAR2(1000),
+                new_val VARCHAR2(1000),
+                message VARCHAR2(1000) NOT NULL,
+                parent_id integer,
+                resource_id integer NOT NULL,
+                subject_id integer NOT NULL
+            )
+        </statement>
+        <statement targetDB="oracle">
+             CREATE SEQUENCE eam_audit_id_seq
+                START WITH 10001
+                INCREMENT BY 1
+                NOMAXVALUE
+                NOCYCLE
+                CACHE 10
+        </statement>
+        <statement>
+            ALTER TABLE eam_audit ADD CONSTRAINT eam_audit_pkey PRIMARY KEY (id)
+        </statement>
+        <statement>
+            CREATE INDEX parent_id_idx ON eam_audit (parent_id)
+        </statement>
+        <statement>
+            CREATE INDEX resource_id_idx ON eam_audit (resource_id)
+        </statement>
+        <statement>
+            CREATE INDEX subject_id_idx ON eam_audit (subject_id)
+        </statement>
+        <statement>
+            ALTER TABLE eam_audit
+               ADD CONSTRAINT fke5b6292dc81f5938 FOREIGN KEY (parent_id) 
+               REFERENCES eam_audit(id)
+        </statement>
+        <statement>
+            ALTER TABLE eam_audit
+                ADD CONSTRAINT fke5b6292de82fbc FOREIGN KEY (subject_id) 
+                REFERENCES eam_subject(id)
+        </statement>
+        <statement>
+            ALTER TABLE eam_audit
+                ADD CONSTRAINT fke5b6292dfc176ae FOREIGN KEY (resource_id) 
+                REFERENCES eam_resource(id)
+        </statement>
+      </schema-directSQL>                        
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 
