@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -82,7 +83,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getData(subject, command);
     }
@@ -98,7 +99,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getData(subject, commands);
     }
@@ -112,7 +113,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getCommands(subject, id);
     }
@@ -127,7 +128,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException    
     {
-        AuthzSubjectValue subject = _manager.getSubject(sessionId);
+        AuthzSubject subject = _manager.getSubjectPojo(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getConfigSchema(subject, id, command);
     }

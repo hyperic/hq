@@ -4,6 +4,7 @@ org.hyperic.hq.authz.server.session.AuthzStartupListener
 org.hyperic.hq.common.server.session.CommonStartupListener
 org.hyperic.hq.appdef.server.session.AppdefStartupListener
 org.hyperic.hq.autoinventory.server.session.AIStartupListener
+org.hyperic.hq.livedata.server.session.LiveDataStartupListener
 org.hyperic.hq.measurement.server.session.MeasurementStartupListener
 org.hyperic.hq.authz.server.session.ResourceStartupListener
 org.hyperic.hq.galerts.server.session.GalertStartupListener

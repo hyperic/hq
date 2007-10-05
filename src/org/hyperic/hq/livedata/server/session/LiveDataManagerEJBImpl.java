@@ -42,9 +42,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
 import org.hyperic.hq.livedata.shared.LiveDataException;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -113,7 +115,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     /**
      * Live data subsystem uses measurement configs.
      */
-    private ConfigResponse getConfig(AuthzSubjectValue subject,
+    private ConfigResponse getConfig(AuthzSubject subject,
                                      LiveDataCommand command)
         throws LiveDataException
     {
@@ -125,7 +127,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
             try {
                 ConfigResponse mConfig = cManager.
-                    getMergedConfigResponse(subject,
+                    getMergedConfigResponse(subject.getAuthzSubjectValue(),
                                             ProductPlugin.TYPE_MEASUREMENT,
                                             id, true);
                 mConfig.merge(config, false);
@@ -142,11 +144,13 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     /**
      * Get the appdef type for a given entity id.
      */
-    private String getType(AuthzSubjectValue subject, LiveDataCommand cmd)
+    private String getType(AuthzSubject subject, LiveDataCommand cmd)
         throws AppdefEntityNotFoundException, PermissionException
     {
         AppdefEntityID id = cmd.getAppdefEntityID();
-        AppdefEntityValue val = new AppdefEntityValue(id, subject);
+        AppdefEntityValue val = 
+            new AppdefEntityValue(id, subject.getAuthzSubjectValue()); 
+                                  
         AppdefResourceTypeValue typeVal = val.getResourceTypeValue();
         return typeVal.getName();
     }
@@ -194,7 +198,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public LiveDataResult getData(AuthzSubjectValue subject,
+    public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd)
         throws AppdefEntityNotFoundException, PermissionException,
                AgentNotFoundException, LiveDataException
@@ -209,7 +213,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @param cacheTimeout
      * @ejb:interface-method
      */
-    public LiveDataResult getData(AuthzSubjectValue subject,
+    public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd, long cacheTimeout)
         throws PermissionException, AgentNotFoundException,
                AppdefEntityNotFoundException, LiveDataException
@@ -245,7 +249,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public LiveDataResult[] getData(AuthzSubjectValue subject,
+    public LiveDataResult[] getData(AuthzSubject subject,
                                     LiveDataCommand[] commands)
         throws AppdefEntityNotFoundException, PermissionException, 
                AgentNotFoundException, LiveDataException
@@ -260,7 +264,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @param cacheTimeout The cache timeout given in milliseconds.
      * @ejb:interface-method
      */
-    public LiveDataResult[] getData(AuthzSubjectValue subject,
+    public LiveDataResult[] getData(AuthzSubject subject,
                                     LiveDataCommand[] commands,
                                     long cacheTimeout)
         throws PermissionException, AppdefEntityNotFoundException,
@@ -320,11 +324,12 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method 
      */
-    public String[] getCommands(AuthzSubjectValue subject, AppdefEntityID id)
+    public String[] getCommands(AuthzSubject subject, AppdefEntityID id)
         throws PluginException, PermissionException
     {
         try {
-            AppdefEntityValue val = new AppdefEntityValue(id, subject);
+            AppdefEntityValue val = 
+                new AppdefEntityValue(id, subject.getAuthzSubjectValue());
             AppdefResourceTypeValue tVal = val.getResourceTypeValue();
 
             return _manager.getCommands(tVal.getName());
@@ -334,16 +339,41 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void registerFormatter(LiveDataFormatter f) {
+        _log.info("Registering formatter [" + f.getName() + "]: " + 
+                  f.getDescription());
+        FormatterRegistry.getInstance().registerFormatter(f);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void unregisterFormatter(LiveDataFormatter f) {
+        _log.info("Unregistering formatter [" + f.getName() + "]");
+        FormatterRegistry.getInstance().unregisterFormatter(f);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public Set findFormatters(LiveDataCommand cmd) {
+        return FormatterRegistry.getInstance().findFormatters(cmd);
+    }
+
+    /**
      * Get the ConfigSchema for a given resource.
      * 
      * @ejb:interface-method
      */
-    public ConfigSchema getConfigSchema(AuthzSubjectValue subject,
+    public ConfigSchema getConfigSchema(AuthzSubject subject,
                                         AppdefEntityID id, String command)
         throws PluginException, PermissionException
     {
         try {
-            AppdefEntityValue val = new AppdefEntityValue(id, subject);
+            AppdefEntityValue val = 
+                new AppdefEntityValue(id, subject.getAuthzSubjectValue());
             AppdefResourceTypeValue tVal = val.getResourceTypeValue();
 
             return _manager.getConfigSchema(tVal.getName(), command);
