@@ -6695,19 +6695,19 @@ has already been defined.
                 CACHE 10
         </statement>
         <statement>        
-            ALTER TABLE ONLY eam_dash_config
+            ALTER TABLE eam_dash_config
                 ADD CONSTRAINT eam_dash_config_pkey PRIMARY KEY (id)
         </statement>        
         <statement>        
-            ALTER TABLE ONLY eam_dash_config
+            ALTER TABLE eam_dash_config
                 ADD CONSTRAINT fk1ef56c811a5420bd FOREIGN KEY (user_id) REFERENCES eam_subject(id)
         </statement>        
         <statement>        
-            ALTER TABLE ONLY eam_dash_config
+            ALTER TABLE eam_dash_config
                 ADD CONSTRAINT fk1ef56c816364efcd FOREIGN KEY (crispo_id) REFERENCES eam_crispo(id)
         </statement>        
         <statement>        
-            ALTER TABLE ONLY eam_dash_config
+            ALTER TABLE eam_dash_config
                 ADD CONSTRAINT fk1ef56c8199d737ae FOREIGN KEY (role_id) REFERENCES eam_role(id)
         </statement>
       </schema-directSQL>
