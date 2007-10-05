@@ -27,7 +27,6 @@ package org.hyperic.hq.auth.server.session;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectField;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -66,12 +65,6 @@ public class UserAudit extends Audit {
         setEndTime(now);
     }
 
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
-    }
-    
     public static UserAudit loginAudit(AuthzSubject user) {
         String msg = MSGS.format("auditMsg.user.login", user.getFullName());
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN,
