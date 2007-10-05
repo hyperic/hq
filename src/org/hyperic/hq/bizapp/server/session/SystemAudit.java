@@ -28,6 +28,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -59,10 +60,9 @@ public class SystemAudit extends Audit {
         setEndTime(System.currentTimeMillis());
     }
 
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
+    private static Resource getSystemResource() {
+        return ResourceManagerEJBImpl.getOne()
+                .findResourcePojoById(AuthzConstants.authzHQSystem);
     }
     
     public static AuthzSubject getOverlord() {
@@ -71,7 +71,7 @@ public class SystemAudit extends Audit {
     
     public static SystemAudit createUpAudit(long startupTime) {
         String msg = MSGS.format("auditMsg.hq.started"); 
-        SystemAudit res = new SystemAudit(getRootResource(), getOverlord(), 
+        SystemAudit res = new SystemAudit(getSystemResource(), getOverlord(), 
                                           HQ_STARTED, AuditImportance.MEDIUM, 
                                           AuditNature.START, msg); 
 
