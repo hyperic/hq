@@ -41,7 +41,6 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 

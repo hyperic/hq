@@ -38,7 +38,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;

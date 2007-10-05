@@ -23,53 +23,40 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.session;
+package org.hyperic.hq.ui.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 
-public class RoleDashboardConfig
-    extends DashboardConfig
-{
-    private Role _role;
+public class UserDashboardConfig
+    extends DashboardConfig {
+    private AuthzSubject _user;
 
-    protected RoleDashboardConfig() {
+    protected UserDashboardConfig() {
     }
 
-    RoleDashboardConfig(Role r, String name, Crispo config) {
+    UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
         super(name, config);
-        _role = r;
+        _user = user;
+    }
+
+    public AuthzSubject getUser() {
+        return _user;
     }
     
-    protected void setRole(Role r) {
-        _role = r;
-    }
-    
-    public Role getRole() {
-        return _role;
+    protected void setUser(AuthzSubject user) {
+        _user = user;
     }
     
     boolean isEditable(AuthzSubject by) {
-        PermissionManager pMan = PermissionManagerFactory.getInstance();
-        
-        try {
-            pMan.check(by.getId(), _role.getResource().getResourceType(), 
-                       _role.getId(), AuthzConstants.roleOpModifyRole);
-            return true;
-        } catch (PermissionException e) {
-            return false;
-        }
+        return getUser().equals(by);
     }
 
     public int hashCode() {
         int hash = super.hashCode();
 
-        hash = hash * 37 + _role.hashCode();
+        hash = hash * 37 + _user.hashCode();
         return hash;
     }
     
@@ -77,14 +64,14 @@ public class RoleDashboardConfig
         if (o == this)
             return true;
         
-        if (o == null || o instanceof RoleDashboardConfig == false)
+        if (o == null || o instanceof UserDashboardConfig == false)
             return false;
         
-        RoleDashboardConfig oe = (RoleDashboardConfig)o;
+        UserDashboardConfig oe = (UserDashboardConfig)o;
 
         if (!super.equals(oe))
             return false;
 
-        return _role.equals(oe.getRole());
+        return _user.equals(oe.getUser());
     }
 }

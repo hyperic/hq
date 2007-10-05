@@ -23,54 +23,53 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.session;
+package org.hyperic.hq.ui.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 
-public abstract class DashboardConfig
-    extends PersistedObject
-{
-    private Crispo _config;
-    private String _name;
+public class RoleDashboardConfig
+    extends DashboardConfig {
+    private Role _role;
 
-    protected DashboardConfig() {
+    protected RoleDashboardConfig() {
+    }
+
+    RoleDashboardConfig(Role r, String name, Crispo config) {
+        super(name, config);
+        _role = r;
     }
     
-    protected DashboardConfig(String name, Crispo config) {
-        _name   = name;
-        _config = config;
+    protected void setRole(Role r) {
+        _role = r;
     }
     
-    public ConfigResponse getConfig() {
-        return _config.toResponse();
+    public Role getRole() {
+        return _role;
     }
     
-    protected Crispo getCrispo() {
-        return _config;
+    boolean isEditable(AuthzSubject by) {
+        PermissionManager pMan = PermissionManagerFactory.getInstance();
+        
+        try {
+            pMan.check(by.getId(), _role.getResource().getResourceType(), 
+                       _role.getId(), AuthzConstants.roleOpModifyRole);
+            return true;
+        } catch (PermissionException e) {
+            return false;
+        }
     }
-    
-    protected void setCrispo(Crispo config) {
-        _config = config;
-    }
-    
-    public String getName() {
-        return _name;
-    }
-    
-    protected void setName(String n) {
-        _name = n;
-    }
-    
-    abstract boolean isEditable(AuthzSubject by);
-    
+
     public int hashCode() {
-        int hash = 17;
+        int hash = super.hashCode();
 
-        hash = hash * 37 + getName().hashCode();
-        hash = hash * 37 + (getCrispo() != null ? getCrispo().hashCode() : 0);
+        hash = hash * 37 + _role.hashCode();
         return hash;
     }
     
@@ -78,17 +77,14 @@ public abstract class DashboardConfig
         if (o == this)
             return true;
         
-        if (o == null || o instanceof DashboardConfig == false)
+        if (o == null || o instanceof RoleDashboardConfig == false)
             return false;
         
-        DashboardConfig oe = (DashboardConfig)o;
+        RoleDashboardConfig oe = (RoleDashboardConfig)o;
 
-        if (!getName().equals(oe.getName()))
-            return false;
-        
-        if (getCrispo().getId() != oe.getCrispo().getId())
+        if (!super.equals(oe))
             return false;
 
-        return true;
+        return _role.equals(oe.getRole());
     }
 }

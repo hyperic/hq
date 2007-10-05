@@ -23,40 +23,54 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.session;
+package org.hyperic.hq.ui.server.session;
 
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.util.config.ConfigResponse;
 
-public class UserDashboardConfig
-    extends DashboardConfig
+public abstract class DashboardConfig
+    extends PersistedObject
 {
-    private AuthzSubject _user;
+    private Crispo _config;
+    private String _name;
 
-    protected UserDashboardConfig() {
-    }
-
-    UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
-        super(name, config);
-        _user = user;
-    }
-
-    public AuthzSubject getUser() {
-        return _user;
+    protected DashboardConfig() {
     }
     
-    protected void setUser(AuthzSubject user) {
-        _user = user;
+    protected DashboardConfig(String name, Crispo config) {
+        _name   = name;
+        _config = config;
     }
     
-    boolean isEditable(AuthzSubject by) {
-        return getUser().equals(by);
+    public ConfigResponse getConfig() {
+        return _config.toResponse();
     }
-
+    
+    protected Crispo getCrispo() {
+        return _config;
+    }
+    
+    protected void setCrispo(Crispo config) {
+        _config = config;
+    }
+    
+    public String getName() {
+        return _name;
+    }
+    
+    protected void setName(String n) {
+        _name = n;
+    }
+    
+    abstract boolean isEditable(AuthzSubject by);
+    
     public int hashCode() {
-        int hash = super.hashCode();
+        int hash = 17;
 
-        hash = hash * 37 + _user.hashCode();
+        hash = hash * 37 + getName().hashCode();
+        hash = hash * 37 + (getCrispo() != null ? getCrispo().hashCode() : 0);
         return hash;
     }
     
@@ -64,14 +78,17 @@ public class UserDashboardConfig
         if (o == this)
             return true;
         
-        if (o == null || o instanceof UserDashboardConfig == false)
+        if (o == null || o instanceof DashboardConfig == false)
             return false;
         
-        UserDashboardConfig oe = (UserDashboardConfig)o;
+        DashboardConfig oe = (DashboardConfig)o;
 
-        if (!super.equals(oe))
+        if (!getName().equals(oe.getName()))
+            return false;
+        
+        if (getCrispo().getId() != oe.getCrispo().getId())
             return false;
 
-        return _user.equals(oe.getUser());
+        return true;
     }
 }

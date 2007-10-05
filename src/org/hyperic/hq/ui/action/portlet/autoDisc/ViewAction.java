@@ -47,7 +47,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;

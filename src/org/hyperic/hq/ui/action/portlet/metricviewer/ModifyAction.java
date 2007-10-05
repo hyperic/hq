@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;

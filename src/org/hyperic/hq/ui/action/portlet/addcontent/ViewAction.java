@@ -40,8 +40,8 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>

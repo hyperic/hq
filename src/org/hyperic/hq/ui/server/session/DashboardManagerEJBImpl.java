@@ -23,10 +23,12 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.session;
+package org.hyperic.hq.ui.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -35,6 +37,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -43,11 +46,14 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.bizapp.server.session.DashboardConfig;
-import org.hyperic.hq.bizapp.server.session.UserDashboardConfig;
-import org.hyperic.hq.bizapp.server.session.RoleDashboardConfig;
-import org.hyperic.hq.bizapp.shared.DashboardManagerUtil;
-import org.hyperic.hq.bizapp.shared.DashboardManagerLocal;
+import org.hyperic.util.StringUtil;
+import org.hyperic.hq.ui.shared.DashboardManagerUtil;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @ejb:bean name="DashboardManager"
@@ -60,9 +66,11 @@ import org.hyperic.hq.bizapp.shared.DashboardManagerLocal;
 
 public class DashboardManagerEJBImpl implements SessionBean {
 
+    private static Log _log = LogFactory.getLog(DashboardManagerEJBImpl.class);
+
     protected SessionManager _manager = SessionManager.getInstance();
 
-    private DashboardConfigDAO _dashDAO = 
+    private DashboardConfigDAO _dashDAO =
         new DashboardConfigDAO(DAOFactory.getDAOFactory());
     
     /** @ejb:create-method */
@@ -200,7 +208,58 @@ public class DashboardManagerEJBImpl implements SessionBean {
         res.addAll(_dashDAO.findRolesFor(me));
         return res;
     }
-    
+
+    /**
+     * Update dashboard configs to account for resource deletion
+     * @ejb:interface-method
+     */
+    public void handleResourceDelete(Set opts, String[] ids) {
+        AuthzSubject s = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        Collection dashboards;
+        try {
+            dashboards = getDashboards(s);
+        } catch (Exception e) {
+            _log.error("Unable to get dashboards to process resource delete " +
+                       "event.", e);
+            return;
+        }
+
+        for (Iterator i = dashboards.iterator(); i.hasNext(); ) {
+            DashboardConfig c = (DashboardConfig)i.next();
+
+            ConfigResponse config = c.getConfig();
+            for (Iterator j = opts.iterator(); j.hasNext(); ) {
+                String key = (String)j.next();
+                removeResources(ids, key, config);
+            }
+
+            try {
+                _log.info("Updating dashboard id=" + c.getId());
+                configureDashboard(s, c, config);
+            } catch (Exception e) {
+                _log.error("Unable to update dashboard config " +
+                            c.getId(), e);
+            }
+        }
+    }
+
+    /**
+     * Yanked from DashboardUtils so we don't need to include anything other
+     * than server and session in the server hq.jar
+     */
+    private void removeResources(String[] ids, String key,
+    		ConfigResponse userConfg) {
+	    String resources = userConfg.getValue(key);
+
+	    for (int i = 0; i < ids.length; i++) {
+	        String resource = ids[i];
+	        resources = StringUtil.remove(resources, resource);
+	        resources = StringUtil.replace(resources, "||", "|");
+	    }
+
+	    userConfg.setValue(key, resources);
+    }
+
     public static DashboardManagerLocal getOne() {
         try {
             return DashboardManagerUtil.getLocalHome().create();    

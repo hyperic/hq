@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.bizapp.server.session;
+package org.hyperic.hq.ui.server.session;
 
 import java.util.Collection;
 
@@ -31,6 +31,9 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 
 class DashboardConfigDAO 
     extends HibernateDAO

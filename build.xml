@@ -362,6 +362,13 @@
       <exclude name="org/hyperic/hq/plugin/**"/>
     </jar>
 
+    <!-- We only want server and shared classes for the UI -->
+    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes"
+         update="true">
+      <include name="org/hyperic/hq/ui/server/session/**"/>
+      <include name="org/hyperic/hq/ui/shared/**"/>
+    </jar>
+
     <!-- Write version resource -->
     <antcall target="write-version-file">
       <param name="version-file"
@@ -553,6 +560,8 @@
     <jar file="${ear.dir}/hq.war/WEB-INF/lib/hq-ui.jar" basedir="${build.dir}/classes" >
       <include name="org/hyperic/hq/ui/**" />
       <include name="servletunit/struts/**" />
+      <exclude name="org/hyperic/hq/ui/server/session/**" />
+      <exclude name="org/hyperic/hq/ui/shared/**" />
     </jar>
 
     <jar file="${ear.dir}/hq.war/WEB-INF/lib/display-taglib.jar" basedir="${build.dir}/classes" >

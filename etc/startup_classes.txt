@@ -1,3 +1,4 @@
+org.hyperic.hq.ui.server.session.UIStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.authz.server.session.AuthzStartupListener
 org.hyperic.hq.common.server.session.CommonStartupListener
