@@ -28,6 +28,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -61,10 +62,9 @@ public class PluginAudit extends Audit {
         setEndTime(endTime);
     }
 
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
+    private static Resource getSystemResource() {
+        return ResourceManagerEJBImpl.getOne()
+                .findResourcePojoById(AuthzConstants.authzHQSystem);
     }
     
     public static PluginAudit deployAudit(String pluginName, long start, 
@@ -73,7 +73,7 @@ public class PluginAudit extends Audit {
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.deploy", pluginName);
-        PluginAudit res = new PluginAudit(getRootResource(), overlord, 
+        PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
                                           PLUGIN_DEPLOYED, AuditImportance.HIGH,
                                           AuditNature.CREATE, msg, start, end); 
         
@@ -87,7 +87,7 @@ public class PluginAudit extends Audit {
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.update", pluginName);
-        PluginAudit res = new PluginAudit(getRootResource(), overlord, 
+        PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
                                           PLUGIN_UPDATED, AuditImportance.HIGH,
                                           AuditNature.UPDATE, msg, start, end); 
         
