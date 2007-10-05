@@ -29,6 +29,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -59,14 +60,13 @@ public class AIAudit extends Audit {
         super(s, r, p, n, i, msg);
     }
 
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
+    private static Resource getSystemResource() {
+        return ResourceManagerEJBImpl.getOne()
+                .findResourcePojoById(AuthzConstants.authzHQSystem);
     }
     
     public static AIAudit newImportAudit(AuthzSubject user) {
-        AIAudit res = new AIAudit(user, getRootResource(), IMPORT_APPROVE, 
+        AIAudit res = new AIAudit(user, getSystemResource(), IMPORT_APPROVE, 
                                   AuditImportance.HIGH,
                                   AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.approve"));
@@ -78,7 +78,7 @@ public class AIAudit extends Audit {
     public static AIAudit newRuntimeImportAudit(Agent reporter) {
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        AIAudit res = new AIAudit(overlord, getRootResource(), IMPORT_RUNTIME,
+        AIAudit res = new AIAudit(overlord, getSystemResource(), IMPORT_RUNTIME,
                                   AuditImportance.MEDIUM, AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.runtime",
                                               reporter.getAddress()));
