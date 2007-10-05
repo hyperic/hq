@@ -116,7 +116,7 @@ public abstract class AuditSortField
         }
 
         String getSortString(String audit, String resource, String subject) {
-            return subject + ".sortName"; 
+            return subject + ".name"; 
         }
     };
 
