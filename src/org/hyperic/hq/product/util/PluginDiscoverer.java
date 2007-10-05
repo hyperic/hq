@@ -623,6 +623,13 @@ public class PluginDiscoverer implements ScanListener {
                                    ", fqdn=" + platforms[i].getFqdn() +
                                    getDescription(platforms[i].getDescription()));
 
+                System.out.println("config...");
+                System.out.println("product.." +
+                                   decodeConfig(platforms[i].getProductConfig()));
+                System.out.println("metric..." +
+                                   decodeConfig(platforms[i].getMeasurementConfig()));
+                System.out.println("control.." +
+                                   decodeConfig(platforms[i].getControlConfig()));
                 System.out.println("cprops..." +
                                    decodeConfig(platforms[i].getCustomProperties()));
 
