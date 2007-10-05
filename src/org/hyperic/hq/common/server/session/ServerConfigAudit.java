@@ -27,6 +27,7 @@ package org.hyperic.hq.common.server.session;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.util.i18n.MessageBundle;
 
@@ -52,10 +53,9 @@ public class ServerConfigAudit extends Audit {
         super(s, r, p, n, i, msg);
     }
 
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
+    private static Resource getSystemResource() {
+        return ResourceManagerEJBImpl.getOne()
+                    .findResourcePojoById(AuthzConstants.authzHQSystem);
     }
     
     private static ServerConfigAudit createAudit(AuthzSubject user,
@@ -63,12 +63,15 @@ public class ServerConfigAudit extends Audit {
                                                  String newVal, String old) 
     {
         ServerConfigAudit res = 
-            new ServerConfigAudit(user, getRootResource(), CONFIG_UPDATE,
+            new ServerConfigAudit(user, getSystemResource(), CONFIG_UPDATE,
                                   AuditImportance.HIGH, AuditNature.UPDATE,
                                   MSGS.format(propKey, newVal, old));
 
         res.setStartTime(System.currentTimeMillis());
         res.setEndTime(System.currentTimeMillis());
+        res.setFieldName(propKey);
+        res.setOldFieldValue(old);
+        res.setNewFieldValue(newVal);
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
     }

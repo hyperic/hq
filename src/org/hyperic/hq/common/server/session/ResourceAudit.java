@@ -27,6 +27,7 @@ package org.hyperic.hq.common.server.session;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.util.i18n.MessageBundle;
 
 public class ResourceAudit extends Audit {
@@ -64,8 +65,7 @@ public class ResourceAudit extends Audit {
                                                long start, long end)
     {
         String msg = MSGS.format("auditMsg.resource.create", 
-                                 r.getResourceType().getLocalizedName(),
-                                 r.getName());
+                                 r.getResourceType().getLocalizedName());
         ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE,
                                               AuditImportance.MEDIUM, 
                                               AuditNature.CREATE,
@@ -75,19 +75,16 @@ public class ResourceAudit extends Audit {
         return res;
     }
     
-    private static Resource getRootResource() {
-        Integer ROOT_ID = new Integer(0);
-        
-        return ResourceManagerEJBImpl.getOne().findResourcePojoById(ROOT_ID);
+    private static Resource getSystemResource() {
+        return ResourceManagerEJBImpl.getOne()
+                .findResourcePojoById(AuthzConstants.authzHQSystem);
     }
     
     public static ResourceAudit deleteResource(Resource r, AuthzSubject creator,
                                                long start, long end)
     {
-        String msg = MSGS.format("auditMsg.resource.delete", 
-                                 r.getResourceType().getLocalizedName(),
-                                 r.getName());
-        ResourceAudit res = new ResourceAudit(getRootResource(), creator, 
+        String msg = MSGS.format("auditMsg.resource.delete"); 
+        ResourceAudit res = new ResourceAudit(getSystemResource(), creator, 
                                               RESOURCE_DELETE,
                                               AuditImportance.HIGH, 
                                               AuditNature.DELETE,
