@@ -53,6 +53,13 @@ class CollectorThread implements Runnable {
         return instance;
     }
 
+    static synchronized void shutdownInstance() {
+        if (instance != null) {
+            instance.doStop();
+            instance = null;
+        }
+    }
+
     public synchronized void doStart() {
         if (this.thread != null) {
             return;

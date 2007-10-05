@@ -78,6 +78,11 @@ public class MeasurementPluginManager extends PluginManager {
                       new Win32MeasurementPlugin());
     }
 
+    public void shutdown() throws PluginException {
+        CollectorThread.shutdownInstance();
+        super.shutdown();
+    }
+
     public String getName() {
         return ProductPlugin.TYPE_MEASUREMENT;
     }
