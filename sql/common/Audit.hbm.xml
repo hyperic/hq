@@ -23,7 +23,7 @@
     </version>
 
     <property name="klazz" insert="false" update="false">
-      <column name="KLAZZ" not-null="true"/>
+      <column name="KLAZZ" length="20" not-null="true"/>
     </property>
 
     <property name="startTime">
@@ -51,7 +51,7 @@
     </property>
 
     <property name="fieldName">
-      <column name="FIELD" not-null="false"/>
+      <column name="FIELD" length="30" not-null="false"/>
     </property>
 
     <property name="oldFieldValue">
