@@ -92,7 +92,7 @@ public class RSSAction extends BaseRSSAction {
 
             if (favIds != null) {
                 List ids = DashboardUtils.listAsEntityIds(
-                    StringUtil.explode(favIds, "|"));
+                    StringUtil.explode(favIds, Constants.DASHBOARD_DELIMITER));
                 AppdefEntityID[] arrayIds = new AppdefEntityID[ids.size()];
                 arrayIds = (AppdefEntityID[]) ids.toArray(arrayIds);
                 

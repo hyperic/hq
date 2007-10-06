@@ -49,6 +49,7 @@ import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.StringUtil;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.shared.DashboardManagerUtil;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
@@ -248,7 +249,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
 	    for (int i = 0; i < ids.length; i++) {
 	        String resource = ids[i];
 	        val = StringUtil.remove(val, resource);
-	        val = StringUtil.replace(val, "||", "|");
+	        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
+                                     Constants.DASHBOARD_DELIMITER);
 	    }
 
 	    return val;

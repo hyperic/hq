@@ -69,7 +69,8 @@ public class RemoveResourcesAction extends TilesAction {
         PageList resources = new PageList();
 
         List resourceList = user.
-            getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES, "|");
+            getPreferenceAsList(Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+                                Constants.DASHBOARD_DELIMITER);
 
         Iterator i = resourceList.iterator();
 
