@@ -58,6 +58,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -507,8 +508,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         for (Iterator it = resources.iterator(); it.hasNext();) {
             Resource res = (Resource) it.next();
             
-            if (resourceName != null &&
-                res.getName().indexOf(resourceName) < 0)
+            if (StringUtil.stringExists(res.getName(), resourceName))
                 continue;
             
             if (pc.isDescending())  // Add to head of array list

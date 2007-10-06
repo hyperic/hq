@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -32,34 +32,26 @@ import java.util.Arrays;
 import java.util.Locale;
 import org.hyperic.util.ArrayUtil;
 
-class UnitsUtil 
-    implements UnitsConstants 
-{
-    static final BigDecimal FACT_NONE =
-        new BigDecimal(1);
-    
+class UnitsUtil implements UnitsConstants {
+    static final BigDecimal FACT_NONE = new BigDecimal(1);
+
     // Binary scaling factors
-    static final BigDecimal FACT_KILO_BIN = 
-        new BigDecimal(1 << 10);
-    static final BigDecimal FACT_MEGA_BIN = 
+    static final BigDecimal FACT_KILO_BIN = new BigDecimal(1 << 10);
+    static final BigDecimal FACT_MEGA_BIN =
         FACT_KILO_BIN.multiply(FACT_KILO_BIN);
-    static final BigDecimal FACT_GIGA_BIN = 
+    static final BigDecimal FACT_GIGA_BIN =
         FACT_MEGA_BIN.multiply(FACT_KILO_BIN);
-    static final BigDecimal FACT_TERA_BIN = 
+    static final BigDecimal FACT_TERA_BIN =
         FACT_GIGA_BIN.multiply(FACT_KILO_BIN);
-    static final BigDecimal FACT_PETA_BIN = 
+    static final BigDecimal FACT_PETA_BIN =
         FACT_TERA_BIN.multiply(FACT_KILO_BIN);
     
     // The following factors are how to convert a number in FACT_* to
     // nanoseconds.  
-    static final BigDecimal FACT_NANOS  = 
-        new BigDecimal(1);
-    static final BigDecimal FACT_MICROS = 
-        new BigDecimal(1000);
-    static final BigDecimal FACT_MILLIS = 
-        new BigDecimal(1000000);
-    static final BigDecimal FACT_JIFFYS = 
-        new BigDecimal(10000000);
+    static final BigDecimal FACT_NANOS = new BigDecimal(1);
+    static final BigDecimal FACT_MICROS = new BigDecimal(1000);
+    static final BigDecimal FACT_MILLIS = new BigDecimal(1000000);
+    static final BigDecimal FACT_JIFFYS = new BigDecimal(10000000);
     static final BigDecimal FACT_SECS   = 
         FACT_MILLIS.multiply(new BigDecimal(1000));
     static final BigDecimal FACT_MINS   = 
@@ -124,8 +116,7 @@ class UnitsUtil
         NumberFormat res;
         String[] sValues;
         double[] values;
-        double val1, val2;
-        int minDiffIdx, numDigits;
+        int numDigits;
 
         res = NumberFormat.getInstance(locale);
         values = new double[inValues.length];
@@ -133,7 +124,7 @@ class UnitsUtil
         Arrays.sort(values);
         values = ArrayUtil.uniq(values);
 
-        if(values.length < 2){
+        if (values.length < 2) {
             res.setMinimumFractionDigits(1);
             res.setMaximumFractionDigits(1);
             return res;
@@ -148,16 +139,16 @@ class UnitsUtil
          */
         numDigits = 0;
         sValues   = new String[values.length];
-        while(numDigits < 9){
+        while (numDigits < 9) {
             res.setMinimumFractionDigits(numDigits);
             res.setMaximumFractionDigits(numDigits);
 
-            for(int i=0; i<sValues.length; i++){
+            for (int i = 0; i < sValues.length; i++) {
                 sValues[i] = res.format(values[i]);
             }
 
             Arrays.sort(sValues);
-            if(ArrayUtil.isUniq(sValues) == false){
+            if (ArrayUtil.isUniq(sValues) == false) {
                 numDigits++;
             } else {
                 break;

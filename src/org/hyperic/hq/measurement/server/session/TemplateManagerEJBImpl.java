@@ -74,6 +74,7 @@ import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -264,12 +265,9 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
 
             // First, keyword
-            if (keyword != null && keyword.length() > 0) {
-                if (tmpl.getName().toLowerCase().indexOf(keyword.toLowerCase())
-                        < 0) {
-                    it.remove();
-                    continue;
-                }
+            if (StringUtil.stringExists(tmpl.getName(), keyword)) {
+                it.remove();
+                continue;
             }
 
             switch (tmpl.getCollectionType()) {

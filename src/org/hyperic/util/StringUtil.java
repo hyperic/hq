@@ -535,4 +535,12 @@ public class StringUtil {
         return str.substring(0, strLen / 2 - toChop / 2 - 1) + "..." + 
                str.substring(strLen / 2 + toChop / 2);
     }
+    
+    /**
+     * Do a case-insensitive search for a substring
+     */
+    public static boolean stringExists(String source, String sub) {
+        return (sub != null) && (sub.length() > 0) &&
+               (source.toLowerCase().indexOf(sub.toLowerCase()) < 0);
+    }
 }
