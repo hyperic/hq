@@ -49,7 +49,7 @@ public class InetAddressChecker extends NetServicesCollector {
             throw new PluginException("This service requires Java 1.5 or higher");
         }
 
-        this.timeout = new Object[] { new Integer(getTimeout()) };
+        this.timeout = new Object[] { new Integer(getTimeoutMillis()) };
     }
 
     public void collect() {
