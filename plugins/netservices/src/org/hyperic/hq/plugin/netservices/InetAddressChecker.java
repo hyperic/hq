@@ -50,6 +50,12 @@ public class InetAddressChecker extends NetServicesCollector {
         }
 
         this.timeout = new Object[] { new Integer(getTimeoutMillis()) };
+
+        try {
+            setSource(getAddress().toString());
+        } catch (IOException e) {
+            setSource(getHostname());
+        }
     }
 
     public void collect() {
