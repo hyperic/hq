@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -37,14 +38,15 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
+import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.StringUtil;
 import org.hyperic.hq.ui.shared.DashboardManagerUtil;
@@ -210,35 +212,30 @@ public class DashboardManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Update dashboard configs to account for resource deletion
+     * Update dashboard and user configs to account for resource deletion
+     * 
+     * @param opts The set of user or dashboard properties to check
+     * @param ids An array of ID's of removed resources
      * @ejb:interface-method
      */
     public void handleResourceDelete(Set opts, String[] ids) {
-        AuthzSubject s = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        Collection dashboards;
-        try {
-            dashboards = getDashboards(s);
-        } catch (Exception e) {
-            _log.error("Unable to get dashboards to process resource delete " +
-                       "event.", e);
-            return;
-        }
 
-        for (Iterator i = dashboards.iterator(); i.hasNext(); ) {
-            DashboardConfig c = (DashboardConfig)i.next();
+        CrispoManagerLocal cm = CrispoManagerEJBImpl.getOne();
 
-            ConfigResponse config = c.getConfig();
-            for (Iterator j = opts.iterator(); j.hasNext(); ) {
-                String key = (String)j.next();
-                removeResources(ids, key, config);
-            }
+        for (Iterator i = opts.iterator(); i.hasNext(); ) {
+            String opt = (String)i.next();
+            List copts = cm.findOptionByKey(opt);
 
-            try {
-                _log.info("Updating dashboard id=" + c.getId());
-                configureDashboard(s, c, config);
-            } catch (Exception e) {
-                _log.error("Unable to update dashboard config " +
-                            c.getId(), e);
+            for (Iterator j = copts.iterator(); j.hasNext(); ) {
+                CrispoOption o = (CrispoOption)j.next();
+                String val = o.getValue();
+                String newVal = removeResources(ids, val);
+
+                if (!val.equals(newVal)) {
+                    cm.updateOption(o, newVal);
+                        _log.debug("Update option key=" + o.getKey() +
+                                   " old =" + val + " new =" + newVal);
+                }
             }
         }
     }
@@ -247,17 +244,14 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * Yanked from DashboardUtils so we don't need to include anything other
      * than server and session in the server hq.jar
      */
-    private void removeResources(String[] ids, String key,
-    		ConfigResponse userConfg) {
-	    String resources = userConfg.getValue(key);
-
+    private String removeResources(String[] ids, String val) {
 	    for (int i = 0; i < ids.length; i++) {
 	        String resource = ids[i];
-	        resources = StringUtil.remove(resources, resource);
-	        resources = StringUtil.replace(resources, "||", "|");
+	        val = StringUtil.remove(val, resource);
+	        val = StringUtil.replace(val, "||", "|");
 	    }
 
-	    userConfg.setValue(key, resources);
+	    return val;
     }
 
     public static DashboardManagerLocal getOne() {

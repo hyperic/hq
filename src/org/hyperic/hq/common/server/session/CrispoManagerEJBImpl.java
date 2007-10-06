@@ -27,6 +27,7 @@ package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -36,6 +37,7 @@ import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.shared.CrispoManagerUtil;
 
@@ -53,10 +55,13 @@ import org.hyperic.hq.common.shared.CrispoManagerUtil;
  * @ejb:transaction type="REQUIRED"
  */
 public class CrispoManagerEJBImpl implements SessionBean {
-    private CrispoDAO getDAO() {
+    private CrispoDAO getCrispoDAO() {
         return DAOFactory.getDAOFactory().getCrispoDAO();
     }
-    
+
+    private CrispoOptionDAO getCrispoOptionDAO() {
+        return DAOFactory.getDAOFactory().getCrispoOptionDAO();
+    }
     /**
      * Create a new {@link Crispo} from a {@link Map} of {@link String}
      * key/value pairs
@@ -66,7 +71,7 @@ public class CrispoManagerEJBImpl implements SessionBean {
     public Crispo createCrispo(Map keyVals) {
         Crispo c = Crispo.create(keyVals);
         
-        getDAO().save(c);
+        getCrispoDAO().save(c);
         return c;
     }
     
@@ -75,14 +80,14 @@ public class CrispoManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public Collection findAll() {
-        return getDAO().findAll();
+        return getCrispoDAO().findAll();
     }
 
     /**
      * @ejb:interface-method
      */
     public Crispo findById(Integer id) {
-        return getDAO().findById(id);
+        return getCrispoDAO().findById(id);
     }
     
     /**
@@ -91,7 +96,7 @@ public class CrispoManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void deleteCrispo(Crispo c) {
-        getDAO().remove(c);
+        getCrispoDAO().remove(c);
     }
 
     /**
@@ -102,7 +107,7 @@ public class CrispoManagerEJBImpl implements SessionBean {
      */
     public Crispo create(ConfigResponse cfg) {
         Crispo res = Crispo.create(cfg);
-        getDAO().save(res);
+        getCrispoDAO().save(res);
         return res;
     }
     
@@ -114,7 +119,31 @@ public class CrispoManagerEJBImpl implements SessionBean {
      */
     public void update(Crispo c, ConfigResponse cfg) {
         c.updateWith(cfg);
-        getDAO().save(c);
+        getCrispoDAO().save(c);
+    }
+
+    /**
+     * Find a List of CrispoOptions given the search key.
+     *
+     * @param key The key to search for
+     * @return A list of CrispoOptions that have a key that matches in whole
+     * @ejb:interface-method
+     * or part the given key parameter.
+     */
+    public List findOptionByKey(String key) {
+        return getCrispoOptionDAO().findOptionsByKey(key);    
+    }
+
+    /**
+     * Update the given CrispoOption with the given value.
+     *
+     * @param o The CrispoOption to update
+     * @param val The new value for this option
+     * @ejb:interface-method 
+     */
+    public void updateOption(CrispoOption o, String val) {
+        o.setValue(val);
+        getCrispoOptionDAO().save(o);
     }
 
     public static CrispoManagerLocal getOne() {

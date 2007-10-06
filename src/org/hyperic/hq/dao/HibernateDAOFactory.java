@@ -36,6 +36,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.server.session.CrispoDAO;
+import org.hyperic.hq.common.server.session.CrispoOptionDAO;
 import org.hyperic.hq.control.server.session.ControlHistoryDAO;
 import org.hyperic.hq.control.server.session.ControlScheduleDAO;
 import org.hyperic.hq.events.server.session.ActionDAO;
@@ -265,6 +266,10 @@ public class HibernateDAOFactory extends DAOFactory {
 
     public CrispoDAO getCrispoDAO() {
         return new CrispoDAO(this);
+    }
+
+    public CrispoOptionDAO getCrispoOptionDAO() {
+        return new CrispoOptionDAO(this);
     }
 
     public EventLogDAO getEventLogDAO() {

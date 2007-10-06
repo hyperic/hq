@@ -1,7 +1,5 @@
 package org.hyperic.hq.ui.server.session;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
@@ -15,11 +13,14 @@ public class ResourceDeleteWatcher implements ZeventListener {
     private Set _opts = new HashSet(); //The set of user prefs to watch
     private static final Object OBJLOCK = new Object();
 
+    //XXX: move this registration into the UI.
     private static final String[] DEFAULT_OPTS = {
-        ".userPref.recent.resources"
+        ".userPref.recent.resources",
+        ".dashContent.availsummary.resources",
+        ".dashContent.resourcehealth.resources",
+        ".dashContent.criticalalerts.resources",
+        ".dashContent.metricviewer.resources"
     };
-
-    private static Log _log = LogFactory .getLog(ResourceDeleteWatcher.class);
 
     private static final ResourceDeleteWatcher _instance =
         new ResourceDeleteWatcher();

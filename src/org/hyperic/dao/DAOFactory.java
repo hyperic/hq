@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.server.session.CrispoDAO;
+import org.hyperic.hq.common.server.session.CrispoOptionDAO;
 import org.hyperic.hq.control.server.session.ControlHistoryDAO;
 import org.hyperic.hq.control.server.session.ControlScheduleDAO;
 import org.hyperic.hq.dao.AIHistoryDAO;
@@ -123,7 +124,8 @@ public abstract class DAOFactory {
     // Common DAO
     public abstract ConfigPropertyDAO getConfigPropertyDAO();
     public abstract CrispoDAO         getCrispoDAO();
-    
+    public abstract CrispoOptionDAO   getCrispoOptionDAO();
+
     // Plugin DAO
     public abstract PluginDAO getPluginDAO();
 
