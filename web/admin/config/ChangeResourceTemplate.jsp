@@ -53,7 +53,7 @@ var DemoTreeManager = {
   addTreeContextMenu: function(){
     var ctxMenu = this.djWdgt.createWidget("TreeContextMenu",{});
     ctxMenu.addChild(this.djWdgt.createWidget(
-      "TreeMenuItem",{caption:"<c:out value="admin.config.monitoring.EditTemplates"/>", widgetId:"ctxMetrics"}));
+      "TreeMenuItem",{caption:"<fmt:message key="admin.config.monitoring.EditTemplates"/>", widgetId:"ctxMetrics"}));
     document.body.appendChild(ctxMenu.domNode);
     /* Bind the context menu to the tree */
     ctxMenu.listenTree(this.myTreeWidget);
