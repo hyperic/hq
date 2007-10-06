@@ -686,6 +686,8 @@
       <fileset dir="${build.dir}/classes" >
         <include name="org/hyperic/hq/ui/**" />
         <include name="servletunit/struts/**" />
+        <exclude name="org/hyperic/hq/ui/server/**" />
+        <exclude name="org/hyperic/hq/ui/shared/**" />
       </fileset>
     </copy>
 
