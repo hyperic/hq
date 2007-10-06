@@ -33,6 +33,7 @@
 <script language="JavaScript" type="text/javascript">
     dojo.require("dojo.lang.*");
     dojo.require("dojo.widget.Tree"); 
+    dojo.require("dojo.widget.TreeContextMenu");
 
     function onMouseRow(el) {
       el.style.background="#a6c2e7";
@@ -46,21 +47,66 @@
       el.style.background="#EBEDF2";
     }
 
+var DemoTreeManager = {
+  djWdgt: null,
+  myTreeWidget: null,
+  addTreeContextMenu: function(){
+    var ctxMenu = this.djWdgt.createWidget("TreeContextMenu",{});
+    ctxMenu.addChild(this.djWdgt.createWidget(
+      "TreeMenuItem",{caption:"<c:out value="admin.config.monitoring.EditTemplates"/>", widgetId:"ctxMetrics"}));
+    document.body.appendChild(ctxMenu.domNode);
+    /* Bind the context menu to the tree */
+    ctxMenu.listenTree(this.myTreeWidget);
+  },
+  addController: function(){
+    this.djWdgt.createWidget(
+      "TreeBasicController",
+      {widgetId:"myTreeController",DNDController:"create"}
+    );
+  },
+  bindEvents: function(){
+    /* Bind the functions in the TreeActions object to the context menu entries */
+    dojo.event.topic.subscribe("ctxMetrics/engage",
+      function (menuItem) { TreeActions.defaultMetrics(menuItem.getTreeNode(),
+        "myTreeController"); }
+    );
+  },
+  init: function(){
+    /* Initialize this object */
+    this.djWdgt = dojo.widget;
+    this.myTreeWidget = this.djWdgt.manager.getWidgetById("TypesTree");
+    this.addTreeContextMenu();
+    this.addController();
+    this.bindEvents();
+  }
+};
+ 
+var TreeActions = {
+  defaultMetrics: function(node,controllerId){
+    if (node.depth > 0) {
+      var appdefType = ("" + node.widgetId).charAt(0);
+      if (appdefType == 1) {
+        window.location.href = "<html:rewrite page="/resource/platform/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
+      }
+      else if (appdefType == 2) {
+        window.location.href = "<html:rewrite page="/resource/server/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
+      }
+      else if (appdefType == 3) {
+        window.location.href = "<html:rewrite page="/resource/service/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
+      }
+    }
+  }
+};
+ 
     dojo.addOnLoad(function(){
+        DemoTreeManager.init()
+
         dojo.event.topic.subscribe("nodeSelected",
             function(message) {
               var node = message.node;
               if (node.depth > 0) {
                 var appdefType = ("" + node.widgetId).charAt(0);
-                if (appdefType == 1) {
-                    window.location.href = "<html:rewrite page="/resource/platform/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
-                }
-                else if (appdefType == 2) {
-                    window.location.href = "<html:rewrite page="/resource/server/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
-                }
-                else if (appdefType == 3) {
-                    window.location.href = "<html:rewrite page="/resource/service/monitor/Config.do?mode=configure&aetid="/>" + node.widgetId;
-                }
+                window.location.href = "<html:rewrite page="/ResourceHub.do?ff="/>" + appdefType + "&ft=" + node.widgetId;
               }
             }
         );
