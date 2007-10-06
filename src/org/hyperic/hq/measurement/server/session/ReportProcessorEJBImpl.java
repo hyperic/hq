@@ -48,6 +48,8 @@ import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
+import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 
@@ -66,8 +68,7 @@ public class ReportProcessorEJBImpl
 {
     private final Log log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private final DataManagerLocal _dataMan = 
-        DataManagerEJBImpl.getOne();
+    private final DataManagerLocal _dataMan = DataManagerEJBImpl.getOne();
     private final DerivedMeasurementManagerLocal _dmMan =
         DerivedMeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
@@ -220,6 +221,14 @@ public class ReportProcessorEJBImpl
         } catch (Exception e) {
             _debugId = null;
         } 
+    }
+
+    public static ReportProcessorLocal getOne() {
+        try {
+            return ReportProcessorUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
     
     public void ejbPostCreate(){}

@@ -54,6 +54,8 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -1786,6 +1788,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             desc += " " + typeLabel;
         }
         return desc;
+    }
+
+    public static AppdefStatManagerLocal getOne() {
+        try {
+            return AppdefStatManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     public void setSessionContext(javax.ejb.SessionContext ctx) {}

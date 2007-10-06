@@ -41,12 +41,15 @@ import org.hyperic.hq.auth.Principal;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
+import org.hyperic.hq.auth.shared.AuthManagerLocal;
+import org.hyperic.hq.auth.shared.AuthManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.util.ConfigPropertyException;
@@ -68,11 +71,6 @@ public class AuthManagerEJBImpl implements SessionBean {
     private static final String appName = HQConstants.ApplicationName;
 
     public AuthManagerEJBImpl() {}
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 
     /**
      * Set the JAAS configuration options
@@ -285,4 +283,18 @@ public class AuthManagerEJBImpl implements SessionBean {
         
         return users;
     }
+
+    public static AuthManagerLocal getOne() {
+        try {
+            return AuthManagerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public void ejbCreate() {}
+    public void ejbRemove() {}
+    public void ejbActivate() {}
+    public void ejbPassivate() {}
+    public void setSessionContext(SessionContext ctx) {}
 }
