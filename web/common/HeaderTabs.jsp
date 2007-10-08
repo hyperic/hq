@@ -27,11 +27,11 @@
  --%>
 <c:if test="${not empty mastheadAttachments}">
   <c:forEach var="attachment" items="${mastheadAttachments}">
-    <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-      <html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link>
-    </td>
+      <div dojoType="MenuItem2" caption="Audit Center" onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10002"/>'"></div>
+      <!--<html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link> -->
   </c:forEach>
 </c:if>
+<!--
 <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
   <a href="." onclick="toggleMenu('reportcenter');return false;" style="color: #DDD"><fmt:message key="reporting.reporting.ReportCenterTitle"/></a>
   <div style="clear: both;"></div>
@@ -44,3 +44,4 @@
     </div>
   </div>
 </td>
+-->

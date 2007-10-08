@@ -33,95 +33,146 @@
 <!--[if lte IE 7]>
 <link rel=stylesheet href="<html:rewrite page="/css/iecss.css"/>" type="text/css">
  <![endif]-->
+<script type="text/javascript">
 
- <link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
+	var djConfig = {
+		debugAtAllCosts: false,
+		isDebug: false
+	};
+
+</script>
+<script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
+<script type="text/javascript">
+	dojo.require("dojo.widget.Menu2");
+	dojo.hostenv.writeIncludes();
+</script>
+<style type="text/css">
+	.dojoMenuBar2 {
+		border-top:1px solid #d4d4d4;
+	}
+</style>
+
+
+<link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
-  var help = "<hq:help/>";
-          
- function getUpdateStatus(opt) {
-   if (opt=="<fmt:message key="header.Acknowledge"/>") {
-     var pars =  "update=true";
-     var updateUrl = 'Dashboard.do?';
-     var url = updateUrl + pars;
-     //window.location = url;
-       new Ajax.Request( url, {method: 'post'} );
-       $('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
-      }
-     menuLayers.hide();
-   }
+    var help = "<hq:help/>";
+
+    function getUpdateStatus(opt) {
+        if (opt == "<fmt:message key="header.Acknowledge"/>") {
+            var pars = "update=true";
+            var updateUrl = 'Dashboard.do?';
+            var url = updateUrl + pars;
+            //window.location = url;
+            new Ajax.Request(url, {method: 'post'});
+            $('hb').innerHTML = '<html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/>'
+        }
+        menuLayers.hide();
+    }
 
 </script>
 <div class="headerWrapper" style="background-image: url('<html:rewrite page="/images/HeaderBkgd6.gif"/>')">
-<div style="position:absolute;left:0px;top:1px;width:225px;height:60px;">
-    <html:link action="/Dashboard">
-        <c:choose>
-            <c:when test="${applicationScope.largeLogo}">
-                <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt=""
-                          border="0"/>
-               
-                <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
-            </c:when>
-            <c:otherwise>
-                <html:img page="/images/newLogo18.gif" width="203" height="60" alt="" border="0" />
-            </c:otherwise>
-        </c:choose>
-    </html:link>
-</div>
+    <div style="position:absolute;left:0px;top:1px;width:225px;height:60px;">
+        <html:link action="/Dashboard">
+            <c:choose>
+                <c:when test="${applicationScope.largeLogo}">
+                    <html:img page="/customer/${applicationScope.largeLogoName}" width="225" height="31" alt=""
+                              border="0"/>
 
-<div class="headRightWrapper" style="z-index: 300;">
-<div class="headTopNav">
+                    <html:img page="/images/cobrand_logo.gif" width="225" height="25" alt="" border="0"/>
+                </c:when>
+                <c:otherwise>
+                    <html:img page="/images/newLogo18.gif" width="203" height="60" alt="" border="0"/>
+                </c:otherwise>
+            </c:choose>
+        </html:link>
+    </div>
+
+    <div class="headRightWrapper" style="z-index: 300;">
+        <div class="headTopNav">
+            <div class="headAlertWrapper">
+                <div class="recentText">
+                    <fmt:message key="header.RecentAlerts"/>
+                    :
+                </div>
+                <div id="recentAlerts"></div>
+                <div style="height:1px;width:1px;clear:both;">
+                    <html:img page="/images/spacer.gif" border="0" width="1" height="1"/>
+                </div>
+            </div>
             <div class="headUsrName">
-              <c:choose>
-              <c:when test="${useroperations['viewSubject']}">
-                <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
-                  <c:out value="${sessionScope.webUser.username}"/>
-                </html:link>
-              </c:when>
-              <c:otherwise>
-                <c:out value="${sessionScope.webUser.username}"/>
-              </c:otherwise>
-              </c:choose>
-               <span style="display:block;padding-top:4px;">
+                <c:choose>
+                    User:
+                    <c:when test="${useroperations['viewSubject']}">
+                        <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
+                            <c:out value="${sessionScope.webUser.username}"/>
+                        </html:link>
+                    </c:when>
+                    <c:otherwise>
+                        User:
+                        <c:out value="${sessionScope.webUser.username}"/>
+                    </c:otherwise>
+                </c:choose>
+               <span style="padding-left:10px;">
                 <html:link action="/Logout">
-                    <span style="font-size:10px;"><fmt:message key="admin.user.generalProperties.Logout"/></span>
+                    <span style=""><fmt:message key="admin.user.generalProperties.Logout"/></span>
+                </html:link></span>
+                <span style="padding-left:10px;"> <html:link href=""
+                                                             onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+                    <fmt:message key="common.label.Help"/>
                 </html:link></span>
             </div>
-            <div class="headAlertWrapper">
-                            <div class="recentText"><fmt:message key="header.RecentAlerts"/> :</div> <div id="recentAlerts"></div>
-                            <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
+            <div style="height:1px;width:1px;clear:both;">
+                <html:img page="/images/spacer.gif" border="0" width="1" height="1"/>
             </div>
-     <div style="height:1px;width:1px;clear:both;"><html:img page="/images/spacer.gif" border="0" width="1" height="1"/></div>
-</div>
+        </div>
 
-<div class="headBotNav">
-      <table border="0" cellspacing="0" cellpadding="0" id="navigationTbl">
-                    <tr>
-                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                            <html:link page="/Dashboard.do"><fmt:message key="dash.home.PageTitle"/></html:link>
-                        </td>
-                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                            <html:link page="/ResourceHub.do"><fmt:message key="resource.hub.ResourceHubPageTitle"/></html:link>
-                        </td>
-                        <tiles:insert definition=".header.optional.tabs"/>
-                        <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                            <html:link action="/Admin"><fmt:message key="admin.admin.AdministrationTitle"/></html:link>
-                        </td>
-                         <td class="navText" onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                        <a href="." onclick="toggleMenu('recent');return false;"><span id="recentImg"><fmt:message key=".dashContent.recentResources"/></span></a>
-                            <div style="clear: both;"></div>
+        <div class="headBotNav">
+
+
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td>
+
+                        <div dojoType="PopupMenu2" widgetId="submenu1">
+                            <div dojoType="MenuItem2" caption="Browse"
+                                 onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
+                            <div dojoType="MenuItem2" caption="Down Resources"></div>
+                            <div dojoType="MenuSeparator2"></div>
+                            <div dojoType="MenuItem2" caption="Recent Resources" submenuId="submenu3"></div>
+
+                        </div>
+
+                        <div dojoType="PopupMenu2" widgetId="submenu2">
+                            <div dojoType="MenuItem2" caption="Reporting"
+                                 onClick="location.href='<html:rewrite page="/reporting/ReportCenter.do"/>'"></div>
+                            <div dojoType="MenuItem2" caption="Audit Center"
+                                 onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10002"/>'"></div>
+                            <div dojoType="MenuItem2" caption="Alert Center"
+                                 onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10001"/>'"></div>
+                        </div>
+
+                        <div dojoType="PopupMenu2" widgetId="submenu3">
                             <tiles:insert definition=".toolbar.recentResources"/>
-                        </td>
-                         <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
-                            <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
-                                <fmt:message key="common.label.Help"/></html:link>
-                        </td>
-                    </tr>
+                        </div>
 
-                </table>
-    <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
+                        <div dojoType="MenuBar2">
+                            <div dojoType="MenuBarItem2" caption="Dashboard"
+                                 onClick="location.href='<html:rewrite page="/Dashboard.do"/>'"></div>
+                            <div dojoType="MenuBarItem2" caption="Resources" submenuId="submenu1"></div>
+                            <div dojoType="MenuBarItem2" caption="Tracking" submenuId="submenu2"></div>
+                            <div dojoType="MenuBarItem2" caption="Administration"
+                                 onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
+                        </div>
+
+                    </td>
+                </tr>
+            </table>
+
+
+            <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
         <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
     <c:if test="${not empty HQUpdateReport}">

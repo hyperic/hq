@@ -2,7 +2,7 @@
 .dojoPopupMenu2 {
 	position: absolute;
 	border: 1px solid #7298d0;
-	background:#85aeec url(images/soriaMenuBg.gif) repeat-x bottom left !important;
+	background:#60a5ea; /*url(images/soriaMenuBg.gif) repeat-x bottom left !important;*/
 	padding: 1px;
 	margin-top: 1px;
 	margin-bottom: 1px;
@@ -10,12 +10,13 @@
 
 .dojoMenuItem2{
 	white-space: nowrap;
-	font: menu;
+	font-family: arial,sans-serif;
+    font-size: 11px;
 	margin: 0;
 }
 
 .dojoMenuItem2Hover {
-	background-color: #D2E4FD;
+	background-color: #ffffff;
 	cursor:pointer;
 	cursor:hand;
 }
@@ -43,7 +44,7 @@
 .dojoMenuItem2Accel {
 	position: relative;
 	vertical-align: middle;
-	padding-left: 3px;
+	padding-left: 0px;
 }
 
 .dojoMenuItem2Disabled .dojoMenuItem2Label,
@@ -82,15 +83,15 @@
 
 .dojoMenuSeparator2Bottom {
 	height: 50%;
-	border-top: 1px solid #c9deff;
+	border-top: 0px solid #c9deff;
 	margin: 0px 2px;
 	font-size: 1px;
 }
 
 .dojoMenuBar2 {
-	background:#85aeec url(images/soriaBarBg.gif) repeat-x top left;
+	background:#336699 /*url(images/soriaBarBg.gif) repeat-x top left*/;
 	/*border-bottom:1px solid #6b9fec;*/
-	padding: 1px;
+	padding: 0px;
 }
 
 .dojoMenuBar2 .dojoMenuItem2 {
@@ -100,7 +101,7 @@
 	position: relative;
 	vertical-align: middle;
 	z-index: 1;
-	padding: 3px 8px;
+	padding: 1px 15px;
 	display: inline;/* needed in khtml to display correctly */
 	display: -moz-inline-box;/* needed in firefox */
 	cursor:pointer;
@@ -108,7 +109,7 @@
 }
 
 .dojoMenuBar2 .dojoMenuItem2Hover {
-	background-color:#d2e4fd;
+	background-color:#ffffff;
 }
 
 .dojoMenuBar2 .dojoMenuItem2Disabled span {

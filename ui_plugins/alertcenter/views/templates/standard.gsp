@@ -1,4 +1,4 @@
-<%= dojoInit %>
+
 <%= dojoInclude(["dojo.event.*",
                  "dojo.collections.Store",
                  "dojo.widget.ContentPane",
