@@ -240,9 +240,14 @@ public final class JMXServlet extends HttpServlet {
         throws Exception 
     {
         ObjectName patternName = null;
+        boolean filterDomain = false;
 
         if ((pat != null) && (pat.length() > 0) && ! "*".equals(pat)) {
             patternName = new ObjectName(pat);
+        }
+
+        if ("*".equals(pat)) {
+            filterDomain = true;
         }
 
         Iterator it = mServer.queryMBeans(patternName, null).iterator();
@@ -331,6 +336,14 @@ public final class JMXServlet extends HttpServlet {
                 String attributes = name.substring(name.indexOf(":") + 1);
                 out.println("Name: Catalina:" + attributes);
             } else {
+                if (filterDomain) {
+                    String domain = oname.getDomain();
+                    if (!(domain.equals("hyperic-hq") ||
+                          domain.equals("Catalina")))
+                    {
+                        continue;
+                    }
+                }
                 out.println("Name: " + name);
             }
 
