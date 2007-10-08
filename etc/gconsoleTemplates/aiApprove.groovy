@@ -37,8 +37,6 @@ list.each { plat ->
     System.out.println("Processing platform " + plat.id)
     aiMan.processQueue(overlord, platformIds, serverIds, 
                        ipIds, AIQueueConstants.Q_DECISION_APPROVE)
-    System.out.println("Sleeping 20 seconds")
-    Thread.sleep(20000)
     System.out.println("Done")
 }
 
