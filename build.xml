@@ -864,7 +864,7 @@
         <include name="getopt.jar" />
         <include name="tomcat-jk.jar" />
         <!-- for SSH collector within netservices plugin -->
-        <include name="jsch-0.1.23.jar"/>
+        <include name="jsch-0.1.34.jar"/>
         <!-- for DNS collector within netservices plugin -->
         <include name="dnsjava-2.0.3.jar"/>
         <!-- for JMX based plugins -->
@@ -1298,7 +1298,7 @@
         <include name="commons-beanutils.jar" />
         <include name="commons-logging.jar" />
         <include name="jdom_b8.jar" />
-        <include name="jsch-0.1.23.jar"/>
+        <include name="jsch-0.1.34.jar"/>
         <include name="getopt.jar"/>
         <!-- For live data translation -->
         <include name="json.jar"/>
