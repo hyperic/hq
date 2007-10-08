@@ -215,16 +215,10 @@ public class RegisteredDispatcherEJBImpl
         
         if (!enqueuedEvents.isEmpty()) {
             final ArrayList eventsToPublish = new ArrayList(enqueuedEvents);
-            
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    Messenger sender = new Messenger();
-                    sender.publishMessage(EventConstants.EVENTS_TOPIC, eventsToPublish);
-                }
 
-                public void beforeCommit() {
-                }
-            });
+            Messenger sender = new Messenger();
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+                                  eventsToPublish);   
         }        
     }
 
