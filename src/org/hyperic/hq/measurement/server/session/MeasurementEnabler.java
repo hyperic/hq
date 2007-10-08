@@ -58,27 +58,27 @@ class MeasurementEnabler
             AuthzSubjectValue subject = z.getAuthzSubjectValue();
             AppdefEntityID id = z.getAppdefEntityID();
             boolean isUpdate;
-            
+
             isUpdate = z instanceof ResourceUpdatedZevent;
-            
+
             try {
-                if (!isUpdate || dm.getEnabledMetricsCount(subject, id) == 0) {
+                if (dm.getEnabledMetricsCount(subject, id) == 0) {
                     _log.info("Enabling default metrics for [" + id + "]");
                     dm.enableDefaultMetrics(subject, id);
+                }
 
+                if (!isUpdate) {
                     // On initial creation of the service check if log or config
                     // tracking is enabled.  If so, enable it.  We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
-                    ConfigResponse c = 
+                    ConfigResponse c =
                         cm.getMergedConfigResponse(subject,
                                                    ProductPlugin.TYPE_MEASUREMENT,
                                                    id, true);
                     tm.enableTrackers(subject, id, c);
-                } else {
-                    _log.info("Rescheduling metric schedule for [" + id + "]");
-                    dm.reschedule(id);
                 }
+
             } catch(Exception e) {
                 _log.warn("Unable to enable default metrics", e);
             }

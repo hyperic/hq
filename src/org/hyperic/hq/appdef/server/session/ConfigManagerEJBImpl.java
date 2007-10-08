@@ -56,6 +56,7 @@ import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.PlatformDAO;
 import org.hyperic.hq.autoinventory.AICompare;
+import org.hyperic.hq.zevents.ZeventManager;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -581,6 +582,12 @@ public class ConfigManagerEJBImpl
         if (wasUpdated) {
             // XXX: Need to cascade and send events for each resource that may
             // have been affected by this config update.
+            if (sendConfigEvent) {
+                ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject,
+                                                                        appdefID);
+                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            }
+            
             return new AppdefEntityID[] { appdefID };
         } else {
             return new AppdefEntityID[] {};
