@@ -137,7 +137,7 @@ public class SenderThread
             } catch(NumberFormatException exc){
                 throw new AgentStartException(PROP_METRICDUP + " is not " +
                                               "a valid integer ('" + 
-                                              sMetricDup + "'");
+                                              sMetricDup + "')");
             }
             
             this.log.info("Duplicating metrics " + this.metricDup + " times");
@@ -150,7 +150,7 @@ public class SenderThread
             } catch(NumberFormatException exc){
                 throw new AgentStartException(PROP_MAXBATCHSIZE + " is not " +
                                               "a valid integer ('" + 
-                                              sMaxBatchSize + "'");
+                                              sMaxBatchSize + "')");
             }
 
         }
