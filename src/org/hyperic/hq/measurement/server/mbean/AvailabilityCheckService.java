@@ -295,6 +295,14 @@ public class AvailabilityCheckService
             }
         }
         watch.markTimeBegin("addData");
+        
+        // We know that all data points in addData are avail metrics
+        MetricDataCache cache = MetricDataCache.getInstance();
+        for (Iterator it = addData.iterator(); it.hasNext(); ) {
+            DataPoint dp = (DataPoint) it.next();
+            cache.setAvailMetric(dp.getMetricId());
+        }
+        
         getDataMan().addData(addData, false);
         watch.markTimeEnd("addData");
         wait = 0;

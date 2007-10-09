@@ -146,9 +146,15 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
-  <!-- Metric data cache, used outside of hibernate -->
+  <!-- Metric data caches, used outside of hibernate -->
   <cache name="MetricDataCache"
          maxElementsInMemory="100000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
+  <cache name="DownMetricsCache"
+         maxElementsInMemory="20000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>

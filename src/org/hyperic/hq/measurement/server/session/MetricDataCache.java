@@ -33,6 +33,8 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MetricValue;
 
     /**
@@ -42,15 +44,18 @@ import org.hyperic.hq.product.MetricValue;
  */
 
 public class MetricDataCache {
+    private final Log _log = LogFactory.getLog(MetricDataCache.class);
+    
     // The cache name, must match what is in ehcache.xml
     private static final String CACHENAME = "MetricDataCache";
+    private static final String DOWNCACHENAME = "DownMetricsCache";
 
     private static Cache _cache;
+    private static Cache _downCache;
 
     private static MetricDataCache _singleton = new MetricDataCache();
     
     private Object _cacheLock = new Object();
-    
     
     /**
      * Singleton accessor
@@ -61,6 +66,7 @@ public class MetricDataCache {
 
     private MetricDataCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
+        _downCache = CacheManager.getInstance().getCache(DOWNCACHENAME);
     }
     
     /**
@@ -117,9 +123,35 @@ public class MetricDataCache {
                 }
             }
 
-            el = new Element(mid, mval);
-            _cache.put(el);
+            _cache.put(new Element(mid, mval));
+            
+            // Could be an availability metric
+            if (_downCache.isKeyInCache(mid)) {
+                el = _downCache.get(mid);
+                MetricValue val = (MetricValue) el.getObjectValue();
+                if (mval.getValue() == 1) {
+                    if (val == null || val.getTimestamp() < mval.getTimestamp())
+                    {
+                        _downCache.remove(mid);
+                        
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("Remove available metric: " + mid);
+                        }
+                    }
+                }
+                else if (mval.getValue() == 0) {
+                    if (val == null || val.getTimestamp() > mval.getTimestamp())
+                    {
+                        _downCache.put(new Element(mid, mval));
 
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("Add unavailable metric: " + mid +
+                                       " at " + mval.getTimestamp());
+                        }
+                    }
+                }
+            }
+            
             return true;            
         }
     }
@@ -142,5 +174,14 @@ public class MetricDataCache {
             }
         }
         return null;
+    }
+    
+    /**
+     * Create placeholder (if necessary) for Availability metric
+     */
+    public void setAvailMetric(Integer mid) {
+        if (!_downCache.isKeyInCache(mid)) {
+            _downCache.put(new Element(mid, null));
+        }
     }
 }

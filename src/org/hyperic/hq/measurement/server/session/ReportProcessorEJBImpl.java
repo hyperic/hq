@@ -155,7 +155,7 @@ public class ReportProcessorEJBImpl
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            DerivedMeasurement dm = _dmMan.getMeasurement(dmId);;
+            DerivedMeasurement dm = _dmMan.getMeasurement(dmId);
             
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -165,6 +165,13 @@ public class ReportProcessorEJBImpl
             // collection period, but the instances should be low.
             if (dm == null || !dm.isEnabled())
                 continue;
+            
+            // If this is an availability metric, then tell the cache about it
+            MeasurementTemplate tmpl = dm.getTemplate();
+            if (tmpl.isDesignate() && tmpl.getCategory().getName()
+                    .equals(MeasurementConstants.CAT_AVAILABILITY)) {
+                MetricDataCache.getInstance().setAvailMetric(dmId);
+            }
             
             ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
