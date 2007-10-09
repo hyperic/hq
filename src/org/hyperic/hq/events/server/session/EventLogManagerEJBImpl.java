@@ -76,12 +76,20 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     }
     
     /** 
-     * Create a new vanilla log item
+     * Create a new vanilla log item.
+     * 
+     * @param event The event to log.
+     * @param subject The log item subject.
+     * @param status The log item status.
+     * @param save <code>true</code> to persist the log item; 
+     *             <code>false</code> to create a transient log item only.
      * 
      * @ejb:interface-method
      */
-    public EventLog createLog(AbstractEvent event, String subject,
-                              String status) {
+    public EventLog createLog(AbstractEvent event, 
+                              String subject,
+                              String status, 
+                              boolean save) {
         EventLog eval = new EventLog();
 
         // Set the time to the event time
@@ -114,9 +122,24 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
             eval.setEntityId(aeId.getID());
         }
 
-        return getEventLogDAO().create(eval);
+        if (save) {
+            return getEventLogDAO().create(eval);            
+        } else {
+            return eval;
+        }
     }
-
+    
+    /**
+     * Insert the event logs in batch.
+     * 
+     * @param eventLogs The event logs.
+     * 
+     * @ejb:interface-method
+     */
+    public void insertEventLogs(EventLog[] eventLogs) {
+        getEventLogDAO().insertLogs(eventLogs);
+    }
+    
     /** 
      * Get a list of log records based on resource, event type and time range
      * 

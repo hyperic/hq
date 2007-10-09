@@ -26,7 +26,9 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
+import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Expression;
@@ -157,6 +159,36 @@ public class EventLogDAO extends HibernateDAO {
         }
         
         return rowsDeleted;
+    }
+    
+    /**
+     * Insert the event logs in batch, with batch size specified by the 
+     * <code>hibernate.jdbc.batch_size</code> configuration property.
+     * 
+     * @param eventLogs The event logs to insert.
+     */
+    void insertLogs(EventLog[] eventLogs) {        
+        Session session = getSession();
+                
+        FlushMode flushMode = session.getFlushMode();
+        CacheMode cacheMode = session.getCacheMode();
+
+        try {
+            session.setFlushMode(FlushMode.MANUAL);
+            
+            // We do not want to update the 2nd level cache with these event logs
+            session.setCacheMode(CacheMode.IGNORE);
+          
+            for (int i = 0; i < eventLogs.length; i++) {
+                save(eventLogs[i]);
+            }
+            
+            session.flush();
+            session.clear();
+        } finally {
+            session.setFlushMode(flushMode);
+            session.setCacheMode(cacheMode);
+        }
     }
     
     void remove(EventLog l) {

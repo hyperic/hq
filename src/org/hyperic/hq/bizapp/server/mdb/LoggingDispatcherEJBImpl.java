@@ -25,8 +25,10 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
@@ -39,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 
@@ -76,15 +79,10 @@ public class LoggingDispatcherEJBImpl
             
             if (obj instanceof AbstractEvent) {
                 AbstractEvent event = (AbstractEvent) obj;
-                EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
-                logEvent(elMan, event);
+                logEvent(event);
             } else if (obj instanceof Collection) {
                 Collection events = (Collection) obj;
-                EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
-                for (Iterator it = events.iterator(); it.hasNext(); ) {
-                    AbstractEvent event = (AbstractEvent) it.next();
-                    logEvent(elMan, event);
-                }
+                logEvents(events);
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
@@ -97,11 +95,36 @@ public class LoggingDispatcherEJBImpl
      * 
      * @param event The event.
      */
-    private void logEvent(EventLogManagerLocal elMan, AbstractEvent event) {
+    private void logEvent(AbstractEvent event) {
+        EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+        
         if (event.isLoggingSupported()) {
             LoggableInterface le = (LoggableInterface) event;            
-            elMan.createLog(event, le.getSubject(), le.getLevelString());
+            elMan.createLog(event, le.getSubject(), le.getLevelString(), true);
         }        
+    }
+    
+    private void logEvents(Collection events) {
+        EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+        List loggableEvents = new ArrayList();
+        
+        for (Iterator it = events.iterator(); it.hasNext();) {
+            AbstractEvent event = (AbstractEvent) it.next();
+            
+            if (event.isLoggingSupported()) {
+                LoggableInterface le = (LoggableInterface) event;
+                EventLog eventLog = elMan.createLog(event, 
+                                                    le.getSubject(), 
+                                                    le.getLevelString(), 
+                                                    false);
+                loggableEvents.add(eventLog);
+            }
+        }
+        
+        if (!loggableEvents.isEmpty()) {
+            elMan.insertEventLogs((EventLog[])loggableEvents.toArray(
+                                       new EventLog[loggableEvents.size()]));
+        }
     }
 
     /**
