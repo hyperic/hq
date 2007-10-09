@@ -606,13 +606,6 @@ public class RuntimeReportProcessor {
                     return;
                 }
 
-                // let's see if we should enable RT collection
-                // if there's a config on the inbound service object, we'll
-                // set rt to true
-                if(isRtEnabled(aiservice)) {
-                    foundAppdefService.setServiceRt(true);
-                }
-
                 Integer serviceTypePK
                     = foundAppdefService.getServiceType().getId();
                 String serviceOwnerName = server.getOwner();
@@ -639,12 +632,6 @@ public class RuntimeReportProcessor {
                 foundAppdefService
                     = AIConversionUtil.mergeAIServiceIntoService(aiservice,
                                                                  foundAppdefService);
-                // and while we're at it, let's see if we should enable RT
-                // collection if there's a config on the inbound service
-                // object, we'll set rt to true
-                if(isRtEnabled(aiservice)) {
-                    foundAppdefService.setServiceRt(true);
-                }
                 serviceMgr.updateService(subject, foundAppdefService);
             }
             
@@ -697,10 +684,5 @@ public class RuntimeReportProcessor {
 
     private boolean isPlaceholder(AIServerExtValue aiserverExt) {
         return (aiserverExt != null && aiserverExt.getPlaceholder());
-    }
-    
-    private boolean isRtEnabled(AIServiceValue aiSvc) {
-        return (aiSvc.getResponseTimeConfig() != null &&
-                aiSvc.getResponseTimeConfig().length > 0);
     }
 }
