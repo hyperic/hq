@@ -45,7 +45,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 class TrackerThread implements Runnable {
-
+    
+    private static final String PROP_MAXEVENTBATCHSIZE  = 
+        "agent.eventReportBatchSize";
+    
+    private static final int    MAX_EVENT_BATCHSIZE = 100;
     private static final String CONFIGTRACK_LISTNAME = "configtrack_spool";
     private static final String LOGTRACK_LISTNAME    = "logtrack_spool";
 
@@ -54,8 +58,8 @@ class TrackerThread implements Runnable {
 
     private Object             interrupter;
     private long               waitTime;
-    private Properties         props;
-
+    private int                maxEventBatchSize = MAX_EVENT_BATCHSIZE;
+    
     private AgentStorageProvider      storage;
     private MeasurementCallbackClient client;
 
@@ -63,23 +67,37 @@ class TrackerThread implements Runnable {
     private LogTrackPluginManager     ltManager;
 
     private Log log;
-    
+        
     TrackerThread(ConfigTrackPluginManager ctManager, 
                   LogTrackPluginManager ltManager, 
                   AgentStorageProvider storage,
-                  Properties props)
+                  Properties bootProps)
         throws AgentStartException
     {
         this.ctManager   = ctManager;
         this.ltManager   = ltManager;
         this.storage     = storage;
-        this.props       = props;
         this.shouldDie   = false;
         this.myThread    = null;
         this.interrupter = new Object();
         this.client      = setupClient();
         this.waitTime    = TrackEventPluginManager.DEFAULT_INTERVAL;
         this.log         = LogFactory.getLog(TrackerThread.class);
+        
+        String sMaxBatchSize = bootProps.getProperty(PROP_MAXEVENTBATCHSIZE);
+        
+        if(sMaxBatchSize != null){
+            try {
+                this.maxEventBatchSize = Integer.parseInt(sMaxBatchSize);
+            } catch(NumberFormatException exc){
+                throw new AgentStartException(PROP_MAXEVENTBATCHSIZE + " is not " +
+                                              "a valid integer ('" + 
+                                              sMaxBatchSize + "')");
+            }
+
+        }
+        
+        this.log.info("Event report batch size set to " + this.maxEventBatchSize);
     }
 
     private void interruptMe()
@@ -132,9 +150,40 @@ class TrackerThread implements Runnable {
 
     private void processDlist(String dListName)
     {
-        for(Iterator i= this.storage.getListIterator(dListName);
-            i != null && i.hasNext();) {
+        boolean moreEventsToProcess = true;
+        
+        while (moreEventsToProcess) {
+            moreEventsToProcess = 
+                processNextEventReport(dListName, maxEventBatchSize);
+        }
                 
+        try {
+            this.storage.flush();
+        } catch(AgentStorageException exc){
+            this.log.error("Failed to flush agent storage", exc);
+        }
+    }
+
+    /**
+     * Process the next event report.
+     * 
+     * @param dListName
+     * @param batchSize The event batch size per report.
+     * @return <code>true</code> if there are more events to process.
+     */
+    private boolean processNextEventReport(String dListName, int batchSize) {
+        boolean moreEventsToProcess = false;
+                
+        Iterator i = this.storage.getListIterator(dListName);
+        
+        if (i == null) {
+            return false;
+        }
+        
+        TrackEventReport report = new TrackEventReport();
+        int numEventsProcessed = 0;
+        
+        while (numEventsProcessed <= batchSize && i.hasNext()) {
             TrackEvent event;
 
             try {
@@ -142,14 +191,35 @@ class TrackerThread implements Runnable {
             } catch (Exception e) {
                 this.log.error("Unable to decode record -- deleting: " + e);
                 continue;
+            } finally {
+                numEventsProcessed++;
+                moreEventsToProcess = i.hasNext();
             }
 
-            this.log.debug("Sending event to server=" + event);
-                
+            this.log.debug("Adding event to report=" + event);
+
+            report.addEvent(event);
+        }
+        
+        if (!sendReportToServer(dListName, report)) {
+            // If there is an error sending to the server, try again later.
+            moreEventsToProcess = false;
+        }
+
+        removeProcessedEventsFromStorage(dListName, numEventsProcessed);
+        
+        return moreEventsToProcess;
+    }
+
+    private boolean sendReportToServer(String dListName,
+                                       TrackEventReport report) {
+        
+        boolean succeeded = true;
+        
+        if (report.getEvents().length > 0) {
+            this.log.debug("Sending report to server");
+            
             try {
-                // Create a report to send
-                TrackEventReport report = new TrackEventReport();
-                report.addEvent(event);
                 if (dListName.equals(LOGTRACK_LISTNAME)) {
                     this.client.trackSendLog(report);
                 } else if (dListName.equals(CONFIGTRACK_LISTNAME)) {
@@ -157,21 +227,24 @@ class TrackerThread implements Runnable {
                 } else {
                     throw new IllegalArgumentException("Unknown DList name");
                 }
-                this.log.debug("Complete send event to server");
+                
+                this.log.debug("Completed sending report to server");            
             } catch (AgentCallbackClientException e) {
-                // If there is an error sending to the server, try again
-                // later.
                 this.log.error("Error sending report to server: " + e);
-                return;
-            }                
-
-            i.remove();
+                succeeded = false;
+            }            
         }
         
-        try {
-            this.storage.flush();
-        } catch(AgentStorageException exc){
-            this.log.error("Failed to flush agent storage", exc);
+        return succeeded;
+    }
+
+    private void removeProcessedEventsFromStorage(String dListName, 
+                                                  int numEventsProcessed) {
+        for(Iterator i= this.storage.getListIterator(dListName);
+            numEventsProcessed > 0 && i != null && i.hasNext(); 
+            numEventsProcessed--) {
+            i.next();
+            i.remove();
         }
     }
 
