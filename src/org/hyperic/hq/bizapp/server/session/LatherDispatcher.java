@@ -650,14 +650,20 @@ public class LatherDispatcher
         TrackEventReport report = args.getEvents();
 
         TrackEvent[] events = report.getEvents();
-
-        for (int i = 0; i < events.length; i++) {
-            // Create a ResourceLogEvent to send
-            log.debug("TrackEvent: " + events[i]);
-            ResourceLogEvent rle = new ResourceLogEvent(events[i]);
-            sendTopicMessage(EventConstants.EVENTS_TOPIC, rle);
+        
+        if (events.length > 0) {
+            ArrayList logEvents = new ArrayList(events.length);
+            
+            for (int i = 0; i < events.length; i++) {
+                // Create a ResourceLogEvent to send
+                log.debug("TrackEvent: " + events[i]);
+                ResourceLogEvent rle = new ResourceLogEvent(events[i]);
+                logEvents.add(rle);
+            }
+            
+            sendTopicMessage(EventConstants.EVENTS_TOPIC, logEvents);
         }
-
+        
         return new NullLatherValue();
     }
 
@@ -670,13 +676,19 @@ public class LatherDispatcher
 
         TrackEvent[] events = report.getEvents();
 
-        for (int i = 0; i < events.length; i++) {
-            // Create a ConfigChangedEvent to send
-            log.debug("TrackEvent: " + events[i]);
-            ConfigChangedEvent cce = new ConfigChangedEvent(events[i]);
-            sendTopicMessage(EventConstants.EVENTS_TOPIC, cce);
+        if (events.length > 0) {
+            ArrayList ccEvents = new ArrayList(events.length);
+            
+            for (int i = 0; i < events.length; i++) {
+                // Create a ConfigChangedEvent to send
+                log.debug("TrackEvent: " + events[i]);
+                ConfigChangedEvent cce = new ConfigChangedEvent(events[i]);
+                ccEvents.add(cce);
+            }
+            
+            sendTopicMessage(EventConstants.EVENTS_TOPIC, ccEvents);
         }
-
+        
         return new NullLatherValue();
     }
 
