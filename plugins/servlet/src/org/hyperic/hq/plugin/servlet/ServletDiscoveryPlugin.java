@@ -137,7 +137,6 @@ public abstract class ServletDiscoveryPlugin
                 Attributes atts = mBeanInfo.getAttributes(objectName);
                 String name = atts.getValue("ContextName");
                 String base = atts.getValue("DocBase");
-                String logDir = atts.getValue("ResponseTimeLogDir");
 
                 AIServiceValue service = new AIServiceValue();
                 service.setServiceTypeName(serviceTypeName);
