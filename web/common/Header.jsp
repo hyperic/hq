@@ -139,19 +139,27 @@
                         <div dojoType="PopupMenu2" widgetId="submenu1">
                             <div dojoType="MenuItem2" caption="Browse"
                                  onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
-                            <div dojoType="MenuItem2" caption="Down Resources"></div>
+                            <!-- <div dojoType="MenuItem2" caption="Down Resources"></div>  -->
+                            <tiles:insert definition=".header.optional.tabs">
+                                <tiles:put name="location" value="resources"/>
+                            </tiles:insert>
                             <div dojoType="MenuSeparator2"></div>
                             <div dojoType="MenuItem2" caption="Recent Resources" submenuId="submenu3"></div>
 
                         </div>
 
                         <div dojoType="PopupMenu2" widgetId="submenu2">
+                            <tiles:insert definition=".header.optional.tabs">
+                                <tiles:put name="location" value="tracking"/>
+                            </tiles:insert>
+                            <!--
                             <div dojoType="MenuItem2" caption="Reporting"
                                  onClick="location.href='<html:rewrite page="/reporting/ReportCenter.do"/>'"></div>
                             <div dojoType="MenuItem2" caption="Audit Center"
                                  onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10002"/>'"></div>
                             <div dojoType="MenuItem2" caption="Alert Center"
                                  onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10001"/>'"></div>
+                            -->
                         </div>
 
                         <div dojoType="PopupMenu2" widgetId="submenu3">

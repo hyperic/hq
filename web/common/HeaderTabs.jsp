@@ -1,4 +1,5 @@
 <%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-c" prefix="c" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
@@ -25,13 +26,23 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<c:if test="${not empty mastheadAttachments}">
-  <c:forEach var="attachment" items="${mastheadAttachments}">
-      <div dojoType="MenuItem2" caption="Audit Center" onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10002"/>'"></div>
-      <!--<html:link action="/mastheadAttach" paramId="id" paramName="attachment" paramProperty="id"><c:out value="${attachment.view.description}"/></html:link> -->
-  </c:forEach>
+<c:set var="location" scope="request"><tiles:getAsString name="location"/></c:set>
+<c:if test="${not empty mastheadAttachments}"> <!-- TODO: change to test the new request vars for multiple attach points -->
+  <c:choose>
+  <c:when test="${location eq 'resources'}">
+	  <c:forEach var="attachment" items="${mastheadAttachments}">
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='/mastheadAttach.do?id=<c:out value="${attachment.id}"/>'"></div>
+      </c:forEach>
+  </c:when>
+  <c:when test="${location eq 'tracking'}">
+    <c:forEach var="attachment" items="${mastheadAttachments}">
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='/mastheadAttach.do?id=<c:out value="${attachment.id}"/>'"></div>
+      </c:forEach>
+  </c:when>
+  </c:choose>
 </c:if>
-<!--
+
+<!-- TODO: Add in the inactive capability for EE only features
 <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
   <a href="." onclick="toggleMenu('reportcenter');return false;" style="color: #DDD"><fmt:message key="reporting.reporting.ReportCenterTitle"/></a>
   <div style="clear: both;"></div>
