@@ -17,17 +17,11 @@ class DojoUtil {
     /**
      * Output a header which sets up the inclusion of the DOJO javascript
      * framework.  This must be called before using any other DOJO methods.
+     * 
+     * Currently dojo init is handled by header.jsp
      */
 	static String dojoInit() {
         '''
-	        <script type="text/javascript">
-                var djConfig = {
-                    isDebug: false
-                };
-            </script>
-
-            <script src="/js/dojo/dojo.js" type="text/javascript">
-            </script>
         '''
 	}
 	
