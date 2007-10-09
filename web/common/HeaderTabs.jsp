@@ -31,7 +31,7 @@
   <c:choose>
   <c:when test="${location eq 'resources'}">
 	  <c:forEach var="attachment" items="${mastheadAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='/mastheadAttach.do?id=<c:out value="${attachment.id}"/>'"></div>
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=${attachment.id}"/>'"></div>
       </c:forEach>
   </c:when>
   <c:when test="${location eq 'tracking'}">
