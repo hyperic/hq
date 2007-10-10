@@ -31,7 +31,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class ResourceCreatedZevent extends ResourceZevent {
 
-     static {
+    static {
         ZeventManager.getInstance().
             registerEventClass(ResourceCreatedZevent.class);
     }
