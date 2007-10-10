@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
@@ -56,6 +57,7 @@ public class MeasurementStartupListener
         Set listenEvents = new HashSet();
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
+        listenEvents.add(ResourceRefreshZevent.class);
         ZeventManager.getInstance()
                      .addBufferedListener(listenEvents,
                                           new MeasurementEnabler());

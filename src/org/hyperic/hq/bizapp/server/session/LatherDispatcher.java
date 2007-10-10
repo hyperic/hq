@@ -48,9 +48,9 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
@@ -370,13 +370,13 @@ public class LatherDispatcher
         if (ids != null) {
             try {
                 List zevents = new ArrayList();
-                ResourceUpdatedZevent zevent;
+                ResourceRefreshZevent zevent;
                 for (Iterator it = ids.iterator(); it.hasNext();) {
                     Integer id = (Integer) it.next();
                     Platform platform = getPlatformManager()
                         .findPlatformById(id);
 
-                    zevent = new ResourceUpdatedZevent(getOverlord(),
+                    zevent = new ResourceRefreshZevent(getOverlord(),
                                                        platform.getEntityId());
                     zevents.add(zevent);
 
@@ -384,7 +384,7 @@ public class LatherDispatcher
                     for (Iterator i = servers.iterator(); i.hasNext(); ) {
                         Server server = (Server)i.next();
 
-                        zevent = new ResourceUpdatedZevent(getOverlord(),
+                        zevent = new ResourceRefreshZevent(getOverlord(),
                                                            server.getEntityId());
                         zevents.add(zevent);
 
@@ -393,7 +393,7 @@ public class LatherDispatcher
                              serviceItr.hasNext(); )
                         {
                             Service service = (Service)serviceItr.next();
-                            zevent = new ResourceUpdatedZevent(getOverlord(),
+                            zevent = new ResourceRefreshZevent(getOverlord(),
                                                                service.getEntityId());
                             zevents.add(zevent);
                         }
