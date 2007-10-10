@@ -45,6 +45,8 @@ import javax.ejb.SessionContext;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import net.sf.ehcache.Element;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
@@ -63,6 +65,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
 import org.hyperic.hq.measurement.ext.depgraph.GraphBuilder;
@@ -1380,6 +1383,29 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
     }
 
+    /**
+     * Get the list of DownMetricValues that represent the resources that are
+     * currently down
+     * 
+     * @ejb:interface-method
+     */
+    public List getUnavailEntities() {
+        List unavailMetrics =
+            MetricDataCache.getInstance().getUnavailableMetrics();
+        List unavailEntities = new ArrayList();
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+        for (Iterator it = unavailMetrics.iterator(); it.hasNext(); ) {
+            Element el = (Element) it.next();
+            Integer mid = (Integer) el.getKey();
+            MetricValue mv = (MetricValue) el.getValue();
+            
+            // Look up the metric for the appdef entity ID
+            DerivedMeasurement dm = dao.findById(mid);
+            unavailEntities.add(new DownMetricValue(dm.getEntityId(), mv));
+        }
+        return unavailEntities;
+    }
+    
     /**
      * @ejb:interface-method
      */
