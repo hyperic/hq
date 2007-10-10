@@ -36,8 +36,8 @@
 <script type="text/javascript">
 
 	var djConfig = {
-		debugAtAllCosts: false,
-		isDebug: false
+		isDebug : false,
+		locale : "en"
 	};
 
 </script>
@@ -115,11 +115,11 @@
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
-               <span style="padding-left:10px;">
+               <span style="padding-left:10px;font-size:0.95em;">
                 <html:link action="/Logout">
-                    <span style=""><fmt:message key="admin.user.generalProperties.Logout"/></span>
+                    <span style="color:#333333;">[</span> <fmt:message key="admin.user.generalProperties.Logout"/>  <span style="color:#333333;">]</span></span>
                 </html:link></span>
-                <span style="padding-left:10px;"> <html:link href=""
+                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""
                                                              onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                     <fmt:message key="common.label.Help"/>
                 </html:link></span>
@@ -143,7 +143,6 @@
                             <tiles:insert definition=".header.optional.tabs">
                                 <tiles:put name="location" value="resources"/>
                             </tiles:insert>
-                            <div dojoType="MenuSeparator2"></div>
                             <div dojoType="MenuItem2" caption="Recent Resources" submenuId="submenu3"></div>
 
                         </div>
