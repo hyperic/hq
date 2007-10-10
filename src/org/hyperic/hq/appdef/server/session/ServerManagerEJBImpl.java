@@ -67,6 +67,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -160,7 +161,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public Server createServer(AuthzSubjectValue subject, Integer platformId,
                                Integer serverTypeId, ServerValue sValue)
         throws CreateException, ValidationException, PermissionException,
-               PlatformNotFoundException, AppdefDuplicateNameException {
+               PlatformNotFoundException, AppdefDuplicateNameException 
+    {
         try {
             trimStrings(sValue);
 
@@ -185,7 +187,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
 
             createAuthzServer(sValue.getName(), server.getId(), platformId,
-                              serverType.isVirtual(), subject);
+                              serverType.isVirtual(), subject, serverType);
 
             // Send resource create event
             ResourceCreatedZevent zevent =
@@ -246,7 +248,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
 
         createAuthzServer(server.getName(), server.getId(), platform.getId(),
-                          st.isVirtual(), subject);
+                          st.isVirtual(), subject, st);
         return server;
     }
     
@@ -1182,7 +1184,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update server types
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void updateServerTypes(String plugin, ServerTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException, VetoException 
@@ -1214,7 +1215,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         ServerTypeDAO stLHome = getServerTypeDAO();
         Collection curServers = stLHome.findByPlugin(plugin);
 
-        AuthzSubjectValue overlord = null;
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
         AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
         for (Iterator i = curServers.iterator(); i.hasNext();) {
             ServerType stlocal = (ServerType) i.next();
@@ -1226,10 +1229,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             if (sinfo == null) {
                 log.debug("Removing ServerType: " + serverName);
 
-                // Get overlord
-                if (overlord == null)
-                    overlord = getOverlord();
-
                 // Find resource groups of this type and remove
                 AppdefGroupPagerFilterGrpEntRes filter =
                     new AppdefGroupPagerFilterGrpEntRes (
@@ -1238,14 +1237,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 
                 try {
                     List groups = grpMgr
-                        .findAllGroups(overlord, PageControl.PAGE_ALL,
+                        .findAllGroups(overlordValue, PageControl.PAGE_ALL,
                                        new AppdefPagerFilter[] { filter });
                     for (Iterator grpIt = groups.iterator();
                          grpIt.hasNext(); ) {
                         try {
                             AppdefGroupValue grp =
                                 (AppdefGroupValue) grpIt.next();
-                            grpMgr.deleteGroup(overlord, grp.getId());
+                            grpMgr.deleteGroup(overlordValue, grp.getId());
                         } catch (AppdefGroupNotFoundException e) {
                             assert false :
                                 "Delete based on a group should not " +
@@ -1261,7 +1260,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                          svrIt.hasNext(); ) {
                         Server svrLocal = (Server) svrIt.next();
                         try {
-                            removeServer(overlord, svrLocal);
+                            removeServer(overlordValue, svrLocal);
                         } catch (ServerNotFoundException e) {
                             assert false :
                                 "Delete based on a server should not " +
@@ -1311,6 +1310,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
             
+        Resource prototype = 
+            ResourceManagerEJBImpl.getOne().findRootResource();
+        
         // Now create the left-overs
         for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
             ServerTypeInfo sinfo = (ServerTypeInfo) i.next();
@@ -1323,8 +1325,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             stype.setVirtual(sinfo.isVirtual());
             String newPlats[] = sinfo.getValidPlatformTypes();
             findAndSetPlatformType(newPlats, stype);
-            // Now create the server type
-            stLHome.create(stype);
+            
+            stype = stLHome.create(stype);
+            createAuthzResource(overlordValue, 
+                                getServerPrototypeResourceType(),
+                                prototype, stype.getId(), stype.getName()); 
         }
     }
 
@@ -1350,16 +1355,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create the Authz resource and verify that the user has 
      * correct permissions
-     * @param serverName TODO
-     * @param serverId TODO
-     * @param subject - the user creating
      */
-    private void createAuthzServer(String serverName, 
-                                   Integer serverId,
-                                   Integer platformId,
-                                   boolean isVirtual, 
-                                   AuthzSubjectValue subject)
-        throws CreateException, FinderException, PermissionException {
+    private void createAuthzServer(String serverName, Integer serverId, 
+                                   Integer platformId, boolean isVirtual, 
+                                   AuthzSubjectValue subject, ServerType st)
+        throws CreateException, FinderException, PermissionException 
+    {
         log.debug("Being Authz CreateServer");
         if(log.isDebugEnabled()) {
             log.debug("Checking for: " + AuthzConstants.platformOpAddServer + 
@@ -1367,7 +1368,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         checkPermission(subject, getPlatformResourceType(), platformId,
                         AuthzConstants.platformOpAddServer);
-        createAuthzResource(subject, getServerResourceType(), serverId,
+        
+        ResourceType serverProto = getServerPrototypeResourceType();
+        Resource proto = ResourceManagerEJBImpl.getOne()
+            .findResourcePojoByInstanceId(serverProto, st.getId());
+        createAuthzResource(subject, getServerResourceType(), proto, serverId,
                             serverName, isVirtual);
     }
 

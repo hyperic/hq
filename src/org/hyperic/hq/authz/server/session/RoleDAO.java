@@ -53,9 +53,12 @@ public class RoleDAO extends HibernateDAO {
                 "resource type not found "+AuthzConstants.roleResourceTypeName
             );
         }
-        Resource myResource =
-            DAOFactory.getDAOFactory().getResourceDAO()
-            .create(resType, null /* No name? */, creator, role.getId(), false); 
+        
+        ResourceDAO rDao = DAOFactory.getDAOFactory().getResourceDAO();
+        Resource proto = rDao.findRootResource();
+        Resource myResource = rDao.create(resType, proto, null /* No name? */, 
+                                          creator, role.getId(), false); 
+            
         role.setResource(myResource);
 
         ResourceGroupDAO resourceGroupDAO = 

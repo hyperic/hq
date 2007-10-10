@@ -68,9 +68,10 @@ class AuthzSubjectDAO
                                                AuthzConstants.subjectResourceTypeName);
         }
 
-        Resource r = daoFactory.getResourceDAO().create(rt, null, /* No Name? */
-                                                        creator, 
-                                                        subject.getId(), false);
+        ResourceDAO rDao = daoFactory.getResourceDAO();
+        Resource r = rDao.create(rt, rDao.findRootResource(),  
+                                 null, /* No Name? */
+                                 creator, subject.getId(), false); 
 
         subject.setResource(r);
         Role role = daoFactory.getRoleDAO().findByName(

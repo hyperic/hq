@@ -140,6 +140,10 @@ public final class AuthzConstants {
         "covalentAuthzResourceGroup";
     public static final String escalationResourceTypeName = "EscalationScheme";
     public static final String hqSystemResourceTypeName = "HQSystem";
+    public static final String platformPrototypeTypeName = "PlatformPrototype";
+    public static final String serverPrototypeTypeName = "ServerPrototype";
+    public static final String servicePrototypeTypeName = "ServicePrototype";
+    public static final String appPrototypeTypeName = "ApplicationPrototype";
         
     public static final String rootOpCAMAdmin = "administerCAM";
 

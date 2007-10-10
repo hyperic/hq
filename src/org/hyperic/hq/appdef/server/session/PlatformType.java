@@ -53,9 +53,9 @@ public class PlatformType extends AppdefResourceType {
     protected PlatformType() {
     }
 
-    public PlatformType(PlatformTypeValue ptv) {
-        setName(ptv.getName());
-        setPlugin(ptv.getPlugin());
+    public PlatformType(String name, String plugin) {
+        setName(name);
+        setPlugin(plugin);
     }
     
     public String getOs() {

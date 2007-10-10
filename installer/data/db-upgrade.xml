@@ -6856,6 +6856,100 @@ has already been defined.
       </schema-directSQL>                        
     </schemaSpec>
 
+    <schemaSpec version="3.58">
+      <schema-addColumn table="EAM_RESOURCE" column="PROTO_ID" columnType="LONG"/>
+
+      <!-- Resource types, associated with prototypes -->
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (601, 601, 601, 0, 0, 0, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (602, 602, 602, 0, 0, 0, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (603, 603, 603, 0, 0, 0, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (604, 604, 604, 0, 0, 0, %%TRUE%%)"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 601, 8)"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 602, 9)"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 603, 10)"/>
+      <schema-insert table="EAM_RES_GRP_RES_MAP"
+                     insertCmd="(RESOURCE_GROUP_ID, RESOURCE_ID, CID) VALUES (0, 604, 11)"/>
+      
+      <schema-directSQL>
+        <statement>
+            update eam_resource set proto_id = 0
+        </statement>
+      </schema-directSQL>
+      
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (601, 0, 'PlatformPrototype', 601, 601, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (602, 0, 'ServerPrototype', 602, 602, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (603, 0, 'ServicePrototype', 603, 603, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE_TYPE"
+                     insertCmd="(ID, VERSION_COL, NAME, CID, RESOURCE_ID, FSYSTEM) VALUES (604, 0, 'ApplicationPrototype', 604, 604, %%TRUE%%)"/>
+
+      <!-- Prototypes for apps get inserted manually -->
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (1600, 1600, 1, 604, 0, 0, %%TRUE%%)"/>
+      <schema-insert table="EAM_RESOURCE"
+                     insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (1601, 1601, 2, 604, 0, 0, %%TRUE%%)"/>
+
+      <schema-directSQL>
+        <statement>
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 8000, 0, 601, id, id, 0, 0, name, sort_name, true 
+            from eam_platform_type
+        </statement>
+        <statement>
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 7800, 0, 602, id, id, 0, 0, name, sort_name, true 
+            from eam_server_type
+        </statement>
+        <statement>
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 7000, 0, 603, id, id, 0, 0, name, sort_name, true 
+            from eam_service_type
+        </statement>
+        <statement>
+            update eam_resource set proto_id = (
+                select proto.id from eam_platform p
+                join eam_platform_type pt on pt.id = p.platform_type_id
+                join eam_resource proto on proto.resource_type_id = 601 and proto.instance_id = pt.id
+                where p.id = eam_resource.instance_id)
+            where eam_resource.resource_type_id = 301
+        </statement>
+        <statement>
+            update eam_resource set proto_id = (
+                select proto.id from eam_server s
+                join eam_server_type st on st.id = s.server_type_id
+                join eam_resource proto on proto.resource_type_id = 602 and proto.instance_id = st.id
+                where s.id = eam_resource.instance_id)
+            where eam_resource.resource_type_id = 303
+        </statement>
+        <statement>
+            update eam_resource set proto_id = (
+                select proto.id from eam_service s
+                join eam_service_type st on st.id = s.service_type_id
+                join eam_resource proto on proto.resource_type_id = 603 and proto.instance_id = st.id
+                where s.id = eam_resource.instance_id)
+            where eam_resource.resource_type_id = 305
+        </statement>
+        <statement>
+            update eam_resource set proto_id = (
+                select proto.id from eam_application a
+                join eam_application_type at on at.id = a.application_type_id
+                join eam_resource proto on proto.resource_type_id = 604 and proto.instance_id = at.id
+                where a.id = eam_resource.instance_id)
+            where eam_resource.resource_type_id = 308;
+        </statement>
+      </schema-directSQL>                        
+      <schema-alterColumn table="EAM_RESOURCE" column="PROTO_ID" 
+                          nullable="NOT NULL"/>
+    </schemaSpec>
 </dbupgrade>
 </target>
 

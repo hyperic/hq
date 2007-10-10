@@ -63,7 +63,8 @@ public class ResourceGroupDAO extends HibernateDAO
         }
 
         ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        Resource r = rDao.create(resType, resGrp.getName(), creator,  
+        Resource proto = rDao.findById(AuthzConstants.rootResourceId);
+        Resource r = rDao.create(resType, proto, resGrp.getName(), creator,  
                                  resGrp.getId(), isSystem);
                                  
         resGrp.setResource(r);

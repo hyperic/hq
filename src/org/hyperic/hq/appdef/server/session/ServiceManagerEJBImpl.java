@@ -66,7 +66,12 @@ import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefPagerFilter;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -142,11 +147,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 // Look for the platform authorization
                 createAuthzService(sValue.getName(), service.getId(),
                                    server.getPlatform().getId(), false,
-                                   subject);
+                                   subject, serviceType);
             } else {
                 // now add the authz resource
                 createAuthzService(sValue.getName(), service.getId(), serverId,
-                                   true, subject);
+                                   true, subject, serviceType);
             }
 
             // Add Service to parent collection
@@ -178,32 +183,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create the Authz service resource
-     * @param serviceName 
-     * @param serviceId 
-     * @param subject - the user creating
      */
-    private void createAuthzService(String serviceName,
-                                    Integer serviceId,
-                                    Integer parentId,
-                                    boolean isServer,
-                                    AuthzSubjectValue subject)
-        throws CreateException, FinderException, PermissionException {
+    private void createAuthzService(String serviceName, Integer serviceId,
+                                    Integer parentId, boolean isServer,
+                                    AuthzSubjectValue subject, ServiceType st)
+        throws CreateException, FinderException, PermissionException 
+    {
         log.debug("Begin Authz CreateService");
         // check to see that the user has permission to addServices
         if (isServer) {
             // to the server in question
             checkPermission(subject, getServerResourceType(), parentId,
                             AuthzConstants.serverOpAddService);
-        }
-        else {
+        } else {
             // to the platform in question
             checkPermission(subject, getPlatformResourceType(), parentId,
                             AuthzConstants.platformOpAddServer);
         }
 
-        createAuthzResource(subject, getServiceResourceType(), serviceId,
-                            serviceName);
+        ResourceType serviceProto = getServicePrototypeResourceType();
+        Resource prototype = ResourceManagerEJBImpl.getOne() 
+            .findResourcePojoByInstanceId(serviceProto, st.getId());
         
+        createAuthzResource(subject, getServiceResourceType(), prototype, 
+                            serviceId, serviceName);
     }
 
     /**
@@ -1299,7 +1302,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws CreateException, FinderException, RemoveException,
                VetoException
     {
-        AuthzSubjectValue overlord = null;
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
         
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
@@ -1328,10 +1333,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
                 // See if this exists
                 if (sinfo == null) {
-                    // Get overlord
-                    if (overlord == null)
-                        overlord = getOverlord();
-
                     // Find resource groups of this type and remove
                     AppdefGroupPagerFilterGrpEntRes filter =
                         new AppdefGroupPagerFilterGrpEntRes (
@@ -1340,14 +1341,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     
                     try {
                         List groups = grpMgr
-                            .findAllGroups(overlord, PageControl.PAGE_ALL,
+                            .findAllGroups(overlordValue, PageControl.PAGE_ALL,
                                            new AppdefPagerFilter[] { filter });
                         for (Iterator grpIt = groups.iterator();
                              grpIt.hasNext(); ) {
                             try {
                                 AppdefGroupValue grp =
                                     (AppdefGroupValue) grpIt.next();
-                                grpMgr.deleteGroup(overlord, grp.getId());
+                                grpMgr.deleteGroup(overlordValue, grp.getId());
                             } catch (AppdefGroupNotFoundException e) {
                                 assert false :
                                     "Delete based on a group should not " +
@@ -1362,7 +1363,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         for (Iterator svcIt = stlocal.getServices().iterator();
                              svcIt.hasNext(); ) {
                             Service svcLocal = (Service) svcIt.next();
-                            removeService(overlord, svcLocal);
+                            removeService(overlordValue, svcLocal);
                         }           
                     } catch (PermissionException e) {
                         assert false :
@@ -1410,30 +1411,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 }
             }
             
+            Resource prototype = 
+                ResourceManagerEJBImpl.getOne().findRootResource();
+            
             // Now create the left-overs
             for (Iterator i = infoMap.values().iterator(); i.hasNext();) {
                 ServiceTypeInfo sinfo = (ServiceTypeInfo) i.next();
 
-                // Just update it
-                ServiceType stype = new ServiceType();
-                stype.setPlugin(plugin);
-                stype.setName(sinfo.getName());
-                stype.setDescription(sinfo.getDescription());
-                stype.setIsInternal(sinfo.getInternal());
-
-                // Now create the service type
-                ServiceType stlocal = stLHome.create(stype);
+                ServiceType stype = stLHome.create(sinfo.getName(), plugin, 
+                                                   sinfo.getDescription(),
+                                                   sinfo.getInternal());
                 
                 // Lookup the server type
                 ServerType servTypeEJB;
-                if (serverTypes.containsKey(sinfo.getServerName()))
+                if (serverTypes.containsKey(sinfo.getServerName())) {
                     servTypeEJB = (ServerType)
                         serverTypes.get(sinfo.getServerName());
-                else {
+                } else {
                     servTypeEJB = stHome.findByName(sinfo.getServerName());
                     serverTypes.put(servTypeEJB.getName(), servTypeEJB);
                 }
-                stlocal.setServerType(servTypeEJB);
+                stype.setServerType(servTypeEJB);
+                createAuthzResource(overlordValue, 
+                                    getServicePrototypeResourceType(),
+                                    prototype, stype.getId(), stype.getName()); 
             }
         } finally {
             stLHome.getSession().flush();

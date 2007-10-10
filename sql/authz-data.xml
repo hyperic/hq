@@ -39,6 +39,10 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
              will start with 4xx -->
         <data ID="401" CID="401" NAME="EscalationScheme" FSYSTEM="FALSE"/>
         <data ID="501" CID="501" NAME="HQSystem" FSYSTEM="FALSE"/>
+        <data ID="601" CID="601" NAME="PlatformPrototype" FSYSTEM="TRUE"/>
+        <data ID="602" CID="602" NAME="ServerPrototype"   FSYSTEM="TRUE"/>
+        <data ID="603" CID="603" NAME="ServicePrototype"  FSYSTEM="TRUE"/>
+        <data ID="604" CID="604" NAME="ApplicationPrototype" FSYSTEM="TRUE"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -51,38 +55,54 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="0" CID="0" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:0"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="1" CID="1" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:1"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="2" CID="2" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:2"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="3" CID="3" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:3"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="4" CID="4" INSTANCE_ID="%EAM_SUBJECT.ID:0"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
     </table>
     <table name="EAM_RESOURCE">
         <data ID="5" CID="5" 
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
     </table>
     <table name="EAM_RESOURCE">
         <data ID="401" CID="401" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:401"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="501" CID="501" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:501"
-              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" PROTO_ID="0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+        <data ID="601" CID="601" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:601"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" PROTO_ID="0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+        <data ID="602" CID="602" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:602"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" PROTO_ID="0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+        <data ID="603" CID="603" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:603"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" PROTO_ID="0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              FSYSTEM="TRUE"/>
+        <data ID="604" CID="604" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:604"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0" PROTO_ID="0"
               SUBJECT_ID="%EAM_SUBJECT.ID:0"    
               FSYSTEM="TRUE"/>
     </table>
@@ -93,7 +113,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     </table>
 
     <table name="EAM_RESOURCE">
-        <data CID="5" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:0"/>
+        <data CID="5" INSTANCE_ID="%EAM_RESOURCE_GROUP.ID:0" PROTO_ID="0"/>
     </table>
 
     <!-- now set the resource ids -->
@@ -104,6 +124,23 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="3" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
         <data CID="401" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
         <data CID="501" RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
+        <data CID="601" RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
+        <data CID="602" RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
+        <data CID="603" RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
+        <data CID="604" RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
+    </table>
+
+    <table name="EAM_RESOURCE">
+        <data ID="1600" CID="1600" 
+              INSTANCE_ID="%EAM_APPLICATION_TYPE.ID:1"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:604"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    PROTO_ID="0"
+              FSYSTEM="TRUE"/>
+        <data ID="1601" CID="1601" 
+              INSTANCE_ID="%EAM_APPLICATION_TYPE.ID:2"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:604"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"    PROTO_ID="0"
+              FSYSTEM="TRUE"/>
     </table>
 
     <table name="EAM_SUBJECT">
@@ -128,6 +165,14 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
                       RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
         <data CID="7" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
                       RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
+        <data CID="8" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
+        <data CID="9" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                      RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
+        <data CID="10" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                       RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
+        <data CID="11" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
+                       RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
     </table>
 
     <table name="EAM_OPERATION">
@@ -197,19 +242,19 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="301" CID="301" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:301"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="303" CID="303" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:303"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="305" CID="305" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:305"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
         <data ID="308" CID="308" INSTANCE_ID="%EAM_RESOURCE_TYPE.ID:308"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:0"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"    
+              SUBJECT_ID="%EAM_SUBJECT.ID:0"  PROTO_ID="0"
               FSYSTEM="TRUE"/>
     </table>
 
@@ -336,7 +381,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="6" CID="6" INSTANCE_ID="%EAM_SUBJECT.ID:1"
               RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
-              SUBJECT_ID="%EAM_SUBJECT.ID:0"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
               FSYSTEM="TRUE"/>
     </table>
     
@@ -349,7 +394,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="7" CID="7" 
             RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:3"
-            SUBJECT_ID="%EAM_SUBJECT.ID:1"
+            SUBJECT_ID="%EAM_SUBJECT.ID:1" PROTO_ID="0"
             FSYSTEM="TRUE"/>
     </table>
 
@@ -377,7 +422,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="8" CID="8" INSTANCE_ID="%EAM_ROLE.ID:0"
             RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
-            SUBJECT_ID="%EAM_SUBJECT.ID:0"
+            SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
             FSYSTEM="TRUE"/>
     </table>
 
@@ -476,7 +521,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <table name="EAM_RESOURCE">
         <data ID="9" CID="9" INSTANCE_ID="%EAM_ROLE.ID:1"
             RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
-            SUBJECT_ID="%EAM_SUBJECT.ID:0"
+            SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
             FSYSTEM="TRUE"/>
     </table>
 

@@ -45,10 +45,11 @@ public class ResourceTypeDAO
 
         // ResourceTypes also have Resources associated with them, so create
         // that and link  'em up.
+        ResourceDAO rDao = DAOFactory.getDAOFactory().getResourceDAO();
         ResourceType typeResType = findTypeResourceType();
-        Resource res = DAOFactory.getDAOFactory().getResourceDAO()
-                                 .create(typeResType, resType.getName(), 
-                                         creator, resType.getId(), false); 
+        Resource prototype = rDao.findById(AuthzConstants.rootResourceId); 
+        Resource res = rDao.create(typeResType, prototype, resType.getName(), 
+                                   creator, resType.getId(), false); 
 
         resType.setResource(res);
 

@@ -7,7 +7,8 @@
     </table>
 <!-- Application Types -->
     <table name="EAM_APPLICATION_TYPE">
-        <data ID="1" NAME="Generic Application"/>
-        <data ID="2" NAME="J2EE Application" />
+        <data ID="1" CID="1" NAME="Generic Application"/>
+        <data ID="2" CID="2" NAME="J2EE Application" />
     </table>
+    
 </Covalent.DBSetup> 

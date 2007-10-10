@@ -33,6 +33,10 @@
       <column name="SUBJECT_ID" not-null="false" index="EAM_RESOURCE_OWNER_ID_IDX"/>
     </many-to-one>
 
+    <many-to-one name="prototype">
+      <column name="PROTO_ID" not-null="true" index="EAM_RESOURCE_PROTO_IDX"/>
+    </many-to-one>
+
     <property name="name" type="string">
       <column name="NAME" not-null="false" length="200"/>
     </property>
@@ -50,7 +54,6 @@
       <many-to-many class="ResourceGroup" column="RESOURCE_GROUP_ID"/>
     </bag>
 
-    
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="virtuals" table="EAM_VIRTUAL">
       <key on-delete="cascade" column="RESOURCE_ID"/>
       <one-to-many class="Virtual"/>

@@ -57,7 +57,9 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -150,9 +152,10 @@ public abstract class AppdefSessionEJB
      * @param id - the id of the object
      */
     protected void createAuthzResource(AuthzSubjectValue who,
-                                       ResourceType resType, 
+                                       ResourceType resType,
+                                       Resource prototype,
                                        Integer id,  String name) {
-        createAuthzResource(who, resType, id, name, false);
+        createAuthzResource(who, resType, prototype, id, name, false);
     }
     
     /**
@@ -165,11 +168,14 @@ public abstract class AppdefSessionEJB
      * @param fsystem - true if the resource should be non-visible
      */
     protected void createAuthzResource(AuthzSubjectValue who, 
-    								   ResourceType resType, 
+    								   ResourceType resType,
+                                       Resource prototype,
 									   Integer id, 
 									   String name,
-                                       boolean fsystem) {
-        getResourceManager().createResource(who, resType, id, name, fsystem);
+                                       boolean fsystem) 
+    {
+        getResourceManager().createResource(who, resType, prototype, id, name, 
+                                            fsystem);
     }
 
     /**
@@ -859,7 +865,7 @@ public abstract class AppdefSessionEJB
     	throws FinderException {
         return getResourceType(AuthzConstants.platformResType);
     }
-
+    
     /**
      * Get the application resource type
      * @return applicationResType
@@ -907,7 +913,31 @@ public abstract class AppdefSessionEJB
          return getResourceType(AuthzConstants.groupResourceTypeName);
      }
 
-    /**
+     protected ResourceType getPlatformPrototypeResourceType() 
+         throws FinderException
+     {
+         return getResourceType(AuthzConstants.platformPrototypeTypeName);
+     }
+
+     protected ResourceType getServerPrototypeResourceType() 
+         throws FinderException
+     {
+         return getResourceType(AuthzConstants.serverPrototypeTypeName);
+     }
+     
+     protected ResourceType getServicePrototypeResourceType() 
+         throws FinderException
+     {
+         return getResourceType(AuthzConstants.servicePrototypeTypeName);
+     }
+
+     protected ResourceType getApplicationPrototypeResourceType() 
+         throws FinderException
+     {
+         return getResourceType(AuthzConstants.appPrototypeTypeName);
+     }
+
+     /**
      * Get the AUTHZ ResourceValue for a Platform
      * @return ResourceValue
      * @ejb:interface-method

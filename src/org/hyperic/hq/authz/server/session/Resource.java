@@ -37,6 +37,7 @@ public class Resource extends AuthzNamedBean {
     public static final Log _log = LogFactory.getLog(Resource.class);
 
     private ResourceType _resourceType;
+    private Resource     _prototype;
     private Integer      _instanceId;
     private Integer      _cid;
     private AuthzSubject _owner;
@@ -49,27 +50,15 @@ public class Resource extends AuthzNamedBean {
     protected Resource() {
     }
 
-    Resource(ResourceType type, String name, AuthzSubject owner,
-             Integer instanceId, boolean system) 
+    Resource(ResourceType type, Resource prototype, String name, 
+             AuthzSubject owner, Integer instanceId, boolean system) 
     {
         super(name);
         _resourceType = type;
+        _prototype    = prototype;
         _instanceId   = instanceId;
         _owner        = owner;
         _system       = system;
-    }
-
-    Resource(ResourceType resourceTypeId, Integer instanceId,
-             Integer cid, AuthzSubject subjectId, String name,
-             boolean fsystem, Collection resourceGroups)
-    {
-        super(name);
-        _resourceType   = resourceTypeId;
-        _instanceId     = instanceId;
-        _cid            = cid;
-        _owner          = subjectId;
-        _system         = fsystem;
-        _resourceGroups = resourceGroups;
     }
 
     public ResourceType getResourceType() {
@@ -78,6 +67,14 @@ public class Resource extends AuthzNamedBean {
 
     protected void setResourceType(ResourceType resourceTypeId) {
         _resourceType = resourceTypeId;
+    }
+    
+    public Resource getPrototype() {
+        return _prototype;
+    }
+    
+    protected void setPrototype(Resource p) {
+        _prototype = p;
     }
 
     public Integer getInstanceId() {

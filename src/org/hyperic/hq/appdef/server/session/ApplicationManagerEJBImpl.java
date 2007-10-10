@@ -39,6 +39,7 @@ import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -59,7 +60,10 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -120,13 +124,20 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get ApplicationType by ID
-     * @return ApplicationTypeValue
      * @ejb:interface-method
      */
     public ApplicationTypeValue findApplicationTypeById(Integer id)
-        throws FinderException {
-        ApplicationType appType = getApplicationTypeDAO().findById(id);
-        return appType.getApplicationTypeValue();
+        throws FinderException 
+    {
+        return findApplicationPojoTypeById(id).getApplicationTypeValue();
+    }
+
+    /**
+     * Get ApplicationType by ID
+     * @ejb:interface-method
+     */
+    public ApplicationType findApplicationPojoTypeById(Integer id) {
+        return getApplicationTypeDAO().findById(id);
     }
 
     /**
@@ -144,6 +155,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws ValidationException, PermissionException, CreateException,
                AppdefDuplicateNameException
     {
+        ApplicationType at = 
+            findApplicationPojoTypeById(newApp.getApplicationType().getId()); 
         if(log.isDebugEnabled()) {
             log.debug("Begin createApplication: " + newApp);
         }
@@ -169,7 +182,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             // call the create
             Application application = getApplicationDAO().create(newApp);
             // AUTHZ CHECK
-            createAuthzApplication(application, subject);
+            createAuthzApplication(application, subject, at);
             // now add the services
             for(Iterator i = services.iterator(); i.hasNext();) {
                 ServiceValue aService = (ServiceValue)i.next();
@@ -665,20 +678,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get all applications for a resource.
      * @ejb:interface-method
-     *
-     * @param subject The subject trying to list services.
-     * @param platformId Server ID.
-     * @param pagenum The page number to start listing.  First page is page zero.
-     * @param pagesize The size of the page (the number of items to return).
-     * @param sort The sort order.  XXX These sort constants are not yet defined,
-     * but when they are, they should live somewhere in appdef/shared so that clients
-     * can use them too.
-     * @return A List of ApplicationValue objects representing all of the
-     * services that the given subject is allowed to view.
-     * @throws PermissionException
-     * @throws FinderException
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
      */
     public PageList getApplicationsByResource ( AuthzSubjectValue subject,
                                                 AppdefEntityID resource,
@@ -775,20 +774,24 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create the authz resource and verify the subject has the createApplication
      * permission. 
-     * @param application - the application 
-     * @param subject - the user creating
      */
     private void createAuthzApplication(Application app,
-                                        AuthzSubjectValue subject)
-        throws FinderException, PermissionException {
+                                        AuthzSubjectValue subject,
+                                        ApplicationType at)
+        throws FinderException, PermissionException 
+    {
         log.debug("Begin Authz CreateApplication");
         checkPermission(subject, getRootResourceType(),
                         AuthzConstants.rootResourceId,
                         AuthzConstants.appOpCreateApplication);
         log.debug("User has permission to create application. " + 
                   "Adding authzresource");
-        createAuthzResource(subject, getApplicationResourceType(), app.getId(),
-                            app.getName());
+        
+        ResourceType appProto = getApplicationPrototypeResourceType();
+        Resource proto = ResourceManagerEJBImpl.getOne()
+            .findResourcePojoByInstanceId(appProto, at.getId());
+        createAuthzResource(subject, getApplicationResourceType(), proto,
+                            app.getId(), app.getName());
     }
 
     private class GroupDeleteWatcher 

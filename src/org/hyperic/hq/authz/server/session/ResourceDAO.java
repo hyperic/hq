@@ -52,16 +52,17 @@ public class ResourceDAO
         super(Resource.class, f);
     }
 
-    Resource create(ResourceType type, String name, AuthzSubject creator, 
-                    Integer instanceId, boolean system)
+    Resource create(ResourceType type, Resource prototype, String name, 
+                    AuthzSubject creator, Integer instanceId, boolean system) 
     {
         if (type == null) {
             throw new IllegalArgumentException("ResourceTypevValue is not " +
                                                "defined");
             
         }
-        Resource resource = new Resource(type, name, creator, instanceId,
-                                         system);
+        Resource resource = new Resource(type, prototype, name, creator, 
+                                         instanceId, system);
+                                         
         save(resource);
 
         /* add it to the root resourcegroup */
@@ -75,6 +76,10 @@ public class ResourceDAO
         return resource;
     }
 
+    public Resource findRootResource() {
+        return findById(AuthzConstants.rootResourceId);
+    }
+    
     public Resource findById(Integer id) {
         return (Resource) super.findById(id);
     }

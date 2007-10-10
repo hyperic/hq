@@ -53,7 +53,15 @@ public class ServiceTypeDAO extends HibernateDAO
         super.remove(entity);        
     }
 
-    ServiceType create(ServiceType st) {
+    ServiceType create(String name, String plugin, String description,
+                       boolean internal)
+    {
+        ServiceType st = new ServiceType();
+        st.setName(name);
+        st.setPlugin(plugin);
+        st.setDescription(description);
+        st.setIsInternal(internal);
+        
         save(st);
         return st;
     }

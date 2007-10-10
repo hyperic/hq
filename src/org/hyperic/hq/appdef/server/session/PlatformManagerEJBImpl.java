@@ -77,6 +77,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -391,7 +392,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // in order to succeed subject has to be in a role 
             // which allows creating of authz resources
             createAuthzPlatform(pValue.getName(), platform.getId(),
-                                subject);
+                                subject, pType);
 
             // Create the virtual server types
             for (Iterator it = pType.getServerTypes().iterator(); it.hasNext();)
@@ -429,7 +430,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public Platform createPlatform(AuthzSubjectValue subject,
-                                  AIPlatformValue aipValue)
+                                   AIPlatformValue aipValue)
         throws ApplicationException, CreateException
     {
         counter.addCPUs(aipValue.getCpuCount().intValue());
@@ -464,7 +465,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         // AUTHZ CHECK
         try {
             createAuthzPlatform(aipValue.getName(), platform.getId(), 
-                                subject);
+                                subject, platType);
         } catch(Exception e) {
             throw new SystemException(e);
         }
@@ -1183,18 +1184,81 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @param subject - the user creating
      */
     private void createAuthzPlatform(String platName, Integer platId,
-                                     AuthzSubjectValue subject)
+                                     AuthzSubjectValue subject,
+                                     PlatformType pType)
         throws CreateException, NamingException, FinderException,
-               PermissionException {
+               PermissionException 
+    {
         _log.debug("Begin Authz CreatePlatform");
         // check to make sure the user has createPlatform permission
         // on the root resource type
         checkCreatePlatformPermission(subject);
+        
+        ResourceType platProtoType = getPlatformPrototypeResourceType();
+        Resource proto = ResourceManagerEJBImpl.getOne()
+            .findResourcePojoByInstanceId(platProtoType, pType.getId());
         _log.debug("User has permission to create platform. Adding AuthzResource");
-        createAuthzResource(subject, getPlatformResourceType(),platId,
+        createAuthzResource(subject, getPlatformResourceType(), proto, platId,
                             platName);
     }
 
+    /**
+     * DevNote: This method was refactored out of updatePlatformTypes.  It
+     * does not work.
+     * @ejb:interface-method
+     */
+    public void deletePlatformType(PlatformType pt) 
+        throws VetoException, RemoveException
+    { 
+        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
+        
+        try {
+            _log.debug("Removing PlatformType: " + pt.getName());
+
+            // Find resource groups of this type and remove
+            AppdefGroupPagerFilterGrpEntRes filter =
+                new AppdefGroupPagerFilterGrpEntRes (
+                    AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
+                    pt.getId().intValue(), true);
+
+            List groups = grpMgr.findAllGroups(overlordValue, 
+                                            PageControl.PAGE_ALL,
+                                            new AppdefPagerFilter[] { filter });
+            for (Iterator i = groups.iterator(); i.hasNext(); ) {
+                try {
+                    AppdefGroupValue grp = (AppdefGroupValue) i.next();
+                    grpMgr.deleteGroup(overlordValue, grp.getId());
+                } catch (AppdefGroupNotFoundException e) {
+                    /*                            assert false :
+                    "Delete based on a group should not " +
+                    "result in AppdefGroupNotFoundException";*/
+                } catch (VetoException e) {
+                    // Why can't we delete?
+                    log.error("Cannot delete group", e);
+                }
+            }
+
+            // Remove all platforms
+            for (Iterator i= pt.getPlatforms().iterator(); i.hasNext();) {
+                Platform platform = (Platform) i.next();
+                try {
+                    removePlatform(overlordValue, platform);
+                } catch (PlatformNotFoundException e) {
+                    assert false :
+                        "Delete based on a platform should not " +
+                        "result in PlatformNotFoundException";
+                }
+            }
+        } catch (PermissionException e) {
+            assert false : "Overlord should not run into PermissionException";
+        }
+        
+        getPlatformTypeDAO().remove(pt);
+    }
+    
     /**
      * Update platform types
      * @ejb:interface-method
@@ -1210,8 +1274,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         PlatformTypeDAO ptLHome = getPlatformTypeDAO();
         Collection curPlatforms = ptLHome.findByPlugin(plugin);
 
-        AuthzSubjectValue overlord = null;
-        AppdefGroupManagerLocal grpMgr = AppdefGroupManagerEJBImpl.getOne();
         for (Iterator i = curPlatforms.iterator(); i.hasNext();) {
             PlatformType ptlocal = (PlatformType) i.next();
             String localName = ptlocal.getName();
@@ -1220,56 +1282,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // See if this exists
             if (pinfo == null) {
-                try {
-                    // Remove platforms which are not supposed to exist
-                    _log.debug("Removing PlatformType: " + localName);
-                    // Get overlord
-                    if (overlord == null)
-                        overlord = getOverlord();
-
-                    // Find resource groups of this type and remove
-                    AppdefGroupPagerFilterGrpEntRes filter =
-                        new AppdefGroupPagerFilterGrpEntRes (
-                            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                            ptlocal.getId().intValue(), true);
-
-                    List groups = grpMgr
-                    .findAllGroups(overlord, PageControl.PAGE_ALL,
-                                   new AppdefPagerFilter[] { filter });
-                    for (Iterator grpIt = groups.iterator();
-                    grpIt.hasNext(); ) {
-                        try {
-                            AppdefGroupValue grp =
-                                (AppdefGroupValue) grpIt.next();
-                            grpMgr.deleteGroup(overlord, grp.getId());
-                        } catch (AppdefGroupNotFoundException e) {
-                            /*                            assert false :
-                            "Delete based on a group should not " +
-                            "result in AppdefGroupNotFoundException";*/
-                        } catch (VetoException e) {
-                            // Why can't we delete?
-                            log.error("Cannot delete group", e);
-                        }
-                    }
-
-                    // Remove all services
-                    for (Iterator pltIt = ptlocal.getPlatforms().iterator();
-                         pltIt.hasNext();) {
-                        Platform pltLocal = (Platform) pltIt.next();
-                        try {
-                            removePlatform(overlord, pltLocal);
-                        } catch (PlatformNotFoundException e) {
-                            assert false :
-                                "Delete based on a platform should not " +
-                                "result in PlatformNotFoundException";
-                        }
-                    }
-                } catch (PermissionException e) {
-                    assert false :
-                        "Overlord should not run into PermissionException";
-                }
-                
-                ptLHome.remove(ptlocal);
+                deletePlatformType(ptlocal);
             } else {
                 String curName = ptlocal.getName();
                 String newName = pinfo.getName();
@@ -1282,17 +1295,20 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
         }
             
+        Resource prototype = 
+            ResourceManagerEJBImpl.getOne().findRootResource();
+        AuthzSubject overlord = 
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        AuthzSubjectValue overlordValue = overlord.getAuthzSubjectValue();
         // Now create the left-overs
         for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
             PlatformTypeInfo pinfo = (PlatformTypeInfo) i.next();
-            PlatformTypeValue ptype = new PlatformTypeValue();
-
+                
             _log.debug("Creating new PlatformType: " + pinfo.getName());
-            ptype.setPlugin(plugin);
-            ptype.setName(pinfo.getName());
-
-            // Now create the platform
-            ptLHome.create(ptype);
+            PlatformType pt = ptLHome.create(pinfo.getName(), plugin);
+            createAuthzResource(overlordValue, 
+                                getPlatformPrototypeResourceType(),
+                                prototype, pt.getId(), pt.getName()); 
         }
     }
 

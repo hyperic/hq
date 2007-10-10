@@ -29,7 +29,6 @@ import java.util.Collection;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 
 public class PlatformTypeDAO extends HibernateDAO
 {
@@ -53,8 +52,8 @@ public class PlatformTypeDAO extends HibernateDAO
         super.remove(entity);
     }
 
-    public PlatformType create(PlatformTypeValue pvalue) {
-        PlatformType pt = new PlatformType(pvalue);
+    public PlatformType create(String name, String plugin) {
+        PlatformType pt = new PlatformType(name, plugin);
         save(pt);
         return pt;
     }

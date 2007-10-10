@@ -101,7 +101,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * setOperations() to associate existing Operations.
      * @return Value-object for the ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public ResourceType createResourceType(AuthzSubjectValue whoami,
                                            ResourceTypeValue typeV,
@@ -231,18 +230,18 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Create a resource.
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public Resource createResource(AuthzSubjectValue whoami,
-                                   ResourceType rt, Integer instanceId,
-                                   String name, boolean system) 
+                                   ResourceType rt, Resource prototype, 
+                                   Integer instanceId, String name, 
+                                   boolean system) 
     {
         long start = System.currentTimeMillis();
         AuthzSubject owner =
             getSubjectDAO().findByAuth(whoami.getName(), whoami.getAuthDsn());
 
-        Resource res = getResourceDAO().create(rt, name, owner, instanceId, 
-                                               system);
+        Resource res = getResourceDAO().create(rt, prototype, name, owner, 
+                                               instanceId, system); 
         
         ResourceAudit.createResource(res, owner, start, 
                                      System.currentTimeMillis());
@@ -253,7 +252,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * Get the Resource entity associated with this ResourceType.
      * @param type This ResourceType.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue getResourceTypeResource(ResourceTypeValue type) {
         ResourceType resourceType = getResourceTypeDAO().findById(type.getId());
@@ -281,16 +279,32 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Resource findResourcePojoByInstanceId(ResourceType type,
+                                                 Integer instanceId)
+    {
+        return getResourceDAO().findByInstanceId(type.getId(), instanceId);
+    }
+
+    /**
      * Find the Resource that has the given ID 
      * @param id id for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public ResourceValue findResourceById(Integer id) {
         return findResourcePojoById(id).getResourceValue();
     }
     
+    /**
+     * Find's the root (id=0) resource
+     * @ejb:interface-method
+     */
+    public Resource findRootResource() {
+        return getResourceDAO().findRootResource();
+    }
+
     /**
      * @ejb:interface-method
      */
@@ -394,7 +408,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @param pc Paging information for the request
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public List getAllResourceTypes(AuthzSubjectValue subject, PageControl pc) {
         Collection resTypes = getResourceTypeDAO().findAll();
@@ -410,7 +423,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @return Map of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public List findViewableInstances(AuthzSubjectValue subject,
                                       String typeName, 
@@ -436,7 +448,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject
      * @return Map of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="Required" 
      */
     public Map findAllViewableInstances(AuthzSubjectValue subject) {
         // First get all resource types
@@ -468,7 +479,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param resourceType 301 for platforms, etc.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="Required" 
      */
     public List findResourcesOfType(int resourceType, PageInfo pInfo) { 
         return getResourceDAO().findResourcesOfType(resourceType, pInfo);
@@ -482,7 +492,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param pc control
      * @return PageList of resource values
      * @ejb:interface-method
-     * @ejb:transaction type="Required" 
      */
     public PageList findViewableSvcResources(AuthzSubjectValue subject,
                                              String resourceName,
@@ -526,7 +535,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param subject The owner.
      * @return Array of resources owned by the given subject.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public ResourceValue[] findResourceByOwner(AuthzSubjectValue subject) {
         AuthzSubject owner = getSubjectDAO().findById(subject.getId());
@@ -543,7 +551,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @exception NamingException
      * @exception FinderException Unable to find a given or dependent entities.
      * @ejb:interface-method
-     * @ejb:transaction type="SUPPORTS"
      */
     public ResourceValue[] findResourceByOwnerAndType(AuthzSubjectValue subjVal,
                                                       String resTypeName ) {
