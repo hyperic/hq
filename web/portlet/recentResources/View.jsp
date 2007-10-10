@@ -35,7 +35,7 @@
 <c:choose>
 <c:when test="${not empty resources}">
   <c:forEach var="resource" items="${resources}">
-    <div dojoType="MenuItem2" caption="<c:out value="${resource.name}"/>" onClick="location.href='/Resource.do?eid=<c:out value="${resource.entityId}"/>'"></div>
+    <div dojoType="MenuItem2" caption="<c:out value="${resource.name}"/>" onClick="location.href='<html:rewrite page="/Resource.do?eid=${resource.entityId}"/>'"></div>
 
 
 
