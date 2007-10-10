@@ -6857,7 +6857,8 @@ has already been defined.
     </schemaSpec>
 
     <schemaSpec version="3.58">
-      <schema-addColumn table="EAM_RESOURCE" column="PROTO_ID" columnType="LONG"/>
+      <schema-addColumn table="EAM_RESOURCE" column="PROTO_ID" 
+                        columnType="INTEGER"/>
 
       <!-- Resource types, associated with prototypes -->
       <schema-insert table="EAM_RESOURCE"
