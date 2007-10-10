@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -178,10 +178,27 @@ public class MetricDataCache {
     
     /**
      * Create placeholder (if necessary) for Availability metric
+     *
+     * @param mid The measurement id.
      */
     public void setAvailMetric(Integer mid) {
         if (!_downCache.isKeyInCache(mid)) {
             _downCache.put(new Element(mid, null));
         }
+    }
+    
+    /**
+     * Get the list of unavailable metrics
+     */
+    public List getUnavailableMetrics() {
+        List keys = _downCache.getKeysWithExpiryCheck();
+        List downMetrics = new ArrayList(keys.size());
+        for (Iterator it = keys.iterator(); it.hasNext(); ) {
+            Element el = _downCache.get(it.next());
+            if (el.getValue() != null) {
+                downMetrics.add(el);
+            }
+        }
+        return downMetrics;
     }
 }
