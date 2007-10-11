@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -443,7 +444,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         ArrayList tmpls = new ArrayList(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             DerivedMeasurement dm = (DerivedMeasurement) it.next();
-            tmpls.add(dm.getTemplate().getMeasurementTemplateValue());
+            tmpls.add(dm.getTemplate());
         }
             
         return tmpls;
@@ -3320,7 +3321,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 new AppdefEntityValue(dmv.getEntityId(), subject);
             
             if (_log.isDebugEnabled()) {
-                _log.debug(res.getName() + " down for " + dmv.getDuration());
+                _log.debug(res.getName() + " down for " +
+                           (dmv.getDuration() / 60000) + "min");
             }
             unavailRes.put(dmv, res.getLiteResourceValue());
         }

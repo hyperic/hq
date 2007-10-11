@@ -25,8 +25,16 @@
 
 package org.hyperic.hq.measurement.ext;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.util.units.UnitNumber;
+import org.hyperic.util.units.UnitsConstants;
+import org.hyperic.util.units.UnitsFormat;
+import org.hyperic.util.units.DateFormatter.DateSpecifics;
 
 public class DownMetricValue extends MetricValue implements Comparable {
     private AppdefEntityID _entityId;
@@ -44,11 +52,8 @@ public class DownMetricValue extends MetricValue implements Comparable {
         _entityId = entityId;
     }
 
-    public String getDuration() {
-        // TODO: actually, require the locale string and format the duration
-        // appropriately
-        long duration = System.currentTimeMillis() - getTimestamp();
-        return "" + (duration / 60000) + "min";
+    public long getDuration() {
+        return System.currentTimeMillis() - getTimestamp();
     }
 
     /**
@@ -66,6 +71,9 @@ public class DownMetricValue extends MetricValue implements Comparable {
     }
 
     public boolean equals(Object o) {
+        if (!(o instanceof DownMetricValue))
+            return false;
+        
         DownMetricValue dmv = (DownMetricValue) o;
         if (_entityId.equals(dmv.getEntityId()))
             return super.equals(o);

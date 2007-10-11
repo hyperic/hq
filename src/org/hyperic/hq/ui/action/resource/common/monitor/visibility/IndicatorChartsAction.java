@@ -40,6 +40,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.actions.DispatchAction;
+import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -54,7 +61,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -64,14 +71,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.InvalidOptionException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.actions.DispatchAction;
-import org.apache.struts.util.MessageResources;
 
 /**
  *
@@ -209,8 +208,8 @@ public class IndicatorChartsAction extends DispatchAction
                     }
                     
                     for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-                        MeasurementTemplateValue mtv =
-                            (MeasurementTemplateValue) it.next();
+                        MeasurementTemplate mtv =
+                            (MeasurementTemplate) it.next();
                         
                         if (!mtv.getAlias().equalsIgnoreCase(
                                 MeasurementConstants.CAT_AVAILABILITY))

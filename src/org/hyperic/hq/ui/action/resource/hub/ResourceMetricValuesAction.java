@@ -33,21 +33,21 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
 
 /**
  *
@@ -73,7 +73,7 @@ public class ResourceMetricValuesAction extends TilesAction {
         Integer[] tids = new Integer[templates.size()];
         int i = 0;
         for (Iterator it = templates.iterator(); it.hasNext(); i++) {
-            MeasurementTemplateValue mtv = (MeasurementTemplateValue) it.next();
+            MeasurementTemplate mtv = (MeasurementTemplate) it.next();
             tids[i] = mtv.getId();
         }
         MetricValue[] vals = boss.getLastMetricValue(sessionId, entityId, tids);
