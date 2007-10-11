@@ -6,9 +6,11 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
+import org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl
 
 class ResourceHelper extends BaseHelper {
     private rsrcMan = ResourceManagerEJBImpl.one
+    private measBoss = MeasurementBossEJBImpl.one
     
     ResourceHelper(AuthzSubject user) {
         super(user)
@@ -36,5 +38,9 @@ class ResourceHelper extends BaseHelper {
     
     def findAllServices() {
         findServices(PageInfo.getAll(ResourceSortField.NAME, true))
+    }
+
+    def getDownResources() {
+        measBoss.getUnavailableResources(user)
     }
 }

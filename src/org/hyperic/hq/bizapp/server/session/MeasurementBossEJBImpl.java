@@ -35,7 +35,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -83,6 +82,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
+import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ClusterDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
@@ -3306,11 +3307,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the list of resources that are unavailable
      * @ejb:interface-method 
      */
-    public Map getUnavailableResources(int sessionId)
+    public Map getUnavailableResources(AuthzSubject user)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
-        
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
         List unavailEnts = getMetricManager().getUnavailEntities();
         Map unavailRes = new TreeMap();
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
@@ -3318,7 +3317,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             // Look up the resource
             AppdefEntityValue res =
-                new AppdefEntityValue(dmv.getEntityId(), subject);
+                new AppdefEntityValue(dmv.getEntityId(), user);
             
             if (_log.isDebugEnabled()) {
                 _log.debug(res.getName() + " down for " +
@@ -3328,6 +3327,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         return unavailRes;
+    }
+
+    public static MeasurementBossLocal getOne() {
+        try {
+            return MeasurementBossUtil.getLocalHome().create();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /**

@@ -59,6 +59,9 @@ public class DownMetricValue extends MetricValue implements Comparable {
                 .compareTo(new Integer(dmv.getEntityId().getType()));
         }
         
+        if (getTimestamp() == dmv.getTimestamp())
+            return -1;
+        
         return new Long(getTimestamp()).compareTo(new Long(dmv.getTimestamp())); 
     }
 
