@@ -22,15 +22,17 @@
     <td><a href="/hqu/${plugin.name}${v.path}"><%= h v.path %></a></td>
     <td><%= h v.description %></td>
     <td><%= h v.attachType.description %></td>
-    <td><%= h v.attachable %></td>
-    <% if (v.attachable) { %>
+    <td><%= h v.isAttachable(v.prototype) %></td>
+    <% if (v.isAttachable(v.prototype)) { %>
       <td><%= buttonTo "Attach", [action : 'attach', id : v] %></td>
     <% } %>
   </tr>
   <% for (a in v.attachments) { %>
     <tr>
       <td/>
-      <td/>
+      <td>
+        <%= h a.toString() %>
+      </td>
       <td/>
       <td/>
       <td>

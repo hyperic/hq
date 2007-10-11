@@ -32,24 +32,22 @@ class AuditController
         defaultSort: AuditSortField.START_TIME,
         defaultSortOrder: 0,  // descending
         columns: [
-            [field:AuditSortField.START_TIME, width:'10%',
+            [field:AuditSortField.START_TIME, width:'15%',
              label:{df.format(it.startTime)}],
-            [field:AuditSortField.DURATION, width:'7%',
+            [field:AuditSortField.DURATION, width:'5%',
              label:{
                 def dur = it.endTime - it.startTime
                 def val = new UnitNumber(dur, UnitsConstants.UNIT_DURATION,
                                          UnitsConstants.SCALE_MILLI)
                 UnitsFormat.format(val).toString() 
              }],
-            [field:AuditSortField.NATURE, width:'5%',
-             label:{it.nature.value}],
-            [field:AuditSortField.PURPOSE, width:'10%',
-             label:{it.purpose.value}],
             [field:AuditSortField.SUBJECT, width:'10%',
              label:{it.subject.fullName}],
+            [field:AuditSortField.RESOURCE, width:'29%',
+             label:{it.resource.name}],
             [field:[getValue: {localeBundle.Message },
-                    description:'message', sortable:false], width:'58%',
-             label:{it.message}],
+                    description:'message', sortable:false], width:'41%',
+             label:{it.htmlMessage}],
         ]
     ]
 
