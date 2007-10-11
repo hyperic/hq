@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -88,14 +87,13 @@ public class ResourceMetricValuesAction extends TilesAction {
         else {
             i = 0;
             for (Iterator it = templates.iterator(); it.hasNext(); i++) {
-                MeasurementTemplateValue mtv =
-                    (MeasurementTemplateValue) it.next();
+                MeasurementTemplate mt = (MeasurementTemplate) it.next();
                 if (vals[i] == null)
                     metrics[i] =
                         RequestUtils.message(request, "common.value.notavail");
                 else {                
                     FormattedNumber fn =
-                        UnitsConvert.convert(vals[i].getValue(), mtv.getUnits());
+                        UnitsConvert.convert(vals[i].getValue(), mt.getUnits());
                     metrics[i] = fn.toString();
                 }
             }
