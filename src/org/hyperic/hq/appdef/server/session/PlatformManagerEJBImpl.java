@@ -81,6 +81,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
@@ -158,6 +159,30 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw new PlatformNotFoundException(type);
         }
         return ptype.getPlatformTypeValue();
+    }
+
+    /**
+     * @return {@link PlatformType}s
+     * @ejb:interface-method
+     */
+    public Collection findAllPlatformTypes() {
+        return getPlatformTypeDAO().findAll();
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Resource findResource(PlatformType pt) {
+        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        ResourceType rType; 
+        
+        String typeName = AuthzConstants.platformPrototypeTypeName;
+        try {
+            rType = rman.findResourceTypeByName(typeName);
+        } catch(FinderException e) {
+            throw new SystemException(e);
+        }
+        return rman.findResourcePojoByInstanceId(rType, pt.getId());
     }
 
     /**
