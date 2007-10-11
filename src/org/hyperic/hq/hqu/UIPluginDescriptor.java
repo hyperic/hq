@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.server.session.View;
 
 /**
  * Returned from a UI plugin when the dispatcher is asked to load it.
@@ -92,12 +94,26 @@ public class UIPluginDescriptor {
     public void addView(String path, String descr, String attachType,
                         boolean autoAttach) 
     {
-        AttachType t = AttachType.findByDescription(attachType);
-        _viewDescriptors.add(new ViewDescriptor(path, descr, t, autoAttach)); 
+        ViewAttacher at = new ViewAttacher() {
+            public void attach(View v) {
+                if (v.getAttachments().isEmpty())
+                    UIPluginManagerEJBImpl.getOne().attachView(v, 
+                                                             v.getPrototype());
+            }
+        };
+        
+        addView(path, descr, attachType, autoAttach ? at : null);
     }
 
     public void addView(String path, String descr, String attachType) {
         addView(path, descr, attachType, false);
+    }
+    
+    public void addView(String path, String desc, String attachType,
+                        ViewAttacher attacher) 
+    {
+        AttachType t = AttachType.findByDescription(attachType);
+        _viewDescriptors.add(new ViewDescriptor(path, desc, t, attacher)); 
     }
     
     public List getViews() {

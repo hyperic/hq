@@ -105,13 +105,12 @@ public class UIPluginManagerEJBImpl
                 if (!vd.getPath().equals(v.getPath()))
                     continue;
                 
-                if (vd.isAutoAttached() && v.isAttachable() &&
-                    v.getAttachType().isAutoAttachable())
-                {
+                AttachmentDescriptor protoDesc = v.getPrototype();
+                
+                if (vd.getAutoAttacher() != null) {
                     _log.info("Auto attaching [" + v + "]");
-                    attachView(v, v.getPrototype());
+                    vd.getAutoAttacher().attach(v);
                 }
-                break;
             }
         }
     }
@@ -167,16 +166,17 @@ public class UIPluginManagerEJBImpl
     public void attachView(View view, AttachmentDescriptor d) {
         AttachType viewType = view.getAttachType();
         
-        if (!view.isAttachable()) {
-            throw new IllegalArgumentException("View [" + view + "] is not " +
-                                               "attachable");
-        }
         if (!viewType.equals(d.getAttachType())) {
             throw new IllegalArgumentException("Attachment descriptor is " + 
                                                "incompatable with view");
         }
+
+        if (!view.isAttachable(d)) {
+            throw new IllegalArgumentException("View [" + view + "] is not " +
+                                               "attachable");
+        }
         
-        _log.info("Attaching " + view);
+        _log.info("Attaching " + view + " [" + d + "]");
         viewType.attach(view, d);
     }
     

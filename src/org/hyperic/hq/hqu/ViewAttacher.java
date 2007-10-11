@@ -24,36 +24,8 @@
  */
 package org.hyperic.hq.hqu;
 
-import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.hq.hqu.server.session.View;
 
-public class ViewDescriptor {
-    private String       _path;
-    private String       _description;
-    private AttachType   _attachType;
-    private ViewAttacher _autoAttach;
-    
-    ViewDescriptor(String path, String description, AttachType type,
-                   ViewAttacher autoAttach)
-    {
-        _path        = path;
-        _description = description;
-        _attachType  = type;
-        _autoAttach  = autoAttach;
-    }
-    
-    public String getPath() {
-        return _path;
-    }
-    
-    public String getDescription() {
-        return _description;
-    }
-    
-    public AttachType getAttachType() {
-        return _attachType;
-    }
-    
-    public ViewAttacher getAutoAttacher() {
-        return _autoAttach;
-    }
+public interface ViewAttacher {
+    void attach(View v);
 }

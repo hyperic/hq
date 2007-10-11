@@ -37,7 +37,7 @@ public class ViewAdmin
         super(plugin, view, AttachType.ADMIN);
     }
 
-    public boolean isAttachable() {
+    public boolean isAttachable(AttachmentDescriptor d) {
         return getAttachments().isEmpty();
     }
 

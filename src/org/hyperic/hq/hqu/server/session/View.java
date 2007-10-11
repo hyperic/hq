@@ -56,7 +56,7 @@ public abstract class View
      * for certain view types which are only attachable a single time
      * (such as admin or masthead areas)
      */
-    public abstract boolean isAttachable();
+    public abstract boolean isAttachable(AttachmentDescriptor d);
     
     /**
      * Return a prototype attachment descriptor that can be filled out when

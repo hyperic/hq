@@ -76,6 +76,27 @@ public abstract class AttachType
         }
     };
 
+    public static AttachType RESOURCE = new AttachType(2, "resource",
+                                                       "attachType.resource") 
+    {
+        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
+            return new ViewResource(plugin, viewInfo);
+        }
+
+        Attachment attach(View view, AttachmentDescriptor d) {
+            AttachmentDescriptorResource r = (AttachmentDescriptorResource)d;
+            ViewResource vr = (ViewResource)view;
+            Attachment a = new AttachmentResource(vr, r);
+            
+            view.addAttachment(a);
+            return a;
+        }
+
+        boolean isAutoAttachable() {
+            return true;
+        }
+    };
+    
     abstract View createView(UIPlugin plugin, ViewDescriptor viewInfo); 
     
     abstract Attachment attach(View view, AttachmentDescriptor d);
@@ -83,10 +104,12 @@ public abstract class AttachType
     abstract boolean isAutoAttachable();
     
     public static AttachType findByDescription(String desc) {
-        if (desc.equals("admin")) 
+        if (desc.equals(ADMIN.getDescription())) 
             return ADMIN;
-        else if (desc.equals("masthead"))
+        else if (desc.equals(MASTHEAD.getDescription()))
             return MASTHEAD;
+        else if(desc.equals(RESOURCE.getDescription()))
+            return RESOURCE;
 
         throw new IllegalArgumentException("Unknown AttachType [" + desc + "]");
     }

@@ -51,6 +51,10 @@
       <key on-delete="cascade" column="VIEW_ID"/>
     </joined-subclass>
 
+    <joined-subclass name="ViewResource" table="EAM_UI_VIEW_RESOURCE">
+      <key on-delete="cascade" column="VIEW_ID"/>
+    </joined-subclass>
+
   </class>
 
 </hibernate-mapping>

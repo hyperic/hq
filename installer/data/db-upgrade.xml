@@ -6963,6 +6963,55 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+    
+    <schemaSpec version="3.60">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          CREATE TABLE eam_ui_attach_rsrc (
+              attach_id integer NOT NULL,
+              resource_id integer NOT NULL,
+              category character varying(255) NOT NULL)
+        </statement>
+        <statement targetDB="oracle">
+          CREATE TABLE eam_ui_attach_rsrc (
+              attach_id integer NOT NULL,
+              resource_id integer NOT NULL,
+              category VARCHAR2(255) NOT NULL)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_attach_rsrc
+            ADD CONSTRAINT eam_ui_attach_rsrc_pkey PRIMARY KEY (attach_id)
+        </statement>
+        <statement>
+          ALTER TABLE ONLY eam_ui_attach_rsrc
+            ADD CONSTRAINT fkd9f7a78fd494bca6 FOREIGN KEY (attach_id) 
+            REFERENCES eam_ui_attachment(id) ON DELETE CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE ONLY eam_ui_attach_rsrc
+           ADD CONSTRAINT fkd9f7a78ffc176ae  FOREIGN KEY (resource_id) 
+           REFERENCES eam_resource(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+      
+    <schemaSpec version="3.61">
+      <schema-directSQL>
+        <statement>
+          CREATE TABLE eam_ui_view_resource (
+              view_id integer NOT NULL)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_view_resource
+              ADD CONSTRAINT eam_ui_view_resource_pkey PRIMARY KEY (view_id)
+        </statement>
+        <statement>
+          ALTER TABLE ONLY eam_ui_view_resource
+              ADD CONSTRAINT fka416a54bf6253048 FOREIGN KEY (view_id) 
+              REFERENCES eam_ui_view(id) ON DELETE CASCADE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 

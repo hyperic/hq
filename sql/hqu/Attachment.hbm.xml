@@ -28,6 +28,20 @@
     <many-to-one name="view" cascade="save-update" class="View">
       <column name="VIEW_ID" not-null="true" />
     </many-to-one>
+    
+    <joined-subclass name="AttachmentResource" table="EAM_UI_ATTACH_RSRC">
+      <key on-delete="cascade" column="ATTACH_ID"/>
+
+      <many-to-one name="resource" cascade="save-update" 
+                   class="org.hyperic.hq.authz.server.session.Resource">
+        <column name="RESOURCE_ID" not-null="true" />
+      </many-to-one>
+
+      <property name="categoryEnum">
+        <column name="CATEGORY" not-null="true"/>
+      </property>
+    </joined-subclass>
+    
   </class>
 
 </hibernate-mapping>
