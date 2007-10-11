@@ -25,16 +25,8 @@
 
 package org.hyperic.hq.measurement.ext;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.units.FormattedNumber;
-import org.hyperic.util.units.UnitNumber;
-import org.hyperic.util.units.UnitsConstants;
-import org.hyperic.util.units.UnitsFormat;
-import org.hyperic.util.units.DateFormatter.DateSpecifics;
 
 public class DownMetricValue extends MetricValue implements Comparable {
     private AppdefEntityID _entityId;
