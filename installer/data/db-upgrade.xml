@@ -6951,6 +6951,18 @@ has already been defined.
       <schema-alterColumn table="EAM_RESOURCE" column="PROTO_ID" 
                           nullable="NOT NULL"/>
     </schemaSpec>
+    
+    <schemaSpec version="3.59">
+      <schema-directSQL>
+        <statement>
+          CREATE INDEX eam_resource_proto_idx ON eam_resource (proto_id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_resource
+              ADD CONSTRAINT fk7ac0e15c8b366a94 FOREIGN KEY (proto_id) REFERENCES eam_resource(id)
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
