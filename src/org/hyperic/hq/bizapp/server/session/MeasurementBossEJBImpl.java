@@ -300,12 +300,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /** Retrieve a measurement template given specific ID
      * @ejb:interface-method
      */
-    public MeasurementTemplateValue getMeasurementTemplate(int sessionId,
-                                                           Integer id)
+    public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        return getTemplateManager().getTemplate(id)
-            .getMeasurementTemplateValue();
+        manager.getSubjectPojo(sessionId);
+        return getTemplateManager().getTemplate(id);
     }
 
     /**

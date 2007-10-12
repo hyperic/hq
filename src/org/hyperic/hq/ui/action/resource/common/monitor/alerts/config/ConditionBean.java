@@ -30,6 +30,11 @@ import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.GenericValidator;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionMessage;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -38,18 +43,13 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.units.FormattedNumber;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.validator.GenericValidator;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMessage;
 
 /**
  * Bean that holds condition info.
@@ -354,20 +354,21 @@ public final class ConditionBean {
                 if (acv.getType() == EventConstants.TYPE_THRESHOLD) {
                     thresholdType = TYPE_ABS;
 
-                    MeasurementTemplateValue mtv;
+                    String unit;
                     
                     if (isTypeAlert) {
-                        mtv = mb.getMeasurementTemplate(
-                            sessionId, new Integer( acv.getMeasurementId() ));
+                        MeasurementTemplate mtv =
+                            mb.getMeasurementTemplate(sessionId, metricId);
+                        unit = mtv.getUnits();
                     }
                     else {
-                        DerivedMeasurementValue dmv = mb.getMeasurement
-                        ( sessionId, new Integer( acv.getMeasurementId() ) );
-                        mtv = dmv.getTemplate();
+                        DerivedMeasurementValue dmv =
+                            mb.getMeasurement(sessionId, metricId);
+                        unit = dmv.getTemplate().getUnits();
                     }
                     
                     FormattedNumber absoluteFmt = UnitsConvert.convert
-                        ( acv.getThreshold(), mtv.getUnits() );
+                        ( acv.getThreshold(), unit );
                     absoluteValue = absoluteFmt.toString();
                 } else if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     thresholdType = TYPE_PERC;
@@ -424,22 +425,23 @@ public final class ConditionBean {
             if ( getThresholdType().equals(TYPE_ABS) ) {
                 acv.setType(EventConstants.TYPE_THRESHOLD);
 
-                MeasurementTemplateValue mtv;
+                String unit;
                 
                 if (typeAlert) {
-                    mtv = mb.getMeasurementTemplate(sessionId,
-                                         new Integer(acv.getMeasurementId()));
+                    MeasurementTemplate mtv =
+                        mb.getMeasurementTemplate(sessionId, getMetricId());
+                    unit = mtv.getUnits();
                 }
                 else {
                     // parse the value
-                    DerivedMeasurementValue dmv = mb.getMeasurement(sessionId,
-                            new Integer(acv.getMeasurementId()));
-                    mtv = dmv.getTemplate();
+                    DerivedMeasurementValue dmv =
+                        mb.getMeasurement(sessionId, getMetricId());
+                    unit = dmv.getTemplate().getUnits();
                 }
 
                 try {
                     acv.setThreshold(BizappUtils.parseMeasurementValue(
-                                     getAbsoluteValue(), mtv));
+                                     getAbsoluteValue(), unit));
                 } catch (ParseException e) {
                     // Just set the value
                     acv.setThreshold(getThresholdValue());

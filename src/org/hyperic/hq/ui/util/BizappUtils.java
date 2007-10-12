@@ -1107,11 +1107,9 @@ public class BizappUtils {
      * @return the measurement as parsed based on a number and its units
      * @throws ParseException
      */
-    public static double parseMeasurementValue(String value,
-                                               MeasurementTemplateValue mtv)
+    public static double parseMeasurementValue(String value, String unit)
         throws ParseException
     {
-        String unit = mtv.getUnits();
         int unitType = UnitsConvert.getUnitForUnit(unit);
         int scale = UnitsConvert.getScaleForUnit(unit);
         UnitNumber num = UnitsFormat.parse(value, unitType);
