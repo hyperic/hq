@@ -9,7 +9,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2007], Hyperic, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
   USA.
  --%>
 
-<div style="padding-bottom: 16px;padding-top: 16px;">
 <html:link action="/Admin"><fmt:message key="admin.config.link.Return"/></html:link>
-</div>
+<br/>
+<br/>
 
