@@ -96,6 +96,16 @@ public class ProductPluginManager extends PluginManager {
     public static final String PROPERTY_PREFIX =
         "hq.plugins.";
 
+    private static final Map JAVA_VERSIONS = new HashMap();
+
+    //java.class.version.major -> java.version
+    static {
+        JAVA_VERSIONS.put("48", "1.4");
+        JAVA_VERSIONS.put("49", "1.5");
+        JAVA_VERSIONS.put("50", "1.6");
+        JAVA_VERSIONS.put("51", "1.7");
+    }
+
     private MeasurementPluginManager mpm;
     private ControlPluginManager cpm;
     private AutoinventoryPluginManager apm;
@@ -684,7 +694,24 @@ public class ProductPluginManager extends PluginManager {
         Arrays.sort(plugins, this.pluginSorter);
         return plugins;
     }
-    
+
+    private String unsupportedClassVersionMessage(String msg) {
+        final String ex = "Unsupported major.minor version ";
+        int ix;
+        if ((ix = msg.indexOf(ex)) > -1) {
+            ix += ex.length();
+            String major = msg.substring(ix, ix+2);
+            String jre = (String)JAVA_VERSIONS.get(major);
+            if (jre == null) {
+                return msg;
+            }
+            return "requires JRE " + jre + " or higher";
+        }
+        else {
+            return msg;
+        }
+    }
+
     public int registerPlugins(String path)
         throws PluginException, PluginExistsException {
 
@@ -711,7 +738,13 @@ public class ProductPluginManager extends PluginManager {
                     continue;
                 }
                 log.info("Loading plugin: " + name);
-                registerPluginJar(plugins[j].getAbsolutePath());
+                try {
+                    registerPluginJar(plugins[j].getAbsolutePath());
+                } catch (UnsupportedClassVersionError e) {
+                    log.info("Cannot load " + name + ": " +
+                             unsupportedClassVersionMessage(e.getMessage()));
+                    continue;
+                }
                 nplugins++;
             }
         }
