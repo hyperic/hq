@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2007], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -45,12 +45,6 @@
          }
 </script>
 
-<span class="italicInfo" style="padding: 4px;">
-  <fmt:message key="feature.available.in.EE">
-    <fmt:param><fmt:message key="inform.config.admin.AlertingPolicies"/></fmt:param>
-    <fmt:param value="http://support.hyperic.com/confluence/display/DOC/Resource-Type+Alerts"/>
-  </fmt:message>
-</span>
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
 	<tr class="ListHeaderDark">
@@ -69,7 +63,10 @@
       </c:otherwise>
     </c:choose>
       <td class="tableCell"><html:link page="/ResourceHub.do?ff=1&ft=1:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
-      <td class="tableCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=1:${entry.id}&type=1"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="platform"/>
+        <tiles:put name="aetid">1:<c:out value="${entry.id}"/></tiles:put>
+      </tiles:insert>
     </tr>
   </c:forEach>
 <!--  /  -->
@@ -97,7 +94,10 @@
       </c:otherwise>
     </c:choose>
       <td class="tableCell"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${platSvc.id}"><c:out value="${platSvc.name}"/></html:link></td>
-      <td class="tableCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${platSvc.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${platSvc.id}"/></tiles:put>
+      </tiles:insert>
     </tr>
     </c:forEach>
     <c:forEach var="winSvc" varStatus="wsStatus" items="${windowsServiceTypes}">
@@ -112,7 +112,10 @@
       </c:otherwise>
     </c:choose>
       <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${winSvc.id}"><c:out value="${winSvc.name}"/></html:link></td>
-      <td class="ListCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${winSvc.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${winSvc.id}"/></tiles:put>
+      </tiles:insert>
     </tr>
     </c:forEach>
 
@@ -140,7 +143,10 @@
       </c:otherwise>
     </c:choose>
       <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${server.id}"><c:out value="${server.name}"/></html:link></td>
-      <td class="ListCell" align="center"><html:link page="/resource/server/monitor/Config.do?mode=configure&aetid=2:${server.id}&type=2"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="server"/>
+        <tiles:put name="aetid">2:<c:out value="${server.id}"/></tiles:put>
+      </tiles:insert>
     </tr>
     <tr class="ListRow">
         <c:forEach var="serviceType" varStatus="status" items="${services}">
@@ -157,7 +163,10 @@
             <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
             <html:link page="/ResourceHub.do?ff=3&ft=3:${serviceType.id}"><c:out value="${serviceType.name}"/></html:link>
             </td>
-            <td class="ListCell" align="center"><html:link page="/resource/platform/monitor/Config.do?mode=configure&aetid=3:${serviceType.id}&type=3"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${serviceType.id}"/></tiles:put>
+      </tiles:insert>
         </tr>
         </c:forEach>   
     </c:if>

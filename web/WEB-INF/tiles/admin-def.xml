@@ -77,4 +77,11 @@
     <put name="configTile" value="/admin/config/ListEscalationSchemes.jsp"/>
   </definition>
 
+  <definition name=".admin.config.EditMonitorConfig"
+              extends=".admin.main.layout"
+              controllerUrl="/MonitorDefaultsHelp.do">
+    <put name="titleKey" value="admin.home.ResourceTemplates"/>
+    <put name="configTile" value="/admin/config/ChangeResourceTemplate.jsp"/>
+  </definition>
+
  </tiles-definitions>
