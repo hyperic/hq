@@ -22,7 +22,7 @@ if exist "%JAVA_HOME%\bin\java.exe" goto basicAntSetup
 goto noJavaExe
 
 :haveBuiltinJRE:
-"%INSTALL_DIR%\jres\x86-win32-jre.exe" -d "%TEMP%" > nul
+"%INSTALL_DIR%\jres\x86-win32-jre-1_5.exe" -d "%TEMP%" > nul
 SET JAVA_HOME=%TEMP%\jre
 SET USE_BUILTIN_JRE=1
 goto basicAntSetup
