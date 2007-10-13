@@ -223,12 +223,28 @@ if [ -d "${SERVER_HOME}/hqdb" ] ; then
   debugOut "startBuiltinDB completed"
 fi
 
+# Enable the 64-bit JRE on Solaris 64-bit OS
+THISOS=`uname -s`
+
+if [ $THISOS = "SunOS" ] ; then
+	ARCH=`isainfo -kv`
+	
+	case $ARCH in
+		*64-bit*)
+		  echo "Setting -d64 JAVA OPTION to enable SunOS 64-bit JRE"
+			HQ_JAVA_OPTS="${HQ_JAVA_OPTS} -d64"
+			;;
+	esac
+fi
+
+
 # Start the server
 infoOut "Booting the HQ server..."
 cd ${SERVER_HOME}/hq-engine/bin
 JBOSSUS=RUNASIS \
 JBOSSHOME=${ENGINE_HOME} \
   ${JAVA} -XX:MaxPermSize=128m -Xmx512m -server \
+    ${HQ_JAVA_OPTS} \
     -Dprogram.name=hq-server \
     -Dserver.home=${SERVER_HOME} \
     -Dengine.home=${ENGINE_HOME} \
