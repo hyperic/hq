@@ -36,22 +36,20 @@
 <tiles:importAttribute name="application"/>
 <tiles:importAttribute name="services"/>
 <tiles:importAttribute name="serviceCount"/>
-<tiles:importAttribute name="selfAction"/>
+
 <hq:pageSize var="pageSize"/>
-<c:set var="addToListUrl" value="/resource/application/Inventory.do?mode=addServices&rid=${Resource.id}&type=${Resource.entityId.type}" />
-<c:set var="baseSelfAction" value="/resource/application/Inventory.do" />
-<c:url var="selfAction" value="${baseSelfAction}">
-<c:param name="mode" value="view" />
-<c:param name="rid" value="${Resource.id}" />
-<c:param name="type" value="${Resource.entityId.type}" />
-</c:url>
+<c:set var="addToListUrl" value="/resource/application/Inventory.do?mode=addServices&eid=${Resource.entityId}" />
 <c:set var="widgetInstanceName" value="listServices"/>
 
-
-<c:url var="selfPssAction" value="${baseSelfAction}">
+<c:url var="selfAction" value="/resource/application/Inventory.do" context="/">
   <c:param name="mode" value="view" />
-  <c:param name="rid" value="${Resource.id}" />
-  <c:param name="type" value="${Resource.entityId.type}" />
+  <c:param name="eid" value="${Resource.entityId}" />
+  <c:param name="accord" value="3" />
+</c:url>
+
+<c:url var="ctxSelfAction" value="${selfAction}"/>
+
+<c:url var="selfPssAction" value="${selfAction}">
   <c:if test="${not empty param.pns}">
     <c:param name="pns" value="${param.pns}"/>
   </c:if>
@@ -75,10 +73,7 @@
   </c:if>
 </c:url>
 
-<c:url var="selfPnsAction" value="${baseSelfAction}">
-  <c:param name="mode" value="view" />
-  <c:param name="rid" value="${Resource.id}" />
-  <c:param name="type" value="${Resource.entityId.type}" />
+<c:url var="selfPnsAction" value="${selfAction}">
   <c:if test="${not empty param.pss}">
     <c:param name="pss" value="${param.pss}"/>
   </c:if>
@@ -117,9 +112,8 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
 <!--  SERVICES CONTENTS -->
 <div id="listDiv">
 
-<display:table items="${Services}" cellspacing="0" cellpadding="0" orderValue="sos" order="${param.sos}"  sortValue="scs"
-sort="${param.scs}"
-  width="100%" action="${selfAction}" var="service" pageSize="${pageSize}">
+<display:table items="${Services}" cellspacing="0" cellpadding="0" orderValue="sos" order="${param.sos}"  sortValue="scs" sort="${param.scs}"
+  width="100%" action="${ctxSelfAction}" var="service" pageSize="${pageSize}">
   <display:column width="1%" property="appServiceId" 
     title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetPropertiesListServices, true)\" name=\"listToggleAll\">"  
     isLocalizedTitle="false" styleClass="ListCellCheckbox" 
