@@ -14,12 +14,12 @@
 
     <!-- Roll platform specific tarballs -->
     <antcall target="roll-platform-agent-bundle">
-      <param name="jre-file" value="amd64-linux-jre.tar.gz"/>
+      <param name="jre-file" value="amd64-linux-jre-1_5.tar.gz"/>
       <param name="archive-suffix" value="amd64-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="amd64-linux-jre.tar.gz"/>
+      <param name="jre-file" value="amd64-linux-jre-1_5.tar.gz"/>
       <param name="archive-suffix" value="amd64-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -39,16 +39,11 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-linux-glibc2-jre.tar.gz"/>
+      <param name="jre-file" value="x86-linux-glibc2-jre-1_5.tar.gz"/>
       <param name="archive-suffix" value="x86-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-agent-bundle">
-      <param name="jre-file" value="hppa2.0-hp-hpux-11.x-jre.tar.gz"/>
-      <param name="archive-suffix" value="hpux-11"/>
-      <param name="compress-mode" value="tgz"/>
-    </antcall>
-    <antcall target="roll-platform-specific-archive">
       <param name="jre-file" value="hppa2.0-hp-hpux-11.x-jre.tar.gz"/>
       <param name="archive-suffix" value="hpux-11"/>
       <param name="compress-mode" value="tgz"/>
@@ -59,7 +54,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="sparc-sun-solaris-jre.tar.gz"/>
+      <param name="jre-file" value="sparc-sun-solaris-jre-1_5.tar.gz"/>
       <param name="archive-suffix" value="sparc-solaris"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -69,7 +64,7 @@
       <param name="compress-mode" value="zip"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-win32-jre.exe"/>
+      <param name="jre-file" value="x86-win32-jre-1_5.exe"/>
       <param name="archive-suffix" value="win32"/>
       <param name="compress-mode" value="zip"/>
     </antcall>
