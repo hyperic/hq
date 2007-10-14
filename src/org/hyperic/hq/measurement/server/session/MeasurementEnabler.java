@@ -59,10 +59,9 @@ class MeasurementEnabler
             ResourceZevent z = (ResourceZevent)i.next();
             AuthzSubjectValue subject = z.getAuthzSubjectValue();
             AppdefEntityID id = z.getAppdefEntityID();
-            boolean isCreate, isUpdate, isRefresh;
+            boolean isCreate, isRefresh;
 
             isCreate = z instanceof ResourceCreatedZevent;
-            isUpdate = z instanceof ResourceUpdatedZevent;
             isRefresh = z instanceof ResourceRefreshZevent;
 
             try {

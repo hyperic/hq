@@ -91,7 +91,6 @@ import org.hyperic.util.timer.StopWatch;
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    private Connection _conn;
     
     private static final BigDecimal MAX_DB_NUMBER =
         new BigDecimal("10000000000000000000000");
