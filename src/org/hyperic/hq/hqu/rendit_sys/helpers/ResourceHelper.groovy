@@ -40,7 +40,7 @@ class ResourceHelper extends BaseHelper {
         findServices(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
-    def getDownResources() {
-        measBoss.getUnavailableResources(user)
+    def getDownResources(PageInfo pInfo) {
+        measBoss.getUnavailableResources(user, pInfo)
     }
 }

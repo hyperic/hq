@@ -1,3 +1,5 @@
 <div id="systemsDownTable">
-Placeholder to be filled
+  <%= dojoTable(id:'SystemsDown', title:l.SystemsDownTitle,
+                refresh:60, url:urlFor(action:'data'),
+                schema:systemsDownSchema, numRows:100) %>
 </div>
