@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -50,9 +51,12 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.DownResSortField;
+import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
@@ -3306,11 +3310,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the list of resources that are unavailable
      * @ejb:interface-method 
      */
-    public Map getUnavailableResources(AuthzSubject user)
+    public Collection getUnavailableResources(AuthzSubject user, PageInfo info)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
         List unavailEnts = getMetricManager().getUnavailEntities();
-        Map unavailRes = new TreeMap();
+        DownResSortField sortField = (DownResSortField) info.getSort();
+        Set ret = new TreeSet(sortField.getComparator());
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             
@@ -3322,10 +3327,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 _log.debug(res.getName() + " down for " +
                            (dmv.getDuration() / 60000) + "min");
             }
-            unavailRes.put(dmv, res.getLiteResourceValue());
+
+            ret.add(new DownResource(res.getLiteResourceValue(), dmv));
         }
-        
-        return unavailRes;
+        return ret;
     }
 
     public static MeasurementBossLocal getOne() {

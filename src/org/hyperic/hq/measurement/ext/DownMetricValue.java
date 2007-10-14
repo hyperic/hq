@@ -28,7 +28,7 @@ package org.hyperic.hq.measurement.ext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.product.MetricValue;
 
-public class DownMetricValue extends MetricValue implements Comparable {
+public class DownMetricValue extends MetricValue {
     private AppdefEntityID _entityId;
 
     public DownMetricValue(AppdefEntityID id, MetricValue mv) {
@@ -46,33 +46,5 @@ public class DownMetricValue extends MetricValue implements Comparable {
 
     public long getDuration() {
         return System.currentTimeMillis() - getTimestamp();
-    }
-
-    /**
-     * DownMetricValue orders by appdef type first, then by when entity
-     * registered the down metric
-     */
-    public int compareTo(Object o) {
-        DownMetricValue dmv = (DownMetricValue) o;
-        if (getEntityId().getType() != dmv.getEntityId().getType()) {
-            return new Integer(getEntityId().getType())
-                .compareTo(new Integer(dmv.getEntityId().getType()));
-        }
-        
-        if (getTimestamp() == dmv.getTimestamp())
-            return -1;
-        
-        return new Long(getTimestamp()).compareTo(new Long(dmv.getTimestamp())); 
-    }
-
-    public boolean equals(Object o) {
-        if (!(o instanceof DownMetricValue))
-            return false;
-        
-        DownMetricValue dmv = (DownMetricValue) o;
-        if (_entityId.equals(dmv.getEntityId()))
-            return super.equals(o);
-        
-        return false;
     }
 }
