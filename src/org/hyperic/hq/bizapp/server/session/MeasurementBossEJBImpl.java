@@ -3315,7 +3315,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, PermissionException {
         List unavailEnts = getMetricManager().getUnavailEntities();
         DownResSortField sortField = (DownResSortField) info.getSort();
-        Set ret = new TreeSet(sortField.getComparator());
+        Set ret = new TreeSet(sortField.getComparator(!info.isAscending()));
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             

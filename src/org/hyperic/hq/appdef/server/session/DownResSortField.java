@@ -36,6 +36,14 @@ public abstract class DownResSortField
 
     private static final String BUNDLE = "org.hyperic.hq.appdef.Resources";
     
+    private abstract class OrderedComparator implements Comparator {
+        boolean _asc;
+        
+        OrderedComparator(boolean asc) {
+            _asc = asc;
+        }
+    }
+
     public static final DownResSortField RESOURCE = 
         new DownResSortField(0, "resource", "down.sortField.resource") 
     {
@@ -43,13 +51,21 @@ public abstract class DownResSortField
             return true;
         }
 
-        public Comparator getComparator() {
-            return new Comparator() {
+        public Comparator getComparator(boolean asc) {
+            return new OrderedComparator(asc) {
 
                 public int compare(Object arg0, Object arg1) {
                     // Have to be DownResource objects
-                    DownResource dr1 = (DownResource) arg0;
-                    DownResource dr2 = (DownResource) arg1;
+                    DownResource dr1 , dr2;
+                    
+                    if (_asc) {
+                        dr1 = (DownResource) arg0;
+                        dr2 = (DownResource) arg1;
+                    }
+                    else {
+                        dr1 = (DownResource) arg1;
+                        dr2 = (DownResource) arg0;
+                    }
                     
                     return dr1.getName().compareTo(dr2.getName());
                 }
@@ -65,13 +81,21 @@ public abstract class DownResSortField
             return true;
         }
 
-        public Comparator getComparator() {
-            return new Comparator() {
+        public Comparator getComparator(boolean asc) {
+            return new OrderedComparator(asc) {
 
                 public int compare(Object arg0, Object arg1) {
                     // Have to be DownResource objects
-                    DownResource dr1 = (DownResource) arg0;
-                    DownResource dr2 = (DownResource) arg1;
+                    DownResource dr1 , dr2;
+                    
+                    if (_asc) {
+                        dr1 = (DownResource) arg0;
+                        dr2 = (DownResource) arg1;
+                    }
+                    else {
+                        dr1 = (DownResource) arg1;
+                        dr2 = (DownResource) arg0;
+                    }
                     
                     if (dr1.getType().equals(dr2.getType()))
                         return -1;
@@ -90,19 +114,27 @@ public abstract class DownResSortField
             return true;
         }
 
-        public Comparator getComparator() {
-            return new Comparator() {
+        public Comparator getComparator(boolean asc) {
+            return new OrderedComparator(asc) {
 
                 public int compare(Object arg0, Object arg1) {
                     // Have to be DownResource objects
-                    DownResource dr1 = (DownResource) arg0;
-                    DownResource dr2 = (DownResource) arg1;
+                    DownResource dr1 , dr2;
                     
-                    if (dr1.getDuration() == dr2.getDuration())
+                    if (_asc) {
+                        dr1 = (DownResource) arg0;
+                        dr2 = (DownResource) arg1;
+                    }
+                    else {
+                        dr1 = (DownResource) arg1;
+                        dr2 = (DownResource) arg0;
+                    }
+                    
+                    if (dr1.getTimestamp() == dr2.getTimestamp())
                         return -1;
                     
-                    return Long.valueOf(dr2.getDuration())
-                        .compareTo(Long.valueOf(dr1.getDuration()));
+                    return Long.valueOf(dr1.getTimestamp())
+                        .compareTo(Long.valueOf(dr2.getTimestamp()));
                 }
                 
             };
@@ -116,19 +148,27 @@ public abstract class DownResSortField
             return true;
         }
 
-        public Comparator getComparator() {
-            return new Comparator() {
+        public Comparator getComparator(boolean asc) {
+            return new OrderedComparator(asc) {
 
                 public int compare(Object arg0, Object arg1) {
                     // Have to be DownResource objects
-                    DownResource dr1 = (DownResource) arg0;
-                    DownResource dr2 = (DownResource) arg1;
+                    DownResource dr1 , dr2;
+                    
+                    if (_asc) {
+                        dr1 = (DownResource) arg0;
+                        dr2 = (DownResource) arg1;
+                    }
+                    else {
+                        dr1 = (DownResource) arg1;
+                        dr2 = (DownResource) arg0;
+                    }
                     
                     if (dr1.getDuration() == dr2.getDuration())
                         return -1;
                     
-                    return Long.valueOf(dr2.getDuration())
-                        .compareTo(Long.valueOf(dr1.getDuration()));
+                    return Long.valueOf(dr1.getDuration())
+                        .compareTo(Long.valueOf(dr2.getDuration()));
                 }
                 
             };
@@ -140,5 +180,5 @@ public abstract class DownResSortField
               ResourceBundle.getBundle(BUNDLE));
     }
     
-    public abstract Comparator getComparator();
+    public abstract Comparator getComparator(boolean asc);
 }
