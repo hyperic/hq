@@ -1765,7 +1765,7 @@
             name="DashboardForm"
             scope="request"
             input="/Dashboard.do">
-            <forward name="success" path="/Dashboard.do" redirect="true"/>
+        <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
 
       <action path="/dashboard/Admin"
@@ -2326,9 +2326,21 @@
 
       <action path="/mastheadAttach"
               forward=".attach.layout"/>
-
+              
       <action path="/attach/Masthead"
               type="org.hyperic.hq.ui.action.attach.MastheadAction"/>
+     
+      <action path="/TabBodyAttach"
+              forward=".attach.tab.layout"/>
+              
+      <action path="/attach/TabBody"
+              type="org.hyperic.hq.ui.action.attach.TabBodyAction"/>
+              
+      <action path="/attach/TabPortal"
+              parameter="mode"
+              input="/TabBodyAttach"
+              type="org.hyperic.hq.ui.action.attach.TabPortalAction">
+      </action>
 
   </action-mappings>
 
