@@ -580,6 +580,15 @@ public class ConfigManagerEJBImpl
         }
 
         if (wasUpdated) {
+            // XXX, in some cases the configuration is not flushed when the
+            // zevent is dispatched after the commit.  Need to figure out why,
+            // in the meantime flush so that configuring servers by hand does
+            // not result in config errors.
+
+            ConfigResponseDAO dao =
+                DAOFactory.getDAOFactory().getConfigResponseDAO();
+            dao.getSession().flush();
+
             // XXX: Need to cascade and send events for each resource that may
             // have been affected by this config update.
             if (sendConfigEvent) {
