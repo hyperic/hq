@@ -134,7 +134,7 @@
     <td class="SubTabCell"><html:img page="/images/spacer.gif" width="25" height="1" alt="" border="0"/></td>
   </c:if>
 </c:forEach>
-       <td width="100%" class="SubTabCell"><html:img page="/images/spacer.gif" width="1" height="25" alt="" border="0"/></td>
+       <td width="100%" class="SubTabCell" id="SubTabTarget"><html:img page="/images/spacer.gif" width="1" height="25" alt="" border="0"/></td>
      </tr>
     </table>
    </td>
