@@ -102,6 +102,13 @@ public class PluginJar extends Jar {
 
     public static void validatePluginXML(String dir, String name)
         throws BuildException {
+
+        File descriptor = new File(name);
+        if (!descriptor.exists()) {
+            System.out.println("Skipping " + name + " validation " +
+                               "(does not exist)");
+            return;
+        }
         PluginParser parser = new PluginParser();
         PluginData data = new PluginData();
         FileInputStream is = null;
@@ -111,7 +118,7 @@ public class PluginJar extends Jar {
 
         try {
             System.out.println("Validating " + name);
-            is = new FileInputStream(new File(name));
+            is = new FileInputStream(descriptor);
             parser.parse(is, data);
         } catch (Exception e) {
             throw new BuildException(e.getMessage(), e);
