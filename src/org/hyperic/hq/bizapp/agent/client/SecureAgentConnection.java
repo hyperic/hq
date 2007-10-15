@@ -91,8 +91,14 @@ public class SecureAgentConnection
         else {
             socket = (SSLSocket)factory.createSocket(host, port);
         }
-        
+
+        // Set the socket timeout during the initial handshake to detect
+        // connection issues with the agent.  The timeout is reset to 0
+        // (unlimited) post handshake, preserving the behavior for 3.1 and
+        // prior.
+        socket.setSoTimeout(timeout);
         socket.startHandshake();
+        socket.setSoTimeout(0);
         
         return socket;
     }
