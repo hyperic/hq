@@ -129,11 +129,8 @@ public abstract class DownResSortField
                         dr1 = (DownResource) arg1;
                         dr2 = (DownResource) arg0;
                     }
-                    
-                    if (dr1.getTimestamp() == dr2.getTimestamp())
-                        return 0;
 
-                    return dr1.getTimestamp() < dr2.getTimestamp() ?
+                    return dr1.getTimestamp() <= dr2.getTimestamp() ?
                         -1 : 1;
                 }
                 
@@ -163,11 +160,8 @@ public abstract class DownResSortField
                         dr1 = (DownResource) arg1;
                         dr2 = (DownResource) arg0;
                     }
-                    
-                    if (dr1.getDuration() == dr2.getDuration())
-                        return 0;
-                    
-                    return dr1.getDuration() < dr2.getDuration() ?
+
+                    return dr1.getDuration() <= dr2.getDuration() ?
                         -1 : 1;
                 }
                 
