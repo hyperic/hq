@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.UIPluginDescriptor;
@@ -59,15 +63,17 @@ public class UIPluginManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
-    private UIPluginDAO   _pluginDAO;
-    private ViewDAO       _viewDAO;
-    private AttachmentDAO _attachDAO;
+    private UIPluginDAO           _pluginDAO;
+    private ViewDAO               _viewDAO;
+    private AttachmentDAO         _attachDAO;
+    private AttachmentResourceDAO _attachRsrcDAO;
     
     public UIPluginManagerEJBImpl() {
         DAOFactory fact = DAOFactory.getDAOFactory();
-        _pluginDAO = new UIPluginDAO(fact);
-        _viewDAO   = new ViewDAO(fact);
-        _attachDAO = new AttachmentDAO(fact);
+        _pluginDAO     = new UIPluginDAO(fact);
+        _viewDAO       = new ViewDAO(fact);
+        _attachDAO     = new AttachmentDAO(fact);
+        _attachRsrcDAO = new AttachmentResourceDAO(fact);
     }
 
     /**
@@ -221,6 +227,17 @@ public class UIPluginManagerEJBImpl
         return _attachDAO.findFor(type);
     }
 
+    /**
+     * Find attachments for a resource.
+     * @ejb:interface-method
+     */
+    public Collection findAttachments(AppdefEntityID ent,
+                                      ViewResourceCategory cat) 
+    {
+        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        return _attachRsrcDAO.findFor(r, cat); 
+    }
+    
     public static UIPluginManagerLocal getOne() {
         try {
             return UIPluginManagerUtil.getLocalHome().create();
