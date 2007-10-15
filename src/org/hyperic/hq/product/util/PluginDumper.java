@@ -218,7 +218,19 @@ public class PluginDumper {
                                        this.pdkDir);
 
             this.pluginDir =
-                this.props.getProperty("plugin.dir", this.pluginDir);
+                this.pdkDir + File.separator + "plugins";
+
+            String dir = this.props.getProperty("plugin.dir");
+            if ((dir != null) && (dir.length() > 0)) {
+                if (dir.charAt(0) == File.pathSeparatorChar) {
+                    //append custom directories to the default
+                    this.pluginDir += dir;
+                }
+                else {
+                    //override the default
+                    this.pluginDir = dir;
+                }
+            }
 
             if ("all".equals(this.plugin)) {
                 this.plugin = null;
@@ -241,11 +253,6 @@ public class PluginDumper {
 
             if (this.outputDir == null) {
                 this.outputDir = ".";
-            }
-
-            if (this.pluginDir == null) {
-                this.pluginDir =
-                    this.pdkDir + File.separator + "plugins";
             }
 
             String pluginProperties =
