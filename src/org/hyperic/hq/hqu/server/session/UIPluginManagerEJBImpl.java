@@ -229,6 +229,7 @@ public class UIPluginManagerEJBImpl
 
     /**
      * Find attachments for a resource.
+     * @return a collection of {@link Attachment}s
      * @ejb:interface-method
      */
     public Collection findAttachments(AppdefEntityID ent,
