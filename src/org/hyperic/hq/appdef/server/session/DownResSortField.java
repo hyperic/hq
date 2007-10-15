@@ -131,10 +131,10 @@ public abstract class DownResSortField
                     }
                     
                     if (dr1.getTimestamp() == dr2.getTimestamp())
-                        return -1;
-                    
-                    return Long.valueOf(dr1.getTimestamp())
-                        .compareTo(Long.valueOf(dr2.getTimestamp()));
+                        return 0;
+
+                    return dr1.getTimestamp() < dr2.getTimestamp() ?
+                        -1 : 1;
                 }
                 
             };
@@ -165,10 +165,10 @@ public abstract class DownResSortField
                     }
                     
                     if (dr1.getDuration() == dr2.getDuration())
-                        return -1;
+                        return 0;
                     
-                    return Long.valueOf(dr1.getDuration())
-                        .compareTo(Long.valueOf(dr2.getDuration()));
+                    return dr1.getDuration() < dr2.getDuration() ?
+                        -1 : 1;
                 }
                 
             };
