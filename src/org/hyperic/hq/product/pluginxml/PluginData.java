@@ -299,6 +299,9 @@ public class PluginData {
         try {
             if (isJar) {
                 is = openPluginResource(loader, PLUGIN_XML);
+                if (is == null) {
+                    log.debug(file + "!" + PLUGIN_XML + " does not exist");
+                }
                 resolver = new PluginResolver(data, loader);
             }
             else {
@@ -306,7 +309,9 @@ public class PluginData {
                 resolver = new PluginResolver(data);
             }
 
-            parser.parse(is, data, resolver);
+            if (is != null) {
+                parser.parse(is, data, resolver);
+            }
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
         } finally {
