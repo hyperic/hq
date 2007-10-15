@@ -7006,7 +7006,7 @@ has already been defined.
               ADD CONSTRAINT eam_ui_view_resource_pkey PRIMARY KEY (view_id)
         </statement>
         <statement>
-          ALTER TABLE ONLY eam_ui_view_resource
+          ALTER TABLE eam_ui_view_resource
               ADD CONSTRAINT fka416a54bf6253048 FOREIGN KEY (view_id) 
               REFERENCES eam_ui_view(id) ON DELETE CASCADE
         </statement>
