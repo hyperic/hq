@@ -52,4 +52,34 @@ class SystemsdownController extends BaseController {
         def json = DojoUtil.processTableRequest(SYSTEMSDOWN_SCHEMA , params)
 		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
+
+    def summary(params) {
+        def json = "[\n" +
+           "{parent: \"Platforms\",\n" +
+            "id: \"1\",\n" +
+            "children:[\n" +
+                "{name: \"Linux\", url:\"#\", id:1},\n" +
+                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
+                "{name: \"Windoze\", url:\"#\", id:3}\n" +
+                "]\n" +
+            "},\n" +
+           "{parent: \"Servers\",\n" +
+            "id: \"1\",\n" +
+            "children:[\n" +
+                "{name: \"Linux\", url:\"#\", id:1},\n" +
+                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
+                "{name: \"Windoze\", url:\"#\", id:3}\n" +
+                "]\n" +
+            "},\n" +
+           "{parent: \"Services\",\n" +
+            "id: \"1\",\n" +
+            "children:[\n" +
+                "{name: \"Linux\", url:\"#\", id:1},\n" +
+                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
+                "{name: \"Windoze\", url:\"#\", id:3}\n" +
+                "]\n" +
+            "},\n" +
+        "]"
+		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
+    }
 }
