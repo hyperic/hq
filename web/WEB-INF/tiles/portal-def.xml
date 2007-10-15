@@ -146,7 +146,6 @@
     <definition name=".dashboard.admin.layout" 
                 extends=".main.layout"
                 controllerUrl="/DashboardAdminController.do" />                
-    <!---->           
 
     <definition name=".resource.server.control.layout" 
                 extends=".main.layout"
@@ -162,10 +161,21 @@
         <put name="body" value="/portal/ResourceLayout.jsp" />
     </definition>
 
+    <!-- UI attachpoints -->
     <definition name=".attach.layout" 
                 extends=".main.layout"
                 controllerUrl="/attach/Masthead.do">
-        <put name="body"    value="/portal/AttachBody.jsp" />
+        <put name="body" value="/portal/AttachBody.jsp" />
     </definition>
-
+    
+    <definition name=".attach.tab.layout"
+                extends=".main.layout"
+                controllerUrl="/attach/TabPortal.do">
+    </definition>
+    
+    <definition name=".tab.Views"
+                controllerUrl="/attach/TabBody.do"
+                path="/resource/Views.jsp">
+    </definition>    
+    
  </tiles-definitions>
