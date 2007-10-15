@@ -6983,12 +6983,12 @@ has already been defined.
             ADD CONSTRAINT eam_ui_attach_rsrc_pkey PRIMARY KEY (attach_id)
         </statement>
         <statement>
-          ALTER TABLE ONLY eam_ui_attach_rsrc
+          ALTER TABLE eam_ui_attach_rsrc
             ADD CONSTRAINT fkd9f7a78fd494bca6 FOREIGN KEY (attach_id) 
             REFERENCES eam_ui_attachment(id) ON DELETE CASCADE
         </statement>
         <statement>
-          ALTER TABLE ONLY eam_ui_attach_rsrc
+          ALTER TABLE eam_ui_attach_rsrc
            ADD CONSTRAINT fkd9f7a78ffc176ae  FOREIGN KEY (resource_id) 
            REFERENCES eam_resource(id)
         </statement>
