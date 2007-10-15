@@ -48,6 +48,10 @@
             link="/alerts/Config.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList> 
   </definition>
 
@@ -56,6 +60,11 @@
               extends=".tabs.resource.platform">
     <put name="selectedIndex"  value="1" />
     <put name="subSectionName" value="Inventory"/>
+  </definition>
+  
+  <definition name=".tabs.resource.platform.views"
+              extends=".tabs.resource.platform">
+    <put name="selectedIndex"  value="3" />
   </definition>
 
   <definition name=".tabs.resource.platform.inventory.current"
