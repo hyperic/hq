@@ -42,12 +42,11 @@
 
   </target>
 
+  <!-- The agent and shell use 1.4 JREs except for the AMD 64 linux install 
+	   that uses a 1.5 JRE. -->	
   <target name="pick-jre" if="use.builtin.jre">
-    <condition property="jre.tar.name" value="hppa2.0-hp-hpux-11.x-jre.tar.gz">
-        <available file="${install.dir}/jres/hppa2.0-hp-hpux-11.x-jre.tar.gz"/>
-    </condition>
-    <condition property="jre.tar.name" value="amd64-linux-jre.tar.gz">
-        <available file="${install.dir}/jres/amd64-linux-jre.tar.gz"/>
+    <condition property="jre.tar.name" value="amd64-linux-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-jre-1_5.tar.gz"/>
     </condition>
     <condition property="jre.tar.name" value="x86-linux-glibc2-jre.tar.gz">
         <available file="${install.dir}/jres/x86-linux-glibc2-jre.tar.gz"/>
@@ -59,21 +58,22 @@
         <available file="${install.dir}/jres/x86-win32-jre.exe"/>
     </condition>
   </target>
-
-  <target name="chmod-jre" if="jre.chmod.java">
-    <echo>^^^INFO:
-      Setting permissions on jre binaries...
-    </echo>
-    <chmod perm="a+rx">
-      <!-- there are 4 java binaries here, bin/java and 3 arch
-           specific.  only two have the x bit set, make sure it is set
-           for all of em -->
-      <fileset dir="${destination}/jre">
-        <include name="bin/java"/>
-        <include name="bin/**/java"/>
-      </fileset>
-    </chmod>
-  </target>
+	
+  <!-- The server uses a 1.5 JRE. -->	
+  <target name="pick-server-jre" if="use.builtin.jre">
+    <condition property="jre.tar.name" value="amd64-linux-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-jre-1_5.tar.gz"/>
+    </condition>
+    <condition property="jre.tar.name" value="x86-linux-glibc2-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-glibc2-jre-1_5.tar.gz"/>
+    </condition>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-jre-1_5.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-jre-1_5.tar.gz"/>
+    </condition>
+    <condition property="jre.exe.name" value="x86-win32-jre-1_5.exe">
+        <available file="${install.dir}/jres/x86-win32-jre-1_5.exe"/>
+    </condition>
+  </target>	
 
   <target name="install-jre-tar" if="jre.tar.name">
     <echo>^^^INFO:
@@ -82,10 +82,6 @@
     <untar src="${install.dir}/jres/${jre.tar.name}"
            dest="${destination}"
            compression="gzip"/>
-    <condition property="jre.chmod.java">
-        <os name="HP-UX"/>
-    </condition>
-    <antcall target="chmod-jre"/>
   </target> 
 
   <target name="install-jre-exe" if="jre.exe.name">
@@ -97,8 +93,20 @@
     </exec>
   </target> 
 
-  <target name="install-jre" depends="pick-jre" if="use.builtin.jre">
-    <echo>^^^INFO: Installing the JRE ...</echo>
+  <target name="install-agent-jre" depends="pick-jre" if="use.builtin.jre">
+    <echo>^^^INFO: Installing the agent JRE ...</echo>
+    <antcall target="install-jre-tar"/>
+    <antcall target="install-jre-exe"/>
+  </target>
+
+  <target name="install-shell-jre" depends="pick-jre" if="use.builtin.jre">
+    <echo>^^^INFO: Installing the shell JRE ...</echo>
+    <antcall target="install-jre-tar"/>
+    <antcall target="install-jre-exe"/>
+  </target>
+
+  <target name="install-server-jre" depends="pick-server-jre" if="use.builtin.jre">
+    <echo>^^^INFO: Installing the server JRE ...</echo>
     <antcall target="install-jre-tar"/>
     <antcall target="install-jre-exe"/>
   </target>
@@ -241,7 +249,7 @@ __ll__
            dest="${agent.installdir}"
            compression="gzip"/>
 
-    <antcall target="install-jre">
+    <antcall target="install-agent-jre">
       <param name="destination" value="${agent.installdir}/agent-${version}" />
     </antcall>
     <echo>^^^INFO: Setting permissions on agent binaries...</echo>
@@ -274,7 +282,7 @@ __ll__
            dest="${shell.installdir}"
            compression="gzip"/>
     
-    <antcall target="install-jre">
+    <antcall target="install-shell-jre">
       <param name="destination" value="${shell.installdir}/shell-${version}" />
     </antcall>
     <echo>^^^INFO: Setting permissions on shell binaries...</echo>
@@ -553,7 +561,7 @@ ${errMsg}
     <echo>^^^INFO: Setting up server database...</echo>
     <ant antfile="setup-db-${server.database}.xml" target="setup"/>
 
-    <antcall target="install-jre">
+    <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />
     </antcall>
 
