@@ -42,6 +42,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -52,7 +53,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerUtil;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
@@ -270,7 +270,7 @@ public class ResourceGroupManagerEJBImpl
     public ResourceGroupValue addResource(AuthzSubjectValue whoami,
                                           ResourceGroupValue group,
                                           Integer instId, 
-                                          ResourceTypeValue type)
+                                          ResourceType type)
         throws PermissionException 
     {
         ResourceGroupDAO dao = getResourceGroupDAO();

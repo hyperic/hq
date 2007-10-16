@@ -129,10 +129,8 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             group.setOwner         ( subject.getName() );
 
            // Here's where we add our own group resource to our group.
-            ResourceValue resVal =
-                getResourceByInstanceId(authzResourceGroupName, rgVo.getId());
             rgmLoc.addResource(subject, rgVo, rgVo.getId(),
-                               resVal.getResourceTypeValue());
+                               getResourceType(authzResourceGroupName));
         } catch (PermissionException pe) {
             // This should NOT occur. Anyone can create groups.
             log.error("Caught PermissionException during "+
