@@ -39,7 +39,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-linux-glibc2-jre-1_5.tar.gz"/>
+      <param name="jre-file" value="x86-linux-glibc2-jre*.tar.gz"/>
       <param name="archive-suffix" value="x86-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -54,7 +54,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="sparc-sun-solaris-jre-1_5.tar.gz"/>
+      <param name="jre-file" value="sparc-sun-solaris-jre*.tar.gz"/>
       <param name="archive-suffix" value="sparc-solaris"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -64,7 +64,7 @@
       <param name="compress-mode" value="zip"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-win32-jre-1_5.exe"/>
+      <param name="jre-file" value="x86-win32-jre*.exe"/>
       <param name="archive-suffix" value="win32"/>
       <param name="compress-mode" value="zip"/>
     </antcall>
@@ -154,9 +154,12 @@
       <else>
         <delete>
           <fileset dir="${archive-dir}/installer-${version}" includes="jres/**"/>
-        </delete>
-        <copy todir="${archive-dir}/installer-${version}/jres"
-              file="${jre.dir}/${jre-file}"/>
+        </delete>		  
+		<copy todir="${archive-dir}/installer-${version}/jres">
+			<fileset dir="${jre.dir}">
+				<include name="${jre-file}"/>	
+			</fileset>			
+		</copy>
       </else>
     </if>
 
