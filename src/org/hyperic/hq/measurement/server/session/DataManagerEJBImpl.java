@@ -115,7 +115,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final int IND_AVG       = MeasurementConstants.IND_AVG;
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
-    private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
     
     // Pager class name
     private boolean confDefaultsLoaded = false;
@@ -741,27 +740,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return left;
     }
 
-    private boolean dataPtExists(PreparedStatement stmt, int metricId,
-                                 long timestamp)
-    {
-        ResultSet rs = null;
-        try
-        {
-            stmt.setLong(1, timestamp);
-            stmt.setInt(2, metricId);
-            rs = stmt.executeQuery();
-            if (rs.next())
-                return true;
-        }
-        catch (SQLException e) {
-            _log.debug("A general SQLException occurred during the check.", e);
-        }
-        finally {
-            DBUtil.closeResultSet(logCtx, rs);
-        }
-        return false;
-    }
-    
     /**
      * This method is called to perform 'updates' for any inserts that failed. 
      * 
@@ -853,20 +831,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Shouldn't happen unless manual edit of config table
             throw new IllegalArgumentException("Invalid purge interval: " + e);
         }
-    }
-
-    /**
-     * Based on the given start time, determine which measurement 
-     * table we should query for measurement data.  If the slice is for the
-     * detailed data segment, we return the UNION view of the required time
-     * slices.
-     * @param begin The beginning of the time range.
-     * @param end The end of the time range
-     */
-    private String getDataTable(long begin, long end)
-    {
-        Integer[] empty = new Integer[0];
-        return getDataTable(begin,end,empty);
     }
 
     private String getDataTable(long begin, long end, int measId)
@@ -1091,7 +1055,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       boolean returnNulls, PageControl pc)
         throws DataNotAvailableException {
         final int    MAX_IDS  = 30;
-        final String REPL_IDS = "@@REPL_IDS@@";
         
         if (ids == null || ids.length < 1) {
             throw new DataNotAvailableException("No IDs were passed");
@@ -1136,11 +1099,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
 
             // Construct SQL command
-            String selectType;
-
-            // The table to query from
-            String table = getDataTable(begin, end, ids);
-            selectType = getSelectType(type, begin, end);
+            String selectType = getSelectType(type, begin, end);
 
             final int pagesize =
                 (int) Math.min(Math.max(pc.getPagesize(),
@@ -1644,7 +1603,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Map data = new HashMap();
         if (ids.length == 0)
             return data;
-
+    
         // Try to get the values from the cache first
         MetricDataCache cache = MetricDataCache.getInstance();
         ArrayList nodata = new ArrayList();
@@ -1652,7 +1611,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if (ids[i] == null) {
                 continue;
             }
-
+    
             MetricValue mval = cache.get(ids[i], timestamp);
             if (mval != null) {
                 data.put(ids[i], mval);
@@ -1660,7 +1619,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 nodata.add(ids[i]);
             }
         }
-
+    
         if (nodata.size() == 0) {
             return data;
         } else {
@@ -1669,16 +1628,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         Connection conn  = null;
         Statement  stmt  = null;
-        ResultSet  rs    = null;
         StopWatch  timer = new StopWatch();
         
         try {
             conn =
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
+    
             int length = Math.min(ids.length, MAX_ID_LEN);
-            boolean constrain =
-                (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED);
             stmt = conn.createStatement();
             for (int ind = 0; ind < ids.length; )
             {
@@ -1687,8 +1643,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 Integer[] subids = new Integer[length];
                 for (int j = 0; j < subids.length; j++) {
                     subids[j] = ids[ind++];
-                    if (_log.isTraceEnabled())
-                        _log.trace("arg" + (j+1) + ": " + subids[j]);
+                    if (_log.isDebugEnabled())
+                        _log.debug("arg" + (j+1) + ": " + subids[j]);
                 }
                 setDataPoints(data, length, timestamp, subids, stmt);
             }
@@ -1698,14 +1654,73 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-            if (_log.isTraceEnabled()) {
-                _log.trace("getLastDataPoints(): Statement query elapsed " +
+            if (_log.isDebugEnabled()) {
+                _log.debug("getLastDataPoints(): Statement query elapsed " +
                           "time: " + timer.getElapsed());
             }
         }
         List dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
         updateMetricDataCache(dataPoints);
         return data;
+    }
+
+    /**
+     * Fetch the most recent non-zero data point for a particular
+     * DerivedMeasurement.
+     *
+     * @param id the ID of the DerivedMeasurement
+     * @return a long time value
+     * @ejb:interface-method
+     */
+    public long getLastNonZeroTimestamp(Integer id)
+    {
+        Connection conn  = null;
+        Statement  stmt  = null;
+        ResultSet  rs    = null;
+        StopWatch  timer = new StopWatch();
+        
+        try {
+            conn =
+                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+
+            stmt = conn.createStatement();
+            
+            // Create array of tables to go through
+            String[] tables = new String[] {
+                    TAB_DATA,
+                    TAB_DATA_1H,
+                    TAB_DATA_6H,
+                    TAB_DATA_1D
+            };
+            
+            for (int i = 0; i < tables.length; i++) {
+                rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
+                                       tables[i] +
+                                       " WHERE not value = 0 AND " +
+                                       " measurement_id = " + id);
+                
+                if (rs.next()) {
+                    long ret = rs.getLong(1);
+                    if (!rs.wasNull())
+                        return ret;
+                }
+                
+                DBUtil.closeResultSet(logCtx, rs);
+            }
+            
+            // If all values are zero, then just return largest value
+            return Long.MAX_VALUE;
+        } catch (SQLException e) {         
+            throw new SystemException("Cannot get last non-zero value", e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            if (_log.isDebugEnabled()) {
+                _log.debug("getLastNonZeroTimestamp(): Statement query " +
+                		   "elapsed time: " + timer.getElapsed());
+            }
+        }
     }
 
     private void setDataPoints(Map data, int length, long timestamp,
@@ -1715,7 +1730,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet rs = null;
         try
         {
-            int i = 1;
             StringBuffer sqlBuf = getLastDataPointsSQL(length, timestamp, measIds);
             if (_log.isTraceEnabled()) {
                 _log.trace("getLastDataPoints(): " + sqlBuf);

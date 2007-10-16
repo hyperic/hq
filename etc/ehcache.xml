@@ -157,7 +157,9 @@
          maxElementsInMemory="20000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
+         memoryStoreEvictionPolicy="LRU">
+    <cacheEventListenerFactory class="org.hyperic.hq.measurement.server.session.DownMetricsCacheEventListenerFactory" properties=""/>
+  </cache>
 
   <!-- The SRN cache, used outside of hibernate -->
   <cache name="SRNCache"
