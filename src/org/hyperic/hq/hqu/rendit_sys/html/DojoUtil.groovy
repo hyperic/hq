@@ -66,6 +66,8 @@ class DojoUtil {
      *   numRows:  Number of rows to display
      *   refresh*:  If specified, the table will refresh at the passed # of
      *              seconds.
+     *   pageControls*:  If specified, provides a boolean value indicating
+     *                   whether or not to display the page controls
      *   schema:   The schema is a map which contains information on how to
      *             retrieve data for the rows, how to format them, etc.  The
      *             following keys for the schema are used:
@@ -108,7 +110,13 @@ class DojoUtil {
 	    def sortOrderVar = "${idVar}_sortOrder"
 	    def urlXtraVar   = "${idVar}_urlXtra"
 	    def ajaxCountVar = "${idVar}_ajaxCountVar"
-	    def res      = new StringBuffer(""" 
+	    def pageControlStyle = 'display:none'
+	    
+	    if (params.get('pageControls', true)) {
+            pageControlStyle = 'display:block'
+	    }
+	    
+	    def res = new StringBuffer(""" 
 	    <script type="text/javascript">
         
         var ${sortFieldVar};
@@ -282,26 +290,27 @@ class DojoUtil {
 	    
 	    res << """
 	    <div class="pageCont">
-	    <div class="tableTitleWrapper">
-          <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
-          ${titleHtml}
+	      <div class="tableTitleWrapper">
+            <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
+            ${titleHtml}
+          </div>
+          <div style="${pageControlStyle}">
+            <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
+	        <div class="pageButtonCont">
+              <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
+              <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
+              <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
+            </div>
+            <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
+          </div>
+          <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/></div>
+          <div class="acLoader" id="${idVar}_loadMsg"></div>
+          <div style="clear: both;"></div>
         </div>
-          <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
-	      <div class="pageButtonCont">
-            <div id="${idVar}_pageLeft" style="float:left;width:19px;height:20px;" class="previousLeft" onclick="${idVar}_previousPage();">&nbsp;</div>
-            <div id="${idVar}_pageNumbers" style="position: relative;display:inline;padding-left: 5px;padding-right: 5px;padding-top: 5px;float: left;">&nbsp;</div>
-            <div id="${idVar}_pageRight" style="position: relative;display:inline;width: 19px;height:20px;float: left;" class="nextRight" onclick="${idVar}_nextPage();">&nbsp;</div>
-
-         </div>
-         <div class="boldText" style="position: relative;float: right;padding-right:5px;padding-top:5px;">${BUNDLE['dojoutil.Previous']}</div>
-         <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/></div>
-         <div class="acLoader" id="${idVar}_loadMsg"></div>
-           <div style="clear: both;"></div>
-         </div>
         
-         <table id='${id}'>
-           <thead>
-             <tr>
+        <table id='${id}'>
+          <thead>
+            <tr>
         """
         
         def colIdx = 0;
