@@ -6,8 +6,10 @@
 
 <!-- get the eid and mode here for the parent portal action and use that action instead of mastheadattach -->
 <div style="display:none;">
+<c:out value="${resourceViewTabAttachments}"></c:out> ---
+<c:out value="${resourceViewTabAttachment.plugin.name}"></c:out>
 <div style="padding:2px" id="SubTabSource">
-<c:forEach var="attachment" items="${mastheadAttachments}">
+<c:forEach var="attachment" items="${resourceViewTabAttachments}">
     <c:choose>
     <c:when test="${param.id eq attachment.id}">
     <div style="padding:1px;border:1px solid rgb(255, 114, 20);margin-right:2px;width: 100px; float: left;text-align: center;"><a href="<html:rewrite page="/TabBodyAttach.do?id=${attachment.id}&mode=${param.mode}&eid=${param.eid}"/>"><c:out value="${attachment.view.description}"/></a></div>
@@ -20,13 +22,13 @@
 </div>
 </div>
 <c:choose>
-<c:when test="${attachment ne null}">
+<c:when test="${resourceViewTabAttachment ne null}">
 	<div id=attachPointContainer style="padding:4px;">
-		<c:url var="attachUrl" context="/hqu/${attachment.plugin.name}" value="${attachment.path}"/>
+		<c:url var="attachUrl" context="/hqu/${resourceViewTabAttachment.plugin.name}" value="${resourceViewTabAttachment.path}"/>
 		<c:import url="${attachUrl}"/>
 	</div>
 </c:when>
-<c:when test="${mastheadAttachments eq null}">
+<c:when test="${resourceViewTabAttachments eq null}">
 	<div style="padding: 100px 0px; color: gray; font-size: 14px;text-align:center;">
 	  No views are available for this resource
 	</div>
