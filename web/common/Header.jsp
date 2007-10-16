@@ -37,7 +37,7 @@
 
 	var djConfig = {
 		isDebug : false,
-		locale : "en"
+		locale : "<%=request.getLocale().toString().substring(0,2)%>"
 	};
 
 </script>
