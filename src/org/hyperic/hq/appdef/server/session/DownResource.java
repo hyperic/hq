@@ -31,4 +31,8 @@ public class DownResource {
     public long getDuration() {
         return _dmv.getDuration();
     }
+    
+    public AppdefResourceValue getResource() {
+        return _res;
+    }
 }
