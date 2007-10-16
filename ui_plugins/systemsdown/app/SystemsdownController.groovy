@@ -20,7 +20,8 @@ class SystemsdownController extends BaseController {
         defaultSortOrder: 1,  // descending
         columns: [
             [field:DownResSortField.RESOURCE, width:'45%',
-             label:{it.name}],
+             label:{linkTo(it.name,
+                           [resource:it.resource.entityId])}],
             [field:DownResSortField.TYPE, width:'10%',
              label:{it.type}],
             [field:DownResSortField.SINCE, width:'25%',

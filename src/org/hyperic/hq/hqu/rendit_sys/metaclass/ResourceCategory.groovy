@@ -37,6 +37,10 @@ class ResourceCategory {
         }
     }
     
+    static String urlFor(AppdefEntityID aeid, String context) {
+    	return "/Resource.do?eid=${aeid}"
+    }
+    
     static boolean getSupportsMonitoring(Resource r) {
         def ent = getEntityID(r)
         ent.isPlatform() || ent.isServer() || ent.isService()
