@@ -11,6 +11,9 @@ import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
+import org.hyperic.hq.hqu.server.session.Attachment
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -200,4 +203,15 @@ abstract class BaseController {
     protected ResourceHelper getResourceHelper() {
         new ResourceHelper(user)
     }
+    
+    /**
+     * Get the attachment point for the view associated with the current 
+     * request.
+     */
+    protected Attachment getViewAttachment() {
+        def uiMan = UIPluginManagerEJBImpl.one
+        def attachId = invokeArgs.request.parameterMap.getOne('attachId').toInteger()
+        uiMan.findAttachmentById(attachId)
+    }
+    
 }
