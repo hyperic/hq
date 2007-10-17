@@ -1,9 +1,11 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
+import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 
 class ResourceCategory {
     /**
@@ -49,5 +51,13 @@ class ResourceCategory {
     static Collection getDesignatedMetrics(Resource r) {
         def aeid = getEntityID(r)
 		DerivedMeasurementManagerEJBImpl.one.findDesignatedMeasurements(aeid)
+    }
+
+    /**
+     * Get a collection of {@link String}s, depicting the LiveData
+     * commands available to the specified resource for the specified user
+     */
+    static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
+        LiveDataManagerEJBImpl.one.getCommands(user, r.entityID) as List
     }
 }
