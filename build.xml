@@ -188,6 +188,18 @@
       </sequential>
     </macrodef>
     
+    <macrodef name="hqu-redeploy-plugin">
+      <attribute name="eardir"/>
+      <attribute name="plugin"/>
+      <sequential>
+        <delete dir="${hqu.deployed.dir}/@{plugin}"/>
+        <sleep seconds="2"/>
+        <copy todir="@{eardir}/hq.war/hqu/@{plugin}">
+          <fileset dir="${basedir}/ui_plugins/@{plugin}"/>
+        </copy>
+      </sequential>
+    </macrodef>
+
     <property name="init-internal-taskdefs.notrequired" value="true"/>
   </target>
 
@@ -600,6 +612,12 @@
     <delete dir="${hqu.deployed.rendit_sys.dir}"/>
   </target>
 
+  <target name="hqu-redeploy-plugin" depends="init">
+    <hqu-redeploy-plugin eardir="${jboss.home}/server/default/deploy/hq.ear"
+                         plugin="${plugin}"/>
+  </target>
+    
+    
   <target name="hqu-gen-scaffold" depends="init">
     <fail unless="plugin.name">
 		You must use -Dplugin.name=my_plugin to specify the plugin name
