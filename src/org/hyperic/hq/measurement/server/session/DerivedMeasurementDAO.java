@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.List;
@@ -128,7 +129,6 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         } 
     }
 
-
     public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
         String sql = "select id from DerivedMeasurement " +
                      "where template.id = :tid and instanceId IN (:ids)";
@@ -161,34 +161,38 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             "where mt.appdefType=? and m.instanceId=? and " +
             "m.interval is not null";
 
+        Query query = getSession().createQuery(sql);
+
         for (int i=0; i<aeids.length; i++)
         {
+            if (aeids[i] == null)
+                continue;
+
             int type = aeids[i].getType(),
                 id   = aeids[i].getID();
-            List derivedMeas = getSession().createQuery(sql)
-                .setInteger(0, type)
+
+            List list = query.setInteger(0, type)
                 .setInteger(1, id)
                 .setCacheable(true)
                 .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
                 .list();
-            rtn.put(aeids[i], derivedMeas);
+
+            rtn.put(aeids[i], list);
         }
         return rtn;
     }
 
-    List findByInstance(int type, int id) {
-        String sql =
-            "select distinct m from DerivedMeasurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "where mt.appdefType=? and m.instanceId=? and " +
-            "m.interval is not null";
-        return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
-            .setCacheable(true)
-            .setCacheRegion("DerivedMeasurement.findByInstance_with_interval")
-            .list();
+    List findByInstance(int type, int id)
+    {
+        AppdefEntityID[] aeids = new AppdefEntityID[1];
+        AppdefEntityID appdef = new AppdefEntityID(type, id);
+        Map map = findByInstance(aeids);
+        Iterator it = map.entrySet().iterator();
+        if (it.hasNext()) {
+            Map.Entry entry = (Map.Entry)it.next();
+            return (List)entry.getValue();
+        }
+        return new ArrayList();
     }
 
     List findByInstances(AppdefEntityID[] ids) {
