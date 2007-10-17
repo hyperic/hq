@@ -2,7 +2,6 @@
       var openElement = "";
      function getData(type, data, evt) {
          if (data) {
-         alert(data)
              var domTree = document.getElementById('resourceTree');
              var tree = "";
              for (var x = 0; x < data.length; x++) {
