@@ -380,15 +380,26 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /** 
      * Get application by id.
      * @ejb:interface-method
-     * @param Integer id
+     * @deprecated
      */
     public ApplicationValue getApplicationById(AuthzSubjectValue subject, 
                                                Integer id) 
         throws ApplicationNotFoundException, PermissionException {
+        return findApplicationById(subject, id).getApplicationValue();
+    }
+
+    /**
+     * Get application pojo by id.
+     * 
+     * @ejb:interface-method
+     */
+    public Application findApplicationById(AuthzSubjectValue subject, 
+                                           Integer id) 
+        throws ApplicationNotFoundException, PermissionException {
         try {
             Application app = getApplicationDAO().findById(id);
             checkViewPermission(subject, app.getEntityId());
-            return app.getApplicationValue();
+            return app;
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
         }
