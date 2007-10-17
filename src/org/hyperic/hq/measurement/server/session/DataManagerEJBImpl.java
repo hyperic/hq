@@ -478,13 +478,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
     
-    private List getRemainingDataPoints(List data, int[] execInfo) {
+    private List getRemainingDataPoints(List data, int[] execInfo)
+    {
         List res = new ArrayList();
         int idx = 0;
 
+        // this is the case for mysql
+        if (execInfo.length == 0)
+            return res;
+            
         for (Iterator i=data.iterator(); i.hasNext(); idx++) {
             DataPoint pt = (DataPoint)i.next();
-            
+
             if (execInfo[idx] == Statement.EXECUTE_FAILED)
                 res.add(pt);
         }
