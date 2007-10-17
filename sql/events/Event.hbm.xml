@@ -15,7 +15,7 @@
     </version>
 
     <property lazy="true" name="eventObject" type="binary">
-      <column name="EVENT_OBJECT" not-null="true"/>
+      <column name="EVENT_OBJECT" not-null="true" length="256"/>
     </property>
 
     <property name="ctime" type="long">
