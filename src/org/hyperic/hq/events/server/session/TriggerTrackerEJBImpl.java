@@ -117,6 +117,11 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
                         .append(TAB_FIRED_TRIGGER)
                         .append(" (id, timestamp, trigger_id) VALUES")
                         .append(" (EAM_FIRED_TRIGGER_ID_SEQ.nextval,?,?)");
+                } else if (DBUtil.isMySQL(conn)) {
+                    strBuf.append("INSERT INTO ")
+                        .append(TAB_FIRED_TRIGGER)
+                        .append(" (id, timestamp, trigger_id) VALUES")
+                        .append(" (nextseqval('EAM_FIRED_TRIGGER_ID_SEQ'),?,?)");
                 } else {
                     strBuf.append("INSERT INTO ")
                         .append(TAB_FIRED_TRIGGER)
