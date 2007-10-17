@@ -273,3 +273,15 @@ font-weight:bold;
     background-repeat: no-repeat;
     background-position: top left;
 }
+
+/* Down Systems Page */
+
+ .leftbxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
+ .leftbxht {padding:3px;overflow-y:auto;height: 400px;}
+ .tree {border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;}
+ .topCat {padding:3px;background-color:#E0EEEE;font-weight:bold;border-bottom:1px solid #BDBDBD;border-top:1px solid #BDBDBD;cursor:pointer;}
+ .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;}
+ #resourceTree ul {margin:0px;padding:0px;}
+ #resourceTree li:hover { background:#d9dfe7;}
+.listItem {padding:2px;}
+
