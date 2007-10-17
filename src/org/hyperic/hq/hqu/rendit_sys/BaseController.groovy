@@ -3,6 +3,9 @@ package org.hyperic.hq.hqu.rendit
 import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
@@ -214,4 +217,16 @@ abstract class BaseController {
         uiMan.findAttachmentById(attachId)
     }
     
+    /**
+     * Get the resource that is currently being viewed.  
+     */
+    protected Resource getViewedResource() {
+        def aeid = invokeArgs.request.parameterMap.getOne('eid')
+        if (aeid == null) {
+            return null
+        }
+        
+        def id = new AppdefEntityID(aeid)
+        ResourceManagerEJBImpl.one.findResource(id)
+    }
 }
