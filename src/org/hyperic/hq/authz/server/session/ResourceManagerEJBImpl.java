@@ -493,7 +493,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return PageList of resource values
      * @ejb:interface-method
      */
-    public PageList findViewableSvcResources(AuthzSubjectValue subject,
+    public PageList findViewableSvcResources(AuthzSubject subject,
                                              String resourceName,
                                              PageControl pc) {
         Collection resources;
