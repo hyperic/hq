@@ -278,10 +278,16 @@ font-weight:bold;
 
  .leftbxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
  .leftbxht {padding:3px;overflow-y:auto;height: 400px;}
- .tree {border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;}
- .topCat {padding:3px;background-color:#E0EEEE;font-weight:bold;border-bottom:1px solid #BDBDBD;border-top:1px solid #BDBDBD;cursor:pointer;}
+ .boxLinks {padding:3px 3px 0px 5px;display:inline;}
+ .right{float:right;}
+ .left{float:left;}
+ .tree {padding:3px;border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;}
+ .topCat {padding:3px;background-color:#E0EEEE;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;}
  #resourceTree ul {margin:0px;padding:0px;}
  #resourceTree li:hover { background:#d9dfe7;}
-.listItem {padding:2px;}
+.listItem {padding:3px; cursor:pointer;}
+.downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
+.downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: left; width: 70%; height: 442px;}
+.downList{margin-right: 10px; width: 260px; float:left}
 
