@@ -240,8 +240,7 @@ public class ClientShell_resource_export
             GroupEntry gEntry = (GroupEntry)i.next();
             int type = AppdefUtil.resNameToAppdefTypeId(gEntry.getType());
 
-            AppdefEntityID id = new AppdefEntityID(type,
-                                                   gEntry.getId());
+            AppdefEntityID id = new AppdefEntityID(type, gEntry.getId());
             ids[j++] = id;
         }
 
@@ -363,9 +362,7 @@ public class ClientShell_resource_export
         exportAgent(agent, ps, INDENT * 2);
 
         // Export Configuration
-        AppdefEntityID id = 
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                               p.getId());
+        AppdefEntityID id = AppdefEntityID.newPlatformID(p.getId().intValue());
         ConfigResponseDB config =
             this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 2);
@@ -428,9 +425,7 @@ public class ClientShell_resource_export
         }
 
         // Export Configuration
-        AppdefEntityID id = 
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                               s.getId());
+        AppdefEntityID id = AppdefEntityID.newServerID(s.getId().intValue());
         ConfigResponseDB config =
             this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 3);
@@ -468,9 +463,7 @@ public class ClientShell_resource_export
         ps.println(s2 + "location=\"" + print(s.getLocation()) + "\">");
 
         // Export Configuration
-        AppdefEntityID id = 
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                               s.getId());
+        AppdefEntityID id = AppdefEntityID.newServiceID(s.getId().intValue());
         ConfigResponseDB config =
             this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 3);
