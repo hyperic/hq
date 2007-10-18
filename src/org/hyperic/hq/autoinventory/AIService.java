@@ -29,8 +29,9 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 public class AIService extends AppdefResource
 {
@@ -235,7 +236,17 @@ public class AIService extends AppdefResource
         return result;
     }
 
+    /**
+     * For compatibility
+     */
     public AppdefResourceType getAppdefResourceType() {
+        return null;
+    }
+
+    /**
+     * For compatibility
+     */
+    public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
 }
