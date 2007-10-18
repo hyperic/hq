@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -60,6 +60,7 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
@@ -495,11 +496,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 AppdefEntityID anId = null;
                 if(appSvc.isIsCluster()) {
                     ResourceGroup group = appSvc.getServiceCluster().getGroup();
-                    anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                              group.getId());
+                    anId = AppdefEntityID.newGroupID(group.getId().intValue());
                 } else {
-                    anId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
-                                              appSvc.getService().getId());
+                    anId = AppdefEntityID.newServiceID(appSvc.getService()
+                                                           .getId().intValue());
                 }
                 if(!entityIds.contains(anId)) {
                     i.remove();
@@ -623,8 +623,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
-        Service service = (Service) getResource(
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
+        Service service =
+            (Service) getResource(AppdefEntityID.newServiceID(id.intValue()));
         
         boolean cluster = service.getServiceCluster() != null;
         
@@ -658,7 +658,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to do the looking up by group.
      */
-    private Collection getApplicationsByGroup(AuthzSubjectValue subject,
+    private Collection getApplicationsByGroup(AuthzSubject subject,
                                               AppdefEntityID resource,
                                               PageControl pc) 
         throws AppdefEntityNotFoundException, PermissionException,
@@ -690,7 +690,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Get all applications for a resource.
      * @ejb:interface-method
      */
-    public PageList getApplicationsByResource ( AuthzSubjectValue subject,
+    public PageList getApplicationsByResource ( AuthzSubject subject,
                                                 AppdefEntityID resource,
                                                 PageControl pc) 
         throws ApplicationNotFoundException, PermissionException {
@@ -751,7 +751,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      *
      * @ejb:interface-method
      */
-    public ResourceTree getResourceTree(AuthzSubjectValue subject,
+    public ResourceTree getResourceTree(AuthzSubject subject,
                                         AppdefEntityID[] resources, 
                                         int traversal)
         throws AppdefEntityNotFoundException, PermissionException
