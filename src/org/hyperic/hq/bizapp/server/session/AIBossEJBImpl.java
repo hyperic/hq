@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -47,13 +47,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -217,7 +217,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                DuplicateAIScanNameException, ScheduleWillNeverFireException,
                GroupNotCompatibleException {
 
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         AppdefEntityID aid
             = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
                                  groupID);
@@ -249,14 +249,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException,
                DuplicateAIScanNameException, ScheduleWillNeverFireException {
-
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        AppdefEntityID aid
-            = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                 platformID);
-        getAutoInventoryManager().startScan(subject, aid, 
-                                            scanConfig, scanName, scanDesc,
-                                            schedule);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
+        getAutoInventoryManager().startScan(subject, aid, scanConfig, scanName,
+                                            scanDesc, schedule);
     }
 
     /**
@@ -268,7 +264,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
-        AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionID);
         getAutoInventoryManager().startScan(subject, agentToken, scanConfig);
     }
 
@@ -284,9 +280,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AgentConnectionException, AgentNotFoundException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        AppdefEntityID aid
-            = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                 platformID);
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
         getAutoInventoryManager().stopScan(subject, aid);
     }
 
@@ -303,12 +297,10 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                AutoinventoryException {
 
         AuthzSubjectValue subject = sessionManager.getSubject(sessionID);
-        ScanStateCore core;
-        AppdefEntityID aid
-            = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                 platformID);
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(platformID);
 
-        core = getAutoInventoryManager().getScanStatus(subject, aid);
+        ScanStateCore core =
+            getAutoInventoryManager().getScanStatus(subject, aid);
         return core;
     }
 
