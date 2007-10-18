@@ -25,22 +25,29 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.AttachmentDescriptor;
+import java.util.ResourceBundle;
 
-public class AttachmentDescriptorMasthead 
-    extends AttachmentDescriptor
+import org.hyperic.util.HypericEnum;
+
+public class ViewMastheadCategory
+    extends HypericEnum
 {
-    private ViewMastheadCategory _category;
+    private static final String BUNDLE = "org.hyperic.hq.hqu.Resources";
+
+    public static final ViewMastheadCategory RESOURCE = 
+        new ViewMastheadCategory(0, "resource", 
+                                 "view.masthead.category.resource");
+    public static final ViewMastheadCategory TRACKER = 
+        new ViewMastheadCategory(1, "tracker", 
+                                 "view.masthead.category.tracker");
     
-    public AttachmentDescriptorMasthead(ViewMastheadCategory category) {
-        _category = category;
+    public static ViewMastheadCategory findByDescription(String d) {
+        return (ViewMastheadCategory)
+            HypericEnum.findByDescription(ViewMastheadCategory.class, d);
     }
     
-    public AttachType getAttachType() {
-        return AttachType.MASTHEAD;
-    }
-    
-    public ViewMastheadCategory getCategory() {
-        return _category;
+    private ViewMastheadCategory(int code, String desc, String localeProp) {
+        super(ViewMastheadCategory.class, code, desc, localeProp,
+              ResourceBundle.getBundle(BUNDLE));
     }
 }

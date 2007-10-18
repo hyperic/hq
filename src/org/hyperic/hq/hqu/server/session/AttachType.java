@@ -64,8 +64,9 @@ public abstract class AttachType
         }
 
         Attachment attach(View view, AttachmentDescriptor d) { 
+            AttachmentDescriptorMasthead m = (AttachmentDescriptorMasthead)d;
             assert view.getAttachments().isEmpty();
-            Attachment a = new Attachment(view);
+            Attachment a = new AttachmentMasthead(view, m);
             
             view.addAttachment(a);
             return a;

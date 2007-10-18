@@ -42,6 +42,14 @@
       </property>
     </joined-subclass>
     
+    <joined-subclass name="AttachmentMasthead" table="EAM_UI_ATTACH_MAST">
+      <key on-delete="cascade" column="ATTACH_ID"/>
+
+      <property name="categoryEnum">
+        <column name="CATEGORY" not-null="true"/>
+      </property>
+    </joined-subclass>
+
   </class>
 
 </hibernate-mapping>

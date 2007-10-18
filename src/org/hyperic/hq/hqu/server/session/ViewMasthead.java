@@ -42,6 +42,10 @@ public class ViewMasthead
     }
 
     public AttachmentDescriptor getPrototype() {
-        return new AttachmentDescriptorMasthead();
+        return new AttachmentDescriptorMasthead(ViewMastheadCategory.RESOURCE);
+    }
+
+    public AttachmentDescriptor getPrototype(ViewMastheadCategory cat) {
+        return new AttachmentDescriptorMasthead(cat);
     }
 }

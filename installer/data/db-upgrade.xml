@@ -7012,6 +7012,41 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+    
+    <schemaSpec version="3.62">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          CREATE TABLE eam_ui_attach_mast (
+              attach_id integer NOT NULL,
+              category character varying(255) NOT NULL)
+        </statement>
+        <statement targetDB="oracle">
+          CREATE TABLE eam_ui_attach_mast (
+              attach_id integer NOT NULL,
+              category VARCHAR2(255) NOT NULL)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_attach_mast
+              ADD CONSTRAINT eam_ui_attach_mast_pkey PRIMARY KEY (attach_id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_attach_mast
+              ADD CONSTRAINT fkd9f51e52d494bca6 FOREIGN KEY (attach_id) 
+              REFERENCES eam_ui_attachment(id) ON DELETE CASCADE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+    
+    <schemaSpec version="3.63">
+      <schema-directSQL>
+        <statement>
+          insert into eam_ui_attach_mast (attach_id, category) 
+          select eam_ui_attachment.id, 'tracker' from eam_ui_attachment 
+            join eam_ui_view on view_id = eam_ui_view.id 
+          where eam_ui_view.description = 'Alert Center'
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 

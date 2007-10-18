@@ -6,4 +6,5 @@ plugin.apiMinor = 1
 
 // Enable if you want to dump the translated scripts to stdout
 plugin.dumpScripts = false
-plugin.addView('/systemsdown/index.hqu', 'Systems Down', "masthead", true)
+plugin.addMastheadView('/systemsdown/index.hqu', 'Systems Down', 
+                       'resource')

@@ -25,22 +25,50 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-
-public class AttachmentDescriptorMasthead 
-    extends AttachmentDescriptor
-{
-    private ViewMastheadCategory _category;
+public class AttachmentMasthead
+    extends Attachment
+{ 
+    private String   _category;
     
-    public AttachmentDescriptorMasthead(ViewMastheadCategory category) {
-        _category = category;
+    protected AttachmentMasthead() {}
+    
+    AttachmentMasthead(View view, AttachmentDescriptorMasthead d) {
+        super(view);
+        _category = d.getCategory().getDescription();
     }
     
-    public AttachType getAttachType() {
-        return AttachType.MASTHEAD;
+    protected String getCategoryEnum() {
+        return _category;
+    }
+    
+    protected void setCategoryEnum(String cat) {
+        _category = cat;
     }
     
     public ViewMastheadCategory getCategory() {
-        return _category;
+        return ViewMastheadCategory.findByDescription(_category);
+    }
+
+    public String toString() {
+        return super.toString() + " (under " + getCategory().getValue() + ")"; 
+    }
+
+    public boolean equals(Object obj) {
+        if (!super.equals(obj))
+            return false;
+        
+        if (obj instanceof AttachmentResource == false)
+            return false;
+        
+        AttachmentResource o = (AttachmentResource)obj;
+        
+        return o.getCategoryEnum().equals(getCategoryEnum()); 
+    }
+
+    public int hashCode() {
+        int result = super.hashCode();
+        
+        result = 37 * result + getCategoryEnum().hashCode();
+        return result;
     }
 }

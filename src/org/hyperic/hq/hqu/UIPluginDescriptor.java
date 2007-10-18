@@ -27,6 +27,8 @@ package org.hyperic.hq.hqu;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.hqu.server.session.ViewMasthead;
+import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.server.session.View;
@@ -91,6 +93,28 @@ public class UIPluginDescriptor {
         return _dumpScripts;
     }
     
+    public void addMastheadView(String path, String descr, 
+                                String mastheadSection)
+    {
+        final ViewMastheadCategory viewCat = 
+            ViewMastheadCategory.findByDescription(mastheadSection);
+        ViewAttacher at = new ViewAttacher() {
+            public void attach(View v) {
+                ViewMasthead view = (ViewMasthead)v;
+                if (!v.getAttachments().isEmpty())
+                    return;
+                
+                UIPluginManagerEJBImpl.getOne().attachView(view, 
+                                                    view.getPrototype(viewCat));
+            }
+        };
+        addView(path, descr, AttachType.MASTHEAD.getDescription(), at);
+    }
+                                
+    public void addView(String path, String descr, String attachType) {
+        addView(path, descr, attachType, false);
+    }
+
     public void addView(String path, String descr, String attachType,
                         boolean autoAttach) 
     {
@@ -105,10 +129,6 @@ public class UIPluginDescriptor {
         addView(path, descr, attachType, autoAttach ? at : null);
     }
 
-    public void addView(String path, String descr, String attachType) {
-        addView(path, descr, attachType, false);
-    }
-    
     public void addView(String path, String desc, String attachType,
                         ViewAttacher attacher) 
     {
