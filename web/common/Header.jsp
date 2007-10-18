@@ -104,14 +104,14 @@
             </div>
             <div class="headUsrName">
                 <c:choose>
-                    User:
+                    <fmt:message key="header.User"/>:
                     <c:when test="${useroperations['viewSubject']}">
                         <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
                             <c:out value="${sessionScope.webUser.username}"/>
                         </html:link>
                     </c:when>
                     <c:otherwise>
-                        User:
+                        <fmt:message key="header.User"/>:
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
@@ -119,8 +119,7 @@
                 <html:link action="/Logout">
                     <span style="color:#333333;">[</span> <fmt:message key="admin.user.generalProperties.Logout"/>  <span style="color:#333333;">]</span></span>
                 </html:link></span>
-                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""
-                                                             onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                     <fmt:message key="common.label.Help"/>
                 </html:link></span>
             </div>
@@ -137,13 +136,12 @@
                     <td>
 
                         <div dojoType="PopupMenu2" widgetId="submenu1">
-                            <div dojoType="MenuItem2" caption="Browse"
+                            <div dojoType="MenuItem2" caption="<fmt:message key="header.Browse"/>"
                                  onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
-                            <!-- <div dojoType="MenuItem2" caption="Down Resources"></div>  -->
                             <tiles:insert definition=".header.optional.tabs">
                                 <tiles:put name="location" value="resources"/>
                             </tiles:insert>
-                            <div dojoType="MenuItem2" caption="Recent Resources" submenuId="submenu3"></div>
+                            <div dojoType="MenuItem2" caption="<fmt:message key=".dashContent.recentResources"/>" submenuId="submenu3"></div>
 
                         </div>
 
@@ -151,14 +149,6 @@
                             <tiles:insert definition=".header.optional.tabs">
                                 <tiles:put name="location" value="tracking"/>
                             </tiles:insert>
-                            <!--
-                            <div dojoType="MenuItem2" caption="Reporting"
-                                 onClick="location.href='<html:rewrite page="/reporting/ReportCenter.do"/>'"></div>
-                            <div dojoType="MenuItem2" caption="Audit Center"
-                                 onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10002"/>'"></div>
-                            <div dojoType="MenuItem2" caption="Alert Center"
-                                 onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=10001"/>'"></div>
-                            -->
                         </div>
 
                         <div dojoType="PopupMenu2" widgetId="submenu3">
@@ -166,11 +156,11 @@
                         </div>
 
                         <div dojoType="MenuBar2">
-                            <div dojoType="MenuBarItem2" caption="Dashboard"
+                            <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.home.PageTitle"/>"
                                  onClick="location.href='<html:rewrite page="/Dashboard.do"/>'"></div>
-                            <div dojoType="MenuBarItem2" caption="Resources" submenuId="submenu1"></div>
-                            <div dojoType="MenuBarItem2" caption="Tracking" submenuId="submenu2"></div>
-                            <div dojoType="MenuBarItem2" caption="Administration"
+                            <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.settings.Resources"/>" submenuId="submenu1"></div>
+                            <div dojoType="MenuBarItem2" caption="<fmt:message key="header.Views"/>" submenuId="submenu2"></div>
+                            <div dojoType="MenuBarItem2" caption="<fmt:message key="admin.admin.AdministrationTitle"/>"
                                  onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
                         </div>
 
