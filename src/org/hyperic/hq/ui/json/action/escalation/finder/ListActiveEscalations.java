@@ -52,7 +52,6 @@ public class ListActiveEscalations extends BaseAction {
         EventsBoss eBoss = ContextUtils.getEventsBoss(ctx.getServletContext());
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx.getServletContext());
         AuthzSubject me = aBoss.getCurrentSubject(ctx.getSessionId());
-        AuthzSubjectValue meVal = me.getAuthzSubjectValue();
         List states = eBoss.getActiveEscalations(ctx.getSessionId(),
                                                  10);  // XXX
 
@@ -68,7 +67,7 @@ public class ListActiveEscalations extends BaseAction {
             AppdefEntityID entId = 
                 new AppdefEntityID(defInfo.getAppdefType(),
                                    defInfo.getAppdefId());
-            AppdefEntityValue ent = new AppdefEntityValue(entId, meVal);
+            AppdefEntityValue ent = new AppdefEntityValue(entId, me);
                 
             sj.put(Escalation.JSON_NAME, s.getEscalation().toJSON());
             sj.put("alertId", alert.getId());
