@@ -262,7 +262,7 @@ public abstract class BizappSessionEJB {
      * use with discretion.
      */
     protected AuthzSubjectValue getOverlord() {
-        return getAuthzSubjectManager().getOverlord();
+        return getAuthzSubjectManager().findOverlord();
     }
 
     public void setSessionContext(SessionContext aCtx) throws RemoteException {
