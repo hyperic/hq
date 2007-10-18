@@ -244,13 +244,9 @@ public class ConfigManagerEJBImpl
 
         if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
             server = getServerStuffForService(id.getId());
-            serverId = new AppdefEntityID(AppdefEntityConstants.
-                                          APPDEF_TYPE_SERVER,
-                                          new Integer(server.id));
+            serverId = AppdefEntityID.newServerID(server.id);
             platform = getPlatformStuffForServer(serverId.getId());
-            platformId = new AppdefEntityID(AppdefEntityConstants.
-                                            APPDEF_TYPE_PLATFORM,
-                                            new Integer(platform.id));
+            platformId = AppdefEntityID.newPlatformID(platform.id);
             serviceId = id;
             
             origReq = required;
@@ -258,9 +254,7 @@ public class ConfigManagerEJBImpl
             isServerOrService = true;
         } else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             platform = getPlatformStuffForServer(id.getId());
-            platformId = new AppdefEntityID(AppdefEntityConstants.
-                                            APPDEF_TYPE_PLATFORM,
-                                            new Integer(platform.id));
+            platformId = AppdefEntityID.newPlatformID(platform.id);
             serverId = id;
             server = getServerStuffForServer(serverId.getId());
             isServerOrService = true;
