@@ -48,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -56,6 +55,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -1365,8 +1365,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      * @ejb:transaction type="Supports"
      */
-    public ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubjectValue
-        subject, AppdefEntityID[] parents, Integer resType)
+    public ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubject subject,
+                                                     AppdefEntityID[] parents,
+                                                     Integer resType)
         throws AppdefEntityNotFoundException, PermissionException {
         try {
             // platform auto-groups do not have parent resource types
@@ -1397,8 +1398,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubjectValue
-        subject, AppdefEntityID[] parents, AppdefResourceType artVo)
+    private ResourceTreeNode[] getNavMapDataForAutoGroup (AuthzSubject subject,
+                                                      AppdefEntityID[] parents,
+                                                      AppdefResourceType artVo)
         throws AppdefEntityNotFoundException, PermissionException, 
                SQLException {
         ResourceTreeNode[] retVal;
@@ -1432,13 +1434,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 for (int x=0;x<parents.length;x++) {
                     AppdefEntityValue av = 
                         new AppdefEntityValue(parents[x],subject);
-                    AppdefResourceValue arv = av.getResourceValue();
-                    parentNodes.add(new ResourceTreeNode (
-                        arv.getName(),
-                        getAppdefTypeLabel(pEntityType,
-                            arv.getAppdefResourceTypeValue().getName()),
-                        arv.getEntityId(),
-                        ResourceTreeNode.RESOURCE));
+                    parentNodes.add(
+                        new ResourceTreeNode(
+                            av.getName(),
+                            getAppdefTypeLabel(pEntityType, av.getTypeName()),
+                            parents[x],
+                            ResourceTreeNode.RESOURCE));
                 }
             }
 
