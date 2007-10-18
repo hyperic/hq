@@ -164,9 +164,8 @@ public class AddServiceDependenciesAction extends BaseAction {
             
             if (node.isCluster())
                 lookFor =
-                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                       node.getAppService()
-                                           .getServiceCluster().getGroupId());
+                    AppdefEntityID.newGroupID(node.getAppService()
+                        .getServiceCluster().getGroupId().intValue());
             else
                 lookFor = node.getAppService().getService().getEntityId();
             if (pendingServiceIdList.contains(lookFor) && 
