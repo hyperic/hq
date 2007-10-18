@@ -30,6 +30,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -48,7 +49,7 @@ public class ConfigValidatorImpl
     extends BizappSessionEJB
     implements ConfigValidator {
 
-    public void validate(AuthzSubjectValue subject, String type,
+    public void validate(AuthzSubject subject, String type,
                          AppdefEntityID[] ids)
         throws PermissionException, EncodingException, ConfigFetchException,
                AppdefEntityNotFoundException, InvalidConfigException
@@ -60,7 +61,7 @@ public class ConfigValidatorImpl
 
         if(type.equals(ProductPlugin.TYPE_PRODUCT) ||
            type.equals(ProductPlugin.TYPE_CONTROL)) {
-            updateControlConfigs(subject, ids);
+            updateControlConfigs(subject.getAuthzSubjectValue(), ids);
         }
     }
 
@@ -68,7 +69,7 @@ public class ConfigValidatorImpl
      * Tell the measurement subsystem that we have updated configuration
      * for a number of entities.
      */
-    private void updateMeasurementConfigs(AuthzSubjectValue subject,
+    private void updateMeasurementConfigs(AuthzSubject subject,
                                           AppdefEntityID[] ids)
         throws EncodingException, PermissionException,
                AppdefEntityNotFoundException, InvalidConfigException
@@ -83,14 +84,15 @@ public class ConfigValidatorImpl
         cman      = getConfigManager();
         responses = new ConfigResponse[ids.length];
 
+        AuthzSubjectValue subj = subject.getAuthzSubjectValue();
         for(int i=0; i<ids.length; i++){
             try {
                 responses[i] =
-                    cman.getMergedConfigResponse(subject,
+                    cman.getMergedConfigResponse(subj,
                                                  ProductPlugin.TYPE_MEASUREMENT,
                                                  ids[i], true);
                 
-                rmMan.checkConfiguration(subject, ids[i], responses[i]);
+                rmMan.checkConfiguration(subj, ids[i], responses[i]);
             } catch(ConfigFetchException exc){
                 responses[i] = null;
             } 
@@ -116,7 +118,7 @@ public class ConfigValidatorImpl
             // Metric configuration has been validated, check if we need
             // to enable or disable log and config tracking.
             try {
-                trackerMan.toggleTrackers(subject, ids[i], responses[i]);
+                trackerMan.toggleTrackers(subj, ids[i], responses[i]);
             } catch (PluginException e) {
                 throw new InvalidConfigException("Unable to modify config " +
                                                  "track config: " +

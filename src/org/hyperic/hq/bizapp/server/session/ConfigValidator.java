@@ -29,14 +29,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.util.config.EncodingException;
 
 public interface ConfigValidator {
 
-    public void validate(AuthzSubjectValue subject,
-                         String type,
+    public void validate(AuthzSubject subject, String type,
                          AppdefEntityID[] ids)
         throws PermissionException, EncodingException, ConfigFetchException,
                AppdefEntityNotFoundException, InvalidConfigException; 
