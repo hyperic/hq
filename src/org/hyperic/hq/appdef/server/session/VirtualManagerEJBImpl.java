@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -131,7 +132,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
      * @return list of virtual resource values
      * @ejb:interface-method
      */
-    public List findVirtualResourcesByPhysical(AuthzSubjectValue subject,
+    public List findVirtualResourcesByPhysical(AuthzSubject subject,
                                                AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException {
         Collection appResources;

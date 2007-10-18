@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -655,9 +655,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             else if (o instanceof ServiceCluster) {
                 ServiceCluster aCluster = (ServiceCluster)o;
-                AppdefEntityID clusterId = 
-                    new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                       aCluster.getGroup().getId());
+                AppdefEntityID clusterId = AppdefEntityID
+                    .newGroupID(aCluster.getGroup().getId().intValue());
                 if (viewableEntityIds != null &&
                     viewableEntityIds.contains(clusterId)) {
                     retVal.add(o);
@@ -1108,13 +1107,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      *         that the given subject is allowed to view.
      */
     public Integer[] getFlattenedServiceIdsByApplication(
-        AuthzSubjectValue subject, Integer appId) 
+        AuthzSubject subject, Integer appId) 
         throws ServiceNotFoundException, PermissionException,
                ApplicationNotFoundException {
 
         List serviceInventory = 
-            getUnflattenedServiceInventoryByApplication(subject, appId,
-                                                        PageControl.PAGE_ALL);
+            getUnflattenedServiceInventoryByApplication(
+                subject.getAuthzSubjectValue(), appId, PageControl.PAGE_ALL);
         
         List servicePKs = new ArrayList();
         // flattening: open up all of the groups (if any) and get their services as well
@@ -1131,9 +1130,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // a cluster is bound to it
                     ServiceCluster cluster = (ServiceCluster) o;
                     AppdefEntityID groupId = 
-                        new AppdefEntityID(
-                            AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                            cluster.getGroup().getId());
+                        AppdefEntityID.newGroupID(
+                            cluster.getGroup().getId().intValue());
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
                     try {
