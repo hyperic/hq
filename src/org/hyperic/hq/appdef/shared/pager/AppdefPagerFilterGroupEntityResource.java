@@ -32,7 +32,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 
@@ -77,14 +76,12 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     private int _groupType;
     private int _entityType;
     private int _resourceType;
-    private AuthzSubjectValue subject;
-    private boolean exclusive;
+    private AuthzSubjectValue _subject;
+    private boolean _exclusive;
     private static final int UNDEFINED = -1;
-    private int filterCount;
+    private int _filterCount;
     private boolean groupSelected = false;
 
-    private static final int APPLICATION =
-        AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
     private static final int GROUP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP;
     private static final int GROUP_ADHOC_APP =
@@ -111,15 +108,15 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     }
 
     public AuthzSubjectValue getSubject() {
-        return subject;
+        return _subject;
     }
 
     public int getFilterCount() {
-        return filterCount;
+        return _filterCount;
     }
 
     public boolean isExclusive() {
-        return exclusive;
+        return _exclusive;
     }
 
     public void setGroupSelected(boolean b) {
@@ -129,12 +126,12 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     public AppdefPagerFilterGroupEntityResource(AuthzSubjectValue subject,
                                                 int gt, int et, int rt,
                                                 boolean negate) {
-        this.subject = subject;
+        _subject = subject;
         _groupType = gt;
         _entityType = et;
         _resourceType = rt;
-        this.exclusive = (!negate);
-        filterCount = 0;
+        _exclusive = (!negate);
+        _filterCount = 0;
     }
 
     /**
@@ -148,7 +145,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
 
         if (!(o instanceof AppdefEntityID)) {
             throw new IllegalArgumentException("Expecting instance of " +
-                "AppdefEntityID");
+                                               "AppdefEntityID");
         }
         
         entity = (AppdefEntityID) o;
@@ -159,46 +156,41 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
 
         try {
             boolean caught = isCompatible(entity);
-            if (exclusive == caught) {
-                filterCount++;
+            if (_exclusive == caught) {
+                _filterCount++;
             }
-            return exclusive == caught;
+            return _exclusive == caught;
 
         } catch (Exception e) {
             // In a paging context, we swallow all exceptions.
-            return exclusive == false;
+            return _exclusive == false;
         }
     }
 
     private boolean isCompatible(AppdefEntityID entity)
         throws PermissionException, AppdefEntityNotFoundException {
-        AppdefResourceValue arv;
-        AppdefEntityValue aev = new AppdefEntityValue(entity, subject);
+        AppdefEntityValue aev = new AppdefEntityValue(entity, _subject);
 
         switch (_groupType) {
         case GROUP_ADHOC_APP:
         case GROUP_ADHOC_GRP:
         case GROUP_ADHOC_PSS:
-            arv = aev.getLiteResourceValue();
-            return isGroupAdhoc((AppdefGroupValue) arv);
+            return isGroupAdhoc(aev);
         case GROUP_COMPAT_PS:
             if (groupSelected)
                 return isResourceCompatible(entity);
             else {
-                arv = aev.getLiteResourceValue();
-                return isGroupResourceCompatible(arv);
+                return isGroupResourceCompatible(aev);
             }
         case GROUP_COMPAT_SVC:
             if (groupSelected)
                 return isResourceCompatible(entity);
             else {
-                arv = aev.getLiteResourceValue();
-                return isGroupResourceCompatible(arv);
+                return isGroupResourceCompatible(aev);
             }
         case UNDEFINED:
             if (_resourceType == UNDEFINED) {
-                arv = aev.getLiteResourceValue();
-                return isEntityCompatible(arv);
+                return isEntityCompatible(aev);
             } else {
                 return isResourceCompatible(entity);
             }
@@ -215,7 +207,9 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // ADHOC_APP      -1           -1             Applications
     // ADHOC_APP      APP          -1             Applications
     // ADHOC_APP      GROUP        -1             Applications
-    private boolean isGroupAdhoc(AppdefGroupValue vo) {
+    private boolean isGroupAdhoc(AppdefEntityValue aev)
+        throws AppdefGroupNotFoundException, PermissionException {
+        AppdefGroupValue vo = aev.getAppdefGroupValue();
         if (!vo.isGroupAdhoc())
             return false;
         
@@ -241,7 +235,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
                 return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 AppdefGroupValue group =
-                    AppdefGroupManagerEJBImpl.getOne().findGroup(subject, id);
+                    AppdefGroupManagerEJBImpl.getOne().findGroup(_subject, id);
                 return _resourceType == group.getGroupEntResType();
             default:
                 return false;
@@ -257,22 +251,24 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // COMPAT_SVC     <type>       <type>         All <type> of <type>
     // COMPAT_PS      GROUP        -1             All compatible (ps) groups
     // COMPAT_SVC     GROUP        -1             All compatible (svc) groups
-    private boolean isGroupResourceCompatible(AppdefResourceValue vo) {
-        if (vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
-            if (groupVo.isGroupCompat()) {
-                if (_entityType == GROUP) {
-                    if (_resourceType != UNDEFINED)
-                        return _resourceType == groupVo.getGroupEntResType();
-                    else
-                        return true;
+    private boolean isGroupResourceCompatible(AppdefEntityValue aev)
+        throws AppdefGroupNotFoundException, PermissionException {
+        if (!aev.getID().isGroup())
+            return false;
+        
+        AppdefGroupValue groupVo = aev.getAppdefGroupValue();
+        if (groupVo.isGroupCompat()) {
+            if (_entityType == GROUP) {
+                if (_resourceType != UNDEFINED)
+                    return _resourceType == groupVo.getGroupEntResType();
+                else
+                    return true;
+            } else {
+                if (_resourceType == UNDEFINED) {
+                    return groupVo.isGroupCompat();
                 } else {
-                    if (_resourceType == UNDEFINED) {
-                        return groupVo.isGroupCompat();
-                    } else {
-                        return (_entityType == groupVo.getGroupEntType() &&
+                    return (_entityType == groupVo.getGroupEntType() &&
                             _resourceType == groupVo.getGroupEntResType());
-                    }
                 }
             }
         }
@@ -287,16 +283,17 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
     // -1             GROUP        -1             All mixed groups
     // -1             GROUP        COMPAT_SVC     All service clusters
     // -1             <type>       -1             All of entity <type>
-    private boolean isEntityCompatible(AppdefResourceValue vo) {
+    private boolean isEntityCompatible(AppdefEntityValue vo)
+        throws AppdefGroupNotFoundException, PermissionException {
         if (_entityType == GROUP && _resourceType == UNDEFINED &&
-            vo.getEntityId().getType() == GROUP) {
-            AppdefGroupValue groupVo = (AppdefGroupValue) vo;
+            vo.getID().isGroup()) {
+            AppdefGroupValue groupVo = vo.getAppdefGroupValue();
             if (groupVo.isGroupAdhoc()) {
                 return true;
             }
             return false;
         }
-        if (_entityType == vo.getEntityId().getType()) {
+        if (_entityType == vo.getID().getType()) {
             return true;
         }
         return false;
