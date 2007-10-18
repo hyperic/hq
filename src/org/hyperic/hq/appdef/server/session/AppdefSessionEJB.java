@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -586,7 +586,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < platIds.size(); i++) {
                 Integer id = (Integer)platIds.get(i);
-                entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id));                                                                           
+                entityIds.add(AppdefEntityID.newPlatformID(id.intValue()));                                                             
             }
             // servers
             List serverIds = 
@@ -596,7 +596,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < serverIds.size(); i++) {
                 Integer id = (Integer)serverIds.get(i);
-                entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, id));                                                                           
+                entityIds.add(AppdefEntityID.newServerID(id.intValue()));                                                                           
             }
             // services
             List serviceIds =
@@ -606,7 +606,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for(int i = 0; i < serviceIds.size(); i++) {
                 Integer id = (Integer)serviceIds.get(i);
-                entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
+                entityIds.add(AppdefEntityID.newServiceID(id.intValue()));
             }
             
             // Groups
@@ -617,7 +617,7 @@ public abstract class AppdefSessionEJB
                                                PageControl.PAGE_ALL);
             for (int i=0; i<groupids.size(); i++) {
                 Integer id = (Integer)groupids.get(i);
-                entityIds.add(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id));
+                entityIds.add(AppdefEntityID.newGroupID(id.intValue()));
             }
         } catch (Exception e) {
             throw new SystemException(e);
@@ -638,8 +638,7 @@ public abstract class AppdefSessionEJB
      * @exception SystemException If the group is empty or is not a group
      * of platforms.
      */
-    public void checkAIScanPermission (AuthzSubjectValue subject,
-                                       AppdefEntityID id)
+    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, GroupNotCompatibleException {
 
         int type = id.getType();
@@ -648,10 +647,11 @@ public abstract class AppdefSessionEJB
         // permission on the platform in question (or, if it's a group, the
         // subject must have modify platform permissions on all platforms
         // in the group), AND the global "add server" permission.
-        if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            checkAIScanPermissionForPlatform(subject, id);
+        if (id.isPlatform()) {
+            checkAIScanPermissionForPlatform(subject.getAuthzSubjectValue(),
+                                             id);
 
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+        } else if (id.isGroup()) {
 
             // Check permissions for EVERY platform in the group
             List groupMembers;
@@ -667,9 +667,10 @@ public abstract class AppdefSessionEJB
                                           "scan on an empty group");
             }
 
+            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID platformEntityID = (AppdefEntityID) i.next();
-                checkAIScanPermissionForPlatform(subject, platformEntityID);
+                checkAIScanPermissionForPlatform(subj, platformEntityID);
             }
         } else {
             throw new SystemException("Autoinventory scans may only be " +
@@ -1003,8 +1004,7 @@ public abstract class AppdefSessionEJB
         List idList = getViewableServices(whoami);
         for (int i=0;i<idList.size();i++) {
             Integer pk = (Integer) idList.get(i);
-            idList.set(i,new AppdefEntityID(AppdefEntityConstants
-                .APPDEF_TYPE_SERVICE,pk ));
+            idList.set(i, AppdefEntityID.newServiceID(pk.intValue()));
         }
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List viewableGroups = 
@@ -1014,8 +1014,7 @@ public abstract class AppdefSessionEJB
                                            PageControl.PAGE_ALL);
         for (int i=0;i<viewableGroups.size();i++) {
             Integer gid = (Integer) viewableGroups.get(i);
-            viewableGroups.set(i, new AppdefEntityID(AppdefEntityConstants
-                .APPDEF_TYPE_GROUP, gid));
+            viewableGroups.set(i, AppdefEntityID.newGroupID(gid.intValue()));
         }
         idList.addAll(viewableGroups);
         return idList;
