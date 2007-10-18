@@ -27,87 +27,97 @@ package org.hyperic.hq.appdef.shared.pager;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
-/** Pager Processor filter that filters object instances of
-*   AppdefEntityID based on whether or not the service it represents
-*   is an internal service.
-*/
+/**
+ * Pager Processor filter that filters object instances of AppdefEntityID based
+ * on whether or not the service it represents is an internal service.
+ */
 public class AppdefPagerFilterInternalService implements AppdefPagerFilter {
 
+    private AuthzSubjectValue _subject;
+    private boolean _exclusive;
+    private Map _fetchedEntityCache;
+    private int _filterCount;
 
-    private AuthzSubjectValue subject;
-    private boolean exclusive;
-    private Map fetchedEntityCache;
-    private int filterCount;
-
-    public AuthzSubjectValue getSubject() { return subject; }
-    public int getFilterCount () { return filterCount; }
-    public boolean isExclusive () { return exclusive; }
-
-    public AppdefPagerFilterInternalService ( AuthzSubjectValue subject) {
-        this.subject      = subject;
-        this.exclusive    = true;
-        fetchedEntityCache = new HashMap();
-        filterCount       = 0;
+    public AuthzSubjectValue getSubject() {
+        return _subject;
     }
 
-    public AppdefPagerFilterInternalService ( AuthzSubjectValue subject,
-        boolean negate ) {
-        this.subject      = subject;
-        this.exclusive    = (! negate);
-        fetchedEntityCache = new HashMap();
-        filterCount       = 0;
+    public int getFilterCount() {
+        return _filterCount;
     }
 
-   /** Evaluate an object against the filter.
-    * @param o - object instance of AppdefEntityID
-    * @return flag - true if caught (unless negated)  */
-    public boolean isCaught ( Object o ) {
-      AppdefResourceValue arv;
-      AppdefEntityID entity;
-
-      if (!(o instanceof AppdefEntityID)) {
-          throw new IllegalArgumentException("Expecting instance of "+
-                                             "AppdefEntityID");
-      }
-
-      try {
-          entity = (AppdefEntityID) o;
-          arv = fetchEntityById(entity);
-          fetchedEntityCache.put(entity,arv);
-
-          boolean caught = isInternal(arv);
-          if (exclusive == caught) {
-              filterCount++;
-          }
-          return exclusive == caught;
-
-      } catch (Exception e) {
-          // In a paging context, we swallow all exceptions.
-          return exclusive == false;
-      }
+    public boolean isExclusive() {
+        return _exclusive;
     }
 
-    private boolean isInternal ( AppdefResourceValue vo ) {
-        Object o = vo.getAppdefResourceTypeValue();
-        if (o instanceof ServiceTypeValue) {
-            if ( ((ServiceTypeValue)o).getIsInternal() ) {
-                return true;
-            }
+    public AppdefPagerFilterInternalService(AuthzSubjectValue subject) {
+        _subject = subject;
+        _exclusive = true;
+        _fetchedEntityCache = new HashMap();
+        _filterCount = 0;
+    }
+
+    public AppdefPagerFilterInternalService(AuthzSubjectValue subject,
+                                            boolean negate) {
+        _subject = subject;
+        _exclusive = (!negate);
+        _fetchedEntityCache = new HashMap();
+        _filterCount = 0;
+    }
+
+    /**
+     * Evaluate an object against the filter.
+     * 
+     * @param o - object instance of AppdefEntityID
+     * @return flag - true if caught (unless negated)
+     */
+    public boolean isCaught(Object o) {
+        AppdefResource arv;
+        AppdefEntityID entity;
+
+        if (!(o instanceof AppdefEntityID)) {
+            throw new IllegalArgumentException("Expecting instance of "
+                    + "AppdefEntityID");
         }
-        return false;
+
+        try {
+            entity = (AppdefEntityID) o;
+
+            if (!entity.isService())
+                return _exclusive == false;
+
+            arv = fetchEntityById(entity);
+            _fetchedEntityCache.put(entity, arv);
+
+            boolean caught = isInternal(arv);
+            if (_exclusive == caught) {
+                _filterCount++;
+            }
+            return _exclusive == caught;
+
+        } catch (Exception e) {
+            // In a paging context, we swallow all exceptions.
+            return _exclusive == false;
+        }
+    }
+
+    private boolean isInternal(AppdefResource vo) {
+        ServiceType type = (ServiceType) vo.getAppdefResourceType();
+        return type.isIsInternal();
     }
 
     // DB fetch the resource value
-    private AppdefResourceValue fetchEntityById (AppdefEntityID id)
+    private AppdefResource fetchEntityById(AppdefEntityID id)
         throws Exception {
-        AppdefEntityValue aev = new AppdefEntityValue (id,this.subject);
-        return aev.getResourceValue();
+        AppdefEntityValue aev = new AppdefEntityValue(id, _subject);
+        return aev.getResourcePOJO();
     }
 
 }
