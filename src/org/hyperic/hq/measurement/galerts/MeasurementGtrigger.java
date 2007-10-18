@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -255,7 +255,7 @@ public class MeasurementGtrigger
 
             Integer[] iids = new Integer[instanceIds.size()];
             instanceIds.toArray(iids);
-            Integer[] mIds = dMan.findMeasurementIds(sMan.getOverlord(), 
+            Integer[] mIds = dMan.findMeasurementIds(sMan.getOverlordPojo(), 
                                                      new Integer(_templateId), 
                                                      iids);
                                     
