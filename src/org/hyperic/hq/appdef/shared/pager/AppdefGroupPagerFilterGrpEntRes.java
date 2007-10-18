@@ -62,12 +62,8 @@ public class AppdefGroupPagerFilterGrpEntRes implements AppdefPagerFilter {
         AppdefEntityConstants.APPDEF_TYPE_SERVICE;
     private static final int APPLICATION = 
         AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-    private static final int GROUP = 
-        AppdefEntityConstants.APPDEF_TYPE_GROUP;
     private static final int GROUP_ADHOC_APP = 
         AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
-    private static final int GROUP_ADHOC_GRP = 
-        AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP;
     private static final int GROUP_ADHOC_PSS = 
         AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
     private static final int GROUP_COMPAT_PS = 
