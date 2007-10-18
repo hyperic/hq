@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,6 +56,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -354,14 +355,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubjectValue subject, 
-                                   AppdefEntityID id, Integer[] templates,
-                                   long[] intervals, ConfigResponse props)
+    public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                   Integer[] templates, long[] intervals,
+                                   ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
                TemplateNotFoundException
     {
         // Authz check
-        super.checkModifyPermission(subject, id);        
+        super.checkModifyPermission(subject.getId(), id);        
 
         // Call back into ourselves to force a new transation to be created.
         List dmList = getDMManager().createMeasurements(id, templates,
@@ -380,7 +381,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubjectValue subject, 
+    public List createMeasurements(AuthzSubject subject, 
                                    AppdefEntityID id, Integer[] templates,
                                    ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
@@ -408,7 +409,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a List of the associated DerivedMeasurementValue objects
      * @ejb:interface-method
      */
-    public List createDefaultMeasurements(AuthzSubjectValue subject,
+    public List createDefaultMeasurements(AuthzSubject subject,
                                           AppdefEntityID id,
                                           String mtype,
                                           ConfigResponse props)
@@ -452,7 +453,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return an associated DerivedMeasurement object
      * @ejb:interface-method
      */
-    public DerivedMeasurement createMeasurement(AuthzSubjectValue subject,
+    public DerivedMeasurement createMeasurement(AuthzSubject subject,
                                                 Integer template,
                                                 AppdefEntityID id,
                                                 long interval,
@@ -461,7 +462,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                TemplateNotFoundException
     {
         // Authz check
-        super.checkModifyPermission(subject, id);
+        super.checkModifyPermission(subject.getId(), id);
 
         List dmvs = createMeasurements(subject, id,
                                        new Integer[] { template },
@@ -475,7 +476,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * Update the derived measurements of a resource
      * @ejb:interface-method
      */
-    public void updateMeasurements(AuthzSubjectValue subject,
+    public void updateMeasurements(AuthzSubject subject,
                                    AppdefEntityID id, ConfigResponse props)
         throws PermissionException, MeasurementCreateException
     {
@@ -749,7 +750,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a DerivedMeasurement value
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
+    public DerivedMeasurementValue findMeasurement(AuthzSubject subject,
                                                    Integer tid, Integer iid)
         throws MeasurementNotFoundException {
         DerivedMeasurement dm = findMeasurement(tid, iid);
@@ -782,8 +783,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    boolean allowStale)
         throws MeasurementNotFoundException {
         
-        DerivedMeasurement dm =
-            getDerivedMeasurementDAO().findByTemplateForInstance(tid, iid, allowStale);
+        DerivedMeasurement dm = getDerivedMeasurementDAO()
+            .findByTemplateForInstance(tid, iid, allowStale);
             
         if (dm == null) {
             throw new MeasurementNotFoundException("No measurement found " +
@@ -800,7 +801,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public List findMeasurements(AuthzSubjectValue subject, Integer tid,
+    public List findMeasurements(AuthzSubject subject, Integer tid,
                                  Integer[] ids) {
         ArrayList results = new ArrayList();
         for (int i = 0; i < ids.length; i++) {
@@ -819,7 +820,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public Integer[] findMeasurementIds(AuthzSubjectValue subject, Integer tid,
+    public Integer[] findMeasurementIds(AuthzSubject subject, Integer tid,
                                         Integer[] ids) {
         List results =
             getDerivedMeasurementDAO().findIdsByTemplateForInstances(tid, ids); 
@@ -864,7 +865,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public PageList findMeasurements(AuthzSubjectValue subject,
+    public PageList findMeasurements(AuthzSubject subject,
                                      AppdefEntityID id, String cat,
                                      PageControl pc) {
         List mcol;
@@ -927,9 +928,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public List findDesignatedMeasurements(AuthzSubjectValue subject,
-                                           AppdefEntityID id,
-                                           String cat) {
+    public List findDesignatedMeasurements(AuthzSubject subject,
+                                           AppdefEntityID id, String cat) {
         return getDerivedMeasurementDAO()
             .findDesignatedByInstanceForCategory(id.getType(), id.getID(), cat);
     }
@@ -939,8 +939,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
      */
-    public DerivedMeasurement getAvailabilityMeasurement(AuthzSubjectValue
-                                                         subject,
+    public DerivedMeasurement getAvailabilityMeasurement(AuthzSubject subject,
                                                          AppdefEntityID id)
         throws MeasurementNotFoundException
     {
@@ -953,8 +952,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "found for " + id);
         }
 
-        DerivedMeasurement dm = (DerivedMeasurement) mlocals.get(0);
-        return dm;
+        return (DerivedMeasurement) mlocals.get(0);
     }
 
     /**
@@ -973,7 +971,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a list of DerivedMeasurement value
      * @ejb:interface-method
      */
-    public Map findDesignatedMeasurementIds(AuthzSubjectValue subject,
+    public Map findDesignatedMeasurementIds(AuthzSubject subject,
                                             AppdefEntityID[] ids, String cat)
         throws MeasurementNotFoundException {
 
@@ -1031,9 +1029,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public Map findMetricIntervals(AuthzSubjectValue subject,
-                                   AppdefEntityID[] aeids, Integer[] tids) 
-    {
+    public Map findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids,
+                                   Integer[] tids) {
         final Long disabled = new Long(-1);
         DerivedMeasurementDAO ddao = getDerivedMeasurementDAO();
         Map intervals = new HashMap(tids.length);
@@ -1043,7 +1040,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             it.hasNext(); )
         {
             Map.Entry entry = (Map.Entry) it.next();
-            AppdefEntityID id = (AppdefEntityID) entry.getKey();
             List metrics = (List)entry.getValue();
             for (Iterator i = metrics.iterator(); i.hasNext();)
             {
@@ -1106,8 +1102,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void enableMeasurements(AuthzSubjectValue subject,
-                                   Integer[] mids, long interval)
+    public void enableMeasurements(AuthzSubject subject, Integer[] mids,
+                                   long interval)
         throws MeasurementNotFoundException, MeasurementCreateException,
                PermissionException {
 
@@ -1132,7 +1128,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 tids = (HashSet)resMap.get(id);
             } else {
                 // Authz check
-                super.checkModifyPermission(subject, id);        
+                super.checkModifyPermission(subject.getId(), id);        
                 tids = new HashSet();
                 resMap.put(id, tids);
             }
@@ -1164,9 +1160,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void enableMeasurements(AuthzSubjectValue subject,
-                                   AppdefEntityID[] aeids, Integer[] mtids,
-                                   long interval)
+    public void enableMeasurements(AuthzSubject subject, AppdefEntityID[] aeids,
+                                   Integer[] mtids, long interval)
         throws MeasurementNotFoundException, MeasurementCreateException,
                TemplateNotFoundException, PermissionException {
         
@@ -1185,11 +1180,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void disableMeasurements(AuthzSubjectValue subject,
-                                    AppdefEntityID id)
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
         // Authz check
-        checkModifyPermission(subject, id);        
+        checkModifyPermission(subject.getId(), id);        
 
         List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
                                                               id.getID());
@@ -1198,7 +1192,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         for (int i = 0; it.hasNext(); i++) {
             DerivedMeasurement dm = (DerivedMeasurement)it.next();
             try {
-                // Call back into ourselves to force a new transation to be
+                // Call back into ourselves to force a new transaction to be
                 // created.
                 getDMManager().enableMeasurement(dm, false);
             } catch (MeasurementNotFoundException e) {
@@ -1218,7 +1212,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void disableMeasurements(AuthzSubjectValue subject, Integer[] mids)
+    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
         throws PermissionException, MeasurementNotFoundException {
         AppdefEntityID aid = null;
         for (int i = 0; i < mids.length; i++) {
@@ -1234,9 +1228,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             // Check removal permission
             if (aid == null) {
                 aid = getAppdefEntityId(m);
-                checkModifyPermission(subject, aid);
+                checkModifyPermission(subject.getId(), aid);
             }
-            // Call back into ourselves to force a new transation to be
+            // Call back into ourselves to force a new transaction to be
             // created.
             getDMManager().enableMeasurement(m, false);
         }
@@ -1251,11 +1245,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void disableMeasurements(AuthzSubjectValue subject,
-                                    AppdefEntityID id, Integer[] tids)
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                    Integer[] tids)
         throws PermissionException {
         // Authz check
-        checkModifyPermission(subject, id);        
+        checkModifyPermission(subject.getId(), id);        
 
         List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
                                                               id.getID());
@@ -1288,13 +1282,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     
-    private static String getMonitorableType(AuthzSubjectValue subject,
+    private static String getMonitorableType(AuthzSubject subject,
                                              AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException 
     {
         if (id.isPlatform() || id.isServer() | id.isService()) {
             AppdefEntityValue av = new AppdefEntityValue(id, subject);
-
             return av.getMonitorableType();
         } 
         return null;
@@ -1302,11 +1295,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Enable the default metrics for a resource.  This should only
-     * be called by the {@link MeasurementEnabler}.  If you want the behaviour
+     * be called by the {@link MeasurementEnabler}.  If you want the behavior
      * of this method, use the {@link MeasurementEnabler} 
      * @ejb:interface-method
      */
-    public void enableDefaultMetrics(AuthzSubjectValue subject, 
+    public void enableDefaultMetrics(AuthzSubject subj, 
                                      AppdefEntityID id) 
         throws AppdefEntityNotFoundException, PermissionException 
     {
@@ -1316,8 +1309,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         ConfigResponse config;
         String mtype;
 
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         try {
-            mtype = getMonitorableType(subject, id);
+            mtype = getMonitorableType(subj, id);
             // No monitorable type
             if (mtype == null) {
                 return;
@@ -1352,7 +1346,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         // Enable the metrics
         try {
-            createDefaultMeasurements(subject, id, mtype, config);
+            createDefaultMeasurements(subj, id, mtype, config);
             cfgMan.clearValidationError(subject, id);
 
             // Execute the callback so other people can do things when the

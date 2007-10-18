@@ -48,7 +48,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -290,20 +289,19 @@ public abstract class SessionEJB {
         }
     }
 
-    private void checkPermission(AuthzSubjectValue subject,
+    private void checkPermission(Integer subjectId,
                                  AppdefEntityID id,
                                  String resType,
                                  String opName)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(subject.getId(), resType, id.getId(), opName);
+        pm.check(subjectId, resType, id.getId(), opName);
     }
     
     /**
      * Check for modify permission for a given resource
      */
-    protected void checkModifyPermission(AuthzSubjectValue subject,
-                                         AppdefEntityID id)
+    protected void checkModifyPermission(Integer subjectId, AppdefEntityID id)
         throws PermissionException {
         String resType = null;
         String opName = null;
@@ -326,13 +324,13 @@ public abstract class SessionEJB {
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         
-        checkPermission(subject, id, resType, opName);
+        checkPermission(subjectId, id, resType, opName);
     }
 
     /**
      * Check for modify permission for a given resource
      */
-    protected void checkDeletePermission(AuthzSubjectValue subject,
+    protected void checkDeletePermission(Integer subjectId,
                                          AppdefEntityID id)
         throws PermissionException {
         String resType = null;
@@ -356,7 +354,7 @@ public abstract class SessionEJB {
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
         
-        checkPermission(subject, id, resType, opName);
+        checkPermission(subjectId, id, resType, opName);
     }
     
     protected void checkTimeArguments(long begin, long end)
