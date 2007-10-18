@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,18 +29,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefCompatGrpComparator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -50,16 +46,16 @@ public class GroupUtil {
     /** Get the members of a compatible group. This method will 
      *  complain if the group is not a compatible group.
      */
-    public static List getCompatGroupMembers(AuthzSubjectValue subject,
+    public static List getCompatGroupMembers(AuthzSubject subject,
                                              AppdefEntityID entity, 
                                              int[] orderSpec) 
         throws AppdefEntityNotFoundException, PermissionException, 
                GroupNotCompatibleException {
         return GroupUtil.getCompatGroupMembers(subject,entity,orderSpec,null);
     }
-    public static List getCompatGroupMembers(AuthzSubjectValue subject,
-                                       AppdefEntityID entity,
-                                       int[] orderSpec, PageControl pc)
+    public static List getCompatGroupMembers(AuthzSubject subject,
+                                             AppdefEntityID entity,
+                                             int[] orderSpec, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                GroupNotCompatibleException {
         List retVal;
@@ -85,14 +81,14 @@ public class GroupUtil {
         return retVal;
     }
 
-    public static List getGroupMembers(AuthzSubjectValue subject,
+    public static List getGroupMembers(AuthzSubject subject,
                                        AppdefEntityID entity, 
                                        int[] orderSpec)
         throws AppdefEntityNotFoundException, PermissionException {
         return GroupUtil.getGroupMembers(subject,entity,orderSpec,null);
     }
     
-    public static PageList getGroupMembers(AuthzSubjectValue subject,
+    public static PageList getGroupMembers(AuthzSubject subject,
                                            AppdefEntityID entity,
                                            int[] orderSpec,
                                            PageControl pc)
@@ -101,7 +97,7 @@ public class GroupUtil {
         AppdefGroupValue agv;
         Comparator comparator;
 
-        agv = GroupUtil.getGroup(subject,entity,pc);
+        agv = GroupUtil.getGroup(subject, entity, pc);
 
         if (orderSpec != null) { 
             comparator = (Comparator) new AppdefCompatGrpComparator(orderSpec);
@@ -117,27 +113,17 @@ public class GroupUtil {
         return retVal;
     }
 
-    public static AppdefGroupValue getGroup (AuthzSubjectValue subject,
+    public static AppdefGroupValue getGroup (AuthzSubject subject,
                                              AppdefEntityID entity )
         throws AppdefEntityNotFoundException, PermissionException {
         return GroupUtil.getGroup(subject,entity,null);
     }
 
-    private static AppdefGroupValue getGroup (AuthzSubjectValue subject,
+    private static AppdefGroupValue getGroup (AuthzSubject subject,
                                               AppdefEntityID entity,
                                               PageControl pc )
         throws AppdefEntityNotFoundException, PermissionException {
-
-        AppdefGroupValue agv;
-        try {
-            AppdefGroupManagerLocal groupMgr =
-                AppdefGroupManagerUtil.getLocalHome().create();
-            agv = groupMgr.findGroup(subject, entity);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-        return agv;
+        AppdefGroupManagerLocal groupMgr = AppdefGroupManagerEJBImpl.getOne();
+        return groupMgr.findGroup(subject.getAuthzSubjectValue(), entity);
     }
 }
