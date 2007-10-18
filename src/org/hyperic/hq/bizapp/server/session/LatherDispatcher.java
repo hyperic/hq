@@ -48,15 +48,16 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
@@ -66,6 +67,7 @@ import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -113,7 +115,6 @@ import org.hyperic.lather.NullLatherValue;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.util.security.SecurityUtil;
 
 public class LatherDispatcher
@@ -543,10 +544,10 @@ public class LatherDispatcher
         MeasurementGetConfigs_result res;
         MeasurementConfigList cList;
         ResourceTree tree;
-        AuthzSubjectValue overlord;
+        AuthzSubject overlord;
         ArrayList ents;
 
-        overlord = getOverlord();
+        overlord = getAuthzSubjectManager().getOverlordPojo();
         try {
             tree = getAgentManager().getEntitiesForAgent(overlord,
                                                          args.getAgentToken());
@@ -562,19 +563,17 @@ public class LatherDispatcher
         ents = new ArrayList();
         for(Iterator p=tree.getPlatformIterator(); p.hasNext(); ){
             PlatformNode pNode = (PlatformNode)p.next();
-
             addMeasurementConfig(ents, pNode.getPlatform());
 
             try {
-                PageList services = getServiceManager().
-                    getPlatformServices(overlord, pNode.getPlatform().getId(),
-                                        PageControl.PAGE_ALL);
+                AppdefEntityValue aeval = new AppdefEntityValue(
+                    pNode.getPlatform().getEntityId(), overlord);
+                List services =
+                    aeval.getAssociatedServices(PageControl.PAGE_ALL);
                 for (int i = 0; i < services.size(); i++) {
-                    ServiceValue val = (ServiceValue)services.get(i);
+                    ServiceValue val = (ServiceValue) services.get(i);
 
-                    AppdefEntityID id =
-                        new AppdefEntityID(AppdefEntityConstants.
-                                           APPDEF_TYPE_SERVICE, val.getId());
+                    AppdefEntityID id = val.getEntityId();
                                            
                     addMeasurementConfig(ents, id,
                                          val.getServiceType().getName());
