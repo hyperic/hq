@@ -117,7 +117,7 @@
                 </c:choose>
                <span style="padding-left:10px;font-size:0.95em;">
                 <html:link action="/Logout">
-                    <span style="color:#333333;">[</span> <fmt:message key="admin.user.generalProperties.Logout"/>  <span style="color:#333333;">]</span></span>
+                    <span style="color:#333333;">[</span> <fmt:message key="admin.user.generalProperties.Logout"/>  <span style="color:#333333;">]</span>
                 </html:link></span>
                 <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                     <fmt:message key="common.label.Help"/>
