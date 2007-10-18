@@ -25,13 +25,14 @@
 
 package org.hyperic.hq.autoinventory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ArrayList;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 /**
  *
@@ -348,7 +349,17 @@ public class AIPlatform extends PlatformBase
         return (obj instanceof AIPlatform) && super.equals(obj);
     }
 
+    /**
+     * For compatibility
+     */
     public AppdefResourceType getAppdefResourceType() {
+        return null;
+    }
+
+    /**
+     * For compatibility
+     */
+   public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
 }

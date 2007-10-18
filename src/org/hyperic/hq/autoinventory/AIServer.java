@@ -28,6 +28,7 @@ package org.hyperic.hq.autoinventory;
 import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 public class AIServer extends ServerBase
 {
@@ -259,7 +260,17 @@ public class AIServer extends ServerBase
         return result;
     }
 
+    /**
+     * For compatibility
+     */
     public AppdefResourceType getAppdefResourceType() {
+        return null;
+    }
+
+    /**
+     * For compatibility
+     */
+   public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
 }
