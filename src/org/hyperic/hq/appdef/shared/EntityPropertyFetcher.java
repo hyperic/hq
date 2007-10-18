@@ -29,15 +29,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.shared.resourceTree.ServerNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ServiceNode;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * XXX -- it would be better if this routine returned an object which 
@@ -176,7 +175,7 @@ public class EntityPropertyFetcher {
     }
 
     public static Properties getProperties(PlatformValue p,
-                                           AuthzSubjectValue subject)
+                                           AuthzSubject subject)
     {
         Properties res = new Properties();
         PlatformTypeValue pt;
@@ -223,14 +222,13 @@ public class EntityPropertyFetcher {
         return res;
     }
 
-    public static Properties getProperties(ServerValue s, 
-                                           AuthzSubjectValue subject)
+    public static Properties getProperties(ServerValue s, AuthzSubject subject)
     {
         return getProperties(s, false, subject);
     }
 
     private static Properties getProperties(ServerValue s, boolean useNamed,
-                                            AuthzSubjectValue subject)
+                                            AuthzSubject subject)
     {
         ServerTypeValue st;
         Properties res = new Properties();
@@ -267,14 +265,13 @@ public class EntityPropertyFetcher {
         return res;
     }
 
-    public static Properties getProperties(ServiceValue v, 
-                                           AuthzSubjectValue subject)
+    public static Properties getProperties(ServiceValue v, AuthzSubject subject)
     {
         return getProperties(v, false, subject);
     }
 
     private static Properties getProperties(ServiceValue v, boolean useNamed,
-                                            AuthzSubjectValue subject)
+                                            AuthzSubject subject)
     {
         ServiceTypeValue vt;
         Properties res = new Properties();
@@ -318,7 +315,7 @@ public class EntityPropertyFetcher {
      *           be a platform, server, or service.
      */
     public static Properties getProperties(AppdefEntityID id,
-                                           AuthzSubjectValue subject)
+                                           AuthzSubject subject)
     {
         boolean isPlat, isServer, isService;
 
