@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServerBase;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -341,5 +342,9 @@ public class Server extends ServerBase
 
     public AppdefResourceType getAppdefResourceType() {
        return _serverType;
+    }
+
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getServerValue();
     }
 }

@@ -32,6 +32,7 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 
@@ -325,5 +326,9 @@ public class Service extends AppdefResource
 
     public AppdefResourceType getAppdefResourceType() {
         return _serviceType;
+    }
+
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getServiceValue();
     }
 }

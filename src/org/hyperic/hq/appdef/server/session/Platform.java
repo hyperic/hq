@@ -25,18 +25,19 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.ArrayList;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 
 public class Platform extends PlatformBase
 {
@@ -312,5 +313,9 @@ public class Platform extends PlatformBase
 
     public AppdefResourceType getAppdefResourceType() {
         return _platformType;
+    }
+
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getPlatformValue();
     }
 }

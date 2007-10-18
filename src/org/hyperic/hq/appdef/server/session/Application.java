@@ -26,6 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -210,5 +211,9 @@ public class Application extends AppdefResource
 
     public AppdefResourceType getAppdefResourceType() {
         return _applicationType;
+    }
+
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getApplicationValue();
     }
 }
