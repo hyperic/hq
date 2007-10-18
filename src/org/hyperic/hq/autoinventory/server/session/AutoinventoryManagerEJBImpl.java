@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -78,6 +78,7 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -383,7 +384,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan(AuthzSubjectValue subject,
+    public void startScan(AuthzSubject subject,
                           AppdefEntityID aid,
                           ScanConfigurationCore scanConfig,
                           String scanName, String scanDesc,
@@ -402,9 +403,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // For now, this works.
             authzChecker.checkAIScanPermission(subject, aid);
 
+            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
+            
             ConfigResponse config =
                 getConfigManagerLocalHome().create().
-                    getMergedConfigResponse(subject, 
+                    getMergedConfigResponse(subj, 
                                             ProductPlugin.TYPE_MEASUREMENT, 
                                             aid, false);
 
@@ -415,7 +418,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             scanConfig.setConfigResponse(config);
 
             // All scans go through the scheduler.
-            aiScheduleManager.doScheduledScan(subject,
+            aiScheduleManager.doScheduledScan(subj,
                                               aid,
                                               scanConfig,
                                               scanName,
@@ -441,7 +444,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public void startScan(AuthzSubjectValue subject,
+    public void startScan(AuthzSubject subject,
                           String agentToken,
                           ScanConfigurationCore scanConfig)
         throws AgentConnectionException, AgentNotFoundException,
@@ -462,14 +465,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         PlatformValue pValue;
         try {
             pValue = getAIQueueManagerLocal().getPlatformByAI
-                (subject, aipLocal.getId().intValue());
+                (subject.getAuthzSubjectValue(), aipLocal.getId().intValue());
 
             // It does exist.  Call the other startScan method so that 
             // authz checks will apply
-            startScan(
-                subject, new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, pValue.getId()),
-                scanConfig, null, null, null);
+            startScan(subject,
+                      AppdefEntityID.newPlatformID(pValue.getId().intValue()),
+                      scanConfig, null, null, null);
             return;
 
         } catch (PlatformNotFoundException e) {
