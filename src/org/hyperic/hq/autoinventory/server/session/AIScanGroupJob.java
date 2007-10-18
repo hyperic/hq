@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -55,12 +56,6 @@ import org.quartz.Trigger;
  */
 public class AIScanGroupJob extends AIJob {
 
-    // Default timeout is 10 minutes.  If a plugin does not define its
-    // own timeout, this is the value that will be used.
-    private static final int DEFAULT_TIMEOUT = 10 * 60 * 1000;
-
-    private AutoinventoryManagerLocal manager = null;
-
     protected Log log = 
         LogFactory.getLog(AIScanGroupJob.class.getName());    
 
@@ -73,7 +68,7 @@ public class AIScanGroupJob extends AIJob {
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
         AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
-        AuthzSubjectValue subject = getSubject(subjectId);
+        AuthzSubject subject = getSubject(subjectId);
         
         Boolean scheduled = new Boolean(dataMap.getString(PROP_SCHEDULED));
         
@@ -127,7 +122,7 @@ public class AIScanGroupJob extends AIJob {
                                     id,
                                     id.getId(),
                                     new Integer(42), // historyLocal.getId(),
-                                    subject,
+                                    subject.getAuthzSubjectValue(),
                                     dateScheduled, 
                                     scheduled,
                                     scanConfig,

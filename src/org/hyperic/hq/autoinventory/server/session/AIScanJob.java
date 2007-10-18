@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,20 +25,15 @@
 
 package org.hyperic.hq.autoinventory.server.session;
  
-import java.util.Date;
-
 import java.io.IOException;
-
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-
-import org.hyperic.hq.autoinventory.AutoinventoryException;
-import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.autoinventory.AutoinventoryException;
+import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -59,7 +54,7 @@ public class AIScanJob extends AIJob {
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
         AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
-        AuthzSubjectValue subject = null;
+        AuthzSubject subject = null;
         try {
             subject = getSubject(subjectId);
         } catch (JobExecutionException e) {
@@ -75,7 +70,7 @@ public class AIScanJob extends AIJob {
         
             String scanName = dataMap.getString(PROP_SCANNAME);
             String scanDesc = dataMap.getString(PROP_SCANDESC);
-            doAgentScan(id, null, null, null, subject, 
+            doAgentScan(id, null, null, null, subject.getAuthzSubjectValue(), 
                         dateScheduled, scheduled, 
                         scanConfig, scanName, scanDesc);
         } catch(IOException e) {
