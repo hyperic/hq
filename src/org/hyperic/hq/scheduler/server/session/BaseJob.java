@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,18 +28,15 @@ package org.hyperic.hq.scheduler.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.util.StringUtil;
 import org.quartz.Job;
-import org.quartz.JobExecutionException;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 public abstract class BaseJob implements Job {
 
@@ -54,23 +51,20 @@ public abstract class BaseJob implements Job {
 
     protected AuthzSubjectManagerLocal manager = null;
     
-    protected AuthzSubjectManagerLocal getSubjectManager()
-        throws CreateException, NamingException
-    {
+    protected AuthzSubjectManagerLocal getSubjectManager() {
         if (manager == null)
-            manager = AuthzSubjectManagerUtil.getLocalHome().create();
+            manager = AuthzSubjectManagerEJBImpl.getOne();
         return manager;
     }
     
     /**
      * @return the subject using the subject Id
      */
-    protected AuthzSubjectValue getSubject(Integer subjectId) 
+    protected AuthzSubject getSubject(Integer subjectId) 
         throws JobExecutionException
     {
         try {
-            return getSubjectManager()
-                .findSubjectById(subjectId).getAuthzSubjectValue(); 
+            return getSubjectManager().findSubjectById(subjectId); 
         } catch(Exception e) { 
             throw new JobExecutionException(e, false);
         }
