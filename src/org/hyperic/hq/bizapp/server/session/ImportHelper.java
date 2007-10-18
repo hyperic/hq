@@ -38,7 +38,6 @@ import javax.naming.NamingException;
 import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -77,8 +76,9 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
@@ -89,11 +89,11 @@ import org.hyperic.hq.bizapp.shared.resourceImport.XmlApplicationServiceValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlApplicationValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlConfigInfo;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlCustomPropsValue;
-import org.hyperic.hq.bizapp.shared.resourceImport.XmlResourceValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlGroupMemberValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlGroupValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlIpValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlPlatformValue;
+import org.hyperic.hq.bizapp.shared.resourceImport.XmlResourceValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlServerValue;
 import org.hyperic.hq.bizapp.shared.resourceImport.XmlServiceValue;
 import org.hyperic.hq.common.ApplicationException;
@@ -104,9 +104,9 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.grouping.shared.GroupVisitorException;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.TextIndenter;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -126,12 +126,14 @@ class ImportHelper
     private ProductBossLocal        _prodBoss;
     private AppdefGroupManagerLocal _groupMan;
 
+    private AuthzSubject            _subjPojo;
     private AuthzSubjectValue       _subject;
     private BatchImportData         _data;
     
-    ImportHelper(AuthzSubjectValue subject, BatchImportData data){
-        _subject      = subject;
-        _data         = data;
+    ImportHelper(AuthzSubject subject, BatchImportData data){
+        _subjPojo = subject;
+        _subject  = _subjPojo.getAuthzSubjectValue();
+        _data     = data;
 
         try {
             _agentMan    = this.getAgentManager();
@@ -330,7 +332,7 @@ class ImportHelper
         
         buf.append("Running auto-scan for platform: " + name + "...");
         try {
-            this.getAutoInventoryManager().startScan(_subject,
+            this.getAutoInventoryManager().startScan(_subjPojo,
                                                      aPlatform.getEntityId(),
                                                      new ScanConfigurationCore(),
                                                      null, null, null);
@@ -797,11 +799,6 @@ class ImportHelper
         } catch(EncodingException exc){
             throw new BatchImportException("Failed to configure " + 
                                            fullName + ": " + exc.getMessage());
-        } catch(FinderException exc){
-            throw new BatchImportException("Failed to configure " + 
-                                           fullName + ": Resource does not " +
-                                           "support " + ghettoConfig.getType()+
-                                           " configuration");
         } catch(AppdefEntityNotFoundException exc){
             throw new BatchImportException("Failed to configure " + 
                                            fullName + ": Resource does not " +
@@ -848,7 +845,7 @@ class ImportHelper
         }
 
         try {
-            _prodBoss.setConfigResponse(_subject, id, response,
+            _prodBoss.setConfigResponse(_subjPojo, id, response,
                                         ghettoConfig.getType());
         } catch(ConfigFetchException exc){
             throw new BatchImportException("Failed to set configuration for " +
