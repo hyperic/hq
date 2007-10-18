@@ -123,8 +123,7 @@ public abstract class AppdefResourceValue
             return AppdefEntityID.newAppID(getId().intValue());
         }
         else if (this instanceof AppdefGroupValue){
-            return AppdefEntityID.newGroupID(
-                ((ServiceClusterValue)this).getGroupId().intValue());
+            return AppdefEntityID.newGroupID(getId().intValue());
         }
         // should never happen.
         // TODO decide what exception to throw here
