@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -50,7 +50,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -60,6 +59,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -180,7 +180,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method view-type="local"
      */
-    public void doAction(AuthzSubjectValue subject, AppdefEntityID id,
+    public void doAction(AuthzSubject subj, AppdefEntityID id,
                          String action, String args)
         throws PluginException, PermissionException
     {
@@ -189,6 +189,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             throw new IllegalArgumentException ("Cannot perform single "+
                                                 "action on a group.");
     
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
     
@@ -222,7 +223,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method view-type="local"
      */
-    public void doGroupAction(AuthzSubjectValue subject, 
+    public void doGroupAction(AuthzSubject subject, 
                               AppdefEntityID id, String action, 
                               String args, int[] order)
         throws PluginException, PermissionException, 
@@ -232,15 +233,16 @@ public class ControlManagerEJBImpl implements SessionBean {
                                                              order, 
                                                              PageControl.PAGE_ALL);
 
+        AuthzSubjectValue subj = subject.getAuthzSubjectValue();
         // For each entity in the list, sanity check config and permissions
         for (Iterator i = groupMembers.iterator(); i.hasNext();) {
             AppdefEntityID entity = (AppdefEntityID) i.next();
 
-            checkControlEnabled(subject, entity);
-            checkControlPermission(subject, entity);
+            checkControlEnabled(subj, entity);
+            checkControlPermission(subj, entity);
         }
        
-        _controlScheduleManager.doSingleAction(id, subject, action,
+        _controlScheduleManager.doSingleAction(id, subj, action,
                                                args, order);
     }
 
@@ -250,7 +252,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      * 
      * @ejb:interface-method view-type="local"
      */
-    public void doGroupAction(AuthzSubjectValue subject, 
+    public void doGroupAction(AuthzSubject subject, 
                               AppdefEntityID id,
                               String action, int[] order, 
                               ScheduleValue schedule)
@@ -261,15 +263,16 @@ public class ControlManagerEJBImpl implements SessionBean {
                                                             order,
                                                             PageControl.PAGE_ALL);
 
+        AuthzSubjectValue subj = subject.getAuthzSubjectValue();
         // For each entity in the list, sanity check config and permissions
         for (Iterator i = groupMembers.iterator(); i.hasNext();) {
             AppdefEntityID entity = (AppdefEntityID) i.next();
 
-            checkControlEnabled(subject, entity);
-            checkControlPermission(subject, entity);
+            checkControlEnabled(subj, entity);
+            checkControlPermission(subj, entity);
         }
 
-        _controlScheduleManager.doScheduledAction(id, subject, action,
+        _controlScheduleManager.doScheduledAction(id, subj, action,
                                                   schedule, order);
     }
 
@@ -308,7 +311,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @return flag - true if group is enabled
      * @ejb:interface-method
      */
-    public boolean isGroupControlEnabled(AuthzSubjectValue subject,
+    public boolean isGroupControlEnabled(AuthzSubject subject,
                                          AppdefEntityID id) 
         throws AppdefEntityNotFoundException, PermissionException 
     {
@@ -332,7 +335,7 @@ public class ControlManagerEJBImpl implements SessionBean {
        for (Iterator i = members.iterator(); i.hasNext();) {
             AppdefEntityID member = (AppdefEntityID) i.next();
             try {
-                checkControlEnabled(subject,member);
+                checkControlEnabled(subject.getAuthzSubjectValue(), member);
                 return true;
             } catch (PluginException e) {
                 //continue
@@ -543,13 +546,13 @@ public class ControlManagerEJBImpl implements SessionBean {
     *
     * @ejb:interface-method
     */
-    public List batchCheckControlPermissions (AuthzSubjectValue 
-        caller, AppdefEntityID[] entities)
+    public List batchCheckControlPermissions(AuthzSubject caller,
+                                             AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException {
         return doBatchCheckControlPermissions(caller,entities);
     }
 
-    protected List doBatchCheckControlPermissions (AuthzSubjectValue caller,
+    protected List doBatchCheckControlPermissions (AuthzSubject caller,
                                                    AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException {
         List resList,opList;
@@ -592,7 +595,8 @@ public class ControlManagerEJBImpl implements SessionBean {
             try {
                 PermissionManager pm = PermissionManagerFactory.getInstance();
                 ResourceValue[] authz =
-                    pm.findOperationScopeBySubjectBatch(caller,resArr,opArr);
+                    pm.findOperationScopeBySubjectBatch(
+                        caller.getAuthzSubjectValue(),resArr,opArr);
                 for (int x=0;x<authz.length;x++) {
                     retVal.add(AppdefUtil.resValToAppdefEntityId(authz[x]));
                 }
