@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -30,18 +30,20 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.config.ConfigResponse;
 
 class MeasurementEnabler 
@@ -76,7 +78,10 @@ class MeasurementEnabler
                 // metrics
                 if (dm.getEnabledMetricsCount(subject, id) == 0) {
                     _log.info("Enabling default metrics for [" + id + "]");
-                    dm.enableDefaultMetrics(subject, id);
+                    AuthzSubjectManagerLocal aman =
+                        AuthzSubjectManagerEJBImpl.getOne();
+                    AuthzSubject subj = aman.findSubjectById(subject.getId());
+                    dm.enableDefaultMetrics(subj, id);
                 }
 
                 if (isCreate) {
