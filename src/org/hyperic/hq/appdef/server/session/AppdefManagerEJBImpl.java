@@ -49,6 +49,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.jdbc.DBUtil;
 
