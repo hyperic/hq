@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,10 +30,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
@@ -54,7 +55,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
@@ -857,8 +857,7 @@ public class EventsBossEJBImpl
     public List getActionsForAlert(int sessionId, Integer alertId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-
+        manager.getSubjectPojo(sessionId);
         return getActMan().getActionsForAlert(alertId.intValue());
     }
 
@@ -870,7 +869,7 @@ public class EventsBossEJBImpl
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         getActMan().updateAction(aval);
     }
 
@@ -896,7 +895,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         /* incorrect to use alert IDs as alert definition IDs
         try {
             // check security
@@ -930,7 +929,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         // XXX - check security
         return getAM().deleteAlerts(begin, end);
     }
@@ -1061,7 +1060,7 @@ public class EventsBossEJBImpl
     	throws SessionNotFoundException, SessionTimeoutException,
 			   AppdefEntityNotFoundException, PermissionException 
     {
-    	AuthzSubjectValue subject = manager.getSubject(sessionID);
+    	AuthzSubject subject = manager.getSubjectPojo(sessionID);
     	// first get the tree 
         // bomb if this isnt a platform
         if(!id.isPlatform()) {
@@ -1089,9 +1088,10 @@ public class EventsBossEJBImpl
         }
 
         // Add any platform services
-        PageList platformServices =
-            getServiceManager().getPlatformServices(subject, id.getId(),
-                                                    PageControl.PAGE_ALL);
+    	AppdefEntityValue aeval = new AppdefEntityValue(id, subject);
+        List platformServices =
+            aeval.getAssociatedServices(PageControl.PAGE_ALL);
+        
         for(int i = 0; i< platformServices.size(); i++) {
             ServiceValue platformService = 
                 (ServiceValue)platformServices.get(i);
@@ -1168,7 +1168,7 @@ public class EventsBossEJBImpl
     public PageList findAllAlerts(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         // XXX no security... FIXME
         return getAM().findAllAlerts();
     }
@@ -1270,7 +1270,7 @@ public class EventsBossEJBImpl
             }
         });
         
-        Map resMap = new HashMap();
+        Set goodIds = new HashSet();
         List badIds = new ArrayList();
         
         List res = new ArrayList();
@@ -1289,15 +1289,12 @@ public class EventsBossEJBImpl
                 continue;
             
             // Check to see if we already have the resource in the hash map
-            AppdefResourceValue resource =
-                (AppdefResourceValue) resMap.get(aeid);
-
-            if (resource == null) {
+            if (!goodIds.contains(aeid)) {
                 AppdefEntityValue entVal = new AppdefEntityValue(aeid, subject);
 
                 try {
-                    resource = entVal.getResourceValue();
-                    resMap.put(aeid, resource);
+                    entVal.getName();
+                    goodIds.add(aeid);
                 } catch (Exception e) {
                     // Probably because the resource does not exist
                     badIds.add(aeid);
@@ -1320,9 +1317,8 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException 
     {
+        manager.getSubjectPojo(sessionID);
         ActionInterface iface;
-
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
         try {
             Class c = Class.forName(actionClass);
             iface = (ActionInterface) c.newInstance();
@@ -1346,7 +1342,7 @@ public class EventsBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException, 
                EncodingException 
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         RegisterableTriggerInterface iface;
         Class c;
 
@@ -1408,10 +1404,9 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      */
     public Collection getAllRegisteredTriggers(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               FinderException 
+        throws SessionNotFoundException, SessionTimeoutException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         return getRTM().getAllTriggers();
     }
     
@@ -1423,7 +1418,7 @@ public class EventsBossEJBImpl
      */
     public void flushRegisteredTriggers(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         RegisteredTriggers.reinitialize();
     }
 
@@ -1507,8 +1502,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        
+        manager.getSubjectPojo(sessionID);
         Escalation escalation = findEscalationById(sessionID, escId);
         // TODO: check permission
         getEscMan().setEscalation(alertType, id, escalation);
@@ -1524,8 +1518,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        
+        manager.getSubjectPojo(sessionID);
         // TODO: check permission
         getEscMan().setEscalation(alertType, id, null);
     }
@@ -1573,8 +1566,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
-
+        manager.getSubjectPojo(sessionID);
         getEscMan().addAction(e, cfg, waitTime);
     }
     
@@ -1585,7 +1577,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        manager.getSubjectPojo(sessionID);
         Escalation e = getEscMan().findById(escId);
         
         if (e != null) {
@@ -1660,7 +1652,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, DuplicateObjectException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        manager.getSubjectPojo(sessionID);
         Escalation res;
         
         // XXX -- We need to do perm-checking here
