@@ -49,7 +49,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -193,8 +192,8 @@ public class AppdefManagerEJBImpl
             Integer id = (Integer) it.next();
             try {
                 Platform plat = getPlatformDAO().findById(id);
-                platformNames.put(plat.getName(), new AppdefEntityID(
-                    AppdefEntityConstants.APPDEF_TYPE_PLATFORM, id));
+                platformNames.put(plat.getName(),
+                                  AppdefEntityID.newPlatformID(id.intValue()));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -256,8 +255,8 @@ public class AppdefManagerEJBImpl
             Integer id = (Integer) it.next();
             try {
                 Server svr = getServerDAO().findById(id);
-                serverNames.put(svr.getName(), new AppdefEntityID(
-                    AppdefEntityConstants.APPDEF_TYPE_SERVER, id));
+                serverNames.put(svr.getName(),
+                                AppdefEntityID.newServerID(id.intValue()));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -319,8 +318,8 @@ public class AppdefManagerEJBImpl
             Integer id = (Integer) it.next();
             try {
                 Service svc = getServiceDAO().findById(id);
-                serviceNames.put(svc.getName(), new AppdefEntityID(
-                    AppdefEntityConstants.APPDEF_TYPE_SERVICE, id));
+                serviceNames.put(svc.getName(),
+                                 AppdefEntityID.newServiceID(id.intValue()));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
