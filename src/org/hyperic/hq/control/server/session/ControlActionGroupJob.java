@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -35,18 +35,18 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
-import org.hyperic.hq.control.shared.ControlManagerUtil;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -55,7 +55,6 @@ import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.dao.DAOFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -70,8 +69,6 @@ public class ControlActionGroupJob extends ControlJob {
     // own timeout, this is the value that will be used.
     private static final int DEFAULT_TIMEOUT = 10 * 60 * 1000;
 
-    private ControlManagerLocal manager = null;
-
     protected Log log = 
         LogFactory.getLog(ControlActionGroupJob.class.getName());    
 
@@ -84,7 +81,7 @@ public class ControlActionGroupJob extends ControlJob {
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
         AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
-        AuthzSubjectValue subject = getSubject(subjectId);
+        AuthzSubject subject = getSubject(subjectId);
         
         String action     = dataMap.getString(PROP_ACTION);
         String args = dataMap.getString(PROP_ARGS);
@@ -130,14 +127,15 @@ public class ControlActionGroupJob extends ControlJob {
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID entity = (AppdefEntityID) i.next();
 
-                int timeout = getTimeout(subject, entity);
+                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
+                int timeout = getTimeout(subj, entity);
                 if (timeout > longestTimeout)
                     longestTimeout = timeout;
 
                 jobId = doAgentControlCommand(entity,
                                               id,
                                               historyValue.getId(),
-                                              subject,
+                                              subj,
                                               dateScheduled,
                                               scheduled, 
                                               description,

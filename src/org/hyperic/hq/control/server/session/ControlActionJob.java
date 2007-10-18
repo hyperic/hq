@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -27,15 +27,11 @@ package org.hyperic.hq.control.server.session;
  
 import java.util.Date;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-
-import org.hyperic.hq.product.PluginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.product.PluginException;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -57,7 +53,7 @@ public class ControlActionJob extends ControlJob {
         Integer type = new Integer(dataMap.getString(PROP_TYPE));
         AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal.intValue());
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
-        AuthzSubjectValue subject = null;
+        AuthzSubject subject = null;
         try {
             subject = getSubject(subjectId);
         } catch (JobExecutionException e1) {
@@ -73,8 +69,9 @@ public class ControlActionJob extends ControlJob {
         Date dateScheduled = trigger.getPreviousFireTime();
 
         try {
-            doAgentControlCommand(id, null, null, subject, dateScheduled, 
-                                  scheduled, description, action, args);
+            doAgentControlCommand(id, null, null, subject.getAuthzSubjectValue(),
+                                  dateScheduled, scheduled, description, action,
+                                  args);
         } catch(PluginException e) {
             log.error(e.getMessage(), e);
         }

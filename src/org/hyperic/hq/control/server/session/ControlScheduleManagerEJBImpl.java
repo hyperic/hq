@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
@@ -492,9 +493,8 @@ public class ControlScheduleManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
      */
-    public PageList findGroupJobHistory(AuthzSubjectValue subject, 
-                                        int batchId, AppdefEntityID id, 
-                                        PageControl pc)
+    public PageList findGroupJobHistory(AuthzSubject subject, int batchId,
+                                        AppdefEntityID id, PageControl pc)
         throws ApplicationException 
     {
         ControlHistoryDAO histLH;
