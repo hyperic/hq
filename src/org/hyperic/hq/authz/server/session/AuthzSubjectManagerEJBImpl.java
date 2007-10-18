@@ -49,7 +49,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
