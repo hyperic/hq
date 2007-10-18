@@ -102,39 +102,29 @@ public abstract class AppdefResourceValue
     public AppdefEntityID getEntityId() {
         if(this instanceof PlatformValue ||
            this instanceof PlatformLightValue){
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_PLATFORM, 
-                getId().intValue());
+            return AppdefEntityID.newPlatformID(getId().intValue());
         }
         else if (this instanceof ServerValue ||
                  this instanceof ServerLightValue){
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_SERVER, 
-                getId().intValue());
+            return AppdefEntityID.newServerID(getId().intValue());
         }
         else if (this instanceof ServiceValue ||
                  this instanceof ServiceLightValue ){
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_SERVICE, 
-                getId().intValue());
+            return AppdefEntityID.newServiceID(getId().intValue());
         }
         else if (this instanceof ServiceClusterValue){
             // hello, butt-ugliness-who-makes-me-wince-whenever-I-see-you
-            // the AppdefEntityID must be of the underlying group so we do something
-            // a little different
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_GROUP, 
+            // the AppdefEntityID must be of the underlying group so we do 
+            // something a little different
+            return AppdefEntityID.newGroupID(
                 ((ServiceClusterValue)this).getGroupId().intValue());
         }
         else if (this instanceof ApplicationValue){
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_APPLICATION, 
-                getId().intValue());
+            return AppdefEntityID.newAppID(getId().intValue());
         }
         else if (this instanceof AppdefGroupValue){
-            return new AppdefEntityID(
-                AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                getId().intValue());
+            return AppdefEntityID.newGroupID(
+                ((ServiceClusterValue)this).getGroupId().intValue());
         }
         // should never happen.
         // TODO decide what exception to throw here
