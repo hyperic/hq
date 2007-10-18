@@ -46,6 +46,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -189,13 +190,14 @@ public class AlertDefinitionManagerEJBImpl
                FinderException, PermissionException 
     {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
-            canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
-                                                         a.getAppdefId()));
+            canManageAlerts(subj.getId(),
+                            new AppdefEntityTypeID(a.getAppdefType(),
+                                                   a.getAppdefId()));
         // Subject permissions should have already been checked when creating 
         // the parent (resource type) alert definition.
         } else if (!a.parentIdHasBeenSet()) {
-            canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
-                                                     a.getAppdefId()));
+            canManageAlerts(subj.getId(), new AppdefEntityID(a.getAppdefType(),
+                                                             a.getAppdefId()));
         }
         
         // HHQ-1054: since the alert definition mtime is managed explicitly, 
@@ -511,7 +513,7 @@ public class AlertDefinitionManagerEJBImpl
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException 
     {
-        canManageAlerts(subj, aeid);
+        canManageAlerts(subj.getId(), aeid);
 
         AlertDefinitionDAO aDao = getAlertDefDAO();
         List adefs = aDao.findByAppdefEntity(aeid.getType(), aeid.getID());
@@ -625,7 +627,7 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition ad = badFindById(id);
         if (ad.getParent() != null &&
             !EventConstants.TYPE_ALERT_DEF_ID.equals(ad.getParent().getId()))
-            canManageAlerts(subj, getAppdefEntityID(ad));
+            canManageAlerts(subj.getId(), getAppdefEntityID(ad));
         return ad;
     }
     
@@ -740,7 +742,7 @@ public class AlertDefinitionManagerEJBImpl
             AlertDefinition a = (AlertDefinition) i.next();
             try {
                 // Only return the alert definitions that user can see
-                canManageAlerts(subj, getAppdefEntityID(a));
+                canManageAlerts(subj.getId(), getAppdefEntityID(a));
             } catch (PermissionException e) {
                 continue;
             }
@@ -852,7 +854,7 @@ public class AlertDefinitionManagerEJBImpl
                                          AppdefEntityID id, PageControl pc)
         throws PermissionException
     {
-        canManageAlerts(subj, id);
+        canManageAlerts(subj.getId(), id);
         AlertDefinitionDAO aDao = getAlertDefDAO(); 
         
         List adefs;
@@ -892,7 +894,7 @@ public class AlertDefinitionManagerEJBImpl
                 adefs = aDao.findByAppdefEntityType(id, pc.isAscending());
             }
         } else {
-            canManageAlerts(subj, id);
+            canManageAlerts(subj.getId(), id);
             AlertDefinition def = getAlertDefDAO().findById(parentId);
             adefs = def.getChildren();
         }
@@ -905,9 +907,9 @@ public class AlertDefinitionManagerEJBImpl
      * @throws PermissionException if user cannot manage alerts for resource
      * @ejb:interface-method
      */
-    public List findAlertDefinitions(AuthzSubjectValue subj, AppdefEntityID id)
+    public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        canManageAlerts(subject.getId(), id);
         return getAlertDefDAO().findByAppdefEntity(id.getType(), id.getID());
     }
     
@@ -945,7 +947,7 @@ public class AlertDefinitionManagerEJBImpl
                 adefs = def.getChildren();
             }
         } else {
-            canManageAlerts(subj, id);
+            canManageAlerts(subj.getId(), id);
             adefs = aDao.findByAppdefEntity(id.getType(), id.getID());
         }
             

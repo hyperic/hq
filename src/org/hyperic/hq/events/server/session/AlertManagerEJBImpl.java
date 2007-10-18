@@ -176,7 +176,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubjectValue subj, AppdefEntityID id)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        canManageAlerts(subj.getId(), id);
         return getAlertDAO().deleteByEntity(id);
     }
 
@@ -289,7 +289,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public PageList findAlerts(AuthzSubjectValue subj, AppdefEntityID id,
                                PageControl pc)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        canManageAlerts(subj.getId(), id);
         List alerts;
 
         if (pc.getSortattribute() == SortAttribute.NAME) {
@@ -314,7 +314,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                long begin, long end, PageControl pc)
         throws PermissionException 
     {
-        canManageAlerts(subj, id);
+        canManageAlerts(subj.getId(), id);
         List alerts = getAlertDAO().findByAppdefEntityInRange(id, begin, end,
                                pc.getSortattribute() == SortAttribute.NAME,
                                pc.isAscending());
@@ -429,9 +429,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertDefinition def = alert.getAlertDefinition();
         AppdefEntityID aeid =
             new AppdefEntityID(def.getAppdefType(), def.getAppdefId());
-        AppdefEntityValue aev =
-            new AppdefEntityValue(aeid, AuthzSubjectManagerEJBImpl
-                                          .getOne().getOverlord());
+        AppdefEntityValue aev = new AppdefEntityValue(
+            aeid, AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo());
         
         String name = "";
         
