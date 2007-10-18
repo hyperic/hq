@@ -1,13 +1,12 @@
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 
 public class DownResource {
-    private AppdefResourceValue _res;
+    private AppdefResource _res;
     private DownMetricValue _dmv;
     
-    public DownResource(AppdefResourceValue res, DownMetricValue dmv) {
+    public DownResource(AppdefResource res, DownMetricValue dmv) {
         _res = res;
         _dmv = dmv;
     }
@@ -21,7 +20,7 @@ public class DownResource {
     }
     
     public String getType() {
-        return _res.getAppdefResourceTypeValue().getName();
+        return _res.getAppdefResourceType().getName();
     }
     
     public long getTimestamp() {
@@ -32,7 +31,7 @@ public class DownResource {
         return _dmv.getDuration();
     }
     
-    public AppdefResourceValue getResource() {
+    public AppdefResource getResource() {
         return _res;
     }
 }
