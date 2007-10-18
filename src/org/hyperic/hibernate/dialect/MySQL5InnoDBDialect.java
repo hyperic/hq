@@ -38,6 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +61,12 @@ public class MySQL5InnoDBDialect
     private static final int IND_AVG       = MeasurementConstants.IND_AVG;
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+
+    public MySQL5InnoDBDialect()
+    {
+        super();
+        registerColumnType(Types.VARBINARY, 255, "blob");
+    }
 
     /*
      * Database table and function to support sequences.  It is assumed that
