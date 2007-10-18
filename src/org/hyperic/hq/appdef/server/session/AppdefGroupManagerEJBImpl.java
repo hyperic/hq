@@ -323,8 +323,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
      */
     public AppdefGroupValue findGroup(AuthzSubjectValue subject, Integer id)
         throws AppdefGroupNotFoundException, PermissionException {
-        AppdefEntityID aeid =
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, id);
+        AppdefEntityID aeid = AppdefEntityID.newGroupID(id.intValue());
         return findGroup(subject, aeid);
     }
 
@@ -391,8 +390,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
             // Check permission, making sure to generate an appdef id if only
             // a group name was passed in.
             if (id == null) {
-                id = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP,
-                                        retVal.getId());
+                id = AppdefEntityID.newGroupID(retVal.getId().intValue());
             }
 
             checkPermission(subject, id,
@@ -434,8 +432,7 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
         throws AppdefGroupNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
         PageList retVal = null;
-        AppdefEntityID aeid =
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_GROUP, gid);
+        AppdefEntityID aeid = AppdefEntityID.newGroupID(gid.intValue());
         AppdefGroupValue groupVo = findGroup(subject, aeid, null, true);
         retVal = groupVo.getAppdefGroupEntries();
 
@@ -929,46 +926,35 @@ public class AppdefGroupManagerEJBImpl extends AppdefSessionEJB
                                          AppdefEntityID entityId)
         throws AppdefEntityNotFoundException, PermissionException {
 
-        PlatformManagerLocal    platformManagerLocal    = null;
         ServerManagerLocal      serverManagerLocal      = null;
         ApplicationManagerLocal appManagerLocal         = null;
 
-        try {
-            switch (entityId.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM: 
-                    platformManagerLocal =
-                        PlatformManagerUtil.getLocalHome().create();
-                    return platformManagerLocal.getPlatformValueById(
-                            subject, entityId.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    serverManagerLocal =
-                        ServerManagerUtil.getLocalHome().create();
-                    return serverManagerLocal.getServerById(
-                            subject, entityId.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return getServiceManager().getServiceById(
-                            subject, entityId.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    appManagerLocal =
-                        ApplicationManagerUtil.getLocalHome().create();
-                    return appManagerLocal.getApplicationById(
-                            subject, entityId.getId());
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    try {
-                        return findGroup(subject, entityId.getId());
-                    }
-                    catch (AppdefGroupNotFoundException e) {
-                        log.debug("getById() failed to find specified group.");
-                        throw e;
-                    }
-                default:
-                    throw new InvalidAppdefTypeException (entityId.getType()
-                            + " is not a valid appdef entity type");
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
+        switch (entityId.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM: 
+                return PlatformManagerEJBImpl.getOne().getPlatformValueById(
+                        subject, entityId.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                serverManagerLocal = ServerManagerEJBImpl.getOne();
+                return serverManagerLocal.getServerById(
+                        subject, entityId.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return getServiceManager().getServiceById(
+                        subject, entityId.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                appManagerLocal = ApplicationManagerEJBImpl.getOne();
+                return appManagerLocal.getApplicationById(
+                        subject, entityId.getId());
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                try {
+                    return findGroup(subject, entityId.getId());
+                }
+                catch (AppdefGroupNotFoundException e) {
+                    log.debug("getById() failed to find specified group.");
+                    throw e;
+                }
+            default:
+                throw new InvalidAppdefTypeException (entityId.getType()
+                        + " is not a valid appdef entity type");
         }
     }
 
