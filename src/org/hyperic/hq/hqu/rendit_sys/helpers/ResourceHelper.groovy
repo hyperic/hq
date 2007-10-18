@@ -6,11 +6,11 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl
 
 class ResourceHelper extends BaseHelper {
     private rsrcMan = ResourceManagerEJBImpl.one
-    private measBoss = MeasurementBossEJBImpl.one
+    private appBoss = AppdefBossEJBImpl.one
     
     ResourceHelper(AuthzSubject user) {
         super(user)
@@ -41,6 +41,6 @@ class ResourceHelper extends BaseHelper {
     }
 
     def getDownResources(PageInfo pInfo) {
-        measBoss.getUnavailableResources(user, pInfo)
+        appBoss.getUnavailableResources(user, pInfo)
     }
 }
