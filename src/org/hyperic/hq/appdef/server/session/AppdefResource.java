@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
 /**
  * abstract base class for all appdef resources
@@ -121,4 +122,5 @@ public abstract class AppdefResource extends AppdefBean
     public abstract AppdefEntityID getEntityId();
     
     public abstract AppdefResourceType getAppdefResourceType();
+    public abstract AppdefResourceValue getAppdefResourceValue();
 }
