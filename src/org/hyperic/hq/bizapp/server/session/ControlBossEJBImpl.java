@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
@@ -114,13 +115,10 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException
                
     {
-        AuthzSubjectValue subject;
-        
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             doGroupAction(sessionId, id, action, args, null);
         } else {
-            subject = sessionManager.getSubject(sessionId);
-
+            AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
             getControlManager().doAction(subject, id, action, args);
         }
     }
@@ -164,9 +162,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, ApplicationException
     {
-        AuthzSubjectValue subject;
-        
-        subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
 
         getControlManager().doGroupAction(subject, groupEnt, action, orderSpec,
                                           schedule);
@@ -184,9 +180,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException
     {
-        AuthzSubjectValue subject;
-        
-        subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
 
         getControlManager().doGroupAction(subject, groupEnt, action, args,
                                           orderSpec);
@@ -227,9 +221,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
    {
-        AuthzSubjectValue subject;
-        
-        subject = sessionManager.getSubject(sessionId);
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
 
         return getControlManager().isGroupControlEnabled(subject, id);
     }
@@ -362,12 +354,12 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefGroupNotFoundException
     {
-        AuthzSubjectValue subject;
+        AuthzSubject subject;
 
         if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_GROUP)
           throw new IllegalArgumentException ("Invalid group entity specified");
 
-        subject = sessionManager.getSubject(sessionId);
+        subject = sessionManager.getSubjectPojo(sessionId);
      
         return getControlScheduleManager().findGroupJobHistory(subject,
                                                                batchJobId,
@@ -559,9 +551,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                                              AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject;
-        subject = sessionManager.getSubject(sessionId);
-
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
         return getControlManager().batchCheckControlPermissions(subject,
                                                                 entities);
     }
