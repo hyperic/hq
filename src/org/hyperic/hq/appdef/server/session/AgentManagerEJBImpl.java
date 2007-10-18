@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -116,7 +117,7 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public ResourceTree getEntitiesForAgent(AuthzSubjectValue subject,
+    public ResourceTree getEntitiesForAgent(AuthzSubject subject,
                                             String agentToken)
         throws AgentNotFoundException, PermissionException
     {
@@ -133,9 +134,7 @@ public class AgentManagerEJBImpl
         int i = 0;
         for (Iterator it = plats.iterator(); it.hasNext(); i++) {
             Platform plat = (Platform) it.next();
-            platIds[i] =
-                new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_PLATFORM,
-                                   plat.getId());
+            platIds[i] = AppdefEntityID.newPlatformID(plat.getId().intValue());
         }
         
         generator = new ResourceTreeGenerator(subject);
