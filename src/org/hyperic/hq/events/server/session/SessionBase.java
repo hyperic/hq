@@ -144,13 +144,13 @@ public abstract class SessionBase {
         Integer parentId = ad.getParent() != null ? ad.getParent().getId()
                 : null;
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who, getAppdefEntityID(ad));
+            canManageAlerts(who.getId(), getAppdefEntityID(ad));
     }
 
     /**
      * Check for manage alerts permission for a given resource
      */
-    protected void canManageAlerts(AuthzSubjectValue subject, AppdefEntityID id)
+    protected void canManageAlerts(Integer subjectId, AppdefEntityID id)
         throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
             return;             // Can't check resoure type alert permission
@@ -181,12 +181,11 @@ public abstract class SessionBase {
                 opName = AuthzConstants.groupOpManageAlerts;
                 break;                
             default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                    type);
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
 
         // now check
-        checkPermission(subject.getId(), rtName, id.getId(), opName);
+        checkPermission(subjectId, rtName, id.getId(), opName);
     }
     
     private static void checkEscalation(Integer subjectId,
@@ -195,8 +194,7 @@ public abstract class SessionBase {
         // The escalation resource type is looked up for its ID to be used
         // instance ID.  The reason is that escalations are global, and we're
         // not applying escalation permission per appdef resource.
-        ResourceType rt =
-            DAOFactory.getDAOFactory().getResourceTypeDAO()
+        ResourceType rt = new ResourceTypeDAO(DAOFactory.getDAOFactory())
             .findByName(AuthzConstants.escalationResourceTypeName);
 
         checkPermission(subjectId, AuthzConstants.rootResType, rt.getId(),
