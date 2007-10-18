@@ -230,7 +230,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             
             try {
                 succeeded = aman.updateAlertDefinitionInternalEnable(
-                                AuthzSubjectManagerEJBImpl.getOne().getOverlord(),
+                                AuthzSubjectManagerEJBImpl.getOne().findOverlord(),
                                 alertDef, 
                                 false);                
             } finally {
