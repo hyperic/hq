@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -51,15 +50,13 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.DownResSortField;
-import org.hyperic.hq.appdef.server.session.DownResource;
+import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -71,7 +68,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -113,7 +109,6 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.DataNotAvailableException;
-import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
@@ -149,7 +144,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     protected static Log _log =
         LogFactory.getLog(MeasurementBossEJBImpl.class.getName());
 
-    private Integer[] getGroupMemberIDs(AuthzSubjectValue subject,
+    private Integer[] getGroupMemberIDs(AuthzSubject subject,
                                         AppdefEntityID gid)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
@@ -167,8 +162,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return ids;
     }
 
-    private List findDesignatedMetrics(AuthzSubjectValue subject,
-                                       AppdefEntityID id,
+    private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
                                        Set cats) {
         List metrics;
         
@@ -321,7 +315,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Find the autogroup members
         List entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid },
@@ -343,48 +337,49 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     private MeasurementTemplate getAvailabilityMetricTemplate(
-        AuthzSubjectValue subject, AppdefEntityID aeid)
+        AuthzSubject subj, AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException,
                MeasurementNotFoundException
     {
         DerivedMeasurement dm = null;
-        if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+        if (aeid.isApplication()) {
             // Get the appointed front-end service
-            AppdefEntityValue aeval = new AppdefEntityValue(aeid, subject);
-            ApplicationValue app = (ApplicationValue) aeval.getResourceValue();
+            AppdefEntityValue aeval = new AppdefEntityValue(aeid, subj);
+            Application app = (Application) aeval.getResourcePOJO();
             
-            AppServiceValue[] appSvcs = app.getAppServiceValues();
-            for (int i = 0; i < appSvcs.length; i++) {
+            Collection appSvcs = app.getAppServices();
+            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
+                AppService appSvc = (AppService) it.next();
                 // Let's try it
-                if (appSvcs[i].getIsCluster()) {
-                    if (appSvcs[i].getServiceCluster() == null)
+                if (appSvc.isIsCluster()) {
+                    if (appSvc.getServiceCluster() == null)
                         continue;
                         
                     aeid = new AppdefEntityID(
                         AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                        appSvcs[i].getServiceCluster().getGroupId());
+                        appSvc.getServiceCluster().getGroup().getId());
                 }
                 else {
                     // Make sure this is a valid service
-                    if (appSvcs[i].getService() == null)
+                    if (appSvc.getService() == null)
                         continue;
                     
                     // Get the metrics for the service                        
-                    aeid = appSvcs[i].getService().getEntityId();
+                    aeid = appSvc.getService().getEntityId();
                 }
     
-                dm = findAvailabilityMetric(subject, aeid);
+                dm = findAvailabilityMetric(subj, aeid);
                 
                 if (dm != null)
                     break;
             }
         }
-        else if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+        else if (aeid.isGroup())
         {
             List grpMembers;
             try {
                 grpMembers =
-                    GroupUtil.getCompatGroupMembers(subject, aeid, null,
+                    GroupUtil.getCompatGroupMembers(subj, aeid, null,
                                                     PageControl.PAGE_ALL);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
@@ -396,14 +391,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
                 aeid = (AppdefEntityID) it.next();
-                dm = findAvailabilityMetric(subject, aeid);
+                dm = findAvailabilityMetric(subj, aeid);
                 
                 if (dm != null)
                     break;
             }
         }
         else {
-            dm = findAvailabilityMetric(subject, aeid);
+            dm = findAvailabilityMetric(subj, aeid);
         }
         
         if (dm != null)
@@ -423,7 +418,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws MeasurementNotFoundException, SessionNotFoundException,
                SessionTimeoutException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getAvailabilityMetricTemplate(subject, aeid)
             .getMeasurementTemplateValue();
     }
@@ -466,7 +461,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         // Find the autogroup members
         List entIds = getAGMemberIds(subject, aids, ctype);
@@ -509,7 +504,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                ConfigFetchException, EncodingException, PermissionException,
                TemplateNotFoundException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, MeasurementCreateException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // Recursively do this for each of the group members
             List grpMembers =
@@ -527,7 +522,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else {
             ConfigResponse mergedCR = getConfigManager()
-                .getMergedConfigResponse(subject, 
+                .getMergedConfigResponse(subject.getAuthzSubjectValue(), 
                                          ProductPlugin.TYPE_MEASUREMENT, 
                                          id, true);
             
@@ -552,7 +547,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, MeasurementCreateException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
         getMetricManager().enableMeasurements(subject, mids, interval);
     }
 
@@ -590,7 +585,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                MeasurementCreateException, ConfigFetchException,
                PermissionException, EncodingException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         List kids = getAGMemberIds(subject, parentid, ctype);
         for(int i = 0; i < kids.size(); i++) {
             // Do create, because we want to create or update
@@ -624,7 +619,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public void disableMeasurements(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         getMetricManager().disableMeasurements(subject, id);
     }
 
@@ -636,7 +631,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public void disableMeasurements(int sessionId, Integer[] mids)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         getMetricManager().disableMeasurements(subject, mids);
     }
 
@@ -652,7 +647,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                GroupNotCompatibleException, PermissionException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        AuthzSubjectValue subjectVal = subject.getAuthzSubjectValue();
 
         DerivedMeasurementManagerLocal dmm = getMetricManager();
         if (id == null) {
@@ -661,15 +655,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         } else if (id.isGroup()) {
             // Recursively do this for each of the group members
             List grpMembers =
-                GroupUtil.getCompatGroupMembers(subjectVal, id, null,
+                GroupUtil.getCompatGroupMembers(subject, id, null,
                                                 PageControl.PAGE_ALL);
     
             for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-                dmm.disableMeasurements(subjectVal, (AppdefEntityID) it.next(), 
+                dmm.disableMeasurements(subject, (AppdefEntityID) it.next(), 
                                         tids);
             }
         } else {
-            dmm.disableMeasurements(subjectVal, id, tids); 
+            dmm.disableMeasurements(subject, id, tids); 
         }
     }
 
@@ -684,7 +678,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                RemoveException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         List grpMembers = getAGMemberIds(subject, parentId, childType);
     
@@ -707,36 +701,37 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             throw new MeasurementNotFoundException("No categories specified");
         }
         
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subj = manager.getSubjectPojo(sessionId);
         
         List metrics = null;
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+        if (id.isApplication()) {
             // Get the appointed front-end service
-            AppdefEntityValue aeval = new AppdefEntityValue(id, subject);
-            ApplicationValue app = (ApplicationValue) aeval.getResourceValue();
+            AppdefEntityValue aeval = new AppdefEntityValue(id, subj);
+            Application app = (Application) aeval.getResourcePOJO();
             
-            AppServiceValue[] appSvcs = app.getAppServiceValues();
-            for (int i = 0; i < appSvcs.length; i++) {
+            Collection appSvcs = app.getAppServices();
+            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
+                AppService appSvc = (AppService) it.next();
                 // Let's try it
-                if (appSvcs[i].getIsCluster()) {
-                    if (appSvcs[i].getServiceCluster() == null)
+                if (appSvc.isIsCluster()) {
+                    if (appSvc.getServiceCluster() == null)
                         continue;
                         
                     id = new AppdefEntityID(
                         AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                        appSvcs[i].getServiceCluster().getGroupId());
+                        appSvc.getServiceCluster().getGroup().getId());
                 }
                 else {
                     // Make sure this is a valid service
-                    if (appSvcs[i].getService() == null)
+                    if (appSvc.getService() == null)
                         continue;
                     
                     // Get the metrics for the service                        
-                    id = appSvcs[i].getService().getEntityId();
+                    id = appSvc.getService().getEntityId();
                 }
 
                 // Require an entry point
-                if (appSvcs[i].getIsEntryPoint()) {
+                if (appSvc.isEntryPoint()) {
                     // Recursively call with the entry point
                     try {
                         metrics = getDesignatedMetrics(sessionId, id, cats);
@@ -749,7 +744,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 else if (metrics == null &&
                          cats.contains(MeasurementConstants.CAT_AVAILABILITY)) {
-                    DerivedMeasurement dm = findAvailabilityMetric(subject, id);
+                    DerivedMeasurement dm = findAvailabilityMetric(subj, id);
                     
                     if (dm != null) {
                         metrics = new ArrayList(1);
@@ -762,7 +757,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             List grpMembers;
             try {
                 grpMembers =
-                    GroupUtil.getCompatGroupMembers(subject, id, null,
+                    GroupUtil.getCompatGroupMembers(subj, id, null,
                                                     PageControl.PAGE_ALL);
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
@@ -774,14 +769,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
                 metrics = findDesignatedMetrics(
-                        subject, (AppdefEntityID) it.next(), cats);
+                        subj, (AppdefEntityID) it.next(), cats);
     
                 if (metrics != null && metrics.size() > 0)
                     break;
             }
         }
         else {
-            metrics = findDesignatedMetrics(subject, id, cats);
+            metrics = findDesignatedMetrics(subj, id, cats);
         }
         
         // Make sure we have valid metrics
@@ -897,7 +892,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         List grpMembers =
             GroupUtil.getCompatGroupMembers(subject, gid, null, 
                                             PageControl.PAGE_ALL);
@@ -912,7 +907,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         String mtype = null;
         IntHashMap summaryMap = new IntHashMap();
@@ -1005,7 +1000,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 findMeasurements(sessionId, tid,
                                  new AppdefEntityID[] { id }).get(0);
 
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getMetricManager().findMeasurement(subject, tid, id.getId());
     }
 
@@ -1021,7 +1016,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP)
             return findGroupMeasurements(sessionId, id, null, pc);
                    
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getMetricManager().findMeasurements(subject, id, null, pc);
     }
 
@@ -1040,7 +1035,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         List ids = new ArrayList();
         
@@ -1083,10 +1078,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     throws SessionNotFoundException, SessionTimeoutException,
            AppdefEntityNotFoundException, GroupNotCompatibleException,
            PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        return findGroupMeasurements(sessionId, getAGMemberIds(subject, 
-                                                               parentId, 
-                                                               childType), 
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        return findGroupMeasurements(sessionId,
+                                     getAGMemberIds(subject,parentId,childType), 
                                      cat, pc);
     }
     
@@ -1192,7 +1186,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                DataNotAvailableException, AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
 
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
             
@@ -1229,7 +1223,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         // Find the autogroup members
         List entIds = getAGMemberIds(subject, aid, ctype);
@@ -1258,7 +1252,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
 
@@ -1318,12 +1312,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                DataNotAvailableException, AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
             
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         Integer[] mids;
         StopWatch watch = new StopWatch();
 
-        if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION &&
+        if (aid.isApplication() &&
             tmpl.getCategory().getName().equals(
                 MeasurementConstants.CAT_AVAILABILITY)) {
             // Special case for application availability
@@ -1354,7 +1348,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             return getDataMan().getHistoricalData(mids, begin, end, interval,
                 tmpl.getCollectionType(), returnNulls, pc);
         } finally {
-            if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
+            if (aid.isApplication())
                 _log.debug("END findMeasurementData() - " + watch.getElapsed() +
                           " msec");
         }
@@ -1370,7 +1364,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                     int count)
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         DerivedMeasurementValue dmv =
             getMetricManager().findMeasurement(subject, tid, new Integer(iid));
     
@@ -1434,7 +1428,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Find the autogroup members
         List entIds = getAGMemberIds(subject, aids, ctype);
@@ -1465,7 +1459,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                GroupNotCompatibleException,
                AppdefEntityNotFoundException, ApplicationNotFoundException,
                TemplateNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         // Get the template
         getTemplateManager().getTemplate(tid);
@@ -1585,7 +1579,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefCompatException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         List resources;
         try {
@@ -1655,7 +1649,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefCompatException, MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         // Just one metric
         List mtids = new ArrayList();
@@ -1696,7 +1690,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException, DataNotAvailableException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
 
         List pruned = new ArrayList();
@@ -1713,32 +1707,32 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return (AppdefResourceValue[])pruned.toArray(prunedResources);
     }
 
-    private Integer[] getMetricIdsForResource(AuthzSubjectValue subject,
+    private Integer[] getMetricIdsForResource(AuthzSubject subject,
                                               AppdefEntityID aid,
                                               MeasurementTemplate tmpl)
         throws PermissionException, AppdefEntityNotFoundException,
                MeasurementNotFoundException {
         // Find the measurement ID based on entity type
-        if (aid.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+        if (aid.isApplication()) {
             AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
 
-            ApplicationValue app =
-                (ApplicationValue) aeval.getResourceValue();
-            AppServiceValue[] appSvcs = app.getAppServiceValues();
+            Application app = (Application) aeval.getResourcePOJO();
+            Collection appSvcs = app.getAppServices();
         
             // If it's availability, then we'd have to get data for all svcs
-            for (int i = 0; i < appSvcs.length; i++) {
+            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
+                AppService appSvc = (AppService) it.next();
                 // Metric is based on the entry point
-                if (appSvcs[i].getIsEntryPoint()) {
+                if (appSvc.isEntryPoint()) {
                     AppdefEntityID id;
                     
-                    if (appSvcs[i].getIsCluster()) {
+                    if (appSvc.isIsCluster()) {
                         id = new AppdefEntityID(
                             AppdefEntityConstants.APPDEF_TYPE_GROUP, 
-                            appSvcs[i].getServiceCluster().getGroupId());
+                            appSvc.getServiceCluster().getGroup().getId());
                     }
                     else {
-                        id = appSvcs[i].getService().getEntityId();
+                        id = appSvc.getService().getEntityId();
                     }
                     
                     try {
@@ -1795,7 +1789,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return summary;
     }
     
-    private List getResourceIds(AuthzSubjectValue subject, AppdefEntityID aeid,
+    private List getResourceIds(AuthzSubject subject, AppdefEntityID aeid,
                                 AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
@@ -2062,7 +2056,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException,
                InvalidOptionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         List resources;
         if (entId.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -2078,7 +2072,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     ") is not a compatible type");
             }
         } else
-        if (entId.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+        if (entId.isApplication()) {
             AppdefEntityValue aev = new AppdefEntityValue(entId, subject);
             resources = aev.getAssociatedServices(typeId, PageControl.PAGE_ALL);
             if (typeId != null) {
@@ -2146,13 +2140,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return a List of ResourceTypeDisplaySummary's
      * @deprecated use POJO API instead
      */    
-    private List 
-        getSummarizedResourceCurrentHealth(AuthzSubjectValue subject, 
-                                           AppdefResourceValue[] resources)
+    private List getSummarizedResourceCurrentHealth(AuthzSubject subject, 
+                                                AppdefResourceValue[] resources)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException 
     {
-    
         List summaries = new ArrayList();
     
         // Create Map of auto-group'd/singleton resources and a List of clusters
@@ -2246,7 +2238,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * @return a List of ResourceTypeDisplaySummary's
      */    
-    private List getSummarizedResourceCurrentHealth(AuthzSubjectValue subject, 
+    private List getSummarizedResourceCurrentHealth(AuthzSubject subject, 
                                                     Collection resources)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
@@ -2316,7 +2308,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     private void 
-        setResourceTypeDisplaySummary(AuthzSubjectValue subject,
+        setResourceTypeDisplaySummary(AuthzSubject subject,
                                       ResourceTypeDisplaySummary summary, 
                                       AppdefResourceTypeValue resType,
                                       AppdefEntityID[] ids) 
@@ -2428,7 +2420,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                   AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Get the associated servers        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
@@ -2465,10 +2457,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                            AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         ServiceManagerLocal svcMgr = ServiceManagerEJBImpl.getOne();
-        Collection services = svcMgr.getPlatformServices(subject,
-                                                         entId.getId());
+        Collection services =
+            svcMgr.getPlatformServices(subject.getAuthzSubjectValue(),
+                                       entId.getId());
         return getSummarizedResourceCurrentHealth(subject, services);
     }
     
@@ -2479,7 +2472,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                    AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         // Get the associated services        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List services= rv.getAssociatedServices(PageControl.PAGE_ALL);
@@ -2501,21 +2494,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return List of ResourceDisplaySummary beans
      * @ejb:interface-method
      */
-    public List findGroupCurrentHealth(int sessionId,
-                                       AppdefEntityID entId)
+    public List findGroupCurrentHealth(int sessionId, AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         PageList siblings = new PageList();
         // siblings.addAll(GroupUtil.getGroupMembers(subject, entId, null));
         List members = GroupUtil.getGroupMembers(subject, entId, null);
         for (Iterator it = members.iterator(); it.hasNext(); ) {
             AppdefEntityID eid = (AppdefEntityID) it.next();
-            AppdefEntityValue ent = new AppdefEntityValue(eid, subject);
-            siblings.add(ent.getResourceValue());
+            siblings.add(new AppdefEntityValue(eid, subject));
         }
     
         return getResourcesCurrentHealth(subject, siblings);
@@ -2538,7 +2528,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
         
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         try {
             VirtualManagerLocal vman =
@@ -2555,14 +2545,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     private void setResourceDisplaySummary(ResourceDisplaySummary rds, 
-                                           AppdefResourceValue resource,
+                                           AppdefEntityValue resource,
                                            AppdefResourceValue parentResource)
-    {
-        rds.setEntityId(resource.getEntityId());
+        throws AppdefEntityNotFoundException, PermissionException {
+        rds.setEntityId(resource.getID());
         rds.setResourceName(resource.getName());
-        rds.setResourceEntityTypeName(resource.getEntityId().getTypeName());
-        rds.setResourceTypeName(
-            resource.getAppdefResourceTypeValue().getName());
+        rds.setResourceEntityTypeName(resource.getID().getTypeName());
+        rds.setResourceTypeName(resource.getTypeName());
         if (parentResource == null) {
             rds.setHasParentResource(Boolean.FALSE);
         } else {
@@ -2574,23 +2563,34 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    private PageList getResourcesCurrentHealth(AuthzSubjectValue subject,
+    private PageList getResourcesCurrentHealth(AuthzSubject subject,
                                                PageList resources)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
-            AppdefResourceValue resource = (AppdefResourceValue) it.next();
+            Object o = it.next();
+            
+            AppdefEntityValue rv;
+            AppdefResourceValue resource = null;
+            AppdefEntityID aeid;
+            if (o instanceof AppdefEntityValue) {
+                rv = (AppdefEntityValue) o;
+                aeid = rv.getID();
+            }
+            else {
+                resource = (AppdefResourceValue) o;
+                aeid = resource.getEntityId();
+                rv = new AppdefEntityValue(aeid, subject);
+            }
+            
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
         
             // Set the resource
             AppdefResourceValue parent = null;
-            AppdefEntityValue rv;
             HashSet categories = new HashSet(4);
-            switch (resource.getEntityId().getType()) {
+            switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    rv = new AppdefEntityValue(resource.getEntityId(), subject);
-                    
                     try {
                         List platforms =
                             rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
@@ -2607,12 +2607,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     categories.add(MeasurementConstants.CAT_THROUGHPUT);
                 
                     setResourceDisplaySummaryValueForCategory(
-                        subject, resource.getEntityId(), summary, categories);
+                        subject, aeid, summary, categories);
                     
                     summary.setMonitorable(Boolean.TRUE);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    AppdefGroupValue agv = (AppdefGroupValue) resource;
+                    AppdefGroupValue agv = (resource == null) ?
+                        rv.getAppdefGroupValue() : (AppdefGroupValue) resource;
                     if (!agv.isGroupCompat()) {
                         // geez, why are we here at all?  well, a user _could_
                         // add a group to their dashboard's resourceHealth
@@ -2627,14 +2628,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     summary.setMonitorable(Boolean.TRUE);
                     // Set the availability now
-                    summary.setAvailability(new Double(
-                        getAvailability(subject, resource.getEntityId())));
+                    summary.setAvailability(new Double(getAvailability(subject,
+                                                                       aeid)));
                     
                     try {
                         // Get the availability template
                         MeasurementTemplate tmpl =
-                            getAvailabilityMetricTemplate(
-                                subject, resource.getEntityId());
+                            getAvailabilityMetricTemplate(subject, aeid);
                         summary.setAvailTempl(tmpl.getId());
                     } catch (MeasurementNotFoundException e) {
                         // No availability metric, don't set it
@@ -2643,9 +2643,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 default:
                     throw new InvalidAppdefTypeException(
                         "entity type is not monitorable, id type: " +
-                        resource.getEntityId().getType());
+                        aeid.getType());
             }            
-            setResourceDisplaySummary(summary, resource, parent);
+            setResourceDisplaySummary(summary, rv, parent);
             summaries.add(summary);
         }
         if (_log.isDebugEnabled()) {
@@ -2708,7 +2708,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @throws AppdefEntityNotFoundException
      */
     private void setResourceDisplaySummaryValueForCategory(
-        AuthzSubjectValue subject, AppdefEntityID id,
+        AuthzSubject subject, AppdefEntityID id,
         ResourceDisplaySummary summary, Set categories)
         throws AppdefEntityNotFoundException, PermissionException {
 
@@ -2809,16 +2809,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                            AppdefEntityID[] entIds)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
 
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         StopWatch timer = new StopWatch();
 
         PageList resources = new PageList();
         for (int i = 0; i < entIds.length; i++) {
-            AppdefEntityValue entVal =
-                new AppdefEntityValue(entIds[i], subject);
-            resources.add(entVal.getLiteResourceValue());
+            resources.add(new AppdefEntityValue(entIds[i], subject));
         }
         timingLog.trace("findResourceCurrentHealth(2) - timing [" +
                         timer.toString()+"]");
@@ -2836,14 +2834,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                        PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         int entType = entId.getType();
 
         if (entType == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            AppdefGroupValue group =
-                (AppdefGroupValue) rv.getLiteResourceValue();
-            entType = group.getGroupEntType();
+            entType = rv.getResourceTypeValue().getAppdefType();
         }
         
         PageList hosts;
@@ -2866,8 +2862,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             
             if (virtIds.size() > 0)
-                hosts = getPlatformManager().getPlatformsByServers(subject,
-                                                                   virtIds);
+                hosts = getPlatformManager()
+                    .getPlatformsByServers(subject.getAuthzSubjectValue(),
+                                           virtIds);
             break;
         default:
             return new PageList();
@@ -2899,7 +2896,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         PageList platforms = rv.getAssociatedPlatforms(pc);
         
@@ -2923,10 +2920,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, PermissionException,
                AppdefEntityNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PlatformManagerLocal platMan = getPlatformManager();
         PlatformType pt = platMan.findPlatformType(platTypeId);
-        PageList platforms = platMan.getPlatformsByType(subject, pt.getName());
+        PageList platforms =
+            platMan.getPlatformsByType(subject.getAuthzSubjectValue(),
+                                       pt.getName());
         
         // Return a paged list of current health        
         return getResourcesCurrentHealth(subject, platforms);
@@ -2973,7 +2972,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         switch (entId.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -3010,7 +3009,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PageList servers = new PageList();
         PageControl pc = PageControl.PAGE_ALL;
         
@@ -3043,7 +3042,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PageList services = new PageList();
         
         for (int i = 0; i < entIds.length; i++){
@@ -3057,17 +3056,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return getResourcesCurrentHealth(subject, services);
     }
 
-    private double getAvailability(AuthzSubjectValue subject, AppdefEntityID id)
+    private double getAvailability(AuthzSubject subject, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
-        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
+        if (id.isApplication())
             _log.debug("BEGIN getAvailability()");
     
         AppdefEntityID[] ids = new AppdefEntityID[] { id };
         try {
             return getAvailability(subject, ids)[0];
         } finally {
-            if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_APPLICATION)
+            if (id.isApplication())
                 _log.debug("END getAvailability() -- " + watch);
         }
     }
@@ -3079,7 +3078,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     public double getAvailability(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return getAvailability(subject, id);
     }
 
@@ -3091,7 +3090,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                     AppdefEntityTypeID ctype)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         StopWatch watch = new StopWatch();
         _log.debug("BEGIN getAGAvailability()");
@@ -3302,37 +3301,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                      AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         return findAvailabilityMetric(subject, id);
     }
     
-    /**
-     * Get the list of resources that are unavailable
-     * @ejb:interface-method 
-     */
-    public Collection getUnavailableResources(AuthzSubject user, PageInfo info)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, PermissionException {
-        List unavailEnts = getMetricManager().getUnavailEntities();
-        DownResSortField sortField = (DownResSortField) info.getSort();
-        Set ret = new TreeSet(sortField.getComparator(!info.isAscending()));
-        for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
-            DownMetricValue dmv = (DownMetricValue) it.next();
-            
-            // Look up the resource
-            AppdefEntityValue res =
-                new AppdefEntityValue(dmv.getEntityId(), user);
-            
-            if (_log.isDebugEnabled()) {
-                _log.debug(res.getName() + " down for " +
-                           (dmv.getDuration() / 60000) + "min");
-            }
-
-            ret.add(new DownResource(res.getLiteResourceValue(), dmv));
-        }
-        return ret;
-    }
-
     public static MeasurementBossLocal getOne() {
         try {
             return MeasurementBossUtil.getLocalHome().create();

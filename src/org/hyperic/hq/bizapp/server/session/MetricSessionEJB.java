@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
@@ -84,7 +85,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
      *        collected data
      * @return Map where key = category, value = List of summary beans
      */
-    protected Map getResourceMetrics(AuthzSubjectValue subject, List resources,
+    protected Map getResourceMetrics(AuthzSubject subject, List resources,
                                      List tmpls, long begin, long end,
                                      Boolean showNoCollect)
         throws AppdefCompatException {
@@ -220,7 +221,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * @return Map where key = category, value = List of summary beans
      * @throws AppdefCompatException
      */
-    protected Map getResourceMetrics(AuthzSubjectValue subject, List resources,
+    protected Map getResourceMetrics(AuthzSubject subject, List resources,
                                      String resourceType, long filters,
                                      String keyword, long begin, long end,
                                      boolean showNoCollect)
@@ -301,14 +302,14 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return summary;
     }
 
-    protected List getAGMemberIds(AuthzSubjectValue subject,
+    protected List getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID parentAid,
                                   AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
         return getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
     }
 
-    protected List getAGMemberIds(AuthzSubjectValue subject,
+    protected List getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID[] aids,
                                   AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
@@ -335,7 +336,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return entIds;
     }
 
-    protected double[] getAvailability(AuthzSubjectValue subject,
+    protected double[] getAvailability(AuthzSubject subject,
                                        AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException, PermissionException {
         long current = System.currentTimeMillis();
@@ -422,7 +423,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return result;
     }
 
-    protected DerivedMeasurement findAvailabilityMetric(AuthzSubjectValue subject,
+    protected DerivedMeasurement findAvailabilityMetric(AuthzSubject subject,
                                                         AppdefEntityID id)
     {
         try {
@@ -455,7 +456,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * the availability shall be disqualified as unknown i.e. the (?)
      * representation
      */
-    protected double getAggregateAvailability(AuthzSubjectValue subject,
+    protected double getAggregateAvailability(AuthzSubject subject,
                                               AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException, PermissionException {
         if (ids.length == 0)
@@ -513,7 +514,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         // Assume all entities are of the same type
         AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
@@ -556,7 +557,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
             PermissionException, AppdefEntityNotFoundException,
             AppdefCompatException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List platforms = null, servers = null, services = null;
@@ -702,10 +703,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException, AppdefCompatException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
     
         // Get the member IDs
-        List platforms = getPlatformAG(subject, platTypeId);
+        List platforms = getPlatformAG(subject.getAuthzSubjectValue(),
+                                       platTypeId);
         
         // Get resource type name
         PlatformTypeValue platType =
@@ -724,7 +726,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, PermissionException,
                AppdefEntityNotFoundException, AppdefCompatException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         
         List group = new ArrayList();
         for (int i = 0; i < entIds.length; i++) {
