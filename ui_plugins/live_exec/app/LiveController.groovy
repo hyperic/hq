@@ -9,6 +9,8 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand
 class LiveController 
 	extends BaseController
 {
+    private FORBIDDEN = ['kill', 'process']
+                         
     def LiveController() {
         setTemplate('standard')
         setJSONMethods(['invoke',])
@@ -20,7 +22,8 @@ class LiveController
         def liveMan    = ldmi.one
         def cmdFmt     = [:]
         def formatters = [:]
-                          
+                         
+        cmds -= FORBIDDEN
         for (c in cmds) {
             def ldCmd = new LiveDataCommand(viewedId, c, new ConfigResponse())
             def fmt   = liveMan.findFormatters(ldCmd, FormatType.HTML)
@@ -37,8 +40,14 @@ class LiveController
     
     def invoke(params) {
         def fmtId = params.getOne('formatter')
-        def res   = viewedResource.getLiveData(user, params.getOne('cmd'),
-                                               new ConfigResponse())
+        def cmd   = params.getOne('cmd')
+
+        if (cmd in FORBIDDEN) {
+            log.warn("User [${user.name}] attempted to execute ${cmd}, " + 
+                     "which is forbidden")
+            return
+        }
+        def res   = viewedResource.getLiveData(user, cmd, new ConfigResponse()) 
          
         if (res.hasError()) {
             return [error: HtmlUtil.escapeHtml(res.errorMessage)]
