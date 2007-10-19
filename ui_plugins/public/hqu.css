@@ -346,4 +346,4 @@ font-weight:bold;
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 .downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: left; width: 70%; height: 442px;}
 .downList{margin-right: 10px; width: 260px; float:left}
-
+.countLinksActive{color: rgb(0, 51, 153); font-weight: bold; cursor: pointer;}
