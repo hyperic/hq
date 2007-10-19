@@ -28,8 +28,11 @@ package org.hyperic.hq.plugin.nagios;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.hyperic.hq.plugin.nagios.parser.*;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -75,49 +78,61 @@ public class NagiosDetector
 
         String file = serverConfig.getValue("nagios.cfg");
         if (!new File(file).isAbsolute()) {
-            file =
-                serverConfig.getValue(ProductPlugin.PROP_INSTALLPATH) +
+            file = serverConfig.getValue(ProductPlugin.PROP_INSTALLPATH) +
                 File.separator + file;
         }
-
-        NagiosConfig parser = new NagiosConfig(file);
-        List configs;
+        NagiosCfgParser parser = new NagiosCfgParser();
         try {
-            configs = parser.parse();
+            parser.parse(file);
         } catch (IOException e) {
-            String msg =
-                "Error parsing " + file + ": " +
-                e.getMessage();
+            String msg = "Error parsing " + file + ": " + e.getMessage();
             throw new PluginException(msg, e);
         }
+        return getServices(parser);
+    }
 
-        int size = configs.size();
-        List services = new ArrayList(size);
-
-        for (int i=0; i<size; i++) {
-            NagiosConfig.Service checker =
-                (NagiosConfig.Service)configs.get(i);
-
-            ServiceResource service =
-                createServiceResource(PLUGIN_NAME);
-            service.setServiceName(PLUGIN_NAME + " " + checker.name);
-
-            ConfigResponse config = new ConfigResponse();
-            config.setValue("path", checker.cmd);
-            config.setValue("args", checker.args);
-
-            service.setProductConfig(config);
-
-            ConfigResponse metricConfig = new ConfigResponse();
-            //XXX does not work (PR 9882)
-            //LogTrackPlugin.setEnabled(metricConfig,
-            //                          TypeInfo.TYPE_SERVICE,
-            //                          LogTrackPlugin.LOGLEVEL_WARN);
-            service.setMeasurementConfig(metricConfig);
-
-            services.add(service);
+    public List getServices(NagiosCfgParser parser)
+        throws PluginException
+    {
+        List services = new ArrayList();
+        Set set;
+        Integer type = new Integer(NagiosObj.SERVICE_TYPE);
+        if (null == (set = (Set)parser.get(type)) || set.size() == 0) {
+            String msg = "Error error retrieving service types from parser";
+            throw new PluginException(msg);
         }
 
+        for (Iterator i=set.iterator(); i.hasNext(); )
+        {
+            NagiosServiceObj nagService = (NagiosServiceObj)i.next();
+            List list = nagService.getHostObjs();
+
+            ServiceResource service = createServiceResource(PLUGIN_NAME);
+            service.setServiceName(PLUGIN_NAME + " " + nagService.getDesc());
+
+            for (Iterator it=list.iterator(); it.hasNext(); )
+            {
+                NagiosHostObj hostObj = (NagiosHostObj)it.next();
+                ConfigResponse config = new ConfigResponse();
+                String cmdLine = nagService.getCmdLine(hostObj);
+                int index = cmdLine.indexOf(" ");
+                String path = (index == -1) ?
+                    cmdLine : cmdLine.substring(0, index);
+                String args = (index == -1) ?
+                    "" : cmdLine.substring(index);
+                config.setValue("path", path);
+                config.setValue("args", args);
+
+                service.setProductConfig(config);
+                ConfigResponse metricConfig = new ConfigResponse();
+                //XXX does not work (PR 9882)
+                //LogTrackPlugin.setEnabled(metricConfig,
+                //                          TypeInfo.TYPE_SERVICE,
+                //                          LogTrackPlugin.LOGLEVEL_WARN);
+                service.setMeasurementConfig(metricConfig);
+                services.add(service);
+            }
+        }
         return services;
     }
 }
