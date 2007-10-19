@@ -52,7 +52,189 @@ class DojoUtil {
             </script>	
         """
 	}
-     
+    
+    /**
+    * Returns the <script> block that controls the ajax updating accordion widget.
+    * The accordion is built from a json map in the form of {[ ]}
+    * 
+    * Example: downResources()
+    */
+    static String accordionSidebar(params) {
+    	def res = new StringBuffer("""
+            dojo.require("dojo.io.cookie");
+
+            var selectedItem;
+		    var currentCountFilter;
+		    var url = "";
+		    var plugin={};plugin.accordion={};plugin.ajax={};
+		    
+		    plugin.ajax.getData = function(type, data, evt) {
+		        var unique;
+		        if (data) {
+		            var domTree = document.getElementById('resourceTree');
+		            var tree = "";
+		            for (var x = 0; x < data.length; x++) {
+		                var parent = data[x]['parent'];
+		                var children = data[x]['children'];
+		                var innerChildren = "";
+		                var markExpanded = false;
+		                for (var i = 0; i < children.length; i++) {
+		                    if(selectedItem){
+		                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
+		                            unique = dojo.dom.getUniqueId();
+		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+		                            markExpanded = true;
+		                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
+		                            unique = dojo.dom.getUniqueId();
+		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+		                            markExpanded = true;
+		                        } else {
+		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+		                        }
+		                    }else{
+		                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+		                    }
+		                }
+		                tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+		            }
+		            domTree.innerHTML = tree;
+		            if(unique) {
+		                plugin.accordion.setSelected(dojo.byId(unique));
+		            }
+		        }
+		        if(unique)
+		            selectedItem = dojo.byId(unique);
+		    }
+		
+		    plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded) {
+		        var ret = '<div class="topCat" onclick="plugin.accordion.swapVis(this);" nodeid="'+id+'">'+name+" ("+count+")</div>"
+		            + '<div class="resourcetypelist"';
+		        if(markExpanded) {
+		            ret += '>' ;
+		        } else {
+		            ret += 'style="display:none">' ;
+		        }
+		        ret += innerChildren;
+		        ret += "</div>";
+		        return ret;
+		    };
+		
+		    plugin.accordion.createChild = function(name, id, count, unique) {
+		        if(unique) {
+		            domId = unique;
+		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + domId + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
+		        } else
+		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" nodeid="' + id + '">' + name + ' ('+count+')</div>';
+		    };
+		    
+		    plugin.accordion.itemClicked = function(item) {
+		        var url = '&nodeid='+item.nodeid;
+		        //mixin with the table update
+		    }
+		    
+		    plugin.accordion.swapVis = function(elem) {
+		        plugin.accordion.disableSelection(elem);
+		        var sib = elem.nextSibling;
+		        if(dojo.html.getStyleProperty(sib, 'display')=='none'){
+		            sib.style.display='block';
+		        } else {
+		            sib.style.display='none';
+		        }
+		        plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+		    }
+		    
+		    plugin.accordion.swapSelected = function(elem) {
+		        plugin.accordion.disableSelection(elem);
+		        if(selectedItem && typeof(selectedItem) == 'object'){
+		            selectedItem.style.padding = '3px';
+		            selectedItem.style.border = '';
+		            selectedItem.style.background = '';
+		        }
+		        selectedItem = elem;
+		        dojo.io.cookie.setCookie('selecteditemid', elem.getAttribute('nodeid'));
+		        plugin.accordion.setSelected(selectedItem);
+		        plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+		    }
+		    
+		    plugin.accordion.setSelected = function(elem){
+		        elem.style.padding = '2px';
+		        elem.style.border = '1px dotted dimGray';
+		        elem.style.background = '#EFF0F2 none repeat scroll 0%';
+		    }
+		    
+		    plugin.accordion.disableSelection = function(element) {
+		        element.onselectstart = function() {
+		            return false;
+		        };
+		        element.unselectable = "on";
+		        element.style.MozUserSelect = "none";
+		        //element.style.cursor = "default";
+		    }
+		
+		    plugin.accordion.openAll = function() {
+		        var tree = document.getElementById('resourceTree');
+		        var x = tree.getElementsByTagName('div');
+		        for (var i = 0; i < x.length; i++) {
+		            if (x[i].className == 'resourcetypelist') {
+		                x[i].style.display = '';
+		               // setselColor(x[i])
+		            }
+		        }
+		    }
+		
+		    plugin.accordion.closeAll = function() {
+		        var tree = document.getElementById('resourceTree');
+		        var x = tree.getElementsByTagName('div');
+		        for (var i = 0; i < x.length; i++) {
+		            if (x[i].className == 'resourcetypelist') {
+		                x[i].style.display = 'none';
+		                //setunselColor(x[i])
+		            }
+		        }
+		    }
+		
+		    plugin.accordion.setselColor = function(elem) {
+		        elem.style.backgroundColor = "#EEf3f3";
+		    }
+		
+		    plugin.accordion.setunselColor = function(elem) {
+		        elem.style.backgroundColor = "#ffffff";
+		    }
+		
+		    plugin.accordion.update = function(kwArgs){
+		        SystemsDown_refreshTable(kwArgs);
+		    }
+		    
+		    plugin.ajax.bindMixin = {
+		       load: plugin.ajax.getData,
+		       method: "get",
+		       mimetype: "text/json-comment-filtered"
+		    };
+		
+		    plugin.ajax.bind = function (url){
+		       plugin.ajax.bindMixin.url = url;
+		       dojo.io.bind(plugin.ajax.bindMixin);
+		    }
+		
+		    dojo.addOnLoad(function(){
+		        if(dojo.io.cookie.getCookie("selecteditemid")) {
+		            selectedItem = dojo.io.cookie.getCookie("selecteditemid")
+		        }
+		        if(dojo.io.cookie.getCookie("filtercount")) {
+		            currentCountFilter = dojo.byId(dojo.io.cookie.getCookie("filtercount"));
+		        } else {
+		            currentCountFilter = dojo.byId("defaultCount");
+		        }
+		        plugin.ajax.bind("/hqu/systemsdown/systemsdown/summary.hqu?q=all");
+		    });
+		    
+		    setInterval(function(){
+		        plugin.ajax.bind("/hqu/systemsdown/systemsdown/summary.hqu?q=all");
+		    }, ${params.refresh}*1000);
+        """)
+        res.toString();
+    }
+
     /**
      * Spit out a table, and appropriate <script> tags to enable AJAXification.
      *
@@ -141,10 +323,14 @@ class DojoUtil {
             ${urlXtraVar}.push(fn);
         }
 
-        function ${idVar}_makeQueryStr() {
+        function ${idVar}_makeQueryStr(kwArgs) {
             var res = '?pageNum=' + ${pageNumVar};
-
-            res += '&pageSize=${params.numRows}';
+            if (kwArgs && kwArgs.numRows)
+                res += '&pageSize='+ kwArgs.numRows;
+            else
+                res += '&pageSize=${params.numRows}';
+            if(kwArgs && kwArgs.typeId)
+                res += '&typeId='+ kwArgs.typeId;
 
             if (${sortFieldVar})
                 res += '&sortField=' + ${sortFieldVar};
@@ -183,8 +369,8 @@ class DojoUtil {
             ${id}_refreshTable();
         }
 
-        function ${id}_refreshTable() {
-            var queryStr = ${idVar}_makeQueryStr();
+        function ${id}_refreshTable(kwArgs) {
+            var queryStr = ${idVar}_makeQueryStr(kwArgs);
             ${ajaxCountVar}++;
             if (${ajaxCountVar} > 0) {
                 dojo.byId("${idVar}_loadMsg").style.visibility = 'visible';
@@ -305,6 +491,13 @@ class DojoUtil {
           </div>
           <div class='refreshButton'><img src='/hqu/public/images/arrow_refresh.gif' width='16' height='16' title="${BUNDLE['dojoutil.Refresh']}" onclick='${id}_refreshTable();'/></div>
           <div class="acLoader" id="${idVar}_loadMsg"></div>
+        """
+        
+		if(params.headerHTML) {
+		    res << params.get('headerHTML');
+		}
+        
+        res << """
           <div style="clear: both;"></div>
         </div>
         
@@ -364,7 +557,6 @@ class DojoUtil {
         def sortField = params.getOne("sortField")
         def sortOrder = params.getOne("sortOrder", 
                                       "${schema.defaultSortOrder}") == '1'
-                                      
         def sortColumn                                      
         for (c in schema.columns) {
             if (c.field.description == sortField) {
