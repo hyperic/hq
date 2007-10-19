@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -3677,6 +3679,52 @@ public class AppdefBossEJBImpl
             }
     
             ret.add(new DownResource(res.getResourcePOJO(), dmv));
+        }
+        return ret;
+    }
+    
+    /**
+     * Get the map of unavailable resource counts by type
+     * @ejb:interface-method
+     */
+    public Map getUnavailableResourcesCount(AuthzSubject user)
+        throws AppdefEntityNotFoundException, PermissionException {
+        // Keys for the Map table, UI should localize instead of showing key
+        // values directly
+        final String PLATFORMS = "Platforms";
+        final String SERVERS   = "Servers";
+        final String SERVICES  = "Services";
+        
+        List unavailEnts = getMetricManager().getUnavailEntities();
+        Map ret = new LinkedHashMap();
+        ret.put(PLATFORMS, new LinkedList());
+        ret.put(SERVERS,   new LinkedList());
+        ret.put(SERVICES,  new LinkedList());
+        
+        for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
+            DownMetricValue dmv = (DownMetricValue) it.next();
+            
+            AppdefEntityID aeid = dmv.getEntityId();
+            List list;
+            
+            if (aeid.isPlatform()) {
+                list = (List) ret.get(PLATFORMS);
+            }
+            else if (aeid.isServer()) {
+                list = (List) ret.get(SERVERS);
+            }
+            else if (aeid.isService()) {
+                list = (List) ret.get(SERVICES);
+            }
+            else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Can't handle appdef type: " + aeid.getType());
+                }
+                continue;
+            }
+            
+            AppdefEntityValue aev = new AppdefEntityValue(aeid, user);
+            list.add(aev.getTypeName());
         }
         return ret;
     }
