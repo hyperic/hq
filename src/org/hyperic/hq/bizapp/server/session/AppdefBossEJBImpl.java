@@ -3660,7 +3660,8 @@ public class AppdefBossEJBImpl
      * Get the list of resources that are unavailable
      * @ejb:interface-method 
      */
-    public Collection getUnavailableResources(AuthzSubject user, PageInfo info)
+    public Collection getUnavailableResources(AuthzSubject user, String typeId,
+                                              PageInfo info)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
         List unavailEnts = getMetricManager().getUnavailEntities();

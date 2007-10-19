@@ -14,7 +14,7 @@ class SystemsdownController extends BaseController {
     
     private final SYSTEMSDOWN_SCHEMA = [
         getData: {pageInfo, params -> 
-            resourceHelper.getDownResources(pageInfo)
+            resourceHelper.getDownResources(params['typeId'], pageInfo)
         },
         defaultSort: DownResSortField.DOWNTIME,
         defaultSortOrder: 1,  // descending
