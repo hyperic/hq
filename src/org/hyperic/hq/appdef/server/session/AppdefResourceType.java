@@ -29,6 +29,7 @@ import org.hyperic.hq.appdef.AppdefBean;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 
 public abstract class AppdefResourceType extends AppdefBean
+    implements Comparable
 {
     protected String name;
     protected String sortName;
@@ -82,6 +83,14 @@ public abstract class AppdefResourceType extends AppdefBean
     public void setDescription(String description)
     {
         this.description = description;
+    }
+
+    public int compareTo(Object o) {
+        if (!(o instanceof AppdefResourceType))
+            return 0;
+        
+        AppdefResourceType other = (AppdefResourceType) o;
+        return getName().compareTo(other.getName());
     }
 
     /**

@@ -54,6 +54,15 @@ class SystemsdownController extends BaseController {
 		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
 
+    def getTypeJSON(type, count) {
+        def json = ""
+        if (type != null) {
+            json += "{name: \"" + type.name + "\", id: \""
+            json += type.appdefType + ":" + type.id + "\", size: " + count + "},\n"
+        }
+        return json
+    }
+
     def summary(params) {
         def map = resourceHelper.downResourcesMap.entrySet()
 
@@ -69,27 +78,24 @@ class SystemsdownController extends BaseController {
                         "size: " + list.size() + ",\n" +
                         "children:[\n"
     
-                appdefType++
-    
-                def previous = ""
+                def previous = null
                 def count = 0
     
                 list.each { type ->
-                    if (previous != type) {
-                        if (previous != "") {
-                            json += "{name: \"" + previous  + "\", url:\"#\", id: 1, size: " + count + "},\n"
-                        }
+                    if (previous == null || previous.name != type.name) {
+                        json += getTypeJSON(previous, count)
                         previous = type
                         count = 0
                     }
     
                     count++
                 }
-    
-                json += "{name: \"" + previous + "\", url:\"#\", id: 1, size: " + count + "},\n"
-    
+
+                json += getTypeJSON(previous, count)
                 json += "]\n},\n"
             }
+
+            appdefType++
         }
 
         json += "]"

@@ -3724,7 +3724,7 @@ public class AppdefBossEJBImpl
             }
             
             AppdefEntityValue aev = new AppdefEntityValue(aeid, user);
-            list.add(aev.getTypeName());
+            list.add(aev.getAppdefResourceType());
         }
         return ret;
     }
