@@ -210,6 +210,18 @@ public class SST_Crisponizer extends SchemaSpecTask {
     }
 
     public void execute() throws BuildException {
+        try {
+            _execute();
+        } catch(BuildException e) {
+            e.printStackTrace();
+            throw (BuildException)e;
+        } catch(RuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    private void _execute() throws BuildException {
         Statement stmt  = null;
         ResultSet rs    = null;
 
