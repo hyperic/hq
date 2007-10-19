@@ -1,16 +1,14 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
-import org.json.JSONObject
-import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.util.config.ConfigResponse
-import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 
 class LiveController 
 	extends BaseController
 {
     def LiveController() {
-        setTemplate('standard')  
+        setTemplate('standard')
+        setJSONMethods(['invoke',])
     }
     
     def index(params) {
@@ -20,14 +18,13 @@ class LiveController
     }
     
     def invoke(params) {
-        log.info "Invoking!  Yay!"
-        def cmd = new LiveDataCommand(viewedResource.entityID, 
-                                      params.getOne('cmd'), 
-                                      new ConfigResponse())
-        def res = LiveDataManagerEJBImpl.one.getData(user, cmd).objectResult
-        log.info "Res is ${res}"
-        
-        def json = [result: HtmlUtil.escapeHtml(res)] as JSONObject
-		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
+        def res = viewedResource.getLiveData(user, params.getOne('cmd'),
+                                             new ConfigResponse())
+         
+        if (res.hasError()) {
+            return [error: HtmlUtil.escapeHtml(res.errorMessage)]
+        } else {
+            return [result: HtmlUtil.escapeHtml(res.objectResult)]
+        }
     }
 }
