@@ -37,11 +37,13 @@ public interface LiveDataFormatter {
     /**
      * Format a result from a LiveData execution into a string 
      * @param cmd        The command that was executed
+     * @param type       The type of data for the result
      * @param formatCfg  Configuration for the formatter (a response to
      *                   {@link getConfig(LiveDataCommand)})
      * @param val        The value to format
      */
-    String format(LiveDataCommand cmd, ConfigResponse formatCfg, Object val);
+    String format(LiveDataCommand cmd, FormatType type, 
+                  ConfigResponse formatCfg, Object val);
     
     /**
      * Get configuration parameters used to pass to format()
@@ -52,7 +54,14 @@ public interface LiveDataFormatter {
     /**
      * Return true if the formatter can format the specified command.
      */
-    boolean canFormat(LiveDataCommand cmd);
+    boolean canFormat(LiveDataCommand cmd, FormatType type);
+    
+    /**
+     * Get a simple string which uniquely identifies this formatter.
+     * 
+     * E.x. "cpuPerc"
+     */
+    String getId();
     
     /**
      * Get the name of the formatter, used for display purposes.

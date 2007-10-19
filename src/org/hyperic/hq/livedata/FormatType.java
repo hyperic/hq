@@ -23,19 +23,29 @@
  * USA.
  */
 
-package org.hyperic.hq.livedata.server.session;
+package org.hyperic.hq.livedata;
 
-import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.livedata.formatters.CpuPercFormatter;
-import org.hyperic.hq.livedata.formatters.ToStringFormatter;
+import java.util.ResourceBundle;
 
-public class LiveDataStartupListener
-    implements StartupListener
+import org.hyperic.util.HypericEnum;
+
+public class FormatType 
+    extends HypericEnum
 {
-    public void hqStarted() {
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new ToStringFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new CpuPercFormatter());
+    private static final String BUNDLE = "org.hyperic.hq.livedata.Resources";
+    
+    public static final FormatType TEXT = 
+        new FormatType(0, "text", "format.type.text"); 
+    public static final FormatType HTML = 
+        new FormatType(1, "html", "format.type.html"); 
+        
+    
+    public static FormatType findByCode(int code) {
+        return (FormatType)HypericEnum.findByCode(FormatType.class, code);
+    }
+    
+    private FormatType(int code, String desc, String localeProp) {
+        super(FormatType.class, code, desc, localeProp,
+              ResourceBundle.getBundle(BUNDLE));
     }
 }

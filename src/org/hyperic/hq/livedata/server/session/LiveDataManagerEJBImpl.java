@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
@@ -354,10 +355,21 @@ public class LiveDataManagerEJBImpl implements SessionBean {
     }
 
     /**
+     * Gets a set of {@link LiveDataFormatter}s which are able to format
+     * the passed command.
+     * 
      * @ejb:interface-method
      */
-    public Set findFormatters(LiveDataCommand cmd) {
-        return FormatterRegistry.getInstance().findFormatters(cmd);
+    public Set findFormatters(LiveDataCommand cmd, FormatType type) {
+        return FormatterRegistry.getInstance().findFormatters(cmd, type);
+    }
+    
+    /**
+     * Find a formatter based on its 'id' property.
+     * @ejb:interface-method
+     */
+    public LiveDataFormatter findFormatter(String id) {
+        return FormatterRegistry.getInstance().findFormatter(id);
     }
 
     /**

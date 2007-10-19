@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 
@@ -56,18 +57,30 @@ class FormatterRegistry {
     /**
      * Find the formatters which can process the specified command 
      */
-    Set findFormatters(LiveDataCommand cmd) {
+    Set findFormatters(LiveDataCommand cmd, FormatType type) {
         Set res = new HashSet();
         
         synchronized (_formatters) {
             for (Iterator i=_formatters.iterator(); i.hasNext(); ) {
                 LiveDataFormatter f = (LiveDataFormatter)i.next();
                 
-                if (f.canFormat(cmd)) 
+                if (f.canFormat(cmd, type)) 
                     res.add(f);
             }
         }
         return res;
+    }
+
+    LiveDataFormatter findFormatter(String id) {
+        synchronized (_formatters) {
+            for (Iterator i=_formatters.iterator(); i.hasNext(); ) {
+                LiveDataFormatter f = (LiveDataFormatter)i.next();
+                
+                if (f.getId().equals(id))
+                    return f;
+            }
+        }
+        return null;
     }
     
     static FormatterRegistry getInstance() {
