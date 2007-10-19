@@ -1,7 +1,10 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
+import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl as ldmi
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.util.config.ConfigResponse
+import org.hyperic.hq.livedata.FormatType
+import org.hyperic.hq.livedata.shared.LiveDataCommand
 
 class LiveController 
 	extends BaseController
@@ -12,19 +15,47 @@ class LiveController
     }
     
     def index(params) {
-        def cmds = viewedResource.getLiveDataCommands(user).sort()
+        def cmds       = viewedResource.getLiveDataCommands(user).sort()
+        def viewedId   = viewedResource.entityID
+        def liveMan    = ldmi.one
+        def cmdFmt     = [:]
+        def formatters = [:]
+                          
+        for (c in cmds) {
+            def ldCmd = new LiveDataCommand(viewedId, c, new ConfigResponse())
+            def fmt   = liveMan.findFormatters(ldCmd, FormatType.HTML)
+            cmdFmt[c] = fmt.collect {f -> f.id}
+            for (f in fmt) {
+                formatters[f.id] = [name:f.name, desc:f.description]
+            }
+        }
+            
         cmds.add(0, '---')
-    	render(locals:[ commands:cmds, eid:viewedResource.entityID ])
+    	render(locals:[ commands:cmds, eid:viewedResource.entityID,
+    	                cmdFmt:cmdFmt, formatters:formatters])
     }
     
     def invoke(params) {
-        def res = viewedResource.getLiveData(user, params.getOne('cmd'),
-                                             new ConfigResponse())
+        def fmtId = params.getOne('formatter')
+        def res   = viewedResource.getLiveData(user, params.getOne('cmd'),
+                                               new ConfigResponse())
          
         if (res.hasError()) {
             return [error: HtmlUtil.escapeHtml(res.errorMessage)]
         } else {
-            return [result: HtmlUtil.escapeHtml(res.objectResult)]
+            if (fmtId == null) {
+                fmtId = 'toString'
+            }
+            def formatter = ldmi.one.findFormatter(fmtId)
+            def ldCmd = new LiveDataCommand(viewedResource.entityID,
+                                            params.getOne('cmd'),
+                                            new ConfigResponse())
+	        def txt = formatter.format(ldCmd, FormatType.HTML,
+	                                   new ConfigResponse(), res.objectResult)
+            
+            if (fmtId == 'toString') 
+                txt = HtmlUtil.escapeHtml(txt)
+            return [result: txt]
         }
     }
 }
