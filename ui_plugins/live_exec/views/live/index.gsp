@@ -21,7 +21,9 @@ function selectCommand(cmd) {
   }
   
   for (var i=0; i<commands.length; i++) {
-    if (commands[i] == cmd && cmd != '---') {
+    if (commands[i] == cmd && cmd != '---' &&
+        fmt[cmd].length > 1) 
+    {
       dojo.html.show("fmt_cont_" + commands[i]);
     } else {
       dojo.html.hide("fmt_cont_" + commands[i]);
