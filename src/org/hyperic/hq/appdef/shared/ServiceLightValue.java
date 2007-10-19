@@ -33,11 +33,10 @@ package org.hyperic.hq.appdef.shared;
  * Value object for Service.
  *
  */
-public class ServiceLightValue
-   extends org.hyperic.hq.appdef.shared.AppdefResourceValue
+public class ServiceLightValue extends AppdefResourceValue
    implements java.io.Serializable
 {
-   private java.lang.String sortName;
+   private String sortName;
    private boolean sortNameHasBeenSet = false;
    private boolean autodiscoveryZombie;
    private boolean autodiscoveryZombieHasBeenSet = false;
@@ -45,34 +44,34 @@ public class ServiceLightValue
    private boolean serviceRtHasBeenSet = false;
    private boolean endUserRt;
    private boolean endUserRtHasBeenSet = false;
-   private java.lang.String modifiedBy;
+   private String modifiedBy;
    private boolean modifiedByHasBeenSet = false;
-   private java.lang.String owner;
+   private String owner;
    private boolean ownerHasBeenSet = false;
-   private java.lang.String location;
+   private String location;
    private boolean locationHasBeenSet = false;
-   private java.lang.Integer configResponseId;
+   private Integer configResponseId;
    private boolean configResponseIdHasBeenSet = false;
    private Integer parentId;
    private boolean parentIdHasBeenSet = false;
-   private java.lang.String name;
+   private String name;
    private boolean nameHasBeenSet = false;
-   private java.lang.String description;
+   private String description;
    private boolean descriptionHasBeenSet = false;
-   private java.lang.Integer id;
+   private Integer id;
    private boolean idHasBeenSet = false;
-   private java.lang.Long mTime;
+   private Long mTime;
    private boolean mTimeHasBeenSet = false;
-   private java.lang.Long cTime;
+   private Long cTime;
    private boolean cTimeHasBeenSet = false;
-   private org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType;
+   private ServiceTypeValue ServiceType;
    private boolean ServiceTypeHasBeenSet = false;
 
    public ServiceLightValue()
    {
    }
 
-   public ServiceLightValue( java.lang.String sortName,boolean autodiscoveryZombie,boolean serviceRt,boolean endUserRt,java.lang.String modifiedBy,java.lang.String owner,java.lang.String location,java.lang.Integer configResponseId,Integer parentId,java.lang.String name,java.lang.String description,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
+   public ServiceLightValue( String sortName,boolean autodiscoveryZombie,boolean serviceRt,boolean endUserRt,String modifiedBy,String owner,String location,Integer configResponseId,Integer parentId,String name,String description,Integer id,Long mTime,Long cTime )
    {
 	  this.sortName = sortName;
 	  sortNameHasBeenSet = true;
@@ -140,12 +139,12 @@ public class ServiceLightValue
 	  ServiceTypeHasBeenSet = true;
    }
 
-   public java.lang.String getSortName()
+   public String getSortName()
    {
 	  return this.sortName;
    }
 
-   public void setSortName( java.lang.String sortName )
+   public void setSortName( String sortName )
    {
 	  this.sortName = sortName;
 	  sortNameHasBeenSet = true;
@@ -200,12 +199,12 @@ public class ServiceLightValue
    public boolean endUserRtHasBeenSet(){
 	  return endUserRtHasBeenSet;
    }
-   public java.lang.String getModifiedBy()
+   public String getModifiedBy()
    {
 	  return this.modifiedBy;
    }
 
-   public void setModifiedBy( java.lang.String modifiedBy )
+   public void setModifiedBy( String modifiedBy )
    {
 	  this.modifiedBy = modifiedBy;
 	  modifiedByHasBeenSet = true;
@@ -215,12 +214,12 @@ public class ServiceLightValue
    public boolean modifiedByHasBeenSet(){
 	  return modifiedByHasBeenSet;
    }
-   public java.lang.String getOwner()
+   public String getOwner()
    {
 	  return this.owner;
    }
 
-   public void setOwner( java.lang.String owner )
+   public void setOwner( String owner )
    {
 	  this.owner = owner;
 	  ownerHasBeenSet = true;
@@ -230,12 +229,12 @@ public class ServiceLightValue
    public boolean ownerHasBeenSet(){
 	  return ownerHasBeenSet;
    }
-   public java.lang.String getLocation()
+   public String getLocation()
    {
 	  return this.location;
    }
 
-   public void setLocation( java.lang.String location )
+   public void setLocation( String location )
    {
 	  this.location = location;
 	  locationHasBeenSet = true;
@@ -245,12 +244,12 @@ public class ServiceLightValue
    public boolean locationHasBeenSet(){
 	  return locationHasBeenSet;
    }
-   public java.lang.Integer getConfigResponseId()
+   public Integer getConfigResponseId()
    {
 	  return this.configResponseId;
    }
 
-   public void setConfigResponseId( java.lang.Integer configResponseId )
+   public void setConfigResponseId( Integer configResponseId )
    {
 	  this.configResponseId = configResponseId;
 	  configResponseIdHasBeenSet = true;
@@ -275,12 +274,12 @@ public class ServiceLightValue
    public boolean parentIdHasBeenSet(){
 	  return parentIdHasBeenSet;
    }
-   public java.lang.String getName()
+   public String getName()
    {
 	  return this.name;
    }
 
-   public void setName( java.lang.String name )
+   public void setName( String name )
    {
 	  this.name = name;
 	  nameHasBeenSet = true;
@@ -290,12 +289,12 @@ public class ServiceLightValue
    public boolean nameHasBeenSet(){
 	  return nameHasBeenSet;
    }
-   public java.lang.String getDescription()
+   public String getDescription()
    {
 	  return this.description;
    }
 
-   public void setDescription( java.lang.String description )
+   public void setDescription( String description )
    {
 	  this.description = description;
 	  descriptionHasBeenSet = true;
@@ -305,12 +304,12 @@ public class ServiceLightValue
    public boolean descriptionHasBeenSet(){
 	  return descriptionHasBeenSet;
    }
-   public java.lang.Integer getId()
+   public Integer getId()
    {
 	  return this.id;
    }
 
-   public void setId( java.lang.Integer id )
+   public void setId( Integer id )
    {
 	  this.id = id;
 	  idHasBeenSet = true;
@@ -319,12 +318,12 @@ public class ServiceLightValue
    public boolean idHasBeenSet(){
 	  return idHasBeenSet;
    }
-   public java.lang.Long getMTime()
+   public Long getMTime()
    {
 	  return this.mTime;
    }
 
-   public void setMTime( java.lang.Long mTime )
+   public void setMTime( Long mTime )
    {
 	  this.mTime = mTime;
 	  mTimeHasBeenSet = true;
@@ -334,12 +333,12 @@ public class ServiceLightValue
    public boolean mTimeHasBeenSet(){
 	  return mTimeHasBeenSet;
    }
-   public java.lang.Long getCTime()
+   public Long getCTime()
    {
 	  return this.cTime;
    }
 
-   public void setCTime( java.lang.Long cTime )
+   public void setCTime( Long cTime )
    {
 	  this.cTime = cTime;
 	  cTimeHasBeenSet = true;
@@ -350,11 +349,11 @@ public class ServiceLightValue
 	  return cTimeHasBeenSet;
    }
 
-   public org.hyperic.hq.appdef.shared.ServiceTypeValue getServiceType()
+   public ServiceTypeValue getServiceType()
    {
 	  return this.ServiceType;
    }
-   public void setServiceType( org.hyperic.hq.appdef.shared.ServiceTypeValue ServiceType )
+   public void setServiceType( ServiceTypeValue ServiceType )
    {
 	  this.ServiceType = ServiceType;
 	  ServiceTypeHasBeenSet = true;
@@ -364,7 +363,14 @@ public class ServiceLightValue
    {
 	  StringBuffer str = new StringBuffer("{");
 
-	  str.append("sortName=" + getSortName() + " " + "autodiscoveryZombie=" + getAutodiscoveryZombie() + " " + "serviceRt=" + getServiceRt() + " " + "endUserRt=" + getEndUserRt() + " " + "modifiedBy=" + getModifiedBy() + " " + "owner=" + getOwner() + " " + "location=" + getLocation() + " " + "configResponseId=" + getConfigResponseId() + " " + "parentId=" + getParentId() + " " + "name=" + getName() + " " + "description=" + getDescription() + " " + "id=" + getId() + " " + "mTime=" + getMTime() + " " + "cTime=" + getCTime());
+	  str.append("sortName=" + getSortName() + " autodiscoveryZombie="
+                + getAutodiscoveryZombie() + " serviceRt=" + getServiceRt()
+                + " endUserRt=" + getEndUserRt() + " modifiedBy="
+                + getModifiedBy() + " owner=" + getOwner() + " location="
+                + getLocation() + " configResponseId=" + getConfigResponseId()
+                + " parentId=" + getParentId() + " name=" + getName()
+                + " description=" + getDescription() + " id=" + getId()
+                + " mTime=" + getMTime() + " cTime=" + getCTime());
 	  str.append('}');
 
 	  return(str.toString());
@@ -551,4 +557,7 @@ public class ServiceLightValue
 	  return result;
    }
 
+   public AppdefEntityID getEntityId() {
+       return AppdefEntityID.newServiceID(getId().intValue());
+   }
 }

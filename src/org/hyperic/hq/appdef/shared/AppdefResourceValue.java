@@ -99,38 +99,7 @@ public abstract class AppdefResourceValue
     /**
      * get an entity ID for the object
      */
-    public AppdefEntityID getEntityId() {
-        if(this instanceof PlatformValue ||
-           this instanceof PlatformLightValue){
-            return AppdefEntityID.newPlatformID(getId().intValue());
-        }
-        else if (this instanceof ServerValue ||
-                 this instanceof ServerLightValue){
-            return AppdefEntityID.newServerID(getId().intValue());
-        }
-        else if (this instanceof ServiceValue ||
-                 this instanceof ServiceLightValue ){
-            return AppdefEntityID.newServiceID(getId().intValue());
-        }
-        else if (this instanceof ServiceClusterValue){
-            // hello, butt-ugliness-who-makes-me-wince-whenever-I-see-you
-            // the AppdefEntityID must be of the underlying group so we do 
-            // something a little different
-            return AppdefEntityID.newGroupID(
-                ((ServiceClusterValue)this).getGroupId().intValue());
-        }
-        else if (this instanceof ApplicationValue){
-            return AppdefEntityID.newAppID(getId().intValue());
-        }
-        else if (this instanceof AppdefGroupValue){
-            return AppdefEntityID.newGroupID(getId().intValue());
-        }
-        // should never happen.
-        // TODO decide what exception to throw here
-        else 
-            throw new IllegalArgumentException("Unsupported appdef resource value object: "
-                                               + this);
-    }
+    public abstract AppdefEntityID getEntityId();
 
     // get a map of resource types and instances
     private static Map getResourceTypeMap(int mapType, Collection objColl) {
