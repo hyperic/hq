@@ -17,7 +17,11 @@ function go() {
     method: "get",
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
-      dojo.byId('result').innerHTML = data.result;
+      if (data.result) {
+        dojo.byId('result').innerHTML = data.result;
+      } else {
+        dojo.byId('result').innerHTML = data.error;
+      }
     },
     error: function(err) {
       alert('error!');
