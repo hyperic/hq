@@ -6,6 +6,10 @@ import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
+import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.hyperic.hq.livedata.shared.LiveDataResult
+import org.hyperic.util.config.ConfigResponse
+
 
 class ResourceCategory {
     /**
@@ -59,5 +63,12 @@ class ResourceCategory {
      */
     static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
         LiveDataManagerEJBImpl.one.getCommands(user, r.entityID) as List
+    }
+
+    static LiveDataResult getLiveData(Resource r, AuthzSubject user, 
+                                      String cmd, ConfigResponse cfg)  
+    {
+        def lcmd = new LiveDataCommand(r.entityID, cmd, cfg)
+        LiveDataManagerEJBImpl.one.getData(user, lcmd)
     }
 }
