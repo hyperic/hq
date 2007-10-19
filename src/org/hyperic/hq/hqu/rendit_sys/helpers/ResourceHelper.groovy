@@ -43,4 +43,8 @@ class ResourceHelper extends BaseHelper {
     def getDownResources(PageInfo pInfo) {
         appBoss.getUnavailableResources(user, pInfo)
     }
+    
+    def getDownResourcesMap() {
+    	appBoss.getUnavailableResourcesCount(user)
+    }
 }

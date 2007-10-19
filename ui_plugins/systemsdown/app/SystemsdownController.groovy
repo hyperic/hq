@@ -55,32 +55,44 @@ class SystemsdownController extends BaseController {
     }
 
     def summary(params) {
-        def json = "[\n" +
-           "{parent: \"Platforms\",\n" +
-            "id: \"1\",\n" +
-            "children:[\n" +
-                "{name: \"Linux\", url:\"#\", id:1},\n" +
-                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
-                "{name: \"Windoze\", url:\"#\", id:3}\n" +
-                "]\n" +
-            "},\n" +
-           "{parent: \"Servers\",\n" +
-            "id: \"1\",\n" +
-            "children:[\n" +
-                "{name: \"Linux\", url:\"#\", id:1},\n" +
-                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
-                "{name: \"Windoze\", url:\"#\", id:3}\n" +
-                "]\n" +
-            "},\n" +
-           "{parent: \"Services\",\n" +
-            "id: \"1\",\n" +
-            "children:[\n" +
-                "{name: \"Linux\", url:\"#\", id:1},\n" +
-                "{name: \"MacOSX\", url:\"#\", id:2},\n" +
-                "{name: \"Windoze\", url:\"#\", id:3}\n" +
-                "]\n" +
-            "},\n" +
-        "]"
+        def map = resourceHelper.downResourcesMap.entrySet()
+
+        def json = "[\n"
+
+        def appdefType = 1
+        map.each { entry ->
+            def list = entry.value
+
+            if (list.size() > 0) {
+                json += "{parent: \"" + entry.key + "\",\n" +
+                        "id: " + appdefType + ",\n" +
+                        "size: " + list.size() + ",\n" +
+                        "children:[\n"
+    
+                appdefType++
+    
+                def previous = ""
+                def count = 0
+    
+                list.each { type ->
+                    if (previous != type) {
+                        if (previous != "") {
+                            json += "{name: \"" + previous  + "\", url:\"#\", id: 1, size: " + count + "},\n"
+                        }
+                        previous = type
+                        count = 0
+                    }
+    
+                    count++
+                }
+    
+                json += "{name: \"" + previous + "\", url:\"#\", id: 1, size: " + count + "},\n"
+    
+                json += "]\n},\n"
+            }
+        }
+
+        json += "]"
 		render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
     }
 }
