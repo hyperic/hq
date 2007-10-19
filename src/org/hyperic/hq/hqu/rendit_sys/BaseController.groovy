@@ -42,11 +42,23 @@ abstract class BaseController {
     private         localeBundle = [:] // l10n bundle, must support getAt()
     private         jsonMethods = []   /* Names of methods which will 
                                           automatically encode JSON */ 
-                                          
+    
+    /**
+     * Add a closure that will be executed prior to any controller action 
+     * methods.  If the filter returns true, then filter-execution will stop
+     * and the request will be aborted.
+     */
     protected void addBeforeFilter(Closure filter) {
         beforeFilters << filter
     }
     
+    /**
+     * Set a list of methods which are set to return a Map which will be
+     * translated to JSON and sent via 'text/json-comment-filtered'.
+     *
+     * @param meths  A list of strings: the names of methods which will
+     *               return Maps to translate to JSON Objects
+     */
     protected void setJSONMethods(List meths) {
         jsonMethods = meths
     }
