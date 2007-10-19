@@ -17,6 +17,8 @@ import org.hyperic.hq.hqu.rendit.render.RenderFrame
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
 import org.hyperic.hq.hqu.server.session.Attachment
 
+import org.json.JSONObject
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
@@ -38,11 +40,17 @@ abstract class BaseController {
     private File    viewDir            // Path to plugin/app/views
     private boolean rendered           // Have we already performed a render?
     private         localeBundle = [:] // l10n bundle, must support getAt()
-
+    private         jsonMethods = []   /* Names of methods which will 
+                                          automatically encode JSON */ 
+                                          
     protected void addBeforeFilter(Closure filter) {
         beforeFilters << filter
     }
     
+    protected void setJSONMethods(List meths) {
+        jsonMethods = meths
+    }
+
     def getLocaleBundle() {
         localeBundle
     }
@@ -84,15 +92,20 @@ abstract class BaseController {
 	    rendered = false
 	    
 	    try {
-	        
 	        for (f in beforeFilters) {
 	        	if (f(params))
 	        	    return;
 	        }
 	        
-			invokeMethod(action, params)
+			def methRes = invokeMethod(action, params)
     		if (!rendered) {
-    		    render([action : action])
+    		    if (action in jsonMethods) {
+    		        def json = methRes as JSONObject
+    				render(inline:"/* ${json} */", 
+    				       contentType:'text/json-comment-filtered')
+    		    } else {
+    		        render([action : action])
+    		    }
 	        }
 	    } finally {
     		log.info "Executed $controllerName:$action in " +   
