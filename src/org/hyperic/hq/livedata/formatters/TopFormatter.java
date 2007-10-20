@@ -159,7 +159,7 @@ public class TopFormatter
              .append("<td>").append(d.getState()).append("</td>")                           
              .append("<td>").append(d.getFormattedCpuTotal()).append("</td>")                           
              .append("<td>").append(d.getFormattedCpuPerc()).append("</td>")                           
-             .append("<td>").append(d.getBaseName()).append("</td></tr>");                           
+             .append("<td>").append(h(d.getBaseName())).append("</td></tr>");                           
         }
         
         r.append("</tbody></table>");
