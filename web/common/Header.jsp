@@ -89,8 +89,14 @@
             </c:choose>
         </html:link>
     </div>
-
-    <div class="headRightWrapper" style="z-index: 300;">
+   <style type="text/css">
+       .headUsrName {
+           max-width: 385px;
+           /*width:expression(document.body.clientWidth > 385 ? "385px": "auto" ); */
+           width:180px;
+      }
+   </style>
+    <div class="headRightWrapper">
         <div class="headTopNav">
             <div class="headAlertWrapper">
                 <div class="recentText">
@@ -129,13 +135,7 @@
         </div>
 
         <div class="headBotNav">
-
-
-            <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                    <td>
-
-                        <div dojoType="PopupMenu2" widgetId="submenu1">
+                <div dojoType="PopupMenu2" widgetId="submenu1">
                             <div dojoType="MenuItem2" caption="<fmt:message key="header.Browse"/>"
                                  onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
                             <tiles:insert definition=".header.optional.tabs">
@@ -163,12 +163,6 @@
                             <div dojoType="MenuBarItem2" caption="<fmt:message key="admin.admin.AdministrationTitle"/>"
                                  onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
                         </div>
-
-                    </td>
-                </tr>
-            </table>
-
-
             <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
         <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>

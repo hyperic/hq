@@ -1078,10 +1078,12 @@ border-left:1px solid #D5D8DE;
     position:relative;
     margin-left:225px;
     height:60px;
+    white-space:nowrap;
 }
 .headTopNav {
-    height:38px;
+    height:40px;
     width:100%;
+    border-top:1px solid #ffffff;
 }
 
 .headUsrName {
@@ -1116,9 +1118,6 @@ a.headUsrName {
 
 .headBotNav {
     background-color:#336699;
-    border-top:1px solid #ffffff;
-    border-left:1px solid #ffffff;
-    height:21px;
 }
 
 .mainNavText {
@@ -1144,8 +1143,6 @@ padding-top:5px;
     font-weight:bold;
     color:black;
     white-space: nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
 }
 
 #navigationTbl  {
