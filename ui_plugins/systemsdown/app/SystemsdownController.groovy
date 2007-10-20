@@ -14,7 +14,11 @@ class SystemsdownController extends BaseController {
     
     private final SYSTEMSDOWN_SCHEMA = [
         getData: {pageInfo, params -> 
-            resourceHelper.getDownResources(params['typeId'], pageInfo)
+            def typeId = ""
+            if (params['typeId'] != null) {
+                typeId = params['typeId'][0]
+            }
+            resourceHelper.getDownResources(typeId, pageInfo)
         },
         defaultSort: DownResSortField.DOWNTIME,
         defaultSortOrder: 1,  // descending
@@ -58,7 +62,7 @@ class SystemsdownController extends BaseController {
         def json = ""
         if (type != null) {
             json += "{name: \"" + type.name + "\", id: \""
-            json += type.appdefType + ":" + type.id + "\", size: " + count + "},\n"
+            json += type.appdefType + ":" + type.id + "\", count: " + count + "},\n"
         }
         return json
     }
@@ -75,7 +79,7 @@ class SystemsdownController extends BaseController {
             if (list.size() > 0) {
                 json += "{parent: \"" + entry.key + "\",\n" +
                         "id: " + appdefType + ",\n" +
-                        "size: " + list.size() + ",\n" +
+                        "count: " + list.size() + ",\n" +
                         "children:[\n"
     
                 def previous = null

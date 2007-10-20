@@ -53,6 +53,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
@@ -3667,12 +3668,36 @@ public class AppdefBossEJBImpl
         List unavailEnts = getMetricManager().getUnavailEntities();
         DownResSortField sortField = (DownResSortField) info.getSort();
         Set ret = new TreeSet(sortField.getComparator(!info.isAscending()));
+        
+        int appdefType = -1;
+        int appdefTypeId = -1;
+        
+        if (typeId != null && typeId.length() > 0) {
+            try {
+                appdefType = Integer.parseInt(typeId);
+            } catch (NumberFormatException e) {
+                AppdefEntityTypeID aetid = new AppdefEntityTypeID(typeId);
+                appdefType = aetid.getType();
+                appdefTypeId = aetid.getID();
+            }
+        }
+        
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
-            
-            // Look up the resource
-            AppdefEntityValue res =
-                new AppdefEntityValue(dmv.getEntityId(), user);
+            AppdefEntityID entityId = dmv.getEntityId();
+            AppdefEntityValue res = new AppdefEntityValue(entityId, user);
+                        
+            // Look up the resource type
+            if (appdefType != -1) {
+                if (entityId.getType() != appdefType)
+                    continue;
+                
+                if (appdefTypeId != -1) {
+                    AppdefResourceType type = res.getAppdefResourceType();
+                    if (type.getId().intValue() != appdefTypeId)
+                        continue;
+                }
+            }
             
             if (log.isDebugEnabled()) {
                 log.debug(res.getName() + " down for " +
@@ -3680,6 +3705,12 @@ public class AppdefBossEJBImpl
             }
     
             ret.add(new DownResource(res.getResourcePOJO(), dmv));
+        }
+        
+        if (!info.isAll() && ret.size() > info.getPageSize()) {
+            // Have to reduce the size
+            List reduced = new ArrayList(ret);
+            return reduced.subList(0, info.getPageSize() - 1);
         }
         return ret;
     }

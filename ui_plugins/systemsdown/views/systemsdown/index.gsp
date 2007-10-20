@@ -45,7 +45,7 @@
         
         <%= dojoTable(id:'SystemsDown', title:'',
             refresh:60, pageControls:false, url:urlFor(action:'data'),
-            schema:systemsDownSchema, numRows:numRows?numRows:50, headerHTML: headerHTML) 
+            schema:systemsDownSchema, numRows:50, headerHTML: headerHTML) 
         %>
         </div>
     </div>
