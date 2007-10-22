@@ -168,7 +168,6 @@
 	dojo.event.connect(window, "onload", function(){
 	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
 	    dialogWidget.setShowControl("openDialog");
-	    dialogWidget.setCloseControl("closeDialog");
 	    if(<c:out value="${DashboardForm.popDialog}"/>){
 	       dialogWidget.show();
 	    }
@@ -213,7 +212,7 @@
     <td colspan="<c:out value="${headerColspan}"/>"><tiles:insert page="/portal/DashboardHeader.jsp"/></td>
   </tr>
   <tr> <!-- Role based config dashboard area -->
-    <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
+    <td class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
     <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
     <td colspan="2">
         <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
