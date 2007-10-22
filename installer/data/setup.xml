@@ -615,6 +615,8 @@ ${errMsg}
     <chmod perm="a+rx">
       <fileset dir="${chmod.dir}">
         <include name="**/bin/*"/>
+		<!-- Set java permissions for Sun Sparc 64 bit JVM -->
+		<include name="**/bin/sparcv9/*"/>
         <include name="**/*.sh"/>
         <include name="**/*.bat"/>
         <include name="**/*.cmd"/>
