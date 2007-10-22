@@ -33,8 +33,16 @@
 <!--[if lte IE 7]>
 <link rel=stylesheet href="<html:rewrite page="/css/iecss.css"/>" type="text/css">
  <![endif]-->
+<script type="text/javascript">
 
- <link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
+	var djConfig = {
+		isDebug : false,
+		locale : "<%=request.getLocale().toString().substring(0,2)%>"
+	};
+
+</script>
+<script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
+<link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
