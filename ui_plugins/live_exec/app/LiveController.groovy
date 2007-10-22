@@ -9,7 +9,7 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand
 class LiveController 
 	extends BaseController
 {
-    private FORBIDDEN = ['kill', 'process']
+    private FORBIDDEN = ['cpu', 'kill', 'process']
                          
     def LiveController() {
         setTemplate('standard')
