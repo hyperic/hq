@@ -23,13 +23,14 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement.ext.depgraph;
+package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.MeasurementArg;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
+import org.hyperic.hq.measurement.ext.depgraph.Graph;
+import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
+import org.hyperic.hq.measurement.ext.depgraph.Node;
+import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 
 import java.util.Collection;
@@ -70,7 +71,7 @@ public final class GraphBuilder {
         }
 
         // now add our dependents, recursively
-        Collection args = mt.getMeasurementArgs();
+        Collection args = mt.getMeasurementArgsBag();
         for (Iterator i = args.iterator(); i.hasNext(); ) {
             MeasurementArg arg = (MeasurementArg)i.next();
             MeasurementTemplate templ = arg.getTemplateArg();

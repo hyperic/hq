@@ -74,7 +74,6 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
-import org.hyperic.hq.measurement.ext.depgraph.GraphBuilder;
 import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
