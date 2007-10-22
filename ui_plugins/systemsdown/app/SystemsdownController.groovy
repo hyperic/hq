@@ -14,11 +14,7 @@ class SystemsdownController extends BaseController {
     
     private final SYSTEMSDOWN_SCHEMA = [
         getData: {pageInfo, params -> 
-            def typeId = ""
-            if (params['typeId'] != null) {
-                typeId = params['typeId'][0]
-            }
-            resourceHelper.getDownResources(typeId, pageInfo)
+            resourceHelper.getDownResources(params.getOne('typeId'), pageInfo)
         },
         defaultSort: DownResSortField.DOWNTIME,
         defaultSortOrder: 1,  // descending
@@ -50,7 +46,7 @@ class SystemsdownController extends BaseController {
     }
 
     def index(params) {
-    	render(locals:[ systemsDownSchema : SYSTEMSDOWN_SCHEMA ])
+    	render(locals:[ systemsDownSchema : SYSTEMSDOWN_SCHEMA, numRows : params.numRows])
     }
 
     def data(params) {
