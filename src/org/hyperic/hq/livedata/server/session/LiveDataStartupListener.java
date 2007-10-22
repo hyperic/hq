@@ -29,25 +29,24 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.livedata.formatters.CpuInfoFormatter;
 import org.hyperic.hq.livedata.formatters.CpuPercFormatter;
 import org.hyperic.hq.livedata.formatters.FilesystemFormatter;
+import org.hyperic.hq.livedata.formatters.IfconfigFormatter;
 import org.hyperic.hq.livedata.formatters.ToStringFormatter;
 import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.livedata.formatters.WhoFormatter;
+import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
 
 public class LiveDataStartupListener
     implements StartupListener
 {
     public void hqStarted() {
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new ToStringFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new CpuPercFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new WhoFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new TopFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new CpuInfoFormatter());
-        LiveDataManagerEJBImpl.getOne()
-            .registerFormatter(new FilesystemFormatter());
+        LiveDataManagerLocal lman = LiveDataManagerEJBImpl.getOne();
+        
+        lman.registerFormatter(new ToStringFormatter());
+        lman.registerFormatter(new CpuPercFormatter());
+        lman.registerFormatter(new WhoFormatter());
+        lman.registerFormatter(new TopFormatter());
+        lman.registerFormatter(new CpuInfoFormatter());
+        lman.registerFormatter(new FilesystemFormatter());
+        lman.registerFormatter(new IfconfigFormatter());
     }
 }
