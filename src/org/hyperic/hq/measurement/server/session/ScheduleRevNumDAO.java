@@ -25,11 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-
 import java.util.Collection;
+
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class ScheduleRevNumDAO extends HibernateDAO {
     public ScheduleRevNumDAO(DAOFactory f) {
@@ -111,4 +113,30 @@ public class ScheduleRevNumDAO extends HibernateDAO {
             .setInteger(0, id.getID())
             .setInteger(1, id.getType()).uniqueResult();
     }
+    
+    /**
+     * Find the minimum collection interval for the given entity, potentially 
+     * allowing for the query to return a stale value (for efficiency reasons).
+     * 
+     * @param id The appdef entity to look up.
+     * @param allowStale <code>true</code> to allow the query to return a stale
+     *                   value; <code>false</code> to never allow a stale value, 
+     *                   potentially always forcing a sync with the database.
+     * @return The minimum collection interval for the given entity.
+     */
+    public Long getMinInterval(AppdefEntityID id, boolean allowStale) {
+        Session session = this.getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+        
+        try {
+            if (allowStale) {
+                session.setFlushMode(FlushMode.MANUAL);                
+            }
+            
+            return getMinInterval(id);
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        } 
+    }    
+     
 }

@@ -46,7 +46,6 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hibernate.Session;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionFactoryImpl;
@@ -360,11 +359,14 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method 
      */
     public void updateTemplateDefaultInterval(AuthzSubject subject, 
-                                              Integer[] templIds, long interval) 
+                                              Integer[] templIds, 
+                                              long interval) 
     {
         HashSet toReschedule = new HashSet();
         MeasurementTemplateDAO templDao = getMeasurementTemplateDAO();
         DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
+       
+        int count = 0;
         
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template = templDao.findById(templIds[i]);
@@ -375,7 +377,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
 
-            List metrics = dmDao.findByTemplate(templIds[i]);
+            List metrics = dmDao.findByTemplate(templIds[i], true);
             for (Iterator it = metrics.iterator(); it.hasNext(); ) {
                 DerivedMeasurement dm = (DerivedMeasurement)it.next();
 
@@ -384,26 +386,41 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
                 if (template.isDefaultOn() != dm.isEnabled())
                     dm.setEnabled(template.isDefaultOn());
-
+                
+                if (++count % 100 == 0) {
+                    getDerivedMeasurementDAO().flushAndClearSession();
+                }
+                
                 AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
                                                          dm.getInstanceId());
                 toReschedule.add(aeid);
             }
         }
-
-        // Increment schedule number for the effected entities.
+        
+        getDerivedMeasurementDAO().flushAndClearSession();
+        
+        count = 0;
+        
         SRNManagerLocal srnManager = getSRNManager();
         SRNCache cache = SRNCache.getInstance();
+        ScheduleRevNumDAO srnDao = getScheduleRevNumDAO();
+
         for (Iterator it = toReschedule.iterator(); it.hasNext();) {
             AppdefEntityID id = (AppdefEntityID)it.next();
             ScheduleRevNum srn = cache.get(id);
             if (srn != null) {
                 srnManager.incrementSrn(id, Math.min(interval,
-                                                     srn.getMinInterval()));
+                        srn.getMinInterval()));
+
+                if (++count % 100 == 0) {
+                    srnDao.flushAndClearSession();                  
+                }
             }
         }
+        
+        srnDao.flushAndClearSession();
     }
-    
+        
     /**
      * Make metrics disabled by default for a list of meas. templates
      * @param templIds - a list of integer template ids
