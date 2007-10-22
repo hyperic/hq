@@ -67,7 +67,7 @@ public class IfconfigFormatter
     private String formatHtml(ConfigResponse cfg, IfconfigData d) {
         StringBuffer r = new StringBuffer();
         
-        r.append("<div><table><thead><tr>");
+        r.append("<div class='ifconfig_livedata'><table><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.ifconfig.head.name"))
          .append("</td>")

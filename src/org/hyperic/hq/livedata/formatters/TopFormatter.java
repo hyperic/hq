@@ -80,7 +80,7 @@ public class TopFormatter
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
         UptimeData utd = t.getUptime();
         
-        r.append("<b>Time</b>: ")
+        r.append("<div class='top_livedata'><b>Time</b>: ")
          .append(h(dateFmt.format(new Date(utd.getTime()))))
          .append(" up ")
          .append(h(utd.getFormattedUptime()))
@@ -162,7 +162,7 @@ public class TopFormatter
              .append("<td>").append(h(d.getBaseName())).append("</td></tr>");                           
         }
         
-        r.append("</tbody></table>");
+        r.append("</tbody></table></div>");
         return r.toString();
     }
 

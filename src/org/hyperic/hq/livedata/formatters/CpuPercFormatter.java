@@ -63,7 +63,7 @@ public class CpuPercFormatter
     private String formatHtml(ConfigResponse cfg, CpuPerc[] p) {
         StringBuffer r = new StringBuffer();
         
-        r.append("<div><table><thead><tr>");
+        r.append("<div class='cpuperc_livedata'><table><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.cpuPerc.head.num"))
          .append("</td>")

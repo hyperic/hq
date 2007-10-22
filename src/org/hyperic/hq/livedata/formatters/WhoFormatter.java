@@ -63,7 +63,7 @@ public class WhoFormatter
     private String formatHtml(ConfigResponse cfg, Who[] w) {
         StringBuffer r = new StringBuffer();
         
-        r.append("<div><table><thead><tr>");
+        r.append("<div class='who_livedata'><table><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.who.head.user"))
          .append("</td>")
