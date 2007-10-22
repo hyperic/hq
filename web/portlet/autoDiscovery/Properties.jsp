@@ -64,13 +64,22 @@
             <table width="100%" cellpadding="0" cellspacing="5" border="0">
              <tr>
               <td nowrap><fmt:message key="dash.settings.auto-disc.last"/></td>
-              <td>
-              <html:select property="range">
-                <html:option value="5">5</html:option>
-                <html:option value="10">10</html:option>         
-                <html:option value="-1"><fmt:message key="dash.settings.auto-disc.all"/></html:option>         
-              </html:select>
-              </td>
+                 <td>
+                     <c:choose>
+                         <c:when test="${not params.isDashEditable}">
+                             <c:out value="${AutoDiscoveryForm.range}"/>
+                         </c:when>
+                         <c:otherwise>
+                             <html:select property="range">
+                                 <html:option value="5">5</html:option>
+                                 <html:option value="10">10</html:option>
+                                 <html:option value="-1">
+                                     <fmt:message key="dash.settings.auto-disc.all"/>
+                                 </html:option>
+                             </html:select>
+                         </c:otherwise>
+                     </c:choose>
+                 </td>
               <td width="100%"><fmt:message key="dash.settings.auto-disc.completed"/></td>
              </tr>
            </table>

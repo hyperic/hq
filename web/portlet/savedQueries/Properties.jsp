@@ -94,18 +94,23 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           {dropOnEmpty:true,containment:["qryOrd"],constraint:false});
       -->
       </script>
+          <c:choose>
+              <c:when test="${not params.isDashEditable}">
 
-      <tiles:insert definition=".toolbar.list">                
-        <tiles:put name="deleteOnly" value="true"/>
-        <%--none of this is being used--%>
-        <tiles:put name="listItems" value="${chartsize}"/>
-        <tiles:put name="listSize" value="${chartsize}"/>
-        <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
-        <tiles:put name="pageSizeAction" beanName="selfAction" />
-        <tiles:put name="pageNumAction" beanName="selfAction"/>    
-        <tiles:put name="defaultSortColumn" value="1"/>
-      </tiles:insert>
-
+              </c:when>
+              <c:otherwise>
+                  <tiles:insert definition=".toolbar.list">
+                      <tiles:put name="deleteOnly" value="true"/>
+                      <%--none of this is being used--%>
+                      <tiles:put name="listItems" value="${chartsize}"/>
+                      <tiles:put name="listSize" value="${chartsize}"/>
+                      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                      <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                      <tiles:put name="pageNumAction" beanName="selfAction"/>
+                      <tiles:put name="defaultSortColumn" value="1"/>
+                  </tiles:insert>
+              </c:otherwise>
+          </c:choose>
       <tiles:insert definition=".form.buttons"/>
       </html:form>
     </td>

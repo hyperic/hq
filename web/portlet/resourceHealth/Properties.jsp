@@ -93,18 +93,24 @@ var help = '<hq:help/>';
           {dropOnEmpty:true,containment:["resOrd"],constraint:'vertical'});
       -->
       </script>
+          <c:choose>
+              <c:when test="${not params.isDashEditable}">
 
-      <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=resourceHealthAddResources&key=.dashContent.resourcehealth.resources"/>  
-        <tiles:put name="listItems" beanName="resourceHealthList"/>
-        <tiles:put name="listSize" beanName="resourceHealthList" beanProperty="totalSize"/>
-        <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
-        <tiles:put name="showPagingControls" value="false"/>
-        <tiles:put name="pageSizeAction" beanName="selfAction" />
-        <tiles:put name="pageNumAction" beanName="selfAction"/>    
-        <tiles:put name="defaultSortColumn" value="1"/>
-      </tiles:insert>
-
+              </c:when>
+              <c:otherwise>
+                  <tiles:insert definition=".toolbar.addToList">
+                      <tiles:put name="addToListUrl"
+                                 value="/dashboard/Admin.do?mode=resourceHealthAddResources&key=.dashContent.resourcehealth.resources"/>
+                      <tiles:put name="listItems" beanName="resourceHealthList"/>
+                      <tiles:put name="listSize" beanName="resourceHealthList" beanProperty="totalSize"/>
+                      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                      <tiles:put name="showPagingControls" value="false"/>
+                      <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                      <tiles:put name="pageNumAction" beanName="selfAction"/>
+                      <tiles:put name="defaultSortColumn" value="1"/>
+                  </tiles:insert>
+              </c:otherwise>
+          </c:choose>
       <html:hidden property="order"/>
       <tiles:insert definition=".form.buttons"/>
 

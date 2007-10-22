@@ -40,35 +40,78 @@
             <html:checkbox property="useLastCompleted"/>
             <fmt:message key="dash.settings.controlActions.last"/>
           </td>
-          <td width="75%" class="BlockContent">
-            <html:select property="lastCompleted">
-              <html:option value="1">1</html:option>
-              <html:option value="5">5</html:option>
-              <html:option value="10">10</html:option>   
-              <html:option value="15">15</html:option>
-            </html:select> <fmt:message key="dash.settings.controlActions.completed"/>
-            <html:select property="past">
-              <html:option value="1800000" >30 <fmt:message key="admin.settings.Minutes"/></html:option>
-              <html:option value="3600000" ><fmt:message key="admin.settings.Hour"/></html:option>
-              <html:option value="43200000" >12 <fmt:message key="admin.settings.Hours"/></html:option>
-              <html:option value="86400000" ><fmt:message key="admin.settings.Day"/></html:option>
-              <html:option value="604800000"><fmt:message key="admin.settings.Week"/></html:option>
-              <html:option value="2419200000"><fmt:message key="admin.settings.Month"/></html:option>
-            </html:select> <br>
-          </td>
+             <td width="75%" class="BlockContent">
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${ControlActionsForm.lastCompleted}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="lastCompleted">
+                             <html:option value="1">1</html:option>
+                             <html:option value="5">5</html:option>
+                             <html:option value="10">10</html:option>
+                             <html:option value="15">15</html:option>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                         <fmt:message key="dash.settings.controlActions.completed"/>
+                  <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${ControlActionsForm.past}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="past">
+                             <html:option value="1800000">30
+                                 <fmt:message key="admin.settings.Minutes"/>
+                             </html:option>
+                             <html:option value="3600000">
+                                 <fmt:message key="admin.settings.Hour"/>
+                             </html:option>
+                             <html:option value="43200000">12
+                                 <fmt:message key="admin.settings.Hours"/>
+                             </html:option>
+                             <html:option value="86400000">
+                                 <fmt:message key="admin.settings.Day"/>
+                             </html:option>
+                             <html:option value="604800000">
+                                 <fmt:message key="admin.settings.Week"/>
+                             </html:option>
+                             <html:option value="2419200000">
+                                 <fmt:message key="admin.settings.Month"/>
+                             </html:option>
+                         </html:select>
+                    </c:otherwise>
+                 </c:choose>
+                 <br>
+             </td>
         </tr>
         <tr>
-          <td class="BlockContent" nowrap>
-            <html:checkbox property="useMostFrequent"/>
-            <fmt:message key="dash.settings.controlActions.last"/>
-          </td>
+            <td class="BlockContent" nowrap>
+                <c:choose>
+                    <c:when test="${not params.isDashEditable}">
+                        <c:out value="${ControlActionsForm.useMostFrequent}"/>
+                    </c:when>
+                    <c:otherwise>
+                        <html:checkbox property="useMostFrequent"/>
+                    </c:otherwise>
+                </c:choose>
+                <fmt:message key="dash.settings.controlActions.last"/>
+            </td>
           <td class="BlockContent">
-            <html:select property="mostFrequent"  >
-              <html:option value="1">1</html:option>
-              <html:option value="5">5</html:option>
-              <html:option value="10">10</html:option>   
-              <html:option value="15">15</html:option>
-            </html:select> <fmt:message key="dash.settings.controlActions.most.frequent"/><br>      
+              <c:choose>
+                  <c:when test="${not params.isDashEditable}">
+                      <c:out value="${ControlActionsForm.mostFrequent}"/>
+                  </c:when>
+                  <c:otherwise>
+                      <html:select property="mostFrequent">
+                          <html:option value="1">1</html:option>
+                          <html:option value="5">5</html:option>
+                          <html:option value="10">10</html:option>
+                          <html:option value="15">15</html:option>
+                      </html:select>
+                  </c:otherwise>
+              </c:choose>
+           <fmt:message key="dash.settings.controlActions.most.frequent"/><br>
           </td>
         </tr>
         <tr>

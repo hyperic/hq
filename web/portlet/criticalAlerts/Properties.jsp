@@ -103,37 +103,81 @@ function handleEnter (field, event) {
         </tr>
          <tr valign="top">
           <td class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.AlertRange"/></td>
-          <td class="BlockContent" colspan="3" valign="center">
-            <fmt:message key="dash.settings.criticalAlerts.last"/>&nbsp;
-            <html:select property="numberOfAlerts">
-              <html:option value="5"/>
-              <html:option value="10"/> 
-              <html:option value="20"/> 
-              <html:option value="30"/> 
-            </html:select> 
-            <html:select property="priority">
-              <html:option value="3">!!! - High</html:option>
-              <html:option value="2">!! - Medium</html:option>
-              <html:option  value="1">! - Low</html:option>
-              <html:option value="0">ALL</html:option>
-            </html:select >
-            &nbsp;<fmt:message key="dash.settings.criticalAlerts.withinThePast"/>
-
-            <html:select property="past">
-              <html:option value="1800000" >30 <fmt:message key="admin.settings.Minutes"/></html:option>
-              <html:option value="3600000" ><fmt:message key="admin.settings.Hour"/></html:option>
-              <html:option value="43200000" >12 <fmt:message key="admin.settings.Hours"/></html:option>
-              <html:option value="86400000" ><fmt:message key="admin.settings.Day"/></html:option>
-              <html:option value="604800000"><fmt:message key="admin.settings.Week"/></html:option>
-              <html:option value="2419200000"><fmt:message key="admin.settings.Month"/></html:option>
-            </html:select>
-            &nbsp;<fmt:message key="dash.settings.criticalAlerts.for"/>&nbsp;      
-            <html:select property="selectedOrAll">
-              <html:option value="selected">selected resources</html:option>
-              <html:option value="all">all resources</html:option>
-            </html:select >
-            &nbsp;<fmt:message key="dash.settings.criticalAlerts.period"/>
-          </td>
+             <td class="BlockContent" colspan="3" valign="center">
+                 <fmt:message key="dash.settings.criticalAlerts.last"/>
+                 &nbsp;
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${CriticalAlertsForm.numberOfAlerts}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="numberOfAlerts">
+                             <html:option value="5"/>
+                             <html:option value="10"/>
+                             <html:option value="20"/>
+                             <html:option value="30"/>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${CriticalAlertsForm.priority}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="priority">
+                             <html:option value="3">!!! - High</html:option>
+                             <html:option value="2">!! - Medium</html:option>
+                             <html:option value="1">! - Low</html:option>
+                             <html:option value="0">ALL</html:option>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                 &nbsp;
+                 <fmt:message key="dash.settings.criticalAlerts.withinThePast"/>
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${CriticalAlertsForm.past}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="past">
+                             <html:option value="1800000">30
+                                 <fmt:message key="admin.settings.Minutes"/>
+                             </html:option>
+                             <html:option value="3600000">
+                                 <fmt:message key="admin.settings.Hour"/>
+                             </html:option>
+                             <html:option value="43200000">12
+                                 <fmt:message key="admin.settings.Hours"/>
+                             </html:option>
+                             <html:option value="86400000">
+                                 <fmt:message key="admin.settings.Day"/>
+                             </html:option>
+                             <html:option value="604800000">
+                                 <fmt:message key="admin.settings.Week"/>
+                             </html:option>
+                             <html:option value="2419200000">
+                                 <fmt:message key="admin.settings.Month"/>
+                             </html:option>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                 &nbsp;
+                 <fmt:message key="dash.settings.criticalAlerts.for"/>
+                 &nbsp;
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${CriticalAlertsForm.selectedOrAll}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="selectedOrAll">
+                             <html:option value="selected">selected resources</html:option>
+                             <html:option value="all">all resources</html:option>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                 &nbsp;
+                 <fmt:message key="dash.settings.criticalAlerts.period"/>
+             </td>
         </tr>
         <tr>
           <td colspan="4" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
@@ -166,16 +210,24 @@ function handleEnter (field, event) {
       <c:if test="${not empty CriticalAlertsForm.token}">
         <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
       </c:if>
-      <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl"><c:out value="${addToListUrl}"/></tiles:put>
-        <tiles:put name="listItems" beanName="criticalAlertsList"/>
-        <tiles:put name="listSize" beanName="criticalAlertsList" beanProperty="totalSize"/>
-        <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
-        <tiles:put name="pageSizeAction" beanName="selfAction" />
-        <tiles:put name="pageNumAction" beanName="selfAction"/>    
-        <tiles:put name="defaultSortColumn" value="1"/>
-      </tiles:insert>
+      <c:choose>
+          <c:when test="${not params.isDashEditable}">
 
+          </c:when>
+          <c:otherwise>
+              <tiles:insert definition=".toolbar.addToList">
+                  <tiles:put name="addToListUrl">
+                      <c:out value="${addToListUrl}"/>
+                  </tiles:put>
+                  <tiles:put name="listItems" beanName="criticalAlertsList"/>
+                  <tiles:put name="listSize" beanName="criticalAlertsList" beanProperty="totalSize"/>
+                  <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                  <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                  <tiles:put name="pageNumAction" beanName="selfAction"/>
+                  <tiles:put name="defaultSortColumn" value="1"/>
+              </tiles:insert>
+          </c:otherwise>
+      </c:choose>
       <tiles:insert definition=".form.buttons"/>
       <html:hidden property="token"/>
       </html:form>

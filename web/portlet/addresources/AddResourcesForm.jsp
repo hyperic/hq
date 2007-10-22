@@ -519,12 +519,21 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <td nowrap class="FilterLabelText">
               <fmt:message key="resource.group.inventory.Edit.FilterByTypeLabel"/>
             </td>
-            <td class="FilterLabelText">
-              <html:select property="filterBy" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'filterBy',  '${selfPnFilterAction}');">
-                <html:option value="-1" key="resource.group.inventory.filter.AllResourceTypes"/>
-                <html:optionsCollection property="types"/>
-              </html:select><br>
-            </td>
+              <td class="FilterLabelText">
+                  <c:choose>
+                      <c:when test="${not params.isDashEditable}">
+                          <c:out value="${DashboardAddResourceHealthForm.filterBy}"/>
+                      </c:when>
+                      <c:otherwise>
+                          <html:select property="filterBy" styleClass="FilterFormText"
+                                       onchange="goToSelectLocation(this, 'filterBy',  '${selfPnFilterAction}');">
+                              <html:option value="-1" key="resource.group.inventory.filter.AllResourceTypes"/>
+                              <html:optionsCollection property="types"/>
+                          </html:select>
+                      </c:otherwise>
+                  </c:choose>
+                  <br>
+              </td>
             <td><html:img page="/images/spacer.gif" width="5" height="1" border="0"/></td>
           </tr>
 
@@ -572,6 +581,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
         <tiles:put name="pageNumParam" value="pna"/>
         <tiles:put name="pageNumAction" beanName="selfPnaAction"/>
       </tiles:insert>
+        
     </td>
     <!-- / SELECT COLUMN  -->
 

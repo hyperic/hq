@@ -117,61 +117,118 @@ onloads.push(selectValidOption);
         </tr>
          <tr valign="top">
           <td class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.MetricViewerRange"/></td>
-          <td class="BlockContent" colspan="3" valign="center">
-              
-            <fmt:message key="dash.settings.metricViewer.top"/>&nbsp;
-            <html:select property="numberToShow">
-              <html:option value="5"/>
-              <html:option value="10"/>
-              <html:option value="20"/>
-              <html:option value="30"/>
-            </html:select>
-            &nbsp;<fmt:message key="dash.settings.metricViewer.resources"/>
-     
-          </td>
+             <td class="BlockContent" colspan="3" valign="center">
+                 <fmt:message key="dash.settings.metricViewer.top"/>
+                 &nbsp;
+                 <c:choose>
+                     <c:when test="${not params.isDashEditable}">
+                         <c:out value="${MetricViewerForm.numberToShow}"/>
+                     </c:when>
+                     <c:otherwise>
+                         <html:select property="numberToShow">
+                             <html:option value="5"/>
+                             <html:option value="10"/>
+                             <html:option value="20"/>
+                             <html:option value="30"/>
+                         </html:select>
+                     </c:otherwise>
+                 </c:choose>
+                 &nbsp;
+                 <fmt:message key="dash.settings.metricViewer.resources"/>
+             </td>
         </tr>
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.ResourceType"/></td>
-          <td width="80%" class="BlockContent" colspan="3" valign="center">
-              <html:select property="resourceType" onchange="submitMetricViewerForm()">
-              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.selectResourceType"/></html:option>
-              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.platformTypes"/></html:option>
-              <c:forEach var="type" items="${platformTypes}">
-                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
-              </c:forEach>
-              <html:option value="-1" disabled="true">&nbsp;</html:option>
-              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.serverTypes"/></html:option>
-              <c:forEach var="type" items="${serverTypes}">
-                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
-              </c:forEach>
-              <html:option value="-1" disabled="true">&nbsp;</html:option>
-              <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.serviceTypes"/></html:option>
-              <c:forEach var="type" items="${serviceTypes}">
-                  <html:option value="${type.appdefTypeKey}"> - <c:out value="${type.name}"/></html:option>
-              </c:forEach>
-              </html:select>
-          </td>
+            <td width="80%" class="BlockContent" colspan="3" valign="center">
+                <c:choose>
+                    <c:when test="${not params.isDashEditable}">
+                        <c:out value="${MetricViewerForm.resourceType}"/>
+                    </c:when>
+                    <c:otherwise>
+                        <html:select property="resourceType" onchange="submitMetricViewerForm()">
+                            <html:option value="-1" style="color: #CCC" disabled="true">
+                                <fmt:message key="dash.settings.metricViewer.selectResourceType"/>
+                            </html:option>
+                            <html:option value="-1" style="color: #CCC" disabled="true">
+                                <fmt:message key="dash.settings.metricViewer.platformTypes"/>
+                            </html:option>
+                            <c:forEach var="type" items="${platformTypes}">
+                                <html:option value="${type.appdefTypeKey}"> -
+                                    <c:out value="${type.name}"/>
+                                </html:option>
+                            </c:forEach>
+                            <html:option value="-1" disabled="true">&nbsp;</html:option>
+                            <html:option value="-1" style="color: #CCC" disabled="true">
+                                <fmt:message key="dash.settings.metricViewer.serverTypes"/>
+                            </html:option>
+                            <c:forEach var="type" items="${serverTypes}">
+                                <html:option value="${type.appdefTypeKey}"> -
+                                    <c:out value="${type.name}"/>
+                                </html:option>
+                            </c:forEach>
+                            <html:option value="-1" disabled="true">&nbsp;</html:option>
+                            <html:option value="-1" style="color: #CCC" disabled="true">
+                                <fmt:message key="dash.settings.metricViewer.serviceTypes"/>
+                            </html:option>
+                            <c:forEach var="type" items="${serviceTypes}">
+                                <html:option value="${type.appdefTypeKey}"> -
+                                    <c:out value="${type.name}"/>
+                                </html:option>
+                            </c:forEach>
+                        </html:select>
+                    </c:otherwise>
+                </c:choose>
+            </td>
         </tr>
         <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-             <html:select property="metric" onchange="submitMetricViewerForm()">
-             <html:option value="-1" style="color: #CCC" disabled="true"><fmt:message key="dash.settings.metricViewer.selectMetric"/></html:option>
-             <c:forEach var="metric" items="${metrics}">
-                 <c:if test="${metric.defaultOn}">
-                 <html:option value="${metric.id}"> - <c:out value="${metric.name}"/></html:option>
-                 </c:if>
-             </c:forEach>    
-             </html:select>
+              <c:choose>
+                  <c:when test="${not params.isDashEditable}">
+                      <c:out value="${MetricViewerForm.metric}"/>
+                  </c:when>
+                  <c:otherwise>
+                      <html:select property="metric" onchange="submitMetricViewerForm()">
+                          <html:option value="-1" style="color: #CCC" disabled="true">
+                              <fmt:message key="dash.settings.metricViewer.selectMetric"/>
+                          </html:option>
+                          <c:forEach var="metric" items="${metrics}">
+                              <c:if test="${metric.defaultOn}">
+                                  <html:option value="${metric.id}"> -
+                                      <c:out value="${metric.name}"/>
+                                  </html:option>
+                              </c:if>
+                          </c:forEach>
+                      </html:select>
+                  </c:otherwise>
+              </c:choose>
           </td>
         </tr>
         <tr valign="top">
             <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.SortOrder"/></td>
             <td width="80%" class="BlockContent" colspan="3" valign="center">
-               <html:select property="descending">
-                 <html:option value="true"><fmt:message key="dash.settings.metricViewer.descending"/></html:option>
-                 <html:option value="false"><fmt:message key="dash.settings.metricViewer.ascending"/></html:option>
-               </html:select>
+                <c:choose>
+                    <c:when test="${not params.isDashEditable}">
+                        <c:choose>
+                        <c:when test="${MetricViewerForm.descending}">
+                            <fmt:message key="dash.settings.metricViewer.descending"/>
+                        </c:when>
+                        <c:otherwise>
+                            <fmt:message key="dash.settings.metricViewer.ascending"/>
+                        </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <html:select property="descending">
+                            <html:option value="true">
+                                <fmt:message key="dash.settings.metricViewer.descending"/>
+                            </html:option>
+                            <html:option value="false">
+                                <fmt:message key="dash.settings.metricViewer.ascending"/>
+                            </html:option>
+                        </html:select>
+                    </c:otherwise>
+                </c:choose>
             </td>
         </tr>
         <tr>
@@ -214,16 +271,22 @@ onloads.push(selectValidOption);
           <c:param name="ff" value="${MetricViewerForm.appdefType}"/>
           <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
       </c:url>
-      <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" beanName="addToListUrl"/>
-        <tiles:put name="listItems" beanName="metricViewerList"/>
-        <tiles:put name="listSize" beanName="metricViewerList" beanProperty="totalSize"/>
-        <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-        <tiles:put name="pageSizeAction" beanName="selfAction" />
-        <tiles:put name="pageNumAction" beanName="selfAction"/>
-        <tiles:put name="defaultSortColumn" value="1"/>
-      </tiles:insert>
+      <c:choose>
+          <c:when test="${not params.isDashEditable}">
 
+          </c:when>
+          <c:otherwise>
+              <tiles:insert definition=".toolbar.addToList">
+                  <tiles:put name="addToListUrl" beanName="addToListUrl"/>
+                  <tiles:put name="listItems" beanName="metricViewerList"/>
+                  <tiles:put name="listSize" beanName="metricViewerList" beanProperty="totalSize"/>
+                  <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                  <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                  <tiles:put name="pageNumAction" beanName="selfAction"/>
+                  <tiles:put name="defaultSortColumn" value="1"/>
+              </tiles:insert>
+          </c:otherwise>
+      </c:choose>
       <tiles:insert definition=".form.buttons"/>
       <html:hidden property="token"/>
       </html:form>

@@ -103,15 +103,24 @@ function handleEnter (field, event) {
          <tr valign="top">
           <td class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.AvailSummaryRange"/></td>
           <td class="BlockContent" colspan="3" valign="center">
-              
-            <fmt:message key="dash.settings.availSummary.top"/>&nbsp;
-            <html:select property="numberToShow">
-              <html:option value="5"/>
-              <html:option value="10"/>
-              <html:option value="20"/>
-              <html:option value="30"/>
-            </html:select>
-            &nbsp;<fmt:message key="dash.settings.availSummary.resources"/>
+
+              <fmt:message key="dash.settings.availSummary.top"/>
+              &nbsp;
+              <c:choose>
+                  <c:when test="${not params.isDashEditable}">
+                      <c:out value="${AvailSummaryForm.numberToShow}"/>
+                  </c:when>
+                  <c:otherwise>
+                      <html:select property="numberToShow">
+                          <html:option value="5"/>
+                          <html:option value="10"/>
+                          <html:option value="20"/>
+                          <html:option value="30"/>
+                      </html:select>
+                  </c:otherwise>
+              </c:choose>
+
+              &nbsp;<fmt:message key="dash.settings.availSummary.resources"/>
      
           </td>
         </tr>
@@ -153,15 +162,23 @@ function handleEnter (field, event) {
           </c:if>
       </c:url>
 
-      <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" beanName="availAddToListUrl"/>
-        <tiles:put name="listItems" beanName="availSummaryList"/>
-        <tiles:put name="listSize" beanName="availSummaryList" beanProperty="totalSize"/>
-        <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-        <tiles:put name="pageSizeAction" beanName="selfAction" />
-        <tiles:put name="pageNumAction" beanName="selfAction"/>
-        <tiles:put name="defaultSortColumn" value="1"/>
-      </tiles:insert>
+      <c:choose>
+          <c:when test="${not params.isDashEditable}">
+            
+          </c:when>
+          <c:otherwise>
+              <tiles:insert definition=".toolbar.addToList">
+                  <tiles:put name="addToListUrl" beanName="availAddToListUrl"/>
+                  <tiles:put name="listItems" beanName="availSummaryList"/>
+                  <tiles:put name="listSize" beanName="availSummaryList" beanProperty="totalSize"/>
+                  <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                  <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                  <tiles:put name="pageNumAction" beanName="selfAction"/>
+                  <tiles:put name="defaultSortColumn" value="1"/>
+              </tiles:insert>
+          </c:otherwise>
+      </c:choose>
+
 
       <tiles:insert definition=".form.buttons"/>
       <html:hidden property="token"/>
