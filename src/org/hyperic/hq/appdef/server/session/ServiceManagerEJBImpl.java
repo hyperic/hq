@@ -757,19 +757,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = getServiceTypeDAO().findByName(svcName);
         if (st == null) {
-            throw new InvalidAppdefTypeException("service type not found: " +
-                                                 svcName);
+            return new PageList();
         }
     
         try {
             Collection services = getServiceDAO().findByType(st.getId());
             if (services.size() == 0) {
-                return new ArrayList(0);
+                return new PageList();
             }
             List toBePaged = filterUnviewable(subject, services);
             return valuePager.seek(toBePaged, PageControl.PAGE_ALL);
         } catch (ServiceNotFoundException e) {
-            return new ArrayList(0);
+            return new PageList();
         }
     }
 

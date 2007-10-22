@@ -971,7 +971,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         try {
             PlatformType ptype = getPlatformTypeDAO().findByName(type);
             if (ptype == null) {
-                throw new InvalidAppdefTypeException("name not found: " + type);
+                return new PageList();
             }
 
             Collection platforms = getPlatformDAO().findByType(ptype.getId());

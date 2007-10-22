@@ -868,7 +868,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         try {
             ServerType ejb = getServerTypeDAO().findByName(name);
             if (ejb == null) {
-                throw new InvalidAppdefTypeException("name not found: " + name);
+                return new PageList();
             }
             
             Collection servers = getServerDAO().findByType(ejb.getId());
