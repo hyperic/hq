@@ -47,6 +47,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.shared.EventTrackerLocal;
+import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -318,8 +320,18 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         }
 
         return events;
-    } // end storeEvent        
+    } // end storeEvent
 
+    public static EventTrackerLocal getOne() {
+        try {
+            return EventTrackerUtil.getLocalHome().create();
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /** @ejb:create-method */
     public void ejbCreate() {}
     public void ejbPostCreate() {}

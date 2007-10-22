@@ -29,9 +29,8 @@ import java.io.ObjectInputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventTypeException;
@@ -42,8 +41,8 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
-import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -52,8 +51,6 @@ import org.hyperic.util.config.IntegerConfigOption;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /** 
  * The CounterTrigger is a simple trigger which fires when a certain 
@@ -236,21 +233,13 @@ public class DurationTrigger extends AbstractTrigger
                             savedTotal < count)
                     return;
                 }
-                else if (!(tfe instanceof TriggerFiredEvent))
-                        return;
+                else if (tfe instanceof HeartBeatEvent)
+                    return;
             }
         }
         
         synchronized (lock) {
-            EventTrackerLocal eTracker;
-            
-            try {
-                eTracker = EventTrackerUtil.getLocalHome().create();
-            } catch(NamingException exc){
-                return; // No fire since we can't track the events
-            } catch(CreateException exc){
-                return; // No fire since we can't track the events
-            }
+            EventTrackerLocal eTracker = EventTrackerEJBImpl.getOne();
 
             boolean track = false;
             boolean fire = false;
