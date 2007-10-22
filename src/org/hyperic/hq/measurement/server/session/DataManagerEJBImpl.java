@@ -282,8 +282,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * 
      * @param data       a list of {@link DataPoint}s 
      * @param overwrite  If true, attempt to over-write values when an insert
-     *                   of the data fails (i.e. it already exists)
-     *                   XXX:  Why would you ever not want to overwrite?
+     *                   of the data fails (i.e. it already exists). You may
+     *                   not want to over-write values when, for instance, the 
+     *                   back filler is inserting data.
      *
      * @ejb:interface-method
      */
