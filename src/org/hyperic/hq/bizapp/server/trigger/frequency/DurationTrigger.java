@@ -236,8 +236,8 @@ public class DurationTrigger extends AbstractTrigger
                             savedTotal < count)
                     return;
                 }
-                else if (!(tfe instanceof TriggerFiredEvent))
-                        return;
+                else if (tfe instanceof HeartBeatEvent)
+                    return;
             }
         }
         
