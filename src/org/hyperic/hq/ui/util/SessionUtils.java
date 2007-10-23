@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -57,11 +57,47 @@ public class SessionUtils {
     private static final int RETURN_STACK_MAX_SIZE = 128;
     
     /**
-     * Retrieve the cached <code>WebUser</code> representing the user
-     * interacting with server.
-     *
-     * @param session the http session
-     */
+	 * @param key the attribute key requested
+	 * @param defValue the value to return if the key returns a null value
+	 * @return the Integer value in the session otherwise the defaultValue if null
+	 */
+	public static Integer getIntegerAttribute(HttpSession session, String key,
+			Integer defValue) {
+		try{
+			Integer value = (Integer) session.getAttribute(key);
+			if (value == null)
+				return defValue;
+			return value;
+		} catch (ClassCastException cce){
+			return defValue;
+		}
+	}
+	
+	/**
+	 * 
+	 * @param key the attribute key requested
+	 * @param defValue the value to retun if the value is null or 
+	 * 			cannot be cast to a String
+	 * @return the String value, otherwise the default value
+	 */
+	public static String getStringAttribute(HttpSession session, String key,
+			String defValue) {
+		try {
+			String value = (String) session.getAttribute(key);
+			if (value == null)
+				return defValue;
+			return value;
+		} catch (ClassCastException cce) {
+			return defValue;
+		}
+	}
+    /**
+	 * Retrieve the cached <code>WebUser</code> representing the user
+	 * interacting with server.
+	 * 
+	 * @param session
+	 *            the http session
+	 */
     public static WebUser getWebUser(HttpSession session) {
         if (session == null) {
             return null;
