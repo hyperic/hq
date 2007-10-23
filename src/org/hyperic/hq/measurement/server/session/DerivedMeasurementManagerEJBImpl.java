@@ -48,12 +48,17 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -349,11 +354,50 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * Handle events from the {@link MeasurementEnabler}.  This method
+     * is required to place the operation within a transaction (and session)
+     * 
      * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubjectValue subject, 
-                                   AppdefEntityID id, Integer[] templates,
-                                   long[] intervals, ConfigResponse props)
+    public void handleCreateRefreshEvents(List events) {
+        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
+        AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
+        
+        for (Iterator i=events.iterator(); i.hasNext(); ) {
+            ResourceZevent z = (ResourceZevent)i.next();
+            AuthzSubjectValue subject = z.getAuthzSubjectValue();
+            AppdefEntityID id = z.getAppdefEntityID();
+            boolean isCreate, isRefresh;
+
+            isCreate = z instanceof ResourceCreatedZevent;
+            isRefresh = z instanceof ResourceRefreshZevent;
+
+            try {
+                // Handle reschedules for when agents are updated.
+                if (isRefresh) {
+                    log.info("Refreshing metric schedule for [" + id + "]");
+                    reschedule(id);
+                    continue;
+                }
+
+                // For either create or update events, schedule the default
+                // metrics
+                if (getEnabledMetricsCount(subject, id) == 0) {
+                    log.info("Enabling default metrics for [" + id + "]");
+                    enableDefaultMetrics(subject, id);
+                }
+            } catch(Exception e) {
+                log.warn("Unable to enable default metrics", e);
+            }
+        }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public List createMeasurements(AuthzSubjectValue subject, AppdefEntityID id,
+                                   Integer[] templates, long[] intervals,
+                                   ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
                TemplateNotFoundException
     {
