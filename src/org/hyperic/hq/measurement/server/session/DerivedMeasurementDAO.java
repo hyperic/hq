@@ -149,6 +149,31 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue()).list();
     }
+    
+    /**
+     * Find all the derived measurements with the give template id, potentially 
+     * allowing for the query to return a stale collection (for efficiency reasons).
+     * 
+     * @param id The template id.
+     * @param allowStale <code>true</code> to allow the query to return stale
+     *                   values; <code>false</code> to never allow stale values, 
+     *                   potentially always forcing a sync with the database.
+     * @return A collection of derived measurements.
+     */
+    List findByTemplate(Integer id, boolean allowStale) {
+        Session session = this.getSession();
+        FlushMode oldFlushMode = session.getFlushMode();
+
+        try {
+            if (allowStale) {
+                session.setFlushMode(FlushMode.MANUAL);                
+            }
+
+            return findByTemplate(id);
+        } finally {
+            session.setFlushMode(oldFlushMode);
+        } 
+    }    
 
     List findByInstance(int type, int id) {
         String sql =

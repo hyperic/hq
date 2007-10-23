@@ -175,10 +175,10 @@ public class SRNManagerEJBImpl extends SessionEJB
                 srn.setMinInterval(newMin);
             } else {
             // Set to default
-                Long defaultMin = dao.getMinInterval(aid);
+                Long defaultMin = dao.getMinInterval(aid, true);
                 srn.setMinInterval(defaultMin.longValue());
             }
-            dao.save(srn);
+
             cache.put(srn);
         }
         _log.debug("Updated SRN for "+ aid + " to " + srn.getSrn());
