@@ -68,7 +68,12 @@
     <put name="subSectionName" value="Monitor"/>
     <putList name="subTabList"/>
   </definition>
-
+  
+  <definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application">
+     <put name="selectedIndex"  value="3" />
+  </definition>
+ 
   <definition name=".resource.application.inventory.serviceList"
             extends=".table">
     <put name="tableComp"
@@ -164,6 +169,10 @@
             link="/resource/application/Inventory.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList> 
   </definition>
 
@@ -173,7 +182,12 @@
               extends=".tabs.resource.application.monitor">
     <put name="subSelectedIndex" value="0"/>
   </definition>
-
+  
+  <definition name=".tabs.resource.application.views"
+              extends=".tabs.resource.application.monitor">
+    <put name="subSelectedIndex" value="2"/>
+  </definition>
+  
   <definition name=".tabs.resource.application.monitor.alerts"
               extends=".tabs.resource.application.monitor">
     <put name="subSelectedIndex" value="2"/>

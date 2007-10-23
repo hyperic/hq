@@ -55,6 +55,10 @@
       <item value="Control" link="/resource/service/Control.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList>     
   </definition>
 
@@ -69,6 +73,10 @@
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
             link="/alerts/Config.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
    </putList>     
@@ -98,6 +106,16 @@
     </putList>
   </definition>  
   
+  <definition name=".tabs.resource.service.view"
+      extends=".tabs.resource.service">  
+    <put name="selectedIndex"  value="4" />
+  </definition>  
+  
+  <definition name=".tabs.resource.service.view.nocontrol"
+      extends=".tabs.resource.service.nocontrol">  
+    <put name="selectedIndex"  value="3" />
+  </definition>  
+   
   <!-- monitor subtabs --> 
   
   <definition name=".tabs.resource.service.monitor"

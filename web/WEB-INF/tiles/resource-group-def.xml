@@ -66,12 +66,12 @@
   
   <definition name=".tabs.resource.group.views"
               extends=".tabs.resource.group">
-     <put name="selectedIndex"  value="4" />
+     <put name="selectedIndex"  value="3" />
   </definition>
   
   <definition name=".tabs.resource.group.views.nocontrol"
               extends=".tabs.resource.group.nocontrol">
-     <put name="selectedIndex"  value="4" />
+     <put name="selectedIndex"  value="2" />
   </definition>
 
   <definition name=".tabs.resource.group.inventory.nocontrol"
