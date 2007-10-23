@@ -1,7 +1,33 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ * 
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
+
 package org.hyperic.hq.ui.action.portlet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -16,27 +42,21 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
-
+	
+		HttpSession session = request.getSession(false);
 		DashboardForm dForm = (DashboardForm) form;
 		WebUser user = (WebUser) request.getSession().getAttribute(
 				Constants.WEBUSER_SES_ATTR);
 		AuthzBoss authzBoss = ContextUtils.getAuthzBoss(request.getSession()
 				.getServletContext());
-		boolean persistPrefs = false;
 		if (dForm.getSelectedDashboardId() != null) {
 			//assign a selected dashboard
-			user.setPreference(Constants.SELECTED_DASHBOARD_ID, dForm
-					.getSelectedDashboardId());
-			persistPrefs = true;
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, 
+					Integer.getInteger(dForm.getSelectedDashboardId()));
 		}
-		if (dForm.getDefaultDashboard() != null
-			//assign a new default dashboard
-				&& user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null) == null) {
+		if (dForm.getDefaultDashboard() != null) {
 			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm
 					.getDefaultDashboard());
-			persistPrefs = true;
-		}
-		if (persistPrefs) {
 			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject()
 					.getId(), user.getPreferences());
 		}
