@@ -75,8 +75,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.units.FormattedNumber;
 
 /** 
- * The alert manager.
- *
  * @ejb:bean name="AlertManager"
  *      jndi-name="ejb/events/AlertManager"
  *      local-jndi-name="LocalAlertManager"
@@ -109,10 +107,22 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return new AlertConditionDAO(DAOFactory.getDAOFactory());
     }
 
-    private ActionDAO getActionDAO() {
-        return new ActionDAO(DAOFactory.getDAOFactory());
+    /**
+     * Returns true if alerts are allowed.
+     * @ejb:interface-method
+     */
+    public boolean alertsAllowed() {
+        return AlertRegulator.getInstance().alertsAllowed();
     }
     
+    /**
+     * @see alertsAllowed()
+     * @ejb:interface-method
+     */
+    public void setAlertsAllowed(boolean allowed) {
+        AlertRegulator.getInstance().setAlertsAllowed(allowed);
+    }
+
     /**
      * Create a new alert
      *

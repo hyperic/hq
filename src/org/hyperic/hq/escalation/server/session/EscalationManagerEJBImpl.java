@@ -53,6 +53,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 
@@ -260,7 +261,12 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public boolean startEscalation(PerformsEscalations def, 
-                                EscalatableCreator creator) {
+                                   EscalatableCreator creator) 
+    {
+        if (!AlertManagerEJBImpl.getOne().alertsAllowed()) {
+            return false;
+        }
+        
         if (def.getEscalation() == null) 
             return false;
         

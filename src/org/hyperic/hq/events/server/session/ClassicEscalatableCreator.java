@@ -72,6 +72,8 @@ public class ClassicEscalatableCreator
      * May or may not be the right place to do that.
      */
     public Escalatable createEscalatable() {
+        AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
+        
         // Create the trigger event map
         Map trigMap = new HashMap();
         TriggerFiredEvent[] events = _event.getRootEvents();
@@ -79,8 +81,6 @@ public class ClassicEscalatableCreator
             trigMap.put(events[i].getInstanceId(), events[i]);
         }
     
-        AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
-
         // Now create the alert
         Alert alert = alertMan.createAlert(_def, _event.getTimestamp());
 

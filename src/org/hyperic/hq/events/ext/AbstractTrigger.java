@@ -56,6 +56,7 @@ import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -142,7 +143,12 @@ public abstract class AbstractTrigger implements TriggerInterface {
         // If the system is not ready, do nothing
         if (!isSystemReady())
             return;
-            
+
+        if (!AlertManagerEJBImpl.getOne().alertsAllowed()) {
+            log.debug("Alert not firing because they are not allowed");
+            return;
+        }
+        
         // No matter what, send a message to let people know that this trigger
         // has fired
         publishEvent(event);
