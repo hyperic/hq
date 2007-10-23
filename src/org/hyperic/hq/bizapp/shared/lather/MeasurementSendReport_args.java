@@ -130,7 +130,7 @@ public class MeasurementSendReport_args
         {
             if (_log.isDebugEnabled()) {
                 _log.debug("Got data point for CID=" + cidList[i] +
-                           " DSN=" + dsnList[i] + 
+                           " DSN=" + dsnIdList[i] + 
                            " Value=" + valueList[i] +
                            " tStamp=" + tStampList[i]);
             }
