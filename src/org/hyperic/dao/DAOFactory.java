@@ -26,6 +26,7 @@
 package org.hyperic.dao;
 
 import org.hibernate.Session;
+import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.ServerTypeDAO;
 import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.authz.server.session.OperationDAO;
@@ -47,7 +48,6 @@ import org.hyperic.hq.dao.AgentDAO;
 import org.hyperic.hq.dao.AgentTypeDAO;
 import org.hyperic.hq.dao.AppServiceDAO;
 import org.hyperic.hq.dao.AppSvcDependencyDAO;
-import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.dao.ApplicationTypeDAO;
 import org.hyperic.hq.dao.ConfigPropertyDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;

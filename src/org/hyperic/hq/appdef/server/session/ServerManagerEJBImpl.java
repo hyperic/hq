@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -86,7 +86,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
-import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.server.session.Platform;

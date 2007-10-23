@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -132,39 +132,28 @@ public class ServiceCluster extends AppdefBean
         return result;
     }
 
-    public AppSvcDependency addDependentService(Integer appPK,
-                                                Integer depPK) {
-        throw new UnsupportedOperationException(
-            "use AppServiceDAO.addDependentService()");
-    }
-
-    public AppSvcDependency addDependentServiceCluster(Integer appPK,
-                                                       Integer depPK) {
-        throw new UnsupportedOperationException(
-            "use AppServiceDAO.addDependentServiceCluster()");
-    }
-
-    private ServiceClusterValue _serviceClusterValue = new ServiceClusterValue();
+    private ServiceClusterValue _svcClusterVal = new ServiceClusterValue();
+    
     /**
      * legacy EJB DTO pattern
      * @deprecated use (this) ServiceCluster object instead
      */
     public ServiceClusterValue getServiceClusterValue() {
-        _serviceClusterValue.setName(getName());
-        _serviceClusterValue.setDescription(getDescription());
-        _serviceClusterValue.setGroupId(getGroup().getId());
-        _serviceClusterValue.setOwner("");
-        _serviceClusterValue.setModifiedBy("");
-        _serviceClusterValue.setLocation("");
-        _serviceClusterValue.setId(getId());
-        _serviceClusterValue.setMTime(getMTime());
-        _serviceClusterValue.setCTime(getCTime());
+        _svcClusterVal.setName(getName());
+        _svcClusterVal.setDescription(getDescription());
+        _svcClusterVal.setGroupId(getGroup().getId());
+        _svcClusterVal.setOwner("");
+        _svcClusterVal.setModifiedBy("");
+        _svcClusterVal.setLocation("");
+        _svcClusterVal.setId(getId());
+        _svcClusterVal.setMTime(getMTime());
+        _svcClusterVal.setCTime(getCTime());
         if ( getServiceType() != null )
-            _serviceClusterValue.setServiceType(
+            _svcClusterVal.setServiceType(
                 getServiceType().getServiceTypeValue() );
         else
-            _serviceClusterValue.setServiceType( null );
-        return _serviceClusterValue;
+            _svcClusterVal.setServiceType( null );
+        return _svcClusterVal;
     }
 
     public void setServiceClusterValue(ServiceClusterValue val) {

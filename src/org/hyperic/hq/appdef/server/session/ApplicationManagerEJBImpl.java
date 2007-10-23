@@ -79,7 +79,6 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.AppServiceDAO;
-import org.hyperic.hq.dao.ApplicationDAO;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -210,7 +209,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                                               ApplicationValue newValue)
         throws ApplicationNotFoundException, PermissionException,
                UpdateException,  AppdefDuplicateNameException, FinderException {
-        Application app = getApplicationDAO().findById(newValue.getId());
+        ApplicationDAO dao = getApplicationDAO();
+        Application app = dao.findById(newValue.getId());
         checkModifyPermission(subject, app.getEntityId());
         newValue.setModifiedBy(subject.getName());
         newValue.setMTime(new Long(System.currentTimeMillis()));
@@ -236,7 +236,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             rv.setName(newValue.getName());
             updateAuthzResource(rv);
         }
-        getApplicationDAO().setApplicationValue(app, newValue);
+        dao.setApplicationValue(app, newValue);
         return getApplicationById(subject, app.getId());
     }
 
@@ -246,13 +246,14 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeApplication(AuthzSubjectValue subject, Integer id)
-        throws ApplicationNotFoundException,
-               PermissionException, RemoveException, VetoException 
+        throws ApplicationNotFoundException, PermissionException,
+               RemoveException, VetoException 
     {
-        Application app = getApplicationDAO().findById(id);
+        ApplicationDAO dao = getApplicationDAO();
+        Application app = dao.findById(id);
         checkRemovePermission(subject, app.getEntityId());
         removeAuthzResource(subject, app.getEntityId());
-        getApplicationDAO().remove(app);
+        dao.remove(app);
     }
 
     /**
@@ -267,12 +268,11 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeAppService(AuthzSubjectValue caller, Integer appId, 
-        Integer appServiceId)
+                                 Integer appServiceId)
         throws ApplicationException, ApplicationNotFoundException,
                PermissionException {
         try {
-            Application app =
-                DAOFactory.getDAOFactory().getApplicationDAO().findById(appId);
+            Application app = getApplicationDAO().findById(appId);
             checkModifyPermission(caller, app.getEntityId());
             
             AppServiceDAO appServDAO = getAppServiceDAO();
@@ -285,9 +285,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     }
 
     private AppServiceDAO getAppServiceDAO() {
-        AppServiceDAO appSvcdao =
-            DAOFactory.getDAOFactory().getAppServiceDAO();
-        return appSvcdao;
+        return new AppServiceDAO(DAOFactory.getDAOFactory());
     }
 
     /**
@@ -327,14 +325,13 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public DependencyTree getServiceDepsForApp(AuthzSubjectValue subject, 
                                                Integer pk)
-        throws ApplicationNotFoundException,
-               PermissionException {
+        throws ApplicationNotFoundException, PermissionException {
         try {
             // find the app
-            Application app = getApplicationDAO()
-                .findById(pk);
+            ApplicationDAO dao = getApplicationDAO();
+            Application app = dao.findById(pk);
             checkViewPermission(subject, app.getEntityId());
-            return getApplicationDAO().getDependencyTree(app);
+            return dao.getDependencyTree(app);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk);
         }
@@ -353,9 +350,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         Integer pk = depTree.getApplication().getId();
         try {
             // find the app
-            Application app = getApplicationDAO().findById(pk);
+            ApplicationDAO dao = getApplicationDAO();
+            Application app = dao.findById(pk);
             checkModifyPermission(subject, app.getEntityId());
-            getApplicationDAO().setDependencyTree(app, depTree);
+            dao.setDependencyTree(app, depTree);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk);
         }
@@ -424,19 +422,19 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             if(pc != null) {
                 attr = pc.getSortattribute();
             }
+            ApplicationDAO dao = getApplicationDAO();
             switch(attr) {
                 case SortAttribute.RESOURCE_NAME:
                     if(pc != null) {
-                        apps = getApplicationDAO().findAll_orderName(!pc.isDescending());
+                        apps = dao.findAll_orderName(!pc.isDescending());
                     }
                     break;
                 default:
-                    apps = getApplicationDAO().findAll();
+                    apps = dao.findAll();
                     break;
             }
             for(Iterator i = apps.iterator(); i.hasNext();) {
-                Integer appPk =
-                    ((Application)i.next()).getId();
+                Integer appPk = ((Application) i.next()).getId();
                 if(!authzPks.contains(appPk)) {
                     i.remove();
                 }
@@ -573,20 +571,19 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private Collection getApplicationsByPlatform(PageControl pc, Integer id) 
         throws FinderException {
-        ApplicationDAO  appLocalHome = getApplicationDAO();
+        ApplicationDAO  dao = getApplicationDAO();
         Collection apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                apps =
-                    appLocalHome.findByPlatformId_orderName(id,pc.isAscending());
+                apps = dao.findByPlatformId_orderName(id, pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                apps =
-                    appLocalHome.findByPlatformId_orderOwner(id,pc.isAscending());
+                apps = dao.findByPlatformId_orderOwner(id, pc.isAscending());
                 break;
             default :
-                apps = appLocalHome.findByPlatformId_orderName(id, true);
+                apps = dao.findByPlatformId_orderName(id, true);
+                break;
         }
         return apps;
     }
@@ -596,20 +593,19 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private Collection getApplicationsByServer(PageControl pc, Integer id) 
         throws FinderException {
-        ApplicationDAO appLocalHome = getApplicationDAO();
+        ApplicationDAO dao = getApplicationDAO();
         Collection apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                apps =
-                    appLocalHome.findByServerId_orderName(id,pc.isAscending());
+                apps = dao.findByServerId_orderName(id, pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                apps =
-                    appLocalHome.findByServerId_orderOwner(id,pc.isAscending());
+                apps = dao.findByServerId_orderOwner(id,pc.isAscending());
                 break;
             default :
-                apps = appLocalHome.findByServerId_orderName(id, true);
+                apps = dao.findByServerId_orderName(id, true);
+                break;
         }
         return apps;
     }
@@ -619,7 +615,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private Collection getApplicationsByService(PageControl pc, Integer id) 
         throws FinderException, AppdefEntityNotFoundException {
-        ApplicationDAO appLocalHome = getApplicationDAO();
+        ApplicationDAO dao = getApplicationDAO();
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
@@ -632,16 +628,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.OWNER_NAME:
-                apps =
-                    appLocalHome.findByServiceId_orderOwner(id,pc.isAscending());
+                apps = dao.findByServiceId_orderOwner(id, pc.isAscending());
                 break;
             case SortAttribute.RESOURCE_NAME:
             default :
                 if (cluster)
-                    apps = appLocalHome.findByServiceIdOrClusterId_orderName(
+                    apps = dao.findByServiceIdOrClusterId_orderName(
                             id, service.getServiceCluster().getId());
                 else
-                    apps = appLocalHome.findByServiceId_orderName(id);
+                    apps = dao.findByServiceId_orderName(id);
 
                 if (pc.isDescending()) {
                     List appsList = new ArrayList(apps);
@@ -663,7 +658,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                                               PageControl pc) 
         throws AppdefEntityNotFoundException, PermissionException,
                FinderException {
-        ApplicationDAO appLocalHome = getApplicationDAO();
+        ApplicationDAO dao = getApplicationDAO();
 
         // We need to look up the service so that we can see if we need to 
         // look up its cluster, too
@@ -674,7 +669,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             return new ArrayList();
         
         Collection apps =
-            appLocalHome.findByServiceIdOrClusterId_orderName(
+            dao.findByServiceIdOrClusterId_orderName(
                     new Integer(0), new Integer(group.getClusterId()));
 
         if (pc.isDescending()) {
@@ -756,9 +751,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                                         int traversal)
         throws AppdefEntityNotFoundException, PermissionException
     {
-        ResourceTreeGenerator generator;
-
-        generator = new ResourceTreeGenerator(subject);
+        ResourceTreeGenerator generator = new ResourceTreeGenerator(subject);
         return generator.generate(resources, traversal);
     }
 

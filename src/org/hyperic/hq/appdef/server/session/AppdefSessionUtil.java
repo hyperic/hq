@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,7 +34,6 @@ import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.ServerDAO;
 import org.hyperic.hq.dao.AgentTypeDAO;
 import org.hyperic.hq.dao.AgentDAO;
-import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.dao.ApplicationTypeDAO;
 import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.hq.dao.AIServerDAO;
@@ -157,7 +156,7 @@ public abstract class AppdefSessionUtil {
     }
 
     protected ApplicationDAO getApplicationDAO() {
-        return DAOFactory.getDAOFactory().getApplicationDAO();
+        return new ApplicationDAO(DAOFactory.getDAOFactory());
     }
 
     protected AIServerDAO getAIServerDAO() {

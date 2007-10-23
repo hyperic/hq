@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -23,7 +23,7 @@
  * USA. 
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -35,14 +35,16 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.dao.AppServiceDAO;
+import org.hyperic.hq.dao.AppSvcDependencyDAO;
+import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.dao.ServiceClusterDAO;
+import org.hyperic.hq.dao.ServiceDAO;
 
 public class ApplicationDAO extends HibernateDAO
 {
@@ -117,9 +119,6 @@ public class ApplicationDAO extends HibernateDAO
         List nodes = newTree.getNodes();
         AppSvcDependencyDAO adao =
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        ServiceClusterDAO scdao =
-            DAOFactory.getDAOFactory().getServiceClusterDAO();
-        ServiceDAO sdao = DAOFactory.getDAOFactory().getServiceDAO();
         AppServiceDAO asdao = DAOFactory.getDAOFactory().getAppServiceDAO();
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -146,22 +145,7 @@ public class ApplicationDAO extends HibernateDAO
                     (AppServiceValue) aNode.getChildren().get(j);
                 
                 // new dependency
-                if(nodeAsv.getIsCluster()) {
-                    if(depAsv.getIsCluster()) {
-                        scdao.findById(
-                            aNode.getServiceClusterPK()).addDependentServiceCluster(
-                                newTree.getAppPK(),
-                                depAsv.getServiceCluster().getId());
-                    } else {
-                        scdao.findById(
-                            aNode.getServiceClusterPK()).addDependentService(
-                                newTree.getAppPK(),
-                                depAsv.getService().getId());
-                    }
-                } else {
-                    asdao.addDependentService(aNode.getAppService().getId(),
-                                              depAsv.getId());
-                }
+                asdao.addDependentService(nodeAsv.getId(), depAsv.getId());
             }
             
             // finally set the entry point flag on the AppService

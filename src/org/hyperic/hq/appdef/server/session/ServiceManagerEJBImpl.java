@@ -88,7 +88,6 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.hq.dao.ServiceDAO;
 import org.hyperic.hq.dao.AppServiceDAO;
-import org.hyperic.hq.dao.ApplicationDAO;
 import org.hyperic.hq.dao.ConfigResponseDAO;
 import org.hyperic.hq.dao.ServiceClusterDAO;
 import org.hyperic.dao.DAOFactory;
