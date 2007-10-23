@@ -51,6 +51,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     private int    updateMode = 0;
     private String elPurgeVal = "0";
     private boolean externDocs = true;
+    private boolean _alertsAllowed = true;
 
     public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
@@ -62,6 +63,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         buf.append(" deleteUnits=").append(deleteUnits);
         buf.append(" updateMode=").append(updateMode);
         buf.append(" externDocs=").append(externDocs);
+        buf.append(" alertsAllowed=").append(_alertsAllowed);
 
         return buf.toString();
     }
@@ -289,18 +291,6 @@ public class SystemConfigForm extends BaseValidatorForm {
         this.reindex = reindex;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.struts.action.ActionForm#validate(org.apache.struts.action.ActionMapping, javax.servlet.http.HttpServletRequest)
-     */
-    public ActionErrors validate(
-        ActionMapping mapping,
-        HttpServletRequest request) {
-        
-        ActionErrors errors = super.validate(mapping, request);
-                    
-        return errors;
-    }
-
     public String getElPurgeVal() {
         return elPurgeVal;
     }
@@ -323,5 +313,25 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     public void setExternDocs(boolean externDocs) {
         this.externDocs = externDocs;
+    }
+
+    public boolean isAlertsAllowed() {
+        return _alertsAllowed;
+    }
+
+    public void setAlertsAllowed(boolean alertsAllowed) {
+        _alertsAllowed = alertsAllowed;
+    }
+
+    /* (non-Javadoc)
+     * @see org.apache.struts.action.ActionForm#validate(org.apache.struts.action.ActionMapping, javax.servlet.http.HttpServletRequest)
+     */
+    public ActionErrors validate(
+        ActionMapping mapping,
+        HttpServletRequest request) {
+        
+        ActionErrors errors = super.validate(mapping, request);
+                    
+        return errors;
     }
 }

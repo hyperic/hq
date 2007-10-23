@@ -109,6 +109,26 @@
   </tr>
 <!--  /  -->
 
+<!--  MAINTENANCE WINDOW CONFIG TITLE -->
+  <tr>
+    <td colspan="4" class="BlockHeader">
+<tiles:insert definition=".header.tab">  
+  <tiles:put name="tabKey" value="admin.settings.MaintenanceConfigTab"/>  
+</tiles:insert>
+    </td>
+  </tr>
+<!--  /  -->
+
+<!--  MAINTENANCE WINDOW CONFIG CONTENTS -->
+  <tr>
+    <td class="BlockLabel"><fmt:message key="admin.settings.AlertsEnabled"/></td>
+    <td class="BlockContent" colspan="3">
+    <html:radio property="alertsAllowed" value="true"/><fmt:message key="yesno.true"/>
+    <html:radio property="alertsAllowed" value="false"/><fmt:message key="yesno.false"/>
+    </td>
+  </tr>
+<!--  /  -->
+
 <!--  DATA MANAGER CONFIG TITLE -->
   <tr>
     <td colspan="4" class="BlockHeader">

@@ -1724,6 +1724,26 @@ public class EventsBossEJBImpl
         AlertDefinition def = getADM().getByIdAndCheck(subject, defId);
         return getEscMan().getLastFix(def);
     }
+    
+    /**
+     * See if alerts are enabled
+     * @ejb:interface-method
+     */
+    public boolean alertsAllowed(int sessionId)
+        throws SessionNotFoundException, SessionTimeoutException {
+        manager.getSubjectPojo(sessionId);
+        return getAM().alertsAllowed();
+    }
+
+    /**
+     * Set to allow/disallow alerts
+     * @ejb:interface-method
+     */
+    public void setAlertsAllowed(int sessionId, boolean allowed)
+        throws SessionNotFoundException, SessionTimeoutException {
+        manager.getSubjectPojo(sessionId);
+        getAM().setAlertsAllowed(allowed);
+    }
 
     /**
      * @ejb:interface-method
