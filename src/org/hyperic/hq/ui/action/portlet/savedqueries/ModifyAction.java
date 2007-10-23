@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@ import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.StringUtil;
@@ -84,7 +85,9 @@ public class ModifyAction extends BaseAction {
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         PropertiesForm pForm = (PropertiesForm) form;

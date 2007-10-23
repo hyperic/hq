@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -47,11 +47,13 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -80,7 +82,10 @@ public class ViewAction extends TilesAction {
         AIQueueForm queueForm = (AIQueueForm) form;
 
         PageControl page = new PageControl();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt( 
         		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );

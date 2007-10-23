@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.criticalalerts;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -33,25 +32,25 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.InvalidOptionException;
-
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
 
 public class PrepareAction extends TilesAction {
 
@@ -71,7 +70,11 @@ public class PrepareAction extends TilesAction {
         Integer sessionId = RequestUtils.getSessionId(request);
         WebUser user =
             (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         PageList resources = new PageList();
         
         String token = pForm.getToken();
@@ -104,41 +107,41 @@ public class PrepareAction extends TilesAction {
         String priority;
         String selectedOrAll;
 
-        pForm.setTitle(userDashPrefs.getValue(titleKey, ""));
+        pForm.setTitle(dashPrefs.getValue(titleKey, ""));
         
         try {
-            numberOfAlerts = new Integer(userDashPrefs.getValue(countKey));
+            numberOfAlerts = new Integer(dashPrefs.getValue(countKey));
         } catch (InvalidOptionException e) {
             numberOfAlerts =
-                new Integer(userDashPrefs.getValue(PropertiesForm.ALERT_NUMBER)); 
+                new Integer(dashPrefs.getValue(PropertiesForm.ALERT_NUMBER)); 
         }
 
         try {
-            past = Long.parseLong(userDashPrefs.getValue(timeKey));
+            past = Long.parseLong(dashPrefs.getValue(timeKey));
         } catch (InvalidOptionException e) {
-            past = Long.parseLong(userDashPrefs.getValue(PropertiesForm.PAST));
+            past = Long.parseLong(dashPrefs.getValue(PropertiesForm.PAST));
         }
 
         try {
-            priority = userDashPrefs.getValue(priorityKey);
+            priority = dashPrefs.getValue(priorityKey);
         } catch (InvalidOptionException e) {
-            priority = userDashPrefs.getValue(PropertiesForm.PRIORITY);
+            priority = dashPrefs.getValue(PropertiesForm.PRIORITY);
         }
 
         try {
-            selectedOrAll = userDashPrefs.getValue(selOrAllKey);
+            selectedOrAll = dashPrefs.getValue(selOrAllKey);
         } catch (InvalidOptionException e) {
-            selectedOrAll = userDashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL);
+            selectedOrAll = dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL);
         }
 
-        DashboardUtils.verifyResources(resKey, ctx, userDashPrefs, user);
+        DashboardUtils.verifyResources(resKey, ctx, dashPrefs, user);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
         pForm.setPriority(priority);
         pForm.setSelectedOrAll(selectedOrAll);
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, userDashPrefs);
+        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] aeids = (AppdefEntityID[])
             entityIds.toArray(new AppdefEntityID[entityIds.size()]);
 

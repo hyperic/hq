@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -42,17 +40,16 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -71,9 +68,13 @@ public class PrepareAction extends TilesAction {
 
         HttpSession session = request.getSession();
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user =
             (WebUser)session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
 
@@ -97,18 +98,18 @@ public class PrepareAction extends TilesAction {
         }
 
         // We set defaults here rather than in DefaultUserPreferences.properites
-        Integer numberToShow = new Integer(userDashPrefs.getValue(numKey, "10"));
-        String resourceType = userDashPrefs.getValue(resTypeKey, "");
-        String metric = userDashPrefs.getValue(metricKey, "");
-        String descending = userDashPrefs.getValue(descendingKey, "true");
+        Integer numberToShow = new Integer(dashPrefs.getValue(numKey, "10"));
+        String resourceType = dashPrefs.getValue(resTypeKey, "");
+        String metric = dashPrefs.getValue(metricKey, "");
+        String descending = dashPrefs.getValue(descendingKey, "true");
         
-        pForm.setTitle(userDashPrefs.getValue(titleKey, ""));
+        pForm.setTitle(dashPrefs.getValue(titleKey, ""));
 
         pForm.setNumberToShow(numberToShow);
         pForm.setMetric(metric);
         pForm.setDescending(descending);
         
-        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, userDashPrefs);        
+        List resourceList = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);        
         AppdefEntityID[] aeids = (AppdefEntityID[])
             resourceList.toArray(new AppdefEntityID[resourceList.size()]);
 

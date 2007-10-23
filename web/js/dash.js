@@ -10,6 +10,6 @@ function selectDefaultDashboard(selectBoxId, formId){
 	    document.getElementById('defaultDashboard').value = options[index].value;
 	    document.getElementById(formId).submit();
 	}else{
-        dojo.byId("dashboardSelectionErrorPanel").style.display="block";
+        document.getElementById("dashboardSelectionErrorPanel").style.display="block";
 	}
 }

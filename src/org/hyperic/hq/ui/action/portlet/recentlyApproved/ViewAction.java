@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,12 +40,14 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -65,11 +67,15 @@ public class ViewAction extends TilesAction {
         Log log = LogFactory.getLog(ViewAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) session.
-            getAttribute(Constants.WEBUSER_SES_ATTR);
+        getAttribute(Constants.WEBUSER_SES_ATTR);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         int sessionId = user.getSessionId().intValue();
 
         Integer range = new Integer(dashPrefs.getValue(PropertiesForm.RANGE));

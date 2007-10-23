@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
@@ -77,17 +78,20 @@ public class ModifyAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
-
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         String forwardStr = "success";
 
         if(pForm.isRemoveClicked()){
             DashboardUtils.
                 removeResources(pForm.getIds(),
                                 Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                userDashPrefs);
+                                dashPrefs);
             forwardStr = "review";
         }
 
@@ -105,14 +109,15 @@ public class ModifyAction extends BaseAction {
             orderTK.nextToken();
             resources.add(orderTK.nextToken());
         }
-        ConfigurationProxy.getInstance().setPreference(session, user, boss, Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+        ConfigurationProxy.getInstance().setPreference(session, user, boss,
+        		Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                            StringUtil.listToString(resources, StringConstants
                                                    .DASHBOARD_DELIMITER));
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in resourcehealth/ModifyAction " +
             " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + userDashPrefs.getKeys().toString());
+            " user.prefs = " + dashPrefs.getKeys().toString());
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
         return mapping.findForward(forwardStr);

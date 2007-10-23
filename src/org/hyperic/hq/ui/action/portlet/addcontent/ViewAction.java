@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -38,9 +39,12 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -50,26 +54,25 @@ import org.hyperic.util.config.ConfigResponse;
  * <code>PORTAL_KEY</code> request attribute.
  */
 public class ViewAction extends TilesAction {
-    // --------------------------------------------------------- Public Methods
-    
     
    public ActionForward execute(ComponentContext context,
-                            ActionMapping mapping,
-                            ActionForm form,
-                            HttpServletRequest request,
-                            HttpServletResponse response)
-   throws Exception{
+			ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
 
         List portlets = (List) context.getAttribute("portlets");
         WebUser user = (WebUser) request.getSession()
                 .getAttribute(Constants.WEBUSER_SES_ATTR);
+		ServletContext ctx = getServlet().getServletContext();
 
         ArrayList availablePortlets = new ArrayList();
         String userPortlets = new String();
 
         Boolean wide = new Boolean((String) context.getAttribute("wide"));
         HttpSession session = request.getSession();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         List multi;
@@ -92,7 +95,5 @@ public class ViewAction extends TilesAction {
 
         context.putAttribute("availablePortlets", availablePortlets);
         return null;
-        
     }
-    
 }

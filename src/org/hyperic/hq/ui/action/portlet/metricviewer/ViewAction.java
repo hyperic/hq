@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,50 +25,51 @@
 
 package org.hyperic.hq.ui.action.portlet.metricviewer;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.exception.ParameterNotFoundException;
-import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.units.FormattedNumber;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
-
-import java.util.List;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.Comparator;
-import java.util.ArrayList;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.hyperic.util.units.FormattedNumber;
+import org.json.JSONObject;
 
 /**
  * This action class is used by the Metric Viewer portlet.  It's main
@@ -87,11 +88,14 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) request.getSession().getAttribute(
-            Constants.WEBUSER_SES_ATTR);
+                Constants.WEBUSER_SES_ATTR);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         
         int sessionId = user.getSessionId().intValue();
         long ts = System.currentTimeMillis();

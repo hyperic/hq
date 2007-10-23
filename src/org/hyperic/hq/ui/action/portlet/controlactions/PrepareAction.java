@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.portlet.controlactions;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -32,9 +33,13 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends BaseAction {
@@ -58,25 +63,30 @@ public class PrepareAction extends BaseAction {
 
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
+        ServletContext ctx = getServlet().getServletContext();
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         
         Integer lastCompleted = new Integer(
-        		userDashPrefs.getValue(".dashContent.controlActions.lastCompleted"));
+        		dashPrefs.getValue(".dashContent.controlActions.lastCompleted"));
         Integer mostFrequent = new Integer(
-        		userDashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
+        		dashPrefs.getValue(".dashContent.controlActions.mostFrequent"));
         Integer nextScheduled = new Integer(
-        		userDashPrefs.getValue(".dashContent.controlActions.nextScheduled"));
-        boolean useLastCompleted = Boolean.valueOf(userDashPrefs.
+        		dashPrefs.getValue(".dashContent.controlActions.nextScheduled"));
+        boolean useLastCompleted = Boolean.valueOf(dashPrefs.
         		getValue(".dashContent.controlActions.useLastCompleted")).
             booleanValue();
-        boolean useMostFrequent = Boolean.valueOf(userDashPrefs.
+        boolean useMostFrequent = Boolean.valueOf(dashPrefs.
         		getValue(".dashContent.controlActions.useMostFrequent")).
             booleanValue();
-        boolean useNextScheduled = Boolean.valueOf(userDashPrefs.
+        boolean useNextScheduled = Boolean.valueOf(dashPrefs.
         		getValue(".dashContent.controlActions.useNextScheduled")).
             booleanValue();
         long past = Long.parseLong(
-        	userDashPrefs.getValue(".dashContent.controlActions.past"));
+        		dashPrefs.getValue(".dashContent.controlActions.past"));
 
         pForm.setLastCompleted(lastCompleted);
         pForm.setMostFrequent(mostFrequent);

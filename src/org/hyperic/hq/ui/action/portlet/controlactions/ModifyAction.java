@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,14 +34,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -72,7 +72,6 @@ public class ModifyAction extends BaseAction {
         
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        Integer sessionId = RequestUtils.getSessionId(request);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
@@ -93,7 +92,9 @@ public class ModifyAction extends BaseAction {
         String useNextScheduled = String.valueOf( pForm.isUseNextScheduled() );
         String past             = String.valueOf(pForm.getPast());
 
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         dashPrefs.setValue(".dashContent.controlActions.lastCompleted", lastCompleted );
@@ -105,7 +106,8 @@ public class ModifyAction extends BaseAction {
         dashPrefs.setValue(".dashContent.controlActions.useNextScheduled", useNextScheduled );
         dashPrefs.setValue(".dashContent.controlActions.past", past);
         
-        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
+        		boss, dashPrefs);
         
         LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
             " in controlactions/ModifyAction " +

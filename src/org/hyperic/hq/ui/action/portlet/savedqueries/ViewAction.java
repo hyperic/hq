@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,11 +41,12 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.timer.StopWatch;
@@ -71,11 +72,14 @@ public class ViewAction extends TilesAction {
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);     
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         WebUser user = (WebUser)
-            session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
 
         //get all the displayed subtypes
 

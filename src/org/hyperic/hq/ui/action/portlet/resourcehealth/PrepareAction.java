@@ -32,8 +32,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -58,16 +61,23 @@ public class PrepareAction extends TilesAction {
     {
         ServletContext ctx = getServlet().getServletContext();
         HttpSession session = request.getSession();
-        ConfigResponse userDashPrefs = (ConfigResponse) request.getSession().getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
-        String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        DashboardUtils.verifyResources(key, ctx, userDashPrefs, user);
+        DashboardUtils.verifyResources(
+        		Constants.USERPREF_KEY_FAVORITE_RESOURCES,
+        		ctx, dashPrefs, user);
         // this quarantees that the session dosen't contain any resources it
         // shouldnt
         SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
-        List resources = DashboardUtils.preferencesAsResources(key, ctx, user, userDashPrefs);
+        List resources = DashboardUtils.preferencesAsResources(
+        		Constants.USERPREF_KEY_FAVORITE_RESOURCES, 
+        		ctx, user, dashPrefs);
 
         Pager pendingPager = Pager.getDefaultPager();
         PageList viewableResourses = pendingPager.seek(resources,

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceDisplaySummary;
@@ -47,6 +47,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.config.ConfigResponse;
@@ -68,11 +69,15 @@ public class ViewAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         MeasurementBoss boss = ContextUtils.getMeasurementBoss(ctx);
         EventsBoss eBoss = ContextUtils.getEventsBoss(ctx);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser)
-            session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
         List entityIds =  DashboardUtils.preferencesAsEntityIds(key, dashPrefs);

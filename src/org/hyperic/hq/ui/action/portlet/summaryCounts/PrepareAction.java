@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,32 +25,28 @@
 
 package org.hyperic.hq.ui.action.portlet.summaryCounts;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
-
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An <code>Action</code> that loads the admin screen for a portlet 
@@ -80,19 +76,22 @@ public class PrepareAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx); 
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         HttpSession session = request.getSession();
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
 
-        boolean application = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
-        boolean platform =  new Boolean(userDashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();             
-        boolean server = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
-        boolean service = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
-        boolean cluster = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
+        boolean application = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.application")).booleanValue();
+        boolean platform =  new Boolean(dashPrefs.getValue(".dashContent.summaryCounts.platform")).booleanValue();             
+        boolean server = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.server")).booleanValue();
+        boolean service = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.service")).booleanValue();
+        boolean cluster = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.cluster")).booleanValue();
 
-        boolean groupMixed= new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
-        boolean groupGroups = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
-        boolean groupPlatServerService = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
-        boolean groupApplication = new Boolean( userDashPrefs.getValue(".dashContent.summaryCounts.group.application")).booleanValue();
+        boolean groupMixed= new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.mixed")).booleanValue();
+        boolean groupGroups = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.groups")).booleanValue();
+        boolean groupPlatServerService = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.plat.server.service")).booleanValue();
+        boolean groupApplication = new Boolean( dashPrefs.getValue(".dashContent.summaryCounts.group.application")).booleanValue();
 
 
         pForm.setApplication(application);
@@ -106,11 +105,11 @@ public class PrepareAction extends BaseAction {
         pForm.setGroupPlatServerService(groupPlatServerService);
         pForm.setGroupApplication(groupApplication);
 
-        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", userDashPrefs);            
-        String[] platformTypes =    getStringArray(".dashContent.summaryCounts.platformTypes", userDashPrefs);            
-        String[] serverTypes =      getStringArray(".dashContent.summaryCounts.serverTypes", userDashPrefs);
-        String[] serviceTypes =     getStringArray(".dashContent.summaryCounts.serviceTypes", userDashPrefs);
-        String[] clusterTypes =     getStringArray(".dashContent.summaryCounts.group.clusterTypes", userDashPrefs);
+        String[] applicationTypes = getStringArray(".dashContent.summaryCounts.applicationTypes", dashPrefs);            
+        String[] platformTypes =    getStringArray(".dashContent.summaryCounts.platformTypes", dashPrefs);            
+        String[] serverTypes =      getStringArray(".dashContent.summaryCounts.serverTypes", dashPrefs);
+        String[] serviceTypes =     getStringArray(".dashContent.summaryCounts.serviceTypes", dashPrefs);
+        String[] clusterTypes =     getStringArray(".dashContent.summaryCounts.group.clusterTypes", dashPrefs);
 
 
         pForm.setApplicationTypes(applicationTypes);

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,15 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.StringConstants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +41,15 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.StringConstants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  *prepairs the list and form for the saved queries properties page.
@@ -66,12 +69,16 @@ public class PrepareAction extends TilesAction {
             
         Log log = LogFactory.getLog(PrepareAction.class.getName());
         log.trace("getting saved charts associated with user ");
-
-        ConfigResponse userDashPrefs = (ConfigResponse) request.getSession().getAttribute(Constants.USER_DASHBOARD_CONFIG);
+        ServletContext ctx = getServlet().getServletContext();
         WebUser user = (WebUser)
             request.getSession().getAttribute( Constants.WEBUSER_SES_ATTR );
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)request.getSession().getAttribute(
+        				Constants.SELECTED_DASHBOARD_ID), user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         List chartList = StringUtil.explode(
-        		userDashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 
+        		dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 
             StringConstants.DASHBOARD_DELIMITER);
 
         ArrayList charts = new ArrayList();

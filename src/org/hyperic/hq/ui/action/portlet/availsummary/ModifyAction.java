@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -33,15 +33,14 @@ import javax.servlet.http.HttpSession;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ModifyAction extends BaseAction {
@@ -53,16 +52,16 @@ public class ModifyAction extends BaseAction {
         throws Exception {
 
         ServletContext ctx = getServlet().getServletContext();
-        Integer sessionId = RequestUtils.getSessionId(request);
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
-        
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
-        
         WebUser user = (WebUser)
             session.getAttribute(Constants.WEBUSER_SES_ATTR);
+        
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
  
         String forwardStr = Constants.SUCCESS_URL;
 
@@ -94,7 +93,8 @@ public class ModifyAction extends BaseAction {
         dashPrefs.setValue(numKey, numberToShow.toString());
         dashPrefs.setValue(titleKey, pForm.getTitle());
         
-        ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+        ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
+				boss, dashPrefs);
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
 

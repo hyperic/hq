@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -76,10 +76,13 @@ public class ViewAction extends BaseAction {
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         EventsBoss eventBoss = ContextUtils.getEventsBoss(ctx);
         HttpSession session = request.getSession();
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
-        ConfigResponse dashPrefs = dashConfig.getConfig();
         WebUser user = (WebUser) request.getSession().getAttribute(
-            Constants.WEBUSER_SES_ATTR);
+                Constants.WEBUSER_SES_ATTR);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, authzBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         
         String token;
 

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,26 +25,25 @@
 
 package org.hyperic.hq.ui.action.portlet.summaryCounts;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code>
@@ -72,10 +71,8 @@ public class ModifyAction extends BaseAction {
                             HttpServletResponse response)
     throws Exception {
         
-        Log log = LogFactory.getLog(ModifyAction.class.getName());
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        Integer sessionId = RequestUtils.getSessionId(request);
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
 
@@ -86,7 +83,9 @@ public class ModifyAction extends BaseAction {
         }
 
         WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        DashboardConfig dashConfig = (DashboardConfig) session.getAttribute(Constants.SELECTED_DASHBOARD);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         
