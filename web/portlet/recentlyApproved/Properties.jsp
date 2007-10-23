@@ -60,12 +60,19 @@
              <tr>
               <td nowrap><fmt:message key="dash.settings.recentlyApproved.last"/></td>
               <td>
-              <html:select property="range">
-                <html:option value="1"/>
-                <html:option value="5"/>
-                <html:option value="10"/>
-                <html:option value="20"/>
-              </html:select>
+                  <c:choose>
+                      <c:when test="${not params.isDashEditable}">
+                          <c:out value="${RecentlyApprovedForm.range}"/>
+                      </c:when>
+                      <c:otherwise>
+                          <html:select property="range">
+                              <html:option value="1"/>
+                              <html:option value="5"/>
+                              <html:option value="10"/>
+                              <html:option value="20"/>
+                          </html:select>
+                      </c:otherwise>
+                  </c:choose>
               </td>
               <td width="100%"><fmt:message key="dash.settings.recentlyApproved.platforms"/></td>
              </tr>
