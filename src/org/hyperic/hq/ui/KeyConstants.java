@@ -35,6 +35,8 @@ public interface KeyConstants {
 	
 	public static final String DASHBOARD_ID = ".dashboard.id";
 	
+	public static final String IS_DASH_EDITABLE = "isDashEditalbe";
+	
     public static final String USERPREF_KEY_PROBLEMS_IGNORELIST = ".dashContent.problems.ignoreList";
 
     public static final String USERPREF_KEY_PROBLEMS_SHOWIGNORED = ".dashContent.problems.showIgnored";
@@ -78,8 +80,6 @@ public interface KeyConstants {
     public static final String LOGON_URL_KEY = "forwardURL";
     
     public static final String SELECTED_DASHBOARD_ID = ".user.dashboard.selected.id";
-    
-    public static final String SELECTED_DASHBOARD = ".user.dashboard.selected";
     
     public static final String DEFAULT_DASHBOARD_ID = ".user.dashboard.default.id";
     /*
