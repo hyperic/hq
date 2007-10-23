@@ -68,7 +68,7 @@ public class FilesystemFormatter
     private String formatHtml(ConfigResponse cfg, FileSystem[] f) {
         StringBuffer r = new StringBuffer();
         
-        r.append("<div class='filesystem_livedata'><table><thead><tr>");
+        r.append("<div class='filesystem_livedata'><table cellpadding='0' cellspacing='0'><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.filesystem.head.name"))
          .append("</td>")

@@ -61,15 +61,31 @@ function runCommand() {
 }
 
 </script>
+<style>
+.outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
+.bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
+.leftbx {float:left;width:18%;margin-right:10px;height:400px;}
+.BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
+#result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
+#result thead {width:100%;padding:0px;margin:0px;}
+#result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
+#result table{width:100%;padding:0px;}
+#result table td {padding:3px;border-bottom:1px solid #cccccc;}
+.fivepad {padding:5px;}
+</style>
 
-<div>
-  Execute Command
+<div class="outerLiveDataCont">
+<div class="leftbx">
+<div class="bxblueborder">
+  <div class="BlockTitle">Execute Command</div>
+  <div class="fivepad">
   <select id="commandSelect" 
           onchange="selectCommand(options[selectedIndex].value)">
   <% for (c in commands) { %>
     <option value="${c}">${h c}</option>
   <% } %>
   </select>
+  </div>
 
   <div id="formatters_cont">
     <% for (c in commands) { %>
@@ -83,11 +99,9 @@ function runCommand() {
     </div>
     <% } %>
   </div>
+  <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Select</button></div>
+  </div>
+</div>
+<div id="result" class="bxblueborder"></div>
 </div>
 
-<div id="goButtonCont">
-  <button onclick="runCommand()">Go!</button>
-</div>
-
-<div id="result">
-</div>

@@ -126,7 +126,7 @@ public class TopFormatter
          .append("<br/>");
         
         
-        r.append("<table><thead><tr><td>")
+        r.append("<table cellpadding='0' cellspacing='0'><thead><tr><td>")
          .append(BUNDLE.format("formatter.top.proc.pid"))
          .append("</td><td>")
          .append(BUNDLE.format("formatter.top.proc.user"))
