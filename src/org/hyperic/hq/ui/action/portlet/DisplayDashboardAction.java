@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -50,13 +50,15 @@ import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 
@@ -79,12 +81,8 @@ public class DisplayDashboardAction extends TilesAction {
 				.getAttribute(Constants.USERS_SES_PORTAL);
 		// TODO add a condition here to check if the dash selected has changed
 		// and re-add if null check
-		String selectedDashboard = user.getPreference(
-				Constants.SELECTED_DASHBOARD_ID, null);
-		String currentDashboard = dForm.getSelectedDashboardId();
-		boolean dashboardSelectionChanged = false;
 		
-			portal = new Portal();
+		portal = new Portal();
 		portal.setName("dashboard.template.title");
 		portal.setColumns(2);
 
@@ -109,54 +107,54 @@ public class DisplayDashboardAction extends TilesAction {
 
 		// Check if there is a default dashboard, selected dashboard or none of
 		// the above
+		Integer selectedDashboard = SessionUtils.getIntegerAttribute(
+				session, Constants.SELECTED_DASHBOARD_ID, null);
 		String defaultDashboard = user.getPreference(
 				Constants.DEFAULT_DASHBOARD_ID, null);
 		DashboardConfig dashboardConfig = null;
-		if (defaultDashboard != null) {
+		if (defaultDashboard != null && selectedDashboard == null) {
 			// TODO grab the default dash by id
 			// if it doesn't exist pop dialog
-			dashboardConfig = findDashboard(dashboardCollection, Integer
+			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, Integer
 					.valueOf(defaultDashboard));
 			if (dashboardConfig == null) {
 				dForm.setPopDialog(true);
 				return null;
 			} else {
-				session.setAttribute(Constants.SELECTED_DASHBOARD,
-						dashboardConfig);
 				session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
 						dashboardConfig.getId());
-				dForm
-						.setSelectedDashboardId(dashboardConfig.getId()
-								.toString());
+				dForm.setSelectedDashboardId(dashboardConfig.getId()
+						.toString());
 			}
 		} else if (selectedDashboard != null) {
 			// TODO grab the selected dash by id
 			// if it doesn't exist pop dialog
-			dashboardConfig = findDashboard(dashboardCollection, Integer
-					.valueOf(selectedDashboard));
+			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, selectedDashboard);
 			if (dashboardConfig == null) {
 				dForm.setPopDialog(true);
 				return null;
 			} else {
-				session.setAttribute(Constants.SELECTED_DASHBOARD,
-						dashboardConfig);
-				dForm
-						.setSelectedDashboardId(dashboardConfig.getId()
+				dForm.setSelectedDashboardId(dashboardConfig.getId()
 								.toString());
 			}
 		} else if (dashboardCollection.size() == 1) {
 			// No need to select a default - only one available
 			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-			session.setAttribute(Constants.SELECTED_DASHBOARD, dashboardConfig);
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
+					dashboardConfig.getId());
 			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 		} else {
 			// many dashboards and no default or selected - pop default dialog
 			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-			session.setAttribute(Constants.SELECTED_DASHBOARD, dashboardConfig);
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
+					dashboardConfig.getId());
 			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 			dForm.setPopDialog(true);
 		}
-
+		
+		request.setAttribute(Constants.IS_DASH_EDITABLE, 
+				new Boolean(dashManager.isEditable(me, dashboardConfig)));
+		
 		// Dashboard exists, display it
 		ConfigResponse dashPrefs = dashboardConfig.getConfig();
 		portal.addPortletsFromString(dashPrefs
@@ -175,7 +173,7 @@ public class DisplayDashboardAction extends TilesAction {
 				portlet.setDescription(dashPrefs.getValue(titleKey, ""));
 			}
 		}
-
+		
 		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
 
 		// Make sure there's a valid RSS auth token
@@ -215,14 +213,4 @@ public class DisplayDashboardAction extends TilesAction {
 		return null;
 	}
 
-	public DashboardConfig findDashboard(ArrayList dashboardList, Integer id) {
-		Iterator i = dashboardList.iterator();
-		while (i.hasNext()) {
-			DashboardConfig config = (DashboardConfig) i.next();
-			if (config.getId().equals(id)) {
-				return config;
-			}
-		}
-		return null;
-	}
 }
