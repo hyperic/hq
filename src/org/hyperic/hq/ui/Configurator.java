@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ public class Configurator implements ServletContextListener {
     }
 
     protected String getRoleDashboardPreferenceFile(){
-    	return "/WEB-INF/DefaultRoleDashboardPreferences.properties";
+    	return "";
     }
     
     protected String getUserDashboardPreferenceFile(){
@@ -163,13 +163,21 @@ public class Configurator implements ServletContextListener {
             ctx.setAttribute(Constants.DEF_USER_DASH_PREFS, userDashPrefs);
             
             // Load Role Dashboard Preferences
-            Properties roleDashProps = ContextUtils.loadProperties(ctx, getRoleDashboardPreferenceFile());
-            keys = roleDashProps.keys();
-            while(keys.hasMoreElements()){
-            	String key = (String) keys.nextElement();
-            	roleDashPrefs.setValue(key, roleDashProps.getProperty(key));
-            }
-            ctx.setAttribute(Constants.DEF_ROLE_DASH_PREFS, roleDashPrefs);
+            Properties roleDashProps;
+			try {
+				roleDashProps = ContextUtils.loadProperties(ctx,
+						getRoleDashboardPreferenceFile());
+			} catch (Exception e) {
+				roleDashProps = null;
+			}
+            if (roleDashProps != null) {
+				keys = roleDashProps.keys();
+				while (keys.hasMoreElements()) {
+					String key = (String) keys.nextElement();
+					roleDashPrefs.setValue(key, roleDashProps.getProperty(key));
+				}
+			}
+			ctx.setAttribute(Constants.DEF_ROLE_DASH_PREFS, roleDashPrefs);
         } 
         catch (Exception e) {
             error("loading table properties file " + Constants.PROPS_TAGLIB + "failed: ", e);
