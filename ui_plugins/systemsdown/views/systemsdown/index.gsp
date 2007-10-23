@@ -43,7 +43,7 @@
         <div id="systemsDownTable">
         <%def headerHTML = '<div style="float: right; margin:5px 5px 0px 0px;">Show:&nbsp;<span id="defaultCount" onclick="updateFilterCount(50, this)">50</span>&nbsp;|&nbsp;<span id="onehundred" onclick="updateFilterCount(100,this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="onethousand"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
         
-        <%= dojoTable(id:'SystemsDown', title:'',
+        <%= dojoTable(id:'SystemsDown', title:'Resource Availability',
             refresh:60, pageControls:false, url:urlFor(action:'data'),
             schema:systemsDownSchema, numRows:50, headerHTML: headerHTML) 
         %>
