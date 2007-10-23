@@ -332,7 +332,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
         catch (SQLException e) {
             _log.debug("Inserting/Updating data outside a transaction failed " +
-            		   "because of an irrecoverable connection error.", e);            
+                       "because autocommit management failed.", e);          
         }
         finally {
             DBUtil.closeConnection(logCtx, conn);
