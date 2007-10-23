@@ -318,8 +318,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             _log.debug("Inserting/Updating data outside a transaction failed.");
             return;
         }
+                
         try {
-            addDataWithCommits(data, overwrite, conn);
+            boolean autocommit = conn.getAutoCommit();
+            
+            try {
+                conn.setAutoCommit(true);
+                addDataWithCommits(data, overwrite, conn);                
+            }
+            finally {
+                conn.setAutoCommit(autocommit);
+            }
+        }
+        catch (SQLException e) {
+            _log.debug("Inserting/Updating data outside a transaction failed " +
+            		   "because of an irrecoverable connection error.", e);            
         }
         finally {
             DBUtil.closeConnection(logCtx, conn);
