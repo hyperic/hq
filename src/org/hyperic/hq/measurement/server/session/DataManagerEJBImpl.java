@@ -86,8 +86,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalDataManager"
  *      view-type="local"
  *      type="Stateless"
- *
- * @ejb:transaction type="NOTSUPPORTED"
+ *      transaction-type="Bean"
  */
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
@@ -234,34 +233,109 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param data       a list of {@link DataPoint}s 
      *
      * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
     public boolean addData(List data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }
-        
+
         data = enforceUnmodifiable(data);
-        
+
         _log.debug("Attempting to insert data in a single transaction.");
-        
+
         HQDialect dialect = Util.getHQDialect();
         boolean succeeded = false;
-        
-        if (dialect.supportsMultiInsertStmt()) {
-            succeeded = insertDataWithOneInsert(data);            
-        } else {
-            succeeded = insertDataInBatch(data);
-        }            
-        
-        if (succeeded) {
-            _log.debug("Inserting data in a single transaction succeeded.");
-            sendMetricEvents(data);
-        } else {
-            _log.debug("Inserting data in a single transaction failed.");
+
+        Connection conn = safeGetConnection();
+        if (conn == null) {
+            return false;
         }
-        
-        return succeeded;        
+
+        try
+        {
+            boolean autocommit = conn.getAutoCommit();
+            try {
+                conn.setAutoCommit(false);
+                succeeded = insertDataInBatch(data, conn);
+                if (succeeded) {
+                    _log.debug("Inserting data in a single transaction succeeded.");
+                    conn.commit();
+                    sendMetricEvents(data);
+                } else {
+                    _log.debug("Inserting data in a single transaction failed." +
+                               "  Rolling back transaction.");
+                    conn.rollback();
+                    conn.setAutoCommit(true);
+                    addDataWithCommits(data, true, conn);
+                }
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(autocommit);
+            }
+        }
+        catch (SQLException e) {
+            _log.debug("Transaction failed around inserting metric data.", e);
+        }
+        finally {
+            DBUtil.closeConnection(logCtx, conn);
+        }
+        return succeeded;
+    }
+
+    private void addDataWithCommits(List data, boolean overwrite,
+                                    Connection conn)
+    {
+        Set failedToSaveMetrics = new HashSet();
+        List left = data;
+        while (true && !left.isEmpty())
+        {
+            int numLeft = left.size();
+            _log.debug("Attempting to insert " + numLeft + " points");
+
+            try {
+                left = insertData(conn, left, true);
+            } catch (SQLException e) {
+                assert false : "The SQLException should not happen: "+e;
+            }
+
+            _log.debug("Num left = " + left.size());
+
+            if (left.isEmpty())
+                break;
+
+            if (!overwrite) {
+                _log.debug("We are not updating the remaining "+
+                            left.size()+" points");
+                failedToSaveMetrics.addAll(left);
+                break;
+            }
+
+            // The insert couldn't insert everything, so attempt to update
+            // the things that are left
+            _log.debug("Sending " + left.size() + " data points to update");
+
+            left = updateData(conn, left);
+
+            if (left.isEmpty())
+                break;
+
+            _log.debug("Update left " + left.size() + " points to process");
+
+            if (numLeft == left.size()) {
+                DataPoint remPt = (DataPoint)left.remove(0);
+                failedToSaveMetrics.add(remPt);
+                // There are some entries that we weren't able to do
+                // anything about ... that sucks.
+                _log.warn("Unable to do anything about " + numLeft +
+                          " data points.  Sorry.");
+                _log.warn("Throwing away data point " + remPt);
+            }
+        }
+        _log.debug("Inserting/Updating data outside a transaction finished.");
+        sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
     }
 
     /**
@@ -273,7 +347,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                   XXX:  Why would you ever not want to overwrite?
      *
      * @ejb:interface-method
-     * @ejb:transaction type="NOTSUPPORTED"
      */
     public void addData(List data, boolean overwrite) {
         /**
@@ -294,73 +367,38 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (shouldAbortDataInsertion(data)) {
             return;
         }
-        
+
         _log.debug("Attempting to insert/update data outside a transaction.");
 
         data = enforceUnmodifiable(data);
-        Set failedToSaveMetrics = new HashSet();
-        List left = data;
-        
+
         Connection conn = safeGetConnection();
-        
+
         if (conn == null) {
             _log.debug("Inserting/Updating data outside a transaction failed.");
             return;
         }
-        
+                
         try {
-            while (true && !left.isEmpty()) {
-                int numLeft = left.size();
-                _log.debug("Attempting to insert " + numLeft + " points");
-                
-                try {
-                    left = insertData(conn, left, true);
-                } catch (SQLException e) {
-                    assert false : "The SQLException should not happen: "+e;
-                }
-                                
-                _log.debug("Num left = " + left.size());
-                
-                if (left.isEmpty())
-                    break;
-                
-                if (!overwrite) {
-                    _log.debug("We are not updating the remaining "+
-                                left.size()+" points");
-                    failedToSaveMetrics.addAll(left);
-                    break;
-                }
-                                    
-                // The insert couldn't insert everything, so attempt to update
-                // the things that are left
-                _log.debug("Sending " + left.size() + " data points to update");
-                                
-                left = updateData(conn, left);                    
-                
-                if (left.isEmpty())
-                    break;
-
-                _log.debug("Update left " + left.size() + " points to process");
-                
-                if (numLeft == left.size()) {
-                    DataPoint remPt = (DataPoint)left.remove(0);
-                    failedToSaveMetrics.add(remPt);
-                    // There are some entries that we weren't able to do
-                    // anything about ... that sucks.
-                    _log.warn("Unable to do anything about " + numLeft + 
-                              " data points.  Sorry.");
-                    _log.warn("Throwing away data point " + remPt);
-                }
+            boolean autocommit = conn.getAutoCommit();
+            
+            try {
+                conn.setAutoCommit(true);
+                addDataWithCommits(data, overwrite, conn);                
             }
-        } finally {
+            finally {
+                conn.setAutoCommit(autocommit);
+            }
+        }
+        catch (SQLException e) {
+            _log.debug("Inserting/Updating data outside a transaction failed " +
+                       "because autocommit management failed.", e);            
+        }
+        finally {
             DBUtil.closeConnection(logCtx, conn);
         }
-        
-        _log.debug("Inserting/Updating data outside a transaction finished.");
-        
-        sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
     }
-    
+
     private boolean shouldAbortDataInsertion(List data) {
         if (data.isEmpty()) {
             _log.debug("Aborting data insertion since data list is empty. This is ok.");
@@ -504,122 +542,39 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Insert the metric data points to the DB with one insert statement. This 
-     * should only be invoked when the DB supports multi-insert statements.
-     * 
-     * @param data a list of {@link DataPoint}s 
-     * @return <code>true</code> if the multi-insert succeeded; <code>false</code> 
-     *         otherwise.
-     */
-    private boolean insertDataWithOneInsert(List data) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
-        
-        Connection conn = safeGetConnection();
-        
-        if (conn == null) {
-            // We are in a bad state. Set txn rollback in case this txn was 
-            // initiated by the client.
-            _ctx.setRollbackOnly();
-            return false;
-        }
-
-        try {
-            for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) it.next();
-                String table = (String) entry.getKey();
-                List dpts = (List) entry.getValue();
-
-                StringBuffer values = new StringBuffer();
-                int rowsToUpdate = 0;
-                for (Iterator i=dpts.iterator(); i.hasNext(); ) {
-                    DataPoint pt = (DataPoint)i.next();
-                    Integer metricId  = pt.getMetricId();
-                    MetricValue val   = pt.getMetricValue();
-                    BigDecimal bigDec;
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch(NumberFormatException e) {  // infinite, or NaN
-                        _log.warn("Unable to insert infinite or NaN for " +
-                                  "metric id=" + metricId);
-                        continue;
-                    }
-                    rowsToUpdate++;
-                    values.append("("+val.getTimestamp()+", "+metricId.intValue()+
-                                  ", "+getDecimalInRange(bigDec)+"),");
-                }
-                String sql = "insert into "+table+" (timestamp, measurement_id, "+
-                             "value) values "+values.substring(0, values.length()-1);
-                stmt = conn.createStatement();
-                int rows = stmt.executeUpdate(sql);
-                _log.debug("Inserted "+rows+" rows into "+table+
-                           " (attempted "+rowsToUpdate+" rows)");
-                if (rows < rowsToUpdate)
-                    return false;
-            }   
-        } catch (SQLException e) {
-            // If there is a SQLException, then none of the data points 
-            // should be inserted. Roll back the txn.
-            _log.debug("Error while inserting data with one insert", e);
-            _ctx.setRollbackOnly();
-            return false;            
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-        return true;
-    }
-    
-    /**
      * Insert the metric data points to the DB in batch.
      * 
      * @param data a list of {@link DataPoint}s 
+     * @param conn datasource connection
      * @return <code>true</code> if the batch insert succeeded; <code>false</code> 
      *         otherwise.       
      */
-    private boolean insertDataInBatch(List data) {
+    private boolean insertDataInBatch(List data, Connection conn) {
         List left = data;
-        
-        Connection conn = safeGetConnection();
-        
-        if (conn == null) {
-            // We are in a bad state. Set txn rollback in case this txn was 
-            // initiated by the client.
-            _ctx.setRollbackOnly();
-            return false;
-        }
-                
-        try {            
-            // Oracle does not handle the batch insert in single transaction
-            // so return right away
-            if (DBUtil.isOracle(conn))
-                return false;
-            
+
+        try {
             _log.debug("Attempting to insert " + left.size() + " points");
-            left = insertData(conn, left, false);            
+            left = insertData(conn, left, false);
             _log.debug("Num left = " + left.size());
-            
+
             if (!left.isEmpty()) {
                 _log.debug("Need to update " + left.size() + " data points.");
-                
+
                 if (_log.isDebugEnabled())
-                    _log.debug("Data points to update: " + left);                
-                
+                    _log.debug("Data points to update: " + left);
+
                 return false;
             }
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points 
             // should be inserted. Roll back the txn.
             _log.debug("Error while inserting data in batch", e);
-            _ctx.setRollbackOnly();
             return false;
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Retrieve a DB connection.
      * 

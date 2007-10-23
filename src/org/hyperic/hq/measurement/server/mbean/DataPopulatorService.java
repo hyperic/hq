@@ -102,9 +102,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
             List data = genData(m, dp, detailedPurgeInterval);
             _log.info("Inserting " + data.size() + " data points");
-            if (!dataMan.addData(data)) {
-                dataMan.addData(data, true);
-            }
+            dataMan.addData(data);
             num += data.size();
         }
 
