@@ -41,8 +41,8 @@ public class DownMetricsCacheEventListenerFactory extends
                 _log.debug("Look up earliest down time data point for " + mid);
             }
             
-            long lastTime =
-                DataManagerEJBImpl.getOne().getLastNonZeroTimestamp(mid);
+            long lastTime = DataManagerEJBImpl.getOne()
+                .getLastNonZeroTimestamp(mid, val.getTimestamp());
 
             // Set the time if it's less than the current timestamp
             if (lastTime < val.getTimestamp()) {

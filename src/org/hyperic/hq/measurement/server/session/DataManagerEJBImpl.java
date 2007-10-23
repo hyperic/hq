@@ -1709,7 +1709,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return a long time value
      * @ejb:interface-method
      */
-    public long getLastNonZeroTimestamp(Integer id)
+    public long getLastNonZeroTimestamp(Integer id, long before)
     {
         Connection conn  = null;
         Statement  stmt  = null;
@@ -1733,8 +1733,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             for (int i = 0; i < tables.length; i++) {
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
-                                       " WHERE not value = 0 AND " +
-                                       " measurement_id = " + id);
+                                       " WHERE " +
+                                       " measurement_id = " + id +
+                                       " and timestamp > " + before +
+                                       " and not value = 0");
                 
                 if (rs.next()) {
                     long ret = rs.getLong(1);
