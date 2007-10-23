@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,15 +29,13 @@ import java.util.StringTokenizer;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesUtil {
 
-    public static Boolean isFavorite (WebUser user, AppdefEntityID aeid) {
-        ConfigResponse prefs = user.getPreferences();
+    public static Boolean isFavorite (ConfigResponse config, AppdefEntityID aeid) {
         String favorites =
-            prefs.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
+        	config.getValue(Constants.USERPREF_KEY_FAVORITE_RESOURCES);
         if (favorites != null) {
             StringTokenizer st =
                 new StringTokenizer(favorites, Constants.DASHBOARD_DELIMITER);
