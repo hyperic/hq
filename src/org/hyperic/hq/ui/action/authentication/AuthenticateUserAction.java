@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -187,30 +187,28 @@ public class AuthenticateUserAction extends TilesAction {
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
-		// Set the user and role dashboard defaults and merge into one
+		// Load the user dashboard if it doesn't exist create a new one
+        // and mix in the defaults
 		try {
-			DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+			DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+					.getOne();
 			ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
 					.getAttribute(Constants.DEF_USER_DASH_PREFS);
 			AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
 					.findSubjectById(webUser.getSubject().getId());
-			UserDashboardConfig userDashboard = dashManager.getUserDashboard(me, me);
+			UserDashboardConfig userDashboard = dashManager.getUserDashboard(
+					me, me);
 			if (userDashboard == null) {
-				userDashboard = dashManager.createUserDashboard(me, me, webUser.getName());
+				userDashboard = dashManager.createUserDashboard(me, me, webUser
+						.getName());
+				ConfigResponse userDashobardConfig = userDashboard.getConfig();
+				userDashobardConfig.merge(defaultUserDashPrefs, false);
+				dashManager.configureDashboard(me, userDashboard,
+						userDashobardConfig);
 			}
-			ConfigResponse userDashobardConfig = userDashboard.getConfig();
-			userDashobardConfig.merge(defaultUserDashPrefs, false);
-			session.setAttribute(Constants.USER_DASHBOARD_CONFIG,
-					userDashobardConfig);
-			dashManager.configureDashboard(me, userDashboard, userDashobardConfig);
 		} catch (PermissionException e) {
 			e.printStackTrace();
 		} 
-		// Set the default dashboard prefs in the session
-		ConfigResponse defaultRoleDashPrefs = (ConfigResponse) ctx
-				.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
-		session.setAttribute(Constants.ROLE_DASHBOARD_CONFIG,
-				defaultRoleDashPrefs);
 
         if (needsRegistration) {
             // will be cleaned out during registration
