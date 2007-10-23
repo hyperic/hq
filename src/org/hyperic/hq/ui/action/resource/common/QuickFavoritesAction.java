@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,27 +30,25 @@ import java.util.HashMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
+import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesAction extends BaseAction {
-
-    private static final Log log
-        = LogFactory.getLog(QuickFavoritesPrepareAction.class.getName());
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
@@ -58,9 +56,14 @@ public class QuickFavoritesAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
+    	HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(request.getSession());
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, boss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String mode   = request.getParameter(Constants.MODE_PARAM);
 
@@ -69,7 +72,7 @@ public class QuickFavoritesAction extends BaseAction {
 
         if (mode == null) return returnFailure(request, mapping, forwardParams);
 
-        Boolean isFavorite = QuickFavoritesUtil.isFavorite(user, aeid);
+        Boolean isFavorite = QuickFavoritesUtil.isFavorite(dashPrefs, aeid);
         if (mode.equals(Constants.MODE_ADD)) {
             // Is this already in the favorites list?  Should not happen
             if (isFavorite.booleanValue()) {
@@ -79,7 +82,7 @@ public class QuickFavoritesAction extends BaseAction {
             }
             // Add to favorites and save
             DashboardUtils.addEntityToPreferences(
-                Constants.USERPREF_KEY_FAVORITE_RESOURCES, user, aeid,
+                Constants.USERPREF_KEY_FAVORITE_RESOURCES, dashPrefs, aeid,
                 Integer.MAX_VALUE);
         } else if (mode.equals(Constants.MODE_REMOVE) ) {
             // Is this not in the favorites list?  Should not happen
@@ -92,14 +95,13 @@ public class QuickFavoritesAction extends BaseAction {
             DashboardUtils
                 .removeResources(new String[] { aeid.getAppdefKey() },
                                  Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                 user);
+                                 dashPrefs);
         } else {
             // Not an add or remove, what the heck is it?  It's an error.
             return returnFailure(request, mapping, forwardParams);
         }
 
-        boss.setUserPrefs(user.getSessionId(), user.getId(), 
-                          user.getPreferences());
+        ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
         return returnSuccess(request, mapping, forwardParams, 
                              BaseAction.YES_RETURN_PATH);
     }

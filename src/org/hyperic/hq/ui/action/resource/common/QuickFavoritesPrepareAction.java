@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,21 +25,24 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.WorkflowPrepareAction;
-import org.hyperic.hq.ui.util.SessionUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -50,19 +53,25 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
                                   HttpServletResponse response)
         throws Exception {
 
-        Log log = LogFactory.getLog(QuickFavoritesPrepareAction.class.getName());
         WebUser user = SessionUtils.getWebUser(request.getSession());
-        Boolean isFavorite = Boolean.FALSE;
-        AppdefResourceValue arv =
-            (AppdefResourceValue) context.getAttribute("resource");
+        ServletContext ctx = getServlet().getServletContext();
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+		DashboardConfig dashConfig = DashboardUtils.findDashboard(
+				(Integer) request.getSession().getAttribute(
+						Constants.SELECTED_DASHBOARD_ID), user, aBoss);
+		ConfigResponse dashPrefs = dashConfig.getConfig();
+		Boolean isFavorite = Boolean.FALSE;
+		AppdefResourceValue arv = (AppdefResourceValue) context
+				.getAttribute("resource");
 
-        // All we need to do is check our preferences to see if this resource 
-        // is in there.
-        isFavorite = QuickFavoritesUtil.isFavorite(user, arv.getEntityId());
+		// All we need to do is check our preferences to see if this resource 
+		// is in there.
+		isFavorite = QuickFavoritesUtil
+				.isFavorite(dashPrefs, arv.getEntityId());
 
-        request.setAttribute(Constants.ENTITY_ID_PARAM,
-                             arv.getEntityId().getAppdefKey());
-        request.setAttribute("isFavorite", isFavorite);
-        return null;
+		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
+				.getAppdefKey());
+		request.setAttribute("isFavorite", isFavorite);
+		return null;
     }
 }

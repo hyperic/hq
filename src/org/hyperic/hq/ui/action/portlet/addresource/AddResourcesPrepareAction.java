@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,14 +34,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -51,14 +60,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
 
 /**
  * An Action that retrieves data from the user preferences
@@ -136,10 +137,14 @@ public class AddResourcesPrepareAction extends Action {
         HttpSession session = request.getSession();            
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
         Integer sessionId = RequestUtils.getSessionId(request);
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user = (WebUser) session.getAttribute( 
                                             Constants.WEBUSER_SES_ATTR );
-
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        
         PageControl pcAvail =
             RequestUtils.getPageControl(request, "psa", "pna",
                                         "soa", "sca");
@@ -160,7 +165,7 @@ public class AddResourcesPrepareAction extends Action {
             log.debug("get avalable resources from user preferences");
             try {
                 pendingResourcesIds =
-                	userDashPrefs.getPreferenceAsList(addForm.getKey(),
+                	dashPrefs.getPreferenceAsList(addForm.getKey(),
                                              StringConstants.DASHBOARD_DELIMITER);
             } catch (InvalidOptionException e) {
                 // Then we don't have any pending resources

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -74,7 +74,9 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.beans.ChartedMetricBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
@@ -165,10 +167,14 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         // This was probably a bad favorites chart
         String query = request.getQueryString();
         HttpSession session = request.getSession();
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
         WebUser user =
             (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        String userCharts = userDashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        String userCharts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
         List chartList =
             StringUtil.explode(userCharts, Constants.DASHBOARD_DELIMITER);
         for (Iterator i = chartList.iterator(); i.hasNext();) {
@@ -179,9 +185,9 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 // Remove this and direct user to dash
                 userCharts = StringUtil.remove(userCharts, chart);
 
-                userDashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
+                dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, userCharts);
                 
-                ConfigurationProxy.getInstance().setUserDashboardPreferences(userDashPrefs, boss, user );
+                ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
                 request.setAttribute("toDashboard", "true");
                 return null;
             }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -44,11 +44,10 @@ import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.util.config.ConfigResponse;
 
 /**
  * An Action that adds resources to a dashboard widget
@@ -124,11 +123,6 @@ public class AddResourcesAction extends BaseAction {
 
         ConfigurationProxy.getInstance().setPreference(session, user, boss,
         		addForm.getKey(), resourcesAsString.toString());
-        ConfigResponse userDashPrefs = (ConfigResponse) session.getAttribute(Constants.USER_DASHBOARD_CONFIG);
-        LogFactory.getLog("user.preferences").trace("Invoking setUserPrefs"+
-            " in AddResourcesAction " +
-            " for " + user.getId() + " at "+System.currentTimeMillis() +
-            " user.prefs = " + userDashPrefs.getKeys().toString());
 
         return returnSuccess(request, mapping);
 
