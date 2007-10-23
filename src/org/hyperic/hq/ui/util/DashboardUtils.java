@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,18 +25,27 @@
 
 package org.hyperic.hq.ui.util;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -335,5 +344,46 @@ public class DashboardUtils {
 				Constants.DASHBOARD_DELIMITER));
         
         return true;
+	}
+    
+    public static DashboardConfig findDashboard(ArrayList dashboardList, Integer id) {
+		Iterator i = dashboardList.iterator();
+		while (i.hasNext()) {
+			DashboardConfig config = (DashboardConfig) i.next();
+			if (config.getId().equals(id)) {
+				return config;
+			}
+		}
+		return null;
+	}
+    
+    /**
+     * Find a given dashboard by its id
+     * @param id the id of the dashboard
+     * @param user current user
+     * @param boss the authzboss
+     * @return the DashboardConfig of the corresponding DashboardId or null if none
+     */
+    public static DashboardConfig findDashboard(Integer id, WebUser user,
+			AuthzBoss boss) {
+		AuthzSubject me;
+		ArrayList dashboardCollection;
+		try {
+			me = boss.findSubjectById(user.getSessionId(), user.getSubject()
+					.getId());
+			DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+					.getOne();
+			dashboardCollection = (ArrayList) dashManager.getDashboards(me);
+		} catch (Exception e) {
+			return null;
+		}
+		Iterator i = dashboardCollection.iterator();
+		while (i.hasNext()) {
+			DashboardConfig config = (DashboardConfig) i.next();
+			if (config.getId().equals(id)) {
+				return config;
+			}
+		}
+		return null;
 	}
 }
