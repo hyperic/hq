@@ -41,11 +41,7 @@
 <c:set var="addToListUrl" value="/resource/application/Inventory.do?mode=addServices&eid=${Resource.entityId}" />
 <c:set var="widgetInstanceName" value="listServices"/>
 
-<c:url var="selfAction" value="/resource/application/Inventory.do" context="/">
-  <c:param name="mode" value="view" />
-  <c:param name="eid" value="${Resource.entityId}" />
-  <c:param name="accord" value="3" />
-</c:url>
+<c:set var="selfAction" value="/resource/application/Inventory.do?mode=view&accord=3&eid=${Resource.entityId}"/>
 
 <c:url var="ctxSelfAction" value="${selfAction}"/>
 
