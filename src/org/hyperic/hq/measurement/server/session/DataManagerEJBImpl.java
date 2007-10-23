@@ -254,8 +254,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     conn.commit();
                     sendMetricEvents(data);
                 } else {
-                    _log.debug("Inserting data in a single transaction failed." +
-                               "  Rolling back transaction.");
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Inserting data in a single transaction failed." +
+                                   "  Rolling back transaction.");
+                    }
                     conn.rollback();
                     conn.setAutoCommit(true);
                     addDataWithCommits(data, true, conn);
@@ -347,7 +349,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         while (true && !left.isEmpty())
         {
             int numLeft = left.size();
-            _log.debug("Attempting to insert " + numLeft + " points");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Attempting to insert " + numLeft + " points");
+            }
             
             try {
                 left = insertData(conn, left, true);
@@ -355,28 +359,36 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 assert false : "The SQLException should not happen: "+e;
             }
                             
-            _log.debug("Num left = " + left.size());
+            if (_log.isDebugEnabled()) {
+                _log.debug("Num left = " + left.size());
+            }
             
             if (left.isEmpty())
                 break;
             
             if (!overwrite) {
-                _log.debug("We are not updating the remaining "+
-                            left.size()+" points");
+                if (_log.isDebugEnabled()) {
+                    _log.debug("We are not updating the remaining "+
+                                left.size()+" points");
+                }
                 failedToSaveMetrics.addAll(left);
                 break;
             }
                                 
             // The insert couldn't insert everything, so attempt to update
             // the things that are left
-            _log.debug("Sending " + left.size() + " data points to update");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Sending " + left.size() + " data points to update");
+            }
                             
             left = updateData(conn, left);                    
             
             if (left.isEmpty())
                 break;
 
-            _log.debug("Update left " + left.size() + " points to process");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Update left " + left.size() + " points to process");
+            }
             
             if (numLeft == left.size()) {
                 DataPoint remPt = (DataPoint)left.remove(0);
@@ -583,8 +595,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                              "value) values "+values.substring(0, values.length()-1);
                 stmt = conn.createStatement();
                 int rows = stmt.executeUpdate(sql);
-                _log.debug("Inserted "+rows+" rows into "+table+
-                           " (attempted "+rowsToUpdate+" rows)");
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Inserted "+rows+" rows into "+table+
+                               " (attempted "+rowsToUpdate+" rows)");
+                }
                 if (rows < rowsToUpdate)
                     return false;
             }   
@@ -610,15 +624,19 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         List left = data;
         
         try {            
-            _log.debug("Attempting to insert " + left.size() + " points");
+            if (_log.isDebugEnabled()) {
+                _log.debug("Attempting to insert " + left.size() + " points");
+            }
             left = insertData(conn, left, false);            
-            _log.debug("Num left = " + left.size());
+            if (_log.isDebugEnabled()) {
+                _log.debug("Num left = " + left.size());
+            }
             
             if (!left.isEmpty()) {
-                _log.debug("Need to update " + left.size() + " data points.");
-                
-                if (_log.isDebugEnabled())
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Need to update " + left.size() + " data points.");
                     _log.debug("Data points to update: " + left);                
+                }
                 
                 return false;
             }
