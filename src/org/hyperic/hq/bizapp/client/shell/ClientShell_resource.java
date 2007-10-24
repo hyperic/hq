@@ -36,7 +36,7 @@ import org.hyperic.util.shell.ShellCommandInitException;
 public class ClientShell_resource 
     extends MultiwordShellCommand 
 {
-    private ClientShell              shell;
+    private ClientShell shell;
 
     public ClientShell_resource(ClientShell shell){
         this.shell = shell;
@@ -55,8 +55,6 @@ public class ClientShell_resource
         registerSubHandler("import", handler);
         handler = new ClientShell_resource_view(this.shell);
         registerSubHandler("view", handler);
-        handler = new ClientShell_resource_configure(this.shell);
-        registerSubHandler("configure", handler);
         handler = new ClientShell_resource_set(this.shell);
         registerSubHandler("set", handler);
         handler = new ClientShell_resource_export(this.shell);
