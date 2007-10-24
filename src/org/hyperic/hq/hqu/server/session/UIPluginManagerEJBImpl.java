@@ -294,9 +294,7 @@ public class UIPluginManagerEJBImpl
         } else {
             r = rman.findResource(ent);
         } 
-        Collection res = _attachRsrcDAO.findFor(r, cat);
-        _log.info("Returning " + res);
-        return res;
+        return _attachRsrcDAO.findFor(r, cat);
     }
     
     public static UIPluginManagerLocal getOne() {
