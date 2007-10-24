@@ -270,7 +270,8 @@ public class AgentScheduleSynchronizer {
             } catch (PermissionException e) {
                 log.debug("No permission to look up agent", e);
             } catch (MonitorAgentException e) {
-                log.debug("Could not contact agent", e);
+                log.error("Unable to communicate with agent for entity: " +
+                          eid.getID() + " to refresh metric schedule");
             } catch (MeasurementScheduleException e) {
                 log.debug("Schedule exception", e);
             } catch (MeasurementUnscheduleException e) {
