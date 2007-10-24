@@ -127,7 +127,6 @@ public class IDGenerator {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_POINTBASE_4:
                 alterPS  = conn.prepareStatement(itsAlterSQL);
                 alterPS.executeUpdate();
                 break;
@@ -197,13 +196,6 @@ public class IDGenerator {
             itsSelectSQL
                 = "SELECT MAX(ID) + 1 FROM " + itsTableName;
             break;
-            
-        case DBUtil.DATABASE_POINTBASE_4:
-        	itsAlterSQL
-        		= PointbaseSequence.getIncrementCommand(itsSequenceName, itsSequenceInterval); 
-        	itsSelectSQL
-        		= PointbaseSequence.getSelectNextValCommand(itsSequenceName);
-        	break;
         }
     }
 
