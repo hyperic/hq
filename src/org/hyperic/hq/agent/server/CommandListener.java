@@ -125,7 +125,7 @@ public class CommandListener
     {
         this.listener.setup(CommandListener.DIE_FREQUENCY);
     }
-
+    
     /**
      * The main loop which blocks, waiting for connections.  Connections are
      * handled in a synchronous manner -- one connection is not processed
@@ -139,115 +139,125 @@ public class CommandListener
 
         lastRequestTime = 0;
         while(true){
-            AgentServerConnection conn;
+            
+            AgentServerConnection conn = null;
             InputStream           inputStream;
             OutputStream          outputStream;
             Object                dispatchResult;
             AgentCommand          cmd;
-
-            // Statistics block
-            if(lastRequestTime != 0){
-                long requestTime = System.currentTimeMillis()-lastRequestTime;
-
-                this.stat_totRequestTime += requestTime;
-                if(requestTime > this.stat_maxRequestTime ||
-                   this.stat_maxRequestTime == -1)
-                {
-                    this.stat_maxRequestTime = requestTime;
+            
+            try {
+                // Statistics block
+                if(lastRequestTime != 0){
+                    gatherLastRequestTimeStatistics(lastRequestTime);
                 }
 
-                if(requestTime < this.stat_minRequestTime ||
-                   this.stat_minRequestTime == -1)
-                {
-                    this.stat_minRequestTime = requestTime;
+                lastRequestTime = 0;
+                try {
+                    conn = this.listener.getNewConnection();
+                } catch(InterruptedIOException exc){
+                    // Timeout occurred
+                    if(this.shouldDie == true){
+                        this.running   = false;
+                        this.shouldDie = false;
+                        this.listener.cleanup();
+                        return;
+                    }
+                    continue;
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed handling new connection", exc);
+                    continue;
                 }
-            }
 
-            lastRequestTime = 0;
-            try {
-                conn = this.listener.getNewConnection();
-            } catch(InterruptedIOException exc){
-                // Timeout occurred
-                if(this.shouldDie == true){
-                    this.running   = false;
-                    this.shouldDie = false;
-                    this.listener.cleanup();
-                    return;
+                lastRequestTime = System.currentTimeMillis();
+                this.stat_numRequestsServed++;
+
+                try {
+                    inputStream   = conn.getInputStream();
+                    outputStream  = conn.getOutputStream();
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed to get connection r/w handles", exc);
+                    continue;
                 }
-                continue;
-            } catch(AgentConnectionException exc){
-                this.stat_numConnFailures++;
-                this.logger.error("Failed handling new connection", exc);
-                continue;
-            }
 
-            lastRequestTime = System.currentTimeMillis();
-            this.stat_numRequestsServed++;
+                cmd = null;
+                try {
+                    cmd = conn.readCommand();
+                    this.logger.debug("Dispatching request for '" + 
+                                      cmd.getCommand() + "'");
 
-            try {
-                inputStream   = conn.getInputStream();
-                outputStream  = conn.getOutputStream();
-            } catch(AgentConnectionException exc){
-                this.stat_numConnFailures++;
-                this.logger.error("Failed to get connection r/w handles", exc);
-                conn.close();
-                continue;
-            }
+                    dispatchResult = 
+                        this.dispatcher.processRequest(cmd, inputStream,
+                                                       outputStream);
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed to read method/args from client",
+                                      exc);
+                    dispatchResult = exc;
+                } catch(AgentRemoteException exc){
+                    // This is a fine result, raised via the AgentServerHandler
+                    // interface
+                    dispatchResult = exc;
+                } catch(Exception exc){
+                    // Catch-all so we don't blow up the program when a plugin
+                    // fails.
+                    dispatchResult = exc;
+                } 
 
-            cmd = null;
-            try {
-                cmd = conn.readCommand();
-                this.logger.debug("Dispatching request for '" + 
-                                  cmd.getCommand() + "'");
-
-                dispatchResult = 
-                    this.dispatcher.processRequest(cmd, inputStream,
-                                                   outputStream);
-            } catch(AgentConnectionException exc){
-                this.stat_numConnFailures++;
-                this.logger.error("Failed to read method/args from client",
-                                  exc);
-                dispatchResult = exc;
-            } catch(AgentRemoteException exc){
-                // This is a fine result, raised via the AgentServerHandler
-                // interface
-                dispatchResult = exc;
-            } catch(Exception exc){
-                // Catch-all so we don't blow up the program when a plugin
-                // fails.
-                dispatchResult = exc;
-            } 
-
-            try {
-                if(dispatchResult instanceof AgentRemoteException){
-                    this.logger.warn("Error invoking method",
-                                     (Exception)dispatchResult);
-                    conn.sendErrorResponse(((AgentRemoteException)dispatchResult)
-                                           .getMessage());
-                } else if(dispatchResult instanceof Exception){
-                    this.logger.warn("Error invoking method",
-                                     (Exception)dispatchResult);
-                    conn.sendErrorResponse(((Exception)dispatchResult).
-                                           toString());
-                } else if(dispatchResult == null){
-                    this.logger.debug("Method '" + cmd + "' returned null ");
-                    conn.sendSuccessResponse(new AgentRemoteValue());
-                } else {
-                    this.logger.debug("Method '" + cmd + "' returned an " +
-                                      "object result");
-                    conn.sendSuccessResponse((AgentRemoteValue)dispatchResult);
+                try {
+                    if(dispatchResult instanceof AgentRemoteException){
+                        this.logger.warn("Error invoking method",
+                                         (Exception)dispatchResult);
+                        conn.sendErrorResponse(((AgentRemoteException)dispatchResult)
+                                               .getMessage());
+                    } else if(dispatchResult instanceof Exception){
+                        this.logger.warn("Error invoking method",
+                                         (Exception)dispatchResult);
+                        conn.sendErrorResponse(((Exception)dispatchResult).
+                                               toString());
+                    } else if(dispatchResult == null){
+                        this.logger.debug("Method '" + cmd + "' returned null ");
+                        conn.sendSuccessResponse(new AgentRemoteValue());
+                    } else {
+                        this.logger.debug("Method '" + cmd + "' returned an " +
+                                          "object result");
+                        conn.sendSuccessResponse((AgentRemoteValue)dispatchResult);
+                    }
+                } catch(AgentConnectionException excIO) {
+                    // Geez, we're really having problems now.  Close
+                    // the socket!  ABANDON SHIP!
+                    this.logger.error("Error writing result to client", excIO);
+                } finally {
+                    try {outputStream.flush();} catch(IOException ignExc){}
+                    try {outputStream.close();} catch(IOException ignExc){}
                 }
-            } catch(AgentConnectionException excIO) {
-                // Geez, we're really having problems now.  Close
-                // the socket!  ABANDON SHIP!
-                this.logger.error("Error writing result to client", excIO);
+                
             } finally {
-                try {outputStream.flush();} catch(IOException ignExc){}
-                try {outputStream.close();} catch(IOException ignExc){}
+                if (conn != null) {
+                    conn.close();                    
+                }
             }
-
-            conn.close();
         }
+    }
+    
+    private void gatherLastRequestTimeStatistics(long lastRequestTime) 
+    {
+        long requestTime = System.currentTimeMillis()-lastRequestTime;
+
+        this.stat_totRequestTime += requestTime;
+        if(requestTime > this.stat_maxRequestTime ||
+           this.stat_maxRequestTime == -1)
+        {
+            this.stat_maxRequestTime = requestTime;
+        }
+
+        if(requestTime < this.stat_minRequestTime ||
+           this.stat_minRequestTime == -1)
+        {
+            this.stat_minRequestTime = requestTime;
+        }        
     }
 
     /**
