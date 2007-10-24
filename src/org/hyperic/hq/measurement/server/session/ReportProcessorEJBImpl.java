@@ -106,6 +106,10 @@ public class ReportProcessorEJBImpl
             
         // For each Datapoint/MetricValue associated
         // with the DSN...
+        boolean trace = log.isTraceEnabled();
+        if (trace) {
+            setDebugID();
+        }
         for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
@@ -113,11 +117,13 @@ public class ReportProcessorEJBImpl
                 long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
                 
                 // Debugging missing data points
-                if (dm.getId().equals(_debugId)) {
-                    log.info("metricDebug: ReportProcessor addData: " +
-                             "metric ID " + _debugId +
-                             " value=" + dpts[i].getValue() +
-                             " at " + adjust);
+                if (trace && (_debugId.intValue() == -1 ||
+                              dm.getId().equals(_debugId))) {
+                    log.trace("metricDebug: ReportProcessor addData: " +
+                              "metric ID " + dm.getId() +
+                              " debug ID " + _debugId +
+                              " value=" + dpts[i].getValue() +
+                              " at " + adjust);
                 }
                 
                 // Create new Measurement data point with the adjusted time
@@ -212,8 +218,9 @@ public class ReportProcessorEJBImpl
                                       "insert data");
         }
     }
-    
-    public void ejbCreate(){
+
+    private void setDebugID()
+    {
         try {
             _debugId = 
                 new Integer(MonitorFactory.getProperty("agent.metricDebug"));
@@ -222,6 +229,7 @@ public class ReportProcessorEJBImpl
         } 
     }
     
+    public void ejbCreate(){}
     public void ejbPostCreate(){}
     public void ejbActivate(){}
     public void ejbPassivate(){}
