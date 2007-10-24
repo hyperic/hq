@@ -346,8 +346,21 @@ public abstract class Collector implements Runnable {
         this.endTime = System.currentTimeMillis();
     }
 
+    String mapToString(Map map) {
+        Map props;
+        if (map.get(PROP_PASSWORD) != null) {
+            props = new HashMap();
+            props.putAll(map);
+            props.put(PROP_PASSWORD, "*****");
+        }
+        else {
+            props = map;
+        }
+        return props.toString();
+    }
+
     public String toString() {
-        return this.props.toString();
+        return mapToString(this.props);
     }
 
     static class PluginContainer {
