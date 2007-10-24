@@ -178,7 +178,13 @@ public class SRNManagerEJBImpl extends SessionEJB
             } else {
             // Set to default
                 Long defaultMin = dao.getMinInterval(aid, true);
-                srn.setMinInterval(defaultMin.longValue());
+                // If this call to incrementSrn is due to the last metric
+                // for a resource being unscheduled it's possible for
+                // getMinInterval to return null if the session was flushed
+                // before the SRN was deleted.
+                if (defaultMin != null) {
+                    srn.setMinInterval(defaultMin.longValue());
+                }
             }
 
             cache.put(srn);
