@@ -29,6 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.ScheduleRevNum;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -228,8 +230,7 @@ public class SRNManagerEJBImpl extends SessionEJB
                                srns[i].getRevisionNumber() +
                                " but cached is " + srn.getSrn() +
                                " rescheduling metrics..");
-                    DerivedMeasurementManagerEJBImpl.getOne().
-                        reschedule(srns[i].getEntity());
+                    AgentScheduleSynchronizer.schedule(srns[i].getEntity());
                     srn.setLastReported(current);
                 } else {
                     srn.setLastReported(current);

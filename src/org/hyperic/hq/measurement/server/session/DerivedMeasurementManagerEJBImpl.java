@@ -84,6 +84,7 @@ import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
@@ -381,7 +382,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
                     log.info("Refreshing metric schedule for [" + id + "]");
-                    reschedule(id);
+                    AgentScheduleSynchronizer.schedule(id);
                     continue;
                 }
 
@@ -1415,25 +1416,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id +
                       ": " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public void reschedule(AppdefEntityID id) {
-        String objName = "hyperic.jmx:type=Service,name=MeasurementSchedule";
-        String meth = "refreshSchedule";
-
-        MBeanServer server = MBeanUtil.getMBeanServer();
-
-        try {
-            ObjectName obj = new ObjectName(objName);
-            server.invoke(obj, meth,
-                          new Object[] { id },
-                          new String[] { AppdefEntityID.class.getName() });
-        } catch(Exception e) {
-            throw new SystemException(e);
         }
     }
 
