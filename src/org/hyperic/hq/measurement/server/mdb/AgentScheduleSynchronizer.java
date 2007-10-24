@@ -57,11 +57,8 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
-import org.hyperic.util.pager.PageControl;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity.
