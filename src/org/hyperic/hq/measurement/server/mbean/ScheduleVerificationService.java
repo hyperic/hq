@@ -57,7 +57,7 @@ import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 /**
  * This job is responsible for verifying measurement jobs.
  * It is possible for the agent's schedule to become lost. In
- * these cases, its desireable for the server to push the
+ * these cases, its desirable for the server to push the
  * schedule out to the agent. At present, the agent scheduling
  * process is synchronous along with the server scheduling
  * process.  The intent is to allow this to be asynchronous.
@@ -101,8 +101,6 @@ public class ScheduleVerificationService
             return;
         }
 
-        SRNManagerLocal srnManager = SRNManagerEJBImpl.getOne();
-
         AgentManagerLocal agentMan;
 
         try {
@@ -122,6 +120,7 @@ public class ScheduleVerificationService
         }
 
         // Ask the SRNCache what requires rescheduling
+        SRNManagerLocal srnManager = SRNManagerEJBImpl.getOne();
         Collection toResched = srnManager.getOutOfSyncEntities();
         
         HashSet downAgents = new HashSet();
@@ -140,7 +139,7 @@ public class ScheduleVerificationService
                     continue;
                 
                 if (!upAgents.contains(agentVal)) {
-                    if (this.getMeasurementProcessor().ping(agentVal)) {
+                    if (getMeasurementProcessor().ping(agentVal)) {
                         upAgents.add(agentVal);
                     }
                     else {
@@ -189,14 +188,14 @@ public class ScheduleVerificationService
      * @jmx:managed-operation
      */
     public void start() {
-        _log.info("Starting " + this.getClass().getName());
+        _log.info("Starting " + getClass().getName());
     }
 
     /**
      * @jmx:managed-operation
      */
     public void stop() {
-        _log.info("Stopping " + this.getClass().getName());
+        _log.info("Stopping " + getClass().getName());
     }
 
     /**
