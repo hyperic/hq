@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,9 +24,7 @@
  */
 package org.hyperic.hq.hqu.rendit;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
-import groovy.lang.Script;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -34,10 +32,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.groovy.runtime.InvokerHelper;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.util.Runnee;
 
 /**
  * Basically a wrapper around the classloader and associated groovy 
@@ -48,11 +49,15 @@ import org.codehaus.groovy.runtime.InvokerHelper;
  * added to the classloader.
  */
 public class PluginWrapper {
+    public static final String DISPATCH_PATH = 
+        "org/hyperic/hq/hqu/rendit/dispatcher.groovy";
+    
     private static final Log _log = LogFactory.getLog(PluginWrapper.class);
     
     private       File              _pluginDir;
     private final File              _sysDir;
     private final GroovyClassLoader _loader;
+    private       IDispatcher       _dispatcher;
 
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
         URLClassLoader urlLoader;
@@ -89,21 +94,82 @@ public class PluginWrapper {
         _loader = new GroovyClassLoader(urlLoader);
     }
     
-    File getPluginDir() {
-        return _pluginDir;
-    }
-    
-    Object run(String script, Binding b) throws Exception {
+    private Object doInContext(Runnee c) throws Exception {
         Thread curThread = Thread.currentThread();
         ClassLoader oldLoader = curThread.getContextClassLoader();
 
         try {
             curThread.setContextClassLoader(_loader);
-            Class c = _loader.parseClass(new File(_sysDir, script));
-            Script s = InvokerHelper.createScript(c, b);
-            return s.run();
+            return c.run();
         } finally {
             curThread.setContextClassLoader(oldLoader);
         }
+    }
+    
+    void loadDispatcher() throws Exception {
+        doInContext(new Runnee() {
+            public Object run() throws Exception {
+                Class c = _loader.parseClass(new File(_sysDir, DISPATCH_PATH));
+                _dispatcher = (IDispatcher)c.newInstance();
+                return null;
+            }
+        });
+    }
+    
+    Properties loadPlugin() {
+        try {
+            return (Properties)doInContext(new Runnee() {
+                public Object run() {
+                    return _dispatcher.loadPlugin(_pluginDir);
+                }
+            });
+        } catch(Exception e) {
+            throw new PluginLoadException("Unable to load plugin", e);
+        }
+    }
+    
+    void handleRequest(final RequestInvocationBindings b) {
+        try {
+            doInContext(new Runnee() {
+                public Object run() {
+                    _dispatcher.handleRequest(b);
+                    return null;
+                }
+            });
+        } catch(Exception e) {
+            _log.warn("Error handling request from " + _pluginDir, e);
+            throw new SystemException(e);
+        }
+    }
+    
+    void deploy(final UIPlugin p) {
+        try {
+            doInContext(new Runnee() {
+                public Object run() {
+                    _dispatcher.deploy(p);
+                    return null;
+                }
+            });
+        } catch(Exception e) {
+            _log.warn("Error deploying from " + _pluginDir, e);
+        }
+    }
+    
+    void invokeMethod(final InvokeMethodInvocationBindings b) {
+        try {
+            doInContext(new Runnee() {
+                public Object run() {
+                    _dispatcher.invokeMethod(b);
+                    return null;
+                }
+            });
+        } catch(Exception e) {
+            _log.warn("Error invoking method from " + _pluginDir, e);
+            throw new SystemException(e);
+        }
+    }
+    
+    File getPluginDir() {
+        return _pluginDir;
     }
 }

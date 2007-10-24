@@ -33,7 +33,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 /**
  * The invocation bindings used when a request is made from the servlet.
  */
-public class RequestInvocationBindings extends InvocationBindings {
+public class RequestInvocationBindings {
     private String              _requestURI;
     private String              _ctxPath;
     private String              _pathInfo;
@@ -51,7 +51,6 @@ public class RequestInvocationBindings extends InvocationBindings {
                                      HttpServletResponse response, 
                                      ServletContext ctx)
     {
-        super("request", null);
         _requestURI  = requestURI;
         _ctxPath     = ctxPath;
         _pathInfo    = pathInfo;

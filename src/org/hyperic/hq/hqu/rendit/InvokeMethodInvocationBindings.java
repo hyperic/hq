@@ -24,18 +24,16 @@
  */
 package org.hyperic.hq.hqu.rendit;
 
-import java.io.File;
 import java.util.List;
 
-public class InvokeMethodInvocationBindings extends InvocationBindings {
+public class InvokeMethodInvocationBindings {
     private String _className;
     private String _methName;
     private List   _args;
     
-    protected InvokeMethodInvocationBindings(File pluginDir, String className,
-                                             String methName, List args) 
+    protected InvokeMethodInvocationBindings(String className, String methName, 
+                                             List args) 
     {
-        super("invokeMethod", pluginDir);
         _className = className;
         _methName  = methName;
         _args      = args;

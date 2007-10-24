@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,23 +24,31 @@
  */
 package org.hyperic.hq.hqu.rendit;
 
-import groovy.lang.Binding;
-
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hqu.UIPluginDescriptor;
+import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl;
+import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.util.Runnee;
 
 public class RenditServer {
+    public static final String PROP_PLUGIN_NAME   = "plugin.name";
+    public static final String PROP_PLUGIN_VER    = "plugin.version";
+    public static final String PROP_PLUGIN_APIMAJ = "plugin.apiMajor";
+    public static final String PROP_PLUGIN_APIMIN = "plugin.apiMinor";
+    
     private static final RenditServer INSTANCE = new RenditServer();
     private static final Log _log = LogFactory.getLog(RenditServer.class);
     private final Object CFG_LOCK = new Object();
@@ -78,23 +86,12 @@ public class RenditServer {
      * before they start adding plugins.
      */
     public void setSysDir(File sysDir) {
-        synchronized (CFG_LOCK) { 
-            Map oldPlugins = new HashMap(_plugins);
-                
-            _sysDir = sysDir;
-            // Re-create all the plugins with the new system directory
-            _plugins.clear();
-            for (Iterator i=oldPlugins.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry ent = (Map.Entry)i.next();
-                String pluginName = (String)ent.getKey();
-                PluginWrapper plugin = (PluginWrapper)ent.getValue();
-                PluginWrapper newWrapper;
-                
-                newWrapper = new PluginWrapper(plugin.getPluginDir(), _sysDir,
-                                               getUseLoader());
-                
-                _plugins.put(pluginName, newWrapper);
+        synchronized (CFG_LOCK) {
+            if (!_plugins.isEmpty()) {
+                throw new IllegalStateException("Unable to set sysdir after " + 
+                                                "plugins have been loaded");
             }
+            _sysDir = sysDir;
         }
     }
     
@@ -119,19 +116,22 @@ public class RenditServer {
      * 
      * @param path Path to the plugin
      */
-    public PluginWrapper loadPlugin(File path) 
+    public PluginWrapper loadPlugin(final File path) 
         throws PluginLoadException
     {
-        PluginWrapper plugin = new PluginWrapper(path, getSysDir(), 
-                                                 getUseLoader());
+        final PluginWrapper plugin = new PluginWrapper(path, getSysDir(), 
+                                                       getUseLoader());
         
-        InvocationBindings bindings = 
-            new LoadInvocationBindings(plugin.getPluginDir());
+        try {
+            plugin.loadDispatcher();
+        } catch(Exception e) {
+            throw new PluginLoadException("Failed to load plugin", e);
+        }
         
-        UIPluginDescriptor pInfo;
+        Properties props;
 
         try {
-            pInfo = (UIPluginDescriptor)invokeDispatcher(plugin, bindings);
+            props = plugin.loadPlugin();
         } catch(PluginLoadException e) {
             throw e;
         } catch(Exception e) {
@@ -139,14 +139,37 @@ public class RenditServer {
                                           path.getAbsolutePath() + "]", e);
         }
 
-        _log.info(pInfo.getName() + " [" + pInfo.getDescription() + 
-                  "] version " + pInfo.getVersion() + 
-                  " loaded at [" + path.getName() + "]");
-                  
-        UIPluginManagerEJBImpl.getOne().createOrUpdate(pInfo);
+        final String pluginName = props.getProperty(PROP_PLUGIN_NAME);
+        final String pluginVer  = props.getProperty(PROP_PLUGIN_VER);
         
-        synchronized (CFG_LOCK) {
-            _plugins.put(path.getName(), plugin);
+        _log.info(pluginName + " version " + pluginVer + 
+                  " loaded at [" + path.getName() + "]");
+             
+        final UIPluginManagerLocal uMan = UIPluginManagerEJBImpl.getOne();
+        try {
+            TransactionManagerEJBImpl.getOne().runInTransaction(new Runnee() {
+                public Object run() throws Exception {
+                    UIPlugin p = uMan.createOrUpdate(pluginName, pluginVer);
+                    plugin.deploy(p);
+                    HQApp.getInstance().addTransactionListener(
+                    new TransactionListener() {
+                        public void afterCommit(boolean success) {
+                            if (success) {
+                                synchronized (CFG_LOCK) {
+                                    _plugins.put(path.getName(), plugin);
+                                }
+                            }
+                        }
+
+                        public void beforeCommit() {
+                        }
+                    });
+                    return null;
+                }
+            });
+        } catch(Exception e) {
+            throw new PluginLoadException("Error loading HQU plugin [" + 
+                                          pluginName + "]", e);
         }
         return plugin;
     }
@@ -158,8 +181,7 @@ public class RenditServer {
         throws Exception
     {
         PluginWrapper plugin = getPlugin(pluginName);
-        b.setPluginDir(plugin.getPluginDir());
-        invokeDispatcher(plugin, b);
+        plugin.handleRequest(b);
     }
     
     /**
@@ -186,20 +208,10 @@ public class RenditServer {
         args.add(template);
         args.add(params);
         args.add(output);
-        InvocationBindings bindings =
-            new InvokeMethodInvocationBindings(plugin.getPluginDir(),
-                                               "Renderer", "render", args);
-        invokeDispatcher(plugin, bindings);
-    }
-
-    private Object invokeDispatcher(PluginWrapper plugin, 
-                                    InvocationBindings bindings)
-        throws Exception
-    {
-        Binding b = new Binding();
-
-        b.setVariable("invokeArgs", bindings);
-        return plugin.run("org/hyperic/hq/hqu/rendit/dispatcher.groovy", b);
+        InvokeMethodInvocationBindings b = 
+            new InvokeMethodInvocationBindings("Renderer", "render", args);
+                                               
+        plugin.invokeMethod(b);
     }
 
     public static final RenditServer getInstance() {
