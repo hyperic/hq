@@ -26,8 +26,10 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -188,15 +190,15 @@ public class MetricDataCache {
     }
     
     /**
-     * Get the list of unavailable metrics
+     * Get the map of unavailable metrics
      */
-    public List getUnavailableMetrics() {
+    public Map getUnavailableMetrics() {
         List keys = _downCache.getKeysWithExpiryCheck();
-        List downMetrics = new ArrayList(keys.size());
+        Map downMetrics = new HashMap(keys.size());
         for (Iterator it = keys.iterator(); it.hasNext(); ) {
             Element el = _downCache.get(it.next());
             if (el.getValue() != null) {
-                downMetrics.add(el);
+                downMetrics.put(el.getKey(), el.getValue());
             }
         }
         return downMetrics;
