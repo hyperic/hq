@@ -120,7 +120,7 @@ import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -364,7 +364,7 @@ public class EventsBossEJBImpl
                     // Don't need to synch the DerivedMeasurement with the db 
                     // since changes to the DerivedMeasurement aren't cascaded 
                     // on saving the AlertCondition.
-                    DerivedMeasurementValue dmv =
+                    DerivedMeasurement dmv =
                         getMetricManager().findMeasurement(subject, tid,
                                                            id.getId(), true);
                     clone.setMeasurementId(dmv.getId().intValue());

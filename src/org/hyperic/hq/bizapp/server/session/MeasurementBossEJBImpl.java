@@ -815,9 +815,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                   String alias)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionID);
-        return getMetricManager().getMeasurement(
-            subject, id, alias);
+        AuthzSubject subject = manager.getSubjectPojo(sessionID);
+        return getMetricManager()
+            .getMeasurement(subject, id, alias).getDerivedMeasurementValue();
     }
 
     /** Get the live measurement value
@@ -1001,7 +1001,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                  new AppdefEntityID[] { id }).get(0);
 
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        return getMetricManager().findMeasurement(subject, tid, id.getId());
+        return getMetricManager().findMeasurement(subject, tid, id.getId())
+                .getDerivedMeasurementValue();
     }
 
     /** Retrieve list of measurements for a specific instance
@@ -1365,7 +1366,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                DataNotAvailableException, MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
-        DerivedMeasurementValue dmv =
+        DerivedMeasurement dmv =
             getMetricManager().findMeasurement(subject, tid, new Integer(iid));
     
         return findMeasurementData(sessionId, dmv.getId(), count);
