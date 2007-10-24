@@ -25,10 +25,6 @@
       <column name="NAME" not-null="true" length="100" unique="true" />
     </property>
 
-    <property name="description" type="string">
-      <column name="DESCRIPTION" not-null="true" length="255" />
-    </property>
-
     <property name="pluginVersion" type="string">
       <column name="PLUGIN_VERSION" not-null="true" length="30" />
     </property>

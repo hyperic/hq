@@ -7047,6 +7047,15 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
+    
+    <schemaSpec version="3.64">
+      <schema-directSQL>
+        <statement>
+          ALTER TABLE EAM_UI_PLUGIN DROP COLUMN DESCRIPTION
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+    
 </dbupgrade>
 </target>
 
