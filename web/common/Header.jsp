@@ -53,7 +53,6 @@
 </style>
 
 
-<link rel=stylesheet href="<html:rewrite page="/css/customCSS.css"/>" type="text/css">
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
