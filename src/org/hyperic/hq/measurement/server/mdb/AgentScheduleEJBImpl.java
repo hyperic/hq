@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
-import org.hyperic.hq.measurement.server.session.ScheduleArgs;
 import org.hyperic.hq.measurement.server.session.UnScheduleArgs;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 
@@ -77,15 +76,12 @@ public class AgentScheduleEJBImpl
             if (o instanceof AppdefEntityID) {
                 AgentScheduleSynchronizer.schedule((AppdefEntityID) o);
             }
-            else if (o instanceof ScheduleArgs) {
-                ScheduleArgs args = (ScheduleArgs) o;
-                AgentScheduleSynchronizer.schedule(args.getEntId());
-            }
             else if (o instanceof UnScheduleArgs) {
                 UnScheduleArgs args = (UnScheduleArgs) o;
                 log.info("Unscheduling metrics for: " + args);
                 MeasurementProcessorUtil.getLocalHome().create()
-                    .unschedule(args.getAgentEntityID(), args.getUnscheduleEntities());
+                    .unschedule(args.getAgentEntityID(),
+                                args.getUnscheduleEntities());
             }
             else {
                 log.error("Unknown message type: " + o);
