@@ -480,53 +480,79 @@ public class DBUtil {
     public static boolean checkTableExists(Connection conn, String table)
         throws SQLException {
 
+        int dbtype = getDBType(conn);
+        switch (dbtype) {
+            case DATABASE_ORACLE_8:
+            case DATABASE_ORACLE_9:
+            case DATABASE_ORACLE_10:
+                return checkTableExistsOracle(conn, table);
+            case DATABASE_POSTGRESQL_7:
+            case DATABASE_POSTGRESQL_8:
+                return checkTableExistsPostgresql(conn, table);
+            case DATABASE_MYSQL5:
+                return checkTableExistsMySQL(conn, table);
+            default:
+                return false;
+        }
+    }
+
+    private static boolean checkTableExistsOracle(Connection conn,
+                                                  String table)
+        throws SQLException
+    {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             ps = conn.prepareStatement("SELECT COUNT(*) FROM " + table);
             rs = ps.executeQuery();
             return true;
-
         } catch (SQLException e) {
-            if (isTableNotFoundException(conn, e)) return false;
+            if (e.getErrorCode() == 942) return false;
             throw e;
         } finally {
             DBUtil.closeJDBCObjects(log, null, ps, rs);
         }
     }
 
-    /**
-     * @return true if the given exception is the database's "table not found"
-     *         exception.
-     */
-    public static boolean isTableNotFoundException(Connection conn,
-                                                   SQLException e)
-        throws SQLException {
-
-        if (conn == null) return false;
-        int dbtype = getDBType(conn);
-        String msg;
-
-        switch (dbtype) {
-
-            case DATABASE_ORACLE_8:
-            case DATABASE_ORACLE_9:
-            case DATABASE_ORACLE_10:
-                // ORA-00942: table or view does not exist
-                return (e.getErrorCode() == 942);
-            case DATABASE_POSTGRESQL_7:
-            case DATABASE_POSTGRESQL_8:
-                msg = changeNullAndTrim(e.getMessage());
-                return (msg.endsWith("does not exist"));
-
-            case DATABASE_MYSQL5:
-                msg = changeNullAndTrim(e.getMessage());
-                return (msg.endsWith("doesn't exist"));
-            default:
-                return false;
+    private static boolean checkTableExistsPostgresql(Connection conn,
+                                                      String table)
+        throws SQLException
+    {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = conn.prepareStatement("SELECT * FROM " + table +
+                                       " LIMIT 1");
+            rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            // No error code given on PGSQL, assume any error means that the
+            // table is not a
+            return false;
+        } finally {
+            DBUtil.closeJDBCObjects(log, null, ps, rs);
         }
     }
 
+    private static boolean checkTableExistsMySQL(Connection conn,
+                                                 String table)
+        throws SQLException
+    {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = conn.prepareStatement("SELECT * FROM " + table +
+                                       " LIMIT 1");
+            rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1146) return false;
+            throw e;
+        } finally {
+            DBUtil.closeJDBCObjects(log, null, ps, rs);
+        }
+    }
+    
     /**
      * Creates a string that consists of the clause repeated a number
      * (iterations) of times, joined by the conjunction string
