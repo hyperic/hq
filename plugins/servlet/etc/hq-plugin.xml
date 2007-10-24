@@ -436,11 +436,19 @@
 
   <!-- ==================== Tomcat 5.5 metrics ==================== -->
   <metrics name="Tomcat 5.5" 
-           include="Tomcat 4.1"/>
+           include="Tomcat 5.0"/>
   <metrics name="Tomcat 5.5 Webapp"
-           include="Tomcat 4.1 Webapp"/>
+           include="Tomcat 5.0 Webapp"/>
   <metrics name="Tomcat 5.5 Connector" 
            include="Tomcat 5.0 Connector"/>
+
+  <!-- ==================== Tomcat 6.0 metrics ==================== -->
+  <metrics name="Tomcat 6.0" 
+           include="Tomcat 5.5"/>
+  <metrics name="Tomcat 6.0 Webapp"
+           include="Tomcat 5.5 Webapp"/>
+  <metrics name="Tomcat 6.0 Connector" 
+           include="Tomcat 5.5 Connector"/>
 
   <!-- ==================== Plugin Help =========================== -->
   <help name="tc_log_track">
@@ -626,6 +634,17 @@ log4j.appender.R=org.apache.log4j.RollingFileAppender
   ]]>
   </help>
 
+  <help name="Tomcat 6.0" include="tomcat" append="footer,tc_log_track">
+  <![CDATA[
+  <p>
+  Finally, the filter must be enabled.  The following must be added to 
+  ${installpath}${FILE.sep}conf${FILE.sep}web.xml.  Keep in mind that each tag 
+  type must be grouped together.
+  </p>
+  ]]>
+  <!-- No additional help for Tomcat 6.0 -->
+  </help>
+
   <help name="Tomcat 5.5" include="tomcat" append="footer,tc_log_track">
   <![CDATA[
   <p>
@@ -786,6 +805,16 @@ log4j.appender.R=org.apache.log4j.RollingFileAppender
   </help>
 
   <help name="Tomcat 5.5 JBoss embedded" include="JBoss Tomcat" append="footer">
+  <![CDATA[
+  <p>
+  Finally, the filter must be enabled.  The following must be added to 
+  ${installpath}${FILE.sep}conf${FILE.sep}web.xml.
+  Keep in mind that each tag type must be grouped together.
+  </p>
+  ]]>
+  </help>
+
+  <help name="Tomcat 6.0 JBoss embedded" include="JBoss Tomcat" append="footer">
   <![CDATA[
   <p>
   Finally, the filter must be enabled.  The following must be added to 

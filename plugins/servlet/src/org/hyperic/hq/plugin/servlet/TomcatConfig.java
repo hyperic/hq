@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -129,7 +129,8 @@ public class TomcatConfig {
                 return;
             }
 
-            if (attributes.getValue("protocol") != null) {
+            String protocol = attributes.getValue("protocol"); 
+            if ((protocol != null) && !protocol.startsWith("HTTP")) {
                 //e.g. AJP/1.3
                 return;
             }

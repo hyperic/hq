@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -372,11 +372,15 @@ public class JBossDetector
 
         for (int i=0; i<dirs.length; i++) {
             File dir = dirs[i];
+            String name = dir.getName();
 
             if (!dir.isDirectory()) {
                 continue;
             }
-            if (!dir.getName().startsWith(EMBEDDED_TOMCAT)) {
+            
+            if (!(name.startsWith(EMBEDDED_TOMCAT) ||
+                  name.startsWith("jboss-web.deployer")))
+            {
                 continue;
             }
 

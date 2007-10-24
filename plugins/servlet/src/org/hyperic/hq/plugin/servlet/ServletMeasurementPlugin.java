@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -79,7 +79,8 @@ public class ServletMeasurementPlugin
             (String)props.get(ServletProductPlugin.PROP_INSTALLPATH);
 
         if ((installpath != null) && //dump-plugin-info will be null
-            (installpath.indexOf("jbossweb") != -1))
+            (installpath.indexOf("jbossweb") != -1 ||
+             installpath.indexOf("jboss-web") != -1))
         {
             //<help name="Tomcat 5.0 JBoss embedded" ...>
             String helpName = info.getName() + " JBoss embedded";

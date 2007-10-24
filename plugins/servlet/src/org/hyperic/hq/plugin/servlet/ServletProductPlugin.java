@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -82,6 +82,7 @@ public class ServletProductPlugin
     static final String TOMCAT_VERSION_41  = "4.1";
     static final String TOMCAT_VERSION_50  = "5.0";
     static final String TOMCAT_VERSION_55  = "5.5";
+    static final String TOMCAT_VERSION_60  = "6.0";
     static final String PROP_TOMCAT_BASE   = "tomcatBase";
 
     static final String[] TOMCAT_DEPLOYED_SERVICES_40 = {
@@ -109,6 +110,14 @@ public class ServletProductPlugin
     };
     
     static final String[] TOMCAT_DEPLOYED_SERVICES_55 = {
+        WEBAPP_NAME,
+    };
+
+    static final String[] TOMCAT_INTERNAL_SERVICES_60 = {
+        CONNECTOR_NAME,
+    };
+    
+    static final String[] TOMCAT_DEPLOYED_SERVICES_60 = {
         WEBAPP_NAME,
     };
 
@@ -142,7 +151,10 @@ public class ServletProductPlugin
             dir.indexOf("jbossweb-tomcat55.sar") != -1) {
             return true;
         }
-
+        if (version.equals(TOMCAT_VERSION_60) &&
+            dir.indexOf("jboss-web.deployer") != -1) {
+            return true;
+        }
         return false;
     }
 
@@ -173,7 +185,8 @@ public class ServletProductPlugin
                         } else if (info.isVersion(TOMCAT_VERSION_41)) {
                             return new Tomcat41Win32ControlPlugin();
                         } else if (info.isVersion(TOMCAT_VERSION_50) ||
-                                   info.isVersion(TOMCAT_VERSION_55)) {
+                                   info.isVersion(TOMCAT_VERSION_55) ||
+                                   info.isVersion(TOMCAT_VERSION_60)) {
                             // Only needed for different service name, could
                             // be consolidated.
                             return new Tomcat50Win32ControlPlugin();
@@ -201,7 +214,9 @@ public class ServletProductPlugin
                     info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
                                               TOMCAT_VERSION_50) ||
                     info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
-                                              TOMCAT_VERSION_55))
+                                              TOMCAT_VERSION_55) ||
+                    info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
+                                              TOMCAT_VERSION_60))
                 {
                     if (info.getName().endsWith(WEBAPP_NAME)) {
                         return new Tomcat41ServiceControlPlugin();
@@ -217,7 +232,9 @@ public class ServletProductPlugin
                 info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
                                           TOMCAT_VERSION_50) ||
                 info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
-                                          TOMCAT_VERSION_55))
+                                          TOMCAT_VERSION_55) ||
+                info.getName().startsWith(TOMCAT_SERVER_NAME + " " +
+                                          TOMCAT_VERSION_60))
                 {
                     return new Tomcat41MeasurementPlugin();
                 }
@@ -259,6 +276,11 @@ public class ServletProductPlugin
                 if (info.getName().equals(TOMCAT_SERVER_NAME + " " +
                                           TOMCAT_VERSION_55)) {
                     return new Tomcat55ServerDetector();
+                }
+                // Tomcat 6.0
+                if (info.getName().equals(TOMCAT_SERVER_NAME + " " +
+                                          TOMCAT_VERSION_60)) {
+                    return new Tomcat60ServerDetector();
                 }
                 // Resin 2.x
                 if (info.getName().startsWith(RESIN_SERVER_NAME)) {
@@ -340,6 +362,16 @@ public class ServletProductPlugin
                                  TOMCAT_VERSION_55);
         types.addServices(server, TOMCAT_DEPLOYED_SERVICES_55,
                           TOMCAT_INTERNAL_SERVICES_55);
+
+        // Clone unix server and services for win32
+        types.addServerAndServices(server,
+                                   TypeBuilder.WIN32_PLATFORM_NAMES);
+
+        // Tomcat 6.0
+        server = types.addServer(TOMCAT_SERVER_NAME,
+                                 TOMCAT_VERSION_60);
+        types.addServices(server, TOMCAT_DEPLOYED_SERVICES_60,
+                          TOMCAT_INTERNAL_SERVICES_60);
 
         // Clone unix server and services for win32
         types.addServerAndServices(server,
