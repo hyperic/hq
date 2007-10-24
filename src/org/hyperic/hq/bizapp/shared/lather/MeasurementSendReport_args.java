@@ -36,16 +36,10 @@ import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.product.MetricValue;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class MeasurementSendReport_args 
     extends SecureAgentLatherValue
 {
-    private static final String logCtx =
-        MeasurementSendReport_args.class.getName();
-    private final Log _log = LogFactory.getLog(logCtx);
-
     private static final String PROP_CIDLIST      = "cids";
     private static final String PROP_DSNIDLIST    = "dsnidss";
     private static final String PROP_TSTAMPLIST   = "tstamps";
@@ -126,14 +120,13 @@ public class MeasurementSendReport_args
             throw new LatherRemoteException("Measurement report mismatch");
         }
 
-        for(int i=0; i<dsnIdList.length; i++)
-        {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Got data point for CID=" + cidList[i] +
-                           " DSN=" + dsnList[i] + 
-                           " Value=" + valueList[i] +
-                           " tStamp=" + tStampList[i]);
-            }
+        for(int i=0; i<dsnIdList.length; i++){
+            /*
+            System.out.println("Got data point for CID=" + cidList[i] +
+                               " DSN=" + dsnList[i] + 
+                               " Value=" + valueList[i] +
+                               " tStamp=" + tStampList[i]);
+            */
             con.addDataPoint(cidList[i], dsnIdList[i],
                              new MetricValue(valueList[i],
                                                   (long)tStampList[i]));
