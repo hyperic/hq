@@ -43,10 +43,6 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
-import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -89,7 +85,6 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -1426,12 +1421,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public List getUnavailEntities() {
-        List unavailMetrics =
+        Map unavailMetrics =
             MetricDataCache.getInstance().getUnavailableMetrics();
         List unavailEntities = new ArrayList();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-        for (Iterator it = unavailMetrics.iterator(); it.hasNext(); ) {
-            Element el = (Element) it.next();
+        for (Iterator it = unavailMetrics.entrySet().iterator(); it.hasNext(); )
+        {
+            Map.Entry el = (Map.Entry) it.next();
             Integer mid = (Integer) el.getKey();
             MetricValue mv = (MetricValue) el.getValue();
             
