@@ -288,6 +288,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Resource findResourcePojoByInstanceId(Integer typeId,
+                                                 Integer instanceId)
+    {
+        return getResourceDAO().findByInstanceId(typeId, instanceId);
+    }
+
+    /**
      * Find the Resource that has the given ID 
      * @param id id for the resource you're looking for.
      * @return The value-object of the Resource of the given ID.
