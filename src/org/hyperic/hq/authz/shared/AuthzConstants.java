@@ -179,6 +179,11 @@ public final class AuthzConstants {
     public static final Integer     authzEscalation     =  new Integer(401);
     public static final Integer     authzHQSystem       =  new Integer(501);
     public static final Integer     authzLocation       =  new Integer(309);
+    public static final Integer     authzPlatformProto  =  new Integer(601);
+    public static final Integer     authzServerProto    =  new Integer(602);
+    public static final Integer     authzServiceProto   =  new Integer(603);
+    public static final Integer     authzApplicationProto  =  new Integer(604);
+    
 
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
