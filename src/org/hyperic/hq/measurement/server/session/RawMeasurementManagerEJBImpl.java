@@ -38,7 +38,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -139,7 +139,7 @@ public class RawMeasurementManagerEJBImpl
     }
 
     private static final int SAMPLE_SIZE = 4;
-    private String[] getTemplatesToCheck(AuthzSubjectValue s,
+    private String[] getTemplatesToCheck(AuthzSubject s,
                                          AppdefEntityID id) 
         throws AppdefEntityNotFoundException, PermissionException
     {
@@ -190,7 +190,7 @@ public class RawMeasurementManagerEJBImpl
      *
      * @ejb:interface-method
      */
-    public void checkConfiguration(AuthzSubjectValue subject,
+    public void checkConfiguration(AuthzSubject subject,
                                    AppdefEntityID entity, 
                                    ConfigResponse config)
         throws PermissionException, InvalidConfigException,

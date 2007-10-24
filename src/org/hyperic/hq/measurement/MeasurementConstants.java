@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -206,9 +206,6 @@ public final class MeasurementConstants  {
 
     /** The measurement report queue */
     public static final String REPORT_QUEUE      = "queue/agentReportQueue";
-    
-    /** The measurement schedule queue */
-    public static final String SCHEDULE_QUEUE    = "queue/agentScheduleQueue";
     
     /** The aggregate data indices */
     public static final int IND_MIN              = 0;

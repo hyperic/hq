@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,7 +82,6 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
@@ -187,10 +187,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
     }
 
-    private void sendAgentSchedule(AppdefEntityID aid) {
-        if (aid != null) {
+    private void sendAgentSchedule(Serializable obj) {
+        if (obj != null) {
             Messenger sender = new Messenger();
-            sender.sendMessage(MeasurementConstants.SCHEDULE_QUEUE, aid);
+            sender.sendMessage("queue/agentScheduleQueue", obj);
         }
     }
     
@@ -594,9 +594,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         // send queue message to unschedule
         UnScheduleArgs unschBean = new UnScheduleArgs(agentEnt, entIds);
-        Messenger msg = new Messenger();
         log.debug("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
-        msg.sendMessage(MeasurementConstants.SCHEDULE_QUEUE, unschBean);
+        sendAgentSchedule(unschBean);
     }
 
     /** 
@@ -606,9 +605,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a DerivedMeasurement value
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue getMeasurement(AuthzSubjectValue subject,
-                                                  AppdefEntityID id,
-                                                  String alias)
+    public DerivedMeasurement getMeasurement(AuthzSubject subject,
+                                             AppdefEntityID id,
+                                             String alias)
         throws MeasurementNotFoundException {
 
         DerivedMeasurement m = 
@@ -619,7 +618,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    " not found.");
         }
 
-        return m.getDerivedMeasurementValue();
+        return m;
     }
 
     /**
@@ -811,8 +810,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a DerivedMeasurement value
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue findMeasurement(AuthzSubject subject,
-                                                   Integer tid, Integer iid)
+    public DerivedMeasurement findMeasurement(AuthzSubject subject,
+                                              Integer tid, Integer iid)
         throws MeasurementNotFoundException {
         DerivedMeasurement dm = findMeasurement(tid, iid);
             
@@ -821,7 +820,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "for " + iid + " with " +
                                                    "template " + tid);
         }
-        return dm.getDerivedMeasurementValue();
+        return dm;
     }
 
     /**
@@ -838,10 +837,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @return a DerivedMeasurement value
      * @ejb:interface-method
      */
-    public DerivedMeasurementValue findMeasurement(AuthzSubjectValue subject,
-                                                   Integer tid, 
-                                                   Integer iid,
-                                                   boolean allowStale)
+    public DerivedMeasurement findMeasurement(AuthzSubjectValue subject,
+                                              Integer tid, 
+                                              Integer iid,
+                                              boolean allowStale)
         throws MeasurementNotFoundException {
         
         DerivedMeasurement dm = getDerivedMeasurementDAO()
@@ -853,7 +852,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                                    "template " + tid);
         }
         
-        return dm.getDerivedMeasurementValue();
+        return dm;
     }
         
     /**
@@ -1392,7 +1391,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         // Check the configuration
         try {
-            rawMan.checkConfiguration(subject, id, config);
+            rawMan.checkConfiguration(subj, id, config);
         } catch (InvalidConfigException e) {
             log.warn("Error turning on default metrics, configuration (" +
                       config + ") " + "couldn't be validated", e);
