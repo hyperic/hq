@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -82,30 +82,9 @@ public class ScheduleVerificationService
         return MeasurementProcessorEJBImpl.getOne();
     }
 
-    private SRNManagerLocal getSrnManager() {
-        return SRNManagerEJBImpl.getOne();
-    }
-
     private AgentScheduleSynchronizer agentSync =
         AgentScheduleSynchronizer.getInstance();
 
-    /**
-     * Refresh the schedule of a given platform entity
-     * 
-     * @param aid - appdefEntityId for a platform
-     * @jmx:managed-operation
-     */
-    public void refreshSchedule(final AppdefEntityID aid) {
-        try {
-            agentSync.reschedule(aid);
-        } catch (MonitorAgentException e) {
-            _log.error("Unable to communicate with agent for entity: " +
-                       aid.getID() + " to refresh metric schedule");
-        } catch (Exception e) {
-            _log.error("Failed to refresh schedule for entity: " + aid, e);
-        }
-    }
-    
     /**
      * @jmx:managed-operation
      */
@@ -122,7 +101,7 @@ public class ScheduleVerificationService
             return;
         }
 
-        SRNManagerLocal srnManager = getSrnManager();
+        SRNManagerLocal srnManager = SRNManagerEJBImpl.getOne();
 
         AgentManagerLocal agentMan;
 
