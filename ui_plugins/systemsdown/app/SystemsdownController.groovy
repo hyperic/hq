@@ -19,14 +19,14 @@ class SystemsdownController extends BaseController {
         defaultSort: DownResSortField.DOWNTIME,
         defaultSortOrder: 1,  // descending
         columns: [
-            [field:DownResSortField.RESOURCE, width:'45%',
+            [field:DownResSortField.RESOURCE, width:'40%',
              label:{linkTo(it.name,
                            [resource:it.resource.entityId])}],
-            [field:DownResSortField.TYPE, width:'10%',
+            [field:DownResSortField.TYPE, width:'32%',
              label:{it.type}],
-            [field:DownResSortField.SINCE, width:'25%',
+            [field:DownResSortField.SINCE, width:'16%',
              label:{df.format(it.timestamp)}],
-            [field:DownResSortField.DOWNTIME, width:'20%',
+            [field:DownResSortField.DOWNTIME, width:'12%',
              label:{formatDuration(it.duration)}],
         ]
     ]
