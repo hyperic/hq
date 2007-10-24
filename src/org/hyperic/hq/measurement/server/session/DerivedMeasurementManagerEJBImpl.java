@@ -1421,8 +1421,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public List getUnavailEntities() {
-        Map unavailMetrics =
-            MetricDataCache.getInstance().getUnavailableMetrics();
+        MetricDataCache cache = MetricDataCache.getInstance();
+        Map unavailMetrics = cache.getUnavailableMetrics();
         List unavailEntities = new ArrayList();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
         for (Iterator it = unavailMetrics.entrySet().iterator(); it.hasNext(); )
@@ -1432,7 +1432,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             MetricValue mv = (MetricValue) el.getValue();
             
             // Look up the metric for the appdef entity ID
-            DerivedMeasurement dm = dao.findById(mid);
+            DerivedMeasurement dm = dao.get(mid);
+            
+            if (dm == null) {
+                cache.remove(mid);
+                continue;
+            }
+            
             unavailEntities.add(new DownMetricValue(dm.getEntityId(), mv));
         }
         return unavailEntities;

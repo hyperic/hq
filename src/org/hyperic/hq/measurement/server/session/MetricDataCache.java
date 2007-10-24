@@ -179,6 +179,14 @@ public class MetricDataCache {
     }
     
     /**
+     * Remove a MetricValue from cache
+     */
+    public void remove(Integer mid) {
+        _cache.remove(mid);
+        _downCache.remove(mid);
+    }
+    
+    /**
      * Create placeholder (if necessary) for Availability metric
      *
      * @param mid The measurement id.
