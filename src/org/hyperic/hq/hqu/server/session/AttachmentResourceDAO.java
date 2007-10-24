@@ -52,12 +52,12 @@ class AttachmentResourceDAO
         if (resourceIsPrototype(r.getResourceType())) {
             String sql = "select a from AttachmentResource a " +
                 "join a.resource r " +
-                "where r.prototype = :proto and " +
+                "where r = :resource and " +
                 "a.categoryEnum = :cat";
             
             return getSession()
                 .createQuery(sql)
-                .setParameter("proto", r)
+                .setParameter("resource", r)
                 .setParameter("cat", cat.getDescription())
                 .list();
         }

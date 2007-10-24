@@ -26,6 +26,7 @@
 package org.hyperic.hq.hqu.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import javax.ejb.SessionBean;
@@ -34,9 +35,15 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
@@ -241,6 +248,18 @@ public class UIPluginManagerEJBImpl
         return _attachDAO.findFor(type);
     }
 
+    private Integer appdefTypeToAuthzType(int appdefType) {
+        switch(appdefType) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            return AuthzConstants.authzPlatformProto;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            return AuthzConstants.authzServerProto;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            return AuthzConstants.authzServiceProto;
+        }
+        return null;
+    }
+    
     /**
      * Find attachments for a resource.
      * @return a collection of {@link Attachment}s
@@ -249,8 +268,35 @@ public class UIPluginManagerEJBImpl
     public Collection findAttachments(AppdefEntityID ent,
                                       ViewResourceCategory cat) 
     {
-        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
-        return _attachRsrcDAO.findFor(r, cat); 
+        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        Resource r;
+        
+        if (ent.isGroup()) {
+            AuthzSubjectValue overlord = rman.findOverlord(); 
+            AppdefGroupValue grp;
+            
+            try {
+                grp = AppdefGroupManagerEJBImpl.getOne().findGroup(overlord, 
+                                                                   ent);
+            } catch(Exception e) {
+                throw new SystemException("Unable to lookup attachments", e);
+            }
+
+            if (!grp.isGroupCompat())
+                return Collections.EMPTY_LIST;
+            
+            Integer authzType = appdefTypeToAuthzType(grp.getGroupEntType());
+            if (authzType == null)
+                return Collections.EMPTY_LIST;
+            
+            Integer entityType = new Integer(grp.getGroupEntResType());
+            r = rman.findResourcePojoByInstanceId(authzType, entityType);
+        } else {
+            r = rman.findResource(ent);
+        } 
+        Collection res = _attachRsrcDAO.findFor(r, cat);
+        _log.info("Returning " + res);
+        return res;
     }
     
     public static UIPluginManagerLocal getOne() {
