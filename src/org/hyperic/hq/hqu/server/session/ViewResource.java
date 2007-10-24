@@ -25,47 +25,14 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import java.util.Iterator;
-
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 public class ViewResource
     extends View
 { 
-    private Resource _resource;
-    
     protected ViewResource() {}
     
     ViewResource(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.RESOURCE);
-    }
-
-    public Resource getResource() {
-        return _resource;
-    }
-    
-    protected void setResource(Resource r) {
-        _resource = r;
-    }
-    
-    public boolean isAttachable(AttachmentDescriptor d) {
-        AttachmentDescriptorResource dr = (AttachmentDescriptorResource)d;
-        
-        if (dr.isPrototype())
-            return false;
-        
-        for (Iterator i=getAttachments().iterator(); i.hasNext(); ) {
-            AttachmentResource ar = (AttachmentResource)i.next();
-            
-            if (ar.getResource().equals(_resource))
-                return false;
-        }
-        return true;
-    }
-
-    public AttachmentDescriptor getPrototype() {
-        return new AttachmentDescriptorResource();
     }
 }

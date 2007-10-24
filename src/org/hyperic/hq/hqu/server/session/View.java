@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 public abstract class View
@@ -50,19 +49,6 @@ public abstract class View
         _descr      = view.getDescription();
         _attachType = attach;
     }
-    
-    /**
-     * Determine whether or not the view can be attached.  This is useful
-     * for certain view types which are only attachable a single time
-     * (such as admin or masthead areas)
-     */
-    public abstract boolean isAttachable(AttachmentDescriptor d);
-    
-    /**
-     * Return a prototype attachment descriptor that can be filled out when
-     * performing an attachment.
-     */
-    public abstract AttachmentDescriptor getPrototype();
     
     public UIPlugin getPlugin() {
         return _plugin;

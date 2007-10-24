@@ -30,15 +30,11 @@ public class ViewDescriptor {
     private String       _path;
     private String       _description;
     private AttachType   _attachType;
-    private ViewAttacher _autoAttach;
     
-    ViewDescriptor(String path, String description, AttachType type,
-                   ViewAttacher autoAttach)
-    {
+    ViewDescriptor(String path, String description, AttachType type) {
         _path        = path;
         _description = description;
         _attachType  = type;
-        _autoAttach  = autoAttach;
     }
     
     public String getPath() {
@@ -51,9 +47,5 @@ public class ViewDescriptor {
     
     public AttachType getAttachType() {
         return _attachType;
-    }
-    
-    public ViewAttacher getAutoAttacher() {
-        return _autoAttach;
     }
 }

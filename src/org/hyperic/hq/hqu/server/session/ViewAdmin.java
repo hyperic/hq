@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 public class ViewAdmin
@@ -35,13 +34,5 @@ public class ViewAdmin
     
     ViewAdmin(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.ADMIN);
-    }
-
-    public boolean isAttachable(AttachmentDescriptor d) {
-        return getAttachments().isEmpty();
-    }
-
-    public AttachmentDescriptor getPrototype() {
-        return new AttachmentDescriptorAdmin();
     }
 }

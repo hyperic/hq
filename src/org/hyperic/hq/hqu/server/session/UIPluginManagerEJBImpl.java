@@ -25,20 +25,6 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.UIPluginDescriptor;
-import org.hyperic.hq.hqu.ViewDescriptor;
-import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.server.session.AttachType;
-import org.hyperic.hq.hqu.server.session.View;
-import org.hyperic.hq.hqu.server.session.Attachment;
-import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
-import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -48,6 +34,21 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.ViewDescriptor;
+import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
+import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.hq.hqu.server.session.Attachment;
+import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.hq.hqu.server.session.View;
+import org.hyperic.hq.hqu.server.session.ViewMasthead;
+import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
+import org.hyperic.hq.hqu.server.session.ViewResource;
+import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 
 /**
  * @ejb:bean name="UIPluginManager"
@@ -79,48 +80,53 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public UIPlugin createPlugin(UIPluginDescriptor pInfo) {
-        return _pluginDAO.create(pInfo);
+    public UIPlugin createPlugin(String name, String ver) {
+        return _pluginDAO.create(name, ver);
     }
     
     /**
      * @ejb:interface-method
      */
-    public UIPlugin createOrUpdate(UIPluginDescriptor pInfo) {
-        UIPlugin p = findPluginByName(pInfo.getName());
+    public UIPlugin createOrUpdate(String name, String version) {
+        UIPlugin p = findPluginByName(name);
         
         if (p == null) {
-            _log.info("Creating plugin [" + pInfo.getName() + "]");
-            p = _pluginDAO.create(pInfo);
+            _log.info("Creating plugin [" + name + "]");
+            p = _pluginDAO.create(name, version);
         } else {
-            _log.info("Updating plugin [" + pInfo.getName() + "]");
-            updatePlugin(p, pInfo);
+            _log.info("Updating plugin [" + name + "]");
+            updatePlugin(p, version);
         }
-        
-        autoAttach(p, pInfo);
         return p;
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public View createAdminView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewAdmin(p, d);
+        p.addView(res);
+        return res;
+    }
 
-    private void autoAttach(UIPlugin p, UIPluginDescriptor pInfo) {
-        for (Iterator i=p.getViews().iterator(); i.hasNext(); ) {
-            View v = (View)i.next();
-            
-            for (Iterator j=pInfo.getViews().iterator(); j.hasNext(); ) {
-                ViewDescriptor vd = (ViewDescriptor)j.next();
-                
-                if (!vd.getPath().equals(v.getPath()))
-                    continue;
-                
-                AttachmentDescriptor protoDesc = v.getPrototype();
-                
-                if (vd.getAutoAttacher() != null) {
-                    _log.info("Auto attaching [" + v + "]");
-                    vd.getAutoAttacher().attach(v);
-                }
-            }
-        }
+    /**
+     * @ejb:interface-method
+     */
+    public View createMastheadView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewMasthead(p, d);
+        p.addView(res);
+        return res;
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public View createResourceView(UIPlugin p, ViewDescriptor d) {
+        View res = new ViewResource(p, d);
+        p.addView(res);
+        return res;
+    }
+
     /**
      * @ejb:interface-method
      */
@@ -169,31 +175,39 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void attachView(View view, AttachmentDescriptor d) {
-        AttachType viewType = view.getAttachType();
-        
-        if (!viewType.equals(d.getAttachType())) {
-            throw new IllegalArgumentException("Attachment descriptor is " + 
-                                               "incompatable with view");
+    public void attachView(ViewMasthead view, ViewMastheadCategory cat) {
+        if (!view.getAttachments().isEmpty()) {
+            throw new IllegalArgumentException("View [" + view + "] already " + 
+                                               "attached");
         }
-
-        if (!view.isAttachable(d)) {
-            throw new IllegalArgumentException("View [" + view + "] is not " +
-                                               "attachable");
-        }
-        
-        _log.info("Attaching " + view + " [" + d + "]");
-        viewType.attach(view, d);
+        view.addAttachment(new AttachmentMasthead(view, cat));
+        _log.info("Attaching [" + view + "] via [" + cat + "]");
     }
     
     /**
      * @ejb:interface-method
      */
-    public void updatePlugin(UIPlugin p, UIPluginDescriptor pInfo) {
-        if (!p.getDescription().equals(pInfo.getDescription()))
-            p.setDescription(pInfo.getDescription());
-        if (!p.getPluginVersion().equals(pInfo.getVersion()))
-            p.setPluginVersion(pInfo.getVersion());
+    public void attachView(ViewResource view, ViewResourceCategory cat,
+                           Resource r) 
+    {
+        for (Iterator i=view.getAttachments().iterator(); i.hasNext(); ) {
+            AttachmentResource a = (AttachmentResource)i.next();
+            
+            if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
+                throw new IllegalArgumentException("View [" + view + "] is " +
+                            "already attached to [" + r + "] in [" + cat + "]");
+            }
+        }
+        view.addAttachment(new AttachmentResource(view, cat, r));
+        _log.info("Attaching [" + view + "] to [" + r + "] via [" + cat + "]");
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void updatePlugin(UIPlugin p, String version) {
+        if (!p.getPluginVersion().equals(version))
+            p.setPluginVersion(version);
 
         // TODO:  What do we do here if the views for a particular plugin
         //        have changed?  Work it out.

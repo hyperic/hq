@@ -35,10 +35,12 @@ public class AttachmentResource
     
     protected AttachmentResource() {}
     
-    AttachmentResource(ViewResource view, AttachmentDescriptorResource d) {
+    AttachmentResource(ViewResource view, ViewResourceCategory cat,
+                       Resource r) 
+    {
         super(view);
-        _category = d.getCategory().getDescription();
-        _resource = d.getResource();
+        _category = cat.getDescription();
+        _resource = r;
     }
     
     protected String getCategoryEnum() {

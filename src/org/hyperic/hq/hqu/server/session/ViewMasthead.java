@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 public class ViewMasthead
@@ -35,17 +34,5 @@ public class ViewMasthead
     
     ViewMasthead(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.MASTHEAD);
-    }
-
-    public boolean isAttachable(AttachmentDescriptor dr) {
-        return getAttachments().isEmpty();
-    }
-
-    public AttachmentDescriptor getPrototype() {
-        return new AttachmentDescriptorMasthead(ViewMastheadCategory.RESOURCE);
-    }
-
-    public AttachmentDescriptor getPrototype(ViewMastheadCategory cat) {
-        return new AttachmentDescriptorMasthead(cat);
     }
 }

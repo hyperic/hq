@@ -36,15 +36,13 @@ public class UIPlugin
     extends PersistedObject 
 { 
     private String     _name;
-    private String     _desc;
     private String     _pluginVersion;
     private Collection _views = new ArrayList();
 
     protected UIPlugin() {}
     
-    UIPlugin(String name, String desc, String pluginVersion) {
+    UIPlugin(String name, String pluginVersion) {
         _name          = name;
-        _desc          = desc;
         _pluginVersion = pluginVersion;
     }
     
@@ -54,14 +52,6 @@ public class UIPlugin
     
     protected void setName(String name){
         _name = name;
-    }
-    
-    public String getDescription() {
-        return _desc;
-    }
-    
-    protected void setDescription(String desc) {
-        _desc = desc;
     }
     
     public String getPluginVersion() {
@@ -76,11 +66,8 @@ public class UIPlugin
         return Collections.unmodifiableCollection(_views);
     }
     
-    View addView(ViewDescriptor viewInfo) {
-        View view = viewInfo.getAttachType().createView(this, viewInfo);
-        
-        getViewsBag().add(view);
-        return view;
+    void addView(View v) {
+        getViewsBag().add(v);
     }
     
     protected Collection getViewsBag() {
@@ -101,15 +88,13 @@ public class UIPlugin
         }
         
         UIPlugin o = (UIPlugin)obj;
-        return o.getName().equals(getName()) &&
-               o.getPluginVersion().equals(getPluginVersion());
+        return o.getName().equals(getName());
     }
 
     public int hashCode() {
         int result = 17;
 
         result = 37 * result + getName().hashCode();
-        result = 37 * result + getDescription().hashCode();
 
         return result;
     }

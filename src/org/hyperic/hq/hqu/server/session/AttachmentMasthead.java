@@ -32,9 +32,9 @@ public class AttachmentMasthead
     
     protected AttachmentMasthead() {}
     
-    AttachmentMasthead(View view, AttachmentDescriptorMasthead d) {
+    AttachmentMasthead(View view, ViewMastheadCategory c) {
         super(view);
-        _category = d.getCategory().getDescription();
+        _category = c.getDescription();
     }
     
     protected String getCategoryEnum() {

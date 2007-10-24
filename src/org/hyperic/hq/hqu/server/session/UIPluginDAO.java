@@ -25,13 +25,9 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import java.util.Iterator;
-
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.hqu.UIPluginDescriptor;
-import org.hyperic.hq.hqu.ViewDescriptor;
 
 class UIPluginDAO
     extends HibernateDAO
@@ -58,15 +54,8 @@ class UIPluginDAO
             .uniqueResult();
     }
     
-    UIPlugin create(UIPluginDescriptor pInfo) {
-        UIPlugin res = new UIPlugin(pInfo.getName(), pInfo.getDescription(), 
-                                    pInfo.getVersion());
-        
-        for (Iterator i=pInfo.getViews().iterator(); i.hasNext(); ) {
-            ViewDescriptor view = (ViewDescriptor)i.next();
-            
-            res.addView(view);
-        }
+    UIPlugin create(String name, String version) {
+        UIPlugin res = new UIPlugin(name, version);
         
         save(res);
         return res;

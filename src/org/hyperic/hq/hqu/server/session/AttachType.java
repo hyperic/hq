@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -27,82 +27,21 @@ package org.hyperic.hq.hqu.server.session;
 
 import java.util.ResourceBundle;
 
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.util.HypericEnum;
 
-public abstract class AttachType 
+public class AttachType 
     extends HypericEnum
 {
     private static final String BUNDLE = "org.hyperic.hq.hqu.Resources";
     
     public static AttachType ADMIN = new AttachType(0, "admin",
-                                                    "attachType.admin") 
-    {
-        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
-            return new ViewAdmin(plugin, viewInfo);
-        }
-
-        Attachment attach(View view, AttachmentDescriptor d) { 
-            assert view.getAttachments().isEmpty();
-            Attachment a = new Attachment(view);
-            
-            view.addAttachment(a);
-            return a;
-        }
-
-        boolean isAutoAttachable() {
-            return true;
-        }
-    };
+                                                    "attachType.admin"); 
 
     public static AttachType MASTHEAD = new AttachType(1, "masthead",
-                                                       "attachType.masthead") 
-    {
-        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
-            return new ViewMasthead(plugin, viewInfo);
-        }
-
-        Attachment attach(View view, AttachmentDescriptor d) { 
-            AttachmentDescriptorMasthead m = (AttachmentDescriptorMasthead)d;
-            assert view.getAttachments().isEmpty();
-            Attachment a = new AttachmentMasthead(view, m);
-            
-            view.addAttachment(a);
-            return a;
-        }
-
-        boolean isAutoAttachable() {
-            return true;
-        }
-    };
+                                                       "attachType.masthead"); 
 
     public static AttachType RESOURCE = new AttachType(2, "resource",
-                                                       "attachType.resource") 
-    {
-        View createView(UIPlugin plugin, ViewDescriptor viewInfo) { 
-            return new ViewResource(plugin, viewInfo);
-        }
-
-        Attachment attach(View view, AttachmentDescriptor d) {
-            AttachmentDescriptorResource r = (AttachmentDescriptorResource)d;
-            ViewResource vr = (ViewResource)view;
-            Attachment a = new AttachmentResource(vr, r);
-            
-            view.addAttachment(a);
-            return a;
-        }
-
-        boolean isAutoAttachable() {
-            return true;
-        }
-    };
-    
-    abstract View createView(UIPlugin plugin, ViewDescriptor viewInfo); 
-    
-    abstract Attachment attach(View view, AttachmentDescriptor d);
-    
-    abstract boolean isAutoAttachable();
+                                                       "attachType.resource"); 
     
     public static AttachType findByDescription(String desc) {
         if (desc.equals(ADMIN.getDescription())) 
