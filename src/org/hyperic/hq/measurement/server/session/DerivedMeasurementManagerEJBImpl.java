@@ -405,8 +405,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                     tm.enableTrackers(subject, id, c);
                 }
 
+            } catch (ConfigFetchException e) {
+                log.debug("Config not set for [" + id + "]", e);
             } catch(Exception e) {
-                log.warn("Unable to enable default metrics", e);
+                log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
     }
