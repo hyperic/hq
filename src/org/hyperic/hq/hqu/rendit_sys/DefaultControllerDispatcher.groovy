@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory
 class DefaultControllerDispatcher {
 	Log log = LogFactory.getLog(DefaultControllerDispatcher.class)
 	
-	def invoke(pluginInfo, invokeArgs) {
+	def invoke(HQUPlugin p, invokeArgs) {
         def path = invokeArgs.requestURI.split('/')[-3..-1]
 
         log.info "Request: ${path}"
@@ -23,7 +23,7 @@ class DefaultControllerDispatcher {
         
         def controllerName = path[1].capitalize() + "Controller"
 
-        def pluginDir = invokeArgs.pluginDir
+        def pluginDir = p.pluginDir
         def appDir    = new File(pluginDir, "app")
         def etcDir    = new File(pluginDir, "etc")
         def contFile  = new File(appDir, controllerName + ".groovy")
@@ -37,7 +37,7 @@ class DefaultControllerDispatcher {
                                        loader).newInstance()
 
         try {
-            def b = ResourceBundle.getBundle("${pluginInfo.name}_i18n", 
+            def b = ResourceBundle.getBundle("${p.name}_i18n", 
                                              invokeArgs.request.locale, loader)
             controller.setLocaleBundle(new BundleMapFacade(b))
         } catch(MissingResourceException e) {
@@ -48,9 +48,9 @@ class DefaultControllerDispatcher {
         def action = path[2][0..-5]  // Strip out the .hqu
         controller.setAction(action)
         controller.setControllerName(path[1])
-        controller.setPluginDir(invokeArgs.pluginDir)
+        controller.setPluginDir(p.pluginDir)
         controller.setInvokeArgs(invokeArgs)
-        controller.setPluginInfo(pluginInfo)
+        controller.setPlugin(p)
         
         return controller.dispatchRequest()
 	}

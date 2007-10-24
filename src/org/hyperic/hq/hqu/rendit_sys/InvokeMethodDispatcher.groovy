@@ -10,8 +10,7 @@ import org.apache.commons.logging.LogFactory
 class InvokeMethodDispatcher {
 	Log log = LogFactory.getLog(InvokeMethodDispatcher.class)
 	
-	def invoke(invokeArgs) {
-        def pluginDir = invokeArgs.pluginDir
+	def invoke(pluginDir, invokeArgs) {
         def loader    = this.class.classLoader
         loader.addURL(pluginDir.toURL())
         def o = Class.forName(invokeArgs.className, true, loader).newInstance() 

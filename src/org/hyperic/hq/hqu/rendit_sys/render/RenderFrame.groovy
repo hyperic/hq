@@ -165,7 +165,7 @@ class RenderFrame {
     	    }
             
             gspFile.withReader { reader ->
-				def eng = new SimpleTemplateEngine(controller.pluginInfo.dumpScripts)
+				def eng = new SimpleTemplateEngine(controller.dumpScripts)
 				def template = eng.createTemplate(reader)
 				locals['render'] = { subOpts ->
                     // Setup a new closure for 'render' so that the context

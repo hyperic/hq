@@ -6,7 +6,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-import org.hyperic.hq.hqu.UIPluginDescriptor
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
@@ -32,7 +31,7 @@ abstract class BaseController {
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
-    UIPluginDescriptor pluginInfo      // The results of init.groovy
+    HQUPlugin          plugin          
     String             template        // Default template when rendering
     
     private beforeFilters = []         // Closures to run prior to any actions
@@ -63,6 +62,10 @@ abstract class BaseController {
         jsonMethods = meths
     }
 
+    protected boolean getDumpScripts() {
+        false
+    }
+    
     def getLocaleBundle() {
         localeBundle
     }
