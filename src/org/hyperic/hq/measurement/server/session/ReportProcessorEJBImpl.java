@@ -104,35 +104,40 @@ public class ReportProcessorEJBImpl
         // Each datapoint corresponds to a set of measurement
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
-            
-        // For each Datapoint/MetricValue associated
-        // with the DSN...
+
+        boolean trace = log.isTraceEnabled();
+        if (trace) {
+            setDebugID();
+        }
         for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
             if (isPassThrough) {
                 long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
-                
+
                 // Debugging missing data points
-                if (dm.getId().equals(_debugId)) {
-                    log.info("metricDebug: ReportProcessor addData: " +
-                             "metric ID " + _debugId +
-                             " value=" + dpts[i].getValue() +
-                             " at " + adjust);
+                if (trace && _debugId != null &&
+                        (_debugId.intValue() == -1 ||
+                         dm.getId().equals(_debugId))) {
+                    log.trace("metricDebug: ReportProcessor addData: " +
+                              "metric ID " + dm.getId() +
+                              " debug ID " + _debugId +
+                              " value=" + dpts[i].getValue() +
+                              " at " + adjust);
                 }
-                
+
                 // Create new Measurement data point with the adjusted time
-                MetricValue modified = new MetricValue(dpts[i].getValue(), 
+                MetricValue modified = new MetricValue(dpts[i].getValue(),
                                                        adjust);
                 passThroughs[i] = modified;
             } else {
                 Integer rmid = new Integer(dsnId);
-                
+
                 // Add the raw measurement if it's not a pass-thru
                 addPoint(dataPoints, rmid, dpts);
             }
         }
-        
+
         if (isPassThrough) {
             addPoint(dataPoints, dm.getId(), passThroughs);
         }
@@ -220,14 +225,15 @@ public class ReportProcessorEJBImpl
                                       "insert data");
         }
     }
-    
-    public void ejbCreate(){
+
+    private void setDebugID()
+    {
         try {
-            _debugId = 
+            _debugId =
                 new Integer(MonitorFactory.getProperty("agent.metricDebug"));
         } catch (Exception e) {
             _debugId = null;
-        } 
+        }
     }
 
     public static ReportProcessorLocal getOne() {
@@ -238,6 +244,7 @@ public class ReportProcessorEJBImpl
         }
     }
     
+    public void ejbCreate(){}
     public void ejbPostCreate(){}
     public void ejbActivate(){}
     public void ejbPassivate(){}

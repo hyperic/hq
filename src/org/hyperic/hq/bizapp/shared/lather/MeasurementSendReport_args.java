@@ -126,9 +126,10 @@ public class MeasurementSendReport_args
             throw new LatherRemoteException("Measurement report mismatch");
         }
 
+        boolean debug = _log.isDebugEnabled();
         for(int i=0; i<dsnIdList.length; i++)
         {
-            if (_log.isDebugEnabled()) {
+            if (debug) {
                 _log.debug("Got data point for CID=" + cidList[i] +
                            " DSN=" + dsnIdList[i] + 
                            " Value=" + valueList[i] +
