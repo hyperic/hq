@@ -57,11 +57,11 @@ function showResult(eid) {
 
 function processResult(result) {
   liveResults = result.results;
-  dojo.byId("groupMembers").className = 'hasData';  
-  
   <% if (!isGroup) { %>
     showResult('${eid}');
   <% } else { %>
+    dojo.byId("groupMembers").className = 'hasData';  
+  
     for (var i=0; i<liveResults.length; i++) {
       var r = liveResults[i];
       
