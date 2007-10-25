@@ -112,7 +112,7 @@ public class IfconfigFormatter
              .append("</td></tr>");
         }
 
-        r.append("<table><thead><tr>");
+        r.append("<table cellpadding='0' cellspacing='0'><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.ifconfig.head.name"))
          .append("</td>")
