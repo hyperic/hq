@@ -335,7 +335,7 @@ public class MBeanUtil {
                                                      Object args[])
         throws PluginException {
 
-        if (method.startsWith("set")) {
+        if (method.startsWith("set") || method.startsWith("get")) {
             method = method.substring(3);
         }
 
@@ -345,10 +345,6 @@ public class MBeanUtil {
             if (!attr.getName().equals(method)) {
                 continue;
             }
-            if (!attr.isWritable()) {
-                throw new PluginException("Attribute '" + method +
-                                          "' is not writable");
-            }
 
             String sig = attr.getType();
             if (!hasConverter(sig)) {
@@ -357,26 +353,21 @@ public class MBeanUtil {
                 throw new PluginException(msg);
             }
 
-            if (args.length != 1) {
-                String msg =
-                    "setAttribute(" + method +
-                    ") takes [1] argument, [" +
-                    args.length + "] given";
-                throw new PluginException(msg);
-            }
-
             OperationParams params = new OperationParams();
-            Object value;
+            Object value = null;
             try {
-                value = convert(sig, (String)args[0]);
+                if (args.length > 0) {
+                    value = convert(sig, (String)args[0]);
+                }
             } catch (Exception e) {
                 String msg =
                     "Exception converting param '" +
                     args[0] + "' to type '" + sig + "'";
                     throw new PluginException(msg + ": " + e);
             }
-            params.arguments =
-                new Object[] { value };
+            if (value != null) {
+                params.arguments = new Object[] { value };
+            }
             params.isAttribute = true;
             return params;
         }
