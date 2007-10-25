@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -416,17 +416,29 @@ public class MxUtil {
                IOException {
 
         String jmxUrl = config.getProperty(MxUtil.PROP_JMX_URL);
+        String jmxUsername = config.getProperty(MxUtil.PROP_JMX_USERNAME, "");
+        String jmxPassword = config.getProperty(MxUtil.PROP_JMX_PASSWORD, "");
+
         boolean isCached = false;
+        JMXConnector connector;
+        ConnectorInstance instance = (ConnectorInstance)cache.get(jmxUrl);
+        if (instance != null) {
+            connector = instance.connector;
+            String username = instance.username;
+            String password = instance.password;
 
-        JMXConnector connector = (JMXConnector)cache.get(jmxUrl);
-
-        if (connector == null) {
+            if (!username.equals(jmxUsername) || !password.equals(jmxPassword)) {
+                log.debug("Credentials changed, reconnecting cached connection for: " + jmxUrl);
+                connector = getMBeanConnector(config);
+                cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
+            }
+            else {
+                isCached = true;
+            }
+        } else {
             connector = getMBeanConnector(config);
-            cache.put(jmxUrl, connector);
+            cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
             log.debug("Caching connector for: " + jmxUrl);
-        }
-        else {
-            isCached = true;
         }
 
         try {
@@ -435,7 +447,7 @@ public class MxUtil {
             if (isCached) {
                 log.debug("Reconnecting cached connection for: " + jmxUrl);
                 connector = getMBeanConnector(config);
-                cache.put(jmxUrl, connector);
+                cache.put(jmxUrl, new ConnectorInstance(connector, jmxUsername, jmxPassword));
                 return connector.getMBeanServerConnection();
             }
             else {
@@ -443,7 +455,7 @@ public class MxUtil {
             }
         }
     }
-    
+
     public static Object getValue(Properties config, String objectName,
                                   String attribute)
         throws MalformedURLException,
@@ -547,6 +559,17 @@ public class MxUtil {
                     throw error(objectName, e, method);
                 }
             }
+        }
+    }
+
+    private static class ConnectorInstance {
+        JMXConnector connector;
+        String username;
+        String password;
+        ConnectorInstance(JMXConnector connector, String username, String password) {
+            this.connector = connector;
+            this.username = username;
+            this.password = password;
         }
     }
 }
