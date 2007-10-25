@@ -93,31 +93,5 @@ class LiveController
         log.warn("Returning ${jsres}")
         render(inline:"/* ${jsres} */", 
     	       contentType:'text/json-comment-filtered')
-                   
-                   
-                   
-                   
-                   
-                   
-            /*       
-                   
-        if (res.hasError()) {
-            return [error: HtmlUtil.escapeHtml(res.errorMessage)]
-        } else {
-            if (fmtId == null) {
-                fmtId = 'toString'
-            }
-            def formatter = ldmi.one.findFormatter(fmtId)
-            def ldCmd = new LiveDataCommand(viewedResource.entityID,
-                                            params.getOne('cmd'),
-                                            new ConfigResponse())
-	        def txt = formatter.format(ldCmd, FormatType.HTML,
-	                                   new ConfigResponse(), res.objectResult)
-            
-            if (fmtId == 'toString') 
-                txt = HtmlUtil.escapeHtml(txt)
-            return [result: txt]
-        }
-        */
     }
 }

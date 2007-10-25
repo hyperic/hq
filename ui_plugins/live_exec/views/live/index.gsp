@@ -3,6 +3,8 @@ var fmt      = {};
 var commands = [];
 var cmd;
 var liveResults = [];
+var ajaxCount = 0;
+var lastSelected = undefined;
 
 <% for (c in commands) { %>
     cmd = '<%= c %>';
@@ -44,13 +46,34 @@ function showResult(eid) {
       break;
     }
   }
+  <% if (isGroup) { %>
+    if (lastSelected) {
+      dojo.byId('mem_' + lastSelected).style.color = 'black';
+    }
+    dojo.byId('mem_' + eid).style.color = 'red';
+    lastSelected = eid;
+  <% } %>
 }
 
 function processResult(result) {
   liveResults = result.results;
+  dojo.byId("groupMembers").className = 'hasData';  
   
   <% if (!isGroup) { %>
     showResult('${eid}');
+  <% } else { %>
+    for (var i=0; i<liveResults.length; i++) {
+      var r = liveResults[i];
+      
+      if (r.result) {
+        dojo.byId('clicker_' + r.rid).className = 'goodResults';
+      } else {
+        dojo.byId('clicker_' + r.rid).className = 'errorResults';
+      }
+      if (lastSelected) {
+        showResult(lastSelected);
+      }
+    }
   <% } %>
 }
 
@@ -65,12 +88,19 @@ function runCommand() {
     var fmt = fmtSelect.options[fmtSelect.selectedIndex].value;
     url = url + '&formatter=' + fmt;
   } 
-  
+
+  if (++ajaxCount > 0) {
+    dojo.byId("spinner").style.visibility = 'visible';  
+  }
+    
   dojo.io.bind({
     url: url,
     method: "get",
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
+      if (--ajaxCount == 0) {
+        dojo.byId("spinner").style.visibility = 'hidden';  
+      }
       processResult(data);
     },
     error: function(err, msg) {
@@ -91,6 +121,10 @@ function runCommand() {
 #result table{width:100%;padding:0px;}
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
 .fivepad {padding:5px;}
+.pendingData {color:gray;}
+.hasData     {;}
+.goodResults  {width:20px;display:inline;background: url(/images/icon_email.gif);}
+.errorResults {width:20px;display:inline;background: url(/images/icon_actual.gif);}
 </style>
 
 <div class="outerLiveDataCont">
@@ -104,6 +138,7 @@ function runCommand() {
           <option value="${c}">${h c}</option>
         <% } %>
       </select>
+      <div class="acLoader" id="spinner"></div>
     </div>
 
     <div id="formatters_cont">
@@ -122,12 +157,14 @@ function runCommand() {
   </div>
 
   <% if (isGroup) { %>
-  <div id="groupMembers">
-    Group Members<br/>
+  Group Members<br/>
+  <div id="groupMembers" class="pendingData">
     <ul>
     <% for (m in groupMembers) { %>
-      <li><span id="mem_${m.entityID}" style="color:red"
-                onclick="showResult('${m.entityID}')">${h m.name}</span></li>
+      <li><span id="mem_${m.entityID}">${h m.name}</span>
+          <div id="clicker_${m.entityID}" 
+               onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
+      </li>
     <% } %>
     </ul>
   </div>
