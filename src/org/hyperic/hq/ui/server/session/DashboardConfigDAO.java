@@ -64,6 +64,10 @@ class DashboardConfigDAO
             .uniqueResult();
     }
     
+    Collection findAllRoleDashboards() {
+        return getSession().createQuery("from RoleDashboardConfig").list();
+    }
+    
     Collection findRolesFor(AuthzSubject me) {
         String sql = "select rc from RoleDashboardConfig rc " + 
             "join rc.role r " + 

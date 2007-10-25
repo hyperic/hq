@@ -201,7 +201,10 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
         if (permMan.hasAdminPermission(me.getAuthzSubjectValue())) {
-            return _dashDAO.findAll();
+            List r = new ArrayList(_dashDAO.findAllRoleDashboards());
+            
+            r.add(getUserDashboard(me, me));
+            return res; 
         }
         
         UserDashboardConfig cfg = getUserDashboard(me, me);
