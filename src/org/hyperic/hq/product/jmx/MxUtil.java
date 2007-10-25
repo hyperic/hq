@@ -523,6 +523,30 @@ public class MxUtil {
         return null;
     }
 
+    private static Object getAttribute(MBeanServerConnection mServer,
+                                       ObjectName obj,
+                                       String name)
+        throws MetricUnreachableException,
+               MetricNotFoundException,
+               PluginException,
+               ReflectionException,
+               InstanceNotFoundException,
+               MBeanException,
+               IOException {
+
+        if (name.startsWith("get")) {
+            name = name.substring(3);
+        }
+
+        try {
+            return mServer.getAttribute(obj, name);
+        } catch (AttributeNotFoundException e) {
+            throw new MetricNotFoundException(e.getMessage(), e);
+        }
+    }
+
+
+
     public static Object invoke(Properties config,
                                 String objectName, String method, 
                                 Object[] args, String[] sig)
@@ -543,8 +567,11 @@ public class MxUtil {
                 MBeanUtil.OperationParams params =
                     MBeanUtil.getOperationParams(info, method, args);
                 if (params.isAttribute) {
-                    return setAttribute(mServer, obj,
-                            method, params.arguments[0]);
+                    if (method.startsWith("set")) {
+                        return setAttribute(mServer, obj, method, params.arguments[0]);
+                    } else {
+                        return getAttribute(mServer, obj, method);
+                    }
                 }
                 sig  = params.signature;
                 args = params.arguments;
