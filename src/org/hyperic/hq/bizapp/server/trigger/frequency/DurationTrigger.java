@@ -231,12 +231,14 @@ public class DurationTrigger extends AbstractTrigger
                     return;
             }
             else {
-                if (savedLast instanceof TriggerFiredEvent) {
-                    if (tfe.getTimestamp() - savedLast.getTimestamp() +
-                            savedTotal < count)
-                    return;
+                if (tfe instanceof HeartBeatEvent) {
+                    if (savedLast instanceof TriggerFiredEvent) {
+                        if (tfe.getTimestamp() - savedLast.getTimestamp() +
+                                savedTotal < count)
+                        return;
+                    }
                 }
-                else if (tfe instanceof HeartBeatEvent)
+                else if (tfe.getClass().equals(savedLast.getClass()))
                     return;
             }
         }
