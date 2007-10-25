@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,8 +24,6 @@
  */
 
 package org.hyperic.hq.product.jmx;
-
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -113,7 +111,7 @@ public class MxControlPlugin
                              String objectName,
                              String action, String[] args) {
 
-        log.debug("invoking " + action + " " + Arrays.asList(args));
+        log.debug("invoking " + action + " " + MBeanUtil.anyToString(args));
 
         try {
             String result = null;
@@ -122,13 +120,7 @@ public class MxControlPlugin
                               objectName,
                               action, args, new String[0]);
             if (obj != null) {
-                if (obj.getClass().isArray()) {
-                    result =
-                        Arrays.asList((Object[])obj).toString();
-                }
-                else {
-                    result = obj.toString();
-                }
+                result = MBeanUtil.anyToString(obj);
             }
             log.debug(objectName + "." + action +
                       "() returned: " + obj);
