@@ -434,7 +434,8 @@ public class ConfigManagerEJBImpl
     private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes,
                                       boolean overwrite)
     {
-        if ((existingBytes == null) || (existingBytes.length == 0)) {
+        if (overwrite || (existingBytes == null) || (existingBytes.length == 0))
+        {
             return newBytes;
         }
 
@@ -448,8 +449,7 @@ public class ConfigManagerEJBImpl
         try {
             ConfigResponse existingConfig =
                 ConfigResponse.decode(existingBytes);
-            ConfigResponse newConfig =
-                ConfigResponse.decode(newBytes);
+            ConfigResponse newConfig = ConfigResponse.decode(newBytes);
             existingConfig.merge(newConfig, overwrite);
             return existingConfig.encode();
         } catch (EncodingException e) {
