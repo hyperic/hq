@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@ import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
 import org.hyperic.hq.measurement.data.ValueList;
+import org.hyperic.hq.measurement.ext.MonitorFactory;
 import org.hyperic.hq.product.MetricValue;
 
 import org.apache.commons.logging.Log;
@@ -126,14 +127,20 @@ public class MeasurementSendReport_args
             throw new LatherRemoteException("Measurement report mismatch");
         }
 
-        boolean debug = _log.isDebugEnabled();
+        boolean trace = _log.isTraceEnabled();
+        int metricId = 0;
+        if (trace) {
+            metricId = getRawMetricDebugId().intValue();
+        }
         for(int i=0; i<dsnIdList.length; i++)
         {
-            if (debug) {
-                _log.debug("Got data point for CID=" + cidList[i] +
-                           " DSN=" + dsnIdList[i] + 
+            if (trace && (metricId == -1 || metricId == cidList[i]))
+            {
+                _log.trace("Got data point for CID=" + cidList[i] +
+                           " DSN=" + dsnIdList[i] +
+                           " debugId=" + metricId +
                            " Value=" + valueList[i] +
-                           " tStamp=" + tStampList[i]);
+                           " tStamp=" + ((long)tStampList[i]));
             }
             con.addDataPoint(cidList[i], dsnIdList[i],
                              new MetricValue(valueList[i],
@@ -159,6 +166,15 @@ public class MeasurementSendReport_args
 
         res.setSRNList(srnList);
         return res;
+    }
+
+    private Integer getRawMetricDebugId()
+    {
+        try {
+            return new Integer(MonitorFactory.getProperty("agent.metricDebug"));
+        } catch (Exception e) {
+            return new Integer(1);
+        }
     }
 
     public void validate()
