@@ -2,6 +2,7 @@
 var fmt      = {};
 var commands = [];
 var cmd;
+var liveResults = [];
 
 <% for (c in commands) { %>
     cmd = '<%= c %>';
@@ -31,6 +32,28 @@ function selectCommand(cmd) {
   }
 }
 
+function showResult(eid) {
+  for (var i=0; i<liveResults.length; i++) {
+    var r = liveResults[i];
+    if (r.rid == eid) {
+      if (r.result) {
+        dojo.byId('result').innerHTML = r.result;
+      } else {
+        dojo.byId('result').innerHTML = r.error;
+      }
+      break;
+    }
+  }
+}
+
+function processResult(result) {
+  liveResults = result.results;
+  
+  <% if (!isGroup) { %>
+    showResult('${eid}');
+  <% } %>
+}
+
 function runCommand() {
   var cmdSelect = dojo.byId('commandSelect');
   var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
@@ -48,14 +71,10 @@ function runCommand() {
     method: "get",
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
-      if (data.result) {
-        dojo.byId('result').innerHTML = data.result;
-      } else {
-        dojo.byId('result').innerHTML = data.error;
-      }
+      processResult(data);
     },
-    error: function(err) {
-      alert('error!');
+    error: function(err, msg) {
+      alert('error! ' + err);
     },
   });
 }
@@ -75,33 +94,45 @@ function runCommand() {
 </style>
 
 <div class="outerLiveDataCont">
-<div class="leftbx">
-<div class="bxblueborder">
-  <div class="BlockTitle">Execute Command</div>
-  <div class="fivepad">
-  <select id="commandSelect" 
-          onchange="selectCommand(options[selectedIndex].value)">
-  <% for (c in commands) { %>
-    <option value="${c}">${h c}</option>
-  <% } %>
-  </select>
-  </div>
-
-  <div id="formatters_cont">
-    <% for (c in commands) { %>
-    <div id="fmt_cont_${c}" style="display:none">
-      Formatter:
-      <select id="fmt_${c}">
-        <% for (f in cmdFmt[c]) { %>
-          <option value="${f}">${formatters[f].name}</option>
+  <div class="leftbx">
+    <div class="bxblueborder">
+      <div class="BlockTitle">Execute Command</div>
+      <div class="fivepad">
+        <select id="commandSelect" 
+                onchange="selectCommand(options[selectedIndex].value)">
+        <% for (c in commands) { %>
+          <option value="${c}">${h c}</option>
         <% } %>
       </select>
     </div>
+
+    <div id="formatters_cont">
+      <% for (c in commands) { %>
+      <div id="fmt_cont_${c}" style="display:none">
+        Formatter:
+        <select id="fmt_${c}">
+          <% for (f in cmdFmt[c]) { %>
+            <option value="${f}">${formatters[f].name}</option>
+          <% } %>
+        </select>
+      </div>
+      <% } %>
+    </div>
+    <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Select</button></div>
+  </div>
+
+  <% if (isGroup) { %>
+  <div id="groupMembers">
+    Group Members<br/>
+    <ul>
+    <% for (m in groupMembers) { %>
+      <li><span id="mem_${m.entityID}" style="color:red"
+                onclick="showResult('${m.entityID}')">${h m.name}</span></li>
     <% } %>
+    </ul>
   </div>
-  <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Select</button></div>
-  </div>
-</div>
-<div id="result" class="bxblueborder"></div>
+  <% } %>
 </div>
 
+<div id="result" class="bxblueborder"></div>
+</div>

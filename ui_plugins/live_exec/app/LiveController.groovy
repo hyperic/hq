@@ -5,6 +5,8 @@ import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.FormatType
 import org.hyperic.hq.livedata.shared.LiveDataCommand
+import org.json.JSONObject
+import org.json.JSONArray
 
 class LiveController 
 	extends BaseController
@@ -13,7 +15,7 @@ class LiveController
                          
     def LiveController() {
         setTemplate('standard')
-        setJSONMethods(['invoke',])
+        //setJSONMethods(['invoke',])
     }
     
     def index(params) {
@@ -22,7 +24,7 @@ class LiveController
         def liveMan    = ldmi.one
         def cmdFmt     = [:]
         def formatters = [:]
-                         
+
         cmds -= FORBIDDEN
         for (c in cmds) {
             def ldCmd = new LiveDataCommand(viewedId, c, new ConfigResponse())
@@ -34,12 +36,19 @@ class LiveController
         }
             
         cmds.add(0, '---')
-    	render(locals:[ commands:cmds, eid:viewedResource.entityID,
-    	                cmdFmt:cmdFmt, formatters:formatters])
+        
+        def isGroup = viewedResource.isGroup()
+        def members = []
+        if (isGroup) {
+            members = viewedResource.getGroupMembers(user)
+        }
+    	render(locals:[ commands:cmds, eid:"${viewedResource.entityID}",
+    	                cmdFmt:cmdFmt, formatters:formatters,
+    	                isGroup:isGroup, groupMembers:members])
     }
     
     def invoke(params) {
-        def fmtId = params.getOne('formatter')
+        def fmtId = params.getOne('formatter', 'toString')
         def cmd   = params.getOne('cmd')
 
         if (cmd in FORBIDDEN) {
@@ -47,8 +56,51 @@ class LiveController
                      "which is forbidden")
             return
         }
-        def res   = viewedResource.getLiveData(user, cmd, new ConfigResponse()) 
-         
+        
+        def resources
+        if (viewedResource.isGroup()) {
+            resources = viewedResource.getGroupMembers(user)
+        } else {
+            resources = [viewedResource]
+        }
+        
+        def lres = resources.getLiveData(user, cmd, new ConfigResponse()) 
+        JSONArray res = new JSONArray()
+
+        def formatter = ldmi.one.findFormatter(fmtId)
+        def fmtCmd    = new LiveDataCommand(viewedResource.entityID, cmd,
+                                            new ConfigResponse())
+
+        for (l in lres) {
+            def val
+            if (l.hasError()) {
+                val = [rid: "${l.appdefEntityID}", 
+                       error: HtmlUtil.escapeHtml(l.errorMessage)] as JSONObject 
+            } else {
+                def txt = formatter.format(fmtCmd, FormatType.HTML,
+                                           new ConfigResponse(), 
+                                           l.objectResult)
+                if (fmtId == 'toString')
+                    txt = HtmlUtil.escapeHtml(txt)
+                
+                val = [rid: "${l.appdefEntityID}", result: txt] as JSONObject
+            }
+            res.put(val)
+        }
+        
+        JSONObject jsres = new JSONObject()
+        jsres.put('results', res)
+        log.warn("Returning ${jsres}")
+        render(inline:"/* ${jsres} */", 
+    	       contentType:'text/json-comment-filtered')
+                   
+                   
+                   
+                   
+                   
+                   
+            /*       
+                   
         if (res.hasError()) {
             return [error: HtmlUtil.escapeHtml(res.errorMessage)]
         } else {
@@ -66,5 +118,6 @@ class LiveController
                 txt = HtmlUtil.escapeHtml(txt)
             return [result: txt]
         }
+        */
     }
 }
