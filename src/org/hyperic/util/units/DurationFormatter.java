@@ -164,31 +164,31 @@ public class DurationFormatter
                               BigDecimal.ROUND_DOWN).intValue();
         if(r.nYears > 0)
             val = val.subtract(UnitsUtil.FACT_YEARS.
-                               multiply(new BigDecimal(r.nYears)));
+                               multiply(new BigDecimal(Long.toString(r.nYears))));
             
         r.nDays = val.divide(UnitsUtil.FACT_DAYS, 
                              BigDecimal.ROUND_DOWN).intValue();
         if(r.nDays > 0)
             val = val.subtract(UnitsUtil.FACT_DAYS.
-                               multiply(new BigDecimal(r.nDays)));
+                               multiply(new BigDecimal(Long.toString(r.nDays))));
 
         r.nHours = val.divide(UnitsUtil.FACT_HOURS, 
                               BigDecimal.ROUND_DOWN).intValue();
         if(r.nHours > 0)
             val = val.subtract(UnitsUtil.FACT_HOURS.
-                               multiply(new BigDecimal(r.nHours)));
+                               multiply(new BigDecimal(Long.toString(r.nHours))));
 
         r.nMins = val.divide(UnitsUtil.FACT_MINS, 
                              BigDecimal.ROUND_DOWN).intValue();
         if(r.nMins > 0)
             val = val.subtract(UnitsUtil.FACT_MINS.
-                               multiply(new BigDecimal(r.nMins)));
+                               multiply(new BigDecimal(Long.toString(r.nMins))));
 
         r.nSecs = val.divide(UnitsUtil.FACT_SECS, 
                              BigDecimal.ROUND_DOWN).intValue();
         if(r.nSecs > 0)
             val = val.subtract(UnitsUtil.FACT_SECS.
-                               multiply(new BigDecimal(r.nSecs)));
+                               multiply(new BigDecimal(Long.toString(r.nSecs))));
 
         r.nMilli = val.divide(UnitsUtil.FACT_MILLIS, 
                               BigDecimal.ROUND_DOWN).intValue();

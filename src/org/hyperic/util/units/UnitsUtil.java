@@ -33,10 +33,11 @@ import java.util.Locale;
 import org.hyperic.util.ArrayUtil;
 
 class UnitsUtil implements UnitsConstants {
-    static final BigDecimal FACT_NONE = new BigDecimal(1);
+    static final BigDecimal FACT_NONE = new BigDecimal(Integer.toString(1));
 
     // Binary scaling factors
-    static final BigDecimal FACT_KILO_BIN = new BigDecimal(1 << 10);
+    static final BigDecimal FACT_KILO_BIN =
+        new BigDecimal(Integer.toString(1 << 10));
     static final BigDecimal FACT_MEGA_BIN =
         FACT_KILO_BIN.multiply(FACT_KILO_BIN);
     static final BigDecimal FACT_GIGA_BIN =
@@ -48,22 +49,25 @@ class UnitsUtil implements UnitsConstants {
     
     // The following factors are how to convert a number in FACT_* to
     // nanoseconds.  
-    static final BigDecimal FACT_NANOS = new BigDecimal(1);
-    static final BigDecimal FACT_MICROS = new BigDecimal(1000);
-    static final BigDecimal FACT_MILLIS = new BigDecimal(1000000);
-    static final BigDecimal FACT_JIFFYS = new BigDecimal(10000000);
+    static final BigDecimal FACT_NANOS = new BigDecimal(Integer.toString(1));
+    static final BigDecimal FACT_MICROS =
+        new BigDecimal(Integer.toString(1000));
+    static final BigDecimal FACT_MILLIS =
+        new BigDecimal(Integer.toString(1000000));
+    static final BigDecimal FACT_JIFFYS =
+        new BigDecimal(Integer.toString(10000000));
     static final BigDecimal FACT_SECS   = 
-        FACT_MILLIS.multiply(new BigDecimal(1000));
+        FACT_MILLIS.multiply(new BigDecimal(Integer.toString(1000)));
     static final BigDecimal FACT_MINS   = 
-        FACT_SECS.multiply(new BigDecimal(60));
+        FACT_SECS.multiply(new BigDecimal(Integer.toString(60)));
     static final BigDecimal FACT_HOURS  = 
-        FACT_MINS.multiply(new BigDecimal(60));
+        FACT_MINS.multiply(new BigDecimal(Integer.toString(60)));
     static final BigDecimal FACT_DAYS   = 
-        FACT_HOURS.multiply(new BigDecimal(24));
+        FACT_HOURS.multiply(new BigDecimal(Integer.toString(24)));
     static final BigDecimal FACT_WEEKS  = 
-        FACT_DAYS.multiply(new BigDecimal(7));
+        FACT_DAYS.multiply(new BigDecimal(Integer.toString(7)));
     static final BigDecimal FACT_YEARS  = 
-        FACT_DAYS.multiply(new BigDecimal(365));
+        FACT_DAYS.multiply(new BigDecimal(Integer.toString(365)));
     
     static void checkValidUnits(int unit){
         if(unit < UNIT_NONE || unit >= UNIT_MAX)
