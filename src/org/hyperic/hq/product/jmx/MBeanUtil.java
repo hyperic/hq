@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -551,5 +551,55 @@ public class MBeanUtil {
         params.signature = signature;
         params.arguments = arguments.toArray();
         return params;
+    }
+
+    //where is commons-anything-tostring.jar?
+    static String anyToString(Object obj) {
+        if (obj.getClass().isArray()) {
+            if (Object[].class.isAssignableFrom(obj.getClass())) {
+                return Arrays.asList((Object[])obj).toString();
+            }
+            else {
+                List values = new ArrayList();
+                if (obj.getClass() == long[].class) {
+                    long[] xv = (long[])obj;
+                    for (int i=0; i<xv.length; i++) {
+                        values.add(String.valueOf(xv[i]));
+                    }
+                }
+                else if (obj.getClass() == int[].class) {
+                    int[] xv = (int[])obj;
+                    for (int i=0; i<xv.length; i++) {
+                        values.add(String.valueOf(xv[i]));
+                    }
+                }
+                else if (obj.getClass() == short[].class) {
+                    short[] xv = (short[])obj;
+                    for (int i=0; i<xv.length; i++) {
+                        values.add(String.valueOf(xv[i]));
+                    }
+                }
+                else if (obj.getClass() == double[].class) {
+                    double[] xv = (double[])obj;
+                    for (int i=0; i<xv.length; i++) {
+                        values.add(String.valueOf(xv[i]));
+                    }
+                }
+                else if (obj.getClass() == boolean[].class) {
+                    boolean[] xv = (boolean[])obj;
+                    for (int i=0; i<xv.length; i++) {
+                        values.add(String.valueOf(xv[i]));
+                    }
+                }
+                else /*if (obj.getClass() == caveman[].class)*/ {
+                    return obj.toString();
+                }
+
+                return values.toString();
+            }
+        }
+        else {
+            return obj.toString();
+        }
     }
 }
