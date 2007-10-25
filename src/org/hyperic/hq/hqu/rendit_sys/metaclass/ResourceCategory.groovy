@@ -2,6 +2,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as rgmi
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl
@@ -57,6 +58,19 @@ class ResourceCategory {
 		DerivedMeasurementManagerEJBImpl.one.findDesignatedMeasurements(aeid)
     }
 
+    static boolean isGroup(Resource r) {
+        return r.resourceType.id == AuthzConstants.authzGroup
+    }
+    
+    static Collection getGroupMembers(Resource r, AuthzSubject user) {
+        if (!r.isGroup()) {
+            return Collections.EMPTY_LIST
+        }
+        
+        rgmi.one.findResourceGroupById(user.authzSubjectValue,
+                                       r.instanceId).resources
+    }
+    
     /**
      * Get a collection of {@link String}s, depicting the LiveData
      * commands available to the specified resource for the specified user
@@ -70,5 +84,15 @@ class ResourceCategory {
     {
         def lcmd = new LiveDataCommand(r.entityID, cmd, cfg)
         LiveDataManagerEJBImpl.one.getData(user, lcmd)
+    }
+    
+    static List getLiveData(Collection resources, AuthzSubject user,
+                            String cmd, ConfigResponse cfg)
+    {
+        def cmds = []
+        for (r in resources) {
+            cmds << new LiveDataCommand(r.entityID, cmd, cfg)
+        }
+        LiveDataManagerEJBImpl.one.getData(user, cmds as LiveDataCommand[]) as List
     }
 }
