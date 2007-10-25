@@ -44,7 +44,6 @@
 <script src="<html:rewrite page="/js/dojo/dojo.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
 	dojo.require("dojo.widget.Menu2");
-	dojo.hostenv.writeIncludes();
 </script>
 <style type="text/css">
 	.dojoMenuBar2 {
