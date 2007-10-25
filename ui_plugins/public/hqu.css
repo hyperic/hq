@@ -330,6 +330,19 @@ font-weight:bold;
     background-position: top left;
 }
 
+.acLoader2 {
+    visibility: hidden;
+    display: block;
+    position: relative;
+    float: right;
+    width:16px;
+    height:16px;
+    padding-right:15px;
+    background-image: url( "images/ajax-loader-blueBkd.gif" );
+    background-repeat: no-repeat;
+    background-position: top left;
+}
+
 /* Down Systems Page */
 
  .leftbxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
