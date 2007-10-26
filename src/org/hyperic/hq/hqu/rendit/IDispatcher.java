@@ -49,4 +49,6 @@ public interface IDispatcher {
     void handleRequest(RequestInvocationBindings b);
     
     void invokeMethod(InvokeMethodInvocationBindings invokeArgs);
+    
+    String getDescription();
 }

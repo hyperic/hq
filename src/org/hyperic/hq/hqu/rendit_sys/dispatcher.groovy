@@ -68,6 +68,12 @@ class Dispatcher implements IDispatcher {
         }
     }
     
+    String getDescription() {
+        use (*CATEGORIES) {
+        	plugin.description
+        }
+    }
+
     /**
      * Attempt to invoke a controller.  If the path looks like:
      *   plugin/controller/action

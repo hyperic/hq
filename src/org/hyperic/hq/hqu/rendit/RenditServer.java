@@ -184,6 +184,12 @@ public class RenditServer {
         plugin.handleRequest(b);
     }
     
+    public String getDescription(String pluginName) 
+    {
+        PluginWrapper plugin = getPlugin(pluginName);
+        return plugin.getDescription();
+    }
+    
     /**
      * Renders a template (.gsp file) to a Writer
      * This facility relies on a plugin being registered under the name

@@ -104,7 +104,7 @@ class HQUPlugin implements IHQUPlugin {
     
     String getDescription() {
         def loader = this.class.classLoader
-        def subloader = new URLClassLoader([new File(pluginDir, 'etc').toURL()],
+        def subloader = new URLClassLoader([new File(pluginDir, 'etc').toURL()] as URL[],
                                            loader)
         
         def file = "${name}_i18n"

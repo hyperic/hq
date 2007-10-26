@@ -14,10 +14,6 @@ class ConsoleController extends BaseController {
         })
 	}
 	
-    protected boolean getDumpScripts() {
-        true
-    }
-
     private def getTemplateDir() {
 		new File(HQApp.instance.resourceDir, "gconsoleTemplates")    
 	}

@@ -155,6 +155,19 @@ public class PluginWrapper {
         }
     }
     
+    String getDescription() {
+        try {
+            return (String)doInContext(new Runnee() {
+                public Object run() {
+                    return _dispatcher.getDescription();
+                }
+            });
+        } catch(Exception e) {
+            _log.warn("Error getting description of " + _pluginDir, e);
+            throw new SystemException(e);
+        }
+    }
+
     void invokeMethod(final InvokeMethodInvocationBindings b) {
         try {
             doInContext(new Runnee() {
