@@ -25,32 +25,30 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
-import org.hyperic.hibernate.PersistedObject;
-
 import java.util.Collection;
+
+import org.hyperic.hibernate.PersistedObject;
 
 /**
  *
  */
 public class CpropKey extends PersistedObject
 {
-    private Integer appdefType;
-    private Integer appdefTypeId;
-    private String key;
-    private String description;
+    private int _appdefType;
+    private int _appdefTypeId;
+    private String _key;
+    private String _description;
+    private Collection _cprops;
 
     public Collection getCprops()
     {
-        return cprops;
+        return _cprops;
     }
 
     public void setCprops(Collection cprops)
     {
-        this.cprops = cprops;
+        _cprops = cprops;
     }
-
-    private Collection cprops;
 
     /**
      * default constructor
@@ -60,59 +58,44 @@ public class CpropKey extends PersistedObject
         super();
     }
 
-    public Integer getAppdefType()
+    public int getAppdefType()
     {
-        return this.appdefType;
+        return _appdefType;
     }
 
-    public void setAppdefType(Integer appdefType)
+    public void setAppdefType(int appdefType)
     {
-        this.appdefType = appdefType;
+        _appdefType = appdefType;
     }
 
-    public Integer getAppdefTypeId()
+    public int getAppdefTypeId()
     {
-        return this.appdefTypeId;
+        return _appdefTypeId;
     }
 
-    public void setAppdefTypeId(Integer appdefTypeId)
+    public void setAppdefTypeId(int appdefTypeId)
     {
-        this.appdefTypeId = appdefTypeId;
+        _appdefTypeId = appdefTypeId;
     }
 
     public String getKey()
     {
-        return this.key;
+        return _key;
     }
 
     public void setKey(String propKey)
     {
-        this.key = propKey;
+        _key = propKey;
     }
 
     public String getDescription()
     {
-        return this.description;
+        return _description;
     }
 
     public void setDescription(String description)
     {
-        this.description = description;
-    }
-
-    private CPropKeyValue _value = new CPropKeyValue();
-    /**
-     * for legacy EJB Entity Bean compatibility
-     * @return
-     */
-    public CPropKeyValue getCPropKeyValue()
-    {
-        _value.setAppdefType(appdefType == null ? 0 : appdefType.intValue());
-        _value.setAppdefTypeId(appdefTypeId == null ? 0 : appdefTypeId.intValue());
-        _value.setDescription(description == null ? "" : description);
-        _value.setKey(key == null ? "" : key);
-        _value.setId(getId());
-        return _value;
+        _description = description;
     }
 
     public boolean equals(Object obj)
@@ -121,25 +104,21 @@ public class CpropKey extends PersistedObject
             return false;
         }
         CpropKey o = (CpropKey)obj;
-        return (key==o.getKey() || (key!=null && o.getKey()!=null &&
-                                    key.equals(o.getKey())))
+        return (_key==o.getKey() || (_key!=null && o.getKey()!=null &&
+                                    _key.equals(o.getKey())))
                &&
-               (appdefType==o.getAppdefType() ||
-                (appdefType!=null && o.getAppdefType()!=null &&
-                 appdefType.equals(o.getAppdefType())))
+               _appdefType==o.getAppdefType()
                &&
-               (appdefTypeId==o.getAppdefTypeId() ||
-                (appdefTypeId!=null && o.getAppdefTypeId()!=null &&
-                 appdefTypeId.equals(o.getAppdefTypeId())));
+               _appdefTypeId==o.getAppdefTypeId();
     }
 
     public int hashCode()
     {
         int result = 17;
 
-        result = 37*result + (key!=null ? key.hashCode() : 0);
-        result = 37*result + (appdefType!=null ? appdefType.hashCode() : 0);
-        result = 37*result + (appdefTypeId!=null ? appdefTypeId.hashCode() : 0);
+        result = 37*result + (_key!=null ? _key.hashCode() : 0);
+        result = 37*result + _appdefType;
+        result = 37*result + _appdefTypeId;
 
         return result;
     }

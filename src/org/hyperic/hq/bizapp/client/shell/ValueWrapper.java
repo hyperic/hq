@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -30,12 +30,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
+import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AgentValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
@@ -167,7 +167,7 @@ public class ValueWrapper {
     private AgentValue               agentValue;
     private AIScheduleValue          aischeduleValue;
     private AIHistoryValue           aihistoryValue;
-    private CPropKeyValue            cpropKeyValue;
+    private CpropKey                 cpropKeyValue;
     private String                   simpleString;
     private GroupMetricDisplaySummary groupMetric;
 
@@ -246,8 +246,8 @@ public class ValueWrapper {
         } else if (val instanceof AgentValue) {
             this.agentValue = (AgentValue)val;
             this.type = TYPE_AGENT;
-        } else if (val instanceof CPropKeyValue) {
-            this.cpropKeyValue = (CPropKeyValue)val;
+        } else if (val instanceof CpropKey) {
+            this.cpropKeyValue = (CpropKey)val;
             this.type = TYPE_CPROPKEY;
         } else if (val instanceof String) {
             this.simpleString = (String)val;

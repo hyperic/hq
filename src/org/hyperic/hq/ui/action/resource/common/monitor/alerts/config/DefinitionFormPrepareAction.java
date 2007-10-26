@@ -42,11 +42,11 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -56,7 +56,6 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
-import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -212,7 +211,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             
         ArrayList custPropStrs = new ArrayList(custProps.size());
         for (Iterator it = custProps.iterator(); it.hasNext();) {
-            CPropKeyValue custProp = (CPropKeyValue) it.next();
+            CpropKey custProp = (CpropKey) it.next();
             custPropStrs.add(new LabelValueBean(custProp.getDescription(),
                                                 custProp.getKey()));
         }

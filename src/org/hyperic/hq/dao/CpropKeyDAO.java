@@ -26,6 +26,7 @@
 package org.hyperic.hq.dao;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.CpropKey;
@@ -55,15 +56,15 @@ public class CpropKeyDAO extends HibernateDAO
                            String description)
     {
         CpropKey cpropkey = new CpropKey();
-        cpropkey.setAppdefType(new Integer(appdefType));
-        cpropkey.setAppdefTypeId(new Integer(appdefTypeId));
+        cpropkey.setAppdefType(appdefType);
+        cpropkey.setAppdefTypeId(appdefTypeId);
         cpropkey.setKey(key);
         cpropkey.setDescription(description);
         save(cpropkey);
         return cpropkey;
     }
 
-    public Collection findByAppdefType(int appdefType, int appdefId)
+    public List findByAppdefType(int appdefType, int appdefId)
     {
         String sql = "from CpropKey k where k.appdefType=? and " +
                      "k.appdefTypeId = ?";
