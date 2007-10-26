@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
@@ -142,38 +143,28 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     List findByTemplate(Integer id) {
+        return createFindByTemplateQuery(id).list();
+    }
+        
+    /**
+     * Return a scrollable result set of all the derived measurements with the 
+     * given template id. Remember to close the result set when finished with it.
+     * 
+     * @param id The template id.
+     * @return A result set of derived measurements.
+     */
+    ScrollableResults scrollByTemplate(Integer id) {
+        return createFindByTemplateQuery(id).scroll();
+    }
+    
+    private Query createFindByTemplateQuery(Integer id) {
         String sql =
             "select distinct m from DerivedMeasurement m " +
             "join m.template t " +
             "where t.id=?";
 
         return getSession().createQuery(sql)
-            .setInteger(0, id.intValue()).list();
-    }
-    
-    /**
-     * Find all the derived measurements with the give template id, potentially 
-     * allowing for the query to return a stale collection (for efficiency reasons).
-     * 
-     * @param id The template id.
-     * @param allowStale <code>true</code> to allow the query to return stale
-     *                   values; <code>false</code> to never allow stale values, 
-     *                   potentially always forcing a sync with the database.
-     * @return A collection of derived measurements.
-     */
-    List findByTemplate(Integer id, boolean allowStale) {
-        Session session = this.getSession();
-        FlushMode oldFlushMode = session.getFlushMode();
-        
-        try {
-            if (allowStale) {
-                session.setFlushMode(FlushMode.MANUAL);                
-            }
-            
-            return findByTemplate(id);
-        } finally {
-            session.setFlushMode(oldFlushMode);
-        } 
+               .setInteger(0, id.intValue());        
     }
 
     Map findByInstance(AppdefEntityID[] aeids)
