@@ -8,6 +8,6 @@ class SampleController
     }
     
     def index(params) {
-    	render(locals:[ pluginInfo : pluginInfo ])
+    	render(locals:[ plugin : plugin])
     }
 }
