@@ -46,6 +46,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionFactoryImpl;
@@ -374,23 +375,32 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
 
-            List metrics = dmDao.findByTemplate(templIds[i], true);
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                DerivedMeasurement dm = (DerivedMeasurement)it.next();
-
-                if (dm.getInterval() != interval)
-                    dm.setInterval(interval);
-
-                if (template.isDefaultOn() != dm.isEnabled())
-                    dm.setEnabled(template.isDefaultOn());
+            ScrollableResults metricResults = null;
+            
+            try {
+                metricResults = dmDao.scrollByTemplate(templIds[i]);
                 
-                if (++count % 100 == 0) {
-                    getDerivedMeasurementDAO().flushAndClearSession();
+                while (metricResults.next()) {
+                    DerivedMeasurement dm = (DerivedMeasurement) metricResults.get(0);
+                    
+                    if (dm.getInterval() != interval)
+                        dm.setInterval(interval);
+
+                    if (template.isDefaultOn() != dm.isEnabled())
+                        dm.setEnabled(template.isDefaultOn());
+                    
+                    if (++count % 100 == 0) {
+                        getDerivedMeasurementDAO().flushAndClearSession();
+                    }
+                    
+                    AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
+                                                             dm.getInstanceId());
+                    toReschedule.add(aeid);
+                }                
+            } finally {
+                if (metricResults != null) {
+                    metricResults.close();
                 }
-                
-                AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                         dm.getInstanceId());
-                toReschedule.add(aeid);
             }
         }
         
