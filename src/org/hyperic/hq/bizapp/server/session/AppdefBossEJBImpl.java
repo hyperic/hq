@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -58,6 +57,7 @@ import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
@@ -86,9 +86,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.DependencyTree;
@@ -157,6 +155,7 @@ import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -3365,43 +3364,6 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Add a key to a resource type.  The key's 'appdefType' and
-     * 'appdefTypeId' fields are used to locate the resource -- if
-     * that resource does not exist, an AppdefEntityNotFoundException
-     * will be thrown.
-     * @param key Key to create
-     * @throws CPropKeyExistsException if the key already exists
-     * @ejb:interface-method
-     */
-    public void addCPropKey(int sessionId, CPropKeyValue key)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AppdefEntityNotFoundException, CPropKeyExistsException
-    {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
-        getCPropManager().addKey(key);
-    }
-
-    /**
-     * Remove a key from a resource type.
-     * @param appdefType   One of AppdefEntityConstants.APPDEF_TYPE_*
-     * @param appdefTypeId The ID of the resource type
-     * @param key          Key to remove
-     * @ejb:interface-method
-     */
-    public void deleteCPropKey(int sessionId, int appdefType,
-                               int appdefTypeId, String key)
-        throws SessionNotFoundException, SessionTimeoutException,
-               CPropKeyNotFoundException
-    {
-        AuthzSubjectValue who;
-
-        who = manager.getSubject(sessionId);
-        getCPropManager().deleteKey(appdefType, appdefTypeId, key);
-    }
-
-    /**
      * Get all the keys associated with an appdef resource type.
      * @param appdefType   One of AppdefEntityConstants.APPDEF_TYPE_*
      * @param appdefTypeId The ID of the appdef resource type
@@ -3539,7 +3501,6 @@ public class AppdefBossEJBImpl
             AppdefEntityID entityId = allConfigs.getResource().getEntityId();
             ProductBossLocal productBossLocal = getProductBoss();
             AppdefEntityID[] ids;
-            Map validationTypes = new HashMap();
             try {
                 if (entityId.isPlatform()) {
                     updatePlatform(sessionInt,
@@ -3549,46 +3510,50 @@ public class AppdefBossEJBImpl
                                   (ServiceValue) allConfigs.getResource());
                 }
 
-                if (allConfigs.shouldConfigProduct()) {
-                    validationTypes.put(ProductPlugin.TYPE_CONTROL,
-                                        Boolean.TRUE);
-                    validationTypes.put(ProductPlugin.TYPE_RESPONSE_TIME,
-                                        Boolean.TRUE);
-                    validationTypes.put(ProductPlugin.TYPE_MEASUREMENT,
-                                        Boolean.TRUE);
-                }
-
-                if (allConfigs.shouldConfigMetric()) {
-                    validationTypes.put(ProductPlugin.TYPE_MEASUREMENT,
-                                        Boolean.TRUE);
-                }
-
-                if (allConfigs.shouldConfigRt()) {
-                    validationTypes.put(ProductPlugin.TYPE_RESPONSE_TIME,
-                                        Boolean.TRUE);
-                }
-
-                if (allConfigs.shouldConfigControl()) {
-                    validationTypes.put(ProductPlugin.TYPE_CONTROL,
-                                        Boolean.TRUE);
-                }
-
+                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
                 ids = getConfigManager().configureResource(
-                    subject.getAuthzSubjectValue(), entityId,
+                    subj, entityId,
                     ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                     ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                     ConfigResponse.safeEncode(allConfigs.getControlConfig()),
                     ConfigResponse.safeEncode(allConfigs.getRtConfig()),
                     Boolean.TRUE,
-                    true);
+                    !doValidation);
                 
                 if (doValidation) {
-                    Iterator validations = validationTypes.keySet().iterator();
+                    Set validationTypes = new HashSet();
+
+                    if (allConfigs.shouldConfigProduct()) {
+                        validationTypes.add(ProductPlugin.TYPE_CONTROL);
+                        validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
+                        validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                    }
+
+                    if (allConfigs.shouldConfigMetric()) {
+                        validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                    }
+
+                    if (allConfigs.shouldConfigRt()) {
+                        validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
+                    }
+
+                    if (allConfigs.shouldConfigControl()) {
+                        validationTypes.add(ProductPlugin.TYPE_CONTROL);
+                    }
+
+                    Iterator validations = validationTypes.iterator();
                     while (validations.hasNext()) {
                         productBossLocal.doValidation(subject, 
                                                       (String) validations.next(),
                                                       ids);
                     }
+                    
+                    List events = new ArrayList(ids.length);
+                    for (int i = 0; i < ids.length; i++)
+                        events.add(new ResourceUpdatedZevent(subj, ids[i]));
+                    
+                    ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+
                 }
 
                 if(entityId.isServer() || entityId.isService()) {
