@@ -39,6 +39,7 @@ import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -51,9 +52,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
@@ -66,7 +65,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -84,15 +82,17 @@ import org.hyperic.hq.bizapp.client.pageFetcher.FindAllServersFetcher;
 import org.hyperic.hq.bizapp.client.pageFetcher.FindAllServiceTypesFetcher;
 import org.hyperic.hq.bizapp.client.pageFetcher.FindAllServicesFetcher;
 import org.hyperic.hq.bizapp.client.pageFetcher.FindClosestMetricDataFetcher;
+import org.hyperic.hq.bizapp.client.pageFetcher.FindControlJobFetcher;
+import org.hyperic.hq.bizapp.client.pageFetcher.FindControlScheduleFetcher;
 import org.hyperic.hq.bizapp.client.pageFetcher.FindMetricDataFetcher;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.LiveDataBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.bizapp.shared.LiveDataBoss;
-import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportData;
 import org.hyperic.hq.bizapp.shared.resourceImport.BatchImportException;
@@ -104,6 +104,9 @@ import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
+import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConfigException;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -117,9 +120,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.scheduler.ScheduleValue;
-import org.hyperic.hq.livedata.shared.LiveDataException;
-import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -130,9 +130,6 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.schedule.ScheduleException;
-
-import org.hyperic.hq.bizapp.client.pageFetcher.FindControlJobFetcher;
-import org.hyperic.hq.bizapp.client.pageFetcher.FindControlScheduleFetcher;
 import org.quartz.SchedulerException;
 
 public class ClientShellEntityFetcher {
@@ -1074,31 +1071,6 @@ public class ClientShellEntityFetcher {
         boss = this.bossManager.getAppdefBoss();
         return boss.getCPropKeys(this.auth.getAuthToken(), appdefType,
                                  appdefTypeId);
-    }
-
-    public void addCPropKey(CPropKeyValue key)
-        throws SessionNotFoundException, SessionTimeoutException,
-               ClientShellAuthenticationException, RemoteException, 
-               NamingException, AppdefEntityNotFoundException, 
-               CPropKeyExistsException
-    {
-        AppdefBoss boss;
-
-        boss = this.bossManager.getAppdefBoss();
-        boss.addCPropKey(this.auth.getAuthToken(), key);
-    }
-
-    public void deleteCPropKey(int appdefType, int appdefTypeId,
-                               String key)
-        throws SessionNotFoundException, SessionTimeoutException,
-               ClientShellAuthenticationException, RemoteException, 
-               NamingException, CPropKeyNotFoundException
-    {
-        AppdefBoss boss;
-
-        boss = this.bossManager.getAppdefBoss();
-        boss.deleteCPropKey(this.auth.getAuthToken(), appdefType,
-                            appdefTypeId, key);
     }
 
     public List getAllSubjects()
