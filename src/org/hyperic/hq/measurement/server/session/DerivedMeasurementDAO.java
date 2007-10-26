@@ -150,6 +150,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                .setInteger(0, id.intValue()).list();   
     }
     
+    /**
+     * Find the AppdefEntityID objects for all the derived measurements 
+     * associated with the measurement template.
+     * 
+     * @param id The measurement template id.
+     * @return A list of AppdefEntityID objects.
+     */
     List findAppdefEntityIdsByTemplate(Integer id) {
         String sql = "select distinct m.template.monitorableType.appdefType, " +
         		    "m.instanceId from DerivedMeasurement m join m.template t " +
