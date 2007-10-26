@@ -130,7 +130,10 @@ function runCommand() {
 <div class="outerLiveDataCont">
   <div class="leftbx">
     <div class="bxblueborder">
-      <div class="BlockTitle">Execute Command</div>
+      <div class="BlockTitle"><div style="float:left;">Execute Command</div>
+      <div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
+      <div style="clear:both;height:1px;"></div>
+      </div>
       <div class="fivepad">
         <select id="commandSelect" 
                 onchange="selectCommand(options[selectedIndex].value)">
@@ -138,8 +141,22 @@ function runCommand() {
           <option value="${c}">${h c}</option>
         <% } %>
       </select>
-      <div class="acLoader" id="spinner"></div>
-    </div>
+      
+      <% if (isGroup) { %>
+      <div style="padding:5px 3px;">Group Members</div>
+      <div id="groupMembers" class="pendingData">
+       <ul style="margin:0px;padding:0px;list-style-type:none;">
+           <% for (m in groupMembers) { %>
+           <li style="padding:2px;"><div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
+           <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
+            <div style="clear:both;height:1px;"></div>
+            </div>
+          </li>
+          <% } %>
+      </ul>
+  </div>
+  <% } %>
+
 
     <div id="formatters_cont">
       <% for (c in commands) { %>
@@ -155,20 +172,8 @@ function runCommand() {
     </div>
     <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Select</button></div>
   </div>
+</div>
 
-  <% if (isGroup) { %>
-  Group Members<br/>
-  <div id="groupMembers" class="pendingData">
-    <ul>
-    <% for (m in groupMembers) { %>
-      <li><span id="mem_${m.entityID}">${h m.name}</span>
-          <div id="clicker_${m.entityID}" 
-               onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
-      </li>
-    <% } %>
-    </ul>
-  </div>
-  <% } %>
 </div>
 
 <div id="result" class="bxblueborder"></div>

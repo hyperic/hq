@@ -80,7 +80,7 @@ public class TopFormatter
             DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
         UptimeData utd = t.getUptime();
         
-        r.append("<div class='top_livedata'><b>Time</b>: ")
+        r.append("<div class='top_livedata'><div class='fivepad' style='background:#efefef;'><b>Time</b>: ")
          .append(h(dateFmt.format(new Date(utd.getTime()))))
          .append(" up ")
          .append(h(utd.getFormattedUptime()))
@@ -126,7 +126,7 @@ public class TopFormatter
          .append("<br/>");
         
         
-        r.append("<table cellpadding='0' cellspacing='0'><thead><tr><td>")
+        r.append("</div><table cellpadding='0' cellspacing='0'><thead><tr><td>")
          .append(BUNDLE.format("formatter.top.proc.pid"))
          .append("</td><td>")
          .append(BUNDLE.format("formatter.top.proc.user"))
