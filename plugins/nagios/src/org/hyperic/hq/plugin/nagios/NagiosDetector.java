@@ -130,6 +130,12 @@ public class NagiosDetector
                 //                          TypeInfo.TYPE_SERVICE,
                 //                          LogTrackPlugin.LOGLEVEL_WARN);
                 service.setMeasurementConfig(metricConfig);
+
+                ConfigResponse cprops = new ConfigResponse();
+                cprops.setValue("nagiosHost", hostObj.getHostname());
+                cprops.setValue("nagiosServiceDesc", nagService.getDesc());
+                service.setCustomProperties(cprops);
+
                 services.add(service);
             }
         }
