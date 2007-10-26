@@ -46,7 +46,6 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionFactoryImpl;
@@ -367,9 +366,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
         HashSet toReschedule = new HashSet();
         MeasurementTemplateDAO templDao = getMeasurementTemplateDAO();
         DerivedMeasurementDAO dmDao = getDerivedMeasurementDAO();
-       
-        int count = 0;
-        
+               
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template = templDao.findById(templIds[i]);
 
@@ -378,44 +375,21 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
 
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
-
-            ScrollableResults metricResults = null;
             
-            try {
-                metricResults = dmDao.scrollByTemplate(templIds[i]);
-                
-                while (metricResults.next()) {
-                    DerivedMeasurement dm = (DerivedMeasurement) metricResults.get(0);
-                    
-                    if (dm.getInterval() != interval)
-                        dm.setInterval(interval);
+            dmDao.updateIntervalToTemplateInterval(template);
+            
+            List appdefEntityIds = 
+                dmDao.findAppdefEntityIdsByTemplate(template.getId());
 
-                    if (template.isDefaultOn() != dm.isEnabled())
-                        dm.setEnabled(template.isDefaultOn());
-                    
-                    if (++count % 100 == 0) {
-                        getDerivedMeasurementDAO().flushAndClearSession();
-                    }
-                    
-                    AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                             dm.getInstanceId());
-                    toReschedule.add(aeid);
-                }                
-            } finally {
-                if (metricResults != null) {
-                    metricResults.close();
-                }
-            }
+            toReschedule.addAll(appdefEntityIds);
         }
-        
-        getDerivedMeasurementDAO().flushAndClearSession();
-        
-        count = 0;
         
         SRNManagerLocal srnManager = getSRNManager();
         SRNCache cache = SRNCache.getInstance();
         ScheduleRevNumDAO srnDao = getScheduleRevNumDAO();
 
+        int count = 0;
+        
         for (Iterator it = toReschedule.iterator(); it.hasNext();) {
             AppdefEntityID id = (AppdefEntityID)it.next();
             ScheduleRevNum srn = cache.get(id);
@@ -424,12 +398,12 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                         srn.getMinInterval()));
 
                 if (++count % 100 == 0) {
-                    srnDao.flushAndClearSession();                  
+                    srnDao.flushSession();                 
                 }
             }
         }
         
-        srnDao.flushAndClearSession();
+        srnDao.flushSession();
     }
         
     /**

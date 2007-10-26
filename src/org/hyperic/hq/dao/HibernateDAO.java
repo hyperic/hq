@@ -59,18 +59,9 @@ public abstract class HibernateDAO {
     public Session getSession() {
         return _daoFactory.getCurrentSession();
     }
-    
-    public void flushAndClearSession() {
-       flush();
-       clear();
-    }
-        
-    protected void flush() {
+            
+    public void flushSession() {
         getSession().flush();
-    }
-    
-    protected void clear() {
-        getSession().clear();
     }
 
     protected Object findById(Serializable id) {
