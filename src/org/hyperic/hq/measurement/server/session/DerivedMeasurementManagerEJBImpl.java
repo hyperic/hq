@@ -369,6 +369,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             AppdefEntityID id = z.getAppdefEntityID();
             boolean isCreate, isRefresh;
 
+            if (log.isDebugEnabled()) {
+                log.debug("handleCreateRefreshEvents(" + z.getClass() + ") for " + id);
+            }
+
             isCreate = z instanceof ResourceCreatedZevent;
             isRefresh = z instanceof ResourceRefreshZevent;
 
@@ -1354,6 +1358,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         ConfigResponse config;
         String mtype;
 
+        if (log.isDebugEnabled()) {
+            log.debug("enableDefaultMetrics() for " + id + " begin fetch configs");
+        }
+
         try {
             mtype = getMonitorableType(subject, id);
             // No monitorable type
@@ -1373,6 +1381,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             return;
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("enableDefaultMetrics() for " + id + " begin checkConfiguration");
+        }
+
         // Check the configuration
         try {
             rawMan.checkConfiguration(subject, id, config);
@@ -1388,6 +1400,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             return;
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("enableDefaultMetrics() for " + id + " create default metrics");
+        }
+
         // Enable the metrics
         try {
             createDefaultMeasurements(subject, id, mtype, config);
@@ -1400,6 +1416,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             log.warn("Unable to enable default metrics for id=" + id +
                       ": " + e.getMessage(), e);
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("enableDefaultMetrics() for " + id + " complete");
+        }
+
     }
 
     /**
