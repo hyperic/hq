@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,24 +29,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.CpropDAO;
 import org.hyperic.hq.dao.CpropKeyDAO;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropKeyValue;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
@@ -61,8 +61,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -81,7 +79,6 @@ public class CPropManagerEJBImpl
     implements SessionBean
 {
     private static final int    CHUNKSIZE      = 1000; // Max size for each row
-    private static final String DATASOURCE     = HQConstants.DATASOURCE;
     private static final String CPROP_TABLE    = "EAM_CPROP";
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
     private static final String CPROP_SEQUENCE = "EAM_CPROP_ID_SEQ";
@@ -103,16 +100,7 @@ public class CPropManagerEJBImpl
      * @ejb:transaction type="Required"
      */
     public List getKeys(int appdefType, int appdefTypeId){
-        Collection keys;
-        List res = new ArrayList();
-
-        keys = getCPropKeyDAO().findByAppdefType(appdefType, 
-                                                 appdefTypeId);
-        for(Iterator i=keys.iterator(); i.hasNext(); ){
-            CpropKey key = (CpropKey)i.next();
-            res.add(key.getCPropKeyValue());
-        }
-        return res;
+        return getCPropKeyDAO().findByAppdefType(appdefType, appdefTypeId);
     }
 
     /**
@@ -166,7 +154,7 @@ public class CPropManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void addKey(CPropKeyValue key)
+    public void addKey(CpropKey key)
         throws AppdefEntityNotFoundException, CPropKeyExistsException
     {
         AppdefResourceTypeValue recValue;
@@ -409,7 +397,6 @@ public class CPropManagerEJBImpl
     }
 
     private Properties getEntries(AppdefEntityID aID, String column) {
-        AppdefResourceTypeValue recType;
         PreparedStatement stmt = null;
         Connection conn = null;
         Properties res = new Properties();
@@ -573,6 +560,18 @@ public class CPropManagerEJBImpl
             DBUtil.closeStatement(this, stmt);
             cpdao.getSession().disconnect();
         }
+    }
+    
+    /**
+     * Get all Cprops values with specified key name, irregardless of type
+     * @ejb:interface-method
+     */
+    public List getCPropValues(AppdefEntityTypeID tid, String key) {
+        CpropKey ckey =
+            getCPropKeyDAO().findByKey(tid.getType(), tid.getID(), key);
+        
+        CpropDAO dao = new CpropDAO(DAOFactory.getDAOFactory()); 
+        return dao.findByKeyName(ckey);
     }
 
     private CpropKeyDAO getCPropKeyDAO(){

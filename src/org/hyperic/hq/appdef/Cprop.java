@@ -32,7 +32,7 @@ import org.hyperic.hibernate.PersistedObject;
  */
 public class Cprop extends PersistedObject
 {
-    private Integer key;
+    private CpropKey key;
     private Integer appdefId;
     private Integer valueIdx;
     private String propValue;
@@ -47,12 +47,12 @@ public class Cprop extends PersistedObject
         super();
     }
 
-    public Integer getKey()
+    public CpropKey getKey()
     {
         return this.key;
     }
 
-    public void setKey(Integer keyId)
+    public void setKey(CpropKey keyId)
     {
         this.key = keyId;
     }

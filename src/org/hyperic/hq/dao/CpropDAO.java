@@ -25,8 +25,14 @@
 
 package org.hyperic.hq.dao;
 
+import java.util.List;
+
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Cprop;
+import org.hyperic.hq.appdef.CpropKey;
 
 public class CpropDAO extends HibernateDAO
 {
@@ -47,5 +53,12 @@ public class CpropDAO extends HibernateDAO
     public void remove(Cprop entity)
     {
         super.remove(entity);
+    }
+    
+    public List findByKeyName(CpropKey key) {
+        Criteria c = createCriteria()
+            .add(Expression.eq("key", key))
+            .addOrder(Order.asc("propValue"));
+        return c.list();
     }
 }
