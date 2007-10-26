@@ -25,13 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
@@ -142,28 +142,55 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     List findByTemplate(Integer id) {
-        return createFindByTemplateQuery(id).list();
-    }
-        
-    /**
-     * Return a scrollable result set of all the derived measurements with the 
-     * given template id. Remember to close the result set when finished with it.
-     * 
-     * @param id The template id.
-     * @return A result set of derived measurements.
-     */
-    ScrollableResults scrollByTemplate(Integer id) {
-        return createFindByTemplateQuery(id).scroll();
-    }
-    
-    private Query createFindByTemplateQuery(Integer id) {
-        String sql =
-            "select distinct m from DerivedMeasurement m " +
-            "join m.template t " +
-            "where t.id=?";
+        String sql = "select distinct m from DerivedMeasurement m " +
+                     "join m.template t " +
+                     "where t.id=?";
 
         return getSession().createQuery(sql)
-               .setInteger(0, id.intValue());        
+               .setInteger(0, id.intValue()).list();   
+    }
+    
+    List findAppdefEntityIdsByTemplate(Integer id) {
+        String sql = "select distinct m.template.monitorableType.appdefType, " +
+        		    "m.instanceId from DerivedMeasurement m join m.template t " +
+                    "where t.id=?";
+        
+        List results = getSession()
+                   .createQuery(sql)
+                   .setInteger(0, id.intValue())
+                   .list();
+        
+        List appdefEntityIds = new ArrayList(results.size());
+        
+        for (Iterator iter = results.iterator(); iter.hasNext();) {
+            Object[] result = (Object[]) iter.next();
+            int appdefType = ((Integer)result[0]).intValue();
+            int instanceId = ((Integer)result[1]).intValue();            
+            appdefEntityIds.add(new AppdefEntityID(appdefType, instanceId));
+        }
+        
+        return appdefEntityIds;
+    }
+    
+    /**
+     * Set the interval for all the associated derived measurements to the 
+     * measurement template interval. Also, make sure that if the measurement 
+     * template has default on set, then the associated derived measurements 
+     * are enabled (and vice versa). 
+     * 
+     * @param template The measurement template (that has been persisted, and 
+     *                 thus, has its id set).
+     */
+    void updateIntervalToTemplateInterval(MeasurementTemplate template) {        
+        String sql = "update versioned DerivedMeasurement set " +
+        		     "interval = :newInterval, enabled = :isEnabled " +
+        		     "where template.id = :tid";
+        
+        getSession().createQuery(sql)
+                    .setLong("newInterval", template.getDefaultInterval())
+                    .setBoolean("isEnabled", template.isDefaultOn())
+                    .setInteger("tid", template.getId().intValue())
+                    .executeUpdate();
     }
 
     List findByInstance(int type, int id) {
@@ -358,4 +385,5 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setCacheRegion("DerivedMeasurement.findByCategory")
             .list();
     }
+
 }
