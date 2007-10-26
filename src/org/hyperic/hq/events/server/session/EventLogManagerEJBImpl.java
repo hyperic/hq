@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
     private EventLogDAO getEventLogDAO() {
-        return DAOFactory.getDAOFactory().getEventLogDAO();
+        return new EventLogDAO(DAOFactory.getDAOFactory());
     }
     
     /** 
@@ -140,6 +140,22 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         getEventLogDAO().insertLogs(eventLogs);
     }
     
+    /** 
+     * Get the last log based on resource limited by time range
+     * 
+     * @ejb:interface-method
+     */
+    public EventLog findLastLog(AppdefEntityID aeid, long begin)
+    {
+        List events = getEventLogDAO().findLastByEntity(aeid, begin);
+        
+        // If there are any, return it
+        if (events.size() > 0)
+            return (EventLog) events.get(0);
+        
+        return null;
+    }
+
     /** 
      * Get a list of log records based on resource, event type and time range
      * 

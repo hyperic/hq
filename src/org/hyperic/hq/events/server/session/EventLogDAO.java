@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class EventLogDAO extends HibernateDAO {
+    private static final String TIMESTAMP = "timestamp";
+    private static final String ENTITY_ID = "entityId";
+    private static final String ENTITY_TYPE = "entityType";
+
     public EventLogDAO(DAOFactory f) {
         super(EventLog.class, f);
     }
@@ -51,49 +55,41 @@ public class EventLogDAO extends HibernateDAO {
         return res;
     }
 
-    List findByEntity(AppdefEntityID ent) {
-        return findByEntity(ent, "desc");
-    }
-
-    List findByEntityOrderTSAsc(AppdefEntityID ent) {
-        return findByEntity(ent, "");
-    }
-
-    private List findByEntity(AppdefEntityID ent, String order) {
-        String sql = "from EventLog l where l.entityType = :eType " +
-            "and l.entityId = :eId order by l.timestamp " + order;
-    
-        return getSession().createQuery(sql)
-            .setInteger("eType", ent.getType())
-            .setInteger("eId", ent.getID())
-            .list();
-    }
-    
     List findByEntityAndStatus(AppdefEntityID entId, long begin, long end,
                                String status) 
     {
         return createCriteria()
-            .add(Expression.eq("entityType", new Integer(entId.getType())))
-            .add(Expression.eq("entityId", entId.getId()))
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
+            .add(Expression.eq(ENTITY_ID, entId.getId()))
             .add(Expression.eq("status", status))
-            .add(Expression.between("timestamp", new Long(begin), 
+            .add(Expression.between(TIMESTAMP, new Long(begin), 
                                     new Long(end)))
-            .addOrder(Order.desc("timestamp"))
+            .addOrder(Order.desc(TIMESTAMP))
             .list();
     }
     
     List findByEntity(AppdefEntityID entId, long begin, long end,
                       String[] eventTypes) {
         Criteria c = createCriteria()
-            .add(Expression.eq("entityType", new Integer(entId.getType())))
-            .add(Expression.eq("entityId", entId.getId()))
-            .add(Expression.between("timestamp", new Long(begin), 
-                                    new Long(end)));
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
+            .add(Expression.eq(ENTITY_ID, entId.getId()))
+            .add(Expression.between(TIMESTAMP, new Long(begin), new Long(end)));
         
         if (eventTypes != null && eventTypes.length > 0)
             c.add(Expression.in("type", eventTypes));
-        c.addOrder(Order.desc("timestamp"));
+        c.addOrder(Order.desc(TIMESTAMP));
         return c.list();
+    }
+    
+    List findLastByEntity(AppdefEntityID entId, long begin) 
+    {
+        return createCriteria()
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
+            .add(Expression.eq(ENTITY_ID, entId.getId()))
+            .add(Expression.gt(TIMESTAMP, new Long(begin)))
+            .addOrder(Order.desc(TIMESTAMP))
+            .setMaxResults(1)
+            .list();
     }
     
     List findBySubject(String subject) {
@@ -106,12 +102,12 @@ public class EventLogDAO extends HibernateDAO {
 
     List findByCtime(long begin, long end, String[] eventTypes) {
         Criteria c = createCriteria()
-            .add(Expression.between("timestamp", new Long(begin),
+            .add(Expression.between(TIMESTAMP, new Long(begin),
                                     new Long(end)));
         if (eventTypes != null && eventTypes.length > 0) {
             c.add(Expression.in("type", eventTypes));
         }
-        c.addOrder(Order.desc("timestamp"));
+        c.addOrder(Order.desc(TIMESTAMP));
         return c.list();
     }
 
