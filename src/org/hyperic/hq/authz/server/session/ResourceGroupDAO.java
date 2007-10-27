@@ -101,13 +101,13 @@ public class ResourceGroupDAO extends HibernateDAO
         entity.getResourceSet().clear();
 
         super.remove(entity);
-        flush();
+        flushSession();
         // remove this resourceGroup itself
         ResourceDAO dao = new ResourceDAO(DAOFactory.getDAOFactory());
         Resource resource =
             dao.findByInstanceId(AuthzConstants.authzGroup, entity.getId());
         dao.remove(resource);
-        flush();
+        flushSession();
     }
     
     public void addResource(ResourceGroup entity, Resource res) {
