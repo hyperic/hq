@@ -78,7 +78,7 @@ public class ResourceGroupDAO extends HibernateDAO
         getSession().refresh(r);
         r.setInstanceId(resGrp.getId());
         save(r);
-        flush();
+        flushSession();
         return resGrp;
     }
 
