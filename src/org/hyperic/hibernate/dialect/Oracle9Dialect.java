@@ -90,6 +90,28 @@ public class Oracle9Dialect
         return false;
     }
 
+    public boolean tableExists(Statement stmt, String tableName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT table_name from all_tables"+
+                         " WHERE lower(table_name) = lower('"+tableName+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+
+    public String getLimitString(int num) {
+        return "AND ROWNUM <= "+num;
+    }
+
     public boolean viewExists(Statement stmt, String viewName)
         throws SQLException
     {
@@ -106,10 +128,6 @@ public class Oracle9Dialect
         finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
-    }
-    
-    public String getLimitString(int num) {
-        return "AND ROWNUM <= "+num;
     }
 
     public Map getLastData(Connection conn, String minMax,

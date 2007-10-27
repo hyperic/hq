@@ -199,14 +199,15 @@ public class DatabaseInitializer {
         public void runRoutines(Connection conn) throws SQLException {
             Statement stmt = null;
 
-            String createHqSeqMemTable =
+            final int batch = 1000;
+            final String createHqSeqMemTable =
                 "CREATE TABLE HQ_MEM_SEQUENCE ( " +
                    "seq_name varchar(50) NOT NULL, " +
                    "seq_val int(11) default NULL, " +
                    "PRIMARY KEY  (seq_name, seq_val) " +
                 ") ENGINE=MEMORY;";
 
-            String getNextHqSeqval =
+            final String getNextHqSeqval =
                 "CREATE FUNCTION getNextHqSeqval(iname CHAR(50)) " +
                 "RETURNS INT " +
                 "DETERMINISTIC " +
@@ -216,29 +217,43 @@ public class DatabaseInitializer {
                     "WHERE seq_name=iname; " +
                   "RETURN @new_seq_val;" +
                 "END;";
-            
-            String getNextMemSeqval =
+
+            final String getNextMemSeqval =
                 "CREATE PROCEDURE getNextMemSeqVal(iname VARCHAR(50), " +
                                          "OUT rtn_val INT)" +
                 "BEGIN "+
                 "DECLARE seq_count INT; " +
                 "DECLARE idx INT; " +
                 "DECLARE next_seq INT; " +
+                "DECLARE seq_max INT; " +
+                "DECLARE mem_seq_max INT; " +
                 "DECLARE tmp INT; " +
                 "SELECT get_lock(\"seq_lock\", 60) into tmp; " +
-                "SELECT count(*) into seq_count from HQ_MEM_SEQUENCE" +
-                " WHERE seq_name = iname; " +
-                "IF seq_count = 0 THEN " +
-                     "SET idx = 0; " +
+                "SELECT count(*) into seq_count from HQ_MEM_SEQUENCE " +
+                    "WHERE seq_name = iname; " +
+                "IF seq_count <= 1 THEN " +
+                     "SELECT seq_val into seq_max from HQ_SEQUENCE " +
+                        "WHERE seq_name = iname; " +
+                     "SELECT max(seq_val) into mem_seq_max from HQ_MEM_SEQUENCE " +
+                        "WHERE seq_name = iname; " +
+                     "IF seq_max != mem_seq_max THEN " +
+                          "UPDATE HQ_SEQUENCE set seq_val = mem_seq_max " +
+                            "WHERE seq_name = iname; " +
+                     "END IF; " +
+                     "select getNextHqSeqval(iname) into next_seq; " +
+                     "SET idx = next_seq + 1; " +
+                     "SET tmp = next_seq + "+(batch-1)+"; " +
+                     "insert into HQ_MEM_SEQUENCE (seq_name, seq_val) " +
+                        "values (iname, next_seq); " +
+                     "UPDATE HQ_SEQUENCE set seq_val = seq_val+"+(batch-1)+" " +
+                        "WHERE seq_name=iname; " +
                      "populate: LOOP " +
-                         "IF idx >= 1000 " +
-                         "THEN " +
-                             "LEAVE populate; " +
+                         "IF idx >= tmp THEN " +
+                                "LEAVE populate; " +
                          "END IF; " +
+                         "insert into HQ_MEM_SEQUENCE (seq_name, seq_val) " +
+                                "values (iname, idx); " +
                          "SET idx = idx + 1; " +
-                         "select getNextHqSeqval(iname) into next_seq; " +
-                         "insert into HQ_MEM_SEQUENCE (seq_name, seq_val)" +
-                         " values (iname, next_seq);" +
                      "END LOOP populate; " +
                 "END IF; " +
                 "select min(seq_val) into rtn_val from HQ_MEM_SEQUENCE" +
@@ -248,7 +263,7 @@ public class DatabaseInitializer {
                 "SELECT release_lock(\"seq_lock\") into tmp; " +
                 "END;";
 
-            String nextseqval =
+            final String nextseqval =
                 "CREATE FUNCTION nextseqval(iname VARCHAR(50)) " +
                 "RETURNS INT " +
                 "READS SQL DATA " +
@@ -261,6 +276,8 @@ public class DatabaseInitializer {
                 "END;";
 
             try {
+                // To see the reason for this refer to JIRA HHQ-1158
+                incrementSequenceIDs(conn, batch);
                 stmt = conn.createStatement();
                 stmt.execute(getNextHqSeqval);
                 stmt.execute(getNextMemSeqval);
@@ -275,6 +292,36 @@ public class DatabaseInitializer {
                 DBUtil.closeStatement(logCtx, stmt);
             }
         }
-        
+    }
+
+    private void incrementSequenceIDs(Connection conn, int batchSize)
+    {
+        if (!memTableExists(conn))
+            return;
+        Statement stmt = null;
+        try
+        {
+            String sql = "update HQ_SEQUENCE set seq_val = seq_val+"+batchSize;
+            stmt = conn.createStatement();
+            stmt.executeUpdate(sql);
+        } catch (SQLException e) {
+        } finally {
+            DBUtil.closeStatement(logCtx, stmt);
+        }
+    }
+
+    private boolean memTableExists(Connection conn)
+    {
+        Statement stmt = null;
+        try
+        {
+            stmt = conn.createStatement();
+            HQDialect dialect = Util.getHQDialect();
+            return dialect.tableExists(stmt, "HQ_MEM_SEQUENCE");
+        } catch (SQLException e) {
+        } finally {
+            DBUtil.closeStatement(logCtx, stmt);
+        }
+        return false;
     }
 }

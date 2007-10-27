@@ -161,6 +161,44 @@ public class MySQL5InnoDBDialect
         ResultSet rs = null;
         try
         {
+            String sql = "SELECT table_name from information_schema.views"+
+                         " WHERE table_name = '"+viewName+"'"+
+                         " AND table_schema = database()";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+
+    public boolean tableExists(Statement stmt, String tableName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT table_name from information_schema.tables"+
+                         " WHERE table_name = '"+tableName+"'"+
+                         " AND table_schema = database()";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+/*    
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
             //no need to lower case here
             String sql = "SHOW TABLES";
             rs = stmt.executeQuery(sql);
@@ -176,7 +214,7 @@ public class MySQL5InnoDBDialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
-    
+*/    
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }

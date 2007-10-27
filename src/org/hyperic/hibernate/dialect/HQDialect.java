@@ -67,9 +67,9 @@ public interface HQDialect
     public boolean supportsDuplicateInsertStmt();
 
     /*
-     * Returns true if the database contains the specified viewName
+     * Returns true if the database contains the specified tableName
      */
-    public boolean viewExists(Statement stmt, String viewName)
+    public boolean tableExists(Statement stmt, String tableName)
         throws SQLException;
     
     /**
@@ -79,6 +79,12 @@ public interface HQDialect
      * @return The limit string.
      */
     public String getLimitString(int num);
+
+    /*
+     * Returns true if the database contains the specified viewName
+     */
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException;
 
     /*
      * Needed mainly for MySQL support.

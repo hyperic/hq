@@ -70,6 +70,24 @@ public class PostgreSQLDialect
         return false;
     }
 
+    public boolean tableExists(Statement stmt, String tableName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            String sql = "SELECT tablename from pg_views"+
+                         " WHERE lower(tablename) = lower('"+tableName+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next())
+                return true;
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+
     public boolean viewExists(Statement stmt, String viewName)
         throws SQLException
     {
