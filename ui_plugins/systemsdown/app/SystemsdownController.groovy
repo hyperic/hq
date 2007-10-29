@@ -11,7 +11,16 @@ import org.hyperic.hq.appdef.server.session.DownResSortField
 class SystemsdownController extends BaseController {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    
+
+    //private final AlertList_Icon = (DOWNTIME.Icon);
+
+    private getAlertListImg(s) {
+        def imgUrl = urlFor(asset:'images') +
+            "/icon_zoom.gif"
+        """<img src="${imgUrl}" width="16" height="16" border="0"
+                class="alertListIcon" title="${clickAlertList}">"""
+    }
+
     private final SYSTEMSDOWN_SCHEMA = [
         getData: {pageInfo, params -> 
             resourceHelper.getDownResources(params.getOne('typeId'), pageInfo)
@@ -27,7 +36,15 @@ class SystemsdownController extends BaseController {
             [field:DownResSortField.SINCE, width:'15%',
              label:{df.format(it.timestamp)}],
             [field:DownResSortField.DOWNTIME, width:'10%',
-             label:{formatDuration(it.duration)}],
+             //label:{formatDuration(it.duration)}
+              label:{
+                dformatDuration(it.duration)
+                def imgUrl = urlFor(asset:'images') +
+                    "/icon_zoom.gif"
+                """<img src="${imgUrl}" width="16" height="16" border="0"
+                        class="alertListIcon" title="${clickAlertList}">}"""
+                 }
+             ],
             [field:DownResSortField.ALERTS, width:'5%',
              label:{linkTo("Alerts", [resource:it]) }],
         ]

@@ -60,7 +60,7 @@ function processResult(result) {
   <% if (!isGroup) { %>
     showResult('${eid}');
   <% } else { %>
-    dojo.byId("groupMembers").className = 'hasData';  
+    dojo.byId("groupMembers").className = 'hasData';
   
     for (var i=0; i<liveResults.length; i++) {
       var r = liveResults[i];
@@ -121,8 +121,8 @@ function runCommand() {
 #result table{width:100%;padding:0px;}
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
 .fivepad {padding:5px;}
-.pendingData {color:gray;}
-.hasData     {;}
+.pendingData li {color:gray;}
+.hasData  li {color:black;}
 .goodResults  {width:20px;display:inline;background: url(/images/icon_email.gif);}
 .errorResults {width:20px;display:inline;background: url(/images/icon_actual.gif);}
 </style>
