@@ -25,18 +25,27 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+
+import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.dao.CpropDAO;
-import org.hyperic.hq.dao.CpropKeyDAO;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
@@ -48,22 +57,13 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.dao.CpropDAO;
+import org.hyperic.hq.dao.CpropKeyDAO;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
-
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * @ejb:bean name="CPropManager"
@@ -566,12 +566,14 @@ public class CPropManagerEJBImpl
      * Get all Cprops values with specified key name, irregardless of type
      * @ejb:interface-method
      */
-    public List getCPropValues(AppdefEntityTypeID tid, String key) {
-        CpropKey ckey =
-            getCPropKeyDAO().findByKey(tid.getType(), tid.getID(), key);
+    public List getCPropValues(AppdefResourceTypeValue appdefType, String key) {
+        int type = appdefType.getAppdefType();
+        int instanceId = appdefType.getId().intValue();
+
+        CpropKey pkey = getCPropKeyDAO().findByKey(type, instanceId, key);
         
         CpropDAO dao = new CpropDAO(DAOFactory.getDAOFactory()); 
-        return dao.findByKeyName(ckey);
+        return dao.findByKeyName(pkey);
     }
 
     private CpropKeyDAO getCPropKeyDAO(){
