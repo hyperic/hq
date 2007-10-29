@@ -96,7 +96,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       </script>
           <c:choose>
               <c:when test="${not params.isDashEditable}">
-
+                <html:image page="/images/tbb_addtolist_locked.gif" border="0" property="" /> 
               </c:when>
               <c:otherwise>
                   <tiles:insert definition=".toolbar.list">

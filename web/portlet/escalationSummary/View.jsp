@@ -42,7 +42,7 @@
   <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewEscUrl" style="visibility:hidden;"></html:link>
+
 
 <script type="text/javascript">
 /*
