@@ -147,11 +147,16 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
@@ -3463,7 +3468,7 @@ public class AppdefBossEJBImpl
         AppdefEntityID id = allConfigs.getResource().getEntityId();
 
         try {
-            doSetAll(subject, sessionInt, allConfigs, doValidation);
+            doSetAll(subject, sessionInt, allConfigs, doValidation, false);
             AuthzSubjectValue subj = subject.getAuthzSubjectValue();
             if (doValidation) {
                 getConfigManager().clearValidationError(subj, id);
@@ -3487,13 +3492,14 @@ public class AppdefBossEJBImpl
             throw e;
         } finally {
             if (doRollback && doValidation) {
-                doSetAll(subject, sessionInt, allConfigsRollback, false);
+                doSetAll(subject, sessionInt, allConfigsRollback, false, true);
             }
         }
     }
 
     private void doSetAll(AuthzSubject subject, int sessionInt,
-                          AllConfigResponses allConfigs, boolean doValidation)
+                          AllConfigResponses allConfigs, boolean doValidation,
+                          boolean force)
         throws EncodingException, FinderException, PermissionException,
                ConfigFetchException, PluginException, ApplicationException
     {
@@ -3517,8 +3523,7 @@ public class AppdefBossEJBImpl
                     ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
                     ConfigResponse.safeEncode(allConfigs.getControlConfig()),
                     ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                    Boolean.TRUE,
-                    !doValidation);
+                    Boolean.TRUE, !doValidation, force);
                 
                 if (doValidation) {
                     Set validationTypes = new HashSet();
@@ -3726,6 +3731,68 @@ public class AppdefBossEJBImpl
         return ret;
     }
 
+    /**
+     * Get Nagios resources and their display information
+     * @ejb:interface-method
+     */
+    public List getNagiosChecks(AuthzSubject subject)
+        throws PermissionException, InvalidAppdefTypeException {
+        // Find all resources of Nagios type
+        List checks =
+            getServiceManager().getServicesByType(subject, "Nagios Plugin");
+        
+        if (checks.size() == 0)
+            return null;
+        
+        AppdefResourceTypeValue type = null;
+        
+        Integer[] instIds = new Integer[checks.size()];
+        
+        int i = 0;
+        for (Iterator it = checks.iterator(); it.hasNext(); i++) {
+            AppdefResourceValue appRes = (AppdefResourceValue) it.next();
+            instIds[i] = appRes.getId();
+            
+            if (type == null)
+                type = appRes.getAppdefResourceTypeValue();
+        }
+            
+        // Get the Nagios hostnames
+        List hostnames =
+            getCPropManager().getCPropValues(type, "nagiosHost");
+        
+        // Get the resource templates
+        List templs = getTemplateManager()
+            .findTemplates(type.getName(), MeasurementConstants.CAT_AVAILABILITY,
+                           null, PageControl.PAGE_ALL);
+        
+        // There should only be one template for availability
+        assert(templs.size() == 1);
+        MeasurementTemplateValue mtv = (MeasurementTemplateValue) templs.get(0);
+
+        // Find all measurement IDs
+        DerivedMeasurementManagerLocal dmMan = getMetricManager();
+        Integer[] mids =
+            dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
+        
+        // Get the down resources and their duration
+        List unavailEnts = dmMan.getUnavailEntities();
+        
+        // Now get the availability data of the leftovers
+        Map avail = getDataMan()
+            .getLastDataPoints(mids, MeasurementConstants
+                               .ACCEPTABLE_SERVICE_LIVE_MILLIS);
+        
+        // Now get their last events
+        EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+        for (Iterator it = checks.iterator(); it.hasNext(); ) {
+            AppdefResourceValue appRes = (AppdefResourceValue) it.next();
+            elMan.findLastLog(appRes.getEntityId(), MeasurementConstants.DAY);
+        }
+        
+        return null;
+    }
+    
     /** 
      * temporary method for determining whether or not we're running
      *  a database that supports navmap 

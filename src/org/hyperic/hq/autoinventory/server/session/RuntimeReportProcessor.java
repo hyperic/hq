@@ -476,7 +476,8 @@ public class RuntimeReportProcessor {
                                             aiserver.getControlConfig(),
                                             null, //RT config
                                             null,
-                                            update);
+                                            update,
+                                            false);
             } catch (Exception e) {
                 log.error("Error configuring server: " 
                           + foundAppdefServer.getId() + ": " + e, e);
@@ -643,7 +644,8 @@ public class RuntimeReportProcessor {
                                         aiservice.getControlConfig(),
                                         aiservice.getResponseTimeConfig(),
                                         null,
-                                        update);
+                                        update,
+                                        false);
             
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
