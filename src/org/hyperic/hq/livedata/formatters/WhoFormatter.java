@@ -24,6 +24,9 @@
  */
 package org.hyperic.hq.livedata.formatters;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
@@ -62,6 +65,8 @@ public class WhoFormatter
 
     private String formatHtml(ConfigResponse cfg, Who[] w) {
         StringBuffer r = new StringBuffer();
+        DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, 
+                                                        DateFormat.SHORT);
         
         r.append("<div class='who_livedata'><table cellpadding='0' cellspacing='0'><thead><tr>");
         r.append("<td>")
@@ -79,12 +84,18 @@ public class WhoFormatter
          .append("</tr></thead><tbody>");
 
         for (int i=0; i<w.length; i++) {
+            String dateStr;
+            
+            if (w[i].getTime() == 0)
+                dateStr = "unknown";
+            else
+                dateStr = fmt.format(new Date(w[i].getTime() * 1000));
             r.append("<tr><td>")
              .append(w[i].getUser())
              .append("</td><td>")
              .append(w[i].getDevice())
              .append("</td><td>")
-             .append(w[i].getTime())
+             .append(dateStr)
              .append("</td><td>")
              .append(w[i].getHost())
              .append("</td></tr>");
