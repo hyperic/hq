@@ -690,6 +690,24 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="UserDashboardConfig.findDashboard"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="RoleDashboardConfig.findDashboard"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="RoleDashboardConfig.findAllRoleDashboards"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Livedata cache -->
   <cache name="LiveData"

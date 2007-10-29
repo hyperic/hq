@@ -52,6 +52,8 @@ class DashboardConfigDAO
         return (UserDashboardConfig)getSession()
             .createQuery(sql)
             .setParameter("user", user)
+            .setCacheable(true)
+            .setCacheRegion("UserDashboardConfig.findDashboard")
             .uniqueResult();
     }
     
@@ -61,11 +63,16 @@ class DashboardConfigDAO
         return (RoleDashboardConfig)getSession()
             .createQuery(sql)
             .setParameter("role", role)
+            .setCacheable(true)
+            .setCacheRegion("RoleDashboardConfig.findDashboard")
             .uniqueResult();
     }
     
     Collection findAllRoleDashboards() {
-        return getSession().createQuery("from RoleDashboardConfig").list();
+        return getSession().createQuery("from RoleDashboardConfig")
+            .setCacheable(true)
+            .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
+            .list();
     }
     
     Collection findRolesFor(AuthzSubject me) {
