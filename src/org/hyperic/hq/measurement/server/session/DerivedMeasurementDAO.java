@@ -158,9 +158,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
      * @return A list of AppdefEntityID objects.
      */
     List findAppdefEntityIdsByTemplate(Integer id) {
-        String sql = "select distinct m.template.monitorableType.appdefType, " +
-                    "m.instanceId from DerivedMeasurement m join m.template t " +
-                    "where t.id=?";
+        String sql = "select distinct mt.appdefType, m.instanceId from " +
+        		     "DerivedMeasurement m join m.template t " +
+                     "join t.monitorableType mt where t.id=?";
         
         List results = getSession()
                    .createQuery(sql)
