@@ -3,8 +3,13 @@ var fmt      = {};
 var commands = [];
 var cmd;
 var liveResults = [];
+var resInfo = {};  
 var ajaxCount = 0;
 var lastSelected = undefined;
+
+<% for (m in groupMembers) { %>
+  resInfo['${m.entityID}'] = {name: "<%= linkTo(h(m.name), [resource:m]) %>" };
+<% } %>
 
 <% for (c in commands) { %>
     cmd = '<%= c %>';
@@ -17,8 +22,11 @@ var lastSelected = undefined;
 <% } %>
 
 function showResult(eid) {
-  for (var i=0; i<liveResults.length; i++) {
-    var r = liveResults[i];
+  dojo.byId("results_msg").innerHTML = "Results of " + liveResults.command + 
+                                       " for " + resInfo[eid].name;
+  var results = liveResults.results;
+  for (var i=0; i<results.length; i++) {
+    var r = results[i];
     if (r.rid == eid) {
       if (r.result) {
         dojo.byId('result').innerHTML = r.result;
@@ -38,14 +46,15 @@ function showResult(eid) {
 }
 
 function processResult(result) {
-  liveResults = result.results;
+  liveResults = result;
   <% if (!isGroup) { %>
     showResult('${eid}');
   <% } else { %>
     dojo.byId("groupMembers").className = 'hasData';
   
-    for (var i=0; i<liveResults.length; i++) {
-      var r = liveResults[i];
+    var res = result.results;
+    for (var i=0; i<res.length; i++) {
+      var r = res[i];
       
       if (r.result) {
         dojo.byId('clicker_' + r.rid).className = 'goodResults';
@@ -159,5 +168,7 @@ function runCommand() {
 
 </div>
 
-<div id="result" class="bxblueborder"></div>
+<div id="result_cont">
+  <span id="results_msg"></span>
+  <div id="result" class="bxblueborder"></div>
 </div>

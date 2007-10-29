@@ -15,7 +15,6 @@ class LiveController
                          
     def LiveController() {
         setTemplate('standard')
-        //setJSONMethods(['invoke',])
     }
     
     def index(params) {
@@ -41,6 +40,8 @@ class LiveController
         def members = []
         if (isGroup) {
             members = viewedResource.getGroupMembers(user)
+        } else {
+            members = [viewedResource]
         }
     	render(locals:[ commands:cmds, eid:"${viewedResource.entityID}",
     	                cmdFmt:cmdFmt, formatters:formatters,
@@ -90,6 +91,7 @@ class LiveController
         
         JSONObject jsres = new JSONObject()
         jsres.put('results', res)
+        jsres.put('command', cmd)
         log.warn("Returning ${jsres}")
         render(inline:"/* ${jsres} */", 
     	       contentType:'text/json-comment-filtered')
