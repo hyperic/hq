@@ -35,7 +35,7 @@ class LiveController
             }
         }
             
-        cmds.add(0, '---')
+        cmds.add(0, 'Please select a command')
         
         def isGroup = viewedResource.isGroup()
         def members = []

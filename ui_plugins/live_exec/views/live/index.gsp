@@ -17,14 +17,14 @@ var lastSelected = undefined;
 <% } %>
 
 function selectCommand(cmd) {
-  if (cmd == '---') {
+  if (cmd == 'Please select a command') {
     dojo.html.hide('goButtonCont');
   } else {  
     dojo.html.show('goButtonCont');
   }
   
   for (var i=0; i<commands.length; i++) {
-    if (commands[i] == cmd && cmd != '---' &&
+    if (commands[i] == cmd && cmd != '' &&
         fmt[cmd].length > 1) 
     {
       dojo.html.show("fmt_cont_" + commands[i]);
@@ -170,7 +170,7 @@ function runCommand() {
       </div>
       <% } %>
     </div>
-    <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Select</button></div>
+    <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Execute</button></div>
   </div>
 </div>
 
