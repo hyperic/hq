@@ -16,24 +16,6 @@ var lastSelected = undefined;
     <% } %>
 <% } %>
 
-function selectCommand(cmd) {
-  if (cmd == 'Please select a command') {
-    dojo.html.hide('goButtonCont');
-  } else {  
-    dojo.html.show('goButtonCont');
-  }
-  
-  for (var i=0; i<commands.length; i++) {
-    if (commands[i] == cmd && cmd != '' &&
-        fmt[cmd].length > 1) 
-    {
-      dojo.html.show("fmt_cont_" + commands[i]);
-    } else {
-      dojo.html.hide("fmt_cont_" + commands[i]);
-    }
-  }
-}
-
 function showResult(eid) {
   for (var i=0; i<liveResults.length; i++) {
     var r = liveResults[i];
@@ -79,6 +61,9 @@ function processResult(result) {
 
 function runCommand() {
   var cmdSelect = dojo.byId('commandSelect');
+  if (cmdSelect.selectedIndex == 0)
+    return;
+    
   var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
   var url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
@@ -136,7 +121,7 @@ function runCommand() {
       </div>
       <div class="fivepad">
         <select id="commandSelect" 
-                onchange="selectCommand(options[selectedIndex].value)">
+                onchange="runCommand()">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
@@ -145,18 +130,17 @@ function runCommand() {
       <% if (isGroup) { %>
       <div style="padding:5px 3px;">Group Members</div>
       <div id="groupMembers" class="pendingData">
-       <ul style="margin:0px;padding:0px;list-style-type:none;">
-           <% for (m in groupMembers) { %>
-           <li style="padding:2px;"><div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
-           <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
+      <ul style="margin:0px;padding:0px;list-style-type:none;">
+        <% for (m in groupMembers) { %>
+        <li style="padding:2px;"><div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
+          <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
             <div style="clear:both;height:1px;"></div>
-            </div>
-          </li>
-          <% } %>
+          </div>
+        </li>
+        <% } %>
       </ul>
-  </div>
-  <% } %>
-
+    </div>
+    <% } %>
 
     <div id="formatters_cont">
       <% for (c in commands) { %>
@@ -170,7 +154,6 @@ function runCommand() {
       </div>
       <% } %>
     </div>
-    <div id="goButtonCont" class="fivepad"><button onclick="runCommand()">Execute</button></div>
   </div>
 </div>
 
