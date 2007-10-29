@@ -86,7 +86,7 @@ public interface AgentStorageProvider extends GenericValueMap {
      * This string is unique to the storage provider and may contain a
      * filename for further configuration, database DSN, etc.
      *
-     * @param info  Information for the StorageProvider to use to initialize
+     * @param info parameters for the StorageProvider to store data and index files
      */
 
     public void init(String info) throws AgentStorageException;
@@ -130,4 +130,6 @@ public interface AgentStorageProvider extends GenericValueMap {
      */
     public void createList(String listName, int recSize)
         throws AgentStorageException;
+
+    public void addOverloadedInfo(String listName, String info);
 }

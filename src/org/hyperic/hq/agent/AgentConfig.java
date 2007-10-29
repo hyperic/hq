@@ -69,9 +69,9 @@ public class AgentConfig {
     public static final String[] PROP_STORAGEPROVIDER    = 
     { "agent.storageProvider", 
       "org.hyperic.hq.agent.server.AgentDListProvider" };
-    public static final String[] PROP_STORAGEPROVIDERINFO = 
-    { "agent.storageProvider.info", "${agent.dataDir}:100:20:50" };
-    public static final String[] PROP_INSTALLHOME = 
+    public static final String[] PROP_STORAGEPROVIDERINFO =
+    { "agent.storageProvider.info", "${agent.dataDir}:m:100:20:50" };
+    public static final String[] PROP_INSTALLHOME =
     { "agent.install.home", System.getProperty("agent.install.home", ".") };
     public static final String[] PROP_TMPDIR =
     { "agent.tmpDir", System.getProperty("agent.tmpDir", "./tmp") };
@@ -97,7 +97,7 @@ public class AgentConfig {
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on
     private String     storageProvider;     // Classname for the provider
-    private String     storageProviderInfo; // Argument to the storage init()
+    private String     storageProviderInfo;  // Argument to the storage init()
     private Properties bootProps;           // Bootstrap properties
     private String     tokenFile;
 
@@ -431,4 +431,5 @@ public class AgentConfig {
     public String getTokenFile() {
         return this.tokenFile;
     }
+
 }

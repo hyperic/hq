@@ -496,7 +496,7 @@ public class MeasurementCommandsServer
         try {
             this.storage      = agent.getStorageProvider();
             this.bootConfig   = agent.getBootConfig();
-            this.schedStorage = new MeasurementSchedule(this.storage);
+            this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here");
         }

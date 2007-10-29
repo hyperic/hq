@@ -58,6 +58,7 @@ public class AgentDListProvider
     private Log      log;        // da logger
     private HashMap  keyVals;    // The key-value pairs
     private HashMap  lists;      // Names onto DiskList objects
+    private HashMap  overloads;
     private File     writeDir;   // Dir to write stuff to
     private File     keyValFile;
     private File     keyValFileBackup;
@@ -66,16 +67,16 @@ public class AgentDListProvider
     // to force an initial flush.
     private boolean  keyValDirty = true;      // Dirty flag for when writing to keyvals
 
-    private long     maxSize = MAXSIZE;
-    private long     chkSize = CHKSIZE;
-    private int      chkPerc = CHKPERC;
+    private long      maxSize = MAXSIZE;
+    private long      chkSize = CHKSIZE;
+    private int       chkPerc = CHKPERC;
 
     public AgentDListProvider(){
         this.log     = LogFactory.getLog(AgentDListProvider.class);
         this.keyVals = null;
         this.lists   = null;
     }
- 
+
     /**
      * Get a description of this storage provider.
      *
@@ -86,6 +87,20 @@ public class AgentDListProvider
             "for lists, and a single file for key/values";
     }
 
+    private DiskList intrCreateList(String name, int recSize) throws IOException {
+        long _maxSize = maxSize;
+        long _chkSize = chkSize;
+        int _chkPerc = chkPerc;
+        ListInfo info = (ListInfo) overloads.get(name);
+        if (info != null) {
+            _maxSize = info.maxSize;
+            _chkSize = info.chkSize;
+            _chkPerc = info.chkPerc;
+        }
+        return new DiskList(new File(this.writeDir, name),
+                                      recSize, _chkSize, _chkPerc, _maxSize);
+    }
+
     /**
      * Create a list of non-standard record size.
      */
@@ -93,8 +108,7 @@ public class AgentDListProvider
         throws AgentStorageException
     {
         try {
-            DiskList dList = new DiskList(new File(this.writeDir, name),
-                                          recSize, chkSize, chkPerc, maxSize);
+            DiskList dList = intrCreateList(name, recSize);
             this.lists.put(name, dList);
         } catch (IOException e) {
             throw new AgentStorageException("Unable to create DiskList: " + 
@@ -102,6 +116,42 @@ public class AgentDListProvider
         }
     }
 
+    private ListInfo parseInfo(String info) throws AgentStorageException {
+        StringTokenizer st = new StringTokenizer(info, ":");
+        if (st.countTokens() != 4) {
+            throw new AgentStorageException(info + " is an invalid agent " +
+                                            "disklist configuration");
+        }
+        String s = st.nextToken().trim();
+        long factor;
+        if ("m".equalsIgnoreCase(s)) {
+            factor = 1024 * 1024;
+        } else if ("k".equalsIgnoreCase(s)) {
+            factor = 1024;
+        } else {
+            throw new AgentStorageException(info + " is an invalid agent " +
+                                            "disklist configuration");
+        }
+        ListInfo listInfo = new ListInfo();
+        try {
+            listInfo.maxSize = Long.parseLong(st.nextToken().trim()) * factor;
+            listInfo.chkSize = Long.parseLong(st.nextToken().trim()) * factor;
+            listInfo.chkPerc = Integer.parseInt(st.nextToken().trim());
+        } catch (NumberFormatException e) {
+            throw new AgentStorageException("Invalid agent disklist " +
+                                            "configuration: " + e);
+        }
+        return listInfo;
+    }
+
+    public void addOverloadedInfo(String listName, String info) {
+        try {
+            overloads.put(listName, parseInfo(info));
+        } catch (AgentStorageException ex) {
+            //use default values
+            log.error(ex);
+        }
+    }
     /**
      * Sets a value within the storage object.  
      *
@@ -219,7 +269,7 @@ public class AgentDListProvider
      *
      * Default is 'data:20:50'
      */
-    public void init(String info) 
+    public void init(String info)
         throws AgentStorageException 
     {
         BufferedInputStream bIs;
@@ -229,33 +279,45 @@ public class AgentDListProvider
 
         // Parse out configuration
         StringTokenizer st = new StringTokenizer(info, ":");
-        if (st.countTokens() != 4) {
+        if (st.countTokens() != 5) {
             throw new AgentStorageException(info + " is an invalid agent" +
                                             " storage provider configuration");
         }
 
         this.keyVals    = new HashMap();
         this.lists      = new HashMap();
-        this.writeDir   = new File(st.nextToken());
+        overloads       = new HashMap();
+        String dir      = st.nextToken();
+        this.writeDir   = new File(dir);
         this.keyValFile = new File(writeDir, "keyvals");
         this.keyValFileBackup = new File(writeDir, "keyvals.backup");
 
+        String s = st.nextToken().trim();
+        long factor;
+        if ("m".equalsIgnoreCase(s)) {
+            factor = 1024 * 1024;
+        } else if ("k".equalsIgnoreCase(s)) {
+            factor = 1024;
+        } else {
+            throw new AgentStorageException(info + " is an invalid agent" +
+                                            " storage provider configuration");
+        }
         try {
-            this.maxSize = Long.parseLong(st.nextToken()) * 1024 * 1024;
-            this.chkSize = Long.parseLong(st.nextToken()) * 1024 * 1024;
-            this.chkPerc = Integer.parseInt(st.nextToken());
+            maxSize = Long.parseLong(st.nextToken().trim()) * factor;
+            chkSize = Long.parseLong(st.nextToken().trim()) * factor;
+            chkPerc = Integer.parseInt(st.nextToken().trim());
         } catch (NumberFormatException e) {
             throw new AgentStorageException("Invalid agent storage provider " +
                                             "configuration: " + e);
         }
-        
+
         if(this.writeDir.exists() == false){
             // Try to create it
             this.writeDir.mkdir();
         }
 
         if(this.writeDir.isDirectory() == false){
-            throw new AgentStorageException(info + " is not a directory");
+            throw new AgentStorageException(dir + " is not a directory");
         }
         
         try {
@@ -326,14 +388,12 @@ public class AgentDListProvider
         throws AgentStorageException
     {
         DiskList dList;
-
         try {
             synchronized(this.lists){
                 dList = (DiskList)this.lists.get(listName);
                 
                 if(dList == null){
-                    dList = new DiskList(new File(this.writeDir, listName), 
-                                         RECSIZE, chkSize, chkPerc, maxSize);
+                    dList = intrCreateList(listName, RECSIZE);
                     this.lists.put(listName, dList);
                 }
             }
@@ -354,8 +414,7 @@ public class AgentDListProvider
 
             if(dList == null){
                 try {
-                    dList = new DiskList(new File(this.writeDir, listName),
-                                         RECSIZE, chkSize, chkPerc, maxSize);
+                    dList = intrCreateList(listName, RECSIZE);
                 } catch(IOException exc){
                     this.log.error("Error loading disk list", exc);
                     return;
@@ -378,8 +437,7 @@ public class AgentDListProvider
 
             if(dList == null){
                 try {
-                    dList = new DiskList(new File(this.writeDir, listName), 
-                                         RECSIZE, chkSize, chkPerc, maxSize);
+                    dList = intrCreateList(listName, RECSIZE);
                 } catch(IOException exc){
                     this.log.error("Error loading disk list", exc);
                     return null; // XXX
@@ -389,5 +447,11 @@ public class AgentDListProvider
         }
 
         return dList.getListIterator();
+    }
+
+    private static class ListInfo {
+        long      maxSize;
+        long      chkSize;
+        int       chkPerc;
     }
 }

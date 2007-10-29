@@ -83,7 +83,15 @@ class TrackerThread implements Runnable {
         this.client      = setupClient();
         this.waitTime    = TrackEventPluginManager.DEFAULT_INTERVAL;
         this.log         = LogFactory.getLog(TrackerThread.class);
-        
+        String info = bootProps.getProperty(CONFIGTRACK_LISTNAME);
+        if (info != null) {
+            storage.addOverloadedInfo(CONFIGTRACK_LISTNAME, info);
+        }
+        info = bootProps.getProperty(LOGTRACK_LISTNAME);
+        if (info != null) {
+            storage.addOverloadedInfo(LOGTRACK_LISTNAME, info);
+        }
+
         String sMaxBatchSize = bootProps.getProperty(PROP_MAXEVENTBATCHSIZE);
         
         if(sMaxBatchSize != null){

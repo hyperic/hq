@@ -120,6 +120,10 @@ public class SenderThread
         this.metricDebug     = new HashSet();
         this.schedule        = schedule;
 
+        String info = bootProps.getProperty(DATA_LISTNAME);
+        if (info != null) {
+            storage.addOverloadedInfo(DATA_LISTNAME, info);
+        }
         // Setup our storage list
         try {
             // Create list early since we want a smaller recordsize

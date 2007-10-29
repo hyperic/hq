@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
@@ -59,7 +60,12 @@ class MeasurementSchedule {
     private ArrayList            srnList;
     private Log                  log;
 
-    MeasurementSchedule(AgentStorageProvider store){
+    MeasurementSchedule(AgentStorageProvider store, Properties bootProps) {
+        String info = bootProps.getProperty(PROP_MSCHED);
+        if (info != null) {
+            store.addOverloadedInfo(PROP_MSCHED, info);
+        }
+
         this.store    = store;
         this.srnList  = new ArrayList();
         this.log      = LogFactory.getLog(MeasurementSchedule.class);
@@ -168,7 +174,7 @@ class MeasurementSchedule {
     void storeMeasurement(ScheduledMeasurement newMeas)
         throws AgentStorageException 
     {
-        this.store.addToList(MeasurementSchedule.PROP_MSCHED, 
+        this.store.addToList(MeasurementSchedule.PROP_MSCHED,
                              newMeas.encode());
         this.store.flush();
     }
