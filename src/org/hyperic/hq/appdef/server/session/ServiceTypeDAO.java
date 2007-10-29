@@ -70,6 +70,8 @@ public class ServiceTypeDAO extends HibernateDAO
         String sql="from ServiceType where sortName=?";
         return (ServiceType)getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
+            .setCacheable(true)
+            .setCacheRegion("ServiceType.findByName")
             .uniqueResult();
     }
 

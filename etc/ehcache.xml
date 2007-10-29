@@ -285,6 +285,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ServiceType.findByName"
+         maxElementsInMemory="500"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Service"
          maxElementsInMemory="10000"
          eternal="true"
@@ -324,6 +330,12 @@
 
   <!-- Group caches -->
   <cache name="org.hyperic.hq.authz.server.session.ResourceGroup"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceGroup.findByName"
          maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"

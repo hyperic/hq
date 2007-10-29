@@ -139,6 +139,8 @@ public class ResourceGroupDAO extends HibernateDAO
         String sql = "from ResourceGroup where lower(name) = lower(?)";
         return (ResourceGroup)getSession().createQuery(sql)
             .setString(0, name)
+            .setCacheable(true)
+            .setCacheRegion("ResourceGroup.findByName")
             .uniqueResult();
     }
     
