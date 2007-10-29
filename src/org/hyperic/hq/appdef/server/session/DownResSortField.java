@@ -169,6 +169,18 @@ public abstract class DownResSortField
         }
     };
     
+    public static final DownResSortField ALERTS = 
+        new DownResSortField(4, "alerts", "down.sortField.alerts") 
+    {
+        public boolean isSortable() {
+            return false;
+        }
+
+        public Comparator getComparator(boolean asc) {
+            return null;
+        }
+    };
+    
     private DownResSortField(int code, String desc, String localeProp) {
         super(DownResSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));

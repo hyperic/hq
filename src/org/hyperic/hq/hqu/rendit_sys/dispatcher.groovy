@@ -11,6 +11,7 @@ import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.hyperic.hq.hqu.rendit.PluginLoadException
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AlertCategory
+import org.hyperic.hq.hqu.rendit.metaclass.DownCategory
 import org.hyperic.hq.hqu.rendit.metaclass.EscalationCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MetricCategory
@@ -32,7 +33,7 @@ class Dispatcher implements IDispatcher {
     final int API_MAJOR = 0
     final int API_MINOR = 1
     
-    private final CATEGORIES = [AuthzSubjectCategory, AlertCategory,
+    private final CATEGORIES = [AuthzSubjectCategory, AlertCategory, DownCategory,
                                 EscalationCategory, MapCategory, MetricCategory, 
                                 ResourceCategory, ResourceGroupCategory, 
                                 StringCategory]   

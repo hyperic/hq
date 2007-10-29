@@ -22,12 +22,14 @@ class SystemsdownController extends BaseController {
             [field:DownResSortField.RESOURCE, width:'40%',
              label:{linkTo(it.name,
                            [resource:it.resource.entityId])}],
-            [field:DownResSortField.TYPE, width:'32%',
+            [field:DownResSortField.TYPE, width:'30%',
              label:{it.type}],
-            [field:DownResSortField.SINCE, width:'16%',
+            [field:DownResSortField.SINCE, width:'15%',
              label:{df.format(it.timestamp)}],
-            [field:DownResSortField.DOWNTIME, width:'12%',
+            [field:DownResSortField.DOWNTIME, width:'10%',
              label:{formatDuration(it.duration)}],
+            [field:DownResSortField.ALERTS, width:'5%',
+             label:{linkTo("Alerts", [resource:it]) }],
         ]
     ]
 
