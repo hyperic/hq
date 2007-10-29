@@ -752,7 +752,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
-    public List getServicesByType(AuthzSubjectValue subject, String svcName) 
+    public List getServicesByType(AuthzSubject subject, String svcName) 
         throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = getServiceTypeDAO().findByName(svcName);
         if (st == null) {
@@ -764,7 +764,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             if (services.size() == 0) {
                 return new PageList();
             }
-            List toBePaged = filterUnviewable(subject, services);
+            List toBePaged = filterUnviewable(subject.getAuthzSubjectValue(),
+                                              services);
             return valuePager.seek(toBePaged, PageControl.PAGE_ALL);
         } catch (ServiceNotFoundException e) {
             return new PageList();
