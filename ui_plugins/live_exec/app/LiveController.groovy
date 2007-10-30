@@ -92,7 +92,6 @@ class LiveController
         JSONObject jsres = new JSONObject()
         jsres.put('results', res)
         jsres.put('command', cmd)
-        log.warn("Returning ${jsres}")
         render(inline:"/* ${jsres} */", 
     	       contentType:'text/json-comment-filtered')
     }
