@@ -81,9 +81,18 @@ class HtmlUtil {
      * Create a text link.
      *
      * text:  The text for the link, which will be HTML escaped
-     * opts:  Options for the link (see urlFor)
+     * opts:  Options for the link (see urlFor).  In addition, the following
+     *        options may be used:
+     *        
+     *        rawLabel: true    - Will not escape the text of the link 
+     *                            (useful for putting HTML and images inside)
      */
     static String linkTo(text, opts) {
+        def rawLabel  = opts.rawLabel
+        if (rawLabel) {
+            opts.remove('rawLabel')
+        }
+        
         def passOpts  = opts + [:]
         def useUrlFor = HtmlUtil.&urlFor
         if (passOpts.urlFor) {
@@ -91,7 +100,7 @@ class HtmlUtil {
             passOpts.remove('urlFor')
         }
         
-        if (opts.rawLabel) {
+        if (rawLabel) {
             return "<a href='${useUrlFor(passOpts)}'>${text}</a>"
         } else {
             return "<a href='${useUrlFor(passOpts)}'>${escapeHtml(text)}</a>"
