@@ -39,7 +39,6 @@
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
   <tiles:put name="rssBase" beanName="rssUrl" />
-  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 

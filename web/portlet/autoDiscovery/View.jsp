@@ -40,7 +40,6 @@
   <tiles:put name="tabKey" value="dash.home.AutoDiscovery"/>  
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 <script language="JavaScript1.2">

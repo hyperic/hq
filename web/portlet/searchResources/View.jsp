@@ -44,7 +44,6 @@ function checkGroup() {
   <tiles:put name="tabKey" value="dash.home.SearchResources"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 <!-- fixme: there's no "minimize" functionality on this block, only "close" -->
 <html:form action="/ResourceHub" onsubmit="checkGroup()">

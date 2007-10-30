@@ -73,7 +73,6 @@ function acknowledgeAlert(img, eid, aid) {
   </c:if>
   <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
   <tiles:put name="rssBase" beanName="rssUrl" />
-  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->

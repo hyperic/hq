@@ -48,7 +48,6 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
   <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="dragDrop" value="true"/>
 
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>

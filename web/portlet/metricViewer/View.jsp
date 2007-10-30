@@ -46,7 +46,6 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
   <tiles:put name="tabKey" value="dash.home.MetricViewer"/>
   <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="dragDrop" value="true"/>
 
   <c:if test="${not empty portlet.token}">
     <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>

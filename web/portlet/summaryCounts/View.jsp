@@ -35,7 +35,6 @@
   <tiles:put name="tabKey" value="dash.home.SummaryCounts"/>
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="dragDrop" value="true"/>
 </tiles:insert>
 
 <tiles:importAttribute name="summary"/>

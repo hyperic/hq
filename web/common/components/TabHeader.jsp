@@ -46,6 +46,10 @@
 <tiles:importAttribute name="rssBase" ignore="true"/>
 <tiles:importAttribute name="dragDrop" ignore="true"/>
 <tiles:importAttribute name="cancelAdvanced" ignore="true"/>
+<tiles:importAttribute name="enableDelete" ignore="true"/>
+
+<c:set var="enableDelete" value="${sessionScope.modifyDashboard}"/>
+<c:set var="dragDrop" value="${sessionScope.modifyDashboard}"/>
 
 <c:if test="${not empty rssBase}">
   <c:url var="rssUrl" value="${rssBase}">
@@ -74,7 +78,7 @@
 
     <td class="BlockTitle" width="100%" valign="middle">
     <c:if test="${dragDrop}">
-      <div style="cursor: move;">
+        <div style="cursor: move;">
     </c:if>
 
 <c:choose>
@@ -116,25 +120,26 @@
     <td class="BlockTitle" align="right">
       <c:choose>
         <c:when test="${not empty adminToken}">
-          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></td>
+          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></t
         </c:when>
         <c:otherwise>
-          <html:link page="${adminUrl}"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link></td>
+          <html:link page="${adminUrl}"><html:img page="/images/dash-icon_edit.gif" width="16" height="16" border="0"/></html:link>
         </c:otherwise>
       </c:choose>
+    </td>
     </c:if>
     <c:if test="${not empty portletName}">
       <td class="BlockTitle" align="right">
-      <c:choose>
-        <c:when test="${not empty portletName}">
-          <a href="javascript:removePortlet(<c:out value="'${portletName}', '${title}'" escapeXml="false"/>)">
-          <html:img page="/images/dash-icon_delete.gif" width="16" height="16" border="0"/>
-          </a>
-        </c:when>
-        <c:otherwise>
-          <html:link page="/dashboard/RemovePortlet.do?portletName=${portletName}"><html:img page="/images/dash-icon_delete.gif" width="16" height="16" border="0"/></html:link>
-        </c:otherwise>
-      </c:choose>
+         <c:choose>
+         <c:when test='${enableDelete eq "true"}'>
+            <a href="javascript:removePortlet(<c:out value="'${portletName}', '${title}'" escapeXml="false"/>)">
+            <html:img page="/images/dash-icon_delete.gif" width="16" height="16" border="0"/>
+            </a>
+         </c:when>
+         <c:otherwise>
+            <html:img page="/images/btn_close_disabled.gif" width="16" height="16" border="0"/>
+         </c:otherwise>
+         </c:choose>
     </td>
     </c:if>
     <c:if test="${not empty useFromSideBar}">
