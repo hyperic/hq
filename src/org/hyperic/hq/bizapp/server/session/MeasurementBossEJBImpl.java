@@ -1520,7 +1520,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         List mds = new ArrayList();
         List mms = getMetricManager().findMeasurements(subject, tid, iids);
         for (iter = mms.iterator(); iter.hasNext();) {
-            DerivedMeasurementValue mm = (DerivedMeasurementValue) iter.next();
+            DerivedMeasurement mm = (DerivedMeasurement) iter.next();
             Integer instanceId = mm.getInstanceId();
             AppdefResourceValue resource =
                 (AppdefResourceValue)resourceMap.get(instanceId.intValue());

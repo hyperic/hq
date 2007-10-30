@@ -28,18 +28,14 @@ package org.hyperic.hq.bizapp.shared.uibeans;
 import java.io.Serializable;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.measurement.shared.BaselineValue;
-import org.hyperic.hq.measurement.shared.DerivedMeasurementValue;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.product.MetricValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class MeasurementMetadataSummary implements Serializable {
 
-    private static Log log =
-        LogFactory.getLog(MeasurementMetadataSummary.class.getName());
     private AppdefResourceValue resource;
     private Double maxExpectedValue;
     private Double minExpectedValue;
@@ -54,9 +50,9 @@ public class MeasurementMetadataSummary implements Serializable {
     public MeasurementMetadataSummary(Integer measurementId,
                                       Long lastValueTimestamp,
                                       Double lastValue,
-                                      MeasurementTemplateValue mtv,
+                                      MeasurementTemplate mt,
                                       Boolean enabled, Long interval,
-                                      Long mtime, BaselineValue bval,
+                                      Long mtime, Baseline b,
                                       AppdefResourceValue resource) {
         setEnabled(enabled);
         setInterval(interval);
@@ -67,20 +63,20 @@ public class MeasurementMetadataSummary implements Serializable {
         setMeasurementTemplate(mtv);
         setResource(resource);
         
-        if (bval != null) {
-            setMaxExpectedValue(bval.getMaxExpectedValue());
-            setMinExpectedValue(bval.getMinExpectedValue());
+        if (b != null) {
+            setMaxExpectedValue(b.getMaxExpectedVal());
+            setMinExpectedValue(b.getMinExpectedVal());
         }
     }
 
-    public MeasurementMetadataSummary(DerivedMeasurementValue mm,
+    public MeasurementMetadataSummary(DerivedMeasurement mm,
                                       MetricValue mv,
                                       AppdefResourceValue resource) {
         this(mm.getId(),
              mv == null ? null : new Long(mv.getTimestamp()),
              mv == null ? new Double(Double.NaN) : new Double(mv.getValue()),
              mm.getTemplate(),
-             new Boolean(mm.getEnabled()),
+             Boolean.valueOf(mm.isEnabled()),
              new Long(mm.getInterval()),
              new Long(mm.getMtime()),
              mm.getBaseline(),
