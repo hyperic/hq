@@ -117,7 +117,7 @@
     </div>
     <div class="downTableContainer" id="downCont">
         <div id="systemsDownTable">
-        <%def headerHTML = '<div id="novalues" style="float: left; padding-top:3px;padding-right:15px;font-weight:bold;font-size:13px;display:none;">There is no data currently</div><div style="float: right; margin-top:5px;padding-right:15px;">Show Most Recent:&nbsp;<span id="defaultCount" onclick="updateFilterCount(50, this)">50</span>&nbsp;|&nbsp;<span id="onehundred" onclick="updateFilterCount(100,this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="onethousand"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
+        <%def headerHTML = '<div style="float: right; margin-top:5px;padding-right:15px;">Show Most Recent:&nbsp;<span id="defaultCount" onclick="updateFilterCount(50, this)">50</span>&nbsp;|&nbsp;<span id="onehundred" onclick="updateFilterCount(100,this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="onethousand"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
 
         <%= dojoTable(id:'SystemsDown', title:'Availability',
             refresh:60, pageControls:false, url:urlFor(action:'data'),
