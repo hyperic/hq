@@ -4,6 +4,7 @@
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -66,10 +67,11 @@
               <td nowrap><fmt:message key="dash.settings.auto-disc.last"/></td>
                  <td>
                      <c:choose>
-                         <c:when test="${not params.isDashEditable}">
+                         <c:when test="${not sessionScope.modifyDashboard}">
                              <c:out value="${AutoDiscoveryForm.range}"/>
                          </c:when>
                          <c:otherwise>
+                            <c:out value="${not sessionScope.modifyDashboard}"/>
                              <html:select property="range">
                                  <html:option value="5">5</html:option>
                                  <html:option value="10">10</html:option>
@@ -92,7 +94,12 @@
           <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
       </table>
-      <tiles:insert definition=".form.buttons"/>
+      <tiles:insert definition=".form.buttons">
+      <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="noReset" value="true"/>
+        <tiles:put name="noCancel" value="true"/>
+      </c:if>
+      </tiles:insert>
       </html:form>
     </td>
   </tr>

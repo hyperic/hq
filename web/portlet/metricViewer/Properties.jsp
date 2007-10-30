@@ -31,7 +31,6 @@
   USA.
  --%>
 
-
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
 <c:url var="selfAction" value="/dashboard/Admin.do?mode=metricViewer"/>
@@ -112,7 +111,14 @@ onloads.push(selectValidOption);
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-            <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+             <c:choose>
+                <c:when test="${not sessionScope.modifyDashboard}">
+                    <c:out value="${MetricViewerForm.title}"/>
+                </c:when>
+                <c:otherwise>
+                    <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+                </c:otherwise>
+             </c:choose>
           </td>
         </tr>
          <tr valign="top">
@@ -121,7 +127,7 @@ onloads.push(selectValidOption);
                  <fmt:message key="dash.settings.metricViewer.top"/>
                  &nbsp;
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
+                     <c:when test="${not sessionScope.modifyDashboard}">
                          <c:out value="${MetricViewerForm.numberToShow}"/>
                      </c:when>
                      <c:otherwise>
@@ -141,7 +147,7 @@ onloads.push(selectValidOption);
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.ResourceType"/></td>
             <td width="80%" class="BlockContent" colspan="3" valign="center">
                 <c:choose>
-                    <c:when test="${not params.isDashEditable}">
+                    <c:when test="${not sessionScope.modifyDashboard}">
                         <c:out value="${MetricViewerForm.resourceType}"/>
                     </c:when>
                     <c:otherwise>
@@ -184,7 +190,7 @@ onloads.push(selectValidOption);
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.Metric"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
               <c:choose>
-                  <c:when test="${not params.isDashEditable}">
+                  <c:when test="${not sessionScope.modifyDashboard}">
                       <c:out value="${MetricViewerForm.metric}"/>
                   </c:when>
                   <c:otherwise>
@@ -208,7 +214,7 @@ onloads.push(selectValidOption);
             <td width="20%" class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.SortOrder"/></td>
             <td width="80%" class="BlockContent" colspan="3" valign="center">
                 <c:choose>
-                    <c:when test="${not params.isDashEditable}">
+                    <c:when test="${not sessionScope.modifyDashboard}">
                         <c:choose>
                         <c:when test="${MetricViewerForm.descending}">
                             <fmt:message key="dash.settings.metricViewer.descending"/>
@@ -272,7 +278,7 @@ onloads.push(selectValidOption);
           <c:param name="ft" value="${MetricViewerForm.appdefTypeID}"/>
       </c:url>
       <c:choose>
-          <c:when test="${not params.isDashEditable}">
+          <c:when test="${not sessionScope.modifyDashboard}">
 
           </c:when>
           <c:otherwise>
@@ -287,7 +293,12 @@ onloads.push(selectValidOption);
               </tiles:insert>
           </c:otherwise>
       </c:choose>
-      <tiles:insert definition=".form.buttons"/>
+      <tiles:insert definition=".form.buttons">
+      <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="noReset" value="true"/>
+        <tiles:put name="noCancel" value="true"/>
+      </c:if>
+      </tiles:insert>
       <html:hidden property="token"/>
       </html:form>
 

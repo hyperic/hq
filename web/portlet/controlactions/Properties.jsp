@@ -4,6 +4,7 @@
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 
 <script type="text/javascript">
   var help = "<hq:help/>";
@@ -37,12 +38,19 @@
          <tr valign="top">
           <td width="20%" class="BlockLabel" rowspan="3"><fmt:message key="dash.settings.FormLabel.ControlRange"/></td>
           <td width="5%" class="BlockContent" nowrap>
-            <html:checkbox property="useLastCompleted"/>
-            <fmt:message key="dash.settings.controlActions.last"/>
+           <c:choose>
+             <c:when test="${not sessionScope.modifyDashboard}">
+	            <fmt:message key="dash.settings.controlActions.last"/>
+	         </c:when>
+	         <c:otherwise>
+	            <html:checkbox property="useLastCompleted"/>
+                <fmt:message key="dash.settings.controlActions.last"/>   
+	         </c:otherwise>
+           </c:choose>
           </td>
              <td width="75%" class="BlockContent">
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
+                     <c:when test="${not sessionScope.modifyDashboard}">
                          <c:out value="${ControlActionsForm.lastCompleted}"/>
                      </c:when>
                      <c:otherwise>
@@ -53,11 +61,28 @@
                              <html:option value="15">15</html:option>
                          </html:select>
                      </c:otherwise>
-                 </c:choose>
+                  </c:choose>
                          <fmt:message key="dash.settings.controlActions.completed"/>
                   <c:choose>
-                     <c:when test="${not params.isDashEditable}">
-                         <c:out value="${ControlActionsForm.past}"/>
+                     <c:when test="${not sessionScope.modifyDashboard}">
+	                     <c:if test="${ControlActionsForm.past eq 1800000}">30
+	                         <fmt:message key="admin.settings.Minutes"/>
+	                     </c:if>
+	                     <c:if test="${ControlActionsForm.past eq 3600000}">
+	                         <fmt:message key="admin.settings.Hour"/>
+	                     </c:if>
+	                     <c:if test="${ControlActionsForm.past eq 43200000}">12
+	                         <fmt:message key="admin.settings.Hours"/>
+	                     </c:if>
+	                     <c:if test="${ControlActionsForm.past eq 86400000}">
+	                         <fmt:message key="admin.settings.Day"/>
+	                     </c:if>
+	                     <c:if test="${ControlActionsForm.past eq 604800000}">
+	                         <fmt:message key="admin.settings.Week"/>
+	                     </c:if>
+	                     <c:if test="${ControlActionsForm.past eq 2419200000}">
+	                         <fmt:message key="admin.settings.Month"/>
+	                     </c:if>
                      </c:when>
                      <c:otherwise>
                          <html:select property="past">
@@ -88,18 +113,18 @@
         <tr>
             <td class="BlockContent" nowrap>
                 <c:choose>
-                    <c:when test="${not params.isDashEditable}">
-                        <c:out value="${ControlActionsForm.useMostFrequent}"/>
+                    <c:when test="${not sessionScope.modifyDashboard}">
+                        <fmt:message key="dash.settings.controlActions.last"/>
                     </c:when>
                     <c:otherwise>
                         <html:checkbox property="useMostFrequent"/>
+                        <fmt:message key="dash.settings.controlActions.last"/>
                     </c:otherwise>
                 </c:choose>
-                <fmt:message key="dash.settings.controlActions.last"/>
             </td>
           <td class="BlockContent">
               <c:choose>
-                  <c:when test="${not params.isDashEditable}">
+                  <c:when test="${not sessionScope.modifyDashboard}">
                       <c:out value="${ControlActionsForm.mostFrequent}"/>
                   </c:when>
                   <c:otherwise>
@@ -118,7 +143,12 @@
           <td colspan="3" class="BlockContent"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
         </tr>
       </table>
-      <tiles:insert definition=".form.buttons"/>
+      <tiles:insert definition=".form.buttons">
+      <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="noReset" value="true"/>
+        <tiles:put name="noCancel" value="true"/>
+      </c:if>
+      </tiles:insert>
       </html:form>
     </td>
   </tr>

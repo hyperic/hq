@@ -94,7 +94,7 @@ var help = '<hq:help/>';
       -->
       </script>
           <c:choose>
-              <c:when test="${not params.isDashEditable}">
+              <c:when test="${not sessionScope.modifyDashboard}">
                <html:image page="/images/tbb_addtolist_locked.gif" border="0" property="" /> 
               </c:when>
               <c:otherwise>
@@ -112,8 +112,12 @@ var help = '<hq:help/>';
               </c:otherwise>
           </c:choose>
       <html:hidden property="order"/>
-      <tiles:insert definition=".form.buttons"/>
-
+      <tiles:insert definition=".form.buttons">
+      <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="noReset" value="true"/>
+        <tiles:put name="noCancel" value="true"/>
+      </c:if>
+      </tiles:insert>
       </html:form>
 
     </td>

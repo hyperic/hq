@@ -3,6 +3,7 @@
 <%@ taglib uri="struts-html" prefix="html" %>
 <%@ taglib uri="struts-tiles" prefix="tiles" %>
 <%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="jstl-c" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application

@@ -97,31 +97,36 @@ function handleEnter (field, event) {
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-            <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+            <c:choose>
+            <c:when test="${not sessionScope.modifyDashboard}">
+                <c:out value="${AvailSummaryForm.title}"/>
+            </c:when>
+            <c:otherwise> 
+                <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+            </c:otherwise>
+            </c:choose>
           </td>
         </tr>
          <tr valign="top">
           <td class="BlockLabel" valign="center"><fmt:message key="dash.settings.FormLabel.AvailSummaryRange"/></td>
           <td class="BlockContent" colspan="3" valign="center">
-
-              <fmt:message key="dash.settings.availSummary.top"/>
-              &nbsp;
               <c:choose>
-                  <c:when test="${not params.isDashEditable}">
+                  <c:when test="${not sessionScope.modifyDashboard}">
+                      <fmt:message key="dash.settings.availSummary.top"/>&nbsp;
                       <c:out value="${AvailSummaryForm.numberToShow}"/>
+                      <fmt:message key="dash.settings.availSummary.resources"/>
                   </c:when>
                   <c:otherwise>
+                      <fmt:message key="dash.settings.availSummary.top"/>&nbsp;
                       <html:select property="numberToShow">
                           <html:option value="5"/>
                           <html:option value="10"/>
                           <html:option value="20"/>
                           <html:option value="30"/>
                       </html:select>
+                      &nbsp;<fmt:message key="dash.settings.availSummary.resources"/>
                   </c:otherwise>
               </c:choose>
-
-              &nbsp;<fmt:message key="dash.settings.availSummary.resources"/>
-     
           </td>
         </tr>
         <tr>
@@ -163,7 +168,7 @@ function handleEnter (field, event) {
       </c:url>
 
       <c:choose>
-          <c:when test="${not params.isDashEditable}">
+          <c:when test="${not sessionScope.modifyDashobard}">
            <html:image page="/images/tbb_addtolist_locked.gif" border="0" property="" /> 
           </c:when>
           <c:otherwise>
@@ -180,7 +185,12 @@ function handleEnter (field, event) {
       </c:choose>
 
 
-      <tiles:insert definition=".form.buttons"/>
+      <tiles:insert definition=".form.buttons">
+      <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="noReset" value="true"/>
+        <tiles:put name="noCancel" value="true"/>
+      </c:if>
+      </tiles:insert>
       <html:hidden property="token"/>
       </html:form>
 

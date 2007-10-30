@@ -98,7 +98,14 @@ function handleEnter (field, event) {
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-            <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+            <c:choose>
+              <c:when test="${not sessionScope.modifyDashboard}">
+                <c:out value="${CriticalAlertsForm.title}"/>
+              </c:when>
+              <c:otherwise>
+                <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
+              </c:otherwise>
+            </c:choose>
           </td>
         </tr>
          <tr valign="top">
@@ -107,7 +114,7 @@ function handleEnter (field, event) {
                  <fmt:message key="dash.settings.criticalAlerts.last"/>
                  &nbsp;
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
+                     <c:when test="${not sessionScope.modifyDashboard}">
                          <c:out value="${CriticalAlertsForm.numberOfAlerts}"/>
                      </c:when>
                      <c:otherwise>
@@ -120,8 +127,19 @@ function handleEnter (field, event) {
                      </c:otherwise>
                  </c:choose>
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
-                         <c:out value="${CriticalAlertsForm.priority}"/>
+                     <c:when test="${not sessionScope.modifyDashboard}">
+						<c:if test="${CriticalAlertsForm.priority eq '3'}">
+						  !!! - High
+						</c:if>
+						<c:if test="${CriticalAlertsForm.priority eq '2'}">
+						  !! - Medium
+						</c:if>
+						<c:if test="${CriticalAlertsForm.priority eq '1'}">
+						  ! - Low 
+						</c:if>
+						<c:if test="${CriticalAlertsForm.priority eq '0'}">
+						  ALL
+						</c:if>
                      </c:when>
                      <c:otherwise>
                          <html:select property="priority">
@@ -135,8 +153,25 @@ function handleEnter (field, event) {
                  &nbsp;
                  <fmt:message key="dash.settings.criticalAlerts.withinThePast"/>
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
-                         <c:out value="${CriticalAlertsForm.past}"/>
+                     <c:when test="${not sessionScope.modifyDashboard}">
+						<c:if test="${CriticalAlertsForm.past eq 1800000}">30
+						    <fmt:message key="admin.settings.Minutes"/>
+						</c:if>
+						<c:if test="${CriticalAlertsForm.past eq 3600000}">
+						    <fmt:message key="admin.settings.Hour"/>
+						</c:if>
+						<c:if test="${CriticalAlertsForm.past eq 43200000}">12
+						   <fmt:message key="admin.settings.Hours"/>
+						</c:if>
+						<c:if test="${CriticalAlertsForm.past eq 86400000}">
+						   <fmt:message key="admin.settings.Day"/>
+						</c:if>
+						<c:if test="${CriticalAlertsForm.past eq 604800000}">
+						   <fmt:message key="admin.settings.Week"/>
+						</c:if>
+						<c:if test="${CriticalAlertsForm.past eq 2419200000}">
+						   <fmt:message key="admin.settings.Month"/>
+						</c:if>
                      </c:when>
                      <c:otherwise>
                          <html:select property="past">
@@ -165,8 +200,8 @@ function handleEnter (field, event) {
                  <fmt:message key="dash.settings.criticalAlerts.for"/>
                  &nbsp;
                  <c:choose>
-                     <c:when test="${not params.isDashEditable}">
-                         <c:out value="${CriticalAlertsForm.selectedOrAll}"/>
+                     <c:when test="${not sessionScope.modifyDashboard}">
+                         <c:out value="${CriticalAlertsForm.selectedOrAll}"/>&nbsp;resources
                      </c:when>
                      <c:otherwise>
                          <html:select property="selectedOrAll">
@@ -211,7 +246,7 @@ function handleEnter (field, event) {
         <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
       </c:if>
       <c:choose>
-          <c:when test="${not params.isDashEditable}">
+          <c:when test="${not sessionScope.modifyDashobard}">
            <html:image page="/images/tbb_addtolist_locked.gif" border="0" property="" /> 
           </c:when>
           <c:otherwise>
@@ -228,7 +263,12 @@ function handleEnter (field, event) {
               </tiles:insert>
           </c:otherwise>
       </c:choose>
-      <tiles:insert definition=".form.buttons"/>
+	  <tiles:insert definition=".form.buttons">
+		 <c:if test='${not sessionScope.modifyDashboard}'>
+		   <tiles:put name="noReset" value="true"/>
+		   <tiles:put name="noCancel" value="true"/>
+		 </c:if>
+	  </tiles:insert>
       <html:hidden property="token"/>
       </html:form>
       
