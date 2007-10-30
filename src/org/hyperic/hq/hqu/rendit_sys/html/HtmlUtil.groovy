@@ -90,7 +90,12 @@ class HtmlUtil {
             useUrlFor = passOpts.urlFor
             passOpts.remove('urlFor')
         }
-        "<a href='${useUrlFor(passOpts)}'>${escapeHtml(text)}</a>"
+        
+        if (opts.rawLabel) {
+            return "<a href='${useUrlFor(passOpts)}'>${text}</a>"
+        } else {
+            return "<a href='${useUrlFor(passOpts)}'>${escapeHtml(text)}</a>"
+        }
     }
         
 	/**
