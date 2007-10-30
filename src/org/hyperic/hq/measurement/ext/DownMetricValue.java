@@ -30,10 +30,12 @@ import org.hyperic.hq.product.MetricValue;
 
 public class DownMetricValue extends MetricValue {
     private AppdefEntityID _entityId;
+    private Integer _metricId;
 
-    public DownMetricValue(AppdefEntityID id, MetricValue mv) {
+    public DownMetricValue(AppdefEntityID id, Integer mid, MetricValue mv) {
         super(mv);
         _entityId = id;
+        _metricId = mid;
     }
 
     public AppdefEntityID getEntityId() {
@@ -42,6 +44,14 @@ public class DownMetricValue extends MetricValue {
 
     public void setEntityId(AppdefEntityID entityId) {
         _entityId = entityId;
+    }
+
+    public Integer getMetricId() {
+        return _metricId;
+    }
+
+    public void setMetricId(Integer metricId) {
+        _metricId = metricId;
     }
 
     public long getDuration() {

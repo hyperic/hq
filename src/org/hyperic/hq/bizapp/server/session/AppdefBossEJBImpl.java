@@ -27,8 +27,10 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -51,9 +53,11 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.appdef.Cprop;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.CPropResource;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -147,6 +151,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.grouping.shared.GroupCreationException;
@@ -157,6 +162,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
@@ -3635,7 +3641,7 @@ public class AppdefBossEJBImpl
                                               PageInfo info)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
-        List unavailEnts = getMetricManager().getUnavailEntities();
+        List unavailEnts = getMetricManager().getUnavailEntities(null);
         DownResSortField sortField = (DownResSortField) info.getSort();
         Set ret = new TreeSet(sortField.getComparator(!info.isAscending()));
         
@@ -3697,7 +3703,7 @@ public class AppdefBossEJBImpl
         final String SERVERS   = "Servers";
         final String SERVICES  = "Services";
         
-        List unavailEnts = getMetricManager().getUnavailEntities();
+        List unavailEnts = getMetricManager().getUnavailEntities(null);
         Map ret = new LinkedHashMap();
         ret.put(PLATFORMS, new LinkedList());
         ret.put(SERVERS,   new LinkedList());
@@ -3732,65 +3738,111 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * Get Nagios resources and their display information
+     * Get Service resources and their display information
      * @ejb:interface-method
+     * @param subject the caller
+     * @param typeName the type name of the services
+     * @param cprop a unique custom property name to be fetched
      */
-    public List getNagiosChecks(AuthzSubject subject)
+    public List getServicesView(AuthzSubject subject, String typeName,
+                                String cprop)
         throws PermissionException, InvalidAppdefTypeException {
-        // Find all resources of Nagios type
-        List checks =
-            getServiceManager().getServicesByType(subject, "Nagios Plugin");
+        List ret = new ArrayList();
         
-        if (checks.size() == 0)
+        // Find all resources of Nagios type
+        List services =
+            getServiceManager().getServicesByType(subject, typeName);
+        
+        if (services.size() == 0)
             return null;
         
         AppdefResourceTypeValue type = null;
         
-        Integer[] instIds = new Integer[checks.size()];
+        Map res = new HashMap();
         
         int i = 0;
-        for (Iterator it = checks.iterator(); it.hasNext(); i++) {
+        for (Iterator it = services.iterator(); it.hasNext(); i++) {
             AppdefResourceValue appRes = (AppdefResourceValue) it.next();
-            instIds[i] = appRes.getId();
+            res.put(appRes.getId(), appRes);
             
             if (type == null)
                 type = appRes.getAppdefResourceTypeValue();
         }
             
-        // Get the Nagios hostnames
-        List hostnames =
-            getCPropManager().getCPropValues(type, "nagiosHost");
+        // Get the Cprop values
+        List cprops = getCPropManager().getCPropValues(type, cprop);
+        
+        // XXX - determine sort order, for now assume sorting by cprop value
+        for (Iterator it = cprops.iterator(); it.hasNext(); ) {
+            Cprop prop = (Cprop) it.next();
+            Integer id = prop.getAppdefId();
+            CPropResource cpRes =
+                new CPropResource((AppdefResourceValue) res.get(id),
+                                  prop.getPropValue());
+            
+            ret.add(cpRes);
+            res.put(id, cpRes);
+        }
         
         // Get the resource templates
         List templs = getTemplateManager()
-            .findTemplates(type.getName(), MeasurementConstants.CAT_AVAILABILITY,
+            .findTemplates(type.getName(),
+                           MeasurementConstants.CAT_AVAILABILITY,
                            null, PageControl.PAGE_ALL);
         
-        // There should only be one template for availability
-        assert(templs.size() == 1);
+        // There should at least one template for availability
+        assert(templs.size() > 0);
         MeasurementTemplateValue mtv = (MeasurementTemplateValue) templs.get(0);
 
         // Find all measurement IDs
         DerivedMeasurementManagerLocal dmMan = getMetricManager();
-        Integer[] mids =
-            dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
+        
+        Integer[] instIds = (Integer[])
+            res.keySet().toArray(new Integer[services.size()]);
+
+        Set mids = new HashSet();
+        mids.addAll(Arrays.asList(
+            dmMan.findMeasurementIds(subject, mtv.getId(), instIds)));
         
         // Get the down resources and their duration
-        List unavailEnts = dmMan.getUnavailEntities();
+        List unavailEnts = dmMan.getUnavailEntities(mids);
         
+        for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
+            DownMetricValue dmv = (DownMetricValue) it.next();
+            
+            CPropResource cpRes =
+                (CPropResource) res.get(dmv.getEntityId().getId());
+            
+            cpRes.setLastValue(dmv);
+            mids.remove(dmv.getMetricId());
+        }
+
         // Now get the availability data of the leftovers
+        Integer[] leftovers =
+            (Integer[]) mids.toArray(new Integer[mids.size()]);
+        
         Map avail = getDataMan()
-            .getLastDataPoints(mids, MeasurementConstants
+            .getLastDataPoints(leftovers, MeasurementConstants
                                .ACCEPTABLE_SERVICE_LIVE_MILLIS);
+        
+        for (Iterator it = avail.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Integer mid = (Integer) entry.getKey();
+            CPropResource cpRes = (CPropResource) res.get(mid);
+            cpRes.setLastValue((MetricValue) entry.getValue());
+        }
         
         // Now get their last events
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
-        for (Iterator it = checks.iterator(); it.hasNext(); ) {
-            AppdefResourceValue appRes = (AppdefResourceValue) it.next();
-            elMan.findLastLog(appRes.getEntityId(), MeasurementConstants.DAY);
+        for (Iterator it = ret.iterator(); it.hasNext(); ) {
+            CPropResource cpRes = (CPropResource) it.next();
+            EventLog eventLog =
+                elMan.findLastLog(cpRes.getEntityId(),
+                                  cpRes.getLastValue().getTimestamp());
+            cpRes.setLastEvent(eventLog);
         }
         
-        return null;
+        return ret;
     }
     
     /** 

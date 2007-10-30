@@ -1420,7 +1420,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * 
      * @ejb:interface-method
      */
-    public List getUnavailEntities() {
+    public List getUnavailEntities(Set includes) {
         MetricDataCache cache = MetricDataCache.getInstance();
         Map unavailMetrics = cache.getUnavailableMetrics();
         List unavailEntities = new ArrayList();
@@ -1429,6 +1429,11 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         {
             Map.Entry el = (Map.Entry) it.next();
             Integer mid = (Integer) el.getKey();
+            
+            if (includes != null && !includes.contains(mid)) {
+                continue;
+            }
+            
             MetricValue mv = (MetricValue) el.getValue();
             
             // Look up the metric for the appdef entity ID
@@ -1439,7 +1444,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 continue;
             }
             
-            unavailEntities.add(new DownMetricValue(dm.getEntityId(), mv));
+            unavailEntities.add(new DownMetricValue(dm.getEntityId(), mid, mv));
         }
         return unavailEntities;
     }
