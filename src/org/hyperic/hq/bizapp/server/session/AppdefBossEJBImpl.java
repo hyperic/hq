@@ -3755,7 +3755,7 @@ public class AppdefBossEJBImpl
             getServiceManager().getServicesByType(subject, typeName);
         
         if (services.size() == 0)
-            return null;
+            return new ArrayList();
         
         AppdefResourceTypeValue type =
             ((AppdefResourceValue) services.get(0)).getAppdefResourceTypeValue();
