@@ -119,6 +119,7 @@ public class DisplayDashboardAction extends TilesAction {
 					.valueOf(defaultDashboard));
 			if (dashboardConfig == null) {
 				dForm.setPopDialog(true);
+				request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));
 				return null;
 			} else {
 				session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
@@ -132,6 +133,7 @@ public class DisplayDashboardAction extends TilesAction {
 			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, selectedDashboard);
 			if (dashboardConfig == null) {
 				dForm.setPopDialog(true);
+				request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));	
 				return null;
 			} else {
 				dForm.setSelectedDashboardId(dashboardConfig.getId()
@@ -145,15 +147,18 @@ public class DisplayDashboardAction extends TilesAction {
 			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 		} else {
 			// many dashboards and no default or selected - pop default dialog
-			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
+			// set the background dashboard to the user dashboard
+			dashboardConfig = dashManager.getUserDashboard(me, me);
 			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
 					dashboardConfig.getId());
 			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 			dForm.setPopDialog(true);
 		}
-		
-		request.setAttribute(Constants.IS_DASH_EDITABLE, 
-				new Boolean(dashManager.isEditable(me, dashboardConfig)));
+		if (dashManager.isEditable(me, dashboardConfig)) {
+			session.setAttribute(Constants.IS_DASH_EDITABLE, "true");
+		} else {
+			session.removeAttribute(Constants.IS_DASH_EDITABLE);
+		}
 		
 		// Dashboard exists, display it
 		ConfigResponse dashPrefs = dashboardConfig.getConfig();

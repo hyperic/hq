@@ -71,6 +71,11 @@ public interface AttrConstants {
      * The session scope attribute under which the defualt user dashboard preferences live
      */
     public static final String DEF_USER_DASH_PREFS = "userDashPrefs";
+    
+    /**
+     * The request scope attribute for toggle dashboard display for default dashboard change
+     */
+    public static final String IS_DASHBOARD_REMOVED = "isDashRemoved";
     /**
      * The session scope attribute under which the ids of users
      * pending association with a role are stored.

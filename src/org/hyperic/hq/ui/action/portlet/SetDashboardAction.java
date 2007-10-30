@@ -49,12 +49,12 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 				Constants.WEBUSER_SES_ATTR);
 		AuthzBoss authzBoss = ContextUtils.getAuthzBoss(request.getSession()
 				.getServletContext());
-		if (dForm.getSelectedDashboardId() != null) {
+		if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {
 			//assign a selected dashboard
 			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, 
-					Integer.getInteger(dForm.getSelectedDashboardId()));
+					new Integer(dForm.getSelectedDashboardId()));
 		}
-		if (dForm.getDefaultDashboard() != null) {
+		if (!isPropertyEmpty(dForm.getDefaultDashboard())) {
 			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm
 					.getDefaultDashboard());
 			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject()
@@ -62,5 +62,13 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 		}
 		return mapping.findForward(Constants.SUCCESS_URL);
 	}
-
+	
+	private boolean isPropertyEmpty(String property) {
+		if (property == null) {
+			return true;
+		} else if (property.equals("")) {
+			return true;
+		} else
+			return false;
+	}
 }

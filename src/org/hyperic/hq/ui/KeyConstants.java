@@ -35,7 +35,7 @@ public interface KeyConstants {
 	
 	public static final String DASHBOARD_ID = ".dashboard.id";
 	
-	public static final String IS_DASH_EDITABLE = "isDashEditalbe";
+	public static final String IS_DASH_EDITABLE = "modifyDashboard";
 	
     public static final String USERPREF_KEY_PROBLEMS_IGNORELIST = ".dashContent.problems.ignoreList";
 
