@@ -83,5 +83,9 @@
     <put name="titleKey" value="admin.home.ResourceTemplates"/>
     <put name="configTile" value="/admin/config/ChangeResourceTemplate.jsp"/>
   </definition>
+  
+  <definition name=".admin.Plugins"
+              controllerUrl="/admin/user/Plugins.do"
+              path="/admin/user/Plugins.jsp"/> 
 
  </tiles-definitions>

@@ -398,7 +398,7 @@
       <action path="/Admin"
               forward=".admin.layout">
       </action>
-
+      
       <action path="/admin/home/AdminHomePortal"
               input="/Admin.do"
               type="org.hyperic.hq.ui.action.admin.home.AdminHomePortalAction">
@@ -506,6 +506,11 @@
       </action>
       <!-- end user admin actions / -->
 
+      <!-- Admin plugins -->
+      <action path="/admin/user/Plugins"
+              type="org.hyperic.hq.ui.action.admin.PluginsAction">
+      </action>
+      
       <!--CONFIG -->
       <action path="/admin/config/Config"
               forward=".admin.config.layout">
