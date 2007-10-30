@@ -167,7 +167,6 @@
     dojo.require("dojo.widget.Dialog");
 	dojo.event.connect(window, "onload", function(){
 	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
-	    dialogWidget.setShowControl("openDialog");
 	    if(<c:out value="${DashboardForm.popDialog}"/>){
 	       dialogWidget.show();
 	    }
@@ -217,18 +216,29 @@
     <td colspan="2">
         <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
         <div class="messagePanel dashboard">
-            
-            <span style="font-weight: bold; margin-right: 4px;"><fmt:message key="dash.home.SelectDashboard"/></span>
-            <html:select property="selectedDashboardId" name="selectedDashboardId" value="selectedDashboardId" onchange="changeDashboard('DashboardForm');" styleId="dashSelect">
-                <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
-            </html:select>
-           <a href="#" id="openDialog">Open Dialog</a>
-           <input type="hidden" name="defaultDashboard" id="defaultDashboard"/>
+	        <span style="font-weight: bold; margin-right: 4px;"><fmt:message key="dash.home.SelectDashboard"/></span>
+	        <html:select property="selectedDashboardId" name="selectedDashboardId" value="selectedDashboardId" onchange="changeDashboard('DashboardForm');" styleId="dashSelect">
+	            <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
+	        </html:select>
+	        <input type="hidden" name="defaultDashboard" id="defaultDashboard"/>
+	        <div class="message" style="margin-left:10px;display:inline;">
+	        <c:choose>
+	        <c:when test="${not sessionScope.modifyDashboard}">
+	           <span style="font-weight:bold;"><fmt:message key="note"/></span>&nbsp;<span><fmt:message key="dash.home.ReadOnlyMessage"/></span>
+	        </c:when>
+	        <c:when test="${sessionScope.modifyDashboard and requestScope.roleDashboard}">
+	           <span style="font-weight:bold;"><fmt:message key="note"/></span>&nbsp;<span><fmt:message key="dash.home.ModifyRoleDashboardMessage"/></span>
+	        </c:when>
+	        </c:choose>
+	        </div>
         </div>
         <div id="dashboardSelectDialog" class="hidden">
-		    <div style="background-color:white;width:300px;height:235px">
-		        <div class="BlockTitle"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
-		        <div style="padding:8px;">
+		    <div class="dialog">
+		        <div class="dialogHeader"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
+		        <div style="dialogBody">
+		            <c:if test="${requestScope.isDashRemoved}">
+		              <div class="dialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
+		            </c:if>
 		            <div id="dashboardSelectionErrorPanel" class="hidden">
 		                <span class="ErrorBlock"><img width="10" height="11" border="0" alt="" src="/images/tt_error.gif"/></span>
 		                <span class="ErrorBlock"><fmt:message key="dash.home.DashboardSelectionDialogError"/></span>            
@@ -240,8 +250,8 @@
                         </html:select>
 		            </div>
 		        </div>
-		        <div style="height:26px;background-color:#efefef;bottom:0px;position:absolute;width:294px;padding:5px 3px 0px 3px;">
-		           <div style="float:right">
+		        <div class="dialogFooter">
+		           <div class="right">
 		            <html:image property="ok" styleId="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"></html:image>
 		           </div>
 		        </div>
@@ -303,6 +313,7 @@
   </li>
   </c:forEach>
 </ul>
+<c:if test="${sessionScope.modifyDashboard}">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr><td valign="top" class="DashboardPadding">
   <c:choose>
@@ -315,6 +326,7 @@
   </c:choose>
   </td></tr>
 </table>
+
       <script type="text/javascript">
       <!--
         Sortable.create("<c:out value="narrowList_${narrow}"/>",
@@ -327,6 +339,7 @@
            constraint: 'vertical'});
       -->
       </script>
+</c:if>      
       <c:choose >
         <c:when test="${narrow eq 'true'}">              
           <c:set var="narrow" value="false" />
