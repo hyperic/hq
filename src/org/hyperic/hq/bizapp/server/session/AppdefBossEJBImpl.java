@@ -3757,34 +3757,35 @@ public class AppdefBossEJBImpl
         if (services.size() == 0)
             return null;
         
-        AppdefResourceTypeValue type = null;
+        AppdefResourceTypeValue type =
+            ((AppdefResourceValue) services.get(0)).getAppdefResourceTypeValue();
         
-        Map res = new HashMap();
-        
-        int i = 0;
-        for (Iterator it = services.iterator(); it.hasNext(); i++) {
-            AppdefResourceValue appRes = (AppdefResourceValue) it.next();
-            res.put(appRes.getId(), appRes);
-            
-            if (type == null)
-                type = appRes.getAppdefResourceTypeValue();
-        }
-            
         // Get the Cprop values
         List cprops = getCPropManager().getCPropValues(type, cprop);
         
         // XXX - determine sort order, for now assume sorting by cprop value
+        Map res = new HashMap();        
         for (Iterator it = cprops.iterator(); it.hasNext(); ) {
             Cprop prop = (Cprop) it.next();
             Integer id = prop.getAppdefId();
-            CPropResource cpRes =
-                new CPropResource((AppdefResourceValue) res.get(id),
-                                  prop.getPropValue());
-            
-            ret.add(cpRes);
-            res.put(id, cpRes);
+            res.put(id, prop);
         }
         
+        for (Iterator it = services.iterator(); it.hasNext(); ) {
+            AppdefResourceValue appRes = (AppdefResourceValue) it.next();
+            Integer id = appRes.getId();
+
+            if (res.containsKey(id)) {
+                Cprop prop = (Cprop) res.get(id);
+
+                CPropResource cpRes =
+                    new CPropResource(appRes, prop.getPropValue());
+
+                ret.add(cpRes);
+                res.put(id, cpRes);
+            }
+        }
+            
         // Get the resource templates
         List templs = getTemplateManager()
             .findTemplates(type.getName(),
