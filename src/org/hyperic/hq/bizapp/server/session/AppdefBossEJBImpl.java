@@ -3828,8 +3828,10 @@ public class AppdefBossEJBImpl
         for (Iterator it = avail.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Integer mid = (Integer) entry.getKey();
-            CPropResource cpRes = (CPropResource) res.get(mid);
-            cpRes.setLastValue((MetricValue) entry.getValue());
+            if (entry.getValue() != null) {
+                CPropResource cpRes = (CPropResource) res.get(mid);
+                cpRes.setLastValue((MetricValue) entry.getValue());
+           }
         }
         
         // Now get their last events

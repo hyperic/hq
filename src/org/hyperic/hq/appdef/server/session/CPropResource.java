@@ -31,7 +31,7 @@ public class CPropResource {
     }
     
     public long getDuration() {
-        if (_mv instanceof DownMetricValue) {
+        if (_mv != null && _mv instanceof DownMetricValue) {
             return ((DownMetricValue) _mv).getDuration();
         }
         return 0;
