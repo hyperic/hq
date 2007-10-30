@@ -521,7 +521,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             </td>
               <td class="FilterLabelText">
                   <c:choose>
-                      <c:when test="${not params.isDashEditable}">
+                      <c:when test="${not sessionScope.modifyDashboard}">
                           <c:out value="${DashboardAddResourceHealthForm.filterBy}"/>
                       </c:when>
                       <c:otherwise>
