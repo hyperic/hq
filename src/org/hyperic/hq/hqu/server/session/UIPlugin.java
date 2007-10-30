@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.hqu.ViewDescriptor;
 
 public class UIPlugin
     extends PersistedObject 
