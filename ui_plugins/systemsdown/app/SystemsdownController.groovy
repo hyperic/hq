@@ -12,13 +12,11 @@ class SystemsdownController extends BaseController {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
 
-    //private final AlertList_Icon = (DOWNTIME.Icon);
-
-    private getAlertListImg(s) {
+    private getAlertListImg() {
         def imgUrl = urlFor(asset:'images') +
             "/icon_zoom.gif"
         """<img src="${imgUrl}" width="16" height="16" border="0"
-                class="alertListIcon" title="${clickAlertList}">"""
+                class="alertListIcon" title="Click to go to the alert list for this resource">"""
     }
 
     private final SYSTEMSDOWN_SCHEMA = [
@@ -37,19 +35,15 @@ class SystemsdownController extends BaseController {
              label:{df.format(it.timestamp)}],
             [field:DownResSortField.DOWNTIME, width:'10%',
              //label:{formatDuration(it.duration)}
-              label:{
-                dformatDuration(it.duration)
-                def imgUrl = urlFor(asset:'images') +
-                    "/icon_zoom.gif"
-                """<img src="${imgUrl}" width="16" height="16" border="0"
-                        class="alertListIcon" title="${clickAlertList}">}"""
-                 }
-             ],
+              label:{formatDuration(it.duration)}
+              ],
             [field:DownResSortField.ALERTS, width:'5%',
-             label:{linkTo("Alerts", [resource:it]) }],
+             label:{
+             linkTo(getAlertListImg(), [resource:it,rawLabel:true])
+             }],
         ]
     ]
-
+   
    def SystemsdownController() {
         setTemplate('standard')
     }
@@ -113,7 +107,6 @@ class SystemsdownController extends BaseController {
                 json += getTypeJSON(previous, count)
                 json += "]\n},\n"
             }
-
             appdefType++
         }
 
