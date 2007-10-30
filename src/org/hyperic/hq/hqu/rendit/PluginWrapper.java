@@ -36,7 +36,10 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.util.Runnee;
 
@@ -155,15 +158,18 @@ public class PluginWrapper {
         }
     }
     
-    String getDescription() {
+    AttachmentDescriptor getAttachmentDescriptor(final Attachment a, 
+                                                 final Resource r)
+    {
         try {
-            return (String)doInContext(new Runnee() {
+            return (AttachmentDescriptor)doInContext(new Runnee() {
                 public Object run() {
-                    return _dispatcher.getDescription();
+                    return _dispatcher.getAttachmentDescriptor(a, r);
                 }
             });
         } catch(Exception e) {
-            _log.warn("Error getting description of " + _pluginDir, e);
+            _log.warn("Error getting attachment descriptor for " + _pluginDir, 
+                      e);
             throw new SystemException(e);
         }
     }

@@ -25,9 +25,11 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -45,7 +47,9 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
+import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import org.hyperic.hq.hqu.server.session.AttachType;
@@ -241,11 +245,13 @@ public class UIPluginManagerEJBImpl
     /**
      * Find all attachments for a specific type
      * 
-     * @return a collection of {@link Attachment}s
+     * @return a collection of {@link AttachmentDescriptor}s
      * @ejb:interface-method
      */
     public Collection findAttachments(AttachType type) {
-        return _attachDAO.findFor(type);
+        Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
+
+        return convertAttachmentsToDescriptors(_attachDAO.findFor(type), root);
     }
 
     private Integer appdefTypeToAuthzType(int appdefType) {
@@ -262,7 +268,7 @@ public class UIPluginManagerEJBImpl
     
     /**
      * Find attachments for a resource.
-     * @return a collection of {@link Attachment}s
+     * @return a collection of {@link AttachmentDescriptor}s
      * @ejb:interface-method
      */
     public Collection findAttachments(AppdefEntityID ent,
@@ -294,7 +300,41 @@ public class UIPluginManagerEJBImpl
         } else {
             r = rman.findResource(ent);
         } 
-        return _attachRsrcDAO.findFor(r, cat);
+        
+        Collection attachments = _attachRsrcDAO.findFor(r, cat);
+        Resource viewedResource = 
+            ResourceManagerEJBImpl.getOne().findResource(ent);
+        return convertAttachmentsToDescriptors(attachments, viewedResource);
+    }
+        
+    private Collection convertAttachmentsToDescriptors(Collection attachments,
+                                                       Resource viewedRsrc)
+    {
+        RenditServer rs = RenditServer.getInstance();
+        
+        Collection res = new ArrayList();
+        for (Iterator i=attachments.iterator(); i.hasNext(); ) {
+            Attachment a = (Attachment)i.next();
+            String pluginName = a.getView().getPlugin().getName();
+            AttachmentDescriptor d;
+            
+            try {
+                d = (AttachmentDescriptor)
+                    rs.getAttachmentDescriptor(pluginName, a, viewedRsrc); 
+            } catch(Exception e) {
+                _log.warn("Not returning attachment for [" + a + "], it " + 
+                          "threw an exception", e);
+                continue;
+            }
+            
+            if (d != null) {
+                res.add(d);
+            } else {
+                _log.debug("Not returning attachment for [" + a + "], the " +
+                           "plugin says not to render it");
+            }
+        }
+        return res; 
     }
     
     public static UIPluginManagerLocal getOne() {

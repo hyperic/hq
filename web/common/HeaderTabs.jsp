@@ -30,12 +30,12 @@
   <c:choose>
   <c:when test="${location eq 'resources'}">
 	  <c:forEach var="attachment" items="${mastheadResourceAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.id}"/>'"></div>
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.HTML}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"></div>
       </c:forEach>
   </c:when>
   <c:when test="${location eq 'tracking'}">
     <c:forEach var="attachment" items="${mastheadTrackerAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.id}"/>'"></div>
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.HTML}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>'"></div>
       </c:forEach>
   </c:when>
   </c:choose>

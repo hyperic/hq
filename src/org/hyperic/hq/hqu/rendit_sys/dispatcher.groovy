@@ -3,6 +3,9 @@ package org.hyperic.hq.hqu.rendit
 import org.codehaus.groovy.runtime.InvokerHelper
 import groovy.lang.Script
 
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.hqu.AttachmentDescriptor
+import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
 import org.hyperic.hq.hqu.rendit.IDispatcher
 import org.hyperic.hq.hqu.rendit.IHQUPlugin
@@ -69,9 +72,10 @@ class Dispatcher implements IDispatcher {
         }
     }
     
-    String getDescription() {
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r) 
+    {
         use (*CATEGORIES) {
-        	plugin.description
+        	plugin.getAttachmentDescriptor(a, r)
         }
     }
 

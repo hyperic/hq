@@ -51,6 +51,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.Constants;
@@ -235,12 +236,14 @@ public class AuthenticateUserAction extends TilesAction {
         ArrayList resourceAttachments = new ArrayList();
 		ArrayList trackerAttachments = new ArrayList();
 		for (Iterator itr = mastheadAttachments.iterator(); itr.hasNext();) {
-			AttachmentMasthead attachment = (AttachmentMasthead) itr.next();
+            AttachmentDescriptor d = (AttachmentDescriptor)itr.next();
+			AttachmentMasthead attachment = (AttachmentMasthead) 
+                d.getAttachment();
 			if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
-				resourceAttachments.add(attachment);
+				resourceAttachments.add(d);
 			} else if (attachment.getCategory().equals(
 					ViewMastheadCategory.TRACKER)) {
-				trackerAttachments.add(attachment);
+				trackerAttachments.add(d);
 			}
 		}
         session.setAttribute("mastheadResourceAttachments", resourceAttachments);

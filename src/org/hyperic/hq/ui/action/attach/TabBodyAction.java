@@ -12,6 +12,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
@@ -41,18 +42,19 @@ public class TabBodyAction extends BaseAction {
 		// Set the list of avail attachments
 		request.setAttribute("resourceViewTabAttachments", availAttachents);
 		for (Iterator it = availAttachents.iterator(); it.hasNext();) {
-			Attachment attach = (Attachment) it.next();
-			if (attach.getId().equals(id)) {
+			AttachmentDescriptor attach = (AttachmentDescriptor) it.next();
+            Attachment a = attach.getAttachment();
+			if (a.getId().equals(id)) {
 				// Set the requested view
-				String title = attach.getView().getDescription();
+				String title = attach.getHTML();
 				request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
 				ServletContext ctx = getServlet().getServletContext();
 				ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
 				request.setAttribute("resourceViewTabAttachment", pBoss.findViewById(
-						RequestUtils.getSessionId(request).intValue(), attach
-								.getView().getId()));
-				String helpTag = title.replace(' ', '.');
-				request.setAttribute(Constants.PAGE_TITLE_KEY, helpTag);
+						RequestUtils.getSessionId(request).intValue(), 
+						a.getView().getId()));
+				request.setAttribute(Constants.PAGE_TITLE_KEY, 
+                                     attach.getHelpTag());
 				break;
 			}
 		}

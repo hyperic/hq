@@ -11,6 +11,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -32,21 +33,20 @@ public class MastheadAction extends BaseAction {
             request.getSession().getAttribute("mastheadAttachments");
         
         for (Iterator it = attachments.iterator(); it.hasNext(); ) {
-            Attachment attach = (Attachment) it.next();
-            if (attach.getId().equals(id)) {
-                String title = attach.getView().getDescription();
+            AttachmentDescriptor attach = (AttachmentDescriptor)it.next();
+            Attachment a = attach.getAttachment();
+            if (a.getId().equals(id)) {
+                String title = attach.getHTML();
                 request.setAttribute(Constants.TITLE_PARAM_ATTR, title);
                 ServletContext ctx = getServlet().getServletContext();
                 ProductBoss pBoss = ContextUtils.getProductBoss(ctx );
                 request.setAttribute("attachment",
                     pBoss.findViewById(
                         RequestUtils.getSessionId(request).intValue(),
-                        attach.getView().getId()));
+                        a.getView().getId()));
                 
-                // Set the help text
-                String helpTag = title.replace(' ', '.');
-                request.setAttribute(Constants.PAGE_TITLE_KEY, helpTag);
-        
+                request.setAttribute(Constants.PAGE_TITLE_KEY, 
+                                     attach.getHelpTag());
                 break;
             }
         }

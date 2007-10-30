@@ -3,8 +3,11 @@ package org.hyperic.hq.hqu.rendit
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
-
+import org.hyperic.hq.hqu.AttachmentDescriptor
+import org.hyperic.hq.hqu.SimpleAttachmentDescriptor
 import org.hyperic.hq.hqu.ViewDescriptor
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as uiManImpl
 import org.hyperic.hq.hqu.server.session.AttachType
@@ -30,15 +33,20 @@ import org.hyperic.hq.hqu.server.session.ViewMastheadCategory
  */
 class HQUPlugin implements IHQUPlugin {
     private Map views = [:]
-    Log  log
-    File pluginDir
+    private Properties descriptor
+    Log        log
+    File       pluginDir
     
     HQUPlugin() {
     }
     
     void initialize(File pluginDir) {
         this.pluginDir = pluginDir
-        this.log       = LogFactory.getLog("hqu.plugin.${name}")
+        this.descriptor = new Properties()
+        new File(pluginDir, 'plugin.properties').withInputStream { s ->
+            this.descriptor.load(s)
+        }
+        this.log = LogFactory.getLog("hqu.plugin.${name}")
     }
     
     protected void addMastheadView(boolean autoAttach, String path,
@@ -91,15 +99,17 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     Properties getDescriptor() {
-        Properties res = new Properties()
-        new File(pluginDir, 'plugin.properties').withInputStream { s ->
-            res.load(s)
-        }
-    	res
+        return this.descriptor
     }
     
     String getName() {
         descriptor.getProperty('plugin.name')
+    }
+
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r) { 
+        new SimpleAttachmentDescriptor(a, 
+                                       descriptor.getProperty('plugin.helpTag'), 
+                                       description)
     }
     
     String getDescription() {
