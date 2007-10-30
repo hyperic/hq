@@ -88,15 +88,15 @@ public class CpuPercFormatter
             r.append("<tr><td>")
              .append(i + 1)
              .append("</td><td>")
-             .append(p[i].getUser())
+             .append(CpuPerc.format(p[i].getUser()))
              .append("</td><td>")
-             .append(p[i].getSys())
+             .append(CpuPerc.format(p[i].getSys()))
              .append("</td><td>")
-             .append(p[i].getNice())
+             .append(CpuPerc.format(p[i].getNice()))
              .append("</td><td>")
-             .append(p[i].getIdle())
+             .append(CpuPerc.format(p[i].getIdle()))
              .append("</td><td>")
-             .append(p[i].getWait())
+             .append(CpuPerc.format(p[i].getWait()))
              .append("</td></tr>");
         }
         r.append("</tbody></table></div>");
