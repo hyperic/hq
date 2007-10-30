@@ -326,6 +326,10 @@ class DojoUtil {
                     if (${ajaxCountVar} == 0) {
                         dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
                     }
+                    if (data.data == '') {
+                    dojo.byId("${idVar}_noValues").style.display = '';
+                    dojo.byId("${idVar}_noValues").innerHTML = "There isn't any information currently";
+                    }
                 }
             });
         }
@@ -402,6 +406,7 @@ class DojoUtil {
             <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
             ${titleHtml}
           </div>
+          <div id="${idVar}_noValues" style="float: left; padding-top:3px;padding-right:15px;font-weight:bold;font-size:13px;display:none;">There isn't any information currently</div>
           <div style="${pageControlStyle}">
             <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	        <div class="pageButtonCont">
