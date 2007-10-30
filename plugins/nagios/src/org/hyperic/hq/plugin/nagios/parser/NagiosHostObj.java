@@ -69,11 +69,13 @@ public class NagiosHostObj
         }
     }
 
+    // to be potentially used at a later date
+    // when an object uses "use ..." we may
+    // want to resolve that, but for now
+    // I see no need since we don't care about
+    // any attrs except the unique attrs
     private void setInheritAttrs(String line)
     {
-        Set set;
-//        if (null == (set = (Set)_allNagiosObjs.get(new Integer(getType()))))
-//            return;
     }
 
     public String getAddress()
@@ -139,14 +141,12 @@ public class NagiosHostObj
 
     private void setContacts(String line)
     {
-//        String[] contacts = line.replaceAll("\\s+$", "").trim().split(",");
         String[] contacts = line.trim().split(",");
         _contacts = Arrays.asList(contacts);
     }
 
     private void setContactGroups(String line)
     {
-//        String[] contacts = line.replaceAll("\\s+$", "").trim().split(",");
         String[] contacts = line.trim().split(",");
         _contactGroups = Arrays.asList(contacts);
     }

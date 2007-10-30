@@ -17,7 +17,9 @@ class Util
         String exception = "";
 
         if (msg != null)
-            msg = "Exception: "+msg;
+            msg = "Exception: "+msg+"\n";
+        else
+            msg = "";
 
         if (e != null)
         {
@@ -25,9 +27,7 @@ class Util
             e.printStackTrace(new PrintWriter(str));
             exception = str.toString();
         }
-        StringWriter str = new StringWriter();
-        e.printStackTrace(new PrintWriter(str));
-        out.println(msg+"\n"+exception);
+        out.println(msg+exception);
     }
 
     static void debug(PrintStream out, Throwable e)

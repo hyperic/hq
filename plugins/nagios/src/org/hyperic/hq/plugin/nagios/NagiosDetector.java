@@ -41,9 +41,15 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class NagiosDetector
     extends ServerDetector
     implements AutoServerDetector {
+
+    private final String logCtx = getClass().getName();
+    private final Log _log = LogFactory.getLog(logCtx);
 
     private static final String PLUGIN_NAME = "Plugin";
     
@@ -108,6 +114,9 @@ public class NagiosDetector
             List list = nagService.getHostObjs();
 
             ServiceResource service = createServiceResource(PLUGIN_NAME);
+            if (_log.isDebugEnabled()) {
+                _log.debug("setting nagios service: "+nagService.getDesc());
+            }
             service.setServiceName(PLUGIN_NAME + " " + nagService.getDesc());
 
             for (Iterator it=list.iterator(); it.hasNext(); )
@@ -120,6 +129,10 @@ public class NagiosDetector
                     cmdLine : cmdLine.substring(0, index);
                 String args = (index == -1) ?
                     "" : cmdLine.substring(index);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("nagios config path: "+path);
+                    _log.debug("nagios config args: "+args);
+                }
                 config.setValue("path", path);
                 config.setValue("args", args);
 
