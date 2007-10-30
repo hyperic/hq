@@ -160,6 +160,7 @@ import org.hyperic.hq.grouping.shared.GroupModificationException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
@@ -3828,10 +3829,11 @@ public class AppdefBossEJBImpl
         for (Iterator it = avail.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Integer mid = (Integer) entry.getKey();
-            if (entry.getValue() != null) {
-                CPropResource cpRes = (CPropResource) res.get(mid);
-                cpRes.setLastValue((MetricValue) entry.getValue());
-           }
+            
+            DerivedMeasurement metric = dmMan.getMeasurement(mid);
+            CPropResource cpRes =
+                (CPropResource) res.get(metric.getInstanceId());
+            cpRes.setLastValue((MetricValue) entry.getValue());
         }
         
         // Now get their last events
