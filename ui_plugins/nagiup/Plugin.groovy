@@ -7,7 +7,7 @@ import org.hyperic.hq.hqu.server.session.Attachment
 class Plugin extends HQUPlugin {
     Plugin() {
         addMastheadView(true, '/nagiup/index.hqu', 'Nagios Availability', 
-                        'tracker')    
+                        'resource')    
     }
     
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r) {
