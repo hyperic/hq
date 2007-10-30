@@ -28,3 +28,6 @@
 
 <tiles:insert page="/admin/Settings.jsp"/>
 
+<c:if test="${useroperations['administerCAM']}">
+  <tiles:insert definition=".admin.Plugins"/>
+</c:if>
