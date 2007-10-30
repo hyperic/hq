@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.ui.action.authentication;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,13 +48,15 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
+import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
@@ -226,16 +230,28 @@ public class AuthenticateUserAction extends TilesAction {
         
         // Look up any UI attach points
         ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
-        session.setAttribute("mastheadAttachments",
-                             pBoss.findMastAttachments(sid));
-
+        Collection mastheadAttachments = pBoss.findMastAttachments(sid);
+        session.setAttribute("mastheadAttachments", mastheadAttachments);
+        ArrayList resourceAttachments = new ArrayList();
+		ArrayList trackerAttachments = new ArrayList();
+		for (Iterator itr = mastheadAttachments.iterator(); itr.hasNext();) {
+			AttachmentMasthead attachment = (AttachmentMasthead) itr.next();
+			if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
+				resourceAttachments.add(attachment);
+			} else if (attachment.getCategory().equals(
+					ViewMastheadCategory.TRACKER)) {
+				trackerAttachments.add(attachment);
+			}
+		}
+        session.setAttribute("mastheadResourceAttachments", resourceAttachments);
+        session.setAttribute("mastheadTrackerAttachments", trackerAttachments);
         return af;
     }
 
     /*
-     * Return the "bookmarked" url saved when we discovered the user's
-     * session had timed out, or null if there is no bookmarked url.
-     */
+	 * Return the "bookmarked" url saved when we discovered the user's session
+	 * had timed out, or null if there is no bookmarked url.
+	 */
     private String getBookmarkedUrl(HttpSession session) {
         String val = (String) session.getAttribute(Constants.LOGON_URL_KEY);
         if (val == null || val.length() == 0) {

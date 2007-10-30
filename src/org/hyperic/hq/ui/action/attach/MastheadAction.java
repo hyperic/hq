@@ -25,7 +25,7 @@ public class MastheadAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
         // Look up the id
-        Integer id = RequestUtils.getIntParameter(request, "id");
+        Integer id = RequestUtils.getIntParameter(request, "typeId");
         
         // Look up the Attachment bean
         Collection attachments = (Collection)

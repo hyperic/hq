@@ -27,20 +27,18 @@
   USA.
  --%>
 <c:set var="location" scope="request"><tiles:getAsString name="location"/></c:set>
-<c:if test="${not empty mastheadAttachments}"> <!-- TODO: change to test the new request vars for multiple attach points -->
   <c:choose>
   <c:when test="${location eq 'resources'}">
-	  <c:forEach var="attachment" items="${mastheadAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=${attachment.id}"/>'"></div>
+	  <c:forEach var="attachment" items="${mastheadResourceAttachments}">
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.id}"/>'"></div>
       </c:forEach>
   </c:when>
   <c:when test="${location eq 'tracking'}">
-    <c:forEach var="attachment" items="${mastheadAttachments}">
-          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?id=${attachment.id}"/>'"></div>
+    <c:forEach var="attachment" items="${mastheadTrackerAttachments}">
+          <div dojoType="MenuItem2" caption='<c:out value="${attachment.view.description}"/>' onClick="location.href='<html:rewrite page="/mastheadAttach.do?typeId=${attachment.id}"/>'"></div>
       </c:forEach>
   </c:when>
   </c:choose>
-</c:if>
 
 <!-- TODO: Add in the inactive capability for EE only features
 <td class="navText" nowrap onmouseover="this.style.backgroundColor='#60a5ea';" onmouseout="this.style.backgroundColor='#336699';">
