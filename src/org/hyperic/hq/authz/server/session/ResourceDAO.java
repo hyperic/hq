@@ -479,4 +479,15 @@ public class ResourceDAO
             .setInteger("newOwner", newOwner)
             .executeUpdate();
     }
+    
+    boolean resourcesExistOfType(String typeName) {
+        String sql = "select r from Resource r " + 
+            "join r.prototype p " +
+            "where p.name = :protoName";
+        
+        return getSession().createQuery(sql)
+            .setParameter("protoName", typeName)
+            .setMaxResults(1)
+            .list().isEmpty() == false;
+    }
 }

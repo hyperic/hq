@@ -226,6 +226,16 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return rt;
     }
 
+    
+    /**
+     * Check if there are any resources of a given type
+     * 
+     * @ejb:interface-method
+     */
+    public boolean resourcesExistOfType(String typeName) {
+        return getResourceDAO().resourcesExistOfType(typeName);
+    }
+        
     /**
      * Create a resource.
      * 
