@@ -198,6 +198,9 @@ class DojoUtil {
      *                   information about sortability, column header,
      *           label:  a closure which takes an element returned by getData
      *                   and returns a string which will be the cell text
+     *           header (optional):  If specified, overrides the header from
+     *                               the column field.  If this is a closure,
+     *                               the result of the closure will be used
      *           width (optional):  Specifies the width of the column.  
      *                              For instance: '10%' will ensure that the 
      *                              column is 10% of the table width
@@ -436,11 +439,19 @@ class DojoUtil {
         def colIdx = 0;
 	    for (c in params.schema.columns) {
 	        def field     = c.field
+	        def header    = c.header
 	        def label     = field.value
 	        def fieldName = field.description 
 
 	        if (label == null && field['getValue'] != null) {
 				label = field.getValue()
+	        }
+	        
+	        if (header) {
+	            if (header in Closure)
+	                label = header()
+	            else
+	                label = header
 	        }
 	        
 	        def widthvar = ""
