@@ -279,7 +279,7 @@ onloads.push(selectValidOption);
       </c:url>
       <c:choose>
           <c:when test="${not sessionScope.modifyDashboard}">
-
+           
           </c:when>
           <c:otherwise>
               <tiles:insert definition=".toolbar.addToList">

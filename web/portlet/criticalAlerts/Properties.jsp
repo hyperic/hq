@@ -247,7 +247,7 @@ function handleEnter (field, event) {
       </c:if>
       <c:choose>
           <c:when test="${not sessionScope.modifyDashobard}">
-           <html:image page="/images/tbb_addtolist_locked.gif" border="0" property="" /> 
+            
           </c:when>
           <c:otherwise>
               <tiles:insert definition=".toolbar.addToList">
