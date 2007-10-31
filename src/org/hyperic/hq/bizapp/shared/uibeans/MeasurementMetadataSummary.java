@@ -28,39 +28,35 @@ package org.hyperic.hq.bizapp.shared.uibeans;
 import java.io.Serializable;
 
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
+import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementMetadataSummary implements Serializable {
 
-    private AppdefResourceValue resource;
-    private Double maxExpectedValue;
-    private Double minExpectedValue;
-    private Long interval;
-    private Boolean enabled;
-    private Long mtime;
-    private Long lastValueTimestamp;
-    private MeasurementTemplateValue mtv;     
-    private Double lastValue;
-    private Integer measurementId;
+    private AppdefResourceValue _resource;
+    private Double _maxExpectedValue;
+    private Double _minExpectedValue;
+    private Long _interval;
+    private Boolean _enabled;
+    private Long _mtime;
+    private Long _lastValueTimestamp;
+    private MeasurementTemplate _mtv;     
+    private Double _lastValue;
+    private Integer _metricId;
 
-    public MeasurementMetadataSummary(Integer measurementId,
-                                      Long lastValueTimestamp,
-                                      Double lastValue,
-                                      MeasurementTemplate mt,
-                                      Boolean enabled, Long interval,
-                                      Long mtime, Baseline b,
+    public MeasurementMetadataSummary(DerivedMeasurement mm, MetricValue mv,
                                       AppdefResourceValue resource) {
-        setEnabled(enabled);
-        setInterval(interval);
-        setLastValue(lastValue);
-        setLastValueTimestamp(lastValueTimestamp);
-        setMeasurementId(measurementId);
-        setMtime(mtime);
-        setMeasurementTemplate(mtv);
+        Baseline b = mm.getBaseline();
+        setEnabled(Boolean.valueOf(mm.isEnabled()));
+        setInterval(new Long(mm.getInterval()));
+        setLastValue(mv == null ?
+                     new Double(Double.NaN) : new Double(mv.getValue()));
+        setLastValueTimestamp(mv == null ? null : new Long(mv.getTimestamp()));
+        setMeasurementId(mm.getId());
+        setMtime(new Long(mm.getMtime()));
+        setMeasurementTemplate(mm.getTemplate());
         setResource(resource);
         
         if (b != null) {
@@ -68,23 +64,10 @@ public class MeasurementMetadataSummary implements Serializable {
             setMinExpectedValue(b.getMinExpectedVal());
         }
     }
-
-    public MeasurementMetadataSummary(DerivedMeasurement mm,
-                                      MetricValue mv,
-                                      AppdefResourceValue resource) {
-        this(mm.getId(),
-             mv == null ? null : new Long(mv.getTimestamp()),
-             mv == null ? new Double(Double.NaN) : new Double(mv.getValue()),
-             mm.getTemplate(),
-             Boolean.valueOf(mm.isEnabled()),
-             new Long(mm.getInterval()),
-             new Long(mm.getMtime()),
-             mm.getBaseline(),
-             resource);
-    }
     
     public String toString() {
-        StringBuffer sb = new StringBuffer(MeasurementMetadataSummary.class.getName());
+        StringBuffer sb =
+            new StringBuffer(MeasurementMetadataSummary.class.getName());
         return sb.toString();
     }
     
@@ -92,70 +75,70 @@ public class MeasurementMetadataSummary implements Serializable {
      * @return Boolean
      */
     public Boolean getEnabled() {
-        return enabled;
+        return _enabled;
     }
 
     /**
      * @return Long
      */
     public Long getInterval() {
-        return interval;
+        return _interval;
     }
 
     /**
      * @return Double
      */
     public Double getLastValue() {
-        return lastValue;
+        return _lastValue;
     }
 
     /**
      * @return Long
      */
     public Long getLastValueTimestamp() {
-        return lastValueTimestamp;
+        return _lastValueTimestamp;
     }
 
     /**
      * @return Double
      */
     public Double getMaxExpectedValue() {
-        return maxExpectedValue;
+        return _maxExpectedValue;
     }
 
     /**
      * @return Integer
      */
     public Integer getMeasurementId() {
-        return measurementId;
+        return _metricId;
     }
 
     /**
      * @return Double
      */
     public Double getMinExpectedValue() {
-        return minExpectedValue;
+        return _minExpectedValue;
     }
 
     /**
      * @return Long
      */
     public Long getMtime() {
-        return mtime;
+        return _mtime;
     }
 
     /**
      * @return MeasurementTemplateValue
      */
-    public MeasurementTemplateValue getMeasurementTemplate() {
-        return mtv;
+    public MeasurementTemplate getMeasurementTemplate() {
+        return _mtv;
     }
 
     /**
      * @return AppdefResourceValue
      */
     public AppdefResourceValue getResource() {
-        return resource;
+        return _resource;
     }
 
     /**
@@ -163,7 +146,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param enabled The enabled to set
      */
     public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+        _enabled = enabled;
     }
 
     /**
@@ -171,7 +154,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param interval The interval to set
      */
     public void setInterval(Long interval) {
-        this.interval = interval;
+        _interval = interval;
     }
 
     /**
@@ -179,7 +162,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param lastValue The lastValue to set
      */
     public void setLastValue(Double lastValue) {
-        this.lastValue = lastValue;
+        _lastValue = lastValue;
     }
 
     /**
@@ -187,7 +170,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param lastValueTimestamp The lastValueTimestamp to set
      */
     public void setLastValueTimestamp(Long lastValueTimestamp) {
-        this.lastValueTimestamp = lastValueTimestamp;
+        _lastValueTimestamp = lastValueTimestamp;
     }
 
     /**
@@ -195,7 +178,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param maxExpectedValue The maxExpectedValue to set
      */
     public void setMaxExpectedValue(Double maxExpectedValue) {
-        this.maxExpectedValue = maxExpectedValue;
+        _maxExpectedValue = maxExpectedValue;
     }
 
     /**
@@ -203,7 +186,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param measurementId The measurementId to set
      */
     public void setMeasurementId(Integer measurementId) {
-        this.measurementId = measurementId;
+        _metricId = measurementId;
     }
 
 
@@ -212,7 +195,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param minExpectedValue The minExpectedValue to set
      */
     public void setMinExpectedValue(Double minExpectedValue) {
-        this.minExpectedValue = minExpectedValue;
+        _minExpectedValue = minExpectedValue;
     }
 
     /**
@@ -220,15 +203,15 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param mtime The mtime to set
      */
     public void setMtime(Long mtime) {
-        this.mtime = mtime;
+        _mtime = mtime;
     }
 
     /**
      * Sets the MeasurementTemplate.
      * @param mtv The MeasurementTemplate to set
      */
-    public void setMeasurementTemplate(MeasurementTemplateValue mtv) {
-        this.mtv = mtv;
+    public void setMeasurementTemplate(MeasurementTemplate mtv) {
+        _mtv = mtv;
     }
 
     /**
@@ -236,7 +219,7 @@ public class MeasurementMetadataSummary implements Serializable {
      * @param resource The resource to set
      */
     public void setResource(AppdefResourceValue resource) {
-        this.resource = resource;
+        _resource = resource;
     }
 
 }
