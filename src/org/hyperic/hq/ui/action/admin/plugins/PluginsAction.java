@@ -33,21 +33,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.tiles.ComponentContext;
+import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
-import org.hyperic.hq.ui.action.BaseAction;
 
-public class PluginsAction extends BaseAction {
-	
-	public ActionForward execute(ActionMapping mapping, ActionForm form,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-		
+public class PluginsAction extends TilesAction {
+
+	public ActionForward execute(ComponentContext context,
+			ActionMapping mapping, ActionForm form, HttpServletRequest request,
+			HttpServletResponse response) {
+
 		UIPluginManagerLocal pluginManager = UIPluginManagerEJBImpl.getOne();
-		Collection attachements = pluginManager.findAttachments(AttachType.ADMIN);
+		Collection attachements = pluginManager
+				.findAttachments(AttachType.ADMIN);
 		request.getSession().setAttribute("adminAttachments", attachements);
-		
+
 		return null;
 	}
 

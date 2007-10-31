@@ -508,7 +508,7 @@
 
       <!-- Admin plugins -->
       <action path="/admin/user/Plugins"
-              type="org.hyperic.hq.ui.action.admin.PluginsAction">
+              type="org.hyperic.hq.ui.action.admin.plugins.PluginsAction">
       </action>
       
       <!--CONFIG -->
