@@ -1420,7 +1420,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * 
      * @ejb:interface-method
      */
-    public List getUnavailEntities(Set includes) {
+    public List getUnavailEntities(List includes) {
         MetricDataCache cache = MetricDataCache.getInstance();
         Map unavailMetrics = cache.getUnavailableMetrics();
         List unavailEntities = new ArrayList();

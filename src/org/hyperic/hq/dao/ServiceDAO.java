@@ -135,9 +135,10 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByType(Integer st)
+    public Collection findByType(Integer st, boolean asc)
     {
-        String sql="from Service where serviceType.id=?";
+        String sql = "from Service where serviceType.id=? order by sortName " +
+                     (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, st.intValue())
             .list();

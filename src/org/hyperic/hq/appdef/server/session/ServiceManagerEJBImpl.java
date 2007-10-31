@@ -246,7 +246,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         ServiceDAO sLHome;
         try {
             sLHome = getServiceDAO();
-            Collection services = sLHome.findByType(servTypeId);
+            Collection services = sLHome.findByType(servTypeId, true);
             if (services.size() == 0) {
                 return new Integer[0];
             }
@@ -752,7 +752,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
-    public List getServicesByType(AuthzSubject subject, String svcName) 
+    public List getServicesByType(AuthzSubject subject, String svcName,
+                                  boolean asc) 
         throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = getServiceTypeDAO().findByName(svcName);
         if (st == null) {
@@ -760,7 +761,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
     
         try {
-            Collection services = getServiceDAO().findByType(st.getId());
+            Collection services = getServiceDAO().findByType(st.getId(), asc);
             if (services.size() == 0) {
                 return new PageList();
             }

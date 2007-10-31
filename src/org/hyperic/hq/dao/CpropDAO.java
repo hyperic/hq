@@ -55,10 +55,10 @@ public class CpropDAO extends HibernateDAO
         super.remove(entity);
     }
     
-    public List findByKeyName(CpropKey key) {
+    public List findByKeyName(CpropKey key, boolean asc) {
         Criteria c = createCriteria()
             .add(Expression.eq("key", key))
-            .addOrder(Order.asc("propValue"));
+            .addOrder(asc ? Order.asc("propValue") : Order.desc("propValue"));
         return c.list();
     }
 }

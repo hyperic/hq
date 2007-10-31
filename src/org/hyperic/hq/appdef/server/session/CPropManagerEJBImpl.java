@@ -566,14 +566,15 @@ public class CPropManagerEJBImpl
      * Get all Cprops values with specified key name, irregardless of type
      * @ejb:interface-method
      */
-    public List getCPropValues(AppdefResourceTypeValue appdefType, String key) {
+    public List getCPropValues(AppdefResourceTypeValue appdefType, String key,
+                               boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
 
         CpropKey pkey = getCPropKeyDAO().findByKey(type, instanceId, key);
         
         CpropDAO dao = new CpropDAO(DAOFactory.getDAOFactory()); 
-        return dao.findByKeyName(pkey);
+        return dao.findByKeyName(pkey, asc);
     }
 
     private CpropKeyDAO getCPropKeyDAO(){

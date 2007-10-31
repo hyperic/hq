@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hibernate.SortField;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
@@ -58,6 +60,7 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.CPropResource;
+import org.hyperic.hq.appdef.server.session.CPropResourceSortField;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -3743,6 +3746,70 @@ public class AppdefBossEJBImpl
         }
         return ret;
     }
+    
+    private class ValueComparator implements Comparator {
+        boolean _asc;
+        
+        ValueComparator(boolean asc) {
+            _asc = asc;
+        }
+        
+        public int compare(Object o1, Object o2) {
+            Map.Entry me1 = (Map.Entry) o1;
+            Map.Entry me2 = (Map.Entry) o2;
+            
+            MetricValue mv1, mv2;
+            
+            if (_asc) {
+                mv1 = (MetricValue) me1.getValue();
+                mv2 = (MetricValue) me2.getValue();
+            }
+            else {
+                mv1 = (MetricValue) me1.getValue();
+                mv2 = (MetricValue) me2.getValue();
+            }
+            
+            if (mv1.getValue() < mv2.getValue())
+                return -1;
+            
+            if (mv1.getValue() > mv2.getValue())
+                return 1;
+            
+            return 0;
+        }
+    }
+
+    private class TimestampComparator implements Comparator {
+        boolean _asc;
+        
+        TimestampComparator(boolean asc) {
+            _asc = asc;
+        }
+        
+        public int compare(Object o1, Object o2) {
+            Map.Entry me1 = (Map.Entry) o1;
+            Map.Entry me2 = (Map.Entry) o2;
+            
+            MetricValue mv1, mv2;
+            
+            if (_asc) {
+                mv1 = (MetricValue) me1.getValue();
+                mv2 = (MetricValue) me2.getValue();
+            }
+            else {
+                mv1 = (MetricValue) me1.getValue();
+                mv2 = (MetricValue) me2.getValue();
+            }
+            
+            if (mv1.getTimestamp() < mv2.getTimestamp())
+                return -1;
+            
+            if (mv1.getTimestamp() > mv2.getTimestamp())
+                return 1;
+            
+            return 0;
+        }
+    }
 
     /**
      * Get Service resources and their display information
@@ -3752,13 +3819,12 @@ public class AppdefBossEJBImpl
      * @param cprop a unique custom property name to be fetched
      */
     public List getServicesView(AuthzSubject subject, String typeName,
-                                String cprop)
+                                String cprop, String metricName, PageInfo pi)
         throws PermissionException, InvalidAppdefTypeException {
-        List ret = new ArrayList();
-        
         // Find all resources of Nagios type
         List services =
-            getServiceManager().getServicesByType(subject, typeName);
+            getServiceManager().getServicesByType(subject, typeName,
+                                                  pi.isAscending());
         
         if (services.size() == 0)
             return new ArrayList();
@@ -3767,10 +3833,15 @@ public class AppdefBossEJBImpl
             ((AppdefResourceValue) services.get(0)).getAppdefResourceTypeValue();
         
         // Get the Cprop values
-        List cprops = getCPropManager().getCPropValues(type, cprop);
+        List cprops = getCPropManager().getCPropValues(type, cprop,
+                                                       pi.isAscending());
         
-        // XXX - determine sort order, for now assume sorting by cprop value
-        Map res = new HashMap();        
+        List ret = new ArrayList(cprops.size());
+        
+        // Get the sort field
+        SortField sf = pi.getSort();
+        
+        Map res = new HashMap();
         for (Iterator it = cprops.iterator(); it.hasNext(); ) {
             Cprop prop = (Cprop) it.next();
             Integer id = prop.getAppdefId();
@@ -3787,18 +3858,32 @@ public class AppdefBossEJBImpl
                 CPropResource cpRes =
                     new CPropResource(appRes, prop.getPropValue());
 
-                ret.add(cpRes);
                 res.put(id, cpRes);
             }
         }
-            
+        
+        if (sf.equals(CPropResourceSortField.RESOURCE)) {
+            for (Iterator it = services.iterator(); it.hasNext(); ) {
+                AppdefResourceValue appRes = (AppdefResourceValue) it.next();
+                if (res.containsKey(appRes.getId())) {
+                    ret.add(res.get(appRes.getId()));
+                }
+            }
+        }
+        else {
+            for (Iterator it = cprops.iterator(); it.hasNext(); ) {
+                Cprop prop = (Cprop) it.next();
+                ret.add(res.get(prop.getAppdefId()));
+            }
+
+        }
+
         // Get the resource templates
         List templs = getTemplateManager()
-            .findTemplates(type.getName(),
-                           MeasurementConstants.CAT_AVAILABILITY,
-                           null, PageControl.PAGE_ALL);
+            .findTemplates(type.getName(), MeasurementConstants.FILTER_NONE,
+                           metricName);
         
-        // There should at least one template for availability
+        // There should at least one template
         assert(templs.size() > 0);
         MeasurementTemplateValue mtv = (MeasurementTemplateValue) templs.get(0);
 
@@ -3808,32 +3893,30 @@ public class AppdefBossEJBImpl
         Integer[] instIds = (Integer[])
             res.keySet().toArray(new Integer[services.size()]);
 
-        Set mids = new HashSet();
-        mids.addAll(Arrays.asList(
-            dmMan.findMeasurementIds(subject, mtv.getId(), instIds)));
+        Integer[] mids =
+            dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
         
-        // Get the down resources and their duration
-        List unavailEnts = dmMan.getUnavailEntities(mids);
-        
-        for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
-            DownMetricValue dmv = (DownMetricValue) it.next();
-            
-            CPropResource cpRes =
-                (CPropResource) res.get(dmv.getEntityId().getId());
-            
-            cpRes.setLastValue(dmv);
-            mids.remove(dmv.getMetricId());
-        }
-
         // Now get the availability data of the leftovers
-        Integer[] leftovers =
-            (Integer[]) mids.toArray(new Integer[mids.size()]);
-        
         Map avail = getDataMan()
-            .getLastDataPoints(leftovers, MeasurementConstants
+            .getLastDataPoints(mids, MeasurementConstants
                                .ACCEPTABLE_SERVICE_LIVE_MILLIS);
         
-        for (Iterator it = avail.entrySet().iterator(); it.hasNext(); ) {
+        Collection entries = avail.entrySet();
+        boolean sortByValue =
+            sf.equals(CPropResourceSortField.METRIC_VALUE) ||
+            sf.equals(CPropResourceSortField.METRIC_TIMESTAMP);
+        /*
+        if (sortByValue) {
+            entries = new ArrayList(entries);
+            Comparator comparator =
+                sf.equals(CPropResourceSortField.METRIC_VALUE) ?
+                        new ValueComparator(pi.isAscending()) :
+                        new TimestampComparator(pi.isAscending());
+            Collections.sort((List) entries, comparator);
+        }
+        */
+        
+        for (Iterator it = entries.iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Integer mid = (Integer) entry.getKey();
             

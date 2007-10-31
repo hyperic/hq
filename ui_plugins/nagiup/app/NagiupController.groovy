@@ -13,7 +13,8 @@ class NagiupController
     
     private final NAGIUP_SCHEMA = [
         getData: {pageInfo, params ->
-            AppdefBossEJBImpl.one.getServicesView(user, 'FileServer File', 'fs')
+            AppdefBossEJBImpl.one.getServicesView(user, 'FileServer File', 'fs', 'Availability',
+                                                  pageInfo)
         },
         defaultSort: CPropResourceSortField.PROPERTY,
         defaultSortOrder: 1,  // descending
@@ -43,15 +44,8 @@ class NagiupController
                         return "${it.lastValue.label}"
                     }
             }],
-            [field: CPropResourceSortField.DURATION, 
-             width:'10%',
-             label:{
-                    if (it.duration) {
-                        return formatDuration(it.duration)
-                    }
-            }],
             [field: CPropResourceSortField.EVENT_LOG, 
-             width:'10%',
+             width:'20%',
              label:{
                     if (it.lastEvent) {
                         return "${it.lastEvent.detail}"

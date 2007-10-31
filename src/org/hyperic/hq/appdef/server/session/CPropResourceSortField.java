@@ -41,7 +41,7 @@ public abstract class CPropResourceSortField
                                    "cpropResource.sortField.property") 
     {
         public boolean isSortable() {
-            return false;
+            return true;
         }
     };
 
@@ -50,7 +50,7 @@ public abstract class CPropResourceSortField
                                    "cpropResource.sortField.resource") 
     {
         public boolean isSortable() {
-            return false;
+            return true;
         }
     };
     
@@ -59,7 +59,7 @@ public abstract class CPropResourceSortField
                                    "cpropResource.sortField.metricValue") 
     {
         public boolean isSortable() {
-            return false;
+            return true;
         }
     };
 
@@ -68,16 +68,7 @@ public abstract class CPropResourceSortField
                                    "cpropResource.sortField.metricTimestamp") 
     {
         public boolean isSortable() {
-            return false;
-        }
-    };
-
-    public static final CPropResourceSortField DURATION  = 
-        new CPropResourceSortField(4, "duration", 
-                                   "cpropResource.sortField.duration") 
-    {
-        public boolean isSortable() {
-            return false;
+            return true;
         }
     };
 
