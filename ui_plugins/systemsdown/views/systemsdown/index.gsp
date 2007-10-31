@@ -41,7 +41,6 @@
         };
         element.unselectable = "on";
         element.style.MozUserSelect = "none";
-        //element.style.cursor = "default";
     }
 
     plugin.accordion.openAll = function() {
@@ -119,7 +118,7 @@
         <div id="systemsDownTable">
         <%def headerHTML = '<div style="float: right; margin-top:5px;padding-right:15px;">Show Most Recent:&nbsp;<span id="defaultCount" onclick="updateFilterCount(50, this)">50</span>&nbsp;|&nbsp;<span id="onehundred" onclick="updateFilterCount(100,this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="onethousand"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
 
-        <%= dojoTable(id:'SystemsDown', title:'Availability',
+        <%= dojoTable(id:'SystemsDown', title:l.SystemsDownTitle,
             refresh:60, pageControls:false, url:urlFor(action:'data'),
             schema:systemsDownSchema, numRows:50, headerHTML: headerHTML)
         %>
