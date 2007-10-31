@@ -19,21 +19,25 @@ class NagiupController
         defaultSortOrder: 1,  // descending
         rowId: {globalId++},
         columns: [
-            [field: CPropResourceSortField.PROPERTY, 
-             width:'10%',
-             label:{it.getCPropValue()}],
-            [field: CPropResourceSortField.RESOURCE, 
-             width:'10%',
-             label:{it.resourceName}],
-            [field: CPropResourceSortField.METRIC_VALUE, 
-             width:'10%',
+            [field:  CPropResourceSortField.PROPERTY, 
+             width:  '10%',
+             header: {localeBundle.Host},
+             label:  {it.getCPropValue()}],
+            [field:  CPropResourceSortField.RESOURCE, 
+             width:  '10%',
+             header: {localeBundle.Service},
+             label:  {it.resourceName}],
+            [field:  CPropResourceSortField.METRIC_VALUE, 
+             width:  '10%',
+             header: {localeBundle.Status},
              label:{
                     if (it.lastValue != null) {
                         return "${it.lastValue.value}"
                     }
             }],
-            [field: CPropResourceSortField.METRIC_TIMESTAMP, 
-             width:'10%',
+            [field:  CPropResourceSortField.METRIC_TIMESTAMP, 
+             width:  '10%',
+             header: {localeBundle.LastCheck},
              label:{
                     if (it.lastValue != null) {
                         return "${it.lastValue.label}"
