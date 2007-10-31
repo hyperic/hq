@@ -169,6 +169,6 @@ function runCommand() {
 </div>
 
 <div id="result_cont">
-  <span id="results_msg"></span>
+  <div id="results_msg"></div>
   <div id="result" class="bxblueborder"></div>
 </div>

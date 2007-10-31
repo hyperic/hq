@@ -360,5 +360,5 @@ font-weight:bold;
  #resourceTree li:hover { background:#d9dfe7;}
 .listItem {padding:3px; cursor:pointer;}
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
-
+#results_msg {width:78%;float:right;padding:3px;padding-bottom:5px;font-weight:bold;}
 .countLinksActive{color: rgb(0, 51, 153); font-weight: bold; cursor: pointer;}
