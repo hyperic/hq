@@ -12,8 +12,10 @@ import org.hyperic.hq.hqu.ViewDescriptor
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as uiManImpl
 import org.hyperic.hq.hqu.server.session.AttachType
 import org.hyperic.hq.hqu.server.session.View
+import org.hyperic.hq.hqu.server.session.ViewAdmin
 import org.hyperic.hq.hqu.server.session.ViewResource
 import org.hyperic.hq.hqu.server.session.ViewMasthead
+import org.hyperic.hq.hqu.server.session.ViewAdminCategory
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory
 
@@ -57,6 +59,14 @@ class HQUPlugin implements IHQUPlugin {
                               category: category]
     }
     
+    protected void addAdminView(boolean autoAttach, String path,
+                                String description)
+    {
+        views[description] = [type: 'admin', autoAttach: autoAttach, 
+                              path: path, description: description,
+                              category: 'plugins']
+    }
+    
     void deploy(UIPlugin me) {
         for (e in views) {
             def name  = e.key
@@ -66,26 +76,48 @@ class HQUPlugin implements IHQUPlugin {
                 continue
                 
             if (me.views.empty) {
-                createAndAttachMasthead(me, name, parms)
+                if (parms.type == 'masthead')
+                    createAndAttachMasthead(me, name, parms)
+                else if (parms.type == 'admin') 
+                    createAndAttachAdmin(me, name, parms)
+                else
+                    log.error("Unknown view type ${parms.type}")
             }
+        }
+    }
+    
+    private findViewByPath(views, path) {
+        for (v in views) {
+            if (v.path == path)
+                return v
+        }
+        return null
+    }
+    
+    private void createAndAttachAdmin(UIPlugin me, String name, Map parms) {
+        def uiMan = uiManImpl.one
+        ViewAdmin view = findViewByPath(me.views, parms.path)
+        
+        if (view == null) {
+            AttachType atype = AttachType.ADMIN
+            ViewDescriptor vd = new ViewDescriptor(parms.path, 
+                                                   parms.description, atype)
+            view = uiMan.createAdminView(me, vd)
+        }
+                
+        if (view.attachments.empty) {
+            ViewAdminCategory cat = 
+                ViewAdminCategory.findByDescription(parms.category)
+            uiMan.attachView(view, cat)
         }
     }
     
     private void createAndAttachMasthead(UIPlugin me, String name, Map parms) {
         def uiMan = uiManImpl.one
-        ViewMasthead view
-
-        boolean foundView = false
-        for (v in me.views) {
-            if (v.path == parms.path) {
-                foundView = true
-                view = v
-                break
-            }
-        }
+        ViewMasthead view = findViewByPath(me.views, parms.path)
         
-        if (!foundView) {
-            AttachType atype = AttachType.findByDescription(parms.type)
+        if (view == null) {
+            AttachType atype = AttachType.MASTHEAD
             ViewDescriptor vd = new ViewDescriptor(parms.path, 
                                                    parms.description, atype)
             view = uiMan.createMastheadView(me, vd)

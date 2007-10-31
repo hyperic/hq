@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -56,6 +55,8 @@ import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.View;
+import org.hyperic.hq.hqu.server.session.ViewAdmin;
+import org.hyperic.hq.hqu.server.session.ViewAdminCategory;
 import org.hyperic.hq.hqu.server.session.ViewMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.hqu.server.session.ViewResource;
@@ -192,6 +193,18 @@ public class UIPluginManagerEJBImpl
                                                "attached");
         }
         view.addAttachment(new AttachmentMasthead(view, cat));
+        _log.info("Attaching [" + view + "] via [" + cat + "]");
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void attachView(ViewAdmin view, ViewAdminCategory cat) {
+        if (!view.getAttachments().isEmpty()) {
+            throw new IllegalArgumentException("View [" + view + "] already " + 
+                                               "attached");
+        }
+        view.addAttachment(new AttachmentAdmin(view, cat));
         _log.info("Attaching [" + view + "] via [" + cat + "]");
     }
     

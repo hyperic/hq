@@ -49,6 +49,14 @@
         <column name="CATEGORY" not-null="true"/>
       </property>
     </joined-subclass>
+    
+    <joined-subclass name="AttachmentAdmin" table="EAM_UI_ATTACH_ADMIN">
+      <key on-delete="cascade" column="ATTACH_ID"/>
+
+      <property name="categoryEnum">
+        <column name="CATEGORY" not-null="true"/>
+      </property>
+    </joined-subclass>
 
   </class>
 
