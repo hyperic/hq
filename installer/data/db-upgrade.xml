@@ -7080,6 +7080,18 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
 
+    <schemaSpec version="3.66">
+      <schema-directSQL>
+        <statement desc="Dropping unique constraint for EAM_SERVICE_REQUEST"
+                   targetDB="postgresql">
+          ALTER table EAM_SERVICE_REQUEST DROP constraint eam_service_request_serviceid_key
+        </statement>
+        <statement desc="Dropping unique constraint for EAM_SERVICE_REQUEST"
+                   targetDB="oracle">
+          ALTER table EAM_SERVICE_REQUEST DROP unique (serviceid, url);
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
 </dbupgrade>
 </target>
 
