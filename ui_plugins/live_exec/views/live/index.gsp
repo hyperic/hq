@@ -99,7 +99,7 @@ function runCommand() {
     },
     error: function(err, msg) {
       alert('error! ' + err);
-    },
+    }
   });
 }
 
@@ -124,13 +124,11 @@ function runCommand() {
 <div class="outerLiveDataCont">
   <div class="leftbx">
     <div class="bxblueborder">
-      <div class="BlockTitle"><div style="float:left;">Execute Command</div>
-      <div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
-      <div style="clear:both;height:1px;"></div>
+      <div class="BlockTitle"><div style="float:left;">Execute Command</div><div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
+      <br style="clear:both;height:1px;"/>
       </div>
       <div class="fivepad">
-        <select id="commandSelect" 
-                onchange="runCommand()">
+        <select id="commandSelect" onchange="runCommand()">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
@@ -169,6 +167,6 @@ function runCommand() {
 </div>
 
 <div id="result_cont">
-  <div id="results_msg"></div>
+  <span id="results_msg"></span>
   <div id="result" class="bxblueborder"></div>
 </div>
