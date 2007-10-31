@@ -25,6 +25,7 @@
 package org.hyperic.hq.livedata.formatters;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.hyperic.hq.livedata.FormatType;
@@ -33,9 +34,13 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.plugin.system.DfData;
 import org.hyperic.hq.plugin.system.FileSystemData;
 import org.hyperic.sigar.FileSystem;
+import org.hyperic.sigar.FileSystemUsage;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.i18n.MessageBundle;
+import org.hyperic.util.units.UnitNumber;
+import org.hyperic.util.units.UnitsConstants;
+import org.hyperic.util.units.UnitsFormat;
 
 public class DfFormatter
     implements LiveDataFormatter
@@ -76,22 +81,52 @@ public class DfFormatter
          .append(BUNDLE.format("formatter.df.head.name"))
          .append("</td>")
          .append("<td>")
+         .append(BUNDLE.format("formatter.df.head.size"))
+         .append("</td>")
+         .append("<td>")
+         .append(BUNDLE.format("formatter.df.head.used"))
+         .append("</td>")
+         .append("<td>")
+         .append(BUNDLE.format("formatter.df.head.avail"))
+         .append("</td>")
+         .append("<td>")
+         .append(BUNDLE.format("formatter.df.head.usePerc"))
+         .append("</td>")
+         .append("<td>")
          .append(BUNDLE.format("formatter.df.head.mount"))
          .append("</td>")
          .append("<td>")
          .append(BUNDLE.format("formatter.df.head.type"))
          .append("</td>")
          .append("</tr></thead><tbody>");
-
+        
+        
         for (Iterator i=df.getFileSystems().iterator(); i.hasNext(); ) {
             FileSystemData fd = (FileSystemData)i.next();
+            FileSystemUsage stat = fd.getStat();
             FileSystem fs = fd.getConfig();
+            long pct = (long)(stat.getUsePercent() * 100);
+            String spct;
+            
+            if (pct == 0)
+                spct = "-";
+            else
+                spct = pct + "%";
+            
             r.append("<tr><td>")
              .append(h(fs.getDevName()))
              .append("</td><td>")
+             .append(formatBytes(stat.getTotal()))
+             .append("</td><td>")
+             .append(formatBytes(stat.getUsed()))
+             .append("</td><td>")
+             .append(formatBytes(stat.getAvail()))
+             .append("</td><td>")
+             .append(spct)
+             .append("</td><td>")
              .append(h(fs.getDirName()))
              .append("</td><td>")
-             .append(h(fs.getSysTypeName()))
+             .append(h(fs.getSysTypeName() + "/" + fs.getTypeName()))
              .append("</td></tr>");
         }
         r.append("</tbody></table></div>");
@@ -99,6 +134,12 @@ public class DfFormatter
         return r.toString();
     }
 
+    private String formatBytes(long b) {
+        return UnitsFormat.format(new UnitNumber(b, UnitsConstants.UNIT_BYTES,
+                                                 UnitsConstants.SCALE_KILO),
+                                  Locale.getDefault(), null).toString();
+    }
+    
     public ConfigSchema getConfig(LiveDataCommand cmd) {
         return EMPTY_SCHEMA;
     }
