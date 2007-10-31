@@ -144,10 +144,14 @@ public class RenditServlet
             new RequestInvocationBindings(reqUri, ctxPath, pathInfo,
                                           servletPath, queryStr, user,
                                           req, resp, getServletContext());
+        long start = System.currentTimeMillis();
         try {
             RenditServer.getInstance().handleRequest(plugin, b); 
         } catch(Exception e) {
             throw new ServletException(e);
+        } finally {
+            _log.info("Processed request for [" + plugin + "] in " +
+                      (System.currentTimeMillis() - start) + " ms");
         }
     }
     
