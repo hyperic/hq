@@ -957,8 +957,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     // return the correct paged ResultSet
                     sqlBuf = new StringBuffer(
                         "SELECT timestamp, value FROM " + table + " d1 " +
-                        "WHERE measurement_id = ? AND" +
-                             " timestamp BETWEEN ? AND ? AND" +
+                        "WHERE timestamp BETWEEN ? AND ? AND" +
+                             " measurement_id = ? AND" +
                              " ? <= (SELECT count(*) FROM " + table + " d2 "+
                                "WHERE d1.measurement_id = d2.measurement_id " +
                                      "AND d2.timestamp ")
@@ -969,15 +969,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 else {
                     sqlBuf = new StringBuffer(
                         "SELECT value, timestamp FROM " + table +
-                        " WHERE measurement_id=? AND " +
-                              " timestamp BETWEEN ? AND ? ORDER BY timestamp ")
+                        " WHERE timestamp BETWEEN ? AND ? AND" +
+                              " measurement_id=? ORDER BY timestamp ")
                         .append(pc.isAscending() ? "" : "DESC");
                 }
 
                 stmt = conn.prepareStatement(sqlBuf.toString());
-                stmt.setInt(i++, id.intValue());
                 stmt.setLong(i++, begin);
                 stmt.setLong(i++, end - 1);
+                stmt.setInt(i++, id.intValue());
 
                 if ( _log.isDebugEnabled() ) {
                     _log.debug("getHistoricalData(): " + sqlBuf);
@@ -1533,8 +1533,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 "SELECT timestamp, value, "+
                 " abs(timestamp - " + bounds[2] + ") AS diff" +
                 " FROM " + table +
-                " WHERE measurement_id = " + id.intValue()+
-                " AND timestamp BETWEEN " + bounds[0] + " AND " + bounds[1] +
+                " WHERE timestamp BETWEEN " + bounds[0] + " AND " + bounds[1] +
+                " AND measurement_id = " + id.intValue()+
                 " ORDER BY diff ASC";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sqlString);
@@ -1580,8 +1580,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT * FROM " + table + " WHERE ")
-                .append(DBUtil.composeConjunctions("measurement_id", ids.length))
-                .append(" AND timestamp BETWEEN ? AND ?");
+                .append("timestamp BETWEEN ? AND ? AND ")
+                .append(DBUtil.composeConjunctions("measurement_id", ids.length));
 
             stmt = conn.prepareStatement(sqlBuf.toString());
 
@@ -1706,10 +1706,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * DerivedMeasurement.
      *
      * @param id the ID of the DerivedMeasurement
+     * @param timeAfter the result timestamps are greater than this value
      * @return a long time value
      * @ejb:interface-method
      */
-    public long getLastNonZeroTimestamp(Integer id, long before)
+    public long getLastNonZeroTimestamp(Integer id, long timeAfter)
     {
         Connection conn  = null;
         Statement  stmt  = null;
@@ -1721,10 +1722,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             stmt = conn.createStatement();
+            String metricUnion =
+                MeasTabManagerUtil.getUnionStatement(
+                    (System.currentTimeMillis()-timeAfter), id.intValue());
             
             // Create array of tables to go through
             String[] tables = new String[] {
-                    TAB_DATA,
+                    metricUnion,
                     TAB_DATA_1H,
                     TAB_DATA_6H,
                     TAB_DATA_1D
@@ -1734,8 +1738,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
                                        " WHERE " +
-                                       " measurement_id = " + id +
-                                       " and timestamp > " + before +
+                                       " timestamp > " + timeAfter +
+                                       " and measurement_id = " + id +
                                        " and not value = 0");
                 
                 if (rs.next()) {
@@ -1849,9 +1853,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             StringBuffer sqlBuf = new StringBuffer(
                 "SELECT MIN(value), AVG(value), MAX(value) FROM ")
                 .append(table)
-                .append(" WHERE measurement_id = ").append(id.intValue())
-                .append(" AND timestamp BETWEEN ").append(begin)
-                .append(" AND ").append(end);
+                .append(" WHERE timestamp BETWEEN ").append(begin)
+                .append(" AND ").append(end)
+                .append(" AND measurement_id = ").append(id.intValue());
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sqlBuf.toString());
@@ -1981,8 +1985,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 "SELECT " + minMax +
                        "COUNT(DISTINCT(measurement_id)) FROM " + table +
                 " WHERE ")
-                .append(mconj)
-                .append(" AND timestamp BETWEEN ? AND ? ");
+                .append("timestamp BETWEEN ? AND ? AND ")
+                .append(mconj);
 
             stmt = conn.prepareStatement(sqlBuf.toString());
 
@@ -2080,8 +2084,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             final String aggregateSQL =
                 "SELECT id, " + minMax + 
                 " FROM " + table + "," + TAB_MEAS +
-                " WHERE timestamp BETWEEN ? AND ? AND " + iconj +
-                  " AND " + tconj + " AND measurement_id = id GROUP BY id";
+                " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
+                " AND " + iconj + " AND " + tconj + " GROUP BY id";
         
             if (_log.isTraceEnabled())
                 _log.trace("getAggregateDataByMetric(): " + aggregateSQL);
@@ -2258,12 +2262,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 .getMeasIdsFromTemplateIds(conn, tids);
             String table = getDataTable(begin, end, measids.toArray());
     
-            StringBuffer sqlBuf = new StringBuffer(
-                "SELECT DISTINCT(instance_id)" +
-                " FROM " + TAB_MEAS + " m, " + table + " d" +
-                " WHERE m.id = measurement_id AND ")
-                .append(DBUtil.composeConjunctions("template_id", tids.length))
-                .append(" AND timestamp BETWEEN ? AND ?");
+            StringBuffer sqlBuf = new StringBuffer();
+            sqlBuf.append("SELECT DISTINCT(instance_id)")
+                  .append(" FROM " + TAB_MEAS + " m, " + table + " d")
+                  .append(" WHERE timestamp BETWEEN ? AND ?")
+                  .append(" AND measurement_id = m.id AND ")
+                  .append(DBUtil.composeConjunctions("template_id", tids.length));
     
             stmt = conn.prepareStatement(sqlBuf.toString());
     
