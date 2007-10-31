@@ -3847,10 +3847,12 @@ public class AppdefBossEJBImpl
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
         for (Iterator it = ret.iterator(); it.hasNext(); ) {
             CPropResource cpRes = (CPropResource) it.next();
-            EventLog eventLog =
-                elMan.findLastLog(cpRes.getEntityId(),
-                                  cpRes.getLastValue().getTimestamp());
-            cpRes.setLastEvent(eventLog);
+            if (cpRes.getLastValue() != null) { // We have collected data for it
+                EventLog eventLog =
+                    elMan.findLastLog(cpRes.getEntityId(),
+                                      cpRes.getLastValue().getTimestamp());
+                cpRes.setLastEvent(eventLog);
+            }
         }
         
         return ret;
