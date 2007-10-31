@@ -113,15 +113,19 @@ public class NagiosDetector
             NagiosServiceObj nagService = (NagiosServiceObj)i.next();
             List list = nagService.getHostObjs();
 
-            ServiceResource service = createServiceResource(PLUGIN_NAME);
-            if (_log.isDebugEnabled()) {
-                _log.debug("setting nagios service: "+nagService.getDesc());
-            }
-            service.setServiceName(PLUGIN_NAME + " " + nagService.getDesc());
 
             for (Iterator it=list.iterator(); it.hasNext(); )
             {
                 NagiosHostObj hostObj = (NagiosHostObj)it.next();
+                String hostname = hostObj.getHostname(),
+                       desc = nagService.getDesc();
+                ServiceResource service = createServiceResource(PLUGIN_NAME);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("setting nagios service: "+nagService.getDesc());
+                }
+                service.setServiceName(PLUGIN_NAME + " " + nagService.getDesc()
+                                        + " " + hostname);
+
                 ConfigResponse config = new ConfigResponse();
                 String cmdLine = nagService.getCmdLine(hostObj);
                 int index = cmdLine.indexOf(" ");
@@ -145,8 +149,8 @@ public class NagiosDetector
                 service.setMeasurementConfig(metricConfig);
 
                 ConfigResponse cprops = new ConfigResponse();
-                cprops.setValue("nagiosHost", hostObj.getHostname());
-                cprops.setValue("nagiosServiceDesc", nagService.getDesc());
+                cprops.setValue("nagiosHost", hostname);
+                cprops.setValue("nagiosServiceDesc", desc);
                 service.setCustomProperties(cprops);
 
                 services.add(service);
