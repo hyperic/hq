@@ -17,6 +17,10 @@ public class CPropResource {
         _res = res;
         _cprop = cprop;
     }
+
+    public String getResourceName() {
+        return _res.getName();
+    }
     
     public String getCPropValue() {
         return _cprop;
