@@ -7056,6 +7056,30 @@ has already been defined.
       </schema-directSQL>
     </schemaSpec>
     
+    <schemaSpec version="3.65">
+      <schema-directSQL>
+        <statement targetDB="postgresql">
+          CREATE TABLE eam_ui_attach_admin (
+              attach_id integer NOT NULL,
+              category character varying(255) NOT NULL)
+        </statement>
+        <statement targetDB="oracle">
+          CREATE TABLE eam_ui_attach_admin (
+              attach_id integer NOT NULL,
+              category VARCHAR2(255) NOT NULL)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_attach_admin
+              ADD CONSTRAINT eam_ui_attach_admin_pkey PRIMARY KEY (attach_id)
+        </statement>
+        <statement>
+          ALTER TABLE eam_ui_attach_admin
+              ADD CONSTRAINT fk6406d772d494bca6 FOREIGN KEY (attach_id) 
+              REFERENCES eam_ui_attachment(id) ON DELETE CASCADE
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 
