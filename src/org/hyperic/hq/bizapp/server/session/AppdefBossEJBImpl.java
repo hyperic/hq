@@ -3706,9 +3706,9 @@ public class AppdefBossEJBImpl
         
         List unavailEnts = getMetricManager().getUnavailEntities(null);
         Map ret = new LinkedHashMap();
-        ret.put(PLATFORMS, new LinkedList());
-        ret.put(SERVERS,   new LinkedList());
-        ret.put(SERVICES,  new LinkedList());
+        ret.put(PLATFORMS, new ArrayList());
+        ret.put(SERVERS,   new ArrayList());
+        ret.put(SERVICES,  new ArrayList());
         
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
@@ -3734,6 +3734,12 @@ public class AppdefBossEJBImpl
             
             AppdefEntityValue aev = new AppdefEntityValue(aeid, user);
             list.add(aev.getAppdefResourceType());
+        }
+        
+        // Now sort each of the lists
+        for (Iterator it = ret.values().iterator(); it.hasNext(); ) {
+            List list = (List) it.next();
+            Collections.sort(list);
         }
         return ret;
     }
