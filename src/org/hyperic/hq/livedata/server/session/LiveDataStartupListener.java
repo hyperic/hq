@@ -28,6 +28,7 @@ package org.hyperic.hq.livedata.server.session;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.livedata.formatters.CpuInfoFormatter;
 import org.hyperic.hq.livedata.formatters.CpuPercFormatter;
+import org.hyperic.hq.livedata.formatters.DfFormatter;
 import org.hyperic.hq.livedata.formatters.FilesystemFormatter;
 import org.hyperic.hq.livedata.formatters.IfconfigFormatter;
 import org.hyperic.hq.livedata.formatters.NetstatFormatter;
@@ -48,6 +49,7 @@ public class LiveDataStartupListener
         lman.registerFormatter(new TopFormatter());
         lman.registerFormatter(new CpuInfoFormatter());
         lman.registerFormatter(new FilesystemFormatter());
+        lman.registerFormatter(new DfFormatter());
         lman.registerFormatter(new IfconfigFormatter());
         lman.registerFormatter(new NetstatFormatter());
     }
