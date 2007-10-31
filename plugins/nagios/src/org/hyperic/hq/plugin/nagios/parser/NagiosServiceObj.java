@@ -139,7 +139,8 @@ public class NagiosServiceObj
             }
             if (_nagiosHostObjs == null)
             {
-                _nagiosHostObjs = new ArrayList(_hostgroups.size());
+                _nagiosHostObjs = new ArrayList(
+                    _hostgroups.size()+_hostnames.size());
                 Integer type = new Integer(HOSTGROUP_TYPE);
                 for (Iterator i=_hostgroups.iterator(); i.hasNext(); )
                 {
@@ -147,6 +148,14 @@ public class NagiosServiceObj
                     NagiosHostGroupObj hostgroupObj =
                         (NagiosHostGroupObj)parser.get(type, hostgroup);
                     _nagiosHostObjs.addAll(hostgroupObj.getHostObjs());
+                }
+                type = new Integer(HOST_TYPE);
+                for (Iterator i=_hostnames.iterator(); i.hasNext(); )
+                {
+                    String host = (String)i.next();
+                    NagiosHostObj hostObj =
+                        (NagiosHostObj)parser.get(type, host);
+                    _nagiosHostObjs.add(hostObj);
                 }
             }
         }
