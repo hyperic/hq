@@ -17,7 +17,7 @@ class Util
         String exception = "";
 
         if (msg != null)
-            msg = "Exception: "+msg+"\n";
+            msg = msg+"\n";
         else
             msg = "";
 
