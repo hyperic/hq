@@ -42,7 +42,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_CPUINFO    = "cpuinfo";
     private static final String CMD_CPU        = "cpu";
     private static final String CMD_CPUPERC    = "cpuperc";
-    private static final String CMD_FILESYSTEM = "filesystem";
+    private static final String CMD_DF         = "df";
     private static final String CMD_TOP        = "top";
     private static final String CMD_PROCESS    = "process";
     private static final String CMD_KILL       = "kill";
@@ -54,7 +54,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_CPUINFO,
         CMD_CPU,
         CMD_CPUPERC,
-        CMD_FILESYSTEM,
+        CMD_DF,
         CMD_TOP,
         CMD_PROCESS,
         CMD_KILL,
@@ -89,8 +89,8 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 return sigar.getCpuList();
             } else if (command.equals(CMD_CPUPERC)) {
                 return sigar.getCpuPercList();
-            } else if (command.equals(CMD_FILESYSTEM)) {
-                return sigar.getFileSystemList();
+            } else if (command.equals(CMD_DF)) {
+                return DfData.gather(sigar);
             } else if (command.equals(CMD_TOP)) {
                 String filter =
                     config.getValue(SigarMeasurementPlugin.PTQL_CONFIG);
