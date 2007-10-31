@@ -112,21 +112,30 @@ public class MeasTabManagerUtil {
         sql.append("(");
         Calendar cal = Calendar.getInstance();
         List ranges = MeasRangeObj.getInstance().getRanges();
+        int joins = 0;
         for (Iterator i=ranges.iterator(); i.hasNext(); )
         {
             MeasRange range = (MeasRange)i.next();
-            String table = MeasRangeObj.getInstance().getTable(ranges, end);
-            sql.append("SELECT * FROM ").
-                append(table).
-                append(getTimeInStmt(begin, end)).
-                append(measInStmt);
-            end = range.getMinTimestamp()-1l;
-            if (end >= begin) {
-                sql.append(" UNION ALL ");
+            long rBegin = range.getMinTimestamp(),
+                 rEnd   = range.getMaxTimestamp();
+
+            boolean outOfRange = (begin > rEnd || end < rBegin);
+            if (outOfRange && joins == 0) {
                 continue;
-            } else {
+            } else if (outOfRange && joins > 0) {
                 break;
             }
+
+            String table = range.getTable();
+            if (joins > 0)
+                sql.append(" UNION ALL ");
+
+            joins++;
+            sql.append("SELECT * FROM ")
+               .append(table)
+               .append( getTimeInStmt(((rBegin > begin) ? rBegin : begin),
+                                      ((rEnd < end) ? rEnd : end)) )
+               .append(measInStmt);
         }
         sql.append(") ").append(TAB_DATA);
         return sql.toString();
