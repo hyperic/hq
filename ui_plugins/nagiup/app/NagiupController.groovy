@@ -2,13 +2,15 @@ import org.hyperic.hq.appdef.server.session.CPropResourceSortField
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
+import org.hyperic.util.units.UnitsFormat
+import org.hyperic.util.units.UnitsConstants
+import org.hyperic.util.units.UnitNumber
 
 class NagiupController 
 	extends BaseController
 {
     private int globalId = 0
     
-    // "FileServer File", "fs"
     private final NAGIUP_SCHEMA = [
         getData: {pageInfo, params ->
             AppdefBossEJBImpl.one.getServicesView(user, 'FileServer File', 'fs')
@@ -41,7 +43,7 @@ class NagiupController
              width:'10%',
              label:{
                     if (it.duration) {
-                        return "${it.duration}"
+                        return formatDuration(it.duration)
                     }
             }],
             [field: CPropResourceSortField.EVENT_LOG, 
@@ -60,6 +62,12 @@ class NagiupController
     
     def index(params) {
     	render(locals:[nagiupSchema : NAGIUP_SCHEMA])
+    }
+    
+    private formatDuration(d) {
+        return UnitsFormat.format(new UnitNumber(d, UnitsConstants.UNIT_DURATION,
+                                                 UnitsConstants.SCALE_MILLI),
+                                  locale, null).toString()
     }
     
     def data(params) {
