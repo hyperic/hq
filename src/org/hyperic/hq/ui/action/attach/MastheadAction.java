@@ -31,6 +31,7 @@ public class MastheadAction extends BaseAction {
         // Look up the Attachment bean
         Collection attachments = (Collection)
             request.getSession().getAttribute("mastheadAttachments");
+        attachments.addAll((Collection)request.getSession().getAttribute("adminAttachments"));
         
         for (Iterator it = attachments.iterator(); it.hasNext(); ) {
             AttachmentDescriptor attach = (AttachmentDescriptor)it.next();
