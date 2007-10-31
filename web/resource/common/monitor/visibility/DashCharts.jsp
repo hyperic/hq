@@ -194,13 +194,19 @@
 </c:forEach>
 </ul>
 
-<div id="slowScreenSplash" align="center" class="dialog" style="top:20%;left:35%;padding:5px;">
+<div id="slowScreenSplash" align="center" class="dialog" style="top:20%;left:22%;padding:5px;line-height: 12pt">
 <c:choose>
 <c:when test="${not empty chartDataKeys}">
   <fmt:message key="resource.common.monitor.visibility.request.wait"/>
 </c:when>
 <c:otherwise>
-  <fmt:message key="resource.common.monitor.visibility.no.indicators"/>
+  <!-- Some weird tag bug that forces me to use the single tag syntax, rather than open/close -->
+  <c:set var="fmtBegin"><hq:dateFormatter value="${begin}"/></c:set>
+  <c:set var="fmtEnd"><hq:dateFormatter value="${end}"/></c:set>
+  <fmt:message key="resource.common.monitor.visibility.no.indicators">
+    <fmt:param value="${fmtBegin}"/>
+    <fmt:param value="${fmtEnd}"/>
+  </fmt:message>
 </c:otherwise>
 </c:choose>
 </div>

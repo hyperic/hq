@@ -87,6 +87,20 @@ public class IndicatorChartsAction extends DispatchAction
     private static String DEFAULT_VIEW = 
         "resource.common.monitor.visibility.defaultview";
     
+    protected ActionForward dispatchMethod(ActionMapping mapping,
+                                           ActionForm form,
+                                           HttpServletRequest request,
+                                           HttpServletResponse response,
+                                           String name)
+        throws Exception {
+        WebUser user = SessionUtils.getWebUser(request.getSession());
+        Map pref = user.getMetricRangePreference(true);
+        request.setAttribute(MonitorUtils.BEGIN, pref.get(MonitorUtils.BEGIN));
+        request.setAttribute(MonitorUtils.END, pref.get(MonitorUtils.END));
+
+        return super.dispatchMethod(mapping, form, request, response, name);
+    }
+
     private List getMetrics(HttpServletRequest request, MeasurementBoss boss,
                             AppdefEntityID aeid, AppdefEntityTypeID ctype,
                             List tids)
