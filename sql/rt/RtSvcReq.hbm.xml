@@ -13,15 +13,13 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="RtSvcReqId" unique="true">
-      <property name="svcID" type="integer">
-        <column name="SERVICEID" index="SERVICE_REQUEST_SVCID" not-null="true"/>
-      </property>
+    <property name="svcID" type="integer">
+      <column name="SERVICEID" index="SERVICE_REQUEST_SVCID" not-null="true"/>
+    </property>
 
-      <property name="url" type="string">
-        <column name="URL" index="SERVICE_REQUEST_URL" not-null="true" length="767"/>
-      </property>
-    </properties>
+    <property name="url" type="string">
+      <column name="URL" index="SERVICE_REQUEST_URL" not-null="true" length="767"/>
+    </property>
 
     <set inverse="true" cascade="save-update,delete,evict,persist,merge" name="rtRequestStat" table="EAM_REQUEST_STAT">
       <key on-delete="cascade" column="SVCREQ_ID"/>
