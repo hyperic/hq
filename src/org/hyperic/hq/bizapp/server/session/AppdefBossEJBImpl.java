@@ -3765,8 +3765,8 @@ public class AppdefBossEJBImpl
                 mv2 = (MetricValue) me2.getValue();
             }
             else {
-                mv1 = (MetricValue) me1.getValue();
-                mv2 = (MetricValue) me2.getValue();
+                mv1 = (MetricValue) me2.getValue();
+                mv2 = (MetricValue) me1.getValue();
             }
             
             if (mv1.getValue() < mv2.getValue())
@@ -3797,8 +3797,8 @@ public class AppdefBossEJBImpl
                 mv2 = (MetricValue) me2.getValue();
             }
             else {
-                mv1 = (MetricValue) me1.getValue();
-                mv2 = (MetricValue) me2.getValue();
+                mv1 = (MetricValue) me2.getValue();
+                mv2 = (MetricValue) me1.getValue();
             }
             
             if (mv1.getTimestamp() < mv2.getTimestamp())
@@ -3838,9 +3838,6 @@ public class AppdefBossEJBImpl
         
         List ret = new ArrayList(cprops.size());
         
-        // Get the sort field
-        SortField sf = pi.getSort();
-        
         Map res = new HashMap();
         for (Iterator it = cprops.iterator(); it.hasNext(); ) {
             Cprop prop = (Cprop) it.next();
@@ -3862,22 +3859,6 @@ public class AppdefBossEJBImpl
             }
         }
         
-        if (sf.equals(CPropResourceSortField.RESOURCE)) {
-            for (Iterator it = services.iterator(); it.hasNext(); ) {
-                AppdefResourceValue appRes = (AppdefResourceValue) it.next();
-                if (res.containsKey(appRes.getId())) {
-                    ret.add(res.get(appRes.getId()));
-                }
-            }
-        }
-        else {
-            for (Iterator it = cprops.iterator(); it.hasNext(); ) {
-                Cprop prop = (Cprop) it.next();
-                ret.add(res.get(prop.getAppdefId()));
-            }
-
-        }
-
         // Get the resource templates
         List templs = getTemplateManager()
             .findTemplates(type.getName(), MeasurementConstants.FILTER_NONE,
@@ -3896,25 +3877,32 @@ public class AppdefBossEJBImpl
         Integer[] mids =
             dmMan.findMeasurementIds(subject, mtv.getId(), instIds);
         
-        // Now get the availability data of the leftovers
+        // Now get the metric values
         Map avail = getDataMan()
             .getLastDataPoints(mids, MeasurementConstants
                                .ACCEPTABLE_SERVICE_LIVE_MILLIS);
+        
+        // Get the sort field
+        SortField sf = pi.getSort();
         
         Collection entries = avail.entrySet();
         boolean sortByValue =
             sf.equals(CPropResourceSortField.METRIC_VALUE) ||
             sf.equals(CPropResourceSortField.METRIC_TIMESTAMP);
-        /*
+
         if (sortByValue) {
             entries = new ArrayList(entries);
-            Comparator comparator =
-                sf.equals(CPropResourceSortField.METRIC_VALUE) ?
-                        new ValueComparator(pi.isAscending()) :
-                        new TimestampComparator(pi.isAscending());
+            Comparator comparator;
+            
+            if (sf.equals(CPropResourceSortField.METRIC_VALUE)) {
+                comparator = new ValueComparator(pi.isAscending());
+            }
+            else {
+                comparator = new TimestampComparator(pi.isAscending());
+            }
+            
             Collections.sort((List) entries, comparator);
         }
-        */
         
         for (Iterator it = entries.iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -3924,8 +3912,31 @@ public class AppdefBossEJBImpl
             CPropResource cpRes =
                 (CPropResource) res.get(metric.getInstanceId());
             cpRes.setLastValue((MetricValue) entry.getValue());
+            
+            if (sortByValue) {
+                ret.add(cpRes);
+            }
         }
         
+        // Sort the result set if not previously sorted
+        if (!sortByValue) {
+            if (sf.equals(CPropResourceSortField.RESOURCE)) {
+                for (Iterator it = services.iterator(); it.hasNext(); ) {
+                    AppdefResourceValue appRes =
+                        (AppdefResourceValue) it.next();
+                    if (res.containsKey(appRes.getId())) {
+                        ret.add(res.get(appRes.getId()));
+                    }
+                }
+            }
+            else {
+                for (Iterator it = cprops.iterator(); it.hasNext(); ) {
+                    Cprop prop = (Cprop) it.next();
+                    ret.add(res.get(prop.getAppdefId()));
+                }
+            }
+        }
+
         // Now get their last events
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
         for (Iterator it = ret.iterator(); it.hasNext(); ) {
