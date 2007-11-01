@@ -357,11 +357,11 @@ public class PluginDumper {
         loadPlugins();
 
         if (this.config.plugin == null) {
-            String include =
-                this.config.props.getProperty("plugins.include");
-            if (include != null && include.indexOf(",") == -1) {
+            List include = getPluginsInclude();
+
+            if (include != null && include.size() == 1) {
                 //e.g. if -Dplugins.include=apache, set -p apache
-                this.config.plugin = include;
+                this.config.plugin = (String)include.get(0);
             }
         }
 
@@ -488,6 +488,16 @@ public class PluginDumper {
     public String getProperty(String key, String defVal) {
         return System.getProperty(key,
                                   this.config.props.getProperty(key, defVal));
+    }
+
+    private List getPluginsInclude() {
+        String include = getProperty("plugins.include");
+        if (include == null) {
+            return null;
+        }
+        else {
+            return StringUtil.explode(include, ",");
+        }
     }
 
     private void loadPlugins() throws PluginException {
@@ -1069,9 +1079,11 @@ public class PluginDumper {
     public void testDiscovery() {
         PluginDiscoverer discoverer =
             new PluginDiscoverer(this);
-
-        if (this.config.plugin != null) {
-            addDiscovery(discoverer, this.config.plugin);
+        List include = getPluginsInclude();
+        if (include != null) {
+            for (int i=0; i<include.size(); i++) {
+                addDiscovery(discoverer, (String)include.get(i));
+            }
         }
         else {
             for (Iterator it = this.ppm.getPlugins().keySet().iterator();
