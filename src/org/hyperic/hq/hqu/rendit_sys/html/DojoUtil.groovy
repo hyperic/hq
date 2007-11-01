@@ -62,6 +62,7 @@ class DojoUtil {
     static String accordionSidebar(params) {
     	def res = new StringBuffer("""
             dojo.require("dojo.io.cookie");
+            dojo.require("dojo.event.topic");
 
             var selectedItem;
 		    var currentCountFilter;
@@ -69,40 +70,45 @@ class DojoUtil {
 		    var plugin={};plugin.accordion={};plugin.ajax={};
 		    
 		    plugin.ajax.getData = function(type, data, evt) {
-		        var unique;
+		        var unique = null;
 		        if (data) {
-		            var domTree = document.getElementById('resourceTree');
-		            var tree = "";
-		            for (var x = 0; x < data.length; x++) {
-		                var parent = data[x]['parent'];
-		                var children = data[x]['children'];
-		                var innerChildren = "";
-		                var markExpanded = false;
-		                for (var i = 0; i < children.length; i++) {
-		                    if(selectedItem){
-		                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
-		                            unique = dojo.dom.getUniqueId();
-		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-		                            markExpanded = true;
-		                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
-		                            unique = dojo.dom.getUniqueId();
-		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
-		                            markExpanded = true;
-		                        } else {
-		                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-		                        }
-		                    }else{
-		                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
-		                    }
-		                }
-		                tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
-		            }
-		            domTree.innerHTML = tree;
-		            if(unique) {
-		                plugin.accordion.setSelected(dojo.byId(unique));
-		            }
+                    if (data.length == 0) {
+                        dojo.event.topic.publish("XHRComplete", "NO_DATA_RETURNED");
+                    }else{
+                        dojo.event.topic.publish("XHRComplete", "DATA_RETURNED");
+			            var domTree = document.getElementById('resourceTree');
+			            var tree = "";
+			            for (var x = 0; x < data.length; x++) {
+			                var parent = data[x]['parent'];
+			                var children = data[x]['children'];
+			                var innerChildren = "";
+			                var markExpanded = false;
+			                for (var i = 0; i < children.length; i++) {
+			                    if(selectedItem){
+			                        if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
+			                            unique = dojo.dom.getUniqueId();
+			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+			                            markExpanded = true;
+			                        }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
+			                            unique = dojo.dom.getUniqueId();
+			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
+			                            markExpanded = true;
+			                        } else {
+			                            innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+			                        }
+			                    }else{
+			                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
+			                    }
+			                }
+			                tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+			            }
+			            domTree.innerHTML = tree;
+			            if(unique) {
+			                plugin.accordion.setSelected(dojo.byId(unique));
+			            }
+                    }
 		        }
-		        if(unique)
+		        if(unique != null)
 		            selectedItem = dojo.byId(unique);
 		    }
 		
@@ -225,7 +231,8 @@ class DojoUtil {
 	    
 	    def res = new StringBuffer(""" 
 	    <script type="text/javascript">
-        
+        dojo.require("dojo.event.topic");
+
         var ${sortFieldVar};
         var ${pageNumVar}  = 0;
         var ${lastPageVar} = false;
@@ -330,9 +337,9 @@ class DojoUtil {
                         dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
                     }
                     if (data.data == '') {
-                    dojo.byId("${idVar}_noValues").style.display = '';
-                    dojo.byId("${idVar}_noValues").innerHTML = "There isn't any information currently";
-                    }
+                        dojo.event.topic.publish("XHRComplete", "NO_DATA_RETURNED");                        
+                    }else
+                        dojo.event.topic.publish("XHRComplete", "DATA_RETURNED");
                 }
             });
         }

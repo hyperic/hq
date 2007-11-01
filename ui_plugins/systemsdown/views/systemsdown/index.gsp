@@ -93,8 +93,31 @@
         currentCountFilter.style.fontWeight = 'normal';
         plugin.accordion.update({numRows: count});
     }
+    
+    plugin.MessagePanel = function(){
+        this.toggleVisibility = function(reason){
+            var msgPanelObj = dojo.byId("messagePanel");
+            if(reason == "NO_DATA_RETURNED"){
+                if(msgPanelObj.style.display != "block"){
+                    msgPanelObj.style.display = "block";
+                    dojo.byId("messagePanelMessage").innerHTML = this.getLocalizedMessageForReason(reason);
+                }
+            }else
+                msgPanelObj.style.display = "none";
+            
+        };
+        this.getLocalizedMessageForReason = function(reason){
+            return "${l.noDataAvailable}";
+        }
+        dojo.event.topic.subscribe("XHRComplete", this, "toggleVisibility");
+    }
+    
+    new plugin.MessagePanel();
+    
+   
 </script>
-<div class="downContainer">
+<div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
+<div class="downContainer" style="clear:both;">
     <div class="downList">
         <div class="leftbxblueborder">
             <div class="BlockTitle" style="text-align:left;">${l.ResType}</div>
