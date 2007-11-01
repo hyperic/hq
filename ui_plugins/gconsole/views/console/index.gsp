@@ -37,7 +37,7 @@ Templates:
 <% } %>
 <br/>
 
-<textarea id="code" cols="80", rows="20">
+<textarea id="code" cols="120", rows="40">
 </textarea>
 
 <br/>
