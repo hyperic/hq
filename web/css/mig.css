@@ -3,6 +3,16 @@
 	margin-bottom: 9px;
 	background-color: #FFFD99;
 }
+.messageWarning{
+	border:1px solid #FFCC33;background-color:#FFFFCC;padding:5px;margin:10px;font-size:13px;
+}
+.messageInfo {
+	border:1px solid #004BD6;background-color:#DCF9FF;padding:9px;margin:10px 0px 10px 10px;font-size:13px;
+}
+
+.infoIcon{
+    height:32px;width:32px;background:url("/images/icon_info_small.gif") no-repeat;float:left;
+}
 
 .dashboard {
 	border-top: 1px solid gray;

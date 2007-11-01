@@ -354,7 +354,7 @@ font-weight:bold;
  .right{float:right;}
  .left{float:left;}
  .tree {padding:3px;border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;}
- .topCat {padding:3px;background-color:#E0EEEE;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
+ .topCat {padding:3px;background-color:#DCF9FF;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
  #resourceTree li:hover { background:#d9dfe7;}
