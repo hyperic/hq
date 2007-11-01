@@ -350,7 +350,6 @@ class DojoUtil {
                 var body = document.getElementById("${id}");
                 var trs = body.getElementsByTagName('tr');
                 var styleClassVal = el[i].styleClass;
-                var strongstyleClassVal =  el[i].strongstyleClass;
                 if (id && (styleClassVal && styleClassVal != '')) {
                     for (b = 0; b < trs.length; b++) {
                         var vals = trs[b].getAttribute("value");
@@ -358,10 +357,6 @@ class DojoUtil {
                             var rowTDs = trs[b].getElementsByTagName('td');
                             for (k = 0; k < rowTDs.length; k++) {
                                 rowTDs[k].setAttribute((document.all ? 'className' : 'class'), styleClassVal);
-                                if (strongstyleClassVal && strongstyleClassVal != '') {
-                                rowTDs[k][0].setAttribute((document.all ? 'className' : 'class'), strongstyleClassVal);
-                                rowTDs[k][2].setAttribute((document.all ? 'className' : 'class'), strongstyleClassVal);
-                                }
                             }
                         }
                     }
