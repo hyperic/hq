@@ -57,6 +57,9 @@ public class JBossConfig {
     private static final String BINDING_MBEAN =
         "jboss.system:service=ServiceBindingManager";
 
+    private static final String WEBSERVER_MBEAN =
+        "jboss.web:service=WebServer";
+
     private static HashMap cache = null;
     private File serviceXML;
     private File bindingXML;
@@ -64,6 +67,7 @@ public class JBossConfig {
     private String jnpPortBinding;
     private String jnpAddress;
     private String jnpAddressBinding;
+    private String httpPort;
     private String serverBinding;
     private long lastModified;
     private long lastModifiedBinding;
@@ -124,6 +128,10 @@ public class JBossConfig {
         }
 
         return false;
+    }
+
+    public String getHttpPort() {
+        return this.httpPort;
     }
 
     public String getJnpPort() {
@@ -210,7 +218,10 @@ public class JBossConfig {
                 }
 
                 name = getAttribute(config, "name");
-                if (!name.equals(NAMING_MBEAN)) {
+                boolean isNaming=false, isWebserver=false;
+                if (!((isNaming = name.equals(NAMING_MBEAN)) ||
+                      (isWebserver = name.equals(WEBSERVER_MBEAN))))
+                {
                     continue;
                 }
 
@@ -225,17 +236,23 @@ public class JBossConfig {
                     if (binding.hasAttributes()) {
                         String val = getAttribute(binding, "port");
                         if (hasValue(val)) {
-                            this.jnpPortBinding = val;
-                            foundPort = true;
+                            if (isNaming) {
+                                this.jnpPortBinding = val;
+                                foundPort = true;
+                            }
+                            else if (isWebserver) {
+                                this.httpPort = val;
+                            }
                         }
                         val = getAttribute(binding, "host");
                         if (hasValue(val)) {
-                            this.jnpAddressBinding = val;
+                            if (isNaming) {
+                                this.jnpAddressBinding = val;
+                            }
                         }
                     }
                     break;
                 }
-                break;
             }
         }
 
@@ -385,5 +402,8 @@ public class JBossConfig {
         System.out.println("JNP url: jnp://" +
                            cfg.getJnpAddress() + ":" +
                            cfg.getJnpPort());
+        if (cfg.getHttpPort() != null) {
+            System.out.println("HTTP port: " + cfg.getHttpPort());
+        }
     }
 }
