@@ -13,7 +13,8 @@ class NagiupController
     
     private final NAGIUP_SCHEMA = [
         getData: {pageInfo, params ->
-            AppdefBossEJBImpl.one.getServicesView(user, 'FileServer File', 'fs', 'Availability',
+            AppdefBossEJBImpl.one.getServicesView(user, 'Nagios Plugin', 
+                                                  'nagiosHost', 'Availability',
                                                   pageInfo)
         },
         defaultSort: CPropResourceSortField.PROPERTY,
