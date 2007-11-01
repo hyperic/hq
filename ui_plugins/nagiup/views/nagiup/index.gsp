@@ -14,22 +14,14 @@
 #nagCont  table tbody tr.selected td {}
 #nagCont table tbody tr:hover td {background: #a6c2e7;}
 #nagCont table tbody tr.selected:hover td {}
- .statusBGUNKNOWN {background-color: #FFDA9F; }
-.statusBGUNKNOWNACK {background-color: #FFDA9F; }
-.statusBGUNKNOWNSCHED {background-color: #FFDA9F; }
-.statusBGWARNING {background-color: #FEFFC1; }
-.statusBGWARNINGACK {background-color: #FEFFC1; }
-.statusBGWARNINGSCHED {background-color: #FEFFC1; }
 .statusBGCRITICAL {background-color: #FFBBBB; }
-.statusBGCRITICALACK {background-color: #FFBBBB; }
-.statusBGCRITICALSCHED {background-color: #FFBBBB; }
-.statusBGDOWN {background-color: #FFBBBB; }
-.statusBGDOWNACK {background-color: #FFBBBB; }
-.statusBGDOWNSCHED {background-color: #FFBBBB; }
-.statusBGUNREACHABLE {background-color: #FFBBBB; }
-.statusBGUNREACHABLEACK {background-color: #FFBBBB; }
-.statusBGUNREACHABLESCHED {background-color: #FFBBBB; }
-
+.statusCRITICAL{background-color:#F83838;}
+.statusBGUNKNOWN {background-color: #FFDA9F; }
+.statusUNKNOWN {background-color:#FF9900;}
+.statusBGOK {background-color:#DBDBDB;}
+.statusOK {background-color:#33FF00;}
+.statusBGWARNING {background-color: #FEFFC1; }
+.statusWARNING {background-color: #ffff00;}
 </style>
 
 

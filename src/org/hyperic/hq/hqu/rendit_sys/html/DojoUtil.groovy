@@ -350,6 +350,7 @@ class DojoUtil {
                 var body = document.getElementById("${id}");
                 var trs = body.getElementsByTagName('tr');
                 var styleClassVal = el[i].styleClass;
+                var strongstyleClassVal =  el[i].strongstyleClass;
                 if (id && (styleClassVal && styleClassVal != '')) {
                     for (b = 0; b < trs.length; b++) {
                         var vals = trs[b].getAttribute("value");
@@ -357,6 +358,10 @@ class DojoUtil {
                             var rowTDs = trs[b].getElementsByTagName('td');
                             for (k = 0; k < rowTDs.length; k++) {
                                 rowTDs[k].setAttribute((document.all ? 'className' : 'class'), styleClassVal);
+                                if (strongstyleClassVal && strongstyleClassVal != '') {
+                                rowTDs[k][0].setAttribute((document.all ? 'className' : 'class'), strongstyleClassVal);
+                                rowTDs[k][2].setAttribute((document.all ? 'className' : 'class'), strongstyleClassVal);
+                                }
                             }
                         }
                     }
@@ -416,7 +421,7 @@ class DojoUtil {
             <div id="tableTitle" style="display:inline;width:75px;">${tableTitle}</div>
             ${titleHtml}
           </div>
-          <div id="${idVar}_noValues" style="float: left; padding-top:3px;padding-right:15px;font-weight:bold;font-size:13px;display:none;">There isn't any information currently</div>
+          <div id="${idVar}_noValues" style="float: left; padding-top:3px;padding-right:15px;font-weight:bold;font-size:12px;display:none;">There isn't any information currently</div>
           <div style="${pageControlStyle}">
             <div class="boldText" style="position:relative;display:inline;float: right;padding-left:5px;padding-right:10px;padding-top:5px;">${BUNDLE['dojoutil.Next']}</div>
 	        <div class="pageButtonCont">
