@@ -135,9 +135,15 @@ public class JBossConfig {
     }
 
     public String getJnpPort() {
-        return
+        String port = 
             (this.jnpPortBinding == null) ?
              this.jnpPort : this.jnpPortBinding;
+        if (port == null) {
+            return "1099";
+        }
+        else {
+            return port;
+        }
     }
 
     public String getJnpAddress() {

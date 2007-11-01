@@ -410,21 +410,13 @@ public class JBossDetector
             List found = getServerList(dir);
             if (found != null) {
                 servers.addAll(found);
-                noteEmbeddedTomcat(dir);
             }
         }
 
         return servers;
     }
 
-    private String getJnpURL(String installpath, File serviceXML) {
-        JBossConfig cfg = JBossConfig.getConfig(serviceXML);
-
-        String port = cfg.getJnpPort();
-        if (port == null) {
-            port = "1099";
-        }
-
+    private String getBindAddress(JBossConfig cfg, String installpath) {
         //attempt to determine address using:
         //1) -b address cmdline argument
         //2) TCP listen address for port
@@ -435,7 +427,7 @@ public class JBossDetector
         String address = (String)bindings.get(installpath);
 
         if (address == null) {
-            address = getListenAddress(port);
+            address = getListenAddress(cfg.getJnpPort());
             if ((address == null) || address.equals("localhost")) {
                 address = cfg.getJnpAddress();
                 where = "configuration";
@@ -448,10 +440,10 @@ public class JBossDetector
             where = "-b argument";
         }
 
-        String url = "jnp://" + address + ":" + port;
-        getLog().debug("JNP url=" + url +
-                       " (address determined from " + where + ")");
-        return url;
+        getLog().debug("Bind address=" + address +
+                       " (determined from " + where + ")");
+
+        return address;
     }
 
     /**
@@ -493,8 +485,14 @@ public class JBossDetector
         ConfigResponse controlConfig = new ConfigResponse();
         ConfigResponse metricConfig = new ConfigResponse();
 
-        config.setValue(Context.PROVIDER_URL,
-                        getJnpURL(installpath, serviceXML));
+        JBossConfig cfg = JBossConfig.getConfig(serviceXML);
+
+        String address = getBindAddress(cfg, installpath);
+
+        String jnpUrl = "jnp://" + address + ":" + cfg.getJnpPort(); 
+        getLog().debug("JNP url=" + jnpUrl);
+
+        config.setValue(Context.PROVIDER_URL, jnpUrl);
 
         //for use w/ -jar hq-product.jar or agent.properties
         Properties props = getManager().getProperties();
@@ -557,6 +555,8 @@ public class JBossDetector
 
         //pickup any jars found relative to this installpath
         adjustClassPath(installpath);
+
+        noteEmbeddedTomcat(installpath);
 
         List servers = new ArrayList();
         servers.add(server);
