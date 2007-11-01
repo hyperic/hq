@@ -122,7 +122,7 @@ public class ControlScheduleDAO extends HibernateDAO
     private Criteria createFindByEntity(int type, int id)
     {
         return createCriteria()
-            .add(Expression.eq("entityType", new Integer(type)))
-            .add(Expression.eq("entityId", new Integer(id)));
+            .add(Expression.eq("entityId", new Integer(id)))
+            .add(Expression.eq("entityType", new Integer(type)));
     }
 }
