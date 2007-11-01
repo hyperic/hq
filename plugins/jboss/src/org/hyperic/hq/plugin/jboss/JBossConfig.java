@@ -241,6 +241,8 @@ public class JBossConfig {
 
                     if (binding.hasAttributes()) {
                         String val = getAttribute(binding, "port");
+                        log.debug(this.serverBinding + " " +
+                                  name + "=" + val);
                         if (hasValue(val)) {
                             if (isNaming) {
                                 this.jnpPortBinding = val;

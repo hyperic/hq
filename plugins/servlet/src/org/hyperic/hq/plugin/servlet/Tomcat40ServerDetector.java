@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -96,28 +97,10 @@ public class Tomcat40ServerDetector
     public List getServerList(String installpath)
         throws PluginException
     {
-        return getServerList(installpath, false);
+        return getServerList(installpath, null, false);
     }
 
-    public List getServerList(String installpath, boolean isEmbedded)
-        throws PluginException
-    {
-        ServerResource server = createServerResource(installpath);
-        //XXX should be more generic, done within ServerDetector
-        String hqname = (String)HQ_NAMES.get(installpath);
-        if (hqname != null) {
-            server.setName(server.getName() + " " + hqname);
-        }
-
-        TomcatConfig cfg = null;
-
-        // Special case if this is the HQ embedded tomcat
-        if (installpath.indexOf("hq-engine") != -1) {
-            String name = getPlatformName() + " " + HQ_SERVER_TOMCAT;
-            server.setName(name);
-            server.setIdentifier(HQ_SERVER_TOMCAT);
-        }
-
+    private String getConfigPort(String installpath) {
         for (int i=0; i<CONF_FILES.length; i++) {
             File file = new File(installpath, CONF_FILES[i]);
             if (!file.exists()) {
@@ -128,26 +111,48 @@ public class Tomcat40ServerDetector
                          "auto-config will be skipped");
                 continue;
             }
-            cfg = TomcatConfig.getConfig(file);
+
+            TomcatConfig cfg = TomcatConfig.getConfig(file);
             //keep trying because jboss w/ 5.5.sar has both
             //./server.xml and META-INF/jboss-service.xml but
             //the port is only in ./server.xml
             if ((cfg != null) && (cfg.getPort() != null)) {
-                break;
+                return cfg.getPort();
             }
         }
+        return null;
+    }
 
-        if ((cfg != null) && (cfg.getPort() != null)) {
+    public List getServerList(String installpath,
+                              String port, boolean isEmbedded)
+        throws PluginException
+    {
+        ServerResource server = createServerResource(installpath);
+        //XXX should be more generic, done within ServerDetector
+        String hqname = (String)HQ_NAMES.get(installpath);
+        if (hqname != null) {
+            server.setName(server.getName() + " " + hqname);
+        }
+
+        // Special case if this is the HQ embedded tomcat
+        if (installpath.indexOf("hq-engine") != -1) {
+            String name = getPlatformName() + " " + HQ_SERVER_TOMCAT;
+            server.setName(name);
+            server.setIdentifier(HQ_SERVER_TOMCAT);
+        }
+
+        if (port == null) {
+            port = getConfigPort(installpath);
+        }
+
+        if (port != null) {
             ConfigResponse productConfig = new ConfigResponse();
-            //XXX jmxUser.  jmxPassword unlikely?
-            try {
-                productConfig.setValue(JMXRemote.PROP_JMX_URL,
-                                       "http://localhost:" + cfg.getPort());
-            } catch (InvalidOptionException e) {
-                log.error(e.getMessage(), e);
-            } catch (InvalidOptionValueException e) {
-                log.error(e.getMessage(), e);
+            String address = getListenAddress(port);
+            if (address == null) {
+                address = "localhost";
             }
+            String url = "http://" + address + ":" + port;
+            productConfig.setValue(JMXRemote.PROP_JMX_URL, url);
 
             server.setProductConfig(productConfig);
             server.setConnectProperties(new String[] {
@@ -198,7 +203,15 @@ public class Tomcat40ServerDetector
         }
 
         for (int i=0; i<embedded.size(); i++) {
-            File dir = (File)embedded.get(i);
+            Map config = (Map)embedded.get(i);
+            final String prop = ServletProductPlugin.PROP_INSTALLPATH;
+            String installpath = (String)config.get(prop);
+            if (installpath == null) {
+                log.error(config + " missing " + prop);
+                continue;
+            }
+            File dir = new File(installpath);
+            String port = (String)config.get("port");
 
             if (!ServletProductPlugin.isJBossEmbeddedVersion(getTypeInfo(),
                                                              dir.getName())) {
@@ -208,7 +221,7 @@ public class Tomcat40ServerDetector
             log.debug("Adding JBoss embedded server " + getName()
                       + " at " + dir);
 
-            List dirs = getServerList(dir.getAbsolutePath(), true);
+            List dirs = getServerList(dir.getAbsolutePath(), port, true);
             if (dirs != null) {
                 servers.addAll(dirs);
             }
