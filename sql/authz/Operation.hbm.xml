@@ -17,7 +17,7 @@
 
     <properties name="resTypeOper" unique="true">
       <property name="name" type="string">
-        <column name="NAME" not-null="true" length="100" index="EAM_OPNAME_IDX"/>
+        <column name="NAME" not-null="true" length="100"/>
       </property>
       <many-to-one name="resourceType" class="ResourceType">
         <column name="RESOURCE_TYPE_ID" not-null="false"/>

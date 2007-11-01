@@ -50,7 +50,7 @@
 
     <properties name="serverAiidIdx">
       <many-to-one name="platform" class="Platform">
-        <column name="PLATFORM_ID" not-null="false" unique-key="EAM_SERVER_AIID_IDX" index="EAM_SERVER_PLATFORM_IDX"/>
+        <column name="PLATFORM_ID" not-null="false" unique-key="EAM_SERVER_AIID_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
         <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" unique-key="EAM_SERVER_AIID_IDX"/>

@@ -5,7 +5,7 @@
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" not-null="true" index="METRIC_PROB_ID_IDX"/>
+        <column name="MEASUREMENT_ID" not-null="true"/>
       </key-property>
       <key-property name="timestamp" type="long">
         <column name="TIMESTAMP" not-null="true"/>

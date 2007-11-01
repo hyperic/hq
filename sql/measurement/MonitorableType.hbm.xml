@@ -24,7 +24,7 @@
     </property>
 
     <property name="appdefType" type="integer">
-      <column name="APPDEF_TYPE" not-null="true" index="MTYPE_IDX_APPDEFTYPE_IDX"/>
+      <column name="APPDEF_TYPE" not-null="true"/>
     </property>
 
     <property name="plugin" type="string">

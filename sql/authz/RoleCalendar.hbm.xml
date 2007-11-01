@@ -21,8 +21,7 @@
     </version>
 
     <many-to-one name="role">
-      <column name="ROLE_ID" index="CALENDAR_ROLE_IDX" unique-key="role_cal_uniq"
-              not-null="true"/>
+      <column name="ROLE_ID" unique-key="role_cal_uniq" not-null="true"/>
     </many-to-one>
 
     <many-to-one name="calendar">

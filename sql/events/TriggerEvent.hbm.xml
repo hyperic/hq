@@ -12,10 +12,8 @@
       </key-many-to-one>
     </composite-id>
 
-    
-
     <property name="expiration" type="long">
-      <column name="EXPIRATION"/>
+      <column name="EXPIRATION" index="TRIGGER_EXPIRATION_IDX"/>
     </property>
   </class>
 

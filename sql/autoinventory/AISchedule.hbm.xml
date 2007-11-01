@@ -14,12 +14,12 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <property name="entityType" type="integer">
-      <column name="ENTITY_TYPE" not-null="true" index="AI_SCHEDULE_ENTITY_IDX"/>
-    </property>
-
     <property name="entityId" type="integer">
       <column name="ENTITY_ID" not-null="true" index="AI_SCHEDULE_ENTITY_IDX"/>
+    </property>	  
+	  
+    <property name="entityType" type="integer">
+      <column name="ENTITY_TYPE" not-null="true" index="AI_SCHEDULE_ENTITY_IDX"/>
     </property>
 
     <property name="subject" type="string">

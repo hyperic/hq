@@ -17,7 +17,7 @@
 
     <properties name="resourceTypeInstance" unique="true">
       <many-to-one name="resourceType" class="ResourceType">
-        <column name="RESOURCE_TYPE_ID" not-null="false" index="EAM_RESOURCE_IDX_TYPE_IDX"/>
+        <column name="RESOURCE_TYPE_ID" not-null="false"/>
       </many-to-one>
 
       <property name="instanceId" type="integer">

@@ -3,11 +3,11 @@
 
   <class name="MeasurementHistData" table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
     <composite-id name="id" class="MeasurementDataId">
-      <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" not-null="true"/>
-      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" not-null="true" index="MEASUREMENT_DATA_1H_TIME_IDX"/>
+        <column name="TIMESTAMP" not-null="true"/>
+      </key-property>
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="MEASUREMENT_DATA_1H_MID_IDX"/>
       </key-property>
     </composite-id>
 
@@ -26,11 +26,11 @@
 
   <class name="MeasurementHistData" entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
     <composite-id name="id" class="MeasurementDataId">
-      <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" not-null="true"/>
-      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" not-null="true" index="MEASUREMENT_DATA_6H_TIME_IDX"/>
+        <column name="TIMESTAMP" not-null="true"/>
+      </key-property>
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="MEASUREMENT_DATA_6H_MID_IDX"/>
       </key-property>
     </composite-id>
 
@@ -49,11 +49,11 @@
 
   <class name="MeasurementHistData" entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
     <composite-id name="id" class="MeasurementDataId">
-      <key-property name="measurementId" type="integer">
-        <column name="MEASUREMENT_ID" not-null="true"/>
-      </key-property>
       <key-property name="timestamp" type="long">
-        <column name="TIMESTAMP" not-null="true" index="MEASUREMENT_DATA_1D_TIME_IDX"/>
+        <column name="TIMESTAMP" not-null="true"/>
+      </key-property>
+      <key-property name="measurementId" type="integer">
+        <column name="MEASUREMENT_ID" not-null="true" index="MEASUREMENT_DATA_1D_MID_IDX"/>
       </key-property>
     </composite-id>
 

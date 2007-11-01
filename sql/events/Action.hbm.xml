@@ -23,7 +23,7 @@
     </property>
 
     <many-to-one name="parent" class="Action">
-      <column name="PARENT_ID"/>
+      <column name="PARENT_ID" index="ACTION_CHILD_IDX" />
     </many-to-one>
 
     <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="childrenBag">

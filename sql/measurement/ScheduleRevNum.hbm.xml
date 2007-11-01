@@ -3,12 +3,12 @@
 
   <class name="ScheduleRevNum" table="EAM_SRN">
     <composite-id name="id" class="SrnId">
-      <key-property name="appdefType" type="integer">
-        <column name="APPDEF_TYPE" not-null="true"/>
-      </key-property>
-
       <key-property name="instanceId" type="integer">
         <column name="INSTANCE_ID" not-null="true"/>
+      </key-property>
+		
+      <key-property name="appdefType" type="integer">
+        <column name="APPDEF_TYPE" not-null="true"/>
       </key-property>
     </composite-id>
 

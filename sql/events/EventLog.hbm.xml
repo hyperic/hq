@@ -18,18 +18,18 @@
       <column name="TYPE" not-null="true" length="100"/>
     </property>
 
-    <property name="entityType" type="integer">
-      <column name="ENTITY_TYPE" index="EVENT_LOG_IDX"/>
+    <property name="timestamp" type="long">
+      <column name="TIMESTAMP" not-null="true" index="EVENT_LOG_IDX"/>
     </property>
-
+	  
     <property name="entityId" type="integer">
       <column name="ENTITY_ID" index="EVENT_LOG_IDX"/>
-    </property>
+    </property>	  
 
-    <property name="timestamp" type="long">
-      <column name="TIMESTAMP" not-null="true" index="EVENT_LOG_IDX, EVENT_LOG_TIMESTAMP_IDX"/>
-    </property>
-
+    <property name="entityType" type="integer">
+      <column name="ENTITY_TYPE" index="EVENT_LOG_IDX"/>
+    </property>	  
+	  
     <property name="subject" type="string">
       <column name="SUBJECT" length="100"/>
     </property>

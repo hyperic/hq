@@ -45,7 +45,7 @@
     </property>
 
     <property name="designate" type="boolean">
-      <column name="DESIGNATE" not-null="true" index="TEMPL_DESIG_MT_IDX"/>
+      <column name="DESIGNATE" not-null="true" index="TEMPL_DESIG_IDX"/>
     </property>
 
     <property name="template" type="string">
@@ -69,7 +69,7 @@
     </property>
 
     <many-to-one name="monitorableType" class="MonitorableType">
-      <column name="MONITORABLE_TYPE_ID" index="TEMPL_DESIG_MT_IDX, TEMPL_MONITORABLE_TYPE_IDX"/>
+      <column name="MONITORABLE_TYPE_ID"/>
     </many-to-one>
 
     <many-to-one name="category" class="Category">

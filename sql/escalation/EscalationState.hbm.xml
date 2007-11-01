@@ -26,18 +26,18 @@
       <column name="ESCALATION_ID" not-null="true" unique-key="escl_uniq"/>
     </many-to-one>
 
-    <property name="alertTypeEnum">
-      <column name="ALERT_TYPE" not-null="true" index="state_idx" unique-key="escl_uniq"/>
-    </property>
-
     <property name="alertDefinitionId">
       <column name="ALERT_DEF_ID" not-null="true" index="state_idx" unique-key="escl_uniq"/>
-    </property>
-
+    </property>	  
+	  
     <property name="alertId">
       <column name="ALERT_ID" not-null="true" unique-key="escl_uniq"/>
     </property>
 
+    <property name="alertTypeEnum">
+      <column name="ALERT_TYPE" not-null="true" index="state_idx" unique-key="escl_uniq"/>
+    </property>	  
+	  
     <many-to-one name="acknowledgedBy">
       <column name="ACKNOWLEDGED_BY" not-null="false"/>
     </many-to-one>
