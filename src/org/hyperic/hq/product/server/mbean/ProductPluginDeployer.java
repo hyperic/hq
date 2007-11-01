@@ -58,6 +58,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.server.session.ProductStartupListener;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.util.file.FileUtil;
@@ -141,7 +142,7 @@ public class ProductPluginDeployer
 
     public ProductPluginDeployer() {
         super();
-        
+    
         //native libraries are deployed into another directory
         //which is not next to sigar.jar, so we drop this hint
         //to find it.
@@ -202,6 +203,8 @@ public class ProductPluginDeployer
             }
         }
 
+        ProductStartupListener.getPluginsDeployedCaller().pluginsDeployed();
+        
         _plugins.clear();
 
         //generally means we are done deploying plugins at startup.

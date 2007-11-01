@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,7 +24,6 @@
  */
 package org.hyperic.hq.ui.servlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -43,19 +42,11 @@ import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.hqu.rendit.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.file.DirWatcher;
-import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
-import org.jboss.system.server.ServerConfigLocator;
 
 public class RenditServlet 
     extends HttpServlet
 {
     private static final Log _log = LogFactory.getLog(RenditServlet.class);
-    private static final Object INIT_LOCK = new Object();
-    private static boolean INITIALIZED;
-    
-    private static DirWatcher _watcher;
-    private static Thread     _watcherThread;
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
         throws ServletException, IOException 
@@ -74,7 +65,6 @@ public class RenditServlet
         throws ServletException, IOException
     {
         boolean useInclude = false;
-        initPlugins();
 
         // Since we may be processing via an internal RequestDispatcher 
         // include(), we need to investigate the subrequest URIs, etc.
@@ -157,51 +147,5 @@ public class RenditServlet
     
     public void init() throws ServletException {
         super.init();
-        initPlugins();
-    }
-
-    private void initPlugins() {
-        synchronized(INIT_LOCK) {
-            if (INITIALIZED)
-                return;
-        
-            File homeDir   = ServerConfigLocator.locate().getServerHomeDir();
-            File deployDir = new File(homeDir, "deploy");
-            File earDir    = new File(deployDir, "hq.ear");
-            File warDir    = new File(earDir, "hq.war");
-            File pluginDir = new File(warDir, "hqu");
-            File sysDir    = new File(earDir, "rendit_sys");
-            RenditServer.getInstance().setSysDir(sysDir);
-
-            _log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
-            _log.info("Watching for HQU plugins in [" + 
-                      pluginDir.getAbsolutePath() + "]");
-            _watcher = new DirWatcher(pluginDir, new DirWatcherCallback() {
-                public void fileAdded(File f) {
-                    if (f.getName().equals("public"))
-                        return;
-                    
-                    try {
-                        RenditServer.getInstance().addPluginDir(f);
-                    } catch(Exception e) {
-                        _log.warn("Unable to add plugin in [" + 
-                                  f.getAbsolutePath() + "]", e);
-                    }
-                }
-
-                public void fileRemoved(File f) {
-                    if (f.getName().equals("public"))
-                        return;
-                    
-                    RenditServer.getInstance().removePluginDir(f.getName());
-                }
-            });
-            
-            _watcherThread = new Thread(_watcher);
-            _watcherThread.setDaemon(true);
-            _watcherThread.start();
-                
-            INITIALIZED = true;
-        }
     }
 }
