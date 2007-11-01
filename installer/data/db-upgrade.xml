@@ -7079,7 +7079,7 @@ has already been defined.
         </statement>
       </schema-directSQL>
     </schemaSpec>
-
+	
     <schemaSpec version="3.66">
       <schema-directSQL>
         <statement desc="Dropping unique constraint for EAM_SERVICE_REQUEST"
@@ -7091,7 +7091,243 @@ has already been defined.
           ALTER table EAM_SERVICE_REQUEST DROP unique (serviceid, url);
         </statement>
       </schema-directSQL>
-    </schemaSpec>
+    </schemaSpec>	
+	
+    <schemaSpec version="3.67">
+      <schema-directSQL>
+		<statement desc="Dropping unnecessary index from eam_role_calendar">
+		  DROP INDEX calendar_role_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_operation">
+		  DROP INDEX eam_opname_idx
+		</statement>	
+		<statement desc="Dropping unnecessary index from eam_resource">
+		  DROP INDEX eam_resource_idx_type_idx
+		</statement>			  		  
+		<statement desc="Dropping unnecessary index from eam_server">
+		  DROP INDEX eam_server_platform_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_event_log">
+		  DROP INDEX event_log_timestamp_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_measurement_bl">
+		  DROP INDEX metric_baseline_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_metric_prob">
+		  DROP INDEX metric_prob_id_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_monitorable_type">
+		  DROP INDEX mtype_idx_appdeftype_idx
+		</statement>		  
+		<statement desc="Dropping unnecessary index from eam_measurement_templ">
+		  DROP INDEX templ_monitorable_type_idx
+		</statement>			  
+		  
+		<statement desc="Dropping index from eam_autoinv_schedule to reorder columns">
+		  DROP INDEX ai_schedule_entity_idx
+		</statement>		  
+		<statement desc="Create index for eam_autoinv_schedule with highest cardinality column first" 
+				   targetDB="oracle">
+		  CREATE INDEX ai_schedule_entity_idx ON eam_autoinv_schedule ( entity_id, entity_type )				  
+        </statement>		  
+		<statement desc="Create index for eam_autoinv_schedule with highest cardinality column first" 
+				   targetDB="postgresql">	
+		  CREATE INDEX ai_schedule_entity_idx ON eam_autoinv_schedule USING btree ( entity_id, entity_type )				  
+        </statement>
+
+		<statement desc="Dropping index from eam_control_schedule to reorder columns">
+		  DROP INDEX ctl_schedule_entity_idx
+		</statement>		  
+		<statement desc="Create index for eam_control_schedule with columns ordered highest cardinality first" 
+				   targetDB="oracle">
+		  CREATE INDEX ctl_schedule_entity_idx ON eam_control_schedule ( entity_id, entity_type )							  
+        </statement>		  
+		<statement desc="Create index for eam_control_schedule with columns ordered highest cardinality first" 
+				   targetDB="postgresql">
+		  CREATE INDEX ctl_schedule_entity_idx ON eam_control_schedule USING btree ( entity_id, entity_type )			  
+        </statement>		  		  
+				  
+		<statement desc="Dropping index from eam_event_log to reorder columns">
+		  DROP INDEX event_log_idx
+		</statement>		  
+		<statement desc="Create index for eam_event_log with columns ordered highest cardinality first" 
+				   targetDB="oracle">
+		  CREATE INDEX event_log_idx ON eam_event_log ( timestamp, entity_id, entity_type )									  
+        </statement>		  
+		<statement desc="Create index for eam_event_log with columns ordered highest cardinality first" 
+				   targetDB="postgresql">
+		  CREATE INDEX event_log_idx ON eam_event_log USING btree ( timestamp, entity_id, entity_type )			  
+        </statement>
+		  
+		<statement desc="Dropping index from eam_escalation_state to reorder columns">
+		  DROP INDEX state_idx
+		</statement>		  
+		<statement desc="Create index for eam_escalation_state with columns ordered highest cardinality first" 
+				   targetDB="oracle">
+		  CREATE INDEX state_idx ON eam_escalation_state ( alert_def_id, alert_type )					
+        </statement>		  
+		<statement desc="Create index for eam_escalation_state with columns ordered highest cardinality first" 
+				   targetDB="postgresql">
+		  CREATE INDEX state_idx ON eam_escalation_state USING btree ( alert_def_id, alert_type )		
+        </statement>
+		  
+		<statement desc="Dropping index from eam_measurement_templ since we do not need to index monitorable_type_id">
+		  DROP INDEX templ_desig_mt_idx
+		</statement>		  
+		<statement desc="Create index for eam_measurement_templ" targetDB="oracle">
+		  CREATE INDEX templ_desig_idx ON eam_measurement_templ ( designate )							
+        </statement>		  
+		<statement desc="Create index for eam_measurement_templ" targetDB="postgresql">	
+		  CREATE INDEX templ_desig_idx ON eam_measurement_templ USING btree ( designate )			
+        </statement>		  		  	 
+		  		  
+		<statement desc="Create index for eam_action for faster lookup by parent"
+			       targetDB="oracle">
+		  CREATE INDEX action_child_idx ON eam_action ( parent_id ) 
+        </statement>
+		<statement desc="Create index for eam_action for faster lookup by parent"
+			       targetDB="postgresql">
+		  CREATE INDEX action_child_idx ON eam_action USING btree ( parent_id ) 
+        </statement>
+
+		<statement desc="Create index for eam_trigger_event for faster deletion 
+			             by expiration date" targetDB="oracle">
+		  CREATE INDEX trigger_expiration_idx ON eam_trigger_event ( expiration )			  
+        </statement>		  
+		<statement desc="Create index for eam_trigger_event for faster deletion 
+			             by expiration date" targetDB="postgresql">	
+		  CREATE INDEX trigger_expiration_idx ON eam_trigger_event USING btree ( expiration )				  
+        </statement>
+		  
+        <statement desc="Dropping unique constraint to reorder columns">
+		  ALTER TABLE eam_cprop_key DROP CONSTRAINT eam_cprop_key_appdef_type_key CASCADE		
+        </statement>
+		<statement desc="Create unique constraint with columns ordered highest cardinality first">
+		  ALTER TABLE eam_cprop_key ADD CONSTRAINT eam_cprop_key_appdef_typeid_key UNIQUE ( appdef_typeid, appdef_type, propkey )
+		</statement>		  
+		  
+        <statement desc="Dropping unique constraint to reorder columns">
+		  ALTER TABLE eam_escalation_state DROP CONSTRAINT eam_escalation_state_escalation_id_key CASCADE			
+        </statement>
+		<statement desc="Create unique constraint with columns ordered highest cardinality first">
+		  ALTER TABLE eam_escalation_state ADD CONSTRAINT eam_escalation_state_escalation_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
+		</statement>
+		
+		<statement desc="Drop primary key from eam_srn" 
+				   targetDB="oracle">
+		  ALTER TABLE eam_srn DROP primary key	  
+		</statement>
+		<statement desc="Drop primary key from eam_srn"
+                   targetDB="postgresql">
+		  ALTER TABLE eam_srn DROP CONSTRAINT eam_srn_pkey			  
+		</statement>
+		<statement desc="Add new primary key to eam_srn"
+                   targetDB="oracle">			
+		  ALTER TABLE eam_srn ADD CONSTRAINT eam_srn_pkey PRIMARY KEY ( instance_id, appdef_type )
+		</statement>
+		<statement desc="Add new primary key to eam_srn"
+                   targetDB="postgresql">
+		  ALTER TABLE eam_srn ADD PRIMARY KEY ( instance_id, appdef_type )			
+		</statement>
+		  
+
+		<statement desc="Dropping index from eam_measurement_data_1h">
+		  drop index measurement_data_1h_time_idx
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_1h"
+                   targetDB="oracle">
+		  alter table eam_measurement_data_1h drop primary key
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_1h"
+				   targetDB="postgresql">
+		  alter table eam_measurement_data_1h drop constraint eam_measurement_data_1h_pkey
+		</statement>		  
+		<statement desc="Add new primary key to eam_measurement_data_1h"
+				   targetDB="oracle">
+		  alter table EAM_MEASUREMENT_DATA_1H add
+		  constraint EAM_MEASUREMENT_DATA_1H_PKEY
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Add new primary key to eam_measurement_data_1h"
+				   targetDB="postgresql">
+		  alter table EAM_MEASUREMENT_DATA_1H add
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Creating index on eam_measurement_data_1h measurement_id"
+				   targetDB="oracle">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H (MEASUREMENT_ID)
+		</statement>		  
+		<statement desc="Creating index on eam_measurement_data_1h measurement_id"
+				   targetDB="postgresql">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H USING btree (MEASUREMENT_ID)
+		</statement>
+		  
+
+		<statement desc="Dropping index from eam_measurement_data_6h">
+		  drop index measurement_data_6h_time_idx
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_6h"
+				   targetDB="oracle">
+		  alter table EAM_MEASUREMENT_DATA_6H drop primary key
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_6h"
+				   targetDB="postgresql">
+		  alter table EAM_MEASUREMENT_DATA_6H drop constraint eam_measurement_data_6h_pkey
+		</statement>
+		<statement desc="Add new primary key to eam_measurement_data_6h"
+				   targetDB="oracle">
+		  alter table EAM_MEASUREMENT_DATA_6H add
+		  constraint EAM_MEASUREMENT_DATA_6H_PKEY
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Add new primary key to eam_measurement_data_6h"
+				   targetDB="postgresql">
+		  alter table EAM_MEASUREMENT_DATA_6H add
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Creating index on eam_measurement_data_6h measurement_id"
+				   targetDB="oracle">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H(MEASUREMENT_ID)
+		</statement>
+		<statement desc="Creating index on eam_measurement_data_6h measurement_id" 
+				   targetDB="postgresql">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H USING btree (MEASUREMENT_ID)
+		</statement>
+		  
+
+		<statement desc="Dropping index from eam_measurement_data_1d">
+		  drop index measurement_data_1d_time_idx
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_1d"
+				   targetDB="oracle">
+		  alter table EAM_MEASUREMENT_DATA_1D drop primary key
+		</statement>
+		<statement desc="Dropping primary key from eam_measurement_data_1d"
+				   targetDB="postgresql">
+		  alter table EAM_MEASUREMENT_DATA_1D drop constraint eam_measurement_data_1d_pkey
+		</statement>
+		<statement desc="Add new primary key to eam_measurement_data_1d"
+				   targetDB="oracle">
+		  alter table EAM_MEASUREMENT_DATA_1D add
+		  constraint EAM_MEASUREMENT_DATA_1D_PKEY
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Add new primary key to eam_measurement_data_1d"
+				   targetDB="postgresql">
+		  alter table EAM_MEASUREMENT_DATA_1D add
+		  primary key (TIMESTAMP, MEASUREMENT_ID)
+		</statement>
+		<statement desc="Creating index on eam_measurement_data_1d measurement_id"
+			       targetDB="oracle">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D(MEASUREMENT_ID)
+		</statement>
+		<statement desc="Creating index on eam_measurement_data_1d measurement_id"
+				   targetDB="postgresql">
+		  CREATE INDEX EAM_MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D USING btree (MEASUREMENT_ID)
+		</statement>
+      </schema-directSQL>
+    </schemaSpec>	
+
 </dbupgrade>
 </target>
 
