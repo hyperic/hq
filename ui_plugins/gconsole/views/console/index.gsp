@@ -1,18 +1,49 @@
+<script type="text/javascript">
+function sendCode() {
+  dojo.io.bind({
+    url: '<%= urlFor(action:"execute") %>',
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    content: {code: dojo.byId("code").value},
+    load: function(type, data, evt) {
+      dojo.byId('result').innerHTML = data.result;
+    },
+    error: function(err, msg) {
+      alert('error! ' + err);
+    }
+  });
+}
+
+function chooseTemplate(t) {
+  dojo.io.bind({
+    url: '<%= urlFor(action:"getTemplate") %>',
+    method: "get",
+    mimetype: "text/json-comment-filtered",
+    content: {template: t},
+    load: function(type, data, evt) {
+      dojo.byId('code').value = data.result;
+    },
+    error: function(err, msg) {
+      alert('error! ' + err);
+    }
+  });
+}
+
+</script>
+
 Templates: 
 <% for(t in templates) { %>
-  <%= linkTo t, [action:'chooseTemplate', template:t] %> | 
+  <a onclick="chooseTemplate('${t}')">${t}</a> |
 <% } %>
 <br/>
-<% formFor([action:'index']) { f -> %>
-<p>
-  <%= f.text_area(name:'code_input', value:r['last_code']) %>
-</p>
-<p>
-  <%= f.submit_button([label:'Execute']) %>
-</p>
-<% } %>
 
-<div>
-  <% render(partial:'result', locals:[foo:'bar']) %>
+<textarea id="code" cols="80", rows="20">
+</textarea>
+
+<br/>
+<button onclick="sendCode()">Execute</button>
+
+<br/>
+Results:<br/>
+<div id='result'>
 </div>
-  

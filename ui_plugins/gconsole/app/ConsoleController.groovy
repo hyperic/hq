@@ -1,3 +1,4 @@
+import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.application.HQApp
 import org.hyperic.hq.product.GenericPlugin
@@ -12,6 +13,7 @@ class ConsoleController extends BaseController {
             }
             return false
         })
+        setJSONMethods(['execute', 'getTemplate'])
 	}
 	
     private def getTemplateDir() {
@@ -31,20 +33,10 @@ class ConsoleController extends BaseController {
 	}
 	
     def index(params) {
-    	def r = [:]
-    
-    	if (params.hasOne('code_input')) {
-		    r['last_code']   = params.getOne('code_input')
-			r['last_result'] = executeCode(r['last_code']) 
-		} else {
-			r['last_code']   = '1 + 2'
-			r['last_result'] = '3'
-		}
-    	
-    	render(action:'index', locals:[r:r, templates:templates])
+        render(action:'index', locals:[templates:templates])
     }
     
-    def chooseTemplate(params) {
+    def getTemplate(params) {
         def template = params.getOne('template')
         def tmplCode = ""
         
@@ -53,8 +45,13 @@ class ConsoleController extends BaseController {
 				tmplCode = r.text
             }
         }
-            
-        index(['code_input' : [tmplCode]])
+
+        [result: tmplCode]
+    }
+    
+    def execute(params) {
+        def code = params.getOne('code')
+        [result: HtmlUtil.escapeHtml(executeCode(code))]
     }
     
     private def executeCode(code) {
