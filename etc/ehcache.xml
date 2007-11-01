@@ -13,6 +13,14 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"/>
 
+  <!-- Server configuration cache -->
+  <cache name="org.hyperic.hq.common.ConfigProperty.findAll"
+         maxElementsInMemory="10"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Measurement caches -->
   <cache name="org.hyperic.hq.measurement.server.session.DerivedMeasurement.baselinesBag"
          maxElementsInMemory="50000"

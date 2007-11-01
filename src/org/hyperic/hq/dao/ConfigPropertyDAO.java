@@ -46,6 +46,10 @@ public class ConfigPropertyDAO extends HibernateDAO
         super.save(entity);
     }
 
+    protected boolean cacheFindAll() {
+        return true;
+    }
+
     public void remove(ConfigProperty entity)
     {
         super.remove(entity);
