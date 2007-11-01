@@ -115,20 +115,20 @@ public class AIScheduleDAO extends HibernateDAO
     }
 
     public Collection findByEntityFireTime(int type, int id, boolean asc) {
-        String sql="from AISchedule where entityType=? and entityId=? " +
+        String sql="from AISchedule where entityId=? and entityType=? " +
                    "order by nextFireTime " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
+            .setInteger(0, id)
+            .setInteger(1, type)
             .list();
     }
 
     public Collection findByEntityScanName(int type, int id, boolean asc) {
-        String sql="from AISchedule where entityType=? and entityId=? " +
+        String sql="from AISchedule where entityId=? and entityType=? " +
                    "order by scanName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
+            .setInteger(0, id)
+            .setInteger(1, type)
             .list();
     }
 }
