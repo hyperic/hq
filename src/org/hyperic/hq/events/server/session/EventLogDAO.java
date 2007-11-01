@@ -59,11 +59,11 @@ public class EventLogDAO extends HibernateDAO {
                                String status) 
     {
         return createCriteria()
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
-            .add(Expression.eq(ENTITY_ID, entId.getId()))
-            .add(Expression.eq("status", status))
             .add(Expression.between(TIMESTAMP, new Long(begin), 
                                     new Long(end)))
+            .add(Expression.eq(ENTITY_ID, entId.getId()))
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
+            .add(Expression.eq("status", status))
             .addOrder(Order.desc(TIMESTAMP))
             .list();
     }
@@ -71,9 +71,9 @@ public class EventLogDAO extends HibernateDAO {
     List findByEntity(AppdefEntityID entId, long begin, long end,
                       String[] eventTypes) {
         Criteria c = createCriteria()
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
+            .add(Expression.between(TIMESTAMP, new Long(begin), new Long(end)))
             .add(Expression.eq(ENTITY_ID, entId.getId()))
-            .add(Expression.between(TIMESTAMP, new Long(begin), new Long(end)));
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())));
         
         if (eventTypes != null && eventTypes.length > 0)
             c.add(Expression.in("type", eventTypes));
@@ -84,9 +84,9 @@ public class EventLogDAO extends HibernateDAO {
     List findLastByEntity(AppdefEntityID entId, long begin) 
     {
         return createCriteria()
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
-            .add(Expression.eq(ENTITY_ID, entId.getId()))
             .add(Expression.gt(TIMESTAMP, new Long(begin)))
+            .add(Expression.eq(ENTITY_ID, entId.getId()))
+            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
             .addOrder(Order.desc(TIMESTAMP))
             .setMaxResults(1)
             .list();

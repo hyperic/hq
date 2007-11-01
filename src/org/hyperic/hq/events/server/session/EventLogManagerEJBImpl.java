@@ -221,11 +221,12 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         sql.append("SELECT i FROM ").append(TABLE_EAM_NUMBERS)
            .append(" WHERE i < ").append(intervals)
            .append(" AND EXISTS (SELECT id FROM ").append(TABLE_EVENT_LOG)
-           .append(" WHERE entity_type = ").append(entityId.getType())
-           .append(" AND entity_id = ").append(entityId.getID())
-           .append(" AND timestamp BETWEEN (")
+           .append(" WHERE timestamp BETWEEN (")
            .append(begin).append(" + (").append(interval).append(" * i)) AND ((")
-           .append(begin).append(" + (").append(interval).append(" * (i + 1))) - 1) ")
+           .append(begin).append(" + (").append(interval).append(" * (i + 1))) - 1)")
+           .append(" AND entity_id = ").append(entityId.getID())
+           .append(" AND entity_type = ").append(entityId.getType())
+           .append(' ')
            .append(Util.getHQDialect().getLimitString(1))
            .append(')');
         
