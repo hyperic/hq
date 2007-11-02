@@ -5,7 +5,7 @@
       "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping package="org.hyperic.hq.hqu.server.session">
-  <class name="Attachment" table="EAM_UI_ATTACHMENT">
+  <class name="Attachment" table="EAM_UI_ATTACHMENT" lazy="false">
 
     <cache usage="read-write" />
 
