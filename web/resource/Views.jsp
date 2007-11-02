@@ -29,7 +29,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
- 
+<hq:constant
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP_ADHOC_PSS" var="CONST_ADHOC_PSS" />
+<hq:constant
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP_ADHOC_GRP" var="CONST_ADHOC_GRP" />
+<hq:constant
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP_ADHOC_APP" var="CONST_ADHOC_APP" />
+<hq:constant
+    classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
+    symbol="APPDEF_TYPE_GROUP_COMPAT_PS" var="CONST_COMPAT_PS" />
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM" var="CONST_PLATFORM" />
@@ -82,6 +93,14 @@ var pageData = new Array();
 		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 		</tiles:insert>
 		<c:choose>
+		   <c:when test="${Resource.groupType == CONST_ADHOC_PSS ||
+                           Resource.groupType == CONST_ADHOC_GRP ||
+                           Resource.groupType == CONST_ADHOC_APP }"> 
+                <tiles:insert definition=".tabs.resource.group.views.inventoryonly">
+                    <tiles:put name="resource" beanName="Resource" />
+                    <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+                </tiles:insert>
+            </c:when>
 		    <c:when test="${ canControl }">
 		        <tiles:insert definition=".tabs.resource.group.views">
 		          <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
@@ -95,7 +114,7 @@ var pageData = new Array();
 		        </tiles:insert>
 		    </c:otherwise>
 		</c:choose>    
-	
+		
 	</c:when>
 	<c:when test="${CONST_PLATFORM == entityId.type}">
 	   
