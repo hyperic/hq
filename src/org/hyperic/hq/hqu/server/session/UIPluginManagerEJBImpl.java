@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -280,6 +281,23 @@ public class UIPluginManagerEJBImpl
     }
     
     /**
+     * @ejb:interface-method
+     */
+    public AttachmentDescriptor findAttachmentDescriptorById(Integer id) {
+        Attachment a = findAttachmentById(id);
+        List c = new ArrayList(1);
+        Collection res;
+        Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
+        c.add(a);
+        
+        res = convertAttachmentsToDescriptors(c, root);
+        if (res.isEmpty())
+            return null;
+        
+        return (AttachmentDescriptor)res.iterator().next();
+    }
+    
+    /**
      * Find attachments for a resource.
      * @return a collection of {@link AttachmentDescriptor}s
      * @ejb:interface-method
@@ -319,7 +337,7 @@ public class UIPluginManagerEJBImpl
             ResourceManagerEJBImpl.getOne().findResource(ent);
         return convertAttachmentsToDescriptors(attachments, viewedResource);
     }
-        
+    
     private Collection convertAttachmentsToDescriptors(Collection attachments,
                                                        Resource viewedRsrc)
     {
