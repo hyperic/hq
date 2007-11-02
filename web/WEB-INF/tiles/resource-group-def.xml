@@ -53,10 +53,14 @@
   <definition name=".tabs.resource.group.inventoryonly"
         extends=".tabs.resource.inventoryonly">
      <putList name="tabList">
-       <item value="Inventory" link="/resource/group/Inventory.do"
+        <item value="Inventory" link="/resource/group/Inventory.do"
              height="21" width="102" classtype="org.hyperic.hq.ui.util.Tab"/>
+        <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
      </putList>     
-    </definition>
+  </definition>
   
   <definition name=".tabs.resource.group.inventory"
               extends=".tabs.resource.group">                            
@@ -83,6 +87,12 @@
   <definition name=".tabs.resource.group.inventory.inventoryonly"
               extends=".tabs.resource.group.inventoryonly">                            
      <put name="selectedIndex"  value="0" />
+     <putList name="subTabList"/>
+  </definition>
+  
+  <definition name=".tabs.resource.group.views.inventoryonly"
+              extends=".tabs.resource.group.inventoryonly">                            
+     <put name="selectedIndex"  value="1" />
      <putList name="subTabList"/>
   </definition>
   
