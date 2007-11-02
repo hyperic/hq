@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
@@ -44,8 +45,10 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
@@ -446,6 +449,26 @@ public class GalertManagerEJBImpl
                                                    severity, pInfo);
     }
 
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's
+     * @ejb:interface-method
+     */
+    public int[] fillAlertCount(AuthzSubjectValue subj, AppdefEntityID[] ids,
+                                int[] counts)
+        throws PermissionException, FinderException {
+        ResourceGroupManagerLocal resMan = ResourceGroupManagerEJBImpl.getOne();
+        
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i].isGroup()) {
+                ResourceGroup group =
+                    resMan.findResourceGroupById(subj, ids[i].getId());
+
+                counts[i] = _logDAO.countAlerts(group).intValue();
+            }
+        }
+        return counts;
+    }
+    
     /**
      * @ejb:interface-method  
      */

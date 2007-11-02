@@ -267,7 +267,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertDAO dao = getAlertDAO();
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            counts[i] = dao.countAlerts(ids[i]).intValue();
+            if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()){
+                counts[i] = dao.countAlerts(ids[i]).intValue();
+            }
         }
         return counts;
     }

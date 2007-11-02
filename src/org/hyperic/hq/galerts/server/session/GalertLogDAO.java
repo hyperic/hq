@@ -36,6 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.SortField;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -167,5 +168,13 @@ class GalertLogDAO
         getSession().createQuery(sql)
                     .setParameter("def", d)
                     .executeUpdate();
+    }
+
+    public Integer countAlerts(ResourceGroup g) {
+        return (Integer) createCriteria()
+            .createAlias("alertDef", "d")
+            .add(Restrictions.eq("d.group", g))
+            .setProjection(Projections.rowCount())
+            .uniqueResult();
     }
 }

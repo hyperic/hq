@@ -431,8 +431,15 @@ public class EventsBossEJBImpl
      * Get the number of alerts for the given array of AppdefEntityID's
      * @ejb:interface-method 
      */
-    public int[] getAlertCount(AppdefEntityID[] ids) {
-        return getAM().getAlertCount(ids);
+    public int[] getAlertCount(int sessionID, AppdefEntityID[] ids)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, FinderException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+
+        int[] counts = getAM().getAlertCount(ids);
+        counts = GalertManagerEJBImpl.getOne().fillAlertCount(subject, ids,
+                                                              counts);
+        return counts;
     }
 
     /**

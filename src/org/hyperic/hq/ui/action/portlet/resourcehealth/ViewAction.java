@@ -86,17 +86,16 @@ public class ViewAction extends BaseAction {
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
         List list;
+        int sessionID = user.getSessionId().intValue();
         try{
-            list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
-                                                   arrayIds);
+            list = boss.findResourcesCurrentHealth(sessionID, arrayIds);
         } catch(Exception e) {
             DashboardUtils.verifyResources(key, ctx, dashPrefs, user);
-            list = boss.findResourcesCurrentHealth(user.getSessionId().intValue(),
-                                                   arrayIds);
+            list = boss.findResourcesCurrentHealth(sessionID, arrayIds);
         }
 
         // Get alert counts for each resource
-        int alerts[] = eBoss.getAlertCount(arrayIds);
+        int alerts[] = eBoss.getAlertCount(sessionID, arrayIds);
 
         // Due to the complexity of the UIBeans, we need to construct the
         // JSON objects by hand.
