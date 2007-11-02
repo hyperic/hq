@@ -207,6 +207,7 @@
           console="false"
           export="true"
           delimiter=";"
+          haltonerror="true"
           />
     </hibernatetool>
   </target>
