@@ -259,6 +259,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     * @return a PageList of MeasurementTemplateValue objects based on entity
+     */
+    public PageList findMeasurementTemplates(int sessionId, 
+                                             AppdefEntityID aeid)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        AppdefEntityValue aev = new AppdefEntityValue(aeid, subject);
+        
+        String typeName = aev.getMonitorableType();
+        return getTemplateManager().findTemplates(typeName, null,
+                                                  new Integer[] {},
+                                                  PageControl.PAGE_ALL);
+    }
+
+    /**
      * Retrieve list of measurement templates applicable to a monitorable type
      * 
      * @param mtype
@@ -2654,52 +2671,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
-    }
-
-    /**
-     * Given a group of resources, find all the scheduled measurements
-     * which are common to everyone in the group.
-     * 
-     *  TODO:  We may want to make this more flexible by considering 
-     *         availability to be the same even though it's actually a 
-     *         different metric.
-     *  
-     * @return a map of {@link Integer} template IDs onto {@link String} 
-     *         descriptions
-     * @ejb:interface-method
-     */
-    public Map findCommonGroupMetrics(int sessionId, AppdefEntityID groupId)
-        throws SessionException, PermissionException, 
-               AppdefEntityNotFoundException, GroupNotCompatibleException
-    {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        List vals = findGroupMeasurements(sessionId, groupId, null, 
-                                          PageControl.PAGE_ALL);
-        AppdefGroupManagerLocal gMan;
-
-        gMan = AppdefGroupManagerEJBImpl.getOne();
-        
-        int numGroupMembers = gMan.findGroup(subject, groupId).getTotalSize();
-        
-        SortedMap ents = new TreeMap(); 
-        for (Iterator i=vals.iterator(); i.hasNext(); ) {
-            GroupMetricDisplaySummary sum = (GroupMetricDisplaySummary)i.next();
-            
-            if (sum.getActiveMembers() != numGroupMembers)
-                continue;
-        
-            ents.put(sum.getLabel(), sum.getTemplateId());
-        }
-
-        // Use the previously created SortedMap to create the new linked hash
-        // map, swapping keys and vals
-        Map res = new LinkedHashMap();
-        for (Iterator i=ents.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            
-            res.put(ent.getValue(), ent.getKey());
-        }
-        return res;
     }
 
     /**
