@@ -29,7 +29,7 @@
 	</div>
 </c:when>
 <c:when test="${empty resourceViewTabAttachments}">
-	<div style="padding: 100px 0px; color: gray; font-size: 14px;text-align:center;">
+	<div style="padding: 100px 0px; color: gray; font-size: 15px;text-align:center;">
 	  No views are available for this resource
 	</div>
 </c:when>
