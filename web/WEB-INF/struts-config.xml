@@ -375,6 +375,10 @@
               forward="/common/Login.jsp">
         <set-property property="title" value="Login"/>  
       </action>
+      
+      <action path="/Header"
+            type="org.hyperic.hq.ui.action.common.HeaderAction">
+      </action>
 
       <!--======================================================= --> 
       <!-- Admin --> 

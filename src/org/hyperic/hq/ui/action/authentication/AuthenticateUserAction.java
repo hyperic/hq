@@ -228,26 +228,6 @@ public class AuthenticateUserAction extends TilesAction {
         } catch (Throwable t) {
             session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
         }
-        
-        // Look up any UI attach points
-        ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
-        Collection mastheadAttachments = pBoss.findMastAttachments(sid);
-        session.setAttribute("mastheadAttachments", mastheadAttachments);
-        ArrayList resourceAttachments = new ArrayList();
-		ArrayList trackerAttachments = new ArrayList();
-		for (Iterator itr = mastheadAttachments.iterator(); itr.hasNext();) {
-            AttachmentDescriptor d = (AttachmentDescriptor)itr.next();
-			AttachmentMasthead attachment = (AttachmentMasthead) 
-                d.getAttachment();
-			if (attachment.getCategory().equals(ViewMastheadCategory.RESOURCE)) {
-				resourceAttachments.add(d);
-			} else if (attachment.getCategory().equals(
-					ViewMastheadCategory.TRACKER)) {
-				trackerAttachments.add(d);
-			}
-		}
-        session.setAttribute("mastheadResourceAttachments", resourceAttachments);
-        session.setAttribute("mastheadTrackerAttachments", trackerAttachments);
         return af;
     }
 

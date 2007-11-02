@@ -48,7 +48,7 @@ public class PluginsAction extends TilesAction {
 		UIPluginManagerLocal pluginManager = UIPluginManagerEJBImpl.getOne();
 		Collection attachements = pluginManager
 				.findAttachments(AttachType.ADMIN);
-		request.getSession().setAttribute("adminAttachments", attachements);
+		request.setAttribute("adminAttachments", attachements);
 
 		return null;
 	}

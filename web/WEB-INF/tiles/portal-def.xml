@@ -11,11 +11,16 @@
                 
         <put name="title"   value="EAM" />
         <put name="head"    value="/common/Head.jsp" />
-        <put name="header"  value="/common/Header.jsp" />     
-        <put name="headerSmall"  value="/common/HeaderSmall.jsp" />   
+        <put name="headerSmall"  value="/common/HeaderSmall.jsp" /> 
+        <put name="header"  value=".main.header"/>   
         <put name="footer"  value="/common/Footer.jsp" />
         <put name="body"    value="/portal/ColumnsLayout.jsp" />
-    </definition>   
+    </definition>
+    
+    <definition name=".main.header"
+                controllerUrl="/Header.do"
+                path="/common/Header.jsp">
+    </definition>
     
     <definition name=".portal.dash.layout" 
                 extends=".main.layout"
