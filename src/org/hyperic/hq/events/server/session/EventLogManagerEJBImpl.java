@@ -145,15 +145,9 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public EventLog findLastLog(AppdefEntityID aeid, long begin)
+    public List findLastLogs(int type, Integer[] ids, long begin)
     {
-        List events = getEventLogDAO().findLastByEntity(aeid, begin);
-        
-        // If there are any, return it
-        if (events.size() > 0)
-            return (EventLog) events.get(0);
-        
-        return null;
+        return getEventLogDAO().findLastByEntity(type, ids, begin);
     }
 
     /** 
@@ -161,13 +155,11 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public List findLogs(int entityType, int entityId, String[] eventTypes,
+    public List findLogs(AppdefEntityID ent, String[] eventTypes,
                          long begin, long end)
     {
         EventLogDAO eDAO = getEventLogDAO();
-        AppdefEntityID entId = new AppdefEntityID(entityType, entityId);
-        
-        return eDAO.findByEntity(entId, begin, end, eventTypes);
+        return eDAO.findByEntity(ent, begin, end, eventTypes);
     }
 
     /** 
@@ -175,13 +167,10 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public List findLogs(int entityType, int entityId, String status,
+    public List findLogs(AppdefEntityID ent, String status,
                          long begin, long end) 
     {
-        EventLogDAO eDAO = getEventLogDAO();
-        AppdefEntityID ent = new AppdefEntityID(entityType, entityId);
-        
-        return eDAO.findByEntityAndStatus(ent, begin, end, status);
+        return getEventLogDAO().findByEntityAndStatus(ent, begin, end, status);
     }
 
     public List findByCtime(long begin, long end, String[] eventTypes) {

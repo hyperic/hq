@@ -27,7 +27,6 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +34,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -276,9 +274,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws FinderException,
-        SessionTimeoutException, SessionNotFoundException,
-        PermissionException {
+        throws FinderException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException {
 
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         PageList platTypeList = null ;
@@ -340,16 +337,13 @@ public class AppdefBossEJBImpl
             return getApplicationManager().findApplicationTypeById(id);
         } catch (FinderException e) {
             throw new ApplicationException(e);
-        } catch (Exception e) {
-            throw new SystemException(e);
         }
     }
 
     /**
      * @ejb:interface-method
      */
-    public PageList findAllServiceTypes(int sessionID,
-                                        PageControl pc)
+    public PageList findAllServiceTypes(int sessionID, PageControl pc)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
 
@@ -597,8 +591,7 @@ public class AppdefBossEJBImpl
     }
 
     private PageList findServices(int sessionID, AppdefEntityID aeid,
-                                  boolean allServiceInventory,
-                                  PageControl pc)
+                                  boolean allServiceInventory, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionTimeoutException, SessionNotFoundException 
     {
@@ -646,8 +639,7 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public PageList findPlatformsByApplication(int sessionID,
-                                               Integer appId,
+    public PageList findPlatformsByApplication(int sessionID, Integer appId,
                                                PageControl pc)
         throws AppdefEntityNotFoundException,
                SessionTimeoutException, SessionNotFoundException,
@@ -830,9 +822,8 @@ public class AppdefBossEJBImpl
                          APPDEF_RES_TYPE_UNDEFINED, pc);
     }
 
-    private PageList findServers(int sessionID, int findByType,
-                                 Integer typeId, int servTypeId,
-                                 PageControl pc)
+    private PageList findServers(int sessionID, int findByType, Integer typeId,
+                                 int servTypeId, PageControl pc)
         throws AppdefEntityNotFoundException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException 
@@ -1015,9 +1006,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PlatformValue findPlatformById(int sessionID, Integer id)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getPlatformManager().getPlatformValueById(subject, id);
@@ -1050,9 +1040,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public PageList findAllServers(int sessionID, PageControl pc)
-        throws FinderException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws FinderException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
 
@@ -1063,9 +1052,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServerValue findServerById(int sessionID, Integer id)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException
+        throws AppdefEntityNotFoundException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getServerManager().getServerById(subject, id);
@@ -1100,9 +1088,8 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServiceValue findServiceById(int sessionID, Integer id)
-        throws AppdefEntityNotFoundException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
+        throws AppdefEntityNotFoundException, SessionTimeoutException,
+               SessionNotFoundException, PermissionException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         return getServiceManager().getServiceById(subject, id);
@@ -1127,7 +1114,7 @@ public class AppdefBossEJBImpl
      */
      public PageList findAllResourceTypes (int sessionId, PageControl pc )
          throws SessionTimeoutException, SessionNotFoundException,
-                SystemException,PermissionException {
+                PermissionException {
          return findAllResourceTypes (sessionId, APPDEF_TYPE_UNDEFINED, pc);
      }
     
@@ -1139,7 +1126,7 @@ public class AppdefBossEJBImpl
     public PageList findAllResourceTypes(int sessionId, int entType,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
-               SystemException, PermissionException 
+                PermissionException 
     {
         List toBePaged;
         Pager defaultPager;
@@ -3042,8 +3029,7 @@ public class AppdefBossEJBImpl
 
     // Page out the collection, applying any filters in the process.
     private PageList getPageList (Collection coll, PageControl pc,
-                                  List filterList) throws SystemException 
-    {
+                                  List filterList) {
         Pager pager;
         AppdefPagerFilter[] filterArr;
 
@@ -3118,7 +3104,7 @@ public class AppdefBossEJBImpl
                GroupModificationException, GroupDuplicateNameException,
                AppSvcClustDuplicateAssignException, PermissionException,
                SessionTimeoutException, SessionNotFoundException,
-               SystemException, VetoException 
+               VetoException 
     {
         AuthzSubjectValue subject = manager.getSubject(sessionId);
         AppdefGroupManagerLocal groupMan = getAppdefGroupManager();
@@ -3904,6 +3890,7 @@ public class AppdefBossEJBImpl
             Collections.sort((List) entries, comparator);
         }
         
+        long minTimestamp = Long.MAX_VALUE;
         for (Iterator it = entries.iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Integer mid = (Integer) entry.getKey();
@@ -3911,7 +3898,12 @@ public class AppdefBossEJBImpl
             DerivedMeasurement metric = dmMan.getMeasurement(mid);
             CPropResource cpRes =
                 (CPropResource) res.get(metric.getInstanceId());
-            cpRes.setLastValue((MetricValue) entry.getValue());
+            
+            MetricValue mval = (MetricValue) entry.getValue();
+            if (mval != null) {
+                cpRes.setLastValue(mval);
+                minTimestamp = Math.min(minTimestamp, mval.getTimestamp());
+            }
             
             if (sortByValue) {
                 ret.add(cpRes);
@@ -3939,14 +3931,14 @@ public class AppdefBossEJBImpl
 
         // Now get their last events
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
-        for (Iterator it = ret.iterator(); it.hasNext(); ) {
-            CPropResource cpRes = (CPropResource) it.next();
-            if (cpRes.getLastValue() != null) { // We have collected data for it
-                EventLog eventLog =
-                    elMan.findLastLog(cpRes.getEntityId(),
-                                      cpRes.getLastValue().getTimestamp());
-                cpRes.setLastEvent(eventLog);
-            }
+        List events =
+            elMan.findLastLogs(AppdefEntityConstants.APPDEF_TYPE_SERVICE,
+                               instIds, minTimestamp);
+        for (Iterator it = events.iterator(); it.hasNext(); ) {
+            EventLog log = (EventLog) it.next();
+            CPropResource cpRes =
+                (CPropResource) res.get(new Integer(log.getEntityId()));
+            cpRes.setLastEvent(log);
         }
         
         return ret;

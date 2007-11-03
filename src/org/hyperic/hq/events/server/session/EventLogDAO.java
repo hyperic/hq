@@ -81,15 +81,16 @@ public class EventLogDAO extends HibernateDAO {
         return c.list();
     }
     
-    List findLastByEntity(AppdefEntityID entId, long begin) 
+    List findLastByEntity(int type, Integer[] ids, long begin) 
     {
-        return createCriteria()
-            .add(Expression.gt(TIMESTAMP, new Long(begin)))
-            .add(Expression.eq(ENTITY_ID, entId.getId()))
-            .add(Expression.eq(ENTITY_TYPE, new Integer(entId.getType())))
-            .addOrder(Order.desc(TIMESTAMP))
-            .setMaxResults(1)
-            .list();
+        return getSession().createQuery("from EventLog as el " +
+        		"where el.entityType = :type and " +
+        		"(el.entityId, el.timestamp) in " +
+        		"(select el.entityId, max(el.timestamp) from EventLog el where " +
+        		"el.entityType = :type and el.entityId in (:ids) group by el.entityId)")
+        		.setInteger("type", type)
+        		.setParameterList("ids", ids)
+        		.list();
     }
     
     List findBySubject(String subject) {
