@@ -406,7 +406,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ResourceType.findByName"
-         maxElementsInMemory="10"
+         maxElementsInMemory="20"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
