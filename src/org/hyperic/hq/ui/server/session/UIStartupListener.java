@@ -54,7 +54,6 @@ public class UIStartupListener implements StartupListener {
         
         app.registerCallbackListener(PluginsDeployedCallback.class,
                                      new UIPluginInitializer());
-        initPlugins();
     }
 
     private static class UIPluginInitializer 
