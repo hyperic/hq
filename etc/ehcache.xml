@@ -14,7 +14,13 @@
          timeToLiveSeconds="0"/>
 
   <!-- Server configuration cache -->
-  <cache name="org.hyperic.hq.common.ConfigProperty.findAll"
+  <cache name="org.hyperic.hq.common.ConfigProperty"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="org.hyperic.hq.common.ConfigProperty.findAll"
          maxElementsInMemory="10"
          eternal="true"
          timeToIdleSeconds="0"

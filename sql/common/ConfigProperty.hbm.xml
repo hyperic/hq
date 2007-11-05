@@ -2,6 +2,8 @@
 <hibernate-mapping package="org.hyperic.hq.common">
 
   <class name="ConfigProperty" table="EAM_CONFIG_PROPS">
+    <cache usage="read-write"/>
+      
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
       <generator class="sequence">
