@@ -444,12 +444,15 @@ function addRow() {
     }
     select1.setAttribute('name', 'waittime');
     addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-    addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
-    addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
-    addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
-    addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-    addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
-    addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
+    addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="5"/></fmt:message>');
+    addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="10"/></fmt:message>');
+    addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="20"/></fmt:message>');
+    addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="30"/></fmt:message>');
+    addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="45"/></fmt:message>');
+    addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait.minutes"><fmt:param value="60"/></fmt:message>');
+    addOption(select1, '14400000', '<fmt:message key="alert.config.escalation.wait.hours"><fmt:param value="4"/></fmt:message>');
+    addOption(select1, '28800000', '<fmt:message key="alert.config.escalation.wait.hours"><fmt:param value="8"/></fmt:message>');
+    addOption(select1, '86400000', '<fmt:message key="alert.config.escalation.wait.hours"><fmt:param value="24"/></fmt:message>');
 
     escTr2.appendChild(td2);
     td2.setAttribute('valign', 'top');
