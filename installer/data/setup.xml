@@ -455,13 +455,18 @@ ${errMsg}
   <target name="server-upgrade" depends="setup-server-init" if="setup.upgrade">
     <echo>^^^INFO: Upgrading the server...</echo>
     <antcall target="setup-server"/>
+    <echo>^^^INFO: Copying existing hq-server.conf</echo>
     <!-- Copy the existing consolidated config -->
     <copy file="${server.upgradedir}/conf/hq-server.conf" 
           todir="${server.installdir}/server-${version}/conf"/>
     <!-- Copy the existing license file, if there is one -->
-    <copy file="${server.upgradedir}/conf/license.xml" 
+    <echo>^^^INFO: Copying existing license file</echo>
+    <copy file="${server.upgradedir}/conf/license.xml"
           todir="${server.installdir}/server-${version}/conf"
           failonerror="false"/>
+    <echo>^^^INFO: Copying existing HQ server cache information</echo>
+    <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
+                    new="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"/>
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
     </echo>
