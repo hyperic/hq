@@ -55,8 +55,14 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.server.session.AIAudit;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -77,21 +83,27 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class RuntimeReportProcessor {
-
     private Log log = LogFactory.getLog(RuntimeReportProcessor.class);
+    private AutoinventoryManagerLocal aiMgr = 
+        AutoinventoryManagerEJBImpl.getOne();
+    private PlatformManagerLocal platformMgr = 
+        PlatformManagerEJBImpl.getOne();
+    private ServerManagerLocal  serverMgr = 
+        ServerManagerEJBImpl.getOne();
+    private ServiceManagerLocal  serviceMgr = 
+        ServiceManagerEJBImpl.getOne();
+    private ConfigManagerLocal configMgr = 
+        ConfigManagerEJBImpl.getOne();
+    private AuthzSubjectManagerLocal subjectMgr =
+        AuthzSubjectManagerEJBImpl.getOne();
+    private CPropManagerLocal cpropMgr =
+        CPropManagerEJBImpl.getOne();
     
     public RuntimeReportProcessor () {}
 
     public void processRuntimeReport(AuthzSubjectValue subject,
                                      String agentToken,
-                                     CompositeRuntimeResourceReport crrr,
-                                     AutoinventoryManagerLocal aiMgr,
-                                     PlatformManagerLocal platformMgr,
-                                     ServerManagerLocal serverMgr,
-                                     ServiceManagerLocal serviceMgr,
-                                     ConfigManagerLocal configMgr,
-                                     CPropManagerLocal cpropMgr,
-                                     AuthzSubjectManagerLocal subjectMgr)
+                                     CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, CreateException, 
                PermissionException, ValidationException, 
                ApplicationException 
@@ -103,9 +115,7 @@ public class RuntimeReportProcessor {
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true; 
-            _processRuntimeReport(subject, agentToken, crrr, aiMgr, platformMgr,
-                                  serverMgr, serviceMgr, configMgr, cpropMgr, 
-                                  subjectMgr);
+            _processRuntimeReport(subject, agentToken, crrr); 
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(false);
@@ -114,15 +124,8 @@ public class RuntimeReportProcessor {
     }
 
     private void _processRuntimeReport(AuthzSubjectValue subject,
-                                     String agentToken,
-                                     CompositeRuntimeResourceReport crrr,
-                                     AutoinventoryManagerLocal aiMgr,
-                                     PlatformManagerLocal platformMgr,
-                                     ServerManagerLocal serverMgr,
-                                     ServiceManagerLocal serviceMgr,
-                                     ConfigManagerLocal configMgr,
-                                     CPropManagerLocal cpropMgr,
-                                     AuthzSubjectManagerLocal subjectMgr)
+                                       String agentToken,
+                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, CreateException, 
                PermissionException, ValidationException, 
                ApplicationException 
@@ -157,7 +160,7 @@ public class RuntimeReportProcessor {
             Server server = serverMgr.getServerById(serverId);
             if (server == null) {
                 log.error("Error finding existing server: " + serverId);
-                turnOffRuntimeDiscovery(subject, serverId, aiMgr,
+                turnOffRuntimeDiscovery(subject, serverId, 
                                         agentToken);
                 appdefServers[i] = null;
                 continue;
@@ -170,7 +173,7 @@ public class RuntimeReportProcessor {
             if (!appdefServers[i].getRuntimeAutodiscovery()) {
                 log.warn("Server reported a runtime report, but " +
                          "autodiscovery should be off, turning off.");
-                turnOffRuntimeDiscovery(subject, serverId, aiMgr, 
+                turnOffRuntimeDiscovery(subject, serverId, 
                                         agentToken);
                 appdefServers[i] = null;
             }
@@ -213,13 +216,7 @@ public class RuntimeReportProcessor {
                         aiplatforms[j].setAgentToken(agentToken);
                     }
                     mergePlatformIntoInventory(subject, aiplatforms[j],
-                                               appdefServers[i], 
-                                               platformMgr,
-                                               serverMgr,
-                                               serviceMgr,
-                                               configMgr,
-                                               cpropMgr,
-                                               subjectMgr);
+                                               appdefServers[i]); 
                     Util.flushCurrentSession();
                 } else {
                     log.error("Runtime Report from server: " + appdefServers[i].getName() 
@@ -234,13 +231,7 @@ public class RuntimeReportProcessor {
 
     private void mergePlatformIntoInventory(AuthzSubjectValue subject,
                                             AIPlatformValue aiplatform,
-                                            ServerValue reportingServer,
-                                            PlatformManagerLocal platformMgr,
-                                            ServerManagerLocal serverMgr,
-                                            ServiceManagerLocal serviceMgr,
-                                            ConfigManagerLocal configMgr,
-                                            CPropManagerLocal cpropMgr,
-                                            AuthzSubjectManagerLocal subjectMgr)
+                                            ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException,
                ApplicationException {
 
@@ -295,9 +286,7 @@ public class RuntimeReportProcessor {
         for (int i=0; i<aiservers.length; i++) {
             if(aiservers[i] != null) {
                 mergeServerIntoInventory(subject, appdefPlatform, aiservers[i],
-                                         appdefServerList, reportingServer,
-                                         serverMgr, serviceMgr, configMgr, 
-                                         cpropMgr, subjectMgr);
+                                         appdefServerList, reportingServer);
                 Util.flushCurrentSession();
             } else {
                 log.error("Platform: " + appdefPlatform.getName() + 
@@ -345,12 +334,7 @@ public class RuntimeReportProcessor {
                                           PlatformValue platform,
                                           AIServerValue aiserver,
                                           List appdefServers,
-                                          ServerValue reportingServer,
-                                          ServerManagerLocal serverMgr,
-                                          ServiceManagerLocal serviceMgr,
-                                          ConfigManagerLocal configMgr,
-                                          CPropManagerLocal cpropMgr,
-                                          AuthzSubjectManagerLocal subjectMgr)
+                                          ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException
     {
         int i;
@@ -525,9 +509,7 @@ public class RuntimeReportProcessor {
                         mergeServiceIntoInventory(subject, foundAppdefServer,
                                                   aiservices[i],
                                                   appdefServices,
-                                                  reportingServer,
-                                                  serviceMgr, configMgr,
-                                                  cpropMgr, subjectMgr);
+                                                  reportingServer);
                         Util.flushCurrentSession();
                     } else {
                         log.error("Server: " + reportingServer.getName() + 
@@ -559,11 +541,7 @@ public class RuntimeReportProcessor {
                                            ServerValue server,
                                            AIServiceValue aiservice,
                                            List appdefServices,
-                                           ServerValue reportingServer,
-                                           ServiceManagerLocal serviceMgr,
-                                           ConfigManagerLocal configMgr,
-                                           CPropManagerLocal cpropMgr,
-                                           AuthzSubjectManagerLocal subjectMgr)
+                                           ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException {
 
         int i;
@@ -666,7 +644,6 @@ public class RuntimeReportProcessor {
 
     private boolean turnOffRuntimeDiscovery(AuthzSubjectValue subject,
                                             Integer serverId,
-                                            AutoinventoryManagerLocal aiMgr,
                                             String agentToken ) {
         AppdefEntityID aid =
             new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,

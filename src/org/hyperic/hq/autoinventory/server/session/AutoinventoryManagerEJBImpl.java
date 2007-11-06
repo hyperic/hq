@@ -791,42 +791,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
-               ApplicationException {
-
-        PlatformManagerLocal platformMgr;
-        ServerManagerLocal serverMgr;
-        ServiceManagerLocal serviceMgr;
-        AutoinventoryManagerLocal aiMgr;
-        ConfigManagerLocal configMgr;
-        ServerConfigManagerLocal serverConfigMgr;
-        CPropManagerLocal cpropMgr;
-
-        AuthzSubjectManagerLocal subjectMgr;
-        try {
-            platformMgr
-                = getPlatformManagerLocalHome().create();
-            serverMgr
-                = getServerManagerLocalHome().create();
-            serviceMgr
-                = getServiceManagerLocalHome().create();
-            aiMgr
-                = (AutoinventoryManagerLocal) sessionCtx.getEJBLocalObject();
-            configMgr
-                = getConfigManagerLocalHome().create();
-            cpropMgr
-                = getCPropManagerLocalHome().create();
-            serverConfigMgr
-                = getServerConfigManagerLocalHome().create();
-            subjectMgr
-                = getAuthzSubjectManagerLocalHome().create();
-
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
-
-
+               ApplicationException 
+    {
         // In the future we may want this method to act as
         // another user besides "admin".  It might make sense to have 
         // a user per-agent, so that actions that are agent-initiated 
@@ -838,9 +804,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
-            rrp.processRuntimeReport(subject, agentToken, crrr, aiMgr, 
-                                     platformMgr, serverMgr, serviceMgr, 
-                                     configMgr, cpropMgr, subjectMgr);
+            rrp.processRuntimeReport(subject, agentToken, crrr);
         } catch (CreateException e) {
             throw new SystemException(e);
         }
