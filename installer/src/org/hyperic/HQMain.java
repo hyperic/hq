@@ -47,6 +47,14 @@ import java.util.Properties;
  */
 public class HQMain {
 
+    // An array of server config properties for backwards compatibility.  On
+    // an upgrade scenario these properties will not be present in the
+    // hq-server.conf, and need to be defined for proper template substitution.
+    private static final String[][] COMPAT_PROPS = {
+        { "server.jms.highmemory", "350" },
+        { "server.jms.maxmemory", "400" }
+    };
+
     private static final String META
         = "META-INF" + File.separator + "jboss-service.xml";
 
@@ -64,9 +72,18 @@ public class HQMain {
     public static void initialize (String serverHome,
                                    String engineHome) throws Exception {
         HQMain m = new HQMain(serverHome, engineHome);
+        m.intializeSymbols();
         m.loadSymbolFile();
         m.copyConfigFiles();
         m.copyLicenseFile();
+    }
+
+    private void intializeSymbols()
+    {
+        symbols = new Properties();
+        for (int i = 0; i < COMPAT_PROPS.length; i++) {
+            symbols.put(COMPAT_PROPS[i][0], COMPAT_PROPS[i][1]);
+        }
     }
 
     private void loadSymbolFile () throws IOException {
@@ -80,7 +97,7 @@ public class HQMain {
             error("No hq-server.conf file found. Expected to find it at: "
                   + symbolFile.getPath());
         }
-        symbols = new Properties();
+
         try {
             fi = new FileInputStream(symbolFile);
             symbols.load(fi);

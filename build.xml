@@ -1504,6 +1504,9 @@
     <!-- Copy other files needed by consolidated config system -->
     <copy tofile="${installer.dir}/data/hq-engine/jboss-service-events.xml"
           file="etc/jboss/events/sar/jboss-service.xml"/>
+    <!-- JMS settings -->
+    <copy toFile="${installer.dir}/data/hq-engine/hsqldb-jdbc2-service.xml"
+          file="etc/jboss/jms/hsqldb-jdbc2-service.xml"/>
 
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${installer.dir}"/>

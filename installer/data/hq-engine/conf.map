@@ -15,3 +15,4 @@ standardjboss.xml=${conf}/
 standardjbosscmp-jdbc.xml=${conf}/
 log4j.xml=${conf}/
 hq.properties=${deploy}/hq.ear/hq.war/WEB-INF/
+hsqldb-jdbc2-service.xml=${deploy}/jms/
