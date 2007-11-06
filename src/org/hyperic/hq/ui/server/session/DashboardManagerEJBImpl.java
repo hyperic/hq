@@ -178,6 +178,20 @@ public class DashboardManagerEJBImpl implements SessionBean {
     }
     
     /**
+     * @ejb:interface-method
+     */
+    public void renameDashboard(AuthzSubject me, DashboardConfig cfg, 
+                                String name)  
+        throws PermissionException
+    {
+        if (!isEditable(me, cfg)) {
+            throw new PermissionException("You are unauthorized to modify " + 
+                                          "this dashboard");
+        }
+        cfg.setName(name);
+    }
+    
+    /**
      * Determine if a dashboard is editable by the passed user
      * 
      * @ejb:interface-method
