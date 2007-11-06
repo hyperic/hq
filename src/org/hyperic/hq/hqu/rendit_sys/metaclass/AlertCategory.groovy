@@ -1,5 +1,8 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
@@ -33,7 +36,12 @@ class AlertCategory {
 
     static String urlFor(AlertDefinition d, String context) {
         if (context == 'listAlerts') {
-            return "/alerts/Alerts.do?mode=list&rid=${d.appdefId}&type=${d.appdefType}"
+        	def cal = new GregorianCalendar()
+        	cal.setTime(new Date(d.lastFired))
+        	
+            return "/alerts/Alerts.do?mode=list&eid=${d.appdefType}:${d.appdefId}&year=" +
+            	cal.get(Calendar.YEAR) + "&month=" + cal.get(Calendar.MONTH) +
+            	"&day=" + cal.get(Calendar.DATE)
         }
         
         if (d.typeBased) {
