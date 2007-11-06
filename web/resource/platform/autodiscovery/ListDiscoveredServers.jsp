@@ -145,7 +145,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <td class="FilterLabelText" width="100%">
         <html:select property="stdStatusFilter" styleClass="FilterFormText" onchange="goToSelectLocation(this, 'stdStatusFilter', '${stdStatusFilterAction}');">
             <html:option value="-1" key="resource.autodiscovery.discoveredServers.states.AllStates"/>
-            <html:option value="${CONST_ADDED}" key="resource.autodiscovery.discoveredServers.states.NewAndModified"/>
+            <html:option value="${CONST_ADDED}" key="resource.autodiscovery.discoveredServers.states.New"/>
+            <html:option value="${CONST_CHANGED}" key="resource.autodiscovery.discoveredServers.states.Modified"/>
             <html:option value="${CONST_UNCHANGED}" key="resource.autodiscovery.discoveredServers.states.Unchanged"/>
         </html:select>
     </td>
