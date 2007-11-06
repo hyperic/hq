@@ -11,6 +11,21 @@ infoOut () {
   echo "${@}"
 }
 
+#
+# Load JAVA_OPTS.  Changes to this file will be lost on server upgrades.  To set this
+# value permanently, set server.java.opts in conf/hq-server.conf
+#
+loadJavaOpts () {
+  TMPPROPFILE="${SERVER_HOME}/logs/.hq-server.conf.tmp"
+  cat ${SERVER_HOME}/conf/hq-server.conf | grep server\.java\.opts | grep -v "^#" | sed 's/\./_/g' > ${TMPPROPFILE}
+  . ${TMPPROPFILE} 2> /dev/null
+  rm -f ${TMPPROPFILE}
+  if [ "x${server_java_opts}" = "x" ] ; then
+    echo "-XX:MaxPermSize=128m -Xmx512m"
+  fi
+  echo "${server_java_opts}"
+}
+
 loadWebappPort () {
   TMPPROPFILE="${SERVER_HOME}/logs/.hq-server.conf.tmp"
   cat ${SERVER_HOME}/conf/hq-server.conf | grep server\.webapp\.port | tr -d ' \t' | grep -v "^#" | sed 's/\./_/g' > ${TMPPROPFILE}
@@ -223,6 +238,9 @@ if [ -d "${SERVER_HOME}/hqdb" ] ; then
   debugOut "startBuiltinDB completed"
 fi
 
+# Setup HQ_JAVA_OPTS from hq-server.conf
+HQ_JAVA_OPTS=`loadJavaOpts`
+
 # Enable the 64-bit JRE on Solaris 64-bit OS
 THISOS=`uname -s`
 
@@ -237,13 +255,14 @@ if [ $THISOS = "SunOS" ] ; then
 	esac
 fi
 
+infoOut "Using JAVA_OPTS=${HQ_JAVA_OPTS}"
 
 # Start the server
 infoOut "Booting the HQ server..."
 cd ${SERVER_HOME}/hq-engine/bin
 JBOSSUS=RUNASIS \
 JBOSSHOME=${ENGINE_HOME} \
-  ${JAVA} -XX:MaxPermSize=128m -Xmx512m -server \
+  ${JAVA} -server \
     ${HQ_JAVA_OPTS} \
     -Dprogram.name=hq-server \
     -Dserver.home=${SERVER_HOME} \
