@@ -121,7 +121,7 @@ class AlertController
              label:{df.format(it.ctime)}],
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.ENABLED, width:'4%',
+            [field:AlertDefSortField.ENABLED, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:AlertDefSortField.LAST_FIRED, width:'13%',
              label:{
@@ -131,17 +131,17 @@ class AlertController
                 else
                     return ''
             }],
-            [field:AlertDefSortField.RESOURCE, width:'19%',
+            [field:AlertDefSortField.RESOURCE, width:'17%',
              label:{linkTo(it.resource.name,
                            [resource:it.resource])}],
-            [field:AlertDefSortField.ESCALATION, width:'15%',
+            [field:AlertDefSortField.ESCALATION, width:'10%',
              label:{
                 if (it.escalation == null)
                     return ""
                 else
                     return linkTo(it.escalation.name, [resource:it.escalation])
             }],
-            [field:AlertDefSortField.PRIORITY, width:'10%',
+            [field:AlertDefSortField.PRIORITY, width:'11%',
              label:{getSeverityImg(it.severity)}],
         ]
     ]
@@ -160,10 +160,10 @@ class AlertController
              label:{df.format(it.ctime)}], 
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}], 
-            [field:AlertDefSortField.ENABLED, width:'10%',
+            [field:AlertDefSortField.ENABLED, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:[getValue: {localeBundle.ResourceType },
-                    description:'resourceType', sortable:false], width:'20%',
+                    description:'resourceType', sortable:false], width:'19%',
              label:{it.resourceType.name}],
              [field:AlertDefSortField.ESCALATION, width:'18%',
               label:{
@@ -192,7 +192,7 @@ class AlertController
              label:{df.format(it.ctime)}],
             [field:GalertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}],
-            [field:GalertDefSortField.ENABLED, width:'4%',
+            [field:GalertDefSortField.ENABLED, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:GalertDefSortField.LAST_FIRED, width:'13%',
              label:{
@@ -202,9 +202,9 @@ class AlertController
                  else
                      return ''
              }],
-            [field:GalertDefSortField.GROUP, width:'19%',
+            [field:GalertDefSortField.GROUP, width:'16%',
              label:{linkTo(it.group.name, [resource:it.group])}],
-            [field:GalertDefSortField.ESCALATION, width:'15%',
+            [field:GalertDefSortField.ESCALATION, width:'11%',
              label:{linkTo(it.escalation.name, [resource:it.escalation])}],
             [field:GalertDefSortField.SEVERITY, width:'10%',
              label:{getSeverityImg(it.severity)}], 
