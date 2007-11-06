@@ -45,13 +45,6 @@
 <script type="text/javascript">
 	dojo.require("dojo.widget.Menu2");
 </script>
-<style type="text/css">
-	.dojoMenuBar2 {
-		border-top:1px solid #d4d4d4;
-	}
-</style>
-
-
 <script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/"/>diagram.js" type="text/javascript"></script>
@@ -69,7 +62,6 @@
         }
         menuLayers.hide();
     }
-
 </script>
 <div class="headerWrapper" style="background-image: url('<html:rewrite page="/images/HeaderBkgd6.gif"/>')">
     <div style="position:absolute;left:0px;top:1px;width:225px;height:60px;">
@@ -87,13 +79,6 @@
             </c:choose>
         </html:link>
     </div>
-   <style type="text/css">
-       .headUsrName {
-           max-width: 385px;
-           /*width:expression(document.body.clientWidth > 385 ? "385px": "auto" ); */
-           width:180px;
-      }
-   </style>
     <div class="headRightWrapper">
         <div class="headTopNav">
             <div class="headAlertWrapper">
@@ -102,75 +87,77 @@
                     :
                 </div>
                 <div id="recentAlerts"></div>
-                <div style="height:1px;width:1px;clear:both;">
-                    <html:img page="/images/spacer.gif" border="0" width="1" height="1"/>
-                </div>
             </div>
-            <div class="headUsrName">
+
+            <div id="headUsrName">
                 <c:choose>
-                    <fmt:message key="header.User"/>:
+                    <fmt:message key="header.User"/>
+                    :
                     <c:when test="${useroperations['viewSubject']}">
                         <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
                             <c:out value="${sessionScope.webUser.username}"/>
                         </html:link>
                     </c:when>
                     <c:otherwise>
-                        <fmt:message key="header.User"/>:
+                        <fmt:message key="header.User"/>
+                        :
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
                <span style="padding-left:10px;font-size:0.95em;">
                 <html:link action="/Logout">
-                    <span style="color:#333333;">[</span> <fmt:message key="admin.user.generalProperties.Logout"/>  <span style="color:#333333;">]</span>
+                    <span style="color:#333333;">[</span>
+                    <fmt:message key="admin.user.generalProperties.Logout"/>
+                    <span style="color:#333333;">]</span>
                 </html:link></span>
-                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""  onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""
+                                                                              onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                     <fmt:message key="common.label.Help"/>
                 </html:link></span>
-            </div>
-            <div style="height:1px;width:1px;clear:both;">
-                <html:img page="/images/spacer.gif" border="0" width="1" height="1"/>
             </div>
         </div>
 
         <div class="headBotNav">
-                <div dojoType="PopupMenu2" widgetId="submenu1">
-                            <div dojoType="MenuItem2" caption="<fmt:message key="header.Browse"/>"
-                                 onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
-                            <tiles:insert definition=".header.optional.tabs">
-                                <tiles:put name="location" value="resources"/>
-                            </tiles:insert>
-                            <div dojoType="MenuItem2" caption="<fmt:message key=".dashContent.recentResources"/>" submenuId="submenu3"></div>
+            <div dojoType="PopupMenu2" widgetId="submenu1">
+                <div dojoType="MenuItem2" caption="<fmt:message key="header.Browse"/>"
+                     onClick="location.href='<html:rewrite page="/ResourceHub.do"/>'"></div>
+                <tiles:insert definition=".header.optional.tabs">
+                    <tiles:put name="location" value="resources"/>
+                </tiles:insert>
+                <div dojoType="MenuItem2" caption="<fmt:message key=".dashContent.recentResources"/>"
+                     submenuId="submenu3"></div>
 
-                        </div>
+            </div>
 
-                        <div dojoType="PopupMenu2" widgetId="submenu2">
-                            <tiles:insert definition=".header.optional.tabs">
-                                <tiles:put name="location" value="tracking"/>
-                            </tiles:insert>
-                        </div>
+            <div dojoType="PopupMenu2" widgetId="submenu2">
+                <tiles:insert definition=".header.optional.tabs">
+                    <tiles:put name="location" value="tracking"/>
+                </tiles:insert>
+            </div>
 
-                        <div dojoType="PopupMenu2" widgetId="submenu3">
-                            <tiles:insert definition=".toolbar.recentResources"/>
-                        </div>
+            <div dojoType="PopupMenu2" widgetId="submenu3">
+                <tiles:insert definition=".toolbar.recentResources"/>
+            </div>
 
-                        <div dojoType="MenuBar2">
-                            <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.home.PageTitle"/>"
-                                 onClick="location.href='<html:rewrite page="/Dashboard.do"/>'"></div>
-                            <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.settings.Resources"/>" submenuId="submenu1"></div>
-                            <div dojoType="MenuBarItem2" caption="<fmt:message key="header.Views"/>" submenuId="submenu2"></div>
-                            <div dojoType="MenuBarItem2" caption="<fmt:message key="admin.admin.AdministrationTitle"/>"
-                                 onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
-                        </div>
+            <div dojoType="MenuBar2">
+                <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.home.PageTitle"/>"
+                     onClick="location.href='<html:rewrite page="/Dashboard.do"/>'"></div>
+                <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.settings.Resources"/>"
+                     submenuId="submenu1"></div>
+                <div dojoType="MenuBarItem2" caption="<fmt:message key="header.Views"/>" submenuId="submenu2"></div>
+                <div dojoType="MenuBarItem2" caption="<fmt:message key="admin.admin.AdministrationTitle"/>"
+                     onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
+            </div>
             <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
-        <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
-    </div>
-    <c:if test="${not empty HQUpdateReport}">
-        <div style="position:absolute;right:26px;bottom:2px;" id="hb">
-            <html:img page="/images/transmit2.gif" border="0" width="16" height="16"
-                      onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/>
+                <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
+            </div>
+            <c:if test="${not empty HQUpdateReport}">
+                <div style="position:absolute;right:26px;bottom:2px;" id="hb">
+                    <html:img page="/images/transmit2.gif" border="0" width="16" height="16"
+                              onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/>
+                </div>
+            </c:if>
         </div>
-  </c:if>
-</div>
 
     </div>
 </div>

@@ -1085,18 +1085,18 @@ border-left:1px solid #D5D8DE;
     width:100%;
 }
 
-.headUsrName {
+#headUsrName {
 color:#333333;
 font-weight:bold;
-padding-top:5px;
-    padding-bottom:5px;
-    display:inline;
-    float:right;
-    padding-right:10px;
-    padding-left:10px;
-    border-left:1px solid #999999;
-    border-bottom:1px solid #999999;
-    background-color:#f1f1f1;
+padding:5px 10px;
+position:absolute;
+top:0px;
+right:0px;
+border-left:1px solid #999999;
+border-bottom:1px solid #999999;
+background-color:#f1f1f1;
+white-space:nowrap;
+text-align: center;
 }
 
 a.headUsrName {
@@ -1109,14 +1109,16 @@ a.headUsrName {
 .headAlertWrapper {
     color:#333333;
     font-weight:bold;
-    display:inline;
-    float:left;
-    padding-left:10px;
-    border:0px solid green;
+    position:absolute;
+    top:0px;
+    left:10px;
+    width:375px;
+    overflow:hidden;
 }
 
 .headBotNav {
     background-color:#336699;
+    
 }
 
 .mainNavText {
@@ -1251,4 +1253,9 @@ white-space: nowrap;
     border-top:1px solid #eeeeee;
     background-repeat:repeat-x;
 }
+/*
+.dojoMenuBar2 {
+		border-top:1px solid #d4d4d4;
 
+}
+*/

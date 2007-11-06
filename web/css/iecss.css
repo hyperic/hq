@@ -2,11 +2,17 @@
    padding-left:0px;
 }
 
+
+.dojoMenuBar2 {
+padding-top:2px;
+padding-bottom:2px;
+}
+
 .dojoMenuBar2 .dojoMenuItem2 {
-    padding:3px 15px 3px;
+    padding:3px 15px 3px; 15px;
 }
 
 .headUsrName {
     font-size:10px;
-    width:210px;
+    z-index:10;
 }
