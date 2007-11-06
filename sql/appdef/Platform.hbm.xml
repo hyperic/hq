@@ -86,7 +86,8 @@
       <one-to-many class="org.hyperic.hq.appdef.Ip"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="servers" table="EAM_SERVER">
+    <bag inverse="true" cascade="all" name="servers" table="EAM_SERVER"
+         optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="PLATFORM_ID"/>
       <one-to-many class="Server"/>

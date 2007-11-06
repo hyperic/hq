@@ -89,7 +89,8 @@
       <column name="CONFIG_RESPONSE_ID" not-null="false"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="services" table="EAM_SERVICE">
+    <bag inverse="true" cascade="all" name="services" table="EAM_SERVICE"
+         optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="SERVER_ID"/>
       <one-to-many class="Service"/>

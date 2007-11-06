@@ -69,7 +69,7 @@
     </many-to-one>
 
     <bag name="childrenBag" table="EAM_AUDIT" cascade="all-delete-orphan"
-         inverse="true">
+         optimistic-lock="false" inverse="true">
       <key column="PARENT_ID" />
       <one-to-many class="Audit"/>
     </bag>
