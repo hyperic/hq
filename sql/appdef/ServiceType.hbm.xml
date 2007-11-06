@@ -56,17 +56,20 @@
       <many-to-many class="ApplicationType" column="APPLICATION_TYPE_ID"/>
     </set>
 
-    <set inverse="true" cascade="save-update,delete,evict,persist,merge" name="appServices" table="EAM_APP_SERVICE">
+    <set inverse="true" cascade="all" name="appServices" table="EAM_APP_SERVICE" 
+         optimistic-lock="false">
       <key on-delete="cascade" column="SERVICE_TYPE_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.AppService"/>
     </set>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="services" table="EAM_SERVICE">
+    <bag inverse="true" cascade="all" name="services" table="EAM_SERVICE"
+         optimistic-lock="false">
       <key on-delete="cascade" column="SERVICE_TYPE_ID"/>
       <one-to-many class="Service"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="serviceClusters" table="EAM_SVC_CLUSTER">
+    <bag inverse="true" cascade="all" name="serviceClusters" table="EAM_SVC_CLUSTER"
+         optimistic-lock="false">
       <key on-delete="cascade" column="SERVICE_TYPE_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.ServiceCluster"/>
     </bag>

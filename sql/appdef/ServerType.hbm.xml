@@ -52,12 +52,14 @@
       <many-to-many class="PlatformType" column="PLATFORM_TYPE_ID"/>
     </set>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="servers" table="EAM_SERVER">
+    <bag inverse="true" cascade="all" name="servers" table="EAM_SERVER"
+         optimistic-lock="false">
       <key on-delete="cascade" column="SERVER_TYPE_ID"/>
       <one-to-many class="Server"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="serviceTypes" table="EAM_SERVICE_TYPE">
+    <bag inverse="true" cascade="all" name="serviceTypes" 
+         table="EAM_SERVICE_TYPE" optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="SERVER_TYPE_ID"/>
       <one-to-many class="ServiceType"/>

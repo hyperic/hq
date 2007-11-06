@@ -66,7 +66,7 @@
       <column name="APPLICATION_TYPE_ID" not-null="true"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="appServices" table="EAM_APP_SERVICE">
+    <bag inverse="true" cascade="all" name="appServices" table="EAM_APP_SERVICE">
       <key on-delete="cascade" column="APPLICATION_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.AppService"/>
     </bag>

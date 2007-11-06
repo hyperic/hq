@@ -32,7 +32,8 @@
       <column name="MTIME"/>
     </property>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="agents" table="EAM_AGENT" lazy="true">
+    <bag inverse="true" cascade="all" name="agents" table="EAM_AGENT" lazy="true"
+         optimistic-lock="false">    
       <key on-delete="cascade" column="AGENT_TYPE_ID"/>
       <one-to-many class="Agent"/>
     </bag>
