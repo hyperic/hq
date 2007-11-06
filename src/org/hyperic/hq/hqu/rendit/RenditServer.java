@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl;
@@ -43,7 +44,6 @@ import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
-import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.util.Runnee;
 
@@ -190,10 +190,11 @@ public class RenditServer {
 
     public AttachmentDescriptor getAttachmentDescriptor(String pluginName,
                                                         Attachment a,
-                                                        Resource ent)
+                                                        Resource ent,
+                                                        AuthzSubject u)
     {
         PluginWrapper plugin = getPlugin(pluginName);
-        return plugin.getAttachmentDescriptor(a, ent);
+        return plugin.getAttachmentDescriptor(a, ent, u);
     }
     
     /**

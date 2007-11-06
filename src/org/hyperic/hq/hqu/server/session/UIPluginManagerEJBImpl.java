@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -262,10 +263,11 @@ public class UIPluginManagerEJBImpl
      * @return a collection of {@link AttachmentDescriptor}s
      * @ejb:interface-method
      */
-    public Collection findAttachments(AttachType type) {
+    public Collection findAttachments(AttachType type, AuthzSubject user) {
         Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
 
-        return convertAttachmentsToDescriptors(_attachDAO.findFor(type), root);
+        return convertAttachmentsToDescriptors(_attachDAO.findFor(type), root,
+                                               user);
     }
 
     private Integer appdefTypeToAuthzType(int appdefType) {
@@ -283,14 +285,16 @@ public class UIPluginManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public AttachmentDescriptor findAttachmentDescriptorById(Integer id) {
+    public AttachmentDescriptor findAttachmentDescriptorById(Integer id,
+                                                             AuthzSubject user) 
+    {
         Attachment a = findAttachmentById(id);
         List c = new ArrayList(1);
         Collection res;
         Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
         c.add(a);
         
-        res = convertAttachmentsToDescriptors(c, root);
+        res = convertAttachmentsToDescriptors(c, root, user);
         if (res.isEmpty())
             return null;
         
@@ -303,7 +307,8 @@ public class UIPluginManagerEJBImpl
      * @ejb:interface-method
      */
     public Collection findAttachments(AppdefEntityID ent,
-                                      ViewResourceCategory cat) 
+                                      ViewResourceCategory cat,
+                                      AuthzSubject user) 
     {
         ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
         Resource r;
@@ -319,15 +324,16 @@ public class UIPluginManagerEJBImpl
                 throw new SystemException("Unable to lookup attachments", e);
             }
 
-            if (!grp.isGroupCompat())
-                return Collections.EMPTY_LIST;
-            
-            Integer authzType = appdefTypeToAuthzType(grp.getGroupEntType());
-            if (authzType == null)
-                return Collections.EMPTY_LIST;
-            
-            Integer entityType = new Integer(grp.getGroupEntResType());
-            r = rman.findResourcePojoByInstanceId(authzType, entityType);
+            if (grp.isGroupAdhoc()) {
+                r = rman.findRootResource();
+            } else {
+                Integer authzType = appdefTypeToAuthzType(grp.getGroupEntType());
+                if (authzType == null)
+                    return Collections.EMPTY_LIST;
+                
+                Integer entityType = new Integer(grp.getGroupEntResType());
+                r = rman.findResourcePojoByInstanceId(authzType, entityType);
+            }
         } else {
             r = rman.findResource(ent);
         } 
@@ -335,11 +341,13 @@ public class UIPluginManagerEJBImpl
         Collection attachments = _attachRsrcDAO.findFor(r, cat);
         Resource viewedResource = 
             ResourceManagerEJBImpl.getOne().findResource(ent);
-        return convertAttachmentsToDescriptors(attachments, viewedResource);
+        return convertAttachmentsToDescriptors(attachments, viewedResource, 
+                                               user);
     }
     
     private Collection convertAttachmentsToDescriptors(Collection attachments,
-                                                       Resource viewedRsrc)
+                                                       Resource viewedRsrc,
+                                                       AuthzSubject user)
     {
         RenditServer rs = RenditServer.getInstance();
         
@@ -351,7 +359,7 @@ public class UIPluginManagerEJBImpl
             
             try {
                 d = (AttachmentDescriptor)
-                    rs.getAttachmentDescriptor(pluginName, a, viewedRsrc); 
+                    rs.getAttachmentDescriptor(pluginName, a, viewedRsrc, user); 
             } catch(Exception e) {
                 _log.warn("Not returning attachment for [" + a + "], it " + 
                           "threw an exception", e);

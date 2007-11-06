@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
+import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
@@ -138,7 +139,9 @@ class HQUPlugin implements IHQUPlugin {
         descriptor.getProperty('plugin.name')
     }
 
-    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r) { 
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
+                                                 AuthzSubject u) 
+    { 
         new SimpleAttachmentDescriptor(a, 
                                        descriptor.getProperty('plugin.helpTag'), 
                                        description)

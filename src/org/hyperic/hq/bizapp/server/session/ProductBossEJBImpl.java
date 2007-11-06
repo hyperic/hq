@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -60,9 +61,11 @@ import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.hq.hqu.server.session.View;
+import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -492,12 +495,41 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
     
     /**
-     * Get the mashead attach points
+     * Find {@link AttachmentDescriptor}s attached to the target type
      * @ejb:interface-method
      */
-    public Collection findMastAttachments(int sessionId) {
+    public Collection findAttachments(int sessionId, AttachType type) 
+        throws SessionException
+    {
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        
+        return UIPluginManagerEJBImpl.getOne().findAttachments(type, subject);
+    }
+    
+    /**
+     * Find {@link AttachmentDescriptor}s attached to the target type
+     * @ejb:interface-method
+     */
+    public Collection findAttachments(int sessionId, AppdefEntityID ent,
+                                      ViewResourceCategory cat) 
+        throws SessionException
+    {
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        
+        return UIPluginManagerEJBImpl.getOne().findAttachments(ent, cat, 
+                                                               subject);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public AttachmentDescriptor findAttachment(int sessionId, Integer descId) 
+        throws SessionException
+    {
+        AuthzSubject subject = sessionManager.getSubjectPojo(sessionId);
+        
         return UIPluginManagerEJBImpl.getOne()
-            .findAttachments(AttachType.MASTHEAD);
+                    .findAttachmentDescriptorById(descId, subject);
     }
     
     /**

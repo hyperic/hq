@@ -41,7 +41,7 @@ public class ViewResourceCategory
 {
     private static final String BUNDLE = "org.hyperic.hq.hqu.Resources";
 
-    private static final ViewResourceCategory VIEWS = 
+    public static final ViewResourceCategory VIEWS = 
         new ViewResourceCategory(0, "views", "view.resource.category.views");
     
     public static ViewResourceCategory findByDescription(String d) {

@@ -40,8 +40,10 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -52,11 +54,14 @@ public class HeaderAction extends TilesAction {
 	public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
 			HttpServletResponse response) throws ServletException,
-			RemoteException {
+			RemoteException, SessionException 
+    {
 		ServletContext ctx = getServlet().getServletContext();
 		ProductBoss pBoss = ContextUtils.getProductBoss(ctx);
 		Integer sessionId = RequestUtils.getSessionId(request);
-		Collection mastheadAttachments = pBoss.findMastAttachments(sessionId.intValue());
+		Collection mastheadAttachments = 
+            pBoss.findAttachments(sessionId.intValue(), AttachType.MASTHEAD);
+                                  
 		ArrayList resourceAttachments = new ArrayList();
 		ArrayList trackerAttachments = new ArrayList();
 		for (Iterator itr = mastheadAttachments.iterator(); itr.hasNext();) {

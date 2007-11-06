@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.admin.plugins;
 
 import java.util.Collection;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,20 +36,27 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl;
+import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.hqu.server.session.AttachType;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
-import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 public class PluginsAction extends TilesAction {
 
 	public ActionForward execute(ComponentContext context,
 			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) {
+			HttpServletResponse response) 
+        throws SessionException, ServletException
+    {
 
-		UIPluginManagerLocal pluginManager = UIPluginManagerEJBImpl.getOne();
-		Collection attachements = pluginManager
-				.findAttachments(AttachType.ADMIN);
-		request.setAttribute("adminAttachments", attachements);
+        ProductBossLocal pboss = ProductBossEJBImpl.getOne();
+		Collection a = 
+            pboss.findAttachments(RequestUtils.getSessionIdInt(request),
+                                  AttachType.ADMIN);
+                                  
+                                  
+		request.setAttribute("adminAttachments", a);
 
 		return null;
 	}

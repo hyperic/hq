@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.rendit;
 import java.io.File;
 import java.util.Properties;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
@@ -53,5 +54,6 @@ public interface IDispatcher {
     
     void invokeMethod(InvokeMethodInvocationBindings invokeArgs);
     
-    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r);
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
+                                                 AuthzSubject u);
 }

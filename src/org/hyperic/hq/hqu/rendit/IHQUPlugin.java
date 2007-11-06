@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.rendit;
 import java.io.File;
 import java.util.Properties;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
@@ -80,9 +81,11 @@ public interface IHQUPlugin {
      * @param r The resource that is currently being viewed, when the
      *          attachment is being rendered.  For attachments that are
      *          global, this will be the root resource (id=0)
-     *         
+     * @param u The user, attempting to view the attachment
+     * 
      * @return a descriptor if one should be displayed, else null, indicating
      *         that the attachment should not be displayed.
      */
-    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r); 
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
+                                                 AuthzSubject u); 
 }
