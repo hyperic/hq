@@ -65,7 +65,7 @@ class Plugin extends HQUPlugin {
             }
             return null
         } else {
-            return super.getAttachmentDescriptor(a, r)
+            return super.getAttachmentDescriptor(a, r, user)
         }
     }
 }
