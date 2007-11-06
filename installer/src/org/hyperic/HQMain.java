@@ -208,11 +208,6 @@ public class HQMain {
     private void error(String s) {
         throw new IllegalStateException(s);
     }
-    private void error(String s, Exception e) {
-        throw new IllegalStateException(s 
-                                        + ": " + e.getClass().getName()
-                                        + ": " + e.getMessage());
-    }
 
     public static void initializeHQServer (String serverHome,
                                            String engineHome,
