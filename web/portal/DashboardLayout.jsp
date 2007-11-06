@@ -235,7 +235,7 @@
         <div id="dashboardSelectDialog" class="hidden">
 		    <div class="dialog">
 		        <div class="dialogHeader"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
-		        <div style="dialogBody">
+		        <div class="dialogBody">
 		            <c:if test="${requestScope.isDashRemoved}">
 		              <div class="dialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
 		            </c:if>
@@ -244,8 +244,8 @@
 		                <span class="ErrorBlock"><fmt:message key="dash.home.DashboardSelectionDialogError"/></span>            
 		            </div>
 		            <div class="fieldSetStacked" style="margin-bottom:8px;">
-		                <span style="vertical-align:top"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
-		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="12" style="width:285px" styleId="defaultDash">
+		                <span class="DashboardSelectBoxLabel"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
+		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="11" style="width:285px;" styleId="defaultDash">
                             <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
                         </html:select>
 		            </div>

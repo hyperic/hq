@@ -54,7 +54,14 @@
 }
 
 .dialogBody{
-    padding:8px;
+    padding-left:6px;
+    padding-right:6px;
+}
+
+.DashboardSelectBoxLabel {
+    vertical-align:top;
+    display:block;
+    padding:3px;
 }
 
 .dialogFooter{
