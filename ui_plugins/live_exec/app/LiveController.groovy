@@ -17,8 +17,28 @@ class LiveController
         setTemplate('standard')
     }
     
+    private getCommands() {
+        def liveMan = ldmi.one
+        def r = viewedResource
+        def members
+        
+        if (r.isGroup()) {
+            members = r.getGroupMembers(user)
+        } else {
+            members = [r]
+        }
+        
+        def cmds = []
+        for (m in members) {
+            if (m.isGroup())  // We don't process sub-groups
+                continue
+            cmds.addAll(m.getLiveDataCommands(user))
+        }
+        cmds.sort().unique()
+    }
+    
     def index(params) {
-        def cmds       = viewedResource.getLiveDataCommands(user).sort()
+        def cmds       = commands
         def viewedId   = viewedResource.entityID
         def liveMan    = ldmi.one
         def cmdFmt     = [:]

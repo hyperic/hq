@@ -7,6 +7,7 @@ import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as UIPM
 import org.hyperic.hq.hqu.server.session.View
 import org.hyperic.hq.hqu.server.session.ViewResource
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as RMI
 
 class Plugin extends HQUPlugin {
     void deploy(UIPlugin me) {
@@ -14,11 +15,13 @@ class Plugin extends HQUPlugin {
 
         ViewResource view
         if (me.views.empty) {
-            view = uiMan.createResourceView(me, new ViewDescriptor('/live/index.hqu', 'LiveExec', AttachType.MASTHEAD))
+            def vd = new ViewDescriptor('/live/index.hqu', 'LiveExec', 
+                                        AttachType.RESOURCE)
+            view = uiMan.createResourceView(me, vd)
         } else {
             view = me.views.iterator().next()
         }
-        
+
         def pluginMan = UIPM.one
         def platMan   = PMI.one
         for (pt in platMan.findAllPlatformTypes()) {
@@ -26,17 +29,22 @@ class Plugin extends HQUPlugin {
                 continue
             
             def r = platMan.findResource(pt)
-            def found = false
-            for (a in view.attachments) {
-                if (a.resource == r) {
-                    found = true
-                    break
-                }
-            }
-            if (found)
+            if (resourceAttached(view, r))
                 continue
 
             uiMan.attachView(view, ViewResourceCategory.VIEWS, r)
         }
+        
+        def root = RMI.one.findRootResource()
+        if (!resourceAttached(view, root))
+            uiMan.attachView(view, ViewResourceCategory.VIEWS, root)
+    }
+    
+    private boolean resourceAttached(view, resource) {
+        for (a in view.attachments) {
+            if (a.resource == resource)
+                return true
+        }
+        return false
     }
 }
