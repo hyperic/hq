@@ -37,7 +37,8 @@ import org.hyperic.sigar.SigarException;
 public class NetConnectionData {
 
     private NetConnection _conn;
-    private boolean _isNumeric;
+    private boolean _isNumericHosts;
+    private boolean _isNumericPorts;
     private String _proto;
     private int _maxLocalAddrLen = -1;
     private int _maxRemoteAddrLen = -1;
@@ -45,9 +46,11 @@ public class NetConnectionData {
     private String _processName;
 
     public NetConnectionData(NetConnection conn,
-                             boolean isNumeric) {
+                             boolean isNumericHosts,
+                             boolean isNumericPorts) {
         _conn = conn;
-        _isNumeric = isNumeric;
+        _isNumericHosts = isNumericHosts;
+        _isNumericPorts = isNumericPorts;
         _proto = conn.getTypeString();
     }
 
@@ -67,7 +70,7 @@ public class NetConnectionData {
         if (port == 0) {
             return "*";
         }
-        if (!_isNumeric) {
+        if (!_isNumericPorts) {
             String service =
                 NetServices.getName(_proto, port);
             if (service != null) {
@@ -88,7 +91,7 @@ public class NetConnectionData {
         if (NetFlags.isAnyAddress(ip)) {
             address = "*";
         }
-        else if (_isNumeric) {
+        else if (_isNumericHosts) {
             address = ip;
         }
         else {

@@ -40,7 +40,8 @@ public class NetstatData {
     public static final String LABEL_RADDR = "Foreign Address";
     public static final String LABEL_STATE = "State";
 
-    private boolean _isNumeric = false;
+    private boolean _isNumericHosts = true;
+    private boolean _isNumericPorts = false;
     private boolean _wantPid = false;
     private int _flags = 
         NetFlags.CONN_CLIENT | NetFlags.CONN_PROTOCOLS;
@@ -55,7 +56,9 @@ public class NetstatData {
 
         for (int i=0; i<connections.length; i++) {
             NetConnectionData data =
-                new NetConnectionData(connections[i], _isNumeric);
+                new NetConnectionData(connections[i],
+                                      _isNumericHosts,
+                                      _isNumericPorts);
 
             if (_wantPid) {
                 data.lookupProcessInfo(sigar);
@@ -69,12 +72,16 @@ public class NetstatData {
         return _connections;
     }
 
-    public boolean isNumeric() {
-        return _isNumeric;
+    public void setIsNumeric(boolean isNumeric) {
+        _isNumericHosts = _isNumericPorts = isNumeric;
     }
 
-    public void setIsNumeric(boolean isNumeric) {
-        _isNumeric = isNumeric;
+    public void setIsNumericHosts(boolean isNumeric) {
+        _isNumericHosts = isNumeric;
+    }
+
+    public void setIsNumericPorts(boolean isNumeric) {
+        _isNumericPorts = isNumeric;
     }
 
     public boolean wantPid() {
@@ -116,7 +123,7 @@ public class NetstatData {
                     _flags |= NetFlags.CONN_SERVER | NetFlags.CONN_CLIENT;
                     break;
                   case 'n':
-                    _isNumeric = true;
+                    setIsNumeric(true);
                     break;
                   case 'p':
                     _wantPid = true;
