@@ -130,7 +130,6 @@ public class ClientShell
         registerCommandHandler("metric",       new ClientShell_metric(this));
         registerCommandHandler("resource",     new ClientShell_resource(this));
         registerCommandHandler("set",          new ClientShell_set(this));
-        registerCommandHandler("scheduler",    new ClientShell_scheduler(this));
         registerCommandHandler("time",         new ClientShell_time(this));
         registerCommandHandler("transfer",     new ClientShell_transfer(this));
         registerCommandHandler("trigger",      new ClientShell_trigger(this));
@@ -140,7 +139,6 @@ public class ClientShell
 
         this.setHandlerHidden(".",            true);
         this.setHandlerHidden("exit",         true);
-        this.setHandlerHidden("scheduler",    true);
         this.setHandlerHidden("transfer",     true);
         this.setHandlerHidden("trigger",      true);
         this.setHandlerHidden("vacuum",       true);
