@@ -8,7 +8,7 @@ import org.hyperic.hq.hqu.server.session.Attachment
 
 class Plugin extends HQUPlugin {
     Plugin() {
-        addMastheadView(true, '/nagiup/index.hqu', 'Nagios Availability', 
+        addMastheadView(true, '/nagiup/index.hqu', 'Nagios Service Detail', 
                         'resource')    
     }
     
