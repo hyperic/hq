@@ -35,7 +35,6 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
 import org.hyperic.hq.product.MetricValue;
 
 public class MeasurementEvent extends AbstractEvent
