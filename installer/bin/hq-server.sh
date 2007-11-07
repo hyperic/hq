@@ -255,10 +255,8 @@ if [ $THISOS = "SunOS" ] ; then
 	esac
 fi
 
-infoOut "Using JAVA_OPTS=${HQ_JAVA_OPTS}"
-
 # Start the server
-infoOut "Booting the HQ server..."
+infoOut "Booting the HQ server (Using JAVA_OPTS=${HQ_JAVA_OPTS})..."
 cd ${SERVER_HOME}/hq-engine/bin
 JBOSSUS=RUNASIS \
 JBOSSHOME=${ENGINE_HOME} \
