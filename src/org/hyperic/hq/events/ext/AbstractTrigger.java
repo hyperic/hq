@@ -81,23 +81,13 @@ public abstract class AbstractTrigger implements TriggerInterface {
 
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
     
-    private volatile boolean hasAlertBeenCreatedInUncommittedTxn;
-    
     public AbstractTrigger() {
         super();
         
         // set the default value
         triggerValue.setId(new Integer(-1));
     }
-    
-    private void setAlertBeenCreatedInUnCommittedTxn(boolean created) {
-        hasAlertBeenCreatedInUncommittedTxn = created;
-    }
-    
-    private boolean hasAlertBeenCreatedInUncommittedTxn() {
-        return hasAlertBeenCreatedInUncommittedTxn;
-    }
-    
+
     private boolean isSystemReady() {
         if (!systemReady) {
             try {
@@ -172,25 +162,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 // fire the actions
                 if (!shouldFireActions(aman, alertDef)) {
                     return;
-                }
-                
-                // HHQ-1195: The alert definition last fired time cannot 
-                // be set my multiple concurrent txns, else there may 
-                // be deadlocks in the alert definition table.
-                if (!hasAlertBeenCreatedInUncommittedTxn()) {
-                    alertDef.setLastFired(new Long(event.getTimestamp()));
-                    
-                    HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                        
-                        public void afterCommit(boolean success) {
-                            AbstractTrigger.this.setAlertBeenCreatedInUnCommittedTxn(false);
-                        }
-
-                        public void beforeCommit() {                            
-                        }});
-                    
-                    setAlertBeenCreatedInUnCommittedTxn(true);
-                }
+                }                
             }
             
             if (log.isDebugEnabled())

@@ -114,8 +114,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
     
     /**
-     * Create a new alert. Note that creating the new alert does not 
-     * set the alert definition last fired time.
+     * Create a new alert
      *
      * @ejb:interface-method
      */
@@ -123,6 +122,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
+        def.setLastFired(new Long(ctime));
         getAlertDAO().save(alert);
         return alert;
     }

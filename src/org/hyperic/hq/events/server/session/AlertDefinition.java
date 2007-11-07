@@ -399,12 +399,7 @@ public class AlertDefinition
         return _lastFired;
     }
     
-    /**
-     * Set the time that the alert definition last fired.
-     * 
-     * @param lastFired The last fired time in milliseconds.
-     */
-    public void setLastFired(Long lastFired) {
+    protected void setLastFired(Long lastFired) {
         _lastFired = lastFired;
     }
     
