@@ -20,10 +20,10 @@
     <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
 
     <!--pooling parameters-->
-    <min-pool-size>5</min-pool-size>
-    <max-pool-size>500</max-pool-size>
-    <blocking-timeout-millis>5000</blocking-timeout-millis>
-    <idle-timeout-minutes>15</idle-timeout-minutes>
+    <min-pool-size>@@@server.database-minpoolsize@@@</min-pool-size>
+    <max-pool-size>@@@server.database-maxpoolsize@@@</max-pool-size>
+    <blocking-timeout-millis>@@@server.database-blockingtimeout@@@</blocking-timeout-millis>
+    <idle-timeout-minutes>@@@server.database-idletimeout@@@</idle-timeout-minutes>
     <prepared-statement-cache-size>75</prepared-statement-cache-size>
 
   </local-tx-datasource>

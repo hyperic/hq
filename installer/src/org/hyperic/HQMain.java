@@ -52,7 +52,11 @@ public class HQMain {
     // hq-server.conf, and need to be defined for proper template substitution.
     private static final String[][] COMPAT_PROPS = {
         { "server.jms.highmemory", "350" },
-        { "server.jms.maxmemory", "400" }
+        { "server.jms.maxmemory", "400" },
+        { "server.database-minpoolsize", "5" },
+        { "server.database-maxpoolsize", "500" },
+        { "server.database-blockingtimeout", "5000" },
+        { "server.database-idletimeout", "15"}
     };
 
     private static final String META
