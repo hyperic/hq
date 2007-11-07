@@ -47,9 +47,9 @@ public class ResourceFilter extends BaseFilter {
 			// Mark images, js and css with cache-control and expires headers
 			HttpServletResponse resp = (HttpServletResponse) response;
 			Date d = new Date();
-			d.setTime(d.getTime() + 172800); // two days 
+			d.setTime(d.getTime() + 172800000); // two days 
 			resp.setHeader(EXPIRES, new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z").format(d));
-			resp.setHeader(CACHE_CONTROL, "max-age=172800");
+			resp.setHeader(CACHE_CONTROL, "max-age=172800000");
 		}
 		chain.doFilter(request, response);
 	}
