@@ -34,7 +34,7 @@ class NagiupController
              header: {localeBundle.Status},
              label:{
                     if (it.lastValue != null) {
-                        return "${it.lastValue.value}"
+                    	return getLocalizedPropertyForValue(it.lastValue.value)
                     }
             }],
             [field:  CPropResourceSortField.METRIC_TIMESTAMP, 
@@ -52,7 +52,12 @@ class NagiupController
                         return "${it.lastEvent.detail}"
                     }
             }],
-        ]
+        ],
+        styleClass: { 
+            if (it.lastValue != null) {
+            	return getStyleClassFromValue(it.lastValue.value)
+            }
+        }
     ]
 
     def NagiupController() {
@@ -67,6 +72,28 @@ class NagiupController
         return UnitsFormat.format(new UnitNumber(d, UnitsConstants.UNIT_DURATION,
                                                  UnitsConstants.SCALE_MILLI),
                                   locale, null).toString()
+    }
+    
+    private getStyleClassFromValue(val){ 
+    	if (val == 0.0) {
+            return "statusBGOK"
+        } else if (val == 1.0) {
+        	return "statusBGWARNING "
+        } else if (val == 2.0) {
+        	return "statusBGCRITICAL"
+        }else 
+        	return "statusBGUNKNOWN"
+    }
+    
+    private getLocalizedPropertyForValue(val) {
+    	if (val == 0.0) {
+            return localeBundle.ok
+        } else if (val == 1.0) {
+            return localeBundle.warning
+        } else if (val == 2.0) {
+        	return localeBundle.critical
+        }else 
+        	return localeBundle.unknown
     }
     
     def data(params) {
