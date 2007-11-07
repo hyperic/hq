@@ -385,3 +385,17 @@ font-weight:bold;
 .statusOK {background-color:#33FF00;}
 .statusBGWARNING {background-color: #FEFFC1; }
 .statusWARNING {background-color: #ffff00;}
+
+/* Live Exec */
+.outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
+.bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
+.leftbx {float:left;width:18%;margin-right:10px;height:400px;overflow-y:auto;}
+.BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
+#result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
+#result thead {width:100%;padding:0px;margin:0px;}
+#result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
+#result table{width:100%;padding:0px;}
+#result table td {padding:3px;border-bottom:1px solid #cccccc;}
+.fivepad {padding:5px;}
+.pendingData li {color:gray;}
+.hasData  li {color:black;}

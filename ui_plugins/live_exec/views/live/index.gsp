@@ -105,29 +105,22 @@ function runCommand() {
 
 </script>
 <style>
-.outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
-.bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
-.leftbx {float:left;width:18%;margin-right:10px;height:400px;}
-.BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
-#result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
-#result thead {width:100%;padding:0px;margin:0px;}
-#result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
-#result table{width:100%;padding:0px;}
-#result table td {padding:3px;border-bottom:1px solid #cccccc;}
-.fivepad {padding:5px;}
-.pendingData li {color:gray;}
-.hasData  li {color:black;}
 .goodResults  {width:20px;display:inline;background: url(/images/icon_email.gif);}
 .errorResults {width:20px;display:inline;background: url(/images/icon_actual.gif);}
 </style>
 
 <div class="outerLiveDataCont">
+
   <div class="leftbx">
+
     <div class="bxblueborder">
+
       <div class="BlockTitle"><div style="float:left;">Execute Command</div><div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
       <br style="clear:both;height:1px;"/>
       </div>
+
       <div class="fivepad">
+
         <select id="commandSelect" onchange="runCommand()">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
@@ -135,19 +128,19 @@ function runCommand() {
       </select>
       
       <% if (isGroup) { %>
-      <div style="padding:5px 3px;">Group Members</div>
-      <div id="groupMembers" class="pendingData">
-      <ul style="margin:0px;padding:0px;list-style-type:none;">
+        <div style="padding:5px 3px;">Group Members</div>
+        <div id="groupMembers" class="pendingData">
+        <ul style="margin:0px;padding:0px;list-style-type:none;">
         <% for (m in groupMembers) { %>
-        <li style="padding:2px;"><div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
+        <li style="padding:2px;">
+        <div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
           <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
-            <div style="clear:both;height:1px;"></div>
-          </div>
+            </br style="clear:both;height:1px;">
         </li>
         <% } %>
-      </ul>
-    </div>
-    <% } %>
+        </ul>
+        </div>
+        <% } %>
 
     <div id="formatters_cont">
       <% for (c in commands) { %>
@@ -161,6 +154,8 @@ function runCommand() {
       </div>
       <% } %>
     </div>
+
+
   </div>
 </div>
 
@@ -169,4 +164,6 @@ function runCommand() {
 <div id="result_cont">
   <span id="results_msg"></span>
   <div id="result" class="bxblueborder"></div>
+</div>
+
 </div>
