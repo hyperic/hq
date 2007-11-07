@@ -57,6 +57,8 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 		if (!isPropertyEmpty(dForm.getDefaultDashboard())) {
 			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm
 					.getDefaultDashboard());
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
+					dForm.getDefaultDashboard());
 			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject()
 					.getId(), user.getPreferences());
 		}
