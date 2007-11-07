@@ -14,7 +14,6 @@
   <script type="text/javascript" src="/dojo/dojo.js"></script>
   <script type="text/javascript">
     dojo.require("dojo.widget.FilteringTable");
-	dojo.hostenv.writeIncludes();
   </script>
   <link rel=stylesheet href="/dojo/fancy.css" type="text/css"/>
 </head>
