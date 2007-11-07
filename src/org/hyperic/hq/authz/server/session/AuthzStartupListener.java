@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -35,18 +35,29 @@ public class AuthzStartupListener
     
     private static ResourceDeleteCallback _callbacks;
     
+    private static SubjectRemoveCallback _srcallbacks;
+    
     public void hqStarted() {
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {
             _callbacks = (ResourceDeleteCallback)
                 app.registerCallbackCaller(ResourceDeleteCallback.class);
+            
+            _srcallbacks = (SubjectRemoveCallback)
+                app.registerCallbackCaller(SubjectRemoveCallback.class);
         }
     }
     
     static ResourceDeleteCallback getCallbackObj() {
         synchronized (LOCK) {
             return _callbacks;
+        }
+    }
+
+    static SubjectRemoveCallback getSRCallbackObj() {
+        synchronized (LOCK) {
+            return _srcallbacks;
         }
     }
 }

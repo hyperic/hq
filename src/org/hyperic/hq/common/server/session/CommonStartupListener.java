@@ -26,11 +26,13 @@
 package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 
 public class CommonStartupListener
     implements StartupListener
 {
     public void hqStarted() {
         AuditManagerEJBImpl.getOne().startup();
+        DashboardManagerEJBImpl.getOne().startup();
     }
 }

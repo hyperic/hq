@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,8 +40,8 @@ import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManagerLocal;
 import org.hyperic.hq.common.shared.AuditManagerUtil;
 import org.hyperic.hq.common.server.session.AuditImportance;
@@ -224,11 +224,26 @@ public class AuditManagerEJBImpl implements SessionBean {
         _DAO.handleResourceDelete(r);
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public void handleSubjectDelete(AuthzSubject s) {
+        _DAO.handleSubjectDelete(s);
+    }
+    
     private static class ResourceDeleteWatcher 
         implements ResourceDeleteCallback 
     {
         public void preResourceDelete(Resource r) {
             AuditManagerEJBImpl.getOne().handleResourceDelete(r);
+        }
+    }
+    
+    private static class SubjectDeleteWatcher 
+        implements SubjectRemoveCallback 
+    {
+        public void subjectRemoved(AuthzSubject toDelete) {
+            AuditManagerEJBImpl.getOne().handleSubjectDelete(toDelete);
         }
     }
     
@@ -238,8 +253,13 @@ public class AuditManagerEJBImpl implements SessionBean {
     public void startup() {
         _log.info("Audit Manager starting up");
         
-        HQApp.getInstance().registerCallbackListener(ResourceDeleteCallback.class,
-                                                     new ResourceDeleteWatcher());
+        HQApp.getInstance()
+                .registerCallbackListener(ResourceDeleteCallback.class,
+                                          new ResourceDeleteWatcher());
+
+        HQApp.getInstance()
+                .registerCallbackListener(SubjectRemoveCallback.class,
+                                          new SubjectDeleteWatcher());
     }
 
     public static AuditManagerLocal getOne() {

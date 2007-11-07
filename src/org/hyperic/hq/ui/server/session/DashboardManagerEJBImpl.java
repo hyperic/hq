@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -28,16 +28,20 @@ package org.hyperic.hq.ui.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -47,16 +51,14 @@ import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.StringUtil;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.shared.DashboardManagerUtil;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.shared.DashboardManagerUtil;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.StringUtil;
 
 /**
  * @ejb:bean name="DashboardManager"
@@ -270,6 +272,22 @@ public class DashboardManagerEJBImpl implements SessionBean {
 	    }
 
 	    return val;
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        _log.info("Dashboard Manager starting up");
+        
+        HQApp.getInstance()
+            .registerCallbackListener(SubjectRemoveCallback.class,
+                 new SubjectRemoveCallback() {
+                    public void subjectRemoved(AuthzSubject toDelete) {
+                        _dashDAO.handleSubjectRemoval(toDelete);
+                    }
+                }
+            );
     }
 
     public static DashboardManagerLocal getOne() {

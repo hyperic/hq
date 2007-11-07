@@ -69,6 +69,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceChangeCallback;
+import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
@@ -1778,13 +1779,23 @@ public class EventsBossEJBImpl
         app.registerCallbackListener(ResourceChangeCallback.class,
             new ResourceChangeCallback() {
                 public void preAppdefResourcesDelete(AppdefEntityID[] ids) {
-                    // Need to tell alert definitions to disassociate the
+                    // Need to tell alert definitions to dissociate the
                     // Resources
                     AlertDefinitionManagerLocal adm = getADM();
                     for (int i = 0; i < ids.length; i++) {
                         adm.disassociateResource(ids[i]);
                     }
                 }
+            }
+        );
+        
+        app.registerCallbackListener(SubjectRemoveCallback.class, 
+            new SubjectRemoveCallback() {
+                public void subjectRemoved(AuthzSubject toDelete) {
+                    getEscMan().handleSubjectRemoval(toDelete);
+                    getAM().handleSubjectRemoval(toDelete);
+                }
+            
             }
         );
         

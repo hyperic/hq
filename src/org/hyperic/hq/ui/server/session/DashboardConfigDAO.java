@@ -86,4 +86,10 @@ class DashboardConfigDAO
             .setParameter("subject", me)
             .list();
     }
+
+    void handleSubjectRemoval(AuthzSubject s) {
+        getSession().createQuery("delete UserDashboardConfig where user = :user")
+            .setParameter("user", s)
+            .executeUpdate();
+    }   
 }

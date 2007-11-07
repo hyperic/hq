@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -22,32 +22,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.dao.HibernateDAO;
+package org.hyperic.hq.authz.server.session;
 
-class GalertActionLogDAO extends HibernateDAO {
-    GalertActionLogDAO(DAOFactory f) {
-        super(GalertActionLog.class, f);
-    }
-
-    GalertActionLog findById(Integer id) {
-        return (GalertActionLog)super.findById(id);
-    }
-
-    void save(GalertActionLog entity) {
-        super.save(entity);
-    }
-
-    void handleSubjectRemoval(AuthzSubject subject) {
-        String sql = "update GalertActionLog set " +
-                     "subject = null " +
-                     "where subject = :subject";
-        
-        getSession().createQuery(sql)
-                    .setParameter("subject", subject)
-                    .executeUpdate();
-    }
+public interface SubjectRemoveCallback {
+    
+    /**
+     * Called when a subject is removed
+     */
+    void subjectRemoved(AuthzSubject toDelete);
 }

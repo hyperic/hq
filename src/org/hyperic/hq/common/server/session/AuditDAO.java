@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.common.server.session;
 
 import java.util.List;
@@ -63,6 +64,12 @@ public class AuditDAO extends HibernateDAO {
         getSession().createQuery(sql)
             .setParameter("rootResource", root)
             .setParameter("resource", r)
+            .executeUpdate();
+    }
+    
+    void handleSubjectDelete(AuthzSubject s) {
+        getSession().createQuery("delete Audit where subject = :subject")
+            .setParameter("subject", s)
             .executeUpdate();
     }
     

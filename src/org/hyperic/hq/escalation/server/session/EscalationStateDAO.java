@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.escalation.server.session;
 
 import java.util.Collection;
@@ -30,6 +31,7 @@ import java.util.List;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
 
 class EscalationStateDAO
@@ -94,6 +96,16 @@ class EscalationStateDAO
             .addOrder(Order.asc("nextActionTime"))
             .setMaxResults(maxEscalations)
             .list();
+    }
+
+    void handleSubjectRemoval(AuthzSubject subject) {
+        String sql = "update EscalationState set " +
+                     "acknowledgedBy = null " +
+                     "where acknowledgedBy = :subject";
+        
+        getSession().createQuery(sql)
+                    .setParameter("subject", subject)
+                    .executeUpdate();
     }
 
     /**

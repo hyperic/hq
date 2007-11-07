@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
-        def.setLastFired(new Long(ctime));
+        def.setLastFired(new Long(System.currentTimeMillis()));
         getAlertDAO().save(alert);
         return alert;
     }
@@ -619,6 +619,15 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         }
 
         return text.toString();
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void handleSubjectRemoval(AuthzSubject subject) {
+        AlertActionLogDAO dao =
+            new AlertActionLogDAO(DAOFactory.getDAOFactory());
+        dao.handleSubjectRemoval(subject);
     }
 
     public static AlertManagerLocal getOne() {

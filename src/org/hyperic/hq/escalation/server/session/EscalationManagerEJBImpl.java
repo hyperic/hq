@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.escalation.server.session;
 
 import java.util.Collection;
@@ -753,6 +754,14 @@ public class EscalationManagerEJBImpl
         return null;
     }
 
+    /**
+     * Called when subject is removed and therefore have to null out the
+     * acknowledgedBy field
+     * @ejb:interface-method
+     */
+    public void handleSubjectRemoval(AuthzSubject subject) {
+        _stateDAO.handleSubjectRemoval(subject);
+    }
     
     /**
      * @ejb:interface-method  
