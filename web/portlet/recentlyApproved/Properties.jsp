@@ -61,19 +61,12 @@
              <tr>
               <td nowrap><fmt:message key="dash.settings.recentlyApproved.last"/></td>
               <td>
-                  <c:choose>
-                      <c:when test="${not sessionScope.modifyDashboard}">
-                          <c:out value="${RecentlyApprovedForm.range}"/>
-                      </c:when>
-                      <c:otherwise>
-                          <html:select property="range">
-                              <html:option value="1"/>
-                              <html:option value="5"/>
-                              <html:option value="10"/>
-                              <html:option value="20"/>
-                          </html:select>
-                      </c:otherwise>
-                  </c:choose>
+                 <html:select property="range" disabled="${not sessionScope.modifyDashboard}">
+                     <html:option value="1"/>
+                     <html:option value="5"/>
+                     <html:option value="10"/>
+                     <html:option value="20"/>
+                 </html:select>
               </td>
               <td width="100%"><fmt:message key="dash.settings.recentlyApproved.platforms"/></td>
              </tr>
@@ -89,8 +82,8 @@
       </table>
       <tiles:insert definition=".form.buttons">
       <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
-        <tiles:put name="noCancel" value="true"/>
       </c:if>
       </tiles:insert>
       </html:form>

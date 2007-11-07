@@ -111,14 +111,7 @@ onloads.push(selectValidOption);
          <tr valign="top">
           <td width="20%" class="BlockLabel" valign="center"><fmt:message key="common.label.Description"/></td>
           <td width="80%" class="BlockContent" colspan="3" valign="center">
-             <c:choose>
-                <c:when test="${not sessionScope.modifyDashboard}">
-                    <c:out value="${MetricViewerForm.title}"/>
-                </c:when>
-                <c:otherwise>
-                    <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);"/>
-                </c:otherwise>
-             </c:choose>
+              <html:text property="title" maxlength="50" onkeypress="return handleEnter(this, event);" disabled="${not sessionScope.modifyDashboard}"/>
           </td>
         </tr>
          <tr valign="top">
@@ -295,8 +288,8 @@ onloads.push(selectValidOption);
       </c:choose>
       <tiles:insert definition=".form.buttons">
       <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
-        <tiles:put name="noCancel" value="true"/>
       </c:if>
       </tiles:insert>
       <html:hidden property="token"/>

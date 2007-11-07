@@ -70,7 +70,15 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
            
       <table class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr class="tableRowHeader">
-          <th width="100%" class="tableRowSorted"><input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll">
+          <th width="100%" class="tableRowSorted">
+          <c:choose>
+          <c:when test="${not sessionScope.modifyDashboard}">
+            <input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll" disabled="true">
+          </c:when>
+          <c:otherwise>
+            <input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll">
+          </c:otherwise>
+          </c:choose>
           <fmt:message key="dash.settings.ListHeader.ResourceChart"/></th>
         </tr>
       </table>
@@ -81,7 +89,14 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
         <c:forEach var="chart" items="${charts}" varStatus="status">
         <li class="tableCell" id="<c:out value="item_${status.count}"/>">
         <span style="cursor: move;">
-          <input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="charts" value="|<c:out value="${chart.key},${chart.value}"/>">
+          <c:choose>
+          <c:when test="${not sessionScope.modifyDashboard}">
+            <input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" disabled="true" class="listMember" name="charts" value="|<c:out value="${chart.key},${chart.value}"/>">             
+          </c:when>
+          <c:otherwise>
+            <input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="charts" value="|<c:out value="${chart.key},${chart.value}"/>">
+          </c:otherwise>
+          </c:choose>
           <html:link page="${chart.value}"><c:out value="${chart.key}"/></html:link>
         </span>
         </li>
@@ -95,26 +110,25 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       -->
       </script>
           <c:choose>
-              <c:when test="${not sessionScope.modifyDashboard}">
-             
-              </c:when>
-              <c:otherwise>
-                  <tiles:insert definition=".toolbar.list">
-                      <tiles:put name="deleteOnly" value="true"/>
-                      <%--none of this is being used--%>
-                      <tiles:put name="listItems" value="${chartsize}"/>
-                      <tiles:put name="listSize" value="${chartsize}"/>
-                      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-                      <tiles:put name="pageSizeAction" beanName="selfAction"/>
-                      <tiles:put name="pageNumAction" beanName="selfAction"/>
-                      <tiles:put name="defaultSortColumn" value="1"/>
-                  </tiles:insert>
-              </c:otherwise>
+             <c:when test="${not sessionScope.modifyDashboard}">
+             </c:when>
+             <c:otherwise>
+                 <tiles:insert definition=".toolbar.list">
+                     <tiles:put name="deleteOnly" value="true"/>
+                     <%--none of this is being used--%>
+                     <tiles:put name="listItems" value="${chartsize}"/>
+                     <tiles:put name="listSize" value="${chartsize}"/>
+                     <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+                     <tiles:put name="pageSizeAction" beanName="selfAction"/>
+                     <tiles:put name="pageNumAction" beanName="selfAction"/>
+                     <tiles:put name="defaultSortColumn" value="1"/>
+                 </tiles:insert>
+             </c:otherwise>
           </c:choose>
       <tiles:insert definition=".form.buttons">
       <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
-        <tiles:put name="noCancel" value="true"/>
       </c:if>
       </tiles:insert>
       </html:form>

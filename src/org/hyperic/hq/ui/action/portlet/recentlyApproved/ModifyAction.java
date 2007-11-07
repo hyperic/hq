@@ -66,17 +66,15 @@ public class ModifyAction extends BaseAction {
 
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        
-        PropertiesForm pForm = (PropertiesForm) form;
-        HttpSession session = request.getSession();
-        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
-        String range = pForm.getRange().toString();            
-
         ActionForward forward = checkSubmit(request, mapping, form);
 
         if (forward != null) {
             return forward;
         }
+        PropertiesForm pForm = (PropertiesForm) form;
+        HttpSession session = request.getSession();
+        WebUser user = (WebUser) session.getAttribute( Constants.WEBUSER_SES_ATTR );
+        String range = pForm.getRange().toString();            
         
         ConfigurationProxy.getInstance().setPreference(session, user, boss, 
         		PropertiesForm.RANGE, range);

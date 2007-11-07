@@ -68,7 +68,16 @@ var help = '<hq:help/>';
 
     <table class="table" class="table" width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr class="tableRowHeader">
-    <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll"></th>
+    <th width="1%" class="ListHeaderCheckbox">
+	    <c:choose>
+	    <c:when test="${not sessionScope.modifyDashboard}">
+	        <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll" disabled="true">
+	    </c:when>
+	    <c:otherwise>
+	        <input type="checkbox" onclick="ToggleAll(this, widgetProperties, true)" name="listToggleAll">
+	    </c:otherwise>
+	    </c:choose>
+    </th>
     <th class="tableRowInactive"><fmt:message key="dash.settings.ListHeader.Resource"/></th>
     </tr></table>
 
@@ -76,7 +85,7 @@ var help = '<hq:help/>';
       <c:forEach var="resource" items="${resourceHealthList}">
         <li class="tableCell" id="<c:out value="item_${resource.entityId}"/>">
         <span style="cursor: move;">
-        <html:checkbox onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember" property="ids" value="${resource.entityId}"/>
+        <html:checkbox onclick="ToggleSelection(this, widgetProperties, true)" styleClass="listMember" property="ids" value="${resource.entityId}" disabled="${not sessionScope.modifyDashboard}"/>
         <c:out value="${resource.name}"/>
         <c:if test="${not empty resource.description}">
           <fmt:message key="parenthesis">
@@ -114,8 +123,8 @@ var help = '<hq:help/>';
       <html:hidden property="order"/>
       <tiles:insert definition=".form.buttons">
       <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
-        <tiles:put name="noCancel" value="true"/>
       </c:if>
       </tiles:insert>
       </html:form>
