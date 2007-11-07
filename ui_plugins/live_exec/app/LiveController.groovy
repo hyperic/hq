@@ -16,23 +16,31 @@ class LiveController
     def LiveController() {
         setTemplate('standard')
     }
-    
-    private getCommands() {
-        def liveMan = ldmi.one
+
+    private getViewedMembers() {
         def r = viewedResource
         def members
         
         if (r.isGroup()) {
-            members = r.getGroupMembers(user)
+            members = r.getGroupMembers(user).findAll {it.entityID.isPlatform()}
         } else {
             members = [r]
         }
-        
+        log.info "Returning ${members}"
+        members
+    }
+    
+    private getCommands() {
+        def liveMan = ldmi.one
+        def r = viewedResource
         def cmds = []
-        for (m in members) {
+                    
+        for (m in viewedMembers) {
             if (m.isGroup())  // We don't process sub-groups
                 continue
-            cmds.addAll(m.getLiveDataCommands(user))
+                
+            if (m.entityID.isPlatform())
+                cmds.addAll(m.getLiveDataCommands(user))
         }
         cmds.sort().unique()
     }
@@ -57,12 +65,7 @@ class LiveController
         cmds.add(0, 'Please select a command')
         
         def isGroup = viewedResource.isGroup()
-        def members = []
-        if (isGroup) {
-            members = viewedResource.getGroupMembers(user)
-        } else {
-            members = [viewedResource]
-        }
+        def members = viewedMembers
     	render(locals:[ commands:cmds, eid:"${viewedResource.entityID}",
     	                cmdFmt:cmdFmt, formatters:formatters,
     	                isGroup:isGroup, groupMembers:members])
@@ -78,12 +81,7 @@ class LiveController
             return
         }
         
-        def resources
-        if (viewedResource.isGroup()) {
-            resources = viewedResource.getGroupMembers(user)
-        } else {
-            resources = [viewedResource]
-        }
+        def resources = viewedMembers
         
         def lres = resources.getLiveData(user, cmd, new ConfigResponse()) 
         JSONArray res = new JSONArray()
