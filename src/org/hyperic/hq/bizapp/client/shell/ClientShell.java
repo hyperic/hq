@@ -144,6 +144,8 @@ public class ClientShell
         this.setHandlerHidden("transfer",     true);
         this.setHandlerHidden("trigger",      true);
         this.setHandlerHidden("vacuum",       true);
+        this.setHandlerHidden("cache",        true);
+        this.setHandlerHidden("livedata",     true);
     }
 
     public ParserRetriever getParserRetriever(){
