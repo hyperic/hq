@@ -117,8 +117,9 @@ public class ReportProcessorEJBImpl
                 long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
                 
                 // Debugging missing data points
-                if (trace && (_debugId.intValue() == -1 ||
-                              dm.getId().equals(_debugId))) {
+                if (trace && _debugId != null &&
+                        (_debugId.intValue() == -1 ||
+                         dm.getId().equals(_debugId))) {
                     log.trace("metricDebug: ReportProcessor addData: " +
                               "metric ID " + dm.getId() +
                               " debug ID " + _debugId +
