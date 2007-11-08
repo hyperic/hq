@@ -90,7 +90,7 @@
    <td width="100%" class="TabCell"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
   <tr> 
-   <td colspan="6">
+   <td colspan="7">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
      <tr>
        <td class="SubTabCell"><html:img page="/images/spacer.gif" width="5" height="25" alt="" border="0"/></td>
