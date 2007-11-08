@@ -247,12 +247,26 @@
             category="AVAILABILITY"
             collectionType="static"
             units="sec"/>
-    <metric name="Running Processes"
-            alias="ProcTotal"
+
+    <metric name="Total Processes"
             template="sigar:Type=ProcStat:Total"
-            category="UTILIZATION"
-            units="none"
-            collectionType="dynamic"/>
+            category="UTILIZATION"/>
+
+    <metric name="Running Processes"
+            template="sigar:Type=ProcStat:Running"
+            category="UTILIZATION"/>
+
+    <metric name="Sleeping Processes"
+            template="sigar:Type=ProcStat:Sleeping"
+            category="UTILIZATION"/>
+
+    <metric name="Stopped Processes"
+            template="sigar:Type=ProcStat:Stopped"
+            category="UTILIZATION"/>
+
+    <metric name="Zombie Processes"
+            template="sigar:Type=ProcStat:Zombie"
+            category="UTILIZATION"/>
   </metrics>
 
   <!-- metrics common to all unix platforms -->
