@@ -105,8 +105,60 @@
             category="THROUGHPUT"/>
   </metrics>
 
+  <!-- TCP-MIB -->
+  <metrics name="tcp-mib">
+    <metric name="Tcp Active Opens"
+            template="sigar:Type=Tcp:ActiveOpens"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Passive Opens"
+            template="sigar:Type=Tcp:PassiveOpens"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Attempt Fails"
+            template="sigar:Type=Tcp:AttemptFails"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Estab Resets"
+            template="sigar:Type=Tcp:EstabResets"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Curr Estab"
+            template="sigar:Type=Tcp:CurrEstab"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp In Segs"
+            template="sigar:Type=Tcp:InSegs"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Out Segs"
+            template="sigar:Type=Tcp:OutSegs"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Retrans Segs"
+            template="sigar:Type=Tcp:RetransSegs"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp In Errs"
+            template="sigar:Type=Tcp:InErrs"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+
+    <metric name="Tcp Out Rsts"
+            template="sigar:Type=Tcp:OutRsts"
+            collectionType="trendsup"
+            category="THROUGHPUT"/>
+  </metrics>
+
   <!-- metrics common to all platforms -->
-  <metrics name="system-common">
+  <metrics name="system-common" include="tcp-mib">
     <!-- we always return 1, no url get -->
     <metric name="Availability"
             alias="Availability"
