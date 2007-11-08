@@ -372,8 +372,8 @@ function showViewEscResponse() {
 <table width="100%" cellpadding="4" cellspacing="0" border="0">
   <tbody>
     <tr class="tableRowHeader">
-      <td><fmt:message key="alert.config.escalation.scheme" /> <select
-        id="escIdSel" name="escId" onchange="schemeChange(this)">
+      <td><fmt:message key="alert.config.escalation.scheme" />
+          <select id="escIdSel" name="escId" onchange="schemeChange(this)" class="selectWid">
         <option value=""><fmt:message key="resource.common.inventory.props.SelectOption" /></option>
       </select>
         <span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
