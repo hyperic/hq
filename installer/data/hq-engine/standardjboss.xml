@@ -1080,7 +1080,8 @@
       <instance-cache></instance-cache>
       <persistence-manager></persistence-manager>
       <container-pool-conf>
-        <MaximumSize>100</MaximumSize>
+        <MaximumSize>1</MaximumSize>
+		<strictMaximumSize>true</strictMaximumSize>
       </container-pool-conf>
     </container-configuration>
 
