@@ -455,6 +455,13 @@
             units="none"
             collectionType="dynamic"/>
 
+    <metric name="Disk Service Time"
+            alias="DiskServiceTime"
+            template="sigar:Type=MountedFileSystemUsage,Arg=%mount%:DiskServiceTime"
+            category="UTILIZATION"
+            units="percentage"
+            collectionType="dynamic"/>
+
     <!-- Win32 does not have inodes, rendering these metric two useless -->
     <metric name="Free Files"
             alias="FreeFiles"
