@@ -193,7 +193,10 @@ class MetricTag
             return;
         }
 
-        //first make sure name is set
+        if (isSet(ATTR_ALIAS)) {
+            addFilter(ATTR_ALIAS); //name <filter> may want to use ${alias}
+        }
+        //allow name to be defined by a <filter>
         filterAttribute(ATTR_NAME);
         addFilter(ATTR_NAME);
 
@@ -212,9 +215,8 @@ class MetricTag
             }
             this.props.put(ATTR_ALIAS,
                            buf.toString());
+            addFilter(ATTR_ALIAS);
         }
-        
-        addFilter(ATTR_ALIAS);
 
         //finally the template (which may have an ${alias} ref)
         filterAttribute(ATTR_TEMPLATE);
