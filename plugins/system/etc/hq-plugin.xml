@@ -50,6 +50,63 @@
   <property name="MacOSX.DEFAULT_CONFIG_FILE"
             value="${unix.config_files}"/>
 
+  <filter name="template" value="sigar:Type=NfsClientV3:${alias}"/>
+  <filter name="name" value="Nfs Client V3 ${alias}"/>
+
+  <metrics name="nfsv3-client">
+    <metric alias="Null" collectionType="trendsup"/>
+    <metric alias="Getattr" collectionType="trendsup"/>
+    <metric alias="Setattr" collectionType="trendsup"/>
+    <metric alias="Lookup" collectionType="trendsup"/>
+    <metric alias="Access" collectionType="trendsup"/>
+    <metric alias="Readlink" collectionType="trendsup"/>
+    <metric alias="Read" collectionType="trendsup"/>
+    <metric alias="Write" collectionType="trendsup"/>
+    <metric alias="Create" collectionType="trendsup"/>
+    <metric alias="Mkdir" collectionType="trendsup"/>
+    <metric alias="Symlink" collectionType="trendsup"/>
+    <metric alias="Mknod" collectionType="trendsup"/>
+    <metric alias="Remove" collectionType="trendsup"/>
+    <metric alias="Rmdir" collectionType="trendsup"/>
+    <metric alias="Rename" collectionType="trendsup"/>
+    <metric alias="Link" collectionType="trendsup"/>
+    <metric alias="Readdir" collectionType="trendsup"/>
+    <metric alias="Readdirplus" collectionType="trendsup"/>
+    <metric alias="Fsstat" collectionType="trendsup"/>
+    <metric alias="Fsinfo" collectionType="trendsup"/>
+    <metric alias="Pathconf" collectionType="trendsup"/>
+    <metric alias="Commit" collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template" value="sigar:Type=NfsServerV3:${alias}"/>
+  <filter name="name" value="Nfs Server V3 ${alias}"/>
+
+  <!-- same rpc counters as -client -->
+  <metrics name="nfsv3-server">
+    <metric alias="Null" collectionType="trendsup"/>
+    <metric alias="Getattr" collectionType="trendsup"/>
+    <metric alias="Setattr" collectionType="trendsup"/>
+    <metric alias="Lookup" collectionType="trendsup"/>
+    <metric alias="Access" collectionType="trendsup"/>
+    <metric alias="Readlink" collectionType="trendsup"/>
+    <metric alias="Read" collectionType="trendsup"/>
+    <metric alias="Write" collectionType="trendsup"/>
+    <metric alias="Create" collectionType="trendsup"/>
+    <metric alias="Mkdir" collectionType="trendsup"/>
+    <metric alias="Symlink" collectionType="trendsup"/>
+    <metric alias="Mknod" collectionType="trendsup"/>
+    <metric alias="Remove" collectionType="trendsup"/>
+    <metric alias="Rmdir" collectionType="trendsup"/>
+    <metric alias="Rename" collectionType="trendsup"/>
+    <metric alias="Link" collectionType="trendsup"/>
+    <metric alias="Readdir" collectionType="trendsup"/>
+    <metric alias="Readdirplus" collectionType="trendsup"/>
+    <metric alias="Fsstat" collectionType="trendsup"/>
+    <metric alias="Fsinfo" collectionType="trendsup"/>
+    <metric alias="Pathconf" collectionType="trendsup"/>
+    <metric alias="Commit" collectionType="trendsup"/>
+  </metrics>
+
   <!-- experimental, none defaultOn -->
   <metrics name="tcp">
     <metric name="Tcp Inbound Connections"
