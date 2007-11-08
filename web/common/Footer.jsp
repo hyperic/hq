@@ -66,7 +66,7 @@
   </tr>
 </table>
 
-<div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; visibility: hidden;">
+<div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; display:none;">
 <table cellpadding="2" cellspacing="0" border="0" width="305">
   <tr class="PageTitleBar">
     <td width="1%" class="PageTitle" style="background-color: #EBEDF2"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>

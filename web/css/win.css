@@ -1097,9 +1097,10 @@ border-bottom:1px solid #999999;
 background-color:#f1f1f1;
 white-space:nowrap;
 text-align: center;
+z-index:2;
 }
 
-a.headUsrName {
+#headUsrName a {
  color: #003399;
  text-decoration:none;
  font-weight: bold;
@@ -1112,8 +1113,10 @@ a.headUsrName {
     position:absolute;
     top:0px;
     left:10px;
-    width:375px;
+    width:380px;
+    height:38px;
     overflow:hidden;
+    z-index:1;
 }
 
 .headBotNav {
@@ -1256,6 +1259,5 @@ white-space: nowrap;
 /*
 .dojoMenuBar2 {
 		border-top:1px solid #d4d4d4;
-
 }
 */
