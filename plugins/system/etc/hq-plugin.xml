@@ -107,6 +107,8 @@
     <metric alias="Commit" collectionType="trendsup"/>
   </metrics>
 
+  <metrics name="nfs" include="nfsv3-server,nfsv3-client"/>
+
   <!-- experimental, none defaultOn -->
   <metrics name="tcp">
     <metric name="Tcp Inbound Connections"
@@ -383,7 +385,7 @@
             units="ms"/>
   </metrics>
 
-  <metrics name="Linux" include="system-common-unix,cpu-wait,tcp">
+  <metrics name="Linux" include="system-common-unix,cpu-wait,tcp,nfs">
     <metric name="Free Memory (+ buffers/cache)"
             alias="ActualMemFree"
             template="sigar:Type=Mem:ActualFree"
@@ -400,17 +402,17 @@
   </metrics>
 
   <metrics name="Solaris"
-           include="system-common-unix,cpu-wait,tcp"/>
+           include="system-common-unix,cpu-wait,tcp,nfs"/>
 
   <metrics name="HPUX"
            include="system-common-unix,cpu-wait,tcp"/>
 
   <metrics name="AIX"
-           include="system-common-unix,cpu-wait"/>
+           include="system-common-unix,cpu-wait,nfs"/>
 
-  <metrics name="MacOSX" include="system-common-unix,tcp"/>
+  <metrics name="MacOSX" include="system-common-unix,tcp,nfs"/>
 
-  <metrics name="FreeBSD" include="system-common-unix,tcp"/>
+  <metrics name="FreeBSD" include="system-common-unix,tcp,nfs"/>
 
   <metrics name="Win32" include="system-common,tcp">
     <metric name="Cpu Usage"
