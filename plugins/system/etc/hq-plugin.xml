@@ -300,6 +300,14 @@
             category="UTILIZATION"
             collectionType="dynamic"
             units="B"/>
+    <metric name="Swap Pages In"
+            template="sigar:Type=Swap:PageIn"
+            category="UTILIZATION"
+            collectionType="trendsup"/>
+    <metric name="Swap Pages Out"
+            template="sigar:Type=Swap:PageOut"
+            category="UTILIZATION"
+            collectionType="trendsup"/>
     <metric name="System Uptime"
             alias="Uptime"
             template="sigar:Type=Uptime:Uptime"
