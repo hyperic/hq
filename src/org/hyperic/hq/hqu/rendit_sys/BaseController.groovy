@@ -44,7 +44,7 @@ abstract class BaseController {
         this.localeBundle = newBundle
     }
     
-    private void setControllerName(String name) {
+    void setControllerName(String name) {
         this.controllerName = name
     }
     
