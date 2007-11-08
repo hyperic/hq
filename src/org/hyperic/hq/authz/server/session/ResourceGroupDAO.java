@@ -27,18 +27,15 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 public class ResourceGroupDAO extends HibernateDAO
 {
-    private final Log _log = LogFactory.getLog(ResourceGroupDAO.class);
-
     public ResourceGroupDAO(DAOFactory f) {
         super(ResourceGroup.class, f);
     }
@@ -197,6 +194,21 @@ public class ResourceGroupDAO extends HibernateDAO
         return getSession().createQuery(sql)
             .setInteger(0, r.getInstanceId().intValue())
             .setInteger(1, r.getResourceType().getId().intValue())
+            .list();
+    }
+
+    public Collection findCompatible(Integer groupEntType,
+                                     Integer groupEntResType) {
+        String sql =
+            "from ResourceGroup g " +
+            "where g.groupEntType = ? and g.groupEntResType = ? and " +
+            "(g.groupType = ? or g.groupType = ?)";
+
+        return getSession().createQuery(sql)
+            .setInteger(0, groupEntType.intValue())
+            .setInteger(1, groupEntResType.intValue())
+            .setInteger(2, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)
+            .setInteger(3, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)
             .list();
     }
 }

@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -501,6 +502,38 @@ public class ResourceGroupManagerEJBImpl
             }
         }
         
+        return groups;
+    }
+
+    /**
+     * Get all compatible resource groups of the given entity type and
+     * resource type.
+     *
+     * @ejb:interface-method
+     * @ejb:transaction type="SUPPORTS"
+     */
+    public Collection getCompatibleResourceGroups(AuthzSubject subject,
+                                                  Integer groupEntType,
+                                                  Integer groupEntResType)
+        throws FinderException, PermissionException
+    {
+        // first get the list of groups subject can view
+        PermissionManager pm = PermissionManagerFactory.getInstance();
+        List groupIds =
+            pm.findOperationScopeBySubject(subject.getAuthzSubjectValue(),
+                                           AuthzConstants.groupOpViewResourceGroup,
+                                           AuthzConstants.groupResourceTypeName,
+                                           PageControl.PAGE_ALL);
+
+        Collection groups = getResourceGroupDAO().findCompatible(groupEntType,
+                                                                 groupEntResType);
+        for (Iterator i = groups.iterator(); i.hasNext(); ) {
+            ResourceGroup g = (ResourceGroup)i.next();
+            if (!groupIds.contains(g.getId())) {
+                i.remove();
+            }
+        }
+
         return groups;
     }
 
