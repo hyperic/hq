@@ -183,7 +183,9 @@ function getAllDaysInMonth(monthNum, yearNum)  {
 
 function setSelect(selId, index) {
   var sel = document.getElementById(selId);
-  sel.selectedIndex = index;
+  if((sel){
+    sel.selectedIndex = index;
+  }
 }
 
 function setRecurDropdown(recurInterval) {
