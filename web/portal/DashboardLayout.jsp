@@ -233,11 +233,11 @@
 	        </div>
         </div>
         <div id="dashboardSelectDialog" class="hidden">
-		    <div class="dialog">
-		        <div class="dialogHeader"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
-		        <div class="dialogBody">
+		    <div class="dojoDialog">
+		        <div class="dojoDialogHeader"><fmt:message key="dash.home.DashboardSelectionDialog"/></div>
+		        <div class="dojoDialogBody">
 		            <c:if test="${requestScope.isDashRemoved}">
-		              <div class="dialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
+		              <div class="dojoDialogMessage"><fmt:message key="dash.home.DefalutDashboardRemoved"/></div>
 		            </c:if>
 		            <div id="dashboardSelectionErrorPanel" class="hidden">
 		                <span class="ErrorBlock"><img width="10" height="11" border="0" alt="" src="/images/tt_error.gif"/></span>
@@ -250,7 +250,7 @@
                         </html:select>
 		            </div>
 		        </div>
-		        <div class="dialogFooter">
+		        <div class="dojoDialogFooter">
 		           <div class="right">
 		            <html:image property="ok" styleId="selectDashboard" src="/images/fb_ok.gif" onmouseout="javscript:this.src='/images/fb_ok.gif'" onmouseover="javscript:this.src='/images/fb_ok_over.gif'" onmousedown="javascript:this.src='/images/fb_ok_down.gif'" onclick="javascript:selectDefaultDashboard('defaultDash', 'DashboardForm');"></html:image>
 		           </div>
