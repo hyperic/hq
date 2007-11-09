@@ -4,8 +4,6 @@
 
 
 .dojoMenuBar2 {
-padding-top:2px;
-padding-bottom:2px;
 }
 
 .dojoMenuBar2 .dojoMenuItem2 {
@@ -15,4 +13,12 @@ padding-bottom:2px;
 .headUsrName {
     font-size:10px;
     z-index:10;
+}
+
+#loading {
+    bottom:0px;
+}
+
+#hb {
+    bottom:0px;   
 }
