@@ -35,4 +35,8 @@ class MeasurementEnabler
     public void processEvents(List e) {
         DerivedMeasurementManagerEJBImpl.getOne().handleCreateRefreshEvents(e);
     }
+    
+    public String toString() {
+        return "MeasurementEnabler";
+    }
 }

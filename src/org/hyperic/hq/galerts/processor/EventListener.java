@@ -41,4 +41,8 @@ class EventListener
     public void processEvents(List events) {
         _aProc.processEvents(events);
     }
+    
+    public String toString() {
+        return "Galert Event Listener";
+    }
 }

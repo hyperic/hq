@@ -58,4 +58,8 @@ public class ResourceDeleteWatcher implements ZeventListener {
         DashboardManagerLocal dm = DashboardManagerEJBImpl.getOne();
         dm.handleResourceDelete(_opts, ids);
     }
+    
+    public String toString() {
+        return "ResourceDeleteWatcher";
+    }
 }

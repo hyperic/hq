@@ -1812,6 +1812,10 @@ public class EventsBossEJBImpl
                         }
                     }
                 }
+                
+                public String toString() {
+                    return "AlertDefCleanupListener";
+                }
             }
         );
     }

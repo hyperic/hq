@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 package org.hyperic.hq.zevents;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,11 +41,13 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * The Zevent subsystem is an event system for fast, non-reliable transmission
@@ -155,8 +158,8 @@ public class ZeventManager {
      * @return false if the listener was already listening
      */
     public boolean addGlobalListener(ZeventListener listener) {
-        synchronized (_listeners) {
-            return _globalListeners.add(listener);
+        synchronized (_listenerLock) {
+            return _globalListeners.add(new TimingListenerWrapper(listener));
         }
     }
     
@@ -223,7 +226,7 @@ public class ZeventManager {
 
             if (listeners.contains(listener))
                 return false;
-            listeners.add(listener);
+            listeners.add(new TimingListenerWrapper(listener));
             return true;
         }
     }
@@ -263,7 +266,7 @@ public class ZeventManager {
             Zevent e = (Zevent)i.next();  
 
             e.enterQueue();
-            _eventQueue.put(e);
+            _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
     }
     
@@ -343,11 +346,101 @@ public class ZeventManager {
     }
 
     private String getDiagnostics() {
+        PrintfFormat fmt = 
+            new PrintfFormat("        %-30s max=%-3.2f avg=%-3.2f\n");
+        
         synchronized (INIT_LOCK) {
-            return "ZEvent Manager Diagnostics:\n" +   
-                       "    Queue Size:        " + _eventQueue.size() + "\n" +
-                       "    Events Handled:    " + _numEvents + "\n" + 
-                       "    Max Time In Queue: " + _maxTimeInQueue + "ms";
+            StringBuffer res = new StringBuffer();
+            
+            res.append("ZEvent Manager Diagnostics:\n")  
+               .append("    Queue Size:        " + _eventQueue.size() + "\n")
+               .append("    Events Handled:    " + _numEvents + "\n")
+               .append("    Max Time In Queue: " + _maxTimeInQueue + "ms\n\n")
+               .append("ZEvent Listener Diagnostics:\n");
+            synchronized (_listenerLock) {
+                for (Iterator i=_listeners.entrySet().iterator(); i.hasNext();){ 
+                    Map.Entry ent = (Map.Entry)i.next();
+                    Collection listeners = (Collection)ent.getValue();
+                    
+                    res.append("    EventClass: " +
+                               ent.getKey() + "\n");
+                    for (Iterator j=listeners.iterator(); j.hasNext(); ) {
+                        TimingListenerWrapper l = 
+                            (TimingListenerWrapper)j.next();
+                        Object[] args = new Object[] { 
+                            l.toString(),
+                            new Double(l.getMaxTime()),
+                            new Double(l.getAverageTime()) 
+                        };
+                            
+                        res.append(fmt.sprintf(args));
+                    }
+                    res.append("\n");
+                }
+                
+                res.append("    Global Listeners:\n");
+                for (Iterator i=_globalListeners.iterator(); i.hasNext(); ) {
+                    TimingListenerWrapper l = (TimingListenerWrapper)i.next();
+                    Object[] args = new Object[] { 
+                        l.toString(),
+                        new Double(l.getMaxTime()),
+                        new Double(l.getAverageTime())
+                    };
+                    
+                    res.append(fmt.sprintf(args));
+                }
+            }
+            
+            return res.toString();
+        }
+    }
+    
+    private static class TimingListenerWrapper 
+        implements ZeventListener
+    {
+        private ZeventListener _target;
+        private long           _maxTime   = 0;
+        private long           _totTime   = 0;
+        private long           _numEvents = 0;
+        
+        public TimingListenerWrapper(ZeventListener target) {
+            _target = target;
+        }
+        
+        public void processEvents(List events) {
+            long time, start = System.currentTimeMillis();
+            try {
+                _target.processEvents(events);
+            } finally {
+                time = System.currentTimeMillis() - start;
+                if (time > _maxTime) {
+                    _maxTime = time;
+                }
+                _totTime   += time;
+                _numEvents += events.size();
+            }
+        }
+
+        public long getMaxTime() {
+           return _maxTime;
+        }
+        
+        public double getAverageTime() {
+            if (_numEvents == 0)
+                return Double.NaN;
+            return (double)_totTime / (double)_numEvents;
+        }
+        
+        public boolean equals(Object obj) {
+            return _target.equals(obj);
+        }
+
+        public int hashCode() {
+            return _target.hashCode();
+        }
+
+        public String toString() {
+            return _target.toString();
         }
     }
     

@@ -67,4 +67,16 @@ class BufferedListener
     public void processEvents(List events) {
         execute(new BufferedEventRunnable(events, _target));
     }
+
+    public boolean equals(Object obj) {
+        return _target.equals(obj);
+    }
+
+    public int hashCode() {
+        return _target.hashCode();
+    }
+    
+    public String toString() {
+        return _target.toString();
+    }
 }

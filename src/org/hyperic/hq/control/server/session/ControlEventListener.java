@@ -42,7 +42,6 @@ public class ControlEventListener
     private static Log _log = LogFactory.getLog(ControlEventListener.class);
 
     public void processEvents(List events) {
-
         ControlScheduleManagerLocal cM = ControlScheduleManagerEJBImpl.getOne();
 
         for (Iterator i = events.iterator(); i.hasNext();) {
@@ -57,5 +56,9 @@ public class ControlEventListener
                 _log.error("Unable to remove scheduled jobs", e);
             }
         }
+    }
+    
+    public String toString() {
+        return "ControlEventListener";
     }
 }
