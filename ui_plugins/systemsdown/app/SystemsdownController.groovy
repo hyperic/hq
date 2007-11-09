@@ -71,7 +71,7 @@ class SystemsdownController extends BaseController {
         def json = ""
         if (type != null) {
             json += "{name: \"" + type.name + "\", id: \""
-            json += type.appdefType + ":" + type.id + "\", count: " + count + "},\n"
+            json += type.appdefType + ":" + type.id + "\", count: " + count + "}"
         }
         return json
     }
@@ -85,6 +85,10 @@ class SystemsdownController extends BaseController {
         map.each { entry ->
             def list = entry.value
 
+            if (appdefType != 1) {
+                json += ",\n"
+            }
+
             if (list.size() > 0) {
                 json += "{parent: \"" + entry.key + "\",\n" +
                         "id: " + appdefType + ",\n" +
@@ -97,6 +101,11 @@ class SystemsdownController extends BaseController {
                 list.each { type ->
                     if (previous == null || previous.name != type.name) {
                         json += getTypeJSON(previous, count)
+
+                        if (previous != null) {
+                            json += ",\n"
+                        }
+
                         previous = type
                         count = 0
                     }
@@ -105,7 +114,7 @@ class SystemsdownController extends BaseController {
                 }
 
                 json += getTypeJSON(previous, count)
-                json += "]\n},\n"
+                json += "]\n}"
             }
             appdefType++
         }
