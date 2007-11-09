@@ -1722,9 +1722,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             stmt = conn.createStatement();
-            String metricUnion =
-                MeasTabManagerUtil.getUnionStatement(
-                    (System.currentTimeMillis()-timeAfter), id.intValue());
+            String metricUnion = MeasTabManagerUtil
+                .getUnionStatement((System.currentTimeMillis() - getPurgeRaw()),
+                                   timeAfter, id.intValue());
             
             // Create array of tables to go through
             String[] tables = new String[] {
@@ -1738,7 +1738,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
                                        " WHERE " +
-                                       " timestamp > " + timeAfter +
+                                       " timestamp < " + timeAfter +
                                        " and measurement_id = " + id +
                                        " and not value = 0");
                 
