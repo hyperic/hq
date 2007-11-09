@@ -354,62 +354,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Handle events from the {@link MeasurementEnabler}.  This method
-     * is required to place the operation within a transaction (and session)
-     * 
-     * @ejb:interface-method
-     */
-    public void handleCreateRefreshEvents(List events) {
-        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
-        TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
-        AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
-        
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            ResourceZevent z = (ResourceZevent)i.next();
-            AuthzSubjectValue subject = z.getAuthzSubjectValue();
-            AppdefEntityID id = z.getAppdefEntityID();
-            boolean isCreate, isRefresh;
-
-            isCreate = z instanceof ResourceCreatedZevent;
-            isRefresh = z instanceof ResourceRefreshZevent;
-
-            try {
-                // Handle reschedules for when agents are updated.
-                if (isRefresh) {
-                    log.info("Refreshing metric schedule for [" + id + "]");
-                    AgentScheduleSynchronizer.schedule(id);
-                    continue;
-                }
-
-                // For either create or update events, schedule the default
-                // metrics
-                if (getEnabledMetricsCount(subject, id) == 0) {
-                    log.info("Enabling default metrics for [" + id + "]");
-                    AuthzSubject subj = aman.findSubjectById(subject.getId());
-                    enableDefaultMetrics(subj, id);
-                }
-
-                if (isCreate) {
-                    // On initial creation of the service check if log or config
-                    // tracking is enabled.  If so, enable it.  We don't auto
-                    // enable log or config tracking for update events since
-                    // in the callback we don't know if that flag has changed.
-                    ConfigResponse c =
-                        cm.getMergedConfigResponse(subject,
-                                                   ProductPlugin.TYPE_MEASUREMENT,
-                                                   id, true);
-                    tm.enableTrackers(subject, id, c);
-                }
-
-            } catch (ConfigFetchException e) {
-                log.debug("Config not set for [" + id + "]", e);
-            } catch(Exception e) {
-                log.warn("Unable to enable default metrics for [" + id + "]", e);
-            }
-        }
-    }
-
-    /**
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
@@ -464,9 +408,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated DerivedMeasurementValue objects
-     * @ejb:interface-method
      */
-    public List createDefaultMeasurements(AuthzSubject subject,
+    private List createDefaultMeasurements(AuthzSubject subject,
                                           AppdefEntityID id,
                                           String mtype,
                                           ConfigResponse props)
@@ -474,13 +417,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                MeasurementCreateException {
         // We're going to make sure there aren't metrics already
         List dms = findMeasurements(subject, id, null, PageControl.PAGE_ALL);
-        if (dms.size() != 0) {
-            return dms;
-        }
 
         // Find the templates
         Collection mts =
             getMeasurementTemplateDAO().findTemplatesByMonitorableType(mtype);
+
+        if (dms.size() != 0 && dms.size() == mts.size()) {
+            return dms;
+        }
 
         Integer[] tids = new Integer[mts.size()];
         long[] intervals = new long[mts.size()];
@@ -1337,83 +1281,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         sendAgentSchedule(id);
     }
 
-    
-    private static String getMonitorableType(AuthzSubject subject,
-                                             AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException 
-    {
-        if (id.isPlatform() || id.isServer() | id.isService()) {
-            AppdefEntityValue av = new AppdefEntityValue(id, subject);
-            return av.getMonitorableType();
-        } 
-        return null;
-    }
-
-    /**
-     * Enable the default metrics for a resource.  This should only
-     * be called by the {@link MeasurementEnabler}.  If you want the behavior
-     * of this method, use the {@link MeasurementEnabler} 
-     * @ejb:interface-method
-     */
-    public void enableDefaultMetrics(AuthzSubject subj, 
-                                     AppdefEntityID id) 
-        throws AppdefEntityNotFoundException, PermissionException 
-    {
-        RawMeasurementManagerLocal rawMan =
-            RawMeasurementManagerEJBImpl.getOne();
-        ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
-        ConfigResponse config;
-        String mtype;
-
-        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
-        try {
-            mtype = getMonitorableType(subj, id);
-            // No monitorable type
-            if (mtype == null) {
-                return;
-            }
-
-            config = 
-                cfgMan.getMergedConfigResponse(subject,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
-        } catch (ConfigFetchException e) {
-            log.debug("Unable to enable default metrics for [" + id + "]", e);
-            return;
-        }  catch (Exception e) {
-            log.error("Unable to enable default metrics for [" + id + "]", e);
-            return;
-        }
-
-        // Check the configuration
-        try {
-            rawMan.checkConfiguration(subj, id, config);
-        } catch (InvalidConfigException e) {
-            log.warn("Error turning on default metrics, configuration (" +
-                      config + ") " + "couldn't be validated", e);
-            cfgMan.setValidationError(subject, id, e.getMessage());
-            return;
-        } catch (Exception e) {
-            log.warn("Error turning on default metrics, " +
-                      "error in validation", e);
-            cfgMan.setValidationError(subject, id, e.getMessage());
-            return;
-        }
-
-        // Enable the metrics
-        try {
-            createDefaultMeasurements(subj, id, mtype, config);
-            cfgMan.clearValidationError(subject, id);
-
-            // Execute the callback so other people can do things when the
-            // metrics have been created (like create type-based alerts)
-            MeasurementStartupListener.getDefaultEnableObj().metricsEnabled(id);
-        } catch (Exception e) {
-            log.warn("Unable to enable default metrics for id=" + id +
-                      ": " + e.getMessage(), e);
-        }
-    }
-
     /**
      * Get the list of DownMetricValues that represent the resources that are
      * currently down
@@ -1457,6 +1324,160 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         getMeasurementTemplateDAO().findAllUsed();
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public void syncPluginMetrics(String plugin) {
+        List entities =
+            getDerivedMeasurementDAO().findMetricsCountMismatch(plugin);
+        
+        for (Iterator it = entities.iterator(); it.hasNext(); ) {
+            Object[] vals = (Object[]) it.next();
+            
+            AppdefEntityID aeid =
+                new AppdefEntityID(((Integer) vals[0]).intValue(),
+                                   (Integer) vals[1]);
+
+            // Get the overlord user
+            AuthzSubject overlord =
+                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        
+            try {
+                enableDefaultMetrics(overlord, aeid, false);
+            } catch (AppdefEntityNotFoundException e) {
+                // Move on since we did this query based on measurement table
+                // not resource table
+            } catch (PermissionException e) {
+                // Quite impossible
+                assert(false);
+            }
+        }
+    }
+    
+    /**
+     * Handle events from the {@link MeasurementEnabler}.  This method
+     * is required to place the operation within a transaction (and session)
+     * 
+     * @ejb:interface-method
+     */
+    public void handleCreateRefreshEvents(List events) {
+        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
+        TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
+        AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
+        
+        for (Iterator i=events.iterator(); i.hasNext(); ) {
+            ResourceZevent z = (ResourceZevent)i.next();
+            AuthzSubjectValue subject = z.getAuthzSubjectValue();
+            AppdefEntityID id = z.getAppdefEntityID();
+            boolean isCreate, isRefresh;
+    
+            isCreate = z instanceof ResourceCreatedZevent;
+            isRefresh = z instanceof ResourceRefreshZevent;
+    
+            try {
+                // Handle reschedules for when agents are updated.
+                if (isRefresh) {
+                    log.info("Refreshing metric schedule for [" + id + "]");
+                    AgentScheduleSynchronizer.schedule(id);
+                    continue;
+                }
+    
+                // For either create or update events, schedule the default
+                // metrics
+                if (getEnabledMetricsCount(subject, id) == 0) {
+                    log.info("Enabling default metrics for [" + id + "]");
+                    AuthzSubject subj = aman.findSubjectById(subject.getId());
+                    enableDefaultMetrics(subj, id, true);
+                }
+    
+                if (isCreate) {
+                    // On initial creation of the service check if log or config
+                    // tracking is enabled.  If so, enable it.  We don't auto
+                    // enable log or config tracking for update events since
+                    // in the callback we don't know if that flag has changed.
+                    ConfigResponse c =
+                        cm.getMergedConfigResponse(subject,
+                                                   ProductPlugin.TYPE_MEASUREMENT,
+                                                   id, true);
+                    tm.enableTrackers(subject, id, c);
+                }
+    
+            } catch (ConfigFetchException e) {
+                log.debug("Config not set for [" + id + "]", e);
+            } catch(Exception e) {
+                log.warn("Unable to enable default metrics for [" + id + "]", e);
+            }
+        }
+    }
+
+    /**
+     * Enable the default metrics for a resource.  This should only
+     * be called by the {@link MeasurementEnabler}.  If you want the behavior
+     * of this method, use the {@link MeasurementEnabler} 
+     */
+    private void enableDefaultMetrics(AuthzSubject subj, 
+                                     AppdefEntityID id, boolean verify) 
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
+        RawMeasurementManagerLocal rawMan =
+            RawMeasurementManagerEJBImpl.getOne();
+        ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
+        ConfigResponse config;
+        String mtype;
+    
+        AuthzSubjectValue subject = subj.getAuthzSubjectValue();
+        try {
+            if (id.isPlatform() || id.isServer() | id.isService()) {
+                AppdefEntityValue av = new AppdefEntityValue(id, subject);
+                mtype = av.getMonitorableType();
+            }
+            else {
+                return;
+            }
+    
+            config = 
+                cfgMan.getMergedConfigResponse(subject,
+                                               ProductPlugin.TYPE_MEASUREMENT,
+                                               id, true);
+        } catch (ConfigFetchException e) {
+            log.debug("Unable to enable default metrics for [" + id + "]", e);
+            return;
+        }  catch (Exception e) {
+            log.error("Unable to enable default metrics for [" + id + "]", e);
+            return;
+        }
+    
+        // Check the configuration\
+        if (verify) {
+            try {
+                rawMan.checkConfiguration(subj, id, config);
+            } catch (InvalidConfigException e) {
+                log.warn("Error turning on default metrics, configuration (" +
+                          config + ") " + "couldn't be validated", e);
+                cfgMan.setValidationError(subject, id, e.getMessage());
+                return;
+            } catch (Exception e) {
+                log.warn("Error turning on default metrics, " +
+                          "error in validation", e);
+                cfgMan.setValidationError(subject, id, e.getMessage());
+                return;
+            }
+        }
+    
+        // Enable the metrics
+        try {
+            createDefaultMeasurements(subj, id, mtype, config);
+            cfgMan.clearValidationError(subject, id);
+    
+            // Execute the callback so other people can do things when the
+            // metrics have been created (like create type-based alerts)
+            MeasurementStartupListener.getDefaultEnableObj().metricsEnabled(id);
+        } catch (Exception e) {
+            log.warn("Unable to enable default metrics for id=" + id +
+                      ": " + e.getMessage(), e);
+        }
+    }
+
     public static DerivedMeasurementManagerLocal getOne() {
         try {
             return DerivedMeasurementManagerUtil.getLocalHome().create();

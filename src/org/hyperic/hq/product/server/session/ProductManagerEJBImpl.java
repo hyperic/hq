@@ -26,17 +26,15 @@
 package org.hyperic.hq.product.server.session;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
-import javax.naming.NamingException;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -45,32 +43,38 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.CpropKey;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocalHome;
-import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
-import org.hyperic.hq.appdef.shared.CPropManagerLocalHome;
-import org.hyperic.hq.appdef.shared.CPropManagerUtil;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.CpropKey;
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.dao.PluginDAO;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocalHome;
-import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.MeasurementInfo;
+import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
+import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.product.shared.PluginValue;
@@ -80,15 +84,6 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
-import org.hyperic.hq.dao.PluginDAO;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
-import org.hyperic.dao.DAOFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @ejb:bean name="ProductManager"
@@ -106,10 +101,10 @@ public class ProductManagerEJBImpl
 
     private Log log = LogFactory.getLog(ProductManagerEJBImpl.class);
 
-    private ProductPluginManager       ppm;
-    private ConfigManagerLocalHome     configManagerLocalHome;
-    private CPropManagerLocalHome      cPropManagerLocalHome;
-    private TemplateManagerLocalHome   templateManagerLocalHome;
+    private ProductPluginManager   ppm;
+    private ConfigManagerLocal     configManagerLocal;
+    private CPropManagerLocal      cPropManagerLocal;
+    private TemplateManagerLocal   templateManagerLocal;
 
     /*
      * There is once instance of the ProductPluginDeployer service
@@ -144,9 +139,9 @@ public class ProductManagerEJBImpl
 
     public ProductManagerEJBImpl(){
         try {
-            this.ppm = getProductPluginManager();
+            ppm = getProductPluginManager();
         } catch (PluginException e) {
-            this.log.error("Unable to initialize plugin manager: " + 
+            log.error("Unable to initialize plugin manager: " + 
                            e.getMessage());
         }
     }       
@@ -171,7 +166,7 @@ public class ProductManagerEJBImpl
     public TypeInfo getTypeInfo(AppdefEntityValue value)
         throws PermissionException, AppdefEntityNotFoundException
     {
-        return this.ppm.getTypeInfo(value.getBasePlatformName(),
+        return ppm.getTypeInfo(value.getBasePlatformName(),
                                     value.getTypeName());
     }
     
@@ -181,7 +176,7 @@ public class ProductManagerEJBImpl
     public PluginManager getPluginManager(String type)
         throws PluginException
     {
-        return this.ppm.getPluginManager(type);
+        return ppm.getPluginManager(type);
     }
 
     /**
@@ -195,7 +190,7 @@ public class ProductManagerEJBImpl
     {
         TypeInfo info = getTypeInfo(entityVal);
         String help =
-            this.ppm.getMeasurementPluginManager().getHelp(info, props);
+            ppm.getMeasurementPluginManager().getHelp(info, props);
         if (help == null) {
             return null;
         }
@@ -235,7 +230,7 @@ public class ProductManagerEJBImpl
         String key =
             ProductPluginManager.getPropertyKey(plugin, "forceUpdate");
 
-        return "true".equals(this.ppm.getProperties().getProperty(key));
+        return "true".equals(ppm.getProperties().getProperty(key));
     }
 
     private void pluginDeployed(PluginInfo pInfo) {
@@ -260,18 +255,17 @@ public class ProductManagerEJBImpl
      * @ejb:transaction type="Required"
      */
     public void deploymentNotify(String pluginName)
-        throws PluginNotFoundException, NamingException, FinderException,
+        throws PluginNotFoundException, FinderException,
                CreateException, RemoveException, VetoException
     {
-        ProductPlugin pplugin = (ProductPlugin) this.ppm.getPlugin(pluginName);
+        ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
         PluginDAO plHome = getPluginDAO();
         PluginValue ejbPlugin;
         PluginInfo pInfo;
         boolean created = false;
-        boolean updated = false;
         long start = System.currentTimeMillis();
         
-        pInfo = this.ppm.getPluginInfo(pluginName);
+        pInfo = ppm.getPluginInfo(pluginName);
         Plugin plugin = plHome.findByName(pluginName);
         ejbPlugin = plugin != null ?plugin.getPluginValue() : null;
 
@@ -279,28 +273,29 @@ public class ProductManagerEJBImpl
            pInfo.name.equals(ejbPlugin.getName()) &&
            pInfo.md5.equals(ejbPlugin.getMD5()))
         {
-            this.log.info(pluginName + " plugin up to date");
+            log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
-                this.log.info(pluginName + " configured to force update");
-                updated = true;
+                log.info(pluginName + " configured to force update");
             }
             else {
                 pluginDeployed(pInfo);
+                
+                // Make sure all entities are sync'ed up with metrics
+                DerivedMeasurementManagerEJBImpl.getOne()
+                    .syncPluginMetrics(pluginName);
+
                 return;
             }
         } else {
-            this.log.info(pluginName + " unknown -- registering");
-            if (ejbPlugin != null)
-                updated = true;
-            else
-                created = true;
+            log.info(pluginName + " unknown -- registering");
+            created = (ejbPlugin == null);
         }
            
         // Get the Appdef entities
         TypeInfo[] entities = pplugin.getTypes();
         if (entities == null) {
-            this.log.info(pluginName + " does not define any resource types");
-            this.updateEJBPlugin(plHome, pInfo);
+            log.info(pluginName + " does not define any resource types");
+            updateEJBPlugin(plHome, pInfo);
             if (created)
                 PluginAudit.deployAudit(pluginName, start, 
                                         System.currentTimeMillis());
@@ -327,7 +322,7 @@ public class ProductManagerEJBImpl
             StopWatch timer = new StopWatch();
 
             // Get the measurement templates
-            TemplateManagerLocal tMan = this.getTemplateManagerLocal();
+            TemplateManagerLocal tMan = getTemplateManagerLocal();
             // Keep a list of templates to add
             HashMap toAdd = new HashMap();
 
@@ -338,10 +333,10 @@ public class ProductManagerEJBImpl
 
                 try {
                     measurements =
-                        this.ppm.getMeasurementPluginManager().getMeasurements(info);
+                        ppm.getMeasurementPluginManager().getMeasurements(info);
                 } catch (PluginNotFoundException e) {
                     if (!isVirtualServer(info)) {
-                        this.log.info(info.getName() +
+                        log.info(info.getName() +
                                       " does not support measurement");
                     }
                     continue;
@@ -361,7 +356,7 @@ public class ProductManagerEJBImpl
             tMan.createTemplates(pluginName, toAdd);
 
             // Add any custom properties.
-            CPropManagerLocal cPropManager = this.getCPropManagerLocal();
+            CPropManagerLocal cPropManager = getCPropManagerLocal();
             for (int i = 0; i < entities.length; i++) {
                 TypeInfo info = entities[i];
                 ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
@@ -376,10 +371,15 @@ public class ProductManagerEJBImpl
                     }
                 }
             }
-            this.log.info(pluginName + " deployment took: " + timer + " seconds");
+            // Make sure all entities are sync'ed up with metrics
+            DerivedMeasurementManagerEJBImpl.getOne()
+                    .syncPluginMetrics(pluginName);
+
+            log.info(pluginName + " deployment took: " + timer + " seconds");
 
             pluginDeployed(pInfo);
-            this.updateEJBPlugin(plHome, pInfo);
+            updateEJBPlugin(plHome, pInfo);
+            
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(true);
@@ -387,28 +387,22 @@ public class ProductManagerEJBImpl
         }
     }
 
-    private ConfigManagerLocal getConfigManagerLocal()
-        throws NamingException, CreateException
-    {
-        if(this.configManagerLocalHome == null)
-            this.configManagerLocalHome = ConfigManagerUtil.getLocalHome();
-        return this.configManagerLocalHome.create();
+    private ConfigManagerLocal getConfigManagerLocal() {
+        if(configManagerLocal == null)
+            configManagerLocal = ConfigManagerEJBImpl.getOne();
+        return configManagerLocal;
     }
 
-    private CPropManagerLocal getCPropManagerLocal()
-        throws NamingException, CreateException
-    {
-        if(this.cPropManagerLocalHome == null)
-            this.cPropManagerLocalHome = CPropManagerUtil.getLocalHome();
-        return this.cPropManagerLocalHome.create();
+    private CPropManagerLocal getCPropManagerLocal() {
+        if(cPropManagerLocal == null)
+            cPropManagerLocal = CPropManagerEJBImpl.getOne();
+        return cPropManagerLocal;
     }
 
-    private TemplateManagerLocal getTemplateManagerLocal()
-        throws NamingException, CreateException
-    {
-        if(this.templateManagerLocalHome == null)
-            this.templateManagerLocalHome = TemplateManagerUtil.getLocalHome();
-        return this.templateManagerLocalHome.create();
+    private TemplateManagerLocal getTemplateManagerLocal() {
+        if(templateManagerLocal == null)
+            templateManagerLocal = TemplateManagerEJBImpl.getOne();
+        return templateManagerLocal;
     }
 
     private PluginDAO getPluginDAO(){

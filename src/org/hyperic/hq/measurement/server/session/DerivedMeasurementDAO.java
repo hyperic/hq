@@ -420,4 +420,22 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .setCacheRegion("DerivedMeasurement.findByCategory")
             .list();
     }
+    
+    List findMetricsCountMismatch(String plugin) {
+        return getSession().createSQLQuery("select appdef_type, instance_id " +
+            "from (select mt.id, mt.appdef_type, m.instance_id, " +
+                         "count(m.*) as count " +
+                  "from eam_monitorable_type mt, eam_measurement_templ t, " +
+                       "eam_measurement m " +
+                  "where monitorable_type_id = mt.id and template_id = t.id " +
+                        "and mt.plugin = :plugin " +
+                  "group by mt.id, mt.appdef_type, m.instance_id) mt, " +
+                 "(select mt.id, count(*) as count " +
+                  "from eam_monitorable_type mt, eam_measurement_templ t " +
+                  "where mt.id = t.monitorable_type_id and " +
+                        "mt.plugin = :plugin group by mt.id) t " +
+            "where mt.id = t.id and not mt.count = t.count")
+            .setString("plugin", plugin)
+            .list();
+    }
 }
