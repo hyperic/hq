@@ -57,7 +57,7 @@ class AlertCategory {
      */
     static AppdefResourceType getResourceType(AlertDefinition d) {
         if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return PlatformManagerEJBImpl.one.findPlatformTypeById(d.appdefId)
+            return PlatformManagerEJBImpl.one.findPlatformType(d.appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             return ServerManagerEJBImpl.one.findServerType(d.appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
