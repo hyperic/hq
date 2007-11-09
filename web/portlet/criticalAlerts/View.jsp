@@ -42,7 +42,7 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 
 function requestRecentAlerts<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&dummy=' + new Date().getTime();
+    var dummyStr = '&hq=' + new Date().getTime();
     var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>" + dummyStr;
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }

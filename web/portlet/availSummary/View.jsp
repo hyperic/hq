@@ -36,7 +36,7 @@
 
 <script type="text/javascript">
 function requestAvailSummary<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&dummy=' + new Date().getTime();
+    var dummyStr = '&hq=' + new Date().getTime();
     var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do?token=${portlet.token}"/>" + dummyStr;
 	new Ajax.Request(availResourcesUrl, {method: 'get', onSuccess:showAvailSummary, onFailure :reportError});
 }
