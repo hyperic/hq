@@ -148,11 +148,11 @@
                 <div dojoType="MenuBarItem2" caption="<fmt:message key="admin.admin.AdministrationTitle"/>"
                      onClick="location.href='<html:rewrite page="/Admin.do"/>'"></div>
             </div>
-            <div style="display:none;position:absolute;right:5px;bottom:2px;" id="loading">
+            <div style="display:none;" id="loading">
                 <html:img page="/images/ajax-loader.gif" border="0" width="16" height="16"/>
             </div>
             <c:if test="${not empty HQUpdateReport}">
-                <div style="position:absolute;right:26px;bottom:2px;" id="hb">
+                <div style="position:absolute;" id="hb">
                     <html:img page="/images/transmit2.gif" border="0" width="16" height="16"
                               onmouseover="menuLayers.show('update', event)" onmouseout="menuLayers.hide()"/>
                 </div>

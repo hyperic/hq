@@ -1124,6 +1124,20 @@ z-index:2;
     background-color:#336699;
 }
 
+#loading {
+    position:absolute;
+    right:5px;
+    bottom:2px;
+}
+
+#hb {right:26px;
+    bottom:2px;
+}
+
+/* IE hack for positioning  in the nav bar*/
+#loading {*bottom:0px;}
+#hb {*bottom:0px;}
+
 .mainNavText {
  font-family: Helvetica, sans-serif;
  font-size: 11px;
