@@ -267,6 +267,12 @@
     font-weight: bold;
 }
 
+.bottomPad {
+    padding-bottom: 5px;
+}
+
+.clearBoth {clear:both;height:1px;}
+
 .filterBox {
 padding:8px;
 }
@@ -397,5 +403,10 @@ font-weight:bold;
 #result table{width:100%;padding:0px;}
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
 .fivepad {padding:5px;}
+.instruction1 {padding-bottom:3px;font-weight:bold;}
 .pendingData li {color:gray;}
 .hasData  li {color:black;}
+.grpmembertext{padding:3px;margin-top:10px;margin-bottom:5px;background-color:#868787;color:#FFFFFF;font-weight:bold;font-size: 12px;}
+#groupMembers {padding-bottom:5px;}
+#groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
+#groupMembers li {padding:2px;}

@@ -39,8 +39,10 @@ function showResult(eid) {
   <% if (isGroup) { %>
     if (lastSelected) {
       dojo.byId('mem_' + lastSelected).style.color = 'black';
+      dojo.byId('mem_' + lastSelected).style.fontWeight = 'normal';
     }
-    dojo.byId('mem_' + eid).style.color = 'red';
+    dojo.byId('mem_' + eid).style.color = '#60A5EA';
+    dojo.byId('mem_' + eid).style.fontWeight = 'bold';
     lastSelected = eid;
   <% } %>
 }
@@ -105,8 +107,8 @@ function runCommand() {
 
 </script>
 <style>
-.goodResults  {width:20px;display:inline;background: url(/images/icon_email.gif);}
-.errorResults {width:20px;display:inline;background: url(/images/icon_actual.gif);}
+.goodResults  {width:20px;display:inline;background: url(/images/lightning_go.gif);}
+.errorResults {width:20px;display:inline;background: url(/images/lightning_delete.gif);}
 </style>
 
 <div class="outerLiveDataCont">
@@ -116,26 +118,29 @@ function runCommand() {
     <div class="bxblueborder">
 
       <div class="BlockTitle"><div style="float:left;">Execute Command</div><div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
-      <br style="clear:both;height:1px;"/>
+      <br class="clearBoth">
       </div>
 
       <div class="fivepad">
 
+        <div class="bottomPad">
+            <div class="instruction1">Please select a query to run:</div>
         <select id="commandSelect" onchange="runCommand()">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
       </select>
+      </div>
       
       <% if (isGroup) { %>
-        <div style="padding:5px 3px;">Group Members</div>
+        <div class="grpmembertext">Group Members</div>
         <div id="groupMembers" class="pendingData">
-        <ul style="margin:0px;padding:0px;list-style-type:none;">
+        <ul>
         <% for (m in groupMembers) { %>
-        <li style="padding:2px;">
+        <li>
         <div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
-          <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')">&nbsp;&nbsp;&nbsp;</div>
-            </br style="clear:both;height:1px;">
+          <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;</div>
+            <br class="clearBoth">
         </li>
         <% } %>
         </ul>
