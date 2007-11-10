@@ -352,15 +352,14 @@ font-weight:bold;
 
 /* Down Systems Page */
 
- .leftbxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
- .downList{margin-right: 10px; width: 22%; float:left;display:inline;}
-
+.leftbxblueborder {border:1px solid #7BAFFF;}
+.downList{margin-right: 10px; width: 22%; float:left;display:inline;height: 400px;}
 .downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: right;display:inline; width: 75%; height: 442px;}
- .leftbxht {padding:3px;overflow-y:auto;height: 400px;}
+ .leftbxht {padding:3px;height: 400px;overflow-x: hidden; overflow-y: auto;}
  .boxLinks {padding:3px 3px 0px 5px;display:inline;}
  .right{float:right;}
  .left{float:left;}
- .tree {padding:3px;border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;}
+ .tree {padding:3px;border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;height:98%;}
  .topCat {padding:3px;background-color:#DCF9FF;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
