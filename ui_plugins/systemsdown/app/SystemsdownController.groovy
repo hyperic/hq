@@ -82,14 +82,18 @@ class SystemsdownController extends BaseController {
         def json = "[\n"
 
         def appdefType = 1
+        def first = true
         map.each { entry ->
             def list = entry.value
 
-            if (appdefType != 1) {
-                json += ",\n"
-            }
-
             if (list.size() > 0) {
+	            if (first) {
+	            	first = false
+	            }
+	            else {
+	                json += ",\n"
+	            }
+	
                 json += "{parent: \"" + entry.key + "\",\n" +
                         "id: " + appdefType + ",\n" +
                         "count: " + list.size() + ",\n" +
