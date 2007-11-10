@@ -107,8 +107,8 @@ function runCommand() {
 
 </script>
 <style>
-.goodResults  {width:20px;display:inline;background: url(/images/lightning_go.gif);}
-.errorResults {width:20px;display:inline;background: url(/images/lightning_delete.gif);}
+.goodResults  {width:20px;height:16;display:inline;background: url(/images/lightning_go.gif)no-repeat;}
+.errorResults {width:20px;height:16;display:inline;background: url(/images/lightning_delete.gif)no-repeat;}
 </style>
 
 <div class="outerLiveDataCont">
