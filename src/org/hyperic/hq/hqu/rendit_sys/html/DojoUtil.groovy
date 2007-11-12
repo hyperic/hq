@@ -350,7 +350,7 @@ class DojoUtil {
                 var body = document.getElementById("${id}");
                 var trs = body.getElementsByTagName('tr');
                 var styleClassVal = el[i].styleClass;
-                if (id && (styleClassVal && styleClassVal != '')) {
+                if (typeof(id)!='undefined' && id != null && (styleClassVal && styleClassVal != '')) {
                     for (b = 0; b < trs.length; b++) {
                         var vals = trs[b].getAttribute("value");
                         if (id == vals) {
