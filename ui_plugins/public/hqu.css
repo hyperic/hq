@@ -381,7 +381,7 @@ font-weight:bold;
 #nagCont table tbody tr td {border-bottom: 1px solid #ddd;}
 #nagCont table tbody tr.alt td {background: #eef4fc;}
 #nagCont  table tbody tr.selected td {}
-#nagCont table tbody tr:hover td {background: #a6c2e7;}
+#nagCont table tbody tr:hover td {}
 #nagCont table tbody tr.selected:hover td {}
 .statusBGCRITICAL {background-color: #FFBBBB; }
 .statusCRITICAL{background-color:#F83838;}
