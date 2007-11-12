@@ -7320,6 +7320,15 @@ has already been defined.
 		</statement>
       </schema-directSQL>
     </schemaSpec>	
+	
+    <schemaSpec version="3.68">
+      <schema-directSQL>
+		<statement desc="Drop foreign key constraint from eam_alert to reduce 
+						 contention between the alert and alert definition tables">			
+		  ALTER TABLE EAM_ALERT DROP CONSTRAINT fke5b216aeb5af9d12		  
+		</statement>
+	  </schema-directSQL>
+	</schemaSpec>	
 
 </dbupgrade>
 </target>

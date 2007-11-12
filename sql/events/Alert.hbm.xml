@@ -22,7 +22,9 @@
       <column name="FIXED" not-null="true"/>
     </property>
 
-    <many-to-one name="alertDefinition" class="AlertDefinition">
+	<!-- We do not want to create the FK constraint to reduce deadlocks between 
+		inserted alerts and updated alert definitions -->
+    <many-to-one name="alertDefinition" class="AlertDefinition" foreign-key="none">
       <column name="ALERT_DEFINITION_ID" not-null="true" index="ALERT_ALERTDEFINITION_IDX"/>
     </many-to-one>
 
