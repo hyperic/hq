@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import javax.management.MBeanServer;
@@ -35,7 +36,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 
 public class EventsStartupListener 
     implements StartupListener
@@ -52,6 +55,11 @@ public class EventsStartupListener
         AlertableRoleCalendarType.class.getClass();
         
         HQApp app = HQApp.getInstance();
+        
+        // Register the alert def last fired time updater with the 
+        // shutdown hook.
+        app.registerCallbackListener(ShutdownCallback.class, 
+                    AlertDefinitionLastFiredTimeUpdater.getInstance());
 
         synchronized (LOCK) {
             _changeCallback = (TriggerChangeCallback)
@@ -60,8 +68,10 @@ public class EventsStartupListener
 
         loadConfigProps("triggers");
         loadConfigProps("actions");
+        
+        synchAlertDefinitionsLastFiredTimes();
     }
-    
+        
     private void loadConfigProps(String prop) {
         try {
             MBeanServer mServer = (MBeanServer) MBeanServerFactory
@@ -103,6 +113,16 @@ public class EventsStartupListener
             // Swallow all exceptions
             _log.error("Encountered error initializing " + prop, e);
         }
+    }
+    
+    /**
+     * We need to make sure that the alert definition last fired times are 
+     * up to date.
+     */
+    private void synchAlertDefinitionsLastFiredTimes() {
+        _log.debug("Synching the alert definition last fired times.");
+
+        AlertDefinitionManagerEJBImpl.getOne().synchAlertDefinitionsLastFiredTimes();
     }
     
     static TriggerChangeCallback getChangedTriggerCallback() {

@@ -67,6 +67,7 @@ import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementDAO;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
+import org.hyperic.hq.events.server.session.AlertDefinitionLastFiredCallback;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -124,8 +125,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Create a new alert
-     *
+     * Create a new alert, setting the alert definition last fired time 
+     * immediately.
+     * 
+     * @param def The alert definition.
+     * @param ctime The alert creation time.
      * @ejb:interface-method
      */
     public Alert createAlert(AlertDefinition def, long ctime) {
@@ -133,6 +137,27 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
         def.setLastFired(new Long(ctime));
+        getAlertDAO().save(alert);
+        return alert;
+    }
+    
+    /**
+     * Create a new alert and notify the alert definition last fired time 
+     * callback that the alert definition last fired time should be updated. 
+     * Do not actually update the last fired time.
+     * 
+     * @param def The alert definition.
+     * @param ctime The alert creation time.
+     * @param callback The alert definition last fired time callback.
+     * @ejb:interface-method
+     */
+    public Alert createAlert(AlertDefinition def, 
+                             long ctime, 
+                             AlertDefinitionLastFiredCallback callback) {
+        Alert alert = new Alert();
+        alert.setAlertDefinition(def);
+        alert.setCtime(ctime);
+        callback.onLastFiredUpdate(def, ctime);
         getAlertDAO().save(alert);
         return alert;
     }

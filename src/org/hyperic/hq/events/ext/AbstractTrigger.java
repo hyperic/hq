@@ -50,11 +50,13 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
+import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionLastFiredCallback;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
@@ -85,6 +87,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
     private static ObjectName readyManName;
 
     private RegisteredTriggerValue triggerValue = new RegisteredTriggerValue();
+
     
     public AbstractTrigger() {
         super();
@@ -182,7 +185,9 @@ public abstract class AbstractTrigger implements TriggerInterface {
             }
             
             EscalatableCreator creator = 
-                new ClassicEscalatableCreator(alertDef, event);
+                new ClassicEscalatableCreator(alertDef, 
+                                              event, 
+                                              getAlertDefLastFiredCallback());
             
             // Now start escalation
             if (alertDef.getEscalation() != null) {
@@ -200,7 +205,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
                 "Overlord does not have permission to disable definition");
         }
     }
-
+    
     private boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
                                       AlertDefinition alertDef) 
         throws PermissionException {
@@ -266,6 +271,17 @@ public abstract class AbstractTrigger implements TriggerInterface {
             });
         }
 
+    }
+    
+    private AlertDefinitionLastFiredCallback getAlertDefLastFiredCallback() {
+        return new AlertDefinitionLastFiredCallback() {
+            public void onLastFiredUpdate(AlertDefinition alertDef,
+                                          long lastFiredTime) {
+                AbstractEvent event = 
+                    new AlertDefinitionLastFiredUpdateEvent(alertDef, lastFiredTime);
+                AbstractTrigger.this.publishEvent(event);
+            }  
+        };
     }
     
     /**

@@ -25,10 +25,11 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -41,6 +42,8 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
@@ -50,6 +53,7 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.AlertDefinitionLastFiredTimeUpdater;
 
 
 /** The RegisteredDispatcher Message-Drive Bean registers Triggers and
@@ -212,11 +216,58 @@ public class RegisteredDispatcherEJBImpl
         List enqueuedEvents = Messenger.drainEnqueuedMessages();
         
         if (!enqueuedEvents.isEmpty()) {
-            final ArrayList eventsToPublish = new ArrayList(enqueuedEvents);
-
+            LinkedList eventsToPublish = new LinkedList();
+            LinkedList alertDefLastFiredEventsToPublish = new LinkedList();
+            
+            for (Iterator iter = enqueuedEvents.iterator(); iter.hasNext();) {
+                AbstractEvent event = (AbstractEvent) iter.next();
+                
+                if (event.isAlertDefinitionLastFiredUpdateEvent()) {
+                    alertDefLastFiredEventsToPublish.add(event);
+                } else {
+                    eventsToPublish.add(event);
+                }
+            }
+            
+            publishOnEventsTopicNow(eventsToPublish);
+            
+            // To reduce contention on the alert def table, publish alert def 
+            // last fired time updates post commit.
+            publishAlertDefLastFiredEventsPostCommit(alertDefLastFiredEventsToPublish);
+            
+        }        
+    }
+    
+    private void publishOnEventsTopicNow(List events) {
+        if (!events.isEmpty()) {
             Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, 
-                                  eventsToPublish);   
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, (Serializable)events);                   
+        }        
+    }
+    
+    private void publishAlertDefLastFiredEventsPostCommit(final List events) {
+        if (!events.isEmpty()) {
+            try {
+                HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                    public void afterCommit(boolean success) {
+                        try {
+                            AlertDefinitionLastFiredTimeUpdater.getInstance()
+                                .enqueueEvents(events);
+                        } catch (InterruptedException e) {
+                            // we've been interrupted - oh well
+                        }
+                    }
+
+                    public void beforeCommit() {
+                    }
+                });                    
+            } catch (Throwable t) {
+                // We want to complete the current txn even if registering 
+                // the post commit listener fails.
+                log.warn("Failed to publish the alert definition last fired " +
+                		"events. The last fired time may not be updated immediately " +
+                		"for some alert definitions: "+events, t);
+            }
         }        
     }
 

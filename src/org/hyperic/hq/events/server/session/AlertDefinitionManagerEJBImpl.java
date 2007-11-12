@@ -26,6 +26,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,6 +57,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
+import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -270,6 +272,39 @@ public class AlertDefinitionManagerEJBImpl
         return res.getAlertDefinitionValue();
     }
     
+    /** 
+     * Update alert definitions last fired times for each of the provided 
+     * update events.
+     * 
+     * @param events The update events.
+     * @ejb:interface-method
+     */
+    public void updateAlertDefinitionsLastFiredTimes(AlertDefinitionLastFiredUpdateEvent[] events) {
+        
+        getAlertDefDAO().updateAlertDefinitionsLastFiredTimes(events);
+        
+    }
+    
+    /**
+     * Synchronize the alert definitions last fired times with their associated 
+     * alerts. If an alert definition exists with a null last fired time or 
+     * a last fired time that is less than the greatest ctime for the associated 
+     * alerts, then set that alert definition's last fired time to the alert 
+     * ctime.
+     * 
+     * @ejb:interface-method
+     */
+    public void synchAlertDefinitionsLastFiredTimes() {
+        List events = getAlertDefDAO()
+                        .getEventsForAlertDefinitionsWithOldLastFiredTimes();
+
+        try {
+            AlertDefinitionLastFiredTimeUpdater.getInstance().enqueueEvents(events);
+        } catch (InterruptedException e) {
+            // do nothing
+        }        
+    }
+        
     /**
      * Update just the basics
      * @throws PermissionException 
