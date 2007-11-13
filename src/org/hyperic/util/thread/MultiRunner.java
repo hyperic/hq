@@ -139,7 +139,7 @@ public class MultiRunner {
         }
 
         BasicConfigurator.configure();
-        PropertyConfigurator.configure(p);
+        PropertyConfigurator.configure(args[0]);
         
         Logger.getLogger(MultiRunner.class).info("Fubar");
         MultiRunner m = new MultiRunner(p);
