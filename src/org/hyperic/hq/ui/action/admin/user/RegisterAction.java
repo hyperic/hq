@@ -137,7 +137,7 @@ public class RegisterAction extends BaseAction {
 
         // we also need to create up a new web user
         webUser = new WebUser(target.getAuthzSubjectValue(), sessionId, 
-                              password, preferences, false);
+                              preferences, false);
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
 
