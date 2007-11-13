@@ -89,10 +89,8 @@ public class MultiRunner {
                 System.out.println("Can't read [" + f.getAbsolutePath() + "]");
             }
             urls[i] = f.toURL();
-            System.out.println("- " + f.getAbsolutePath()); 
         }
         
-        System.out.println(ArrayUtil.toString(urls));
         return new URLClassLoader(urls,
                                   Thread.currentThread().getContextClassLoader());
     }
