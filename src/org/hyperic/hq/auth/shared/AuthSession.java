@@ -25,12 +25,13 @@
 
 package org.hyperic.hq.auth.shared;
 
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class AuthSession {
 
     private long _timeout = 0;
-    private AuthzSubjectValue _subject = null;
+    private AuthzSubject _subject = null;
 
     /**
      * The last access time for this subject.  Used for cache invalidation
@@ -43,7 +44,7 @@ public class AuthSession {
      * @param subject The subject to store
      * @param timeout The timeout for this session in milliseconds
      */
-    protected AuthSession(AuthzSubjectValue subject, long timeout) {
+    protected AuthSession(AuthzSubject subject, long timeout) {
         
         _subject = subject;
         _timeout = timeout;
@@ -51,9 +52,9 @@ public class AuthSession {
     }
     
     /**
-     * Return the AuthzSubjectValue for this session
+     * Return the AuthzSubject for this session
      */
-    protected AuthzSubjectValue getAuthzSubjectValue() {
+    protected AuthzSubject getAuthzSubject() {
         
         _lastAccess = System.currentTimeMillis();
         return _subject;

@@ -52,7 +52,7 @@ public class SessionManager {
      * @param subject The AuthzSubjectValue to store
      * @return The session id
      */
-    public synchronized int put(AuthzSubjectValue subject) {
+    public synchronized int put(AuthzSubject subject) {
         return put(subject, DEFAULT_TIMEOUT);
     }
 
@@ -63,7 +63,7 @@ public class SessionManager {
      * @param timeout The timeout for the session in milliseconds
      * @return The session id
      */
-    public synchronized int put(AuthzSubjectValue subject, long timeout) {
+    public synchronized int put(AuthzSubject subject, long timeout) {
 
         Integer key = null;
 
@@ -99,7 +99,7 @@ public class SessionManager {
                     _cache.get(sessKey);
                 
                 // If found...
-                if (session.getAuthzSubjectValue().getName().equals(username)) {
+                if (session.getAuthzSubject().getName().equals(username)) {
                     
                     // check expiration...
                     if (session.isExpired()) {
@@ -143,6 +143,13 @@ public class SessionManager {
     public synchronized AuthzSubjectValue getSubject(int sessionId) 
         throws SessionNotFoundException, SessionTimeoutException
     {
+        AuthzSubject subject = getSubjectPojo(sessionId);
+        return subject.getAuthzSubjectValue();
+    }
+
+    public synchronized AuthzSubject getSubjectPojo(int sessionId) 
+        throws SessionNotFoundException, SessionTimeoutException
+    {
         Integer id = new Integer(sessionId);
 
         AuthSession session = (AuthSession)_cache.get(id);
@@ -157,15 +164,7 @@ public class SessionManager {
             throw new SessionTimeoutException();
         }
 
-        return session.getAuthzSubjectValue();
-    }
-
-    public synchronized AuthzSubject getSubjectPojo(int sessionId) 
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        AuthzSubjectValue sVal = getSubject(sessionId);
-        
-        return AuthzSubjectManagerEJBImpl.getOne().findSubjectById(sVal.getId());
+        return session.getAuthzSubject();
     }
 
     /**

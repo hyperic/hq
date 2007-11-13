@@ -80,15 +80,6 @@ public class AuthManagerEJBImpl implements SessionBean {
     {
     }
 
-    private AuthzSubjectValue createSubjectValue(String name, String dsn) {
-        AuthzSubjectValue  value = new AuthzSubjectValue();
-        value.setName(name);
-        value.setAuthDsn(dsn);
-        // set it to active, else they wont be able to log in
-        value.setActive(true);
-        return value;
-    }
-
     /**
      * Authenticates the user using the given password
      * @param user The user to authenticate
@@ -116,7 +107,7 @@ public class AuthManagerEJBImpl implements SessionBean {
         AuthzSubjectManagerLocal subjMan = 
             AuthzSubjectManagerEJBImpl.getOne();
         
-        AuthzSubjectValue subject;
+        AuthzSubject subject;
         try {
             subject = subjMan.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
@@ -126,20 +117,15 @@ public class AuthManagerEJBImpl implements SessionBean {
             // User not found in the authz system.  Create it.
             try {
                 AuthzSubjectValue overlord = subjMan.findOverlord();
-                AuthzSubjectValue newUser = createSubjectValue(user, appName);
-                AuthzSubject sub = subjMan.createSubject(overlord, user,
-                                                         true, appName, "",
-                                                         "", "", "", "",
-                                                         "", false);
-                subject = sub.getAuthzSubjectValue();
+                subject = subjMan.createSubject(overlord, user, true, appName,
+                                                "", "", "", "", "", "", false);
             } catch (CreateException e) {
                 throw new ApplicationException("Unable to add user to " +
                                                "authorization system", e);
             }
         }
 
-        SessionManager mgr = SessionManager.getInstance();
-        return mgr.put(subject);
+        return SessionManager.getInstance().put(subject);
     }
 
     /**
@@ -169,7 +155,7 @@ public class AuthManagerEJBImpl implements SessionBean {
             AuthzSubjectManagerLocal subjMgrLocal = 
                 AuthzSubjectManagerEJBImpl.getOne(); 
         
-            AuthzSubjectValue subject =
+            AuthzSubject subject =
                 subjMgrLocal.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
                 throw new SessionNotFoundException(
