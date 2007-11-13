@@ -38,6 +38,8 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
@@ -71,9 +73,32 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             int res = getAuthManager().getSessionId(username, password);
-            
             UserAudit.loginAudit(manager.getSubjectPojo(res));
             return res;
+        } catch (AccessLocalException e) {
+            throw new LoginException(e.getMessage());
+        }
+    }
+
+    /**
+     * Login a guest.
+     * @param username The name of the user.
+     * @param password The password.
+     * @return An integer representing the session ID of the logged-in user.
+     * @ejb:interface-method
+     */
+    public int loginGuest () 
+        throws SecurityException, LoginException, ApplicationException,
+               ConfigPropertyException 
+    {
+        try {
+            AuthzSubject guest =
+                getAuthzSubjectManager().findSubjectById(AuthzConstants.guestId);
+            
+            if (guest != null && guest.getActive()) {
+                return manager.put(guest);
+            }
+            throw new LoginException("Guest account not enabled");
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
         }

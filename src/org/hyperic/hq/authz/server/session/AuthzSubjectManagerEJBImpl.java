@@ -259,7 +259,7 @@ public class AuthzSubjectManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public AuthzSubject findSubjectById(AuthzSubjectValue whoami, Integer id)
+    public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id)
         throws PermissionException 
     {
         PermissionManager pm = PermissionManagerFactory.getInstance(); 

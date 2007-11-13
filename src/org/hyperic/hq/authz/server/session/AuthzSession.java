@@ -137,7 +137,8 @@ public abstract class AuthzSession {
     public AuthzSubjectValue findOverlord() {
         try {
             return findSubjectByAuth(AuthzConstants.overlordName,
-                                     AuthzConstants.overlordDsn);
+                                     AuthzConstants.overlordDsn)
+                                     .getAuthzSubjectValue();
         } catch(SubjectNotFoundException e) {
             throw new SystemException("Unable to find overlord", e);
         }
@@ -157,7 +158,7 @@ public abstract class AuthzSession {
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AuthzSubjectValue findSubjectByAuth(String name, String authDsn)
+    public AuthzSubject findSubjectByAuth(String name, String authDsn)
         throws SubjectNotFoundException 
     {
          AuthzSubject subject = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
@@ -166,7 +167,7 @@ public abstract class AuthzSession {
             throw new SubjectNotFoundException(
                 "Can't find subject: name=" + name + ",authDsn=" + authDsn);
         }
-        return subject.getAuthzSubjectValue();
+        return subject;
     }
 
     protected Set toPojos(Object[] vals) {

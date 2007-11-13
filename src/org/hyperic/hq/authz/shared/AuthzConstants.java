@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -136,6 +136,7 @@ public final class AuthzConstants {
     public static final Integer overlordId = new Integer(0);
     public static final String overlordName = "admin";
     public static final String overlordDsn = "covalentAuthzInternalDsn";
+    public static final Integer guestId = new Integer(2);
     public static final String authzResourceGroupName =
         "covalentAuthzResourceGroup";
     public static final String escalationResourceTypeName = "EscalationScheme";
@@ -184,10 +185,10 @@ public final class AuthzConstants {
     public static final Integer     authzServiceProto   =  new Integer(603);
     public static final Integer     authzApplicationProto  =  new Integer(604);
     
-
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
     }
+    
     public static boolean isOverlord(AuthzSubjectValue subject) {
         return isOverlord(subject.getId());
     }

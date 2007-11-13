@@ -394,7 +394,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         // check for timeout
-        AuthzSubjectValue subj = manager.getSubject(sessionId.intValue());
+        AuthzSubject subj = manager.getSubjectPojo(sessionId.intValue());
         return getAuthzSubjectManager().findSubjectById(subj, subjectId);
     }
 
