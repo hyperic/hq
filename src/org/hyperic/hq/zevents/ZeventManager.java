@@ -162,6 +162,13 @@ public class ZeventManager {
             return _globalListeners.add(new TimingListenerWrapper(listener));
         }
     }
+
+    public boolean addBufferedGlobalListener(ZeventListener listener) {
+        BufferedListener bListen = new BufferedListener(listener, _threadFact);
+        synchronized (_listenerLock) {
+            return _globalListeners.add(new TimingListenerWrapper(bListen));
+        }
+    }
     
     /**
      * Remove a global event listener

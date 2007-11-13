@@ -79,13 +79,18 @@ public class GalertProcessor {
     
     private GalertProcessor() {
         _zMan = ZeventManager.getInstance();
-        _zMan.addGlobalListener(new EventListener(this));
+        _zMan.addBufferedGlobalListener(new EventListener(this));
     }
 
     /**
      * Entry point to the processor from the {@link EventListener}
      *
      * @param events  A list of {@link Zevent}s to process
+     * 
+     * TODO:  This needs to be optimized so that the EventListener buffers
+     *        up many events and calls this method.  The overhead of creating
+     *        and checking session existance is too high on a per-event
+     *        basis.
      */
     void processEvents(final List events) {
         try {
