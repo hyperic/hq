@@ -383,6 +383,8 @@ font-weight:bold;
 #nagCont  table tbody tr.selected td {}
 #nagCont table tbody tr:hover td {}
 #nagCont table tbody tr.selected:hover td {}
+.goodResults  {width:20px;height:16;display:inline;background: url(/images/lightning_go.gif)no-repeat;}
+.errorResults {width:20px;height:16;display:inline;background: url(/images/lightning_delete.gif)no-repeat;}
 .statusBGCRITICAL {background-color: #FFBBBB; }
 .statusCRITICAL{background-color:#F83838;}
 .statusBGUNKNOWN {background-color: #FFDA9F; }
