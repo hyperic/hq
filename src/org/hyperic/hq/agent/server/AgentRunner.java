@@ -46,7 +46,8 @@ public class AgentRunner
     }
     
     public void run() {
-        File cloneDir = new File("clone_" + _threadNo);
+        File clonesDir = new File("clones");
+        File cloneDir = new File(clonesDir, "clone_" + _threadNo);
         File dataDir  = new File(cloneDir, "data");
         File agentCfg = new File(cloneDir, "agent.properties");
         FileInputStream fIs = null;
