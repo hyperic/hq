@@ -112,7 +112,7 @@ function handleEnter (field, event) {
                      <html:option value="20"/>
                      <html:option value="30"/>
                  </html:select>
-                 <html:select property="priority" disabled="${not sessionScope.modifyDashboard}">
+                 <html:select property="priority" value="2" disabled="${not sessionScope.modifyDashboard}">
                      <html:option value="3">!!! - High</html:option>
                      <html:option value="2">!! - Medium</html:option>
                      <html:option value="1">! - Low</html:option>
