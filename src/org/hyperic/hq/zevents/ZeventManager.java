@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +46,7 @@ import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 
+import edu.emory.mathcs.backport.java.util.Queue;
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
@@ -82,6 +84,10 @@ public class ZeventManager {
      * {@link ZeventListener}s */
     private final Map _listeners = new HashMap();
 
+    /* Map of {@link Queue} onto the target listeners using them. 
+     */
+    private final WeakHashMap _registeredBuffers = new WeakHashMap();
+    
     private final ThreadGroupFactory _threadFact =
         new ThreadGroupFactory(new LoggingThreadGroup("ZeventManager"), 
                                "BufferedProcessor");
@@ -115,6 +121,12 @@ public class ZeventManager {
             throw new IllegalArgumentException("[" + c.getName() + 
                                                "] does not subclass [" +
                                                Zevent.class.getName() + "]");
+        }
+    }
+    
+    void registerBuffer(Queue q, ZeventListener e) {
+        synchronized (_registeredBuffers) {
+            _registeredBuffers.put(q, e);
         }
     }
     
@@ -353,9 +365,6 @@ public class ZeventManager {
     }
 
     private String getDiagnostics() {
-        PrintfFormat fmt = 
-            new PrintfFormat("        %-30s max=%-3.2f avg=%-3.2f\n");
-        
         synchronized (INIT_LOCK) {
             StringBuffer res = new StringBuffer();
             
@@ -365,6 +374,9 @@ public class ZeventManager {
                .append("    Max Time In Queue: " + _maxTimeInQueue + "ms\n\n")
                .append("ZEvent Listener Diagnostics:\n");
             synchronized (_listenerLock) {
+                PrintfFormat fmt = 
+                    new PrintfFormat("        %-30s max=%-3.2f avg=%-3.2f\n");
+                
                 for (Iterator i=_listeners.entrySet().iterator(); i.hasNext();){ 
                     Map.Entry ent = (Map.Entry)i.next();
                     Collection listeners = (Collection)ent.getValue();
@@ -395,6 +407,25 @@ public class ZeventManager {
                     };
                     
                     res.append(fmt.sprintf(args));
+                }
+            }
+            
+            synchronized (_registeredBuffers) {
+                PrintfFormat fmt = 
+                    new PrintfFormat("    %-30s size=%d\n");
+                
+                res.append("\nZevent Registered Buffers:\n");
+                for (Iterator i=_registeredBuffers.entrySet().iterator(); 
+                     i.hasNext(); )
+                {
+                    Map.Entry ent = (Map.Entry)i.next();
+                    Queue q = (Queue)ent.getKey();
+                    ZeventListener targ = (ZeventListener)ent.getValue();
+
+                    res.append(fmt.sprintf(new Object[] {
+                        targ.toString(),
+                        new Integer(q.size()),
+                    }));
                 }
             }
             

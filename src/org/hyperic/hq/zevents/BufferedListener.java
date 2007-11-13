@@ -44,7 +44,8 @@ class BufferedListener
     private final ZeventListener _target;
     
     BufferedListener(ZeventListener target, ThreadGroupFactory fact) {
-        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), fact); 
+        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), fact);
+        ZeventManager.getInstance().registerBuffer(getQueue(), target);
         _target = target;
     }
 
