@@ -60,7 +60,7 @@ public class Role extends AuthzNamedBean {
         return _cid;
     }
     
-    protected void setCid(Integer val) {
+    void setCid(Integer val) {
         _cid = val;
     }
 
@@ -68,7 +68,7 @@ public class Role extends AuthzNamedBean {
         return _description;
     }
     
-    protected void setDescription(String val) {
+    void setDescription(String val) {
         _description = val;
     }
 
@@ -76,7 +76,7 @@ public class Role extends AuthzNamedBean {
         return _system;
     }
     
-    protected void setSystem(boolean fsystem) {
+    void setSystem(boolean fsystem) {
         _system = fsystem;
     }
 
@@ -84,7 +84,7 @@ public class Role extends AuthzNamedBean {
         return _resource;
     }
     
-    protected void setResource(Resource resourceId) {
+    void setResource(Resource resourceId) {
         _resource = resourceId;
     }
 
@@ -101,7 +101,7 @@ public class Role extends AuthzNamedBean {
         getResourceGroups().clear();
     }
     
-    protected void setResourceGroups(Collection val) {
+    void setResourceGroups(Collection val) {
         _resourceGroups = val;
     }
 
@@ -113,7 +113,7 @@ public class Role extends AuthzNamedBean {
         return _operations;
     }
     
-    protected void setOperations(Collection val) {
+    void setOperations(Collection val) {
         _operations = val;
     }
 
@@ -121,15 +121,15 @@ public class Role extends AuthzNamedBean {
         return _subjects;
     }
     
-    protected void setSubjects(Collection val) {
+    void setSubjects(Collection val) {
         _subjects = val;
     }
     
-    protected Collection getCalendarBag() {
+    Collection getCalendarBag() {
         return _calendars;
     }
     
-    protected void setCalendarBag(Collection c) {
+    void setCalendarBag(Collection c) {
         _calendars = c;
     }
     
