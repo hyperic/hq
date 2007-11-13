@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.authentication;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +53,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
@@ -61,6 +64,7 @@ import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
+import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -108,24 +112,23 @@ public class AuthenticateUserAction extends TilesAction {
             }
 
             // look up the subject record
-            AuthzSubjectValue subject =
-                authzBoss.findSubjectByName(sessionId,
-                                            logonForm.getJ_username());
-            if (subject == null) {
+            AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
+            AuthzSubjectValue subject = null;
 
+            if (subjPojo == null) {
                 subject = new AuthzSubjectValue();
                 subject.setName(logonForm.getJ_username());
 
                 needsRegistration = true;
-            } else if (subject.getEmailAddress() == null ||
-                       subject.getEmailAddress().length() == 0) {
-                needsRegistration = true;
+            } else {
+                subject = subjPojo.getAuthzSubjectValue();
+                needsRegistration = subjPojo.getEmailAddress() == null ||
+                                    subjPojo.getEmailAddress().length() == 0;
             }
 
             // figure out if the user has a principal
-            boolean
-                hasPrincipal = authBoss.isUser(sessionId.intValue(),
-                                               logonForm.getJ_username());
+            boolean hasPrincipal = authBoss.isUser(sessionId.intValue(),
+                                                   subject.getName());
 
             ConfigResponse preferences = new ConfigResponse();
             if (!needsRegistration) {
@@ -147,8 +150,7 @@ public class AuthenticateUserAction extends TilesAction {
                 }
             }
 
-            webUser = new WebUser(subject, sessionId, 
-                                  logonForm.getJ_password(), preferences,
+            webUser = new WebUser(subject, sessionId, preferences,
                                   hasPrincipal);
         }
         catch ( Exception e ) {
@@ -188,38 +190,18 @@ public class AuthenticateUserAction extends TilesAction {
         // if any, forget the old session and start a new one,
         // setting the web user to show that we're logged in
 
-        session = request.getSession(true);              
+        session = request.getSession(true);
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
-
-		// Load the user dashboard if it doesn't exist create a new one
-        // and mix in the defaults
-		try {
-			DashboardManagerLocal dashManager = DashboardManagerEJBImpl
-					.getOne();
-			ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
-					.getAttribute(Constants.DEF_USER_DASH_PREFS);
-			AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
-					.findSubjectById(webUser.getSubject().getId());
-			UserDashboardConfig userDashboard = dashManager.getUserDashboard(
-					me, me);
-			if (userDashboard == null) {
-				userDashboard = dashManager.createUserDashboard(me, me, webUser
-						.getName());
-				ConfigResponse userDashobardConfig = userDashboard.getConfig();
-				userDashobardConfig.merge(defaultUserDashPrefs, false);
-				dashManager.configureDashboard(me, userDashboard,
-						userDashobardConfig);
-			}
-		} catch (PermissionException e) {
-			e.printStackTrace();
-		} 
 
         if (needsRegistration) {
             // will be cleaned out during registration
             session.setAttribute(Constants.PASSWORD_SES_ATTR,
                                  logonForm.getJ_password());
         }
+        
+        // Load the user dashboard
+        loadUserDashboard(ctx, webUser);
         
         // See if graphics engine is present
         try {
@@ -231,6 +213,31 @@ public class AuthenticateUserAction extends TilesAction {
         return af;
     }
 
+    private static void loadUserDashboard(ServletContext ctx, WebUser webUser) {
+        // Load the user dashboard if it doesn't exist create a new one
+        // and mix in the defaults
+        try {
+            DashboardManagerLocal dashManager =
+                DashboardManagerEJBImpl.getOne();
+            ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
+                    .getAttribute(Constants.DEF_USER_DASH_PREFS);
+            AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+                    .findSubjectById(webUser.getSubject().getId());
+            UserDashboardConfig userDashboard =
+                dashManager.getUserDashboard(me, me);
+            if (userDashboard == null) {
+                userDashboard =
+                    dashManager.createUserDashboard(me, me, webUser.getName());
+                ConfigResponse userDashobardConfig = userDashboard.getConfig();
+                userDashobardConfig.merge(defaultUserDashPrefs, false);
+                dashManager.configureDashboard(me, userDashboard,
+                                               userDashobardConfig);
+            }
+        } catch (PermissionException e) {
+            e.printStackTrace();
+        } 
+    }
+        
     /*
 	 * Return the "bookmarked" url saved when we discovered the user's session
 	 * had timed out, or null if there is no bookmarked url.
@@ -258,5 +265,51 @@ public class AuthenticateUserAction extends TilesAction {
         }
 
         return url.toString();
+    }
+    
+    public static WebUser loginGuest(HttpServletRequest request,
+                                     ServletContext ctx) {
+        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        try {
+            int sid = authBoss.loginGuest();
+            
+            ConfigResponse preferences = new ConfigResponse();
+
+            // look up the user's preferences
+            ConfigResponse defaultPreferences =
+                (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
+
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthzSubjectValue subject =
+                authzBoss.getCurrentSubject(sid).getAuthzSubjectValue();
+
+            Integer sessionId = new Integer(sid);
+            preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
+            preferences.merge(defaultPreferences, false );
+
+            WebUser webUser;
+            HashMap userOpsMap = new HashMap();
+
+            // look up the user's permissions
+            List userOps = authzBoss.getAllOperations(sessionId);
+            for (Iterator it = userOps.iterator(); it.hasNext();) {
+                OperationValue op = (OperationValue) it.next();
+                userOpsMap.put( op.getName(), Boolean.TRUE );
+            }
+
+            webUser = new WebUser(subject, sessionId, preferences, true);
+
+            HttpSession session = request.getSession(true);
+            session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
+            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+            
+            // Load the user dashboard
+            loadUserDashboard(ctx, webUser);
+            
+            return webUser;
+        } catch (Exception e) {
+            // No guest account available
+            return null;
+        }
     }
 }

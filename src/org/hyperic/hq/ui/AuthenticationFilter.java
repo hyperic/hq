@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.hyperic.hq.ui.action.authentication.AuthenticateUserAction;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 public final class AuthenticationFilter extends BaseFilter {
@@ -71,6 +71,14 @@ public final class AuthenticationFilter extends BaseFilter {
          * and should be forwarded to the login page
          */
         WebUser webUser = SessionUtils.getWebUser(session);
+        
+        if (webUser == null) {
+        // See if there is a guest user
+            webUser =
+                AuthenticateUserAction.loginGuest(request,
+                                                  session.getServletContext());            
+        }
+        
         if (webUser == null ){
             String path = request.getServletPath();
             

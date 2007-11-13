@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -43,6 +43,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.Constants;
@@ -72,8 +73,8 @@ public class DisplayDashboardAction extends TilesAction {
 		ServletContext ctx = getServlet().getServletContext();
 		AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 		DashboardForm dForm = (DashboardForm) form;
-		WebUser user = (WebUser) session
-				.getAttribute(Constants.WEBUSER_SES_ATTR);
+		WebUser user =
+		    (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
 		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
@@ -162,6 +163,20 @@ public class DisplayDashboardAction extends TilesAction {
 		
 		// Dashboard exists, display it
 		ConfigResponse dashPrefs = dashboardConfig.getConfig();
+
+		// See if we need to initialize the dashboard (for Roles)
+		if (dashPrefs.getValue( Constants.USER_PORTLETS_FIRST) == null) {
+		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse)
+		        ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
+		    try {
+		        dashManager.configureDashboard(me, dashboardConfig,
+		                                       defaultRoleDashPrefs);
+		        dashPrefs.merge(defaultRoleDashPrefs, true);
+		    } catch (PermissionException e) {
+		        // User has no permission to write the dashboard configs
+		    }
+		}
+		
 		portal.addPortletsFromString(dashPrefs
 				.getValue(Constants.USER_PORTLETS_FIRST), 1);
 		portal.addPortletsFromString(dashPrefs
