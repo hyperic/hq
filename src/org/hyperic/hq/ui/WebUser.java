@@ -70,7 +70,6 @@ public class WebUser {
 
     private AuthzSubjectValue _subject;
     private Integer _sessionId;
-    private String _password;
     private ConfigResponse _preferences;
     /** Indicates whether or not the user has an entry in the
       * principals table */
@@ -87,12 +86,10 @@ public class WebUser {
     }
     
     public WebUser(AuthzSubjectValue subject, Integer sessionId,
-                   String password, ConfigResponse preferences,
-                   boolean hasPrincipal) {
+                   ConfigResponse preferences, boolean hasPrincipal) {
                        
         _subject = subject;
         _sessionId = sessionId;
-        setPassword(password);
         setPreferences(preferences);
         _hasPrincipal = hasPrincipal;
     }
@@ -246,14 +243,6 @@ public class WebUser {
         str.append("subject=").append(getSubject()).append(" ");
         str.append("}");
         return(str.toString());
-    }
-    
-    public String getPassword() {
-        return _password;
-    }
-
-    public void setPassword(String password) {
-        _password = password;
     }
     
     public boolean getHasPrincipal() {
