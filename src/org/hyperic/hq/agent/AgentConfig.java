@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PropertyUtil;
@@ -238,8 +236,6 @@ public class AgentConfig {
     {
         String listenPort, storageProvider, storageProviderInfo;
         String listenIp;
-        StringTokenizer tokenizer;
-        Vector tokenTmp;
 
         this.bootProps = appProps;
 
@@ -298,7 +294,7 @@ public class AgentConfig {
 
         dir = new File(logDir);
         if (!dir.exists()) {
-            boolean created = dir.mkdirs();
+            dir.mkdirs();
             //XXX need a log or exception here.
         }
     }
