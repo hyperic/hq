@@ -34,6 +34,10 @@ import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
@@ -47,11 +51,6 @@ import org.hyperic.hq.product.PluginExistsException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.security.SecurityUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.PropertyConfigurator;
 
 /**
  * The main daemon which processes requests from clients.  The Agent has
@@ -752,11 +751,6 @@ public class AgentDaemon
             }
         }
     }
-
-    /**
-     * Invoke the agent from a command line.  The agent may take an optional
-     * argument, which is the path to a configuration file.
-     */
 
     public static void main(String[] args) {
         new RunnableAgent().run();
