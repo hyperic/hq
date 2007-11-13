@@ -383,8 +383,6 @@ font-weight:bold;
 #nagCont  table tbody tr.selected td {}
 #nagCont table tbody tr:hover td {}
 #nagCont table tbody tr.selected:hover td {}
-.goodResults  {width:20px;height:16;display:inline;background: url(/images/lightning_go.gif)no-repeat;}
-.errorResults {width:20px;height:16;display:inline;background: url(/images/lightning_delete.gif)no-repeat;}
 .statusBGCRITICAL {background-color: #FFBBBB; }
 .statusCRITICAL{background-color:#F83838;}
 .statusBGUNKNOWN {background-color: #FFDA9F; }
@@ -397,7 +395,7 @@ font-weight:bold;
 /* Live Exec */
 .outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 .bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
-.leftbx {float:left;width:18%;margin-right:10px;height:400px;overflow-y:auto;}
+.leftbx {float:left;width:18%;margin-right:10px;height:400px;}
 .BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
 #result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
 #result thead {width:100%;padding:0px;margin:0px;}
@@ -406,9 +404,12 @@ font-weight:bold;
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
 .fivepad {padding:5px;}
 .instruction1 {padding-bottom:3px;font-weight:bold;}
+#commandSelect {width:140px;}
+.bottomPad {padding-right:5px;}
 .pendingData li {color:gray;}
 .hasData  li {color:black;}
+.goodResults  {cursor:pointer;}
 .grpmembertext{padding:3px;margin-top:10px;margin-bottom:5px;background-color:#868787;color:#FFFFFF;font-weight:bold;font-size: 12px;}
-#groupMembers {padding-bottom:5px;}
+#groupMembers {padding-bottom:5px;overflow-y:auto;overflow-x: hidden;height:298px;}
 #groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
-#groupMembers li {padding:2px;}
+#groupMembers li {padding:1px;white-space:nowrap;}
