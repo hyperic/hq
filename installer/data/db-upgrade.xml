@@ -7330,6 +7330,71 @@ has already been defined.
 	  </schema-directSQL>
 	</schemaSpec>	
 
+  <schemaSpec version="3.69">
+    <schema-directSQL>
+      <statement desc="reserve two crispo IDs for the guest user">
+        INSERT INTO EAM_CRISPO (ID) VALUES ('2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_CRISPO (ID) VALUES ('3');
+      </statement>
+      <statement desc="create a guest subject">
+        INSERT INTO EAM_SUBJECT (CID,DSN,EMAIL_ADDRESS,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,PREF_CRISPO_ID) VALUES ('2','CAM','localhost',false,'Guest',false,false,'2','User','guest','3');
+      </statement>
+      <statement desc="add a resource for the guest subject">
+        INSERT INTO EAM_RESOURCE (CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('10',false,'10','2','0','1','0');
+      </statement>
+      <statement>
+        UPDATE EAM_SUBJECT SET CID = '2',RESOURCE_ID = '10' WHERE CID = '2';
+      </statement>
+      <statement desc="set the default dashboard for view only role">
+        INSERT INTO EAM_CRISPO_OPT (CRISPO_ID,ID,PROPKEY,VAL) VALUES ('3','2','.user.dashboard.default.id','2');
+      </statement>
+      <statement desc="Define a view only role which includes the guest user and has all the read operations availble on the authz resource group">
+        INSERT INTO EAM_ROLE (CID,FSYSTEM,ID,NAME) VALUES ('2',false,'2','View Only Role');
+      </statement>
+      <statement desc="add the role resource">
+        INSERT INTO EAM_RESOURCE (CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('11',false,'11','2','0','2','0');
+      </statement>
+      <statement>
+        UPDATE EAM_ROLE SET CID = '2',RESOURCE_ID = '11' WHERE CID = '2';
+      </statement>
+      <statement desc="create the role dashboard">
+        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','View Only Role','2');
+      </statement>
+      <statement desc="add the user to the root resource group">
+        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','10');
+      </statement>
+      <statement desc="add the role to the root resource group">
+        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','11');
+      </statement>
+      <statement desc="add the guest user to view only role">
+        INSERT INTO EAM_SUBJECT_ROLE_MAP (CID,ROLE_ID,SUBJECT_ID) VALUES ('2','2','2');
+      </statement>
+      <statement desc="the read operations for all resource types to the view only role">
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('71','8','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('72','16','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('73','28','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('74','305','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('75','311','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('76','315','2');
+      </statement>
+      <statement>
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('77','319','2');
+      </statement>
+	  </schema-directSQL>
+	</schemaSpec>	
+
 </dbupgrade>
 </target>
 

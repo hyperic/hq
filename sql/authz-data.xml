@@ -412,7 +412,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data cid="1" RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
     </table>
 
-    <!-- Define a role which includes our  Admin User and
+    <!-- Define a role which includes our Admin User and
         has all the operations availble on the authz resource group -->
     <table name="EAM_ROLE">
         <data ID="0" CID="0" NAME="Super User Role" FSYSTEM="TRUE"/>
@@ -543,6 +543,84 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
      <!-- add the permissions to the creator role -->
     <table name="EAM_ROLE_OPERATION_MAP">
         <data CID="51" OPERATION_ID="%EAM_OPERATION.ID:0" ROLE_ID="%EAM_ROLE.ID:1"/>
+    </table>
+
+    <!-- reserve two crispo IDs for the guest user -->
+    <table name="EAM_CRISPO">
+        <data ID="2"/>
+        <data ID="3"/>
+    </table>
+
+    <!-- create a guest subject -->
+    <table name="EAM_SUBJECT">
+        <data ID="2" CID="2" NAME="guest" FIRST_NAME="Guest"
+              LAST_NAME="User" EMAIL_ADDRESS="@@@ADMINEMAIL@@@"
+              DSN="CAM" FSYSTEM="FALSE" FACTIVE="FALSE" HTML_EMAIL="FALSE"
+              PREF_CRISPO_ID="3"/>
+    </table>
+
+    <!-- add a resource for the guest subject -->
+    <table name="EAM_RESOURCE">
+        <data ID="10" CID="10" INSTANCE_ID="%EAM_SUBJECT.ID:2"
+              RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:1"
+              SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
+              FSYSTEM="FALSE"/>
+    </table>
+
+    <table name="EAM_SUBJECT">
+        <data CID="2" RESOURCE_ID="%EAM_RESOURCE.ID:10"/>
+    </table>
+
+    <!-- set the default dashboard for view only role -->
+    <table name="EAM_CRISPO_OPT">
+        <data ID="2" PROPKEY=".user.dashboard.default.id" VAL="2" CRISPO_ID="3"/>
+    </table>
+
+    <!-- Define a view only role which includes the guest user and
+        has all the read operations availble on the authz resource group -->
+    <table name="EAM_ROLE">
+        <data ID="2" CID="2" NAME="View Only Role" FSYSTEM="FALSE"/>
+    </table>
+
+    <!-- add the role resource -->
+    <table name="EAM_RESOURCE">
+        <data ID="11" CID="11" INSTANCE_ID="%EAM_ROLE.ID:2"
+            RESOURCE_TYPE_ID="%EAM_RESOURCE_TYPE.ID:2"
+            SUBJECT_ID="%EAM_SUBJECT.ID:0" PROTO_ID="0"
+            FSYSTEM="FALSE"/>
+    </table>
+
+    <table name="EAM_ROLE">
+        <data CID="2" RESOURCE_ID="%EAM_RESOURCE.ID:11"/>
+    </table>
+
+    <table name="EAM_DASH_CONFIG">
+        <data ID="2" CONFIG_TYPE="ROLE" NAME="View Only Role" CRISPO_ID="2"
+              ROLE_ID="%EAM_ROLE.ID:2"/>
+    </table>
+
+    <!-- add the user and role to the root resource group -->
+    <table name="EAM_RES_GRP_RES_MAP">
+        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+            RESOURCE_ID="%EAM_RESOURCE.ID:10"/>
+        <data RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:1"
+            RESOURCE_ID="%EAM_RESOURCE.ID:11"/>
+    </table>
+
+    <!-- add the guest user to the view only role -->
+    <table name="EAM_SUBJECT_ROLE_MAP">
+        <data CID="2" ROLE_ID="%EAM_ROLE.ID:2" SUBJECT_ID="%EAM_SUBJECT.ID:2"/>
+    </table>
+
+    <!-- and the read operations for all resource types to the view only role -->
+    <table name="EAM_ROLE_OPERATION_MAP">
+        <data CID="71" OPERATION_ID="%EAM_OPERATION.ID:8" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="72" OPERATION_ID="%EAM_OPERATION.ID:16" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="73" OPERATION_ID="%EAM_OPERATION.ID:28" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="74" OPERATION_ID="%EAM_OPERATION.ID:305" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="75" OPERATION_ID="%EAM_OPERATION.ID:311" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="76" OPERATION_ID="%EAM_OPERATION.ID:315" ROLE_ID="%EAM_ROLE.ID:2"/>
+        <data CID="77" OPERATION_ID="%EAM_OPERATION.ID:319" ROLE_ID="%EAM_ROLE.ID:2"/>
     </table>
 
 </Covalent.DBSetup>
