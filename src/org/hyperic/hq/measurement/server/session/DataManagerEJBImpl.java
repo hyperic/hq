@@ -605,7 +605,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points 
             // should be inserted. Roll back the txn.
-            _log.debug("Error while inserting data with one insert", e);
+            if (_log.isDebugEnabled()) {
+                _log.debug("Error inserting data with one insert stmt: " +
+                    e.getMessage() + " (this is ok)");
+            }
             return false;            
         } finally {
             DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
@@ -643,7 +646,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points 
             // should be inserted. Roll back the txn.
-            _log.debug("Error while inserting data in batch", e);
+            if (_log.isDebugEnabled()) {
+                _log.debug("Error while inserting data in batch (this is ok)" +
+                    e.getMessage() + " (this is ok)");
+            }
             return false;
         }
         
