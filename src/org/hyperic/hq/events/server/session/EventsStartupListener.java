@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import javax.management.MBeanServer;
@@ -38,7 +37,6 @@ import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 
 public class EventsStartupListener 
     implements StartupListener
