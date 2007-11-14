@@ -176,20 +176,113 @@ A.GuideLink:hover {color: #003399; font-weight: bold; text-decoration: underline
 .DashTabs {margin-bottom: 4px;}
 
 /* MASTHEAD */
-.MastheadBgTop {background-color: #60a5ea;}
-.MastheadBgBottom {background-color: #DBE3F6;}
+.headRightWrapper {
+    position:relative;
+    margin-left:225px;
+    height:60px;
+    white-space:nowrap;
+}
+.headTopNav {
+    height:41px;
+    width:100%;
+}
 
-A.MastheadLink:link {font-weight: bold; color: #105CA8; text-decoration: none;}
-A.MastheadLink:visited {font-weight: bold; color: #105CA8; text-decoration: none;}
-A.MastheadLink:hover {font-weight: bold; color: #105CA8; text-decoration: underline;}
-A.MastheadLink:active {font-weight: bold; color: #666666; text-decoration: none;}
+#headUsrName {
+color:#333333;
+font-weight:bold;
+padding:5px 10px;
+position:absolute;
+top:0px;
+right:0px;
+border-left:1px solid #999999;
+border-bottom:1px solid #999999;
+background-color:#f1f1f1;
+white-space:nowrap;
+text-align: center;
+z-index:2;
+}
 
-.MastheadContent {font-size: 11px; color: #000000;}
-td.MastheadBgTop .MastheadContent{color: #ffffff;}
+#headUsrName a {
+ color: #003399;
+ text-decoration:none;
+ font-weight: bold;
+    font-size:10px;
+}
 
-.RecentPlaces {color: #000000; font-weight: bold;}
+.headAlertWrapper {
+    color:#333333;
+    font-weight:bold;
+    position:absolute;
+    top:0px;
+    left:10px;
+    width:380px;
+    height:38px;
+    overflow:hidden;
+    z-index:1;
+}
 
-.MastheadBottomLine {background-color: #3399ff;}
+.headBotNav {
+    background-color:#336699;
+}
+
+#loading {
+    position:absolute;
+    right:5px;
+    bottom:2px;
+}
+
+#hb {right:26px;
+    bottom:2px;
+}
+
+/* IE hack for positioning  in the nav bar*/
+#loading {*bottom:0px;}
+#hb {*bottom:0px;}
+
+.mainNavText {
+ font-family: Helvetica, sans-serif;
+ font-size: 11px;
+ color: #062b7a;
+ font-weight: bold;
+ white-space:nowrap;
+}
+
+.recentText {
+float:left;
+display:inline;
+width:85px;
+padding-top:5px;
+}
+
+#recentAlerts {
+    position:absolute;
+    top:0px;
+    padding-left:80px;
+    padding-top:1px;
+    font-weight:bold;
+    color:black;
+    white-space: nowrap;
+}
+
+#recent a {
+ color: #ffffff;
+ font-weight: bold;
+}
+
+#recent li {
+    padding:0px;
+    margin:0px;
+    display:block;
+    list-style:none;
+    white-space:nowrap;
+}
+
+.headerWrapper {
+    height:60px;
+    border-top:1px solid #eeeeee;
+    background-repeat:repeat-x;
+}
+
 
 /* FOOTER */
 .FooterBold {font-weight: bold; padding: 3px;}
@@ -950,7 +1043,9 @@ white-space:  nowrap;
    width: 100%;
    border-bottom:1px solid gray;
 }
-   
+
+/* Escalation administration */
+
 #viewEscalationUL {
   margin:0;
   padding:0;
@@ -1049,6 +1144,8 @@ background-color: #dbe3f5
 .waitTd {
 }
 
+/* Dashboard Portlets */
+
 .portletLRBotBorder {
  border-left:1px solid #D5D8DE;
  border-right:1px solid #D5D8DE;
@@ -1075,146 +1172,6 @@ border-left:1px solid #D5D8DE;
  background-color:#eaedf2;
 }
 
-.headRightWrapper {
-    position:relative;
-    margin-left:225px;
-    height:60px;
-    white-space:nowrap;
-}
-.headTopNav {
-    height:41px;
-    width:100%;
-}
-
-#headUsrName {
-color:#333333;
-font-weight:bold;
-padding:5px 10px;
-position:absolute;
-top:0px;
-right:0px;
-border-left:1px solid #999999;
-border-bottom:1px solid #999999;
-background-color:#f1f1f1;
-white-space:nowrap;
-text-align: center;
-z-index:2;
-}
-
-#headUsrName a {
- color: #003399;
- text-decoration:none;
- font-weight: bold;
-    font-size:10px;
-}
-
-.headAlertWrapper {
-    color:#333333;
-    font-weight:bold;
-    position:absolute;
-    top:0px;
-    left:10px;
-    width:380px;
-    height:38px;
-    overflow:hidden;
-    z-index:1;
-}
-
-.headBotNav {
-    background-color:#336699;
-}
-
-#loading {
-    position:absolute;
-    right:5px;
-    bottom:2px;
-}
-
-#hb {right:26px;
-    bottom:2px;
-}
-
-/* IE hack for positioning  in the nav bar*/
-#loading {*bottom:0px;}
-#hb {*bottom:0px;}
-
-.mainNavText {
- font-family: Helvetica, sans-serif;
- font-size: 11px;
- color: #062b7a;
- font-weight: bold;
- white-space:nowrap;
-}
-
-.recentText {
-float:left;
-display:inline;
-width:85px;
-padding-top:5px;
-}
-
-#recentAlerts {
-    position:absolute;
-    top:0px;
-    padding-left:80px;
-    padding-top:1px;
-    font-weight:bold;
-    color:black;
-    white-space: nowrap;
-}
-
-#navigationTbl  {
- font-family: arial,sans-serif;
- font-size: 11px;
- display:inline;
-position:relative;
- color: #ffffff;
-font-weight: bold;
-white-space: nowrap;
-}
-
-#navigationTbl .navText {
-    padding-left:10px;
-    padding-right:10px;
-    border-right:1px solid #ffffff;
-}
-
-#navigationTbl a {
- color: #ffffff;
- text-decoration:none;
- font-weight: bold;
-}
-
-#navigationTbl a:visited {
- color: #ffffff;
- text-decoration:none;
- font-weight: bold;
-}
-
-#navigationTbl a:hover {
- color: #ffffff;
- text-decoration:none;
- font-weight: bold;
-}
-
-#navigationTbl a:active {
- color: #ffffff;
- text-decoration:none;
- font-weight: bold;
-}
-
-#recent a {
- color: #ffffff;
- font-weight: bold;
-}
-
-#recent li {
-    padding:0px;
-    margin:0px;
-    display:block;
-    list-style:none;
-    white-space:nowrap;
-}
 
 #displaySelAction {
  border: 1px dotted #D5D8DE;
@@ -1265,13 +1222,3 @@ white-space: nowrap;
 
 .italicInfo {font-size: 11px; font-style: italic; color:#333333;}
 
-.headerWrapper {
-    height:60px;
-    border-top:1px solid #eeeeee;
-    background-repeat:repeat-x;
-}
-/*
-.dojoMenuBar2 {
-		border-top:1px solid #d4d4d4;
-}
-*/
