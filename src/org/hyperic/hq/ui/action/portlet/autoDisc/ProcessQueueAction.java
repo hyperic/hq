@@ -31,6 +31,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -38,14 +39,18 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -78,9 +83,19 @@ public class ProcessQueueAction extends BaseAction {
         List aiIpList       = new ArrayList();
         List aiServerList   = new ArrayList();
 
-        // Grab a fresh view of the entire AI queue
+        // Refresh the queue items this user can see.
+        HttpSession session = request.getSession();
+        PageControl page = new PageControl();
+        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		user, aBoss);
+        ConfigResponse dashPrefs = dashConfig.getConfig();
+        page.setPagesize(Integer.parseInt(
+        		dashPrefs.getValue(".dashContent.autoDiscovery.range") ) );
+
         PageList aiQueue = aiBoss.getQueue(sessionId, true, false, true,
-                                                PageControl.PAGE_ALL);
+                                           page);
 
         // Walk the queue.  For each platform in the queue:
         // 
