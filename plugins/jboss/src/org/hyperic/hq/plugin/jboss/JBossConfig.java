@@ -295,6 +295,10 @@ public class JBossConfig {
                                              home.toString());
                 }
 
+                url = StringUtil.replace(url,
+                                         "${jboss.server.config.url}",
+                                         this.serviceXML.getParentFile().toString());
+
                 File bindings = new File(url);
                 boolean exists = bindings.exists();
                 log.debug("StoreURL exists=" + exists + " (" + url + ")");
