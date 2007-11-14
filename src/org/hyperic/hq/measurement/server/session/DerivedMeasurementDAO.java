@@ -130,6 +130,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
 
     public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
+        if (iids.length == 0)
+            return new ArrayList(0);
+        
         String sql = "select id from DerivedMeasurement " +
                      "where template.id = :tid and instanceId IN (:ids)";
 
