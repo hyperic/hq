@@ -133,6 +133,14 @@ public class Util {
             private PrintfFormat _hdr = 
                 new PrintfFormat("%-50s %-6s %-6s %-6s %6s");
 
+            public String getName() {
+                return "EhCache Diagnostics";
+            }
+
+            public String getShortName() {
+                return "ehcacheDiag";
+            }
+
             private List getSortedCaches() {
                 CacheManager cacheManager = CacheManager.getInstance();
                 String[] caches = cacheManager.getCacheNames();

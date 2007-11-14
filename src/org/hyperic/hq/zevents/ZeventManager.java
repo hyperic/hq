@@ -502,6 +502,14 @@ public class ZeventManager {
                     public String toString() {
                         return "ZEvent Subsystem";
                     }
+
+                    public String getName() {
+                        return "ZEvents";
+                    }
+
+                    public String getShortName() {
+                        return "zevents";
+                    }
                 };
                 
                 DiagnosticThread.addDiagnosticObject(myDiag);
