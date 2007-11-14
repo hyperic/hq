@@ -183,7 +183,7 @@ function getAllDaysInMonth(monthNum, yearNum)  {
 
 function setSelect(selId, index) {
   var sel = document.getElementById(selId);
-  if((sel){
+  if(sel){
     sel.selectedIndex = index;
   }
 }
