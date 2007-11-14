@@ -137,11 +137,11 @@ public class AIQSynchronizer {
         if (fqdnMatches.size() == 0) {
             _log.warn("FindByFQDN failed: "+fqdn);
         }
-        if (fqdnMatches == null || fqdnMatches.size() != 1) {
+        if (fqdnMatches.size() != 1) {
             aiPlatform = aiPlatformLH.findByCertDN(certdn);
             if (aiPlatform == null) {
                 // Hope that we actually found some by FQDN
-                if (fqdnMatches == null || fqdnMatches.size() == 0)
+                if (fqdnMatches.size() == 0)
                     _log.warn("FindByFQDN and FindByCertDN both failed: "+
                               certdn);
                 else
