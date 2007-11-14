@@ -149,9 +149,15 @@ public class ViewAction extends BaseAction {
             CacheEntry ent = ents[i];
             MetricValue val = vals[i];
             if (val == null) {
-                // If we don't have measurement data for this resource, assume
-                // that it is down.
-                val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
+                // If we don't have measurement data for this resource,
+                // assume that it is down.
+                double mval = MeasurementConstants.AVAIL_DOWN;
+                if (arrayIds[i].isApplication()) {
+                    // A little expensive, hopefully we don't have to do it very
+                    // often
+                    mval = mBoss.getAvailability(sessionId, arrayIds[i]);
+                }
+                val = new MetricValue(mval);
             }
 
             // If no avail measurement is scheduled, skip this resource
@@ -289,12 +295,9 @@ public class ViewAction extends BaseAction {
         try {
             AppdefResourceValue val = aBoss.findById(sessionId, id);
             DerivedMeasurement m = mBoss.findAvailabilityMetric(sessionId, id);
-            if (m == null) {
-                return null;
-            }
 
             CacheEntry res = new CacheEntry(val.getAppdefResourceTypeValue(),
-                                            m.getId(), m.getInterval());
+                                            m);
             cache.put(new Element(key, res));
             return res;
         } catch (AppdefEntityNotFoundException ex) {
@@ -332,11 +335,18 @@ public class ViewAction extends BaseAction {
         private Integer _metricId;
         private long _interval;
 
-        public CacheEntry(AppdefResourceTypeValue tval, Integer metricId,
-                          long interval) {
+        public CacheEntry(AppdefResourceTypeValue tval,
+                          DerivedMeasurement metric) {
             _type = tval;
-            _metricId = metricId;
-            _interval = interval;
+            
+            if (metric == null) {
+                _metricId = null;
+                _interval = 0;
+            }
+            else {
+                _metricId = metric.getId();
+                _interval = metric.getInterval();
+            }
         }
 
         public AppdefResourceTypeValue getType() {
