@@ -31,6 +31,7 @@ package org.hyperic.hq.common;
  * @see DiagnosticThread
  */
 public interface DiagnosticObject {
-
-    public String getStatus();
+    String getStatus();
+    String getShortName();
+    String getName();
 }
