@@ -132,7 +132,14 @@ public class ServerType extends AppdefResourceType
     }
 
     public boolean equals(Object obj) {
-        return (obj instanceof ServerType) && super.equals(obj);
+        if (obj instanceof ServerType == false)
+            return false;
+        
+        return ((ServerType)obj).getName().equals(getName());
+    }
+    
+    public int hashCode() {
+        return getName().hashCode();
     }
 
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {

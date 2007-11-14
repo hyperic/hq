@@ -230,7 +230,14 @@ public class PlatformType extends AppdefResourceType {
     }
 
     public boolean equals(Object obj) {
-        return (obj instanceof PlatformType) && super.equals(obj);
+        if (obj instanceof PlatformType == false)
+            return false;
+        
+        return ((PlatformType)obj).getName().equals(getName());
+    }
+    
+    public int hashCode() {
+        return getName().hashCode();
     }
 
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {

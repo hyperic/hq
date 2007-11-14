@@ -151,7 +151,14 @@ public class ServiceType extends AppdefResourceType
     }
 
     public boolean equals(Object obj) {
-        return (obj instanceof ServiceType) && super.equals(obj);
+        if (obj instanceof ServiceType == false)
+            return false;
+        
+        return ((ServiceType)obj).getName().equals(getName());
+    }
+
+    public int hashCode() {
+        return getName().hashCode();
     }
 
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
