@@ -125,9 +125,8 @@ function showViewEscResponse(originalRequest) {
         var actionId = actions[i].action.id;
         var actionsClassName = actions[i].action.className;
         var actionsVersion = actions[i].action._version_;
-        var actionWaitTime = (actions[i].waitTime / 60000) +
-                             " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
-
+        var actionWaitTime = formatactionWaitTime(actions[i].waitTime);
+        
         var liID = actionId;
         var viewLi = document.createElement('li');
         var remDiv = document.createElement('div');
@@ -320,6 +319,16 @@ function showViewEscResponse(originalRequest) {
         },
         constraint: 'vertical'});
 
+}
+
+function formatactionWaitTime(time) {
+        actionWaitTime = time;
+            if  (actionWaitTime > 3600000) {
+                actionWaitTime =  (actionWaitTime / 3600000) + " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>";
+                } else {
+                actionWaitTime =  (actionWaitTime / 60000) + " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+             }
+         return actionWaitTime;
 }
 
 function editEscalation() {
@@ -711,7 +720,7 @@ function onchange_time(el) {
     var writeTime = $('time');
     writeTime.style.display = "";
     var index = el.options[el.selectedIndex].value;
-    writeTime.innerHTML = 'Then wait: ' + (index / 60000) + ' minutes';
+    writeTime.innerHTML = 'Then wait: ' + formatActionWaitTime(el);
 }
 
 function hideDisplay() {
@@ -1142,6 +1151,18 @@ function saveAddEscalation() {
 
 }
 
+function formatActionWaitTime(el) {
+    if (el) {
+    var formtdWaitTime;
+        var index = el.options[el.selectedIndex].value;
+            if  (index > 3600000) {
+                formtdWaitTime = (index / 3600000) + " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>";
+                } else {
+                formtdWaitTime =  (index / 60000) + " <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>";
+             }
+   		return formtdWaitTime;
+   	}
+}
 
 </script>
 
