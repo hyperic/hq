@@ -271,7 +271,17 @@ public class AppdefEntityValue {
 
     public String getDescription()
         throws PermissionException, AppdefEntityNotFoundException {
-        return getResourcePOJO().getDescription();
+        switch(_id.getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            return getResourcePOJO().getDescription();
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            return getResourceValue().getDescription();
+        default:
+            throw new IllegalStateException("Unknown appdef entity type"); 
+        }
     }
 
     public String getTypeName()
