@@ -80,7 +80,8 @@
       <column name="AGENT_ID" not-null="false"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="ips" table="EAM_IP">
+    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="ips" table="EAM_IP"
+         optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="PLATFORM_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.Ip"/>
