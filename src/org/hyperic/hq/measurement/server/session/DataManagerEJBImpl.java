@@ -92,11 +92,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final String logCtx = DataManagerEJBImpl.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
     
+    // The boolean system property that makes all events interesting. This 
+    // property is provided as a testing hook so we can flood the event 
+    // bus on demand.
+    public static final String ALL_EVENTS_INTERESTING_PROP = 
+        "org.hq.triggers.all.events.interesting";
+    
     private static final BigDecimal MAX_DB_NUMBER =
         new BigDecimal("10000000000000000000000");
-
-    private static final long MINUTE = 60 * 1000;
     
+    private static final long MINUTE = 60 * 1000;
+        
     // Table names
     private static final String TAB_DATA    = MeasurementConstants.TAB_DATA;
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
@@ -476,13 +482,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
         
+        boolean allEventsInteresting = 
+            Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
+        
         for (Iterator i = data.iterator(); i.hasNext();) {
             DataPoint dp = (DataPoint) i.next();
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event))
+            if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting)
                 events.add(event);
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
