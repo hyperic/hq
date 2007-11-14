@@ -33,10 +33,8 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.product.PlatformDetector;
 
-/**
- *
- */
 public class AIPlatform extends PlatformBase
 {
     private String platformTypeName;
@@ -59,9 +57,6 @@ public class AIPlatform extends PlatformBase
     private Collection aiips = new ArrayList();
     private Collection aiservers =  new ArrayList();
 
-    /**
-     * default constructor
-     */
     public AIPlatform()
     {
         super();
@@ -297,6 +292,10 @@ public class AIPlatform extends PlatformBase
             aiservers.add(server);
             server.setAIPlatform(this);
         }
+    }
+
+    public boolean isPlatformDevice() {
+        return !PlatformDetector.isSupportedPlatform(getPlatformTypeName());
     }
 
     private AIPlatformValue aipValue = new AIPlatformValue();
