@@ -28,6 +28,7 @@ package org.hyperic.hq.common;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -92,6 +93,12 @@ public class DiagnosticThread implements Runnable {
         }
     }
 
+    public static Collection getDiagnosticObjects() {
+        synchronized(INIT_LOCK) {
+            return new ArrayList(_diagnosticObjects);
+        }
+    }
+    
     public void run() {
         _log.info("Starting Diagnostic Thread (interval=" + _interval + " ms)");
 
