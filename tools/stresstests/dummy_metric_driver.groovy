@@ -125,13 +125,18 @@ def startDataInserterThread(startDataPointId,
 
       // println(name+" "+dataPoints)
       
-      // randomly insert backfiller metrics before the true data points
-      if (runBackfiller && random.nextBoolean()) {
-        def backfilled = dataPoints.subList(0, random.nextInt(dataPoints.size()))
-        dM.one.addData(backfilled, false)        
-      }
+      try {
+        // randomly insert backfiller metrics before the true data points
+        if (runBackfiller && random.nextBoolean()) {
+          def backfilled = dataPoints.subList(0, random.nextInt(dataPoints.size()))
+          dM.one.addData(backfilled, false)        
+        }
       
-      dM.one.addData(dataPoints)      
+        dM.one.addData(dataPoints)      
+      } catch (InterruptedException e) {
+        // data insertion may be interrupted when the test is complete
+        return
+      }
     }
   }] as Runnable
 
