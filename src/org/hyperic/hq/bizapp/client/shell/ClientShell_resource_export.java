@@ -366,7 +366,7 @@ public class ClientShell_resource_export
         ConfigResponseDB config =
             this.pBoss.getConfigResponse(auth.getAuthToken(), id);
         exportConfig(id, config, ps, INDENT * 2);
-
+/*
         // Export Servers
         PageList servers = 
             this.aBoss.findServersByPlatform(auth.getAuthToken(),
@@ -375,7 +375,7 @@ public class ClientShell_resource_export
             ServerValue s = (ServerValue)i.next();
             exportServer(s, ps, INDENT * 2);
         }
-
+*/
         ps.println(s1 + "</platform>");
     }
 
@@ -529,9 +529,6 @@ public class ClientShell_resource_export
                 ps.print(s2 + key + "=\"" + config.getValue(key));
             }
             ps.println("\" />");
-        } else {
-            // Empty config response
-            ps.println(s1 + "<" + tag + " />");
         }
     }
 
