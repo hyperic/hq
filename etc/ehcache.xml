@@ -236,7 +236,7 @@
 
   <!-- Server Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.ServerType"
-         maxElementsInMemory="100"
+         maxElementsInMemory="200"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -294,7 +294,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.ServiceType"
-         maxElementsInMemory="300"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -324,7 +324,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.ServerType.serviceTypes"
-         maxElementsInMemory="100"
+         maxElementsInMemory="200"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
