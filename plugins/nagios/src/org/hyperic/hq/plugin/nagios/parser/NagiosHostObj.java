@@ -17,6 +17,7 @@ public class NagiosHostObj
                                  _useEx = Pattern.compile("^\\s*use"),
                                  _hostnameEx = Pattern.compile("^\\s*host_name"),
                                  _nameEx = Pattern.compile("^\\s*name"),
+                                 _checkCmdEx = Pattern.compile("^\\s*check_command"),
                                  _addressEx = Pattern.compile("^\\s*address"),
                                  _contactsEx = Pattern.compile("^\\s*contacts"),
                                  _contactGroupsEx =
@@ -28,7 +29,10 @@ public class NagiosHostObj
     private String _alias,
                    _name,
                    _hostname,
+                   _cmdName,
                    _address;
+
+    NagiosCommandObj _cmdObj;
 
     protected NagiosHostObj()
     {
@@ -48,6 +52,8 @@ public class NagiosHostObj
             }
             if (_aliasEx.matcher(line).find()) {
                 setAlias(line);
+            } else if (_checkCmdEx.matcher(line).find()) {
+                setCheckCmd(line);
             } else if (_useEx.matcher(line).find()) {
                 setInheritAttrs(line);
             } else if (_nameEx.matcher(line).find()) {
@@ -88,6 +94,11 @@ public class NagiosHostObj
         return _hostname;
     }
 
+    public String getChkCmd()
+    {
+        return (_cmdObj == null) ? null : _cmdObj.getCmdExec();
+    }
+
     public String getHostname()
     {
         return _hostname;
@@ -98,6 +109,13 @@ public class NagiosHostObj
         line = removeInlineComments(line);
         String[] name = line.split("\\s+");
         _name = name[name.length-1];
+    }
+
+    private void setCheckCmd(String line)
+    {
+        line = removeInlineComments(line);
+        String[] cmd = line.split("\\s+");
+        _cmdName = cmd[cmd.length-1];
     }
 
     private void setHostname(String line)
@@ -170,8 +188,9 @@ public class NagiosHostObj
                "\nName -> "+_name+
                "\nAlias -> "+_alias+
                "\nAddr  -> "+_address+
-               "\nContacts  -> "+_contacts+
-               "\nContactGroups  -> "+_contactGroups;
+               "\nContacts -> "+_contacts+
+               "\nCmdObj   -> "+_cmdObj+
+               "\nContactGroups -> "+_contactGroups;
     }
 
     public boolean equals(Object rhs)
@@ -192,6 +211,25 @@ public class NagiosHostObj
 
     void resolveDependencies(NagiosParser parser)
     {
+        try
+        {
+            if (_cmdObj == null)
+            {
+                Integer type = new Integer(COMMAND_TYPE);
+                _cmdObj = (NagiosCommandObj)parser.get(type, _cmdName);
+            }
+        }
+        catch (NagiosParserInternalException e) {
+            debug(e);
+        }
+        catch (NagiosTypeNotSupportedException e) {
+            debug(e);
+        }
+    }
+
+    public String getChkAliveCmd()
+    {
+        return _cmdObj.getCmdExec();
     }
 
     private boolean equals(NagiosHostObj rhs)

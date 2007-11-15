@@ -32,13 +32,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.hyperic.hq.plugin.nagios.parser.*;
+import org.hyperic.hq.plugin.nagios.parser.NagiosCfgParser;
+import org.hyperic.hq.plugin.nagios.parser.NagiosHostObj;
+import org.hyperic.hq.plugin.nagios.parser.NagiosObj;
+import org.hyperic.hq.plugin.nagios.parser.NagiosServiceObj;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.logging.Log;
@@ -107,55 +112,93 @@ public class NagiosDetector
             String msg = "Error error retrieving service types from parser";
             throw new PluginException(msg);
         }
+        services.addAll(setNagSvcObjCmds(set));
+        type = new Integer(NagiosObj.HOST_TYPE);
+        if (null == (set = (Set)parser.get(type)) || set.size() == 0) {
+            String msg = "Error error retrieving service types from parser";
+            throw new PluginException(msg);
+        }
+        services.addAll(setNagHostObjCmds(set));
+        return services;
+    }
 
+    private List setNagHostObjCmds(Set set)
+    {
+        List rtn = new ArrayList();
+        for (Iterator i=set.iterator(); i.hasNext(); )
+        {
+            NagiosHostObj hostObj = (NagiosHostObj)i.next();
+            String hostname = hostObj.getHostname();
+            if (_log.isDebugEnabled()) {
+                _log.debug("setting nagios host: "+hostname);
+            }
+            String cmdLine = hostObj.getChkAliveCmd();
+            if (cmdLine == null) {
+                _log.warn("Could not find check_command for "+hostname);
+                continue;
+            }
+            int index = cmdLine.indexOf(" ");
+            String path = (index == -1) ? cmdLine : cmdLine.substring(0, index),
+                   args = (index == -1) ? "" : cmdLine.substring(index);
+            rtn.add(getService("check_command", hostname, path, args, true));
+        }
+        return rtn;
+    }
+
+    private List setNagSvcObjCmds(Set set)
+    {
+        List rtn = new ArrayList();
         for (Iterator i=set.iterator(); i.hasNext(); )
         {
             NagiosServiceObj nagService = (NagiosServiceObj)i.next();
             List list = nagService.getHostObjs();
-
 
             for (Iterator it=list.iterator(); it.hasNext(); )
             {
                 NagiosHostObj hostObj = (NagiosHostObj)it.next();
                 String hostname = hostObj.getHostname(),
                        desc = nagService.getDesc();
-                ServiceResource service = createServiceResource(PLUGIN_NAME);
-                if (_log.isDebugEnabled()) {
-                    _log.debug("setting nagios service: "+nagService.getDesc());
-                }
-                service.setServiceName(PLUGIN_NAME + " " + nagService.getDesc()
-                                        + " " + hostname);
 
-                ConfigResponse config = new ConfigResponse();
                 String cmdLine = nagService.getCmdLine(hostObj);
                 int index = cmdLine.indexOf(" ");
                 String path = (index == -1) ?
                     cmdLine : cmdLine.substring(0, index);
                 String args = (index == -1) ?
                     "" : cmdLine.substring(index);
-                if (_log.isDebugEnabled()) {
-                    _log.debug("nagios config path: "+path);
-                    _log.debug("nagios config args: "+args);
-                }
-                config.setValue("path", path);
-                config.setValue("args", args);
 
-                service.setProductConfig(config);
-                ConfigResponse metricConfig = new ConfigResponse();
-                //XXX does not work (PR 9882)
-                //LogTrackPlugin.setEnabled(metricConfig,
-                //                          TypeInfo.TYPE_SERVICE,
-                //                          LogTrackPlugin.LOGLEVEL_WARN);
-                service.setMeasurementConfig(metricConfig);
-
-                ConfigResponse cprops = new ConfigResponse();
-                cprops.setValue("nagiosHost", hostname);
-                cprops.setValue("nagiosServiceDesc", desc);
-                service.setCustomProperties(cprops);
-
-                services.add(service);
+                rtn.add(getService(desc, hostname, path, args, false));
             }
         }
-        return services;
+        return rtn;
+    }
+
+    private ServiceResource getService(String desc, String hostname,
+                                       String path, String args,
+                                       boolean upCheck)
+    {
+        ServiceResource service = createServiceResource(PLUGIN_NAME);
+        if (_log.isDebugEnabled()) {
+            _log.debug("setting nagios service: "+desc);
+        }
+        service.setServiceName(PLUGIN_NAME + " " + desc + " " + hostname);
+        ConfigResponse config = new ConfigResponse();
+        if (_log.isDebugEnabled()) {
+            _log.debug("nagios config path: "+path);
+            _log.debug("nagios config args: "+args);
+        }
+        config.setValue("path", path);
+        config.setValue("args", args);
+        service.setProductConfig(config);
+        ConfigResponse metricConfig = new ConfigResponse();
+        LogTrackPlugin.setEnabled(metricConfig,
+                                  TypeInfo.TYPE_SERVICE,
+                                  LogTrackPlugin.LOGLEVEL_DEBUG);
+        service.setMeasurementConfig(metricConfig);
+        ConfigResponse cprops = new ConfigResponse();
+        cprops.setValue("nagiosHost", hostname);
+        cprops.setValue("nagiosServiceDesc", desc);
+        cprops.setValue("nagiosHostUpCheck", ((upCheck)?"true":"false"));
+        service.setCustomProperties(cprops);
+        return service;
     }
 }

@@ -62,6 +62,9 @@
 
         <property name="nagiosServiceDesc"
                   description="Nagios Service Description"/>
+
+        <property name="nagiosHostUpCheck"
+                  description="Describes whether the check determines if the host is up or down"/>
       </properties>
 
       <property name="DEFAULT_LOG_LEVEL" value="Warn"/>
