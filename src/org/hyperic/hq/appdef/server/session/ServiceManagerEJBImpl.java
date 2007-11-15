@@ -218,6 +218,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         List serviceLocals = getServiceDAO().findByName(name);
 
         int numServices = serviceLocals.size();
+        
+        if (numServices == 0)
+            throw new ServiceNotFoundException("Service: " + name +
+                                               " not found");
 
         List services = new ArrayList();
         for (int i = 0; i < numServices; i++) {
