@@ -7197,14 +7197,26 @@ has already been defined.
 		<statement desc="Create index for eam_trigger_event for faster deletion 
 			             by expiration date" targetDB="postgresql">	
 		  CREATE INDEX trigger_expiration_idx ON eam_trigger_event USING btree ( expiration )				  
-        </statement>
-		  		  
-        <statement desc="Dropping unique constraint to reorder columns">
+        </statement>  
+		
+		<!-- The table was renamed from eam_mescalation_state to eam_escalation_state 
+			 but the constraint name was never changed. Dropping the constraint 
+			 using one of the names should succeed.-->    
+        <statement desc="Dropping unique constraint to reorder columns" 
+			       targetDB="postgresql" fail="false">
+		  ALTER TABLE eam_escalation_state DROP CONSTRAINT eam_mescalation_state_escalation_id_key CASCADE			
+        </statement>		  		  
+        <statement desc="Dropping unique constraint to reorder columns" 
+			       targetDB="postgresql" fail="false">
 		  ALTER TABLE eam_escalation_state DROP CONSTRAINT eam_escalation_state_escalation_id_key CASCADE			
+        </statement> 
+		<statement desc="Dropping unique constraint to reorder columns" 
+			       targetDB="oracle">
+		  ALTER table eam_escalation_state DROP unique (escalation_id, alert_type, alert_def_id, alert_id)		
         </statement>
 		<statement desc="Create unique constraint with columns ordered highest cardinality first">
 		  ALTER TABLE eam_escalation_state ADD CONSTRAINT eam_escalation_state_escalation_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
-		</statement>
+		</statement>		  
 		
 		<statement desc="Drop primary key from eam_srn" 
 				   targetDB="oracle">
