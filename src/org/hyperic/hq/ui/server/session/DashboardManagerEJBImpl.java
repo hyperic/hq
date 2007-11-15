@@ -33,6 +33,7 @@ import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -258,6 +260,29 @@ public class DashboardManagerEJBImpl implements SessionBean {
             }
         }
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public ConfigResponse getRssUserPreferences(String user, String token)
+        throws LoginException {
+        ConfigResponse preferences;
+        try {
+            AuthzSubject me = AuthzSubjectManagerEJBImpl.getOne()
+                .findSubjectByName(user);
+            preferences = getUserDashboard(me, me).getConfig();
+        }
+        catch (Exception e) {
+            throw new LoginException("Username has no preferences");
+        }
+    
+        // Let's make sure that the rss auth token matches
+        String prefToken = preferences.getValue(Constants.RSS_TOKEN);
+        if (token == null || !token.equals(prefToken))
+            throw new LoginException("Username and Auth token do not match");
+        
+        return preferences;
+    }    
 
     /**
      * Yanked from DashboardUtils so we don't need to include anything other
