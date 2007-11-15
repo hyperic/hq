@@ -60,12 +60,11 @@ def runTest(totalNumInserters,
     if (sleepTime > 0) Thread.sleep(sleepTime)
 
     inserterThreads.each {
-      it.interrupt()  
+      it.shutdown()  
     }
 
     inserterThreads.each {
       while (it.isAlive())  {
-        it.interrupt()
         it.join(10000)
       }
     }
@@ -109,57 +108,79 @@ def startDataInserterThread(startDataPointId,
                             endDataPointId, 
                             insertPauseTime, 
                             runBackfiller) {
-  def name = "data inserter "+startDataPointId+":"+endDataPointId
-  
-  def runnable = [run: {
+                            
+	def dataInserter = new DataInserter(insertPauseTime, 
+																			startDataPointId, 
+																			endDataPointId, 
+																			runBackfiller)  
+  dataInserter.start()
+  return dataInserter
+}
+
+
+// DATAINSERTER CLASS
+
+private class DataInserter extends Thread {
+
+  private volatile boolean running
+  private pauseTime
+  private startDpt
+  private endDpt
+  private boolean backfill
+
+  def DataInserter(insertPauseTime, 
+                   startDataPointId, 
+                   endDataPointId, 
+                   runBackfiller) {
+                  
+    super("data inserter "+startDataPointId+":"+endDataPointId)
+    setDaemon(true)
+    pauseTime = insertPauseTime
+    startDpt = startDataPointId
+    endDpt = endDataPointId
+    backfill = runBackfiller
+    running = true
+  }
+ 
+  def shutdown() {
+    running = false
+  }
+ 
+  void run() {   
     def random = new Random()
 
-    while (true) {
-      try {
-        Thread.sleep(insertPauseTime)
-      } catch (InterruptedException e) {
-        return
-      }
+    while (running) {
+      Thread.sleep(pauseTime)
       
-      def dataPoints = getDataPoints(startDataPointId, endDataPointId, random)
+      def dataPoints = getDataPoints(startDpt, endDpt, random)
 
       // println(name+" "+dataPoints)
       
-      try {
-        // randomly insert backfiller metrics before the true data points
-        if (runBackfiller && random.nextBoolean()) {
-          def backfilled = dataPoints.subList(0, random.nextInt(dataPoints.size()))
-          dM.one.addData(backfilled, false)        
-        }
-      
-        dM.one.addData(dataPoints)      
-      } catch (InterruptedException e) {
-        // data insertion may be interrupted when the test is complete
-        return
+      // randomly insert backfiller metrics before the true data points
+      if (backfill && random.nextBoolean()) {
+        def backfilledDpts = dataPoints.subList(0, random.nextInt(dataPoints.size()))
+        dM.one.addData(backfilledDpts, false)        
       }
-    }
-  }] as Runnable
+      
+      dM.one.addData(dataPoints)      
+    }  
+  }
+ 
+  private def getDataPoints(startDataPointId, endDataPointId, random) {
+    def dataPoints = new ArrayList()
+    def currentTime = System.currentTimeMillis()
 
-  def thread = new Thread(runnable, name)
-  thread.setDaemon(true)
-  thread.start()
-
-  return thread
-}
-
-def getDataPoints(startDataPointId, endDataPointId, random) {
-  def dataPoints = new ArrayList()
-  def currentTime = System.currentTimeMillis()
-
-  for (i in startDataPointId..endDataPointId) {
-    def mvalue = Math.abs(random.nextLong())
-    // the absolute value of Long.MIN_VALUE is Long.MIN_VALUE
-    if (mvalue < 0) mvalue = Long.MAX_VALUE    
+    for (i in startDataPointId..endDataPointId) {
+      def mvalue = Math.abs(random.nextLong())
+      // the absolute value of Long.MIN_VALUE is Long.MIN_VALUE
+      if (mvalue < 0) mvalue = Long.MAX_VALUE    
   
-    def mv = new MetricValue(mvalue, currentTime)
-    def dp = new DataPoint(i, mv)
-    dataPoints.add(dp)          
+      def mv = new MetricValue(mvalue, currentTime)
+      def dp = new DataPoint(i, mv)
+      dataPoints.add(dp)          
+    }
+
+    return dataPoints
   }
 
-  return dataPoints
 }					   
