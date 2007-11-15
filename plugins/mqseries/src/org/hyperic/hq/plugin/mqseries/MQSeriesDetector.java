@@ -63,14 +63,14 @@ public class MQSeriesDetector
             return null; //registry scan will pick it up.
         }
 
-        //always installed in /opt/mqm
-        String path = MQSeriesProductPlugin.DEFAULT_UNIX_INST[0];
-        if (new File(path).exists()) {
-            return getServerList(path);
+        final String[] dirs = MQSeriesProductPlugin.DEFAULT_UNIX_INST;
+        for (int i=0; i<dirs.length; i++) {
+            String path = dirs[i]; 
+            if (new File(path).exists()) {
+                return getServerList(path);
+            }
         }
-        else {
-            return null;
-        }
+        return null;
     }
 
     public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {

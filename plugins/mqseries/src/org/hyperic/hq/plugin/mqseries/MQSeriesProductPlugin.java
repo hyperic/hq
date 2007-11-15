@@ -50,7 +50,9 @@ public class MQSeriesProductPlugin
         "mqseries." + ProductPlugin.PROP_INSTALLPATH;
 
     static final String[] DEFAULT_UNIX_INST = {
-        "/opt/mqm",
+        "/opt/mqm", //linux+solaris
+        "/usr/lpp/mqm", //aix
+        "/usr/mqm" //aix
     };
 
     private static final String[] DEFAULT_WIN32_INST = {

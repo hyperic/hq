@@ -100,6 +100,10 @@ public class MQSeriesMgrService
             }
         });
 
+        if (dirs == null) {
+            return new String[0];
+        }
+
         String[] names = new String[dirs.length];
 
         for (int i=0; i<dirs.length; i++) {
