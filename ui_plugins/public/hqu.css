@@ -387,7 +387,7 @@ font-weight:bold;
 .statusCRITICAL{background-color:#F83838;}
 .statusBGUNKNOWN {background-color: #FFDA9F; }
 .statusUNKNOWN {background-color:#FF9900;}
-.statusBGOK {background-color:#DBDBDB;}
+.statusBGOK {background-color:#bbffc0;}
 .statusOK {background-color:#33FF00;}
 .statusBGWARNING {background-color: #FEFFC1; }
 .statusWARNING {background-color: #ffff00;}
