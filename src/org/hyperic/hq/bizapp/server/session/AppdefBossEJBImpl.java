@@ -3819,8 +3819,8 @@ public class AppdefBossEJBImpl
             ((AppdefResourceValue) services.get(0)).getAppdefResourceTypeValue();
         
         // Get the Cprop values
-        List cprops = getCPropManager().getCPropValues(type, cprop,
-                                                       pi.isAscending());
+        CPropManagerLocal cpropMan = getCPropManager();
+        List cprops = cpropMan.getCPropValues(type, cprop, pi.isAscending());
         
         List ret = new ArrayList(cprops.size());
         
@@ -3836,12 +3836,16 @@ public class AppdefBossEJBImpl
             Integer id = appRes.getId();
 
             if (res.containsKey(id)) {
-                Cprop prop = (Cprop) res.get(id);
-
-                CPropResource cpRes =
-                    new CPropResource(appRes, prop.getPropValue());
-
-                res.put(id, cpRes);
+                try {
+                    Properties cpropProps =
+                        cpropMan.getEntries(appRes.getEntityId());
+                    CPropResource cpRes =
+                        new CPropResource(appRes, cpropProps);
+                    res.put(id, cpRes);
+                }
+                catch (AppdefEntityNotFoundException e) {
+                    log.warn("Could not find ", e);
+                }
             }
         }
         
