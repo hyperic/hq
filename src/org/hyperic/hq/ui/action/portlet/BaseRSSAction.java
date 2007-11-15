@@ -27,12 +27,15 @@ package org.hyperic.hq.ui.action.portlet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.ConfigPropertyException;
@@ -63,28 +66,16 @@ public abstract class BaseRSSAction extends BaseAction {
         ServletContext ctx = getServlet().getServletContext();
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
 
+        // Let's make sure that the rss auth token matches
+        String rssToken = RequestUtils.getStringParameter(request, "token");
+
         // Get user preferences
-        ConfigResponse preferences = new ConfigResponse();
+        ConfigResponse preferences = DashboardManagerEJBImpl.getOne()
+            .getRssUserPreferences(user, rssToken);
 
         ConfigResponse defaultPreferences =
             (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_PREFS);
 
-        try {            
-            preferences = authzBoss.getUserPrefs(user);
-        }
-        catch (ApplicationException e ){
-            // this is ok- the user has no prefs
-            if (log.isDebugEnabled())
-                log.debug("error retrieving user preferences:", e);
-        }
-    
-        // Let's make sure that the rss auth token matches
-        String rssToken = RequestUtils.getStringParameter(request, "token");
-        String prefToken = preferences.getValue(Constants.RSS_TOKEN);
-        if (rssToken == null ||
-            !rssToken.equals(prefToken))
-            throw new LoginException("Username and Auth token do not match");
-        
         preferences.merge(defaultPreferences, false);
         
         return preferences;

@@ -61,7 +61,6 @@ import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.InvalidOptionException;
 
 public class DisplayDashboardAction extends TilesAction {
 
@@ -197,16 +196,15 @@ public class DisplayDashboardAction extends TilesAction {
 		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
 
 		// Make sure there's a valid RSS auth token
-		String rssToken;
-		try {
-			rssToken = dashPrefs.getValue(Constants.RSS_TOKEN);
-		} catch (InvalidOptionException e) {
+		ConfigResponse dashCfg =
+		    dashManager.getUserDashboard(me, me).getConfig();
+		String rssToken = dashCfg.getValue(Constants.RSS_TOKEN);
+		if (rssToken == null) {
 			rssToken = String.valueOf(session.hashCode());
-
+			dashCfg.setValue(Constants.RSS_TOKEN, rssToken);
 			// Now store the RSS auth token
-
-			ConfigurationProxy.getInstance().setPreference(session, user, boss,
-					Constants.RSS_TOKEN, rssToken);
+			ConfigurationProxy.getInstance()
+                    .setUserDashboardPreferences(dashCfg, boss, user);
 		}
 		session.setAttribute("rssToken", rssToken);
 

@@ -415,7 +415,7 @@ public class ResourceGroupManagerEJBImpl
      * @ejb:transaction type="SUPPORTS"
      */
     public List getAllResourceGroups(AuthzSubjectValue subject, PageControl pc)
-        throws PermissionException, FinderException, NamingException 
+        throws PermissionException, FinderException 
     {
         return getAllResourceGroups(subject, pc, false);
     }
@@ -545,7 +545,7 @@ public class ResourceGroupManagerEJBImpl
     public PageList getAllResourceGroups(AuthzSubjectValue subject,
                                          PageControl pc,
                                          boolean excludeRoot)
-        throws PermissionException, FinderException, NamingException 
+        throws PermissionException, FinderException 
     {
         Collection groups = getAllResourceGroups(subject, excludeRoot);
         return _ownedGroupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
@@ -562,7 +562,7 @@ public class ResourceGroupManagerEJBImpl
     public PageList getResourceGroupsById(AuthzSubjectValue whoami,
                                           Integer[] ids,
                                           PageControl pc)
-        throws PermissionException, FinderException, NamingException 
+        throws PermissionException, FinderException 
     {
         if (ids.length == 0)
             return new PageList();
