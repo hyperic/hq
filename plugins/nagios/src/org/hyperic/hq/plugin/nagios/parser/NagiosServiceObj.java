@@ -117,6 +117,13 @@ public class NagiosServiceObj
             String val = (String)it.next();
             _args.put(name, val);
         }
+        // Nagios can support ARG(n), n being 1-32
+        // This must be accounted for even if there is no value
+        for ( ; i<=32; i++)
+        {
+            String name = "ARG"+i;
+            _args.put(name, "");
+        }
     }
 
     public void populateData(String config)
