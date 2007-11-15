@@ -388,13 +388,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.authz.server.session.ResourceType"
-         maxElementsInMemory="10"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.authz.server.session.ResourceType.operationsBag"
-         maxElementsInMemory="10"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
