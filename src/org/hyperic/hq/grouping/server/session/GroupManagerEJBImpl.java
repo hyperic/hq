@@ -307,10 +307,6 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             log.error("GroupManager caught PermissionException: "+
                       pe.getMessage());
             throw pe;
-        } catch (NamingException ne) {
-            log.error("Caught NamingException in resource group manager",ne);
-            throw new SystemException ("Caught NamingException "+
-                                       "in resource group manager");
         }
         return retVal;
     }
