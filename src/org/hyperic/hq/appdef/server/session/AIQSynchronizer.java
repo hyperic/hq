@@ -134,19 +134,14 @@ public class AIQSynchronizer {
         Collection fqdnMatches;
         // Try FQDN first
         fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
-        if (fqdnMatches.size() == 0) {
-            _log.warn("FindByFQDN failed: "+fqdn);
-        }
+
         if (fqdnMatches.size() != 1) {
             aiPlatform = aiPlatformLH.findByCertDN(certdn);
             if (aiPlatform == null) {
-                // Hope that we actually found some by FQDN
-                if (fqdnMatches.size() == 0)
-                    _log.warn("FindByFQDN and FindByCertDN both failed: "+
-                              certdn);
-                else
+                if (fqdnMatches.size() > 1) {
                     _log.warn("Multiple platforms matched FQDN: " +
                               fqdn + " [" + fqdnMatches + "]");
+                }
                 return null;
             }
             return aiPlatform;
