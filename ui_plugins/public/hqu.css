@@ -374,3 +374,33 @@ font-weight:bold;
 #groupMembers {padding-bottom:5px;overflow-y:auto;overflow-x: hidden;height:298px;}
 #groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
 #groupMembers li {padding:1px;white-space:nowrap;}
+.metricGroup{
+   margin-top:2px;
+}
+.metricRow{
+    margin-left:15px;
+}
+.metricCatLabel{
+    font-weight:bold;
+}
+.metricGroupBlock{
+	float:left;
+    margin-right:30px;   
+    margin-bottom:20px;
+    font-family:Verdana;
+}
+#metrics table,td,tr{
+	font-family:Verdana;
+	font-size:11px;
+	margin-left:14px;
+}
+.barContainer{
+    border: 1px dotted #DBDBDB;padding:1px;width:100px;
+    white-space: nowrap;
+}
+.bar{
+	height: 12px; background-color:#88C7FF;text-align:center;width:0px;
+}
+#bodyTabContainer .dojoTabPane{
+    overflow:auto;
+}
