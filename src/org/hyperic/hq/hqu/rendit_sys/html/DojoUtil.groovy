@@ -42,10 +42,7 @@ class DojoUtil {
 	    
 	    b << "dojo.hostenv.writeIncludes();\n"
 	    """
-            <script type="text/javascript">
-                ${b}
-            </script>
-            <script type="text/javascript">
+	        <script type="text/javascript">
                 function getDojo() {
                     ${b}
                 }
