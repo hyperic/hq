@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Class-Path: @@@HYPERIC_EAR@@@/hq.jar
+  @@@HYPERIC_EAR@@@/lib/sigar.jar
   @@@HYPERIC_EAR@@@/lib/jdomb8.jar
   @@@HYPERIC_EAR@@@/lib/struts.jar
   @@@HYPERIC_EAR@@@/lib/quartz-1.5.1.jar
@@ -15,7 +16,6 @@ Class-Path: @@@HYPERIC_EAR@@@/hq.jar
   @@@HYPERIC_EAR@@@/lib/jstl.jar
   @@@HYPERIC_EAR@@@/lib/instantj-1.6.jar
   @@@HYPERIC_EAR@@@/lib/pizza-1.1.jar
-  @@@HYPERIC_EAR@@@/lib/sigar.jar
   @@@HYPERIC_EAR@@@/lib/lather.jar
   @@@HYPERIC_EAR@@@/lib/jxla.jar
   @@@HYPERIC_EAR@@@/lib/ant.jar
