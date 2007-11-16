@@ -145,10 +145,8 @@
      <logic:messagesPresent property="phoneNumber">
       <td width="30%" class="ErrorField"><html:text size="31" maxlength="50" property="phoneNumber" tabindex="9"/><br><span class="ErrorFieldContent">- <html:errors property="phoneNumber"/></span></td>
      </logic:messagesPresent>
-     <logic:messagesNotPresent property="phoneNumber">
-      <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="phoneNumber" tabindex="9"/></td>
-     </logic:messagesNotPresent>	    
-    </tr>
+     <td width="30%" class="BlockContent"><html:text size="31" maxlength="50" property="phoneNumber" tabindex="9"/></td>
+     </tr>
 
     <tr>
   <c:choose>
@@ -186,6 +184,7 @@
        <logic:messagesNotPresent property="emailAddress">
         <td class="BlockContent"><html:text size="31" property="emailAddress" tabindex="5"/></td>
        </logic:messagesNotPresent>
+    
     <td class="BlockLabel"><fmt:message key="admin.user.generalProperties.smsAddress"/></td>
     <td class="BlockContent"><html:text size="31" maxlength="50" property="smsAddress" tabindex="10"/></td>
     </tr>  
