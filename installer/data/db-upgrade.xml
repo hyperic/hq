@@ -7363,7 +7363,7 @@ has already been defined.
         INSERT INTO EAM_CRISPO_OPT (CRISPO_ID,ID,PROPKEY,VAL) VALUES ('3','2','.user.dashboard.default.id','2');
       </statement>
       <statement desc="Define a view only role which includes the guest user and has all the read operations availble on the authz resource group">
-        INSERT INTO EAM_ROLE (CID,FSYSTEM,ID,NAME) VALUES ('2',false,'2','View Only Role');
+        INSERT INTO EAM_ROLE (CID,FSYSTEM,ID,NAME) VALUES ('2',false,'2','Guest Role');
       </statement>
       <statement desc="add the role resource">
         INSERT INTO EAM_RESOURCE (CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('11',false,'11','2','0','2','0');
@@ -7372,7 +7372,7 @@ has already been defined.
         UPDATE EAM_ROLE SET CID = '2',RESOURCE_ID = '11' WHERE CID = '2';
       </statement>
       <statement desc="create the role dashboard">
-        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','View Only Role','2');
+        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','Guest Role Dashboard','2');
       </statement>
       <statement desc="add the user to the root resource group">
         INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','10');
