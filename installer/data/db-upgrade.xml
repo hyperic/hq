@@ -7407,6 +7407,11 @@ has already been defined.
 	  </schema-directSQL>
 	</schemaSpec>	
 
+    <schemaSpec version="3.70">
+      <schema-alterColumn table="EAM_AUDIT" column="FIELD" precision="100"
+                          columnType="VARCHAR2" />
+    </schemaSpec>
+
 </dbupgrade>
 </target>
 

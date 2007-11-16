@@ -49,7 +49,7 @@
     </property>
 
     <property name="fieldName">
-      <column name="FIELD" length="30" not-null="false"/>
+      <column name="FIELD" length="100" not-null="false"/>
     </property>
 
     <property name="oldFieldValue">
