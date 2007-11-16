@@ -12,6 +12,8 @@
     width: 100%;
     border: 1px solid #ccc;
     border-collapse: collapse;
+    /* IE issue loosing table border on left side - do not remove */
+    *margin-left:1px;
     cursor: default;
 }
 
@@ -72,6 +74,8 @@
     width: 100%;
     border: 1px solid #ccc;
     border-collapse: collapse;
+      /* IE issue loosing table border on left side - do not remove */
+    *margin-left:1px;
     cursor: default;
 }
 
@@ -122,65 +126,6 @@
 #defsCont table tbody tr.selected:hover td {
 
 }
-
-#downCont table {
-    font-family: Lucida Grande, Verdana;
-    font-size: 11px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-collapse: collapse;
-    cursor: default;
-}
-
-#downCont  table th {
-    font-weight: bold;
-    padding: 3px;
-    padding-left: 5px;
-    border-right: 1px solid #7bafff;
-    border-top: 1px solid #7bafff;
-}
-
-#downCont table td {
-    padding: 3px;
-    font-weight: normal;
-    padding-left: 5px;
-}
-
-#downCont table thead td, table thead th {
-    background-image: url( "images/ft-head.gif" );
-    background-repeat: no-repeat;
-    background-position: top right;
-}
-
-#downCont table thead td.selectedUp, table thead th.selectedUp {
-    background-image: url( "images/ft-headup.gif" );
-}
-
-#downCont  table thead td.selectedDown, table thead th.selectedDown {
-    background-image: url( "images/ft-headdown.gif" );
-}
-
-#downCont table tbody tr td {
-    border-bottom: 1px solid #ddd;
-}
-
-#downCont table tbody tr.alt td {
-    background: #eef4fc;
-}
-
-#downCont  table tbody tr.selected td {
-
-}
-
-#downCont table tbody tr:hover td {
-    background: #a6c2e7;
-}
-
-#downCont table tbody tr.selected:hover td {
-
-}
-
-
 
 #inputArea {
     margin: 1em 0;
@@ -368,6 +313,22 @@ font-weight:bold;
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 #results_msg {width:78%;float:right;padding:3px;padding-bottom:5px;font-weight:bold;}
 .countLinksActive{color: rgb(0, 51, 153); font-weight: bold; cursor: pointer;}
+#downCont table {font-family: Lucida Grande, Verdana;font-size: 11px;width: 100%;border: 1px solid #ccc; border-collapse: collapse;
+      /* IE issue loosing table border on left side - do not remove */
+    *margin-left:1px;
+    cursor: default;
+}
+#downCont  table th {font-weight: bold;padding: 3px;padding-left: 5px;border-right: 1px solid #7bafff;border-top: 1px solid #7bafff;}
+#downCont table td {padding: 3px;font-weight: normal;padding-left: 5px;}
+#downCont table thead td, table thead th {background-image: url( "images/ft-head.gif" );background-repeat: no-repeat;background-position: top right;}
+#downCont table thead td.selectedUp, table thead th.selectedUp {background-image: url( "images/ft-headup.gif" );}
+#downCont  table thead td.selectedDown, table thead th.selectedDown {background-image: url( "images/ft-headdown.gif" );}
+#downCont table tbody tr td {border-bottom: 1px solid #ddd;}
+#downCont table tbody tr.alt td {background: #eef4fc;}
+#downCont  table tbody tr.selected td {}
+#downCont table tbody tr:hover td {background: #a6c2e7;}
+#downCont table tbody tr.selected:hover td {}
+
 
 /* Nagios page */
 .nagContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
