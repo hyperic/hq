@@ -340,7 +340,7 @@ A.displaylink:hover {font-size: 11px; color: #003399; text-decoration: underline
 .MonitorChartBlock {background-color: #FFFFFF;}
 .MonitorChartCell {background-color: #FFFFFF; padding: 10px;}
 .MonitorChartBlockPadding {background-color: #FFFFFF; padding: 5px;}
-.selectWid {width:300px;}
+.selectWid {width:225px;}
 
 /* MONITORING: MINI TABS */
 .MiniTabOn {background-color: #D9D9D9; padding: 0px; border-top: solid #F35E0C; border-width: 1px; font-size: 12px; font-weight: bold; color: #F35E0C;}
