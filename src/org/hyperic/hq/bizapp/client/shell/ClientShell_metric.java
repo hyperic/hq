@@ -27,9 +27,7 @@ package org.hyperic.hq.bizapp.client.shell;
 
 import org.hyperic.util.shell.MultiwordShellCommand;
 import org.hyperic.util.shell.ShellBase;
-import org.hyperic.util.shell.ShellCommandHandler;
 import org.hyperic.util.shell.ShellCommandInitException;
-import org.hyperic.util.shell.ShellCommand_set;
 
 public class ClientShell_metric 
     extends MultiwordShellCommand 
@@ -43,12 +41,15 @@ public class ClientShell_metric
     public void init(String commandName, ShellBase shell)
         throws ShellCommandInitException 
     {
-        ShellCommandHandler handler;
 
         super.init(commandName, shell);
 
-        handler = new ClientShell_metric_compact(this.shell);
-        registerSubHandler("compact", handler);
+        registerSubHandler("list", new ClientShell_metric_list(this.shell));
+        registerSubHandler("view", new ClientShell_metric_view(this.shell));
+        registerSubHandler("create", new ClientShell_metric_create(this.shell));
+        registerSubHandler("delete", new ClientShell_metric_delete(this.shell));
+        registerSubHandler("compact",
+                           new ClientShell_metric_compact(this.shell));
     }
 
     public String getUsageShort(){
