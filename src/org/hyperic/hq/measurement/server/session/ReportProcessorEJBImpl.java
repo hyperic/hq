@@ -173,7 +173,9 @@ public class ReportProcessorEJBImpl
             
             // If this is an availability metric, then tell the cache about it
             MeasurementTemplate tmpl = dm.getTemplate();
-            if (tmpl.isDesignate() && tmpl.getCategory().getName()
+            if (tmpl.getAlias().toUpperCase()
+                    .equals(MeasurementConstants.CAT_AVAILABILITY) &&
+                tmpl.getCategory().getName()
                     .equals(MeasurementConstants.CAT_AVAILABILITY)) {
                 MetricDataCache.getInstance().setAvailMetric(dmId);
             }
