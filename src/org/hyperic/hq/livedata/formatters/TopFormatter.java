@@ -36,8 +36,8 @@ import org.hyperic.hq.plugin.system.ProcessData;
 import org.hyperic.hq.plugin.system.TopData;
 import org.hyperic.hq.plugin.system.UptimeData;
 import org.hyperic.sigar.CpuPerc;
-import org.hyperic.sigar.CurrentProcessSummary;
 import org.hyperic.sigar.Mem;
+import org.hyperic.sigar.ProcStat;
 import org.hyperic.sigar.Swap;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -117,7 +117,7 @@ public class TopFormatter
          .append("<br/>");
         
         
-        CurrentProcessSummary ps = t.getCurrentProcessSummary();
+        ProcStat ps = t.getProcStat();
         r.append("<b>Processes</b>: ")
          .append(h(BUNDLE.format("formatter.top.procSummary", 
                                  "" + ps.getTotal(), "" + ps.getRunning(), 

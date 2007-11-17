@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.sigar.CpuPerc;
-import org.hyperic.sigar.CurrentProcessSummary;
 import org.hyperic.sigar.Mem;
+import org.hyperic.sigar.ProcStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.Swap;
@@ -40,7 +40,7 @@ import org.hyperic.sigar.ptql.ProcessFinder;
 public class TopData {
 
     private UptimeData _uptime;
-    private CurrentProcessSummary _currentProcessSummary;
+    private ProcStat _procStat;
     private CpuPerc _cpu;
     private Mem _mem;
     private Swap _swap;
@@ -52,7 +52,7 @@ public class TopData {
         throws SigarException {
 
         _uptime = UptimeData.gather(sigar);
-        _currentProcessSummary = CurrentProcessSummary.get(sigar);
+        _procStat = sigar.getProcStat();
         _cpu = sigar.getCpuPerc();
         _mem = sigar.getMem();
         _swap = sigar.getSwap();
@@ -93,8 +93,8 @@ public class TopData {
         return _uptime;
     }
 
-    public CurrentProcessSummary getCurrentProcessSummary() {
-        return _currentProcessSummary;
+    public ProcStat getProcStat() {
+        return _procStat;
     }
 
     public CpuPerc getCpu() {
@@ -115,7 +115,7 @@ public class TopData {
 
     public void print(PrintStream out) {
         out.println(getUptime());
-        out.println(getCurrentProcessSummary());
+        out.println(getProcStat());
         out.println(getCpu());
         out.println(getMem());
         out.println(getSwap());
