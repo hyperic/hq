@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -107,13 +107,11 @@ public class NagiosDetector
     {
         List services = new ArrayList();
         Set set;
-//        Integer type = new Integer(NagiosObj.SERVICE_TYPE);
         if (null == (set = (Set)parser.getServiceObjs()) || set.size() == 0) {
             String msg = "Error error retrieving service types from parser";
             throw new PluginException(msg);
         }
         services.addAll(setNagSvcObjCmds(set));
-//        type = new Integer(NagiosObj.HOST_TYPE);
         if (null == (set = (Set)parser.getHostObjs()) || set.size() == 0) {
             String msg = "Error error retrieving service types from parser";
             throw new PluginException(msg);
