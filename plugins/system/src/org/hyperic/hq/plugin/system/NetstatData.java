@@ -56,7 +56,8 @@ public class NetstatData {
 
         for (int i=0; i<connections.length; i++) {
             NetConnectionData data =
-                new NetConnectionData(connections[i],
+                new NetConnectionData(sigar,
+                                      connections[i],
                                       _isNumericHosts,
                                       _isNumericPorts);
 

@@ -30,7 +30,6 @@ import java.net.UnknownHostException;
 
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetFlags;
-import org.hyperic.sigar.NetServices;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 
@@ -40,18 +39,25 @@ public class NetConnectionData {
     private boolean _isNumericHosts;
     private boolean _isNumericPorts;
     private String _proto;
+    private String _localPort;
+    private String _remotePort;
     private int _maxLocalAddrLen = -1;
     private int _maxRemoteAddrLen = -1;
     private long _processPid = -1;
     private String _processName;
 
-    public NetConnectionData(NetConnection conn,
+    public NetConnectionData(Sigar sigar,
+                             NetConnection conn,
                              boolean isNumericHosts,
                              boolean isNumericPorts) {
         _conn = conn;
         _isNumericHosts = isNumericHosts;
         _isNumericPorts = isNumericPorts;
         _proto = conn.getTypeString();
+        _localPort =
+            getFormattedPort(sigar, conn.getType(), conn.getLocalPort()); 
+        _remotePort =
+            getFormattedPort(sigar, conn.getType(), conn.getRemotePort()); 
     }
 
     public void setMaxLocalAddrLen(int len) {
@@ -66,13 +72,21 @@ public class NetConnectionData {
         return _proto;
     }
 
-    public String getFormattedPort(long port) {
+    public String getLocalPort() {
+        return _localPort;
+    }
+
+    public String getRemotePort() {
+        return _remotePort;
+    }
+
+    private String getFormattedPort(Sigar sigar, int proto, long port) {
         if (port == 0) {
             return "*";
         }
         if (!_isNumericPorts) {
             String service =
-                NetServices.getName(_proto, port);
+                sigar.getNetServicesName(proto, port);
             if (service != null) {
                 return service;
             }
@@ -82,10 +96,9 @@ public class NetConnectionData {
     }
 
     public String getFormattedAddress(String ip,
-                                      long port,
+                                      String port,
                                       int max) {
 
-        String fport = getFormattedPort(port);
         String address;
 
         if (NetFlags.isAnyAddress(ip)) {
@@ -103,24 +116,24 @@ public class NetConnectionData {
         }
 
         if (max != -1) {
-            max -= fport.length() + 1;
+            max -= port.length() + 1;
             if (address.length() > max) {
                 address = address.substring(0, max);
             }
         }
 
-        return address + ":" + fport; 
+        return address + ":" + port; 
     }
 
     public String getFormattedLocalAddress() {
         return getFormattedAddress(_conn.getLocalAddress(),
-                                   _conn.getLocalPort(),
+                                   _localPort,
                                    _maxLocalAddrLen);
     }
     
     public String getFormattedRemoteAddress() {
         return getFormattedAddress(_conn.getRemoteAddress(),
-                                   _conn.getRemotePort(),
+                                   _remotePort,
                                    _maxRemoteAddrLen);
     }
 
