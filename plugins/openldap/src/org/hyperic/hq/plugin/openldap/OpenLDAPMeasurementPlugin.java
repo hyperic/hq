@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.plugin.openldap;
 
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.SchemaBuilder;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricUnreachableException;
@@ -35,11 +32,6 @@ import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginManager;
-
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.ptql.ProcessFinder;
 
 import javax.naming.Context;
 import javax.naming.directory.Attribute;
@@ -61,7 +53,6 @@ import java.util.TreeSet;
 public class OpenLDAPMeasurementPlugin
     extends MeasurementPlugin
 {
-    private Sigar mySigar = new Sigar();
     private DirContext ctx = null;
     private Boolean hasMonitoringEnabled = null;
     private Object myLockObj = new Object();
@@ -105,8 +96,6 @@ public class OpenLDAPMeasurementPlugin
     {
         // will look like "generic:Type=GenericService,option1=option1,option2=option2"
         String objectName = metric.getObjectName();
-        String option1 = metric.getObjectProperty("option1"),
-               option2 = metric.getObjectProperty("option2");
 
         // will look like "Availability"
         // -OR-
