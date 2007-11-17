@@ -50,6 +50,18 @@ public class NagiosCfgParser implements NagiosParser
         return Collections.unmodifiableSet(set);
     }
 
+    public Set getServiceObjs()
+    {
+        Integer type = new Integer(NagiosObj.SERVICE_TYPE);
+        return get(type);
+    }
+
+    public Set getHostObjs()
+    {
+        Integer type = new Integer(NagiosObj.HOST_TYPE);
+        return get(type);
+    }
+
     public NagiosObj get(Integer type, String name)
         throws NagiosParserInternalException,
                NagiosTypeNotSupportedException
@@ -103,6 +115,30 @@ public class NagiosCfgParser implements NagiosParser
                 Util.debug(_debugOut, obj+"\n");
             }
         }
+
+        Util.debug(_debugOut, "!RESOLVING HOST TEMPLATES!");
+        type = new Integer(NagiosObj.HOST_TEMPL_TYPE);
+        if (null != (set = (Set)_map.get(type)))
+        {
+            for (Iterator i=set.iterator(); i.hasNext(); )
+            {
+                NagiosTemplateHostObj obj = (NagiosTemplateHostObj)i.next();
+                obj.resolveDependencies(this);
+                Util.debug(_debugOut, obj+"\n");
+            }
+        }
+
+        Util.debug(_debugOut, "!RESOLVING HOSTS!");
+        type = new Integer(NagiosObj.HOST_TYPE);
+        if (null != (set = (Set)_map.get(type)))
+        {
+            for (Iterator i=set.iterator(); i.hasNext(); )
+            {
+                NagiosHostObj obj = (NagiosHostObj)i.next();
+                obj.resolveDependencies(this);
+                Util.debug(_debugOut, obj+"\n");
+            }
+        }
     }
 
     public void parse(String file)
@@ -147,9 +183,8 @@ public class NagiosCfgParser implements NagiosParser
                 if (_define.matcher(line).find())
                 {
                     Util.debug(_debugOut, line+"\n");
-                    int type = NagiosObj.getObjectType(line);
                     lines = readObj(line, reader);
-                    NagiosObj obj = NagiosObj.getObject(type, lines,
+                    NagiosObj obj = NagiosObj.getObject(line, lines,
                                                         file, _debugOut);
                     if (obj != null) {
                         Util.debug(_debugOut, obj+"\n");
@@ -161,8 +196,7 @@ public class NagiosCfgParser implements NagiosParser
                 else if (_resource.matcher(line).find())
                 {
                     Util.debug(_debugOut, line+"\n");
-                    int type = NagiosObj.getObjectType(line);
-                    NagiosObj obj = NagiosObj.getObject(type, line,
+                    NagiosObj obj = NagiosObj.getObject(line, line,
                                                         file, _debugOut);
                     if (obj != null) {
                         Util.debug(_debugOut, obj+"\n");
@@ -227,20 +261,31 @@ public class NagiosCfgParser implements NagiosParser
     {
         Set set;
         Integer type = new Integer(NagiosObj.SERVICE_TYPE);
+        if (null != (set = (Set)_map.get(type)))
+        {
+            for (Iterator i=set.iterator(); i.hasNext(); )
+            {
+                NagiosServiceObj service = (NagiosServiceObj)i.next();
+                List list = service.getHostObjs();
+                Util.debug(_debugOut, "service -> "+service.getDesc());
+                for (Iterator it=list.iterator(); it.hasNext(); )
+                {
+                    NagiosHostObj hostObj = (NagiosHostObj)it.next();
+                    Util.debug(_debugOut, "host -> "+hostObj.getHostname());
+                    Util.debug(_debugOut, service.getCmdLine(hostObj));
+                }
+            }
+        }
+
+        type = new Integer(NagiosObj.HOST_TYPE);
         if (null == (set = (Set)_map.get(type)))
             return;
 
         for (Iterator i=set.iterator(); i.hasNext(); )
         {
-            NagiosServiceObj service = (NagiosServiceObj)i.next();
-            List list = service.getHostObjs();
-            Util.debug(_debugOut, "service -> "+service.getDesc());
-            for (Iterator it=list.iterator(); it.hasNext(); )
-            {
-                NagiosHostObj hostObj = (NagiosHostObj)it.next();
-                Util.debug(_debugOut, "host -> "+hostObj.getHostname());
-                Util.debug(_debugOut, service.getCmdLine(hostObj));
-            }
+            NagiosHostObj host = (NagiosHostObj)i.next();
+            Util.debug(_debugOut, "host -> "+host.getHostname());
+            Util.debug(_debugOut, host.getChkAliveCmd());
         }
     }
 

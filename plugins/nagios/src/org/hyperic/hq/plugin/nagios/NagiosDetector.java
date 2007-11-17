@@ -107,14 +107,14 @@ public class NagiosDetector
     {
         List services = new ArrayList();
         Set set;
-        Integer type = new Integer(NagiosObj.SERVICE_TYPE);
-        if (null == (set = (Set)parser.get(type)) || set.size() == 0) {
+//        Integer type = new Integer(NagiosObj.SERVICE_TYPE);
+        if (null == (set = (Set)parser.getServiceObjs()) || set.size() == 0) {
             String msg = "Error error retrieving service types from parser";
             throw new PluginException(msg);
         }
         services.addAll(setNagSvcObjCmds(set));
-        type = new Integer(NagiosObj.HOST_TYPE);
-        if (null == (set = (Set)parser.get(type)) || set.size() == 0) {
+//        type = new Integer(NagiosObj.HOST_TYPE);
+        if (null == (set = (Set)parser.getHostObjs()) || set.size() == 0) {
             String msg = "Error error retrieving service types from parser";
             throw new PluginException(msg);
         }

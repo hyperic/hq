@@ -22,17 +22,18 @@ public abstract class NagiosObj
 
     protected Log _log = LogFactory.getLog(logCtx);
 
-    public static final int HOST_TYPE    = 0,
-                            SERVICE_TYPE = 1,
-                            COMMAND_TYPE = 2,
-                            CONTACT_TYPE = 3,
-                            CONTACTGROUP_TYPE = 4,
-                            HOSTGROUP_TYPE    = 5,
-                            HOSTGROUPESCALATION_TYPE = 6,
-                            SERVICEDEPENDENCY_TYPE   = 7,
-                            SERVICESCALATION_TYPE    = 8,
-                            TIMEPERIOD_TYPE          = 9,
-                            RESOURCE_TYPE            = 10;
+    static final int HOST_TYPE    = 0,
+                     SERVICE_TYPE = 1,
+                     COMMAND_TYPE = 2,
+                     CONTACT_TYPE = 3,
+                     CONTACTGROUP_TYPE = 4,
+                     HOSTGROUP_TYPE    = 5,
+                     HOSTGROUPESCALATION_TYPE = 6,
+                     SERVICEDEPENDENCY_TYPE   = 7,
+                     SERVICESCALATION_TYPE    = 8,
+                     TIMEPERIOD_TYPE          = 9,
+                     RESOURCE_TYPE            = 10,
+                     HOST_TEMPL_TYPE          = 11;
 
     private static final Pattern
         _host      = Pattern.compile("\\s+host\\s*\\{"),
@@ -67,7 +68,7 @@ public abstract class NagiosObj
         _debugOut = debugOut;
     }
 
-    public static int getObjectType(String line)
+    static int getObjectType(String line)
         throws NagiosTypeNotSupportedException
     {
         if (_host.matcher(line).find()) {
@@ -106,7 +107,28 @@ public abstract class NagiosObj
         }
     }
 
-    public static final NagiosObj getObject(int objType,
+    private static NagiosObj getHostObj(String cfgLines,
+                                 String filename,
+                                 PrintStream _debugOut)
+        throws NagiosParserException
+    {
+        NagiosObj rtn;
+        try
+        {
+            rtn = new NagiosHostObj();
+            rtn.setDebugInfo(filename, _debugOut);
+            rtn.parseCfg(cfgLines);
+        }
+        catch (NagiosParserException e)
+        {
+            rtn = new NagiosTemplateHostObj();
+            rtn.setDebugInfo(filename, _debugOut);
+            rtn.parseCfg(cfgLines);
+        }
+        return rtn;
+    }
+
+    public static final NagiosObj getObject(String firstLine,
                                             String cfgLines,
                                             String filename,
                                             PrintStream _debugOut)
@@ -115,12 +137,11 @@ public abstract class NagiosObj
                UnknownHostException
     {
         NagiosObj rtn;
+        int objType = getObjectType(firstLine);
         switch (objType)
         {
             case HOST_TYPE:
-                rtn = new NagiosHostObj();
-                rtn.setDebugInfo(filename, _debugOut);
-                rtn.parseCfg(cfgLines);
+                rtn = getHostObj(cfgLines, filename, _debugOut);
                 break;
             case SERVICE_TYPE:
                 rtn = new NagiosServiceObj();

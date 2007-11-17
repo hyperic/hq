@@ -4,10 +4,14 @@ import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.hyperic.util.StringUtil;
 
 public class NagiosHostObj
     extends NagiosObj
@@ -16,7 +20,6 @@ public class NagiosHostObj
     private static final Pattern _aliasEx = Pattern.compile("^\\s*alias"),
                                  _useEx = Pattern.compile("^\\s*use"),
                                  _hostnameEx = Pattern.compile("^\\s*host_name"),
-                                 _nameEx = Pattern.compile("^\\s*name"),
                                  _checkCmdEx = Pattern.compile("^\\s*check_command"),
                                  _addressEx = Pattern.compile("^\\s*address"),
                                  _contactsEx = Pattern.compile("^\\s*contacts"),
@@ -26,8 +29,11 @@ public class NagiosHostObj
     private List _contactGroups,
                  _contacts;
 
+    private Map _args = new HashMap();
+    private Set _resources;
+
     private String _alias,
-                   _name,
+                   _use,
                    _hostname,
                    _cmdName,
                    _address;
@@ -55,9 +61,7 @@ public class NagiosHostObj
             } else if (_checkCmdEx.matcher(line).find()) {
                 setCheckCmd(line);
             } else if (_useEx.matcher(line).find()) {
-                setInheritAttrs(line);
-            } else if (_nameEx.matcher(line).find()) {
-                setName(line);
+                setTemplateHost(line);
             } else if (_hostnameEx.matcher(line).find()) {
                 setHostname(line);
             } else if (_addressEx.matcher(line).find()) {
@@ -75,13 +79,11 @@ public class NagiosHostObj
         }
     }
 
-    // to be potentially used at a later date
-    // when an object uses "use ..." we may
-    // want to resolve that, but for now
-    // I see no need since we don't care about
-    // any attrs except the unique attrs
-    private void setInheritAttrs(String line)
+    private void setTemplateHost(String line)
     {
+        line = removeInlineComments(line);
+        String[] use = line.split("\\s+");
+        _use = use[use.length-1];
     }
 
     public String getAddress()
@@ -94,28 +96,34 @@ public class NagiosHostObj
         return _hostname;
     }
 
-    public String getChkCmd()
-    {
-        return (_cmdObj == null) ? null : _cmdObj.getCmdExec();
-    }
-
     public String getHostname()
     {
         return _hostname;
     }
 
-    private void setName(String line)
-    {
-        line = removeInlineComments(line);
-        String[] name = line.split("\\s+");
-        _name = name[name.length-1];
-    }
-
     private void setCheckCmd(String line)
     {
         line = removeInlineComments(line);
-        String[] cmd = line.split("\\s+");
-        _cmdName = cmd[cmd.length-1];
+        String[] buf = line.split("\\s+");
+        String tmp = join(" ", Arrays.asList(buf), 1);
+        buf = tmp.split("!");
+        _cmdName = buf[0];
+        List list = new ArrayList(Arrays.asList(buf));
+        list.remove(0);
+        int i=1;
+        for (Iterator it=list.iterator(); it.hasNext(); )
+        {
+            String name = "ARG"+i++;
+            String val = (String)it.next();
+            _args.put(name, val);
+        }
+        // Nagios can support ARG(n), n being 1-32
+        // This must be accounted for even if there is no value
+        for ( ; i<=32; i++)
+        {
+            String name = "ARG"+i;
+            _args.put(name, "");
+        }
     }
 
     private void setHostname(String line)
@@ -185,7 +193,6 @@ public class NagiosHostObj
     public String toString()
     {
         return "Hostname -> "+_hostname+
-               "\nName -> "+_name+
                "\nAlias -> "+_alias+
                "\nAddr  -> "+_address+
                "\nContacts -> "+_contacts+
@@ -204,12 +211,46 @@ public class NagiosHostObj
 
     public int hashCode()
     {
-        if (_name == null)
-            return _hostname.hashCode();
-        return _name.hashCode();
+        return _hostname.hashCode();
     }
 
     void resolveDependencies(NagiosParser parser)
+    {
+        resolveInheritDependencies(parser);
+        resolveCmdDependencies(parser);
+        resolveResourceDependencies(parser);
+    }
+
+    private void resolveResourceDependencies(NagiosParser parser)
+    {
+        if (_resources == null)
+        {
+            Integer type = new Integer(RESOURCE_TYPE);
+            _resources = parser.get(type);
+        }
+    }
+
+    private void resolveInheritDependencies(NagiosParser parser)
+    {
+        try
+        {
+            if (_cmdName == null)
+            {
+                Integer type = new Integer(HOST_TEMPL_TYPE);
+                NagiosTemplateHostObj obj =
+                    (NagiosTemplateHostObj)parser.get(type, _use);
+                _cmdName = obj.getCmdName();
+            }
+        }
+        catch (NagiosParserInternalException e) {
+            debug(e);
+        }
+        catch (NagiosTypeNotSupportedException e) {
+            debug(e);
+        }
+    }
+
+    private void resolveCmdDependencies(NagiosParser parser)
     {
         try
         {
@@ -229,7 +270,29 @@ public class NagiosHostObj
 
     public String getChkAliveCmd()
     {
-        return _cmdObj.getCmdExec();
+        if (_cmdObj == null)
+            return null;
+
+        String host = getHostname();
+        String rtn = _cmdObj.getCmdExec();
+        for (Iterator i=_args.entrySet().iterator(); i.hasNext(); )
+        {
+            Map.Entry entry = (Map.Entry)i.next();
+            String arg = (String)entry.getKey();
+            String val = (String)entry.getValue();
+            rtn = StringUtil.replace(rtn, "$"+arg+"$", val);
+        }
+        for (Iterator i=_resources.iterator(); i.hasNext(); )
+        {
+            NagiosResourceObj obj = (NagiosResourceObj)i.next();
+            String arg = obj.getKey();
+            String val = obj.getValue();
+            rtn = StringUtil.replace(rtn, arg, val);
+        }
+        rtn = StringUtil.replace(rtn, "$HOSTADDRESS$", getAddress());
+        rtn = StringUtil.replace(rtn, "$HOSTNAME$", host);
+        rtn = StringUtil.replace(rtn, "$SERVICEDESC$", "");
+        return rtn;
     }
 
     private boolean equals(NagiosHostObj rhs)

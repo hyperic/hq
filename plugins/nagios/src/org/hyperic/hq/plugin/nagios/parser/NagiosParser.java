@@ -12,4 +12,6 @@ public interface NagiosParser
                NagiosTypeNotSupportedException;
 
     public void parse(String file) throws IOException;
+    public Set getServiceObjs();
+    public Set getHostObjs();
 }
