@@ -110,7 +110,7 @@ class DojoUtil {
 		    }
 		
 		    plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded) {
-		        var ret = '<div class="topCat" onclick="plugin.accordion.swapVis(this);plugin.accordion.disableSelection(this);" nodeid="'+id+'">'+name+" ("+count+")</div>"
+		        var ret = '<div class="topCat" onclick="plugin.accordion.swapVis(this);plugin.accordion.disableSelection(this);" nodeid="'+id+'"><div class=expand style=width:18px;height:18px;display:inline;>&nbsp;&nbsp;&nbsp;</div><div style=display:inline;>'+name+" ("+count+")</div></div>"
 		            + '<div class="resourcetypelist"';
 		        if(markExpanded) {
 		            ret += '>' ;

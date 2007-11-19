@@ -31,7 +31,7 @@
 
     plugin.accordion.setSelected = function(elem) {
         elem.style.padding = '2px';
-        elem.style.border = '1px dotted dimGray';
+        elem.style.border = '1px solid dimGray';
         elem.style.background = '#EFF0F2 none repeat scroll 0%';
     }
 
@@ -60,6 +60,28 @@
         for (var i = 0; i < x.length; i++) {
             if (x[i].className == 'resourcetypelist') {
                 x[i].style.display = 'none';
+                //setunselColor(x[i])
+            }
+        }
+    }
+
+    plugin.accordion.setExpandAll = function() {
+        var tree = document.getElementById('resourceTree');
+        var x = tree.getElementsByTagName('div');
+        for (var i = 0; i < x.length; i++) {
+            if (x[i].className == 'unexpand') {
+                x[i].className == 'expand';
+                //setunselColor(x[i])
+            }
+        }
+    }
+
+    plugin.accordion.setUnexpandAll = function() {
+        var tree = document.getElementById('resourceTree');
+        var x = tree.getElementsByTagName('div');
+        for (var i = 0; i < x.length; i++) {
+            if (x[i].className == 'expand') {
+                x[i].className == 'unexpand';
                 //setunselColor(x[i])
             }
         }

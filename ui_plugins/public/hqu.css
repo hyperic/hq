@@ -296,7 +296,8 @@ font-weight:bold;
 }
 
 /* Down Systems Page */
-
+.expand {background: url( "images/expand_plus.gif" ) no-repeat right bottom;}
+.unexpand {background: url( "images/expand_minus.gif" ) no-repeat right bottom;}
 .leftbxblueborder {border:1px solid #7BAFFF;}
 .downList{margin-right: 10px; width: 22%; float:left;display:inline;height: 400px;}
 .downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: right;display:inline; width: 75%; height: 442px;}
@@ -304,8 +305,8 @@ font-weight:bold;
  .boxLinks {padding:3px 3px 0px 5px;display:inline;}
  .right{float:right;}
  .left{float:left;}
- .tree {padding:3px;border-top:1px solid #BDBDBD;border-left:1px solid #BDBDBD;border-right:1px solid #BDBDBD;border-bottom:1px solid #BDBDBD;height:98%;}
- .topCat {padding:3px;background-color:#DCF9FF;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
+ .tree {padding:3px;height:98%;}
+ .topCat {padding:3px;background-color:#FFE09D;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
  #resourceTree li:hover { background:#d9dfe7;}
@@ -363,7 +364,7 @@ font-weight:bold;
 #result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
 #result table{width:100%;padding:0px;}
 #result table td {padding:3px;border-bottom:1px solid #cccccc;}
-.fivepad {padding:5px;}
+.fivepad {padding:5px 5px 0px 5px;}
 .instruction1 {padding-bottom:3px;font-weight:bold;}
 #commandSelect {width:140px;}
 .bottomPad {padding-right:5px;}
@@ -373,7 +374,11 @@ font-weight:bold;
 .grpmembertext{padding:3px;margin-top:10px;margin-bottom:5px;background-color:#868787;color:#FFFFFF;font-weight:bold;font-size: 12px;}
 #groupMembers {padding-bottom:5px;overflow-y:auto;overflow-x: hidden;height:298px;}
 #groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
-#groupMembers li {padding:1px;white-space:nowrap;}
+#groupMembers li {padding:1px;width:100%;padding:1px;white-space:nowrap;}
+.groupMemberName {display:inline;float:left;width:80%;overflow:auto;}
+.goodResults  {width:20px;height:16;display:inline;background: url("/images/lightning_go.gif")no-repeat;cursor:pointer;}
+.errorResults {width:20px;height:16;display:inline;background: url("/images/lightning_delete.gif")no-repeat;cursor:pointer;}
+
 .metricGroup{
    margin-top:2px;
 }
