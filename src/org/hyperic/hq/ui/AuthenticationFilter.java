@@ -29,9 +29,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 
+import javax.ejb.FinderException;
+import javax.security.auth.login.LoginException;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -41,8 +45,11 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.action.authentication.AuthenticateUserAction;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.encoding.Base64;
 
 public final class AuthenticationFilter extends BaseFilter {
     
@@ -72,11 +79,38 @@ public final class AuthenticationFilter extends BaseFilter {
          */
         WebUser webUser = SessionUtils.getWebUser(session);
         
+        ServletContext ctx = session.getServletContext();
         if (webUser == null) {
-        // See if there is a guest user
-            webUser =
-                AuthenticateUserAction.loginGuest(request,
-                                                  session.getServletContext());            
+            // See if there is authentication information
+            String auth = request.getHeader("Authorization");
+            if (auth != null) {
+                StringTokenizer token = new StringTokenizer(auth, " ");
+                if (token.countTokens() == 2) {
+                    String tok = token.nextToken();
+                    assert(tok.equals("Basic"));
+                    tok = token.nextToken();
+                    String userpass = new String(Base64.decode(tok));
+                    
+                    token = new StringTokenizer(userpass, ":");
+                    assert(token.countTokens() == 2);
+                    String user = token.nextToken();
+                    String pass = token.nextToken();
+                    try {
+                        webUser = AuthenticateUserAction.loginUser(request, ctx,
+                                                                   user, pass);
+                        session.setAttribute(Constants.WEBUSER_SES_ATTR,
+                                             webUser);
+                    } catch (Exception e) {
+                        // Unsuccessful login
+                        log.debug("User attempted to log in with " + userpass);
+                    }
+                }
+            }
+        }
+        
+        if (webUser == null) {
+            // See if there is a guest user
+            webUser = AuthenticateUserAction.loginGuest(request, ctx);            
         }
         
         if (webUser == null ){
@@ -111,8 +145,7 @@ public final class AuthenticationFilter extends BaseFilter {
                 response.sendRedirect(request.getContextPath() + LOGIN_URL);
             }
         }
-        else{
-            
+        else{            
             HttpServletRequest hreq=(HttpServletRequest)request;
             try {
                 chain.doFilter(request, response);

@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.FinderException;
 import javax.security.auth.login.LoginException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +46,9 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -77,6 +81,10 @@ public class AuthenticateUserAction extends TilesAction {
         "/admin/user/UserAdmin.do?mode=register";
     private static final String URL_DASHBOARD = "/";
 
+    private static Log log =
+        LogFactory.getLog(AuthenticateUserAction.class.getName());
+
+
     // ---------------------------------------------------- Public Methods
 
     /**
@@ -90,68 +98,23 @@ public class AuthenticateUserAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-        Log log = LogFactory.getLog(AuthenticateUserAction.class.getName());
         HttpSession session = request.getSession(true);              
         LogonForm logonForm = (LogonForm) form;
         ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
-
+        
         WebUser webUser;
-        HashMap userOpsMap = new HashMap();
+        Map userOpsMap = new HashMap();
         boolean needsRegistration = false;
-        int sid = 0;
         try {
-            // authenticate the credentials
-            AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-            sid = authBoss.login(logonForm.getJ_username(),
-                                 logonForm.getJ_password());
-            Integer sessionId = new Integer(sid);
-            if (log.isTraceEnabled()) {
-                log.trace("Logged in as [" + logonForm.getJ_username() +
-                          "] with session id [" + sessionId + "]");
-            }
-
-            // look up the subject record
-            AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
-            AuthzSubjectValue subject = null;
-
-            if (subjPojo == null) {
-                subject = new AuthzSubjectValue();
-                subject.setName(logonForm.getJ_username());
-
-                needsRegistration = true;
-            } else {
-                subject = subjPojo.getAuthzSubjectValue();
-                needsRegistration = subjPojo.getEmailAddress() == null ||
-                                    subjPojo.getEmailAddress().length() == 0;
-            }
-
-            // figure out if the user has a principal
-            boolean hasPrincipal = authBoss.isUser(sessionId.intValue(),
-                                                   subject.getName());
-
-            ConfigResponse preferences = new ConfigResponse();
-            if (!needsRegistration) {
-                // look up the user's preferences
-
-                ConfigResponse defaultPreferences =
-                    (ConfigResponse)ctx.getAttribute(Constants.DEF_USER_PREFS);
-
-                preferences = authzBoss.getUserPrefs(sessionId,
-                                                     subject.getId());
+            webUser = loginUser(request, ctx, logonForm.getJ_username(),
+                                logonForm.getJ_password());
             
-                preferences.merge(defaultPreferences, false );
-
-                // look up the user's permissions
-                List userOps = authzBoss.getAllOperations(sessionId);
-                for (Iterator it = userOps.iterator(); it.hasNext();) {
-                    OperationValue op = (OperationValue) it.next();
-                    userOpsMap.put( op.getName(), Boolean.TRUE );
-                }
+            needsRegistration = webUser.getPreferences().getKeys().size() == 0;
+            if (!needsRegistration) {
+                AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+                userOpsMap = loadUserPermissions(webUser.getSessionId(),
+                                                 authzBoss);
             }
-
-            webUser = new WebUser(subject, sessionId, preferences,
-                                  hasPrincipal);
         }
         catch ( Exception e ) {
             String msg = e.getMessage().toLowerCase();
@@ -189,7 +152,6 @@ public class AuthenticateUserAction extends TilesAction {
         // now that we've constructed a forward to the bookmarked url,
         // if any, forget the old session and start a new one,
         // setting the web user to show that we're logged in
-
         session = request.getSession(true);
         session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
         session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
@@ -267,6 +229,71 @@ public class AuthenticateUserAction extends TilesAction {
         return url.toString();
     }
     
+    public static WebUser loginUser(HttpServletRequest request,
+                                    ServletContext ctx,
+                                    String username,
+                                    String password)
+        throws RemoteException, SecurityException, LoginException,
+               ApplicationException, ConfigPropertyException, FinderException {
+        boolean needsRegistration = false;
+
+        // authenticate the credentials
+        AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+        int sid = authBoss.login(username, password);
+        Integer sessionId = new Integer(sid);
+        if (log.isTraceEnabled()) {
+            log.trace("Logged in as [" + username +
+                      "] with session id [" + sessionId + "]");
+        }
+
+        // look up the subject record
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+        AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
+        AuthzSubjectValue subject = null;
+
+        if (subjPojo == null) {
+            subject = new AuthzSubjectValue();
+            subject.setName(username);
+
+            needsRegistration = true;
+        } else {
+            subject = subjPojo.getAuthzSubjectValue();
+            needsRegistration = subjPojo.getEmailAddress() == null ||
+            subjPojo.getEmailAddress().length() == 0;
+        }
+
+        // figure out if the user has a principal
+        boolean hasPrincipal = authBoss.isUser(sessionId.intValue(),
+                                               subject.getName());
+
+        ConfigResponse preferences = new ConfigResponse();
+        if (!needsRegistration) {
+            // look up the user's preferences
+            ConfigResponse defaultPreferences =
+                (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_PREFS);
+
+            preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
+
+            preferences.merge(defaultPreferences, false );
+        }
+
+        return new WebUser(subject, sessionId, preferences, hasPrincipal);
+    }
+
+    private static Map loadUserPermissions(Integer sessionId,
+                                           AuthzBoss authzBoss)
+        throws FinderException, PermissionException, SessionTimeoutException,
+               SessionNotFoundException, RemoteException {
+        // look up the user's permissions
+        HashMap userOpsMap = new HashMap();
+        List userOps = authzBoss.getAllOperations(sessionId);
+        for (Iterator it = userOps.iterator(); it.hasNext();) {
+            OperationValue op = (OperationValue) it.next();
+            userOpsMap.put( op.getName(), Boolean.TRUE );
+        }
+        return userOpsMap;
+    }
+    
     public static WebUser loginGuest(HttpServletRequest request,
                                      ServletContext ctx) {
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
@@ -287,17 +314,9 @@ public class AuthenticateUserAction extends TilesAction {
             preferences = authzBoss.getUserPrefs(sessionId, subject.getId());
             preferences.merge(defaultPreferences, false );
 
-            WebUser webUser;
-            HashMap userOpsMap = new HashMap();
-
-            // look up the user's permissions
-            List userOps = authzBoss.getAllOperations(sessionId);
-            for (Iterator it = userOps.iterator(); it.hasNext();) {
-                OperationValue op = (OperationValue) it.next();
-                userOpsMap.put( op.getName(), Boolean.TRUE );
-            }
-
-            webUser = new WebUser(subject, sessionId, preferences, true);
+            WebUser webUser =
+                new WebUser(subject, sessionId, preferences, true);
+            Map userOpsMap = loadUserPermissions(sessionId, authzBoss);
 
             HttpSession session = request.getSession(true);
             session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
