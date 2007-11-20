@@ -107,8 +107,7 @@ function runCommand() {
 
 </script>
 <style>
-.goodResults  {width:20px;height:16;display:inline;background: url(/images/lightning_go.gif)no-repeat;}
-.errorResults {width:20px;height:16;display:inline;background: url(/images/lightning_delete.gif)no-repeat;}
+
 </style>
 
 <div class="outerLiveDataCont">
@@ -123,7 +122,7 @@ function runCommand() {
 
       <div class="fivepad">
 
-        <div class="bottomPad">
+        <div class="">
             <div class="instruction1">Please select a query to run:</div>
         <select id="commandSelect" onchange="runCommand()">
         <% for (c in commands) { %>
@@ -138,8 +137,8 @@ function runCommand() {
         <ul>
         <% for (m in groupMembers) { %>
         <li>
-        <div style="display:inline;float:left;"><span id="mem_${m.entityID}">${h m.name}</span></div>
-          <div id="clicker_${m.entityID}" style="float:right;display:inline;" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;</div>
+        <div class="groupMemberName"><span id="mem_${m.entityID}">${h m.name}</span></div>
+          <div id="clicker_${m.entityID}" style="float:right;display:inline;height:16px;width:20px;" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
             <br class="clearBoth">
         </li>
         <% } %>

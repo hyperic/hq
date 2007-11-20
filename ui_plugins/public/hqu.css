@@ -376,8 +376,8 @@ font-weight:bold;
 #groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
 #groupMembers li {padding:1px;width:100%;padding:1px;white-space:nowrap;}
 .groupMemberName {display:inline;float:left;width:80%;overflow:auto;}
-.goodResults  {width:20px;height:16;display:inline;background: url("/images/lightning_go.gif")no-repeat;cursor:pointer;}
-.errorResults {width:20px;height:16;display:inline;background: url("/images/lightning_delete.gif")no-repeat;cursor:pointer;}
+.goodResults  {background: url("images/lightning_go.gif") no-repeat;cursor:pointer;}
+.errorResults {background: url("images/lightning_delete.gif") no-repeat;cursor:pointer;}
 
 .metricGroup{
    margin-top:2px;
