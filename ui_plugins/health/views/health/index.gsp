@@ -35,6 +35,7 @@ function getSystemStats() {
       dojo.byId('freeSwap').innerHTML  = data.freeSwap;
       
       dojo.byId('pid').innerHTML         = data.pid;
+      dojo.byId('procStartTime').innerHTML = data.procStartTime;
       dojo.byId('procOpenFds').innerHTML = data.procOpenFds;
       
       dojo.byId('procMemSize').innerHTML  = data.procMemSize;
@@ -157,6 +158,9 @@ getSystemStats();
     </tr>
     <tr class="metricRow">
       <td>${l.procOpenFds}:</td><td><span id="procOpenFds"></span></td>
+    </tr>
+    <tr class="metricRow">
+      <td>${l.procStartTime}:</td><td><span id="procStartTime"></span></td>
     </tr>
     <tr class="metricRow">
       <td>${l.procMemSize}:</td><td><span id="procMemSize"></span></td>

@@ -14,6 +14,7 @@ import org.hyperic.hq.common.DiagnosticThread
 import net.sf.ehcache.CacheManager
 import org.hyperic.hq.common.Humidor
 
+import java.text.SimpleDateFormat;
 
 class HealthController 
 	extends BaseController
@@ -127,7 +128,8 @@ class HealthController
         //def s   = new Sigar()
         def s = Humidor.instance.sigar
         def loadAvgFmt = new PrintfFormat('%.2f')
-
+        def dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm a");
+        
         try {
             def cpu      = s.cpuPerc
             def sysMem   = s.mem
@@ -135,7 +137,8 @@ class HealthController
             def pid      = s.pid
             def procFds  = 'unknown'
             def procMem  = s.getProcMem(pid)
-            def procCpu  = s.getProcCpu(pid) 
+            def procCpu  = s.getProcCpu(pid)
+            def procTime = s.getProcTime(pid)
             def loadAvg  = s.loadAverage
             def runtime  = Runtime.runtime
             
@@ -144,33 +147,34 @@ class HealthController
             } catch(Exception e) {
             }
             
-            return [sysUserCpu:   (int)(cpu.user * 100),
-                    sysSysCpu:    (int)(cpu.sys * 100), 
-                    sysNiceCpu:   (int)(cpu.nice * 100), 
-                    sysIdleCpu:   (int)(cpu.idle * 100), 
-                    sysWaitCpu:   (int)(cpu.wait * 100),
-                    sysPercCpu:   (int)(100 - cpu.idle * 100),
-                    loadAvg1:     loadAvgFmt.sprintf(loadAvg[0]),
-                    loadAvg5:     loadAvgFmt.sprintf(loadAvg[1]),
-                    loadAvg15:    loadAvgFmt.sprintf(loadAvg[2]),
-                    totalMem:     formatBytes(sysMem.total),   
-                    usedMem:      formatBytes(sysMem.used),   
-                    freeMem:      formatBytes(sysMem.free),
-                    percMem:      (int)(sysMem.used * 100 / sysMem.total),
-                    totalSwap:    formatBytes(sysSwap.total),
-                    usedSwap:     formatBytes(sysSwap.used),
-                    freeSwap:     formatBytes(sysSwap.free),
-                    percSwap:     (int)(sysSwap.used * 100 / sysSwap.total),
-                    pid:          pid,
-                    procOpenFds:  procFds,
-                    procMemSize:  formatBytes(procMem.size),
-                    procMemRes:   formatBytes(procMem.resident),
-                    procMemShare: formatBytes(procMem.share),
-                    procCpu:      (int)(procCpu.percent * 100),
-                    jvmTotalMem:  formatBytes(runtime.totalMemory()),
-                    jvmFreeMem:   formatBytes(runtime.freeMemory()),
-                    jvmMaxMem:    formatBytes(runtime.maxMemory()),
-                    jvmPercMem:   (int)((runtime.maxMemory() - runtime.freeMemory()) * 100 / runtime.maxMemory()),  
+            return [sysUserCpu:    (int)(cpu.user * 100),
+                    sysSysCpu:     (int)(cpu.sys * 100),
+                    sysNiceCpu:    (int)(cpu.nice * 100),
+                    sysIdleCpu:    (int)(cpu.idle * 100),
+                    sysWaitCpu:    (int)(cpu.wait * 100),
+                    sysPercCpu:    (int)(100 - cpu.idle * 100),
+                    loadAvg1:      loadAvgFmt.sprintf(loadAvg[0]),
+                    loadAvg5:      loadAvgFmt.sprintf(loadAvg[1]),
+                    loadAvg15:     loadAvgFmt.sprintf(loadAvg[2]),
+                    totalMem:      formatBytes(sysMem.total),
+                    usedMem:       formatBytes(sysMem.used),
+                    freeMem:       formatBytes(sysMem.free),
+                    percMem:       (int)(sysMem.used * 100 / sysMem.total),
+                    totalSwap:     formatBytes(sysSwap.total),
+                    usedSwap:      formatBytes(sysSwap.used),
+                    freeSwap:      formatBytes(sysSwap.free),
+                    percSwap:      (int)(sysSwap.used * 100 / sysSwap.total),
+                    pid:           pid,
+                    procStartTime: dateFormat.format(procTime.startTime),
+                    procOpenFds:   procFds,
+                    procMemSize:   formatBytes(procMem.size),
+                    procMemRes:    formatBytes(procMem.resident),
+                    procMemShare:  formatBytes(procMem.share),
+                    procCpu:       (int)(procCpu.percent * 100),
+                    jvmTotalMem:   formatBytes(runtime.totalMemory()),
+                    jvmFreeMem:    formatBytes(runtime.freeMemory()),
+                    jvmMaxMem:     formatBytes(runtime.maxMemory()),
+                    jvmPercMem:    (int)((runtime.maxMemory() - runtime.freeMemory()) * 100 / runtime.maxMemory()),
             ]
         } finally {
             //s.close()
