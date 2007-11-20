@@ -30,19 +30,23 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 
 import org.hyperic.sigar.win32.RegistryKey;
@@ -62,7 +66,12 @@ public class OracleServerDetector
 
     private static final String PTQL_QUERY = "State.Name.eq=oracle";
 
+    private static final String PROP_PROC_PTQL = "process.ptql";
+
     private static final String ORATAB = "/etc/oratab";
+
+    private static final Pattern _serviceNameEx =
+        Pattern.compile("\\(\\s*service_name\\s*=", Pattern.CASE_INSENSITIVE);
 
     // Versions
     static final String VERSION_8i = "8i";
@@ -88,7 +97,7 @@ public class OracleServerDetector
     /**
      * Utility function to query the process table for Oracle
      */
-    private static List getServerProcessList() {
+    private List getServerProcessList() {
         ArrayList servers = new ArrayList();
 
         long[] pids = getPids(PTQL_QUERY);
@@ -161,7 +170,18 @@ public class OracleServerDetector
                 }
             }
 
-            servers.add(createServerResource(path));
+            ConfigResponse productConfig = new ConfigResponse();
+            ServerResource server = createServerResource(path);
+            productConfig.setValue("installpath", path);
+            // Set custom properties
+//            ConfigResponse cprop = new ConfigResponse();
+//            cprop.setValue("version", version);
+//            server.setCustomProperties(cprop);
+            setProductConfig(server, productConfig);
+            server.setMeasurementConfig();
+//            server.setName(SERVER_NAME+" "+version);
+            servers.add(server);
+//            servers.add(createServerResource(path));
         }
 
         return servers;
@@ -184,17 +204,18 @@ public class OracleServerDetector
         }
 
         // If nothing found, try parsing /etc/oratab
-        if (servers.size() == 0 && !isWin32()) {
-            try {
+        if (servers.size() == 0 && !isWin32())
+        {
+            try
+            {
                 String line;
-                BufferedReader in
-                    = new BufferedReader(new FileReader(ORATAB));
-                while ((line = in.readLine()) != null) {
+                BufferedReader in = new BufferedReader(new FileReader(ORATAB));
+                while ((line = in.readLine()) != null)
+                {
                     // Check for empty or commented out lines
                     if (line.length() == 0 || line.startsWith("#")) {
                         continue;
                     }
-
                     // Ensure format
                     int x1, x2;
                     x1 = line.indexOf(':');
@@ -205,9 +226,11 @@ public class OracleServerDetector
                         servers.addAll(getServerList(oraHome));
                     }
                 }
-            } catch (FileNotFoundException e) {
+            }
+            catch (FileNotFoundException e) {
                 //Ok, no oracle installed.
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 log.error("Error parsing oratab: " + e);
             }
         }
@@ -228,33 +251,25 @@ public class OracleServerDetector
     {
         List servers = new ArrayList();
         String version;
-
-        if (path.indexOf("ora92") != -1) {
-            if (getTypeInfo().getVersion().
-                equals(VERSION_9i))
-            {
+        if (path.indexOf("ora92") != -1)
+        {
+            if (getTypeInfo().getVersion().equals(VERSION_9i))
                 version = VERSION_9i;
-            }
-            else {
+            else
                 return null;
-            }
         }
-        else if (path.indexOf("10.") != -1) {
-            if (getTypeInfo().getVersion().
-                equals(VERSION_10g)) {
-
+        else if (path.indexOf("10.") != -1)
+        {
+            if (getTypeInfo().getVersion().equals(VERSION_10g))
                 version = VERSION_10g;
-            } else {
+            else
                 return null;
-            }
         }
         else {
             // Assume 8i
             version = VERSION_8i;
         }
-        
         servers.add(createServerResource(path));
-        
         return servers;
     }
 
@@ -269,52 +284,97 @@ public class OracleServerDetector
         ArrayList services = new ArrayList();
         Connection conn = null;
         Statement stmt = null;
-        ResultSet rs = null;
+        try
+        {
+            String instance = url.substring(url.lastIndexOf(':') + 1);
+            conn = DriverManager.getConnection(url, user, pass);
+            stmt = conn.createStatement();
+            services.addAll(getUserServices(stmt, instance));
+            services.addAll(getTablespaceServices(stmt, instance));
+            services.addAll(getProcessServices(config));
+            services.addAll(getTnsServices(config));
+            setCustomProps(stmt);
+        }
+        catch (SQLException e)
+        {
+            // Try to do some investigation of what went wrong
+            if (e.getMessage().indexOf("table or view does not exist") != -1)
+            {
+                log.error("System table does not exist, make sure that " +
+                          " the Oracle user specified has the correct " +
+                          " privileges.  See the HQ server configuration " +
+                          " page for more information");
+                return services;
+            }
+            // Otherwise, dump the error.
+            throw new PluginException("Error querying for Oracle " +
+                                      "services: " + e.getMessage());
+        }
+        finally {
+            DBUtil.closeJDBCObjects(log, conn, stmt, null);
+        }
+        return services;
+    }
 
+    private void setCustomProps(Statement stmt)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            // Query for server inventory properties
+            ConfigResponse props = new ConfigResponse();
+            rs = stmt.executeQuery(VERSION_QUERY);
+            if (rs != null && rs.next()) {
+                String version = rs.getString(1);
+                props.setValue("version", version);
+            }
+            setCustomProperties(props);
+        }
+        finally {
+            DBUtil.closeResultSet(log, rs);
+        }
+    }
+
+    private List getUserServices(Statement stmt, String instance)
+        throws SQLException
+    {
         // Discover the user instances, for user instances to be
         // discovered, the user must be connected to the database.
-        try {
-            String instance = url.substring(url.lastIndexOf(':') + 1);
+        List rtn = new ArrayList();
+        ResultSet rs = null;
+        try
+        {
             // Set server description
             setDescription("Oracle " + instance + " database instance");
 
-            conn = DriverManager.getConnection(url, user, pass);
-
             // Discover user instances
             ArrayList users = new ArrayList();
-            stmt = conn.createStatement();
             rs = stmt.executeQuery(USER_QUERY);
             while (rs != null && rs.next()) {
                 String username = rs.getString(1);
                 users.add(username);
             }
             rs.close();
-            stmt.close();
-            
-            for (int i=0; i<users.size(); i++) {
+            for (int i=0; i<users.size(); i++)
+            {
                 String username = (String)users.get(i);
-
                 ServiceResource service = new ServiceResource();
                 service.setType(this, USER_INSTANCE);
                 service.setServiceName(username);
                 service.setDescription("User of the " + instance + 
                                        " database instance");
-
                 ConfigResponse productConfig = new ConfigResponse();
                 ConfigResponse metricConfig = new ConfigResponse();
-
                 productConfig.setValue(OracleMeasurementPlugin.PROP_USERNAME,
                                        username);
-
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig(metricConfig);
-
                 // Query for service inventory properties
-                stmt = conn.createStatement();
                 rs = stmt.executeQuery(DBA_USER_QUERY + "'" + username + "'");
-                if (rs != null && rs.next()) {
+                if (rs != null && rs.next())
+                {
                     ConfigResponse svcProps = new ConfigResponse();
-
                     svcProps.setValue("status",
                                       rs.getString("ACCOUNT_STATUS"));
                     svcProps.setValue("default_tablespace",
@@ -323,35 +383,39 @@ public class OracleServerDetector
                                       rs.getString("TEMPORARY_TABLESPACE"));
                     service.setCustomProperties(svcProps);
                 }
-                rs.close();
-                stmt.close();
-
-                services.add(service);
+                rtn.add(service);
             }
+        }
+        finally {
+            DBUtil.closeResultSet(log, rs);
+        }
+        return rtn;
+    }
 
+    private List getTablespaceServices(Statement stmt, String instance)
+        throws SQLException
+    {
+        List rtn = new ArrayList();
+        ResultSet rs = null;
+        try
+        {
             // Discover tablespaces
-            stmt = conn.createStatement();
             rs = stmt.executeQuery(TABLESPACE_QUERY);
-            while (rs != null && rs.next()) {
+            while (rs != null && rs.next())
+            {
                 String tablespace = rs.getString("TABLESPACE_NAME");
-                
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TABLESPACE);
                 service.setServiceName(tablespace);
                 service.setDescription("Tablespace on the " + instance +
                                        " database instance");
-
                 ConfigResponse productConfig = new ConfigResponse();
                 ConfigResponse metricConfig = new ConfigResponse();
-
                 productConfig.setValue(OracleMeasurementPlugin.PROP_TABLESPACE,
                                        tablespace);
-
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig(metricConfig);
-
                 ConfigResponse svcProps = new ConfigResponse();
-
                 // 9i and 10g only
                 if (!getTypeInfo().getVersion().equals(VERSION_8i)) {
                     svcProps.setValue("block_size",
@@ -361,47 +425,112 @@ public class OracleServerDetector
                     svcProps.setValue("space_management",
                                       rs.getString("SEGMENT_SPACE_MANAGEMENT"));
                 }
-
                 svcProps.setValue("contents",
                                   rs.getString("CONTENTS"));
                 svcProps.setValue("logging",
                                   rs.getString("LOGGING"));
                 service.setCustomProperties(svcProps);
-
-                services.add(service);
+                rtn.add(service);
             }
-            rs.close();
-            stmt.close();
-
-            // Query for server inventory properties
-            ConfigResponse props = new ConfigResponse();
-                        
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(VERSION_QUERY);
-            if (rs != null && rs.next()) {
-                String version = rs.getString(1);
-                props.setValue("version", version);
-            }
-
-            setCustomProperties(props);
-
-        } catch (SQLException e) {
-            // Try to do some investigation of what went wrong
-            if (e.getMessage().indexOf("table or view does not exist") != -1) {
-                log.error("System table does not exist, make sure that " +
-                          " the Oracle user specified has the correct " +
-                          " privileges.  See the HQ server configuration " +
-                          " page for more information");
-                return services;
-            }
-            
-            // Otherwise, dump the error.
-            throw new PluginException("Error querying for Oracle " +
-                                      "services: " + e.getMessage());
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
         }
+        finally {
+            DBUtil.closeResultSet(log, rs);
+        }
+        return rtn;
+    }
 
-        return services;
+    private List getProcessServices(ConfigResponse config)
+    {
+        List rtn = new ArrayList();
+        String ptql = config.getValue(PROP_PROC_PTQL);
+        if (log.isDebugEnabled())
+            log.debug("using ptql, "+ptql+", to retrieve processes");
+        List processes = getProcesses(ptql);
+        for (Iterator i=processes.iterator(); i.hasNext(); )
+        {
+            String process = (String)i.next();
+            if (log.isDebugEnabled())
+                log.debug("adding Process Metrics "+process+" service");
+            ServiceResource service = new ServiceResource();
+            service.setType(this, "Process Metrics");
+            service.setServiceName(process+" process");
+            ConfigResponse productConfig = new ConfigResponse();
+            ptql = "State.Name.eq=oracle,Args.0.sw="+process;
+            productConfig.setValue("process.query", ptql);
+            service.setProductConfig(productConfig);
+            service.setMeasurementConfig();
+            rtn.add(service);
+        }
+        return rtn;
+    }
+
+    private List getProcesses(String ptql)
+    {
+        long[] pids = getPids(ptql);
+
+        List rtn = new ArrayList();
+        for (int i=0; i<pids.length; i++)
+        {
+            String[] args = getProcArgs(pids[i]);
+            if (args.length == 0 || args[0] == null) {
+                continue;
+            }
+            rtn.add(args[0]);
+        }
+        return rtn;
+    }
+
+    private List getTnsServices(ConfigResponse config)
+    {
+        String line;
+        BufferedReader reader = null;
+        String tnsnames = config.getValue("tnsnames"),
+               installpath = config.getValue("installpath");
+        List rtn = new ArrayList();
+        try
+        {
+            if (log.isDebugEnabled())
+                log.debug("READING tnsnames.ora FILE: "+installpath+"/"+tnsnames);
+            reader = new BufferedReader(new FileReader(installpath+"/"+tnsnames));
+            while (null != (line = reader.readLine()))
+            {
+                if (_serviceNameEx.matcher(line).find())
+                {
+                    String[] toks = line.split("=");
+                    if (toks[1] == null)
+                        continue;
+                    String tnslistener =
+                        toks[1].replaceAll("\\s*\\)", "").trim();
+                    if (log.isDebugEnabled())
+                        log.debug("Configuring TNS Listener "+tnslistener);
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, "TNS Ping");
+                    service.setServiceName(tnslistener+" TNS Ping");
+                    ConfigResponse productConfig = new ConfigResponse();
+                    productConfig.setValue("tnslistener", tnslistener);
+                    service.setProductConfig(productConfig);
+                    service.setMeasurementConfig();
+                    rtn.add(service);
+                }
+            }
+        }
+        catch (IOException e) {
+            log.error("Error reading "+tnsnames);
+        }
+        finally {
+            close(reader);
+        }
+        return rtn;
+    }
+
+    private void close(Reader reader)
+    {
+        if (reader == null)
+            return;
+        try {
+            reader.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

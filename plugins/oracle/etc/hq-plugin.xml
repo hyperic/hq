@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -8,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2007], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -27,12 +31,58 @@
 
 <plugin package="org.hyperic.hq.plugin.oracle">
 
+  <!-- extracted to: pdk/work/scripts/oracle/hq-tns-ping -->
+  <script name="hq-tns-ping">
+#!/bin/sh
+
+this_script=`basename $0`
+
+usage()
+{ 
+  printf "usage: %s -p &lt;installpath&gt; -n &lt;tnsname&gt;\n" $this_script
+  exit 4
+}
+
+while getopts "p:n:" opt
+do
+     case $opt in
+     n)     nflag=1
+            tnsname="$OPTARG";;
+     p)     pflag=1
+            path="$OPTARG";;
+     ?)     usage;;
+     esac
+done
+
+if [ -z "$nflag" ]
+then
+  usage
+elif [ -z "$pflag" ]
+then
+  usage
+fi
+
+tnschk=`$path/bin/tnsping $tnsname`
+tnschk2=`echo  $tnschk | grep -c OK`
+if [ "${tnschk2}" -eq 1 ] ; then
+    tnschk3=`echo $tnschk | sed -e 's/.*(//' -e 's/).*//' -e 's/ msec//'`
+    echo "$tnsname.TNSResponseTime=${tnschk3}"
+    exit 0
+else
+    echo "No TNS Listener on $tnsname"
+    exit 3
+fi
+  </script>
+
   <classpath>
     <include name="pdk/lib/jdbc/oracle12.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="oracle"/>
+
+  <filter name="hq-tns-ping"
+          value="pdk/work/scripts/oracle/hq-tns-ping"/>
 
   <property name="DEFAULT_URL"
             value="jdbc:oracle:thin:@localhost:1521:ORCLTST"/>
@@ -366,7 +416,15 @@
             category="UTILIZATION"
             units="none"
             collectionType="static"/>
-    
+
+    <metric name="Space Used Percent"
+            alias="TSSpaceUsedPercent"
+            template="${domain}:Type=Tablespace,tablespace=%tablespace%:${alias}"
+            category="UTILIZATION"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
   </metrics>
 
   <!-- ==================== Resource Definition =================== -->
@@ -397,6 +455,15 @@
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
+      <option name="installpath"
+              default="/oracle"
+              description="Oracle Install Path"/>
+      <option name="tnsnames"
+              description="TNS Listener File"
+              default="network/admin/tnsnames.ora"/>
+      <option name="process.ptql"
+              description="PTQL which describes the processes to monitor"
+              default="State.Name.eq=oracle,Args.0.sw=ora_"/>
     </config>
 
     <properties>
@@ -429,14 +496,11 @@
     <service name="Tablespace">
       <plugin type="measurement"
               class="OracleMeasurementPlugin"/>
-
       <config>
         <option name="tablespace"
                 description="Tablespace to monitor"/>
       </config>
-
       <metrics include="Tablespace"/>
-
       <properties>
         <property name="block_size"
                   description="Block Size"/>
@@ -449,7 +513,38 @@
         <property name="space_management"
                   description="Segment Space Management"/>
       </properties>
+    </service>
 
+    <service name="Process Metrics">
+      <config>
+        <option name="process.query"
+                description="PTQL which describes the process to retrieve metrics"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="TNS Ping">
+      <config>
+        <option name="tnslistener"
+                description="TNS Listener"/>
+        <option name="timeout"
+                description="TNS Ping Timeout"
+                default="10"/>
+      </config>
+      <filter name="template">
+        exec:timeout=%timeout%,file=${hq-tns-ping},args=-p %installpath% -n %tnslistener%:%tnslistener%.${alias}
+      </filter>
+      <metric name="Availability"
+              category="AVAILABILITY"
+              indicator="true"/>
+      <metric name="TNS Response Time"
+              category="PERFORMANCE"
+              indicator="true"
+              units="ms"
+              collectionType="dynamic"/>
     </service>
 
   </server>

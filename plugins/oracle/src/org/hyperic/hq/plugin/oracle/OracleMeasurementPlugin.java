@@ -307,6 +307,14 @@ public class OracleMeasurementPlugin
         genericQueries.put("TSNumDataFiles",
                            "SELECT COUNT(*) FROM DBA_DATA_FILES " +
                            "WHERE TABLESPACE_NAME='%tablespace%'");
+        genericQueries.put("TSSpaceUsedPercent",
+                           "SELECT 1-(SELECT sum(bytes)/1024" +
+                           " FROM sys.dba_free_space" +
+                           " WHERE tablespace_name = '%tablespace%') /" +
+                           " (SELECT sum(bytes/1024) from sys.dba_data_files" +
+                           " WHERE tablespace_name = '%tablespace%')"+
+                           " AS percent_used" +
+                           " FROM dual");
 
         // Oracle 8i queries
         ora8Queries.put("SortsDisk", baseQuery + "'sorts (disk)'");
