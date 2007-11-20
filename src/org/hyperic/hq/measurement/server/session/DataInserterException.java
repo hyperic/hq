@@ -25,19 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.List;
-
-/**
- * The {@link DataInserter} takes data from the 
- * {@link ReportProcessorEJBImpl} and sends it to the {@link DataManagerEJBImpl} 
- * to put into the DB.
- */
-public interface DataInserter {
-    /**
-     * Insert data into the DB, possibly blocking.
-     * 
-     * @param metricData a list of {@link DataPoint}s
-     */
-    public void insertMetrics(List metricData)
-        throws InterruptedException, DataInserterException;
+public class DataInserterException extends Exception {
+    public DataInserterException(String msg) {
+        super(msg);
+    }
 }

@@ -150,7 +150,9 @@ public class ReportProcessorEJBImpl
      *
      * @ejb:interface-method
      */
-    public void handleMeasurementReport(MeasurementReport report){
+    public void handleMeasurementReport(MeasurementReport report)
+        throws DataInserterException
+    {
         // get current time so that we can use to check for old data
         long current = System.currentTimeMillis();
 
@@ -187,7 +189,7 @@ public class ReportProcessorEJBImpl
                 addData(dataPoints, dm, dsnId, vals, current);
             }
         }
-        
+
         sendDataToDB(dataPoints);
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
@@ -217,7 +219,9 @@ public class ReportProcessorEJBImpl
     /**
      * Sends the actual data to the DB.
      */
-    private void sendDataToDB(List dataPoints) {
+    private void sendDataToDB(List dataPoints) 
+        throws DataInserterException
+    {
         DataInserter d = MeasurementStartupListener.getDataInserter();
 
         try {
