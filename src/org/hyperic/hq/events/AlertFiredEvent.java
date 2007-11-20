@@ -49,6 +49,7 @@ public class AlertFiredEvent extends AbstractEvent
     /** Creates a new instance of AlertFiredEvent */
     public AlertFiredEvent(TriggerFiredEvent e, Integer alertId,
                            AlertDefinition alertDef) {
+        setTimestamp(e.getTimestamp());
         setMessage(e.getMessage());
         setInstanceId(alertDef.getId());
         setAlertId(alertId);
