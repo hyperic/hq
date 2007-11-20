@@ -329,7 +329,7 @@ public class ZeventManager {
     
     /**
      * Internal method to dispatch events.  Called by the 
-     * {@link EventQueueProcessor}
+     * {@link QueueProcessor}
      */
     void dispatchEvent(Zevent e) {
         long timeInQueue = e.getQueueExitTime() - e.getQueueEntryTime();
