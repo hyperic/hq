@@ -118,6 +118,9 @@ class HealthController
     }
 
     private formatBytes(b) {
+        if (b == -1)
+            return 'unknown'
+            
         UnitsFormat.format(new UnitNumber(b, UnitsConstants.UNIT_BYTES,
                                           UnitsConstants.SCALE_NONE),
                            locale, null).toString()
