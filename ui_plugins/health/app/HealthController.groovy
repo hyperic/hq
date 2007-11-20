@@ -12,9 +12,8 @@ import org.hyperic.sigar.CpuPerc
 import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
 
+import java.text.DateFormat;
 import net.sf.ehcache.CacheManager
-
-import java.text.SimpleDateFormat;
 
 class HealthController 
 	extends BaseController
@@ -127,7 +126,7 @@ class HealthController
     def getSystemStats(params) {
         def s = Humidor.instance.sigar
         def loadAvgFmt = new PrintfFormat('%.2f')
-        def dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm a");
+        def dateFormat = DateFormat.getDateTimeInstance();
         
         def cpu      = s.cpuPerc
         def sysMem   = s.mem
