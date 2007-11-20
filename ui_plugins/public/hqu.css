@@ -296,7 +296,8 @@ font-weight:bold;
 }
 
 /* Down Systems Page */
-.expand {background: url( "images/expand_plus.gif" ) no-repeat right bottom;}
+.expand {width:18px;height:18px;background: url( "images/expand_plus.gif" ) no-repeat}
+.expand {background-position:bottom right}
 .unexpand {background: url( "images/expand_minus.gif" ) no-repeat right bottom;}
 .leftbxblueborder {border:1px solid #7BAFFF;}
 .downList{margin-right: 10px; width: 22%; float:left;display:inline;height: 400px;}
@@ -306,10 +307,9 @@ font-weight:bold;
  .right{float:right;}
  .left{float:left;}
  .tree {padding:3px;height:98%;}
- .topCat {padding:3px;background-color:#FFE09D;font-weight:bold;border:1px solid #BDBDBD;cursor:pointer;}
+ .topCat {font-weight:bold;cursor:pointer;padding:3px;border:1px solid #dddddd;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
- #resourceTree li:hover { background:#d9dfe7;}
 .listItem {padding:3px; cursor:pointer;}
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 #results_msg {width:78%;float:right;padding:3px;padding-bottom:5px;font-weight:bold;}

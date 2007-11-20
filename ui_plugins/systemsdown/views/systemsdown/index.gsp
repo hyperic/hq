@@ -31,8 +31,8 @@
 
     plugin.accordion.setSelected = function(elem) {
         elem.style.padding = '2px';
-        elem.style.border = '1px solid dimGray';
-        elem.style.background = '#EFF0F2 none repeat scroll 0%';
+        elem.style.border = '1px solid #dddddd';
+        elem.style.background = '#88BDEE none repeat scroll 0%';
     }
 
     plugin.accordion.disableSelection = function(element) {
