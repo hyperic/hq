@@ -98,6 +98,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.data.TrackEventReport;
+import org.hyperic.hq.measurement.server.session.DataInserterException;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
 import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
@@ -484,7 +485,12 @@ public class LatherDispatcher
         MeasurementSendReport_result res =
             new MeasurementSendReport_result();
 
-        getReportProcessor().handleMeasurementReport(args.getReport());
+        try {
+            getReportProcessor().handleMeasurementReport(args.getReport());
+        } catch(DataInserterException e) {
+            throw new LatherRemoteException("Unable to insert data " + 
+                                            e.getMessage());
+        }
 
         res.setTime(System.currentTimeMillis());
         return res;
