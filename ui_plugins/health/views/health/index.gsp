@@ -230,5 +230,9 @@ getSystemStats();
                     schema:cacheSchema, numRows:500, pageControls:false) %>
     </div>  
 
+    <div dojoType="ContentPane" label="Load">
+      ${l.metricsPerMinute}: ${metricsPerMinute}
+    </div>  
+
   </div>
 </div>

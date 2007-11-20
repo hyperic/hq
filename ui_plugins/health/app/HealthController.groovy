@@ -1,3 +1,4 @@
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -18,9 +19,6 @@ class HealthController
 	extends BaseController
 {
     def HealthController() {
-        /*
-        SELECT COUNT(m.template_id) AS total, m.coll_interval/60000 AS coll_interval, t.name AS name, mt.name AS type FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, EAM_MONITORABLE_TYPE mt WHERE m.template_id = t.id and t.monitorable_type_id=mt.id and m.coll_interval > 0 and m.enabled =$P{SQL_BOOLEAN_TRUE} GROUP BY m.template_id, t.name, mt.name, m.coll_interval ORDER BY total DESC
-        */
         addBeforeFilter({ 
             if (!user.isSuperUser()) {
                 render(inline: "Unauthorized")
@@ -92,9 +90,20 @@ class HealthController
 
 	def index(params) {
     	render(locals:[ diags: DiagnosticThread.diagnosticObjects,
-    	                cacheSchema: cacheSchema ])
+    	                cacheSchema: cacheSchema,
+    	                metricsPerMinute: metricsPerMinute])
     }
     
+	private getMetricsPerMinute() {
+	    def vals  = DMM.one.findMetricCountSummaries()
+	    def total = 0.0
+	    
+	    for (v in vals) {
+	        total = total + (float)v.total / (float)v.interval
+	    }
+	    (int)total
+	}
+	
     def getDiag(params) {
         def diagName = params.getOne('diag')
         for (d in DiagnosticThread.diagnosticObjects) {
@@ -134,8 +143,6 @@ class HealthController
                 procFds = s.getProcFd(pid).total
             } catch(Exception e) {
             }
-            
-            log.info "ProcCPU = ${procCpu}"
             
             return [sysUserCpu:   (int)(cpu.user * 100),
                     sysSysCpu:    (int)(cpu.sys * 100), 
