@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -440,5 +441,37 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             "where mt.id = t.id and not mt.count = t.count")
             .setString("plugin", plugin)
             .list();
+    }
+    
+    List findMetricCountSummaries() {
+        String sql = 
+            "SELECT COUNT(m.template_id) AS total, " +
+            "m.coll_interval/60000 AS coll_interval, " +  
+            "t.name AS name, mt.name AS type " + 
+            "FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
+            "EAM_MONITORABLE_TYPE mt " +
+            "WHERE m.template_id = t.id " +
+            " and t.monitorable_type_id=mt.id " +
+            " and m.coll_interval > 0 " +
+            " and m.enabled = :enabled " +
+            "GROUP BY m.template_id, t.name, mt.name, m.coll_interval " +
+            "ORDER BY total DESC"; 
+        List vals = getSession().createSQLQuery(sql)
+            .setBoolean("enabled", true)
+            .list();
+
+        List res = new ArrayList(vals.size());
+        
+        for (Iterator i=vals.iterator(); i.hasNext(); ) {
+            Object[] v = (Object[])i.next();
+            BigInteger total = (BigInteger)v[0];
+            BigInteger interval = (BigInteger)v[1];
+            String metricName = (String)v[2];
+            String resourceName = (String)v[3];
+            
+            res.add(new CollectionSummary(total.intValue(), interval.intValue(),
+                                          metricName, resourceName));
+        }
+        return res;
     }
 }

@@ -1338,7 +1338,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 new AppdefEntityID(((Integer) vals[0]).intValue(),
                                    (Integer) vals[1]);
 
-            // Get the overlord user
             AuthzSubject overlord =
                 AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         
@@ -1352,6 +1351,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 assert(false);
             }
         }
+    }
+    
+    /**
+     * Gets a summary of the metrics which are scheduled for collection, 
+     * across all resource types and metrics.
+     * 
+     * @return a list of {@link CollectionSummary} beans
+     * @ejb:interface-method
+     */
+    public List findMetricCountSummaries() {
+        return getDerivedMeasurementDAO().findMetricCountSummaries();
     }
     
     /**
