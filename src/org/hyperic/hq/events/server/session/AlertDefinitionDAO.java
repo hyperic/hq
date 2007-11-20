@@ -160,6 +160,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      * @param refresh <code>true</code> to force the alert def state to be 
      *                to be re-read from the database; <code>false</code> to 
      *                allow the persistence engine to return a cached copy.
+     * @return The alert definition.               
      * @throws ObjectNotFoundException if no alert definition with the give Id exists.
      */
     public AlertDefinition findById(Integer id, boolean refresh) {
@@ -170,6 +171,17 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
         
         return def;
+    }
+    
+    /** 
+     * Find an alert definition by Id, loading from the session.
+     * 
+     * @param id The alert definition Id.
+     * @return The alert definition or <code>null</code> if no alert definition 
+     *         exists with the given Id.
+     */
+    public AlertDefinition get(Integer id) {
+        return (AlertDefinition)super.get(id);
     }
     
     public List findByAppdefEntityTypeSortByCtime(AppdefEntityID id,
@@ -363,21 +375,37 @@ public class AlertDefinitionDAO extends HibernateDAO {
      * 
      * @param events The update events.
      */
-    void updateAlertDefinitionsLastFiredTimes(AlertDefinitionLastFiredUpdateEvent[] events) {        
-        String sql = "update AlertDefinition ad set ad.lastFired = :lastFiredTime " +
-          "where ad.id = :defid and (ad.lastFired is null or ad.lastFired < :lastFiredTime)";
-
+    void updateAlertDefinitionsLastFiredTimes(AlertDefinitionLastFiredUpdateEvent[] events) {
+        // We want to retrieve the alert definition objects, then update the 
+        // object state so that the 2nd level cache is updated appropriately.
         Session session = getSession();
-        Query query = session.createQuery(sql);
-        
-        for (int i = 0; i < events.length; i++) {
-            AlertDefinitionLastFiredUpdateEvent event = events[i];
-            query.setInteger("defid", event.getAlertDefinitionId().intValue());
-            query.setLong("lastFiredTime", event.getLastFiredTime());
-            query.executeUpdate();
+        FlushMode flushMode = session.getFlushMode();
+                
+        try {
+            session.setFlushMode(FlushMode.MANUAL);
+            
+            for (int i = 0, count = 0; i < events.length; i++) {
+                AlertDefinitionLastFiredUpdateEvent event = events[i];
+                AlertDefinition ad = get(event.getAlertDefinitionId());
+                
+                if (ad != null) {
+                    Long currentLastFiredTime = ad.getLastFired();
+                    
+                    if (currentLastFiredTime == null || 
+                        currentLastFiredTime.longValue() < event.getLastFiredTime()) {
+                        ad.setLastFired(new Long(event.getLastFiredTime()));
+                    }
+                    
+                    if (++count % 100 == 0) {
+                        session.flush();
+                    }                    
+                }
+            }
+            
+            session.flush();
+        } finally {
+            session.setFlushMode(flushMode);
         }
-        
-        session.flush();
     }
 
     /** 
