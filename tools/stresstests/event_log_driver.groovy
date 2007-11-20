@@ -4,6 +4,7 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.common.util.Messenger
 import org.hyperic.hq.events.EventConstants
 import org.hyperic.hq.product.LogTrackPlugin
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as elM
 
 /**
  * This script publishes resource log events for a given set of 
@@ -25,6 +26,9 @@ def pauseBetweenInserterStarts = 2000   // pause time between starting each log 
 
 def totalRunTime = 60000                // total test run time (msec)
 
+def deleteAllLogs = false				// set to true to delete all the event logs after 
+										// the test is finished
+
 
 // SCRIPT EXECUTION STARTS HERE
 
@@ -32,7 +36,8 @@ runTest(appDefEntityIds,
     	numLogEventsPerInserter, 
         pauseTimeBetweenInserts, 
         pauseBetweenInserterStarts, 
-        totalRunTime)
+        totalRunTime,
+        deleteAllLogs)
 
 
 //HELPER FUNCTIONS
@@ -41,7 +46,8 @@ def runTest(appDefEntityIds,
         	numLogEventsPerInserter, 
             pauseTimeBetweenInserts, 
             pauseBetweenInserterStarts, 
-            totalRunTime) {
+            totalRunTime,
+            deleteAllLogs) {
 
     def startTime = System.currentTimeMillis()
 
@@ -63,10 +69,37 @@ def runTest(appDefEntityIds,
         it.join(10000)
       }
     }
+    
+    def totalNumInserted = 0
 
     inserterThreads.each {
+      totalNumInserted+=it.getNumLogEventsInserted() 
       println(it.toString()+" thread is still active ="+it.isAlive()+
               ", total num log events inserted="+it.getNumLogEventsInserted())
+    }
+    
+    println("Event log inserters ran for "+
+            (System.currentTimeMillis()-startTime)+
+            " msec, inserting "+totalNumInserted+ " events")
+    
+    def extraTimeStart = System.currentTimeMillis()
+
+    while (getTotalNumEventLogs() < totalNumInserted) {
+    	Thread.sleep(20000)	    
+    }
+    
+    println("Event log system took an extra "+
+            (System.currentTimeMillis()-extraTimeStart)+ 
+            " msec to finish event log insertion")
+    
+    if (deleteAllLogs) {
+        def delStartTime = System.currentTimeMillis()
+        
+        def numDeleted = deleteAllLogs() 
+        
+        println("Deleted "+numDeleted+
+                " event logs in "+
+                (System.currentTimeMillis()-delStartTime)+" msec")        
     }
     
 }
@@ -98,6 +131,14 @@ def startLogEventInserterThread(appDefEntityId,
 	        								    pauseTimeBetweenInserts)
 	logEventInserter.start()
 	return logEventInserter
+}
+
+def getTotalNumEventLogs() {
+    return elM.one.getTotalNumberLogs()
+}
+
+def deleteAllLogs() {
+    return elM.one.deleteLogs(-1, -1)
 }
 
 //LOG EVENT INSERTER CLASS
