@@ -373,9 +373,9 @@ font-weight:bold;
 .goodResults  {cursor:pointer;}
 .grpmembertext{padding:3px;margin-top:10px;margin-bottom:5px;background-color:#868787;color:#FFFFFF;font-weight:bold;font-size: 12px;}
 #groupMembers {padding-bottom:5px;overflow-y:auto;overflow-x: hidden;height:298px;}
-#groupMembers ul {margin:0px;padding:0px;list-style-type:none;}
-#groupMembers li {padding:1px;width:100%;padding:1px;white-space:nowrap;}
-.groupMemberName {display:inline;float:left;width:80%;overflow:auto;}
+#groupMembers ul {margin:0px;padding:0px;}
+#groupMembers li {padding:2px 3px;width:100%;list-style-type:none;}
+.groupMemberName {display:inline;float:left;width:80%;}
 .goodResults  {background: url("images/lightning_go.gif") no-repeat;cursor:pointer;}
 .errorResults {background: url("images/lightning_delete.gif") no-repeat;cursor:pointer;}
 
