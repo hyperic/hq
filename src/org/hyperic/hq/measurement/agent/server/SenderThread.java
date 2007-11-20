@@ -364,7 +364,9 @@ public class SenderThread
             
             if(log.isDebugEnabled()){
                 this.log.debug("    Data:  d=" + rec.derivedID + 
-                               " r=" + rec.dsnId + " v=" + rec.data);
+                               " r=" + rec.dsnId +
+                               " t=" + rec.data.getTimestamp() +
+                               " v=" + rec.data);
             }
 
             if(this.metricDebug.contains(new Integer(rec.derivedID))){
