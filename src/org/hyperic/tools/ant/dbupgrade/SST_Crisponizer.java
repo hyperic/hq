@@ -100,8 +100,8 @@ public class SST_Crisponizer extends SchemaSpecTask {
         
         try {
             String sql = "insert into " + CRISPO_OPT_TABLE + 
-                " (\"id\", \"version_col\", \"propkey\", \"val\", " + 
-                "\"crispo_id\") VALUES (" + optId + ", 1, ?, ?, " + crispoId +
+                " (id, version_col, propkey, val, " + 
+                "crispo_id) VALUES (" + optId + ", 1, ?, ?, " + crispoId +
                 ")";
                 
             pstmt = getConnection().prepareStatement(sql);
@@ -133,7 +133,7 @@ public class SST_Crisponizer extends SchemaSpecTask {
         try {
             stmt = getConnection().createStatement();
             String sql = "insert into " + CRISPO_TABLE +  
-                         " (\"id\", \"version_col\") VALUES (" + crispoId + 
+                         " (id, version_col) VALUES (" + crispoId + 
                          ", 1)";
             stmt.execute(sql);
         } finally {
