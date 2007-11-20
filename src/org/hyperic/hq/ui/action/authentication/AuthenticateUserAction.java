@@ -26,8 +26,6 @@
 package org.hyperic.hq.ui.action.authentication;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +44,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -56,11 +53,7 @@ import org.hyperic.hq.authz.shared.OperationValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.server.session.AttachmentMasthead;
-import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
@@ -105,13 +98,13 @@ public class AuthenticateUserAction extends TilesAction {
         WebUser webUser;
         Map userOpsMap = new HashMap();
         boolean needsRegistration = false;
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         try {
             webUser = loginUser(request, ctx, logonForm.getJ_username(),
                                 logonForm.getJ_password());
             
             needsRegistration = webUser.getPreferences().getKeys().size() == 0;
             if (!needsRegistration) {
-                AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
                 userOpsMap = loadUserPermissions(webUser.getSessionId(),
                                                  authzBoss);
             }
@@ -135,7 +128,6 @@ public class AuthenticateUserAction extends TilesAction {
         if (needsRegistration) {
             log.debug("User registration required");
             af = new ActionForward(URL_REGISTER);
-
         } else {
             // if the user's session timed out, we "bookmarked" the
             // url that he was going to so that we can send him there
@@ -149,33 +141,33 @@ public class AuthenticateUserAction extends TilesAction {
             af.setRedirect(true);
         }
 
-        // now that we've constructed a forward to the bookmarked url,
-        // if any, forget the old session and start a new one,
-        // setting the web user to show that we're logged in
-        session = request.getSession(true);
-        session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
-        session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+        // Load the user dashboard
+        session = loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss);
 
         if (needsRegistration) {
             // will be cleaned out during registration
             session.setAttribute(Constants.PASSWORD_SES_ATTR,
                                  logonForm.getJ_password());
         }
-        
-        // Load the user dashboard
-        loadUserDashboard(ctx, webUser);
-        
-        // See if graphics engine is present
-        try {
-            new ResourceTree(1);
-            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
-        } catch (Throwable t) {
-            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
-        }
+                
         return af;
     }
 
-    private static void loadUserDashboard(ServletContext ctx, WebUser webUser) {
+    private static HttpSession loadUserDashboard(HttpServletRequest request,
+                                                 ServletContext ctx,
+                                                 WebUser webUser,
+                                                 Map userOpsMap,
+                                                 AuthzBoss authzBoss)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, RemoteException, FinderException {
+
+        // now that we've constructed a forward to the bookmarked url,
+        // if any, forget the old session and start a new one,
+        // setting the web user to show that we're logged in
+        HttpSession session = request.getSession(true);
+        session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
+        session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+
         // Load the user dashboard if it doesn't exist create a new one
         // and mix in the defaults
         try {
@@ -198,6 +190,16 @@ public class AuthenticateUserAction extends TilesAction {
         } catch (PermissionException e) {
             e.printStackTrace();
         } 
+
+        // See if graphics engine is present
+        try {
+            new ResourceTree(1);
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
+        } catch (Throwable t) {
+            session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
+        }
+        
+        return session;
     }
         
     /*
@@ -316,14 +318,11 @@ public class AuthenticateUserAction extends TilesAction {
 
             WebUser webUser =
                 new WebUser(subject, sessionId, preferences, true);
+            
             Map userOpsMap = loadUserPermissions(sessionId, authzBoss);
 
-            HttpSession session = request.getSession(true);
-            session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
-            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
-            
             // Load the user dashboard
-            loadUserDashboard(ctx, webUser);
+            loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss);
             
             return webUser;
         } catch (Exception e) {
