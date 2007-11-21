@@ -67,9 +67,11 @@ tnschk2=`echo  $tnschk | grep -c OK`
 if [ "${tnschk2}" -eq 1 ] ; then
     tnschk3=`echo $tnschk | sed -e 's/.*(//' -e 's/).*//' -e 's/ msec//'`
     echo "$tnsname.TNSResponseTime=${tnschk3}"
+    echo "$tnsname.Availability=1"
     exit 0
 else
     echo "No TNS Listener on $tnsname"
+    echo "$tnsname.Availability=0"
     exit 3
 fi
   </script>
