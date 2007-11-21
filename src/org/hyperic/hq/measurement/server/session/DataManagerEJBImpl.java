@@ -1442,8 +1442,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // First, figure out how many i's we need
             int totalIntervals = (int) Math.min((end - begin) / interval, 60);
             // The SQL that we will use
-            String metricUnion = MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
-                                                                  id.intValue());
+            String metricUnion =
+                MeasTabManagerUtil.getUnionStatement(begin, end, id.intValue());
             String sql =
                 "SELECT ("+begin+" + ("+interval+" * i)) FROM " + TAB_NUMS +
                 " WHERE i < "+totalIntervals+" AND" +
