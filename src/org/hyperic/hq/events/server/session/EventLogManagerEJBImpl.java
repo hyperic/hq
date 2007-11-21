@@ -177,7 +177,17 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         EventLogDAO dao = getEventLogDAO();
         return dao.findByCtime(begin, end, eventTypes);
     }
-
+    
+    /**
+     * Retrieve the total number of event logs.
+     * 
+     * @return The total number of event logs.
+     * @ejb:interface-method
+     */
+    public int getTotalNumberLogs() {
+        return getEventLogDAO().getTotalNumberLogs();
+    }
+    
     /**
      * Get an array of booleans, each element indicating whether or not there 
      * are log records for that respective interval, for a particular entity 

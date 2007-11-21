@@ -131,6 +131,19 @@ public class EventLogDAO extends HibernateDAO {
     }
     
     /**
+     * Retrieve the total number of event logs.
+     * 
+     * @return The total number of event logs.
+     */
+    int getTotalNumberLogs() {
+        String sql = "select count(*) from EventLog";
+        
+        Integer result = (Integer)getSession().createQuery(sql).uniqueResult();
+        
+        return result.intValue();
+    }
+    
+    /**
      * Delete event logs in chunks.
      * 
      * @param from The timestamp to delete from.
