@@ -54,11 +54,11 @@ public class MetricProblemDAO extends HibernateDAO {
         return p;
     }
     
-    int deleteByMetricIds(Integer[] ids) {
-        String sql = "delete MetricProblem where measurement_id in (:ids)";
+    int deleteByMetricId(Integer id) {
+        String sql = "delete MetricProblem where measurement_id = :id";
 
         return getSession().createQuery(sql)
-            .setParameterList("ids", ids)
+            .setInteger("id", id.intValue())
             .executeUpdate();
     }
 }
