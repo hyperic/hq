@@ -130,9 +130,16 @@ public class AvailabilityCheckService
         List addData = new ArrayList();
         // Let's be safe and reset the time to current
         current = System.currentTimeMillis();
+
+        MetricDataCache cache = MetricDataCache.getInstance();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
             DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            if (!dm.getTemplate().getAlias().toUpperCase()
+                    .equals(MeasurementConstants.CAT_AVAILABILITY))
+                continue;
             
+            cache.setAvailMetric(dm.getId());
+
             AppdefEntityID aeid =
                 new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
                                                  
@@ -232,8 +239,7 @@ public class AvailabilityCheckService
             Collection servers = platform.getServers();
             for (Iterator it = servers.iterator(); it.hasNext();) {
                 Server server = (Server)it.next();
-                Object dmv =
-                    availMap.remove(server.getEntityId());
+                Object dmv = availMap.remove(server.getEntityId());
                 if (dmv != null)
                     metrics.add(dmv);
                 Collection services = server.getServices();
@@ -250,6 +256,11 @@ public class AvailabilityCheckService
         // Go through the server and service metrics and backfill them
         for (Iterator it = metrics.iterator(); it.hasNext();) {
             DerivedMeasurement dm = (DerivedMeasurement) it.next();
+            if (!dm.getTemplate().getAlias().toUpperCase()
+                    .equals(MeasurementConstants.CAT_AVAILABILITY))
+                continue;
+
+            cache.setAvailMetric(dm.getId());
 
             // End is at least more than 1/2 interval away
             long end = TimingVoodoo.closestTime(
@@ -295,13 +306,6 @@ public class AvailabilityCheckService
             }
         }
         watch.markTimeBegin("addData");
-        
-        // We know that all data points in addData are avail metrics
-        MetricDataCache cache = MetricDataCache.getInstance();
-        for (Iterator it = addData.iterator(); it.hasNext(); ) {
-            DataPoint dp = (DataPoint) it.next();
-            cache.setAvailMetric(dp.getMetricId());
-        }
         
         getDataMan().addData(addData, false);
         watch.markTimeEnd("addData");
