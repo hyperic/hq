@@ -142,8 +142,12 @@ public class CrispoManagerEJBImpl implements SessionBean {
      * @ejb:interface-method 
      */
     public void updateOption(CrispoOption o, String val) {
-        o.setValue(val);
-        getCrispoOptionDAO().save(o);
+        if (val == null || val.matches("^\\s*$")) {
+            getCrispoOptionDAO().remove(o);
+        } else {
+            o.setValue(val);
+            getCrispoOptionDAO().save(o);
+        }
     }
 
     public static CrispoManagerLocal getOne() {

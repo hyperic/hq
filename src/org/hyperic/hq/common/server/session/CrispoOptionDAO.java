@@ -12,6 +12,10 @@ public class CrispoOptionDAO extends HibernateDAO {
         super(CrispoOption.class, f);
     }
 
+    void remove(CrispoOption o) {
+        super.remove(o);
+    }
+
     void save(CrispoOption o) {
         super.save(o);
     }
