@@ -36,7 +36,6 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
@@ -52,7 +51,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
 
 public class ConfigChangedTrigger
     extends AbstractTrigger
-    implements RegisterableTriggerInterface, ConditionalTriggerInterface {
+    implements ConditionalTriggerInterface {
     static {
         // Register the trigger/condition
         ConditionalTriggerInterface.MAP_COND_TRIGGER.put(
@@ -64,21 +63,21 @@ public class ConfigChangedTrigger
     private String         match;
 
     /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedEventTypes()
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
      */
     public Class[] getInterestedEventTypes(){
         return new Class[] { ConfigChangedEvent.class };
     }
 
     /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getInterestedInstanceIDs()
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
      */
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { id.getId() };
     }
 
     /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#getConfigSchema()
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
      */
     public ConfigSchema getConfigSchema(){
         return ConditionalTriggerSchema
@@ -103,7 +102,7 @@ public class ConfigChangedTrigger
     }
 
     /**
-     * @see org.hyperic.hq.events.shared.RegisteredTriggerValue#init()
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException {

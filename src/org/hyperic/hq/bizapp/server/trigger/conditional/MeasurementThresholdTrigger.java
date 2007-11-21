@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
 import org.hyperic.hq.common.SystemException;
@@ -36,7 +38,6 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -47,15 +48,12 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * A simple trigger which fires if a measurement event exceeds a threshold.
  */
 
 public class MeasurementThresholdTrigger extends AbstractTrigger
-    implements RegisterableTriggerInterface, ConditionalTriggerInterface {
+    implements ConditionalTriggerInterface {
     private Log log = LogFactory.getLog(getClass().getName());
     
     static {
@@ -78,14 +76,23 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
     private double  threshold;
     private Integer metricId;
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
+     */
     public Class[] getInterestedEventTypes(){
         return new Class[] { MeasurementEvent.class };
     }
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
+     */
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { metricId };
     }
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     */
     public ConfigSchema getConfigSchema(){
         return ConditionalTriggerSchema
             .getConfigSchema(EventConstants.TYPE_THRESHOLD);
@@ -117,6 +124,9 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         return resp;
     }
     
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
+     */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException
     {

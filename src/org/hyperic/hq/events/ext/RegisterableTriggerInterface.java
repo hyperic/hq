@@ -35,13 +35,12 @@ import org.hyperic.util.config.ConfigSchema;
  */
 
 public interface RegisterableTriggerInterface {
+    
     /**
-     * Initialize the trigger with a value object.  
+     * Initialize the trigger with a value object.
      *
-     * @param triggerData  Configuration data for the trigger
-     *
-     * @throws org.hyperic.hq.bizapp.server.trigger.InvalidTriggerDataException
-     * indicating that the triggerData was invalid.
+     * @param tval  Configuration data for the trigger
+     * @throws InvalidTriggerDataException if the configuration data is invalid.
      */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException;

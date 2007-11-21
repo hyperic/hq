@@ -57,7 +57,6 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -78,8 +77,7 @@ import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
  *
  */
 public class MultiConditionTrigger
-    extends AbstractTrigger
-    implements RegisterableTriggerInterface {
+    extends AbstractTrigger {
     private final Log log = LogFactory.getLog(MultiConditionTrigger.class);
 
     public static final String CFG_TRIGGER_IDS = "triggerIds";
@@ -189,6 +187,9 @@ public class MultiConditionTrigger
         rwLock.writeLock().release();
     }
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     */
     public ConfigSchema getConfigSchema() {
         ConfigSchema res = new ConfigSchema();
 
@@ -219,14 +220,9 @@ public class MultiConditionTrigger
         resp.setValue(CFG_TIME_RANGE, String.valueOf(range));
         return resp;
     }
-            
-    /** 
-     * Initialize the trigger with a value object.
-     *
-     * @param tval  Configuration data for the trigger
-     *
-     * @throws InvalidTriggerDataException indicating that the triggerData
-     *                                     was invalid.
+    
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException {
@@ -539,15 +535,9 @@ public class MultiConditionTrigger
                                              lastException);
         }
     }    
-
-    /** Get the event classes that the trigger is interested in
-     * seeing.  This is an optimization, so that a trigger's
-     * processEvent() method is called only when a valid event
-     * occurs.
-     *
-     * @return an array of Class objects which implement
-     *          the 'Event' interface
-     *
+    
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
      */
     public Class[] getInterestedEventTypes() {
         return new Class[] { TriggerFiredEvent.class,
@@ -555,16 +545,8 @@ public class MultiConditionTrigger
                              FlushStateEvent.class };
     }
 
-    /** Get a list of instance IDs specific to a class (as returned
-     * by getInterestedEventTypes) which the trigger is interested
-     * in seeing.  These values are specific to the event type, and
-     * represent things such as specific measurements.
-     *
-     * @param c Class to get the interested event IDs for
-     *
-     * @return An array of integers representing the instance IDs
-     *          for the specific event class
-     *
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
      */
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in

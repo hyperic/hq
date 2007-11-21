@@ -52,6 +52,7 @@ import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
@@ -69,7 +70,8 @@ import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 
 /** Abstract class that defines a trigger, which can fire actions
  */
-public abstract class AbstractTrigger implements TriggerInterface {
+public abstract class AbstractTrigger 
+    implements TriggerInterface, RegisterableTriggerInterface {
     
     private final Log log = LogFactory.getLog(AbstractTrigger.class);
     
@@ -95,7 +97,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
         // set the default value
         triggerValue.setId(new Integer(-1));
     }
-
+    
     private boolean isSystemReady() {
         if (!systemReady) {
             try {
@@ -185,9 +187,7 @@ public abstract class AbstractTrigger implements TriggerInterface {
             }
             
             EscalatableCreator creator = 
-                new ClassicEscalatableCreator(alertDef, 
-                                              event, 
-                                              getAlertDefLastFiredCallback());
+                new ClassicEscalatableCreator(alertDef, event);
             
             // Now start escalation
             if (alertDef.getEscalation() != null) {

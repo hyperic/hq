@@ -46,7 +46,6 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
@@ -62,7 +61,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  *
  */
 public class AlertTrigger extends AbstractTrigger
-    implements RegisterableTriggerInterface, ConditionalTriggerInterface {
+    implements ConditionalTriggerInterface {
     static {
         // Register the trigger/condition
         ConditionalTriggerInterface.MAP_COND_TRIGGER.put(
@@ -111,34 +110,23 @@ public class AlertTrigger extends AbstractTrigger
         }
     }
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     */
     public ConfigSchema getConfigSchema() {
         return ConditionalTriggerSchema
             .getConfigSchema(EventConstants.TYPE_ALERT);
     }
 
-    /** Get the event classes that the trigger is interested in
-     * seeing.  This is an optimization, so that a trigger's
-     * processEvent() method is called only when a valid event
-     * occurs.
-     *
-     * @return an array of Class objects which implement
-     *          the 'Event' interface
-     *
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
      */
     public Class[] getInterestedEventTypes() {
         return new Class[] { AlertFiredEvent.class };
     }
 
-    /** Get a list of instance IDs specific to a class (as returned
-     * by getInterestedEventTypes) which the trigger is interested
-     * in seeing.  These values are specific to the event type, and
-     * represent things such as specific measurements.
-     *
-     * @param c Class to get the interested event IDs for
-     *
-     * @return An array of integers representing the instance IDs
-     *          for the specific event class
-     *
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
      */
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in
@@ -147,14 +135,9 @@ public class AlertTrigger extends AbstractTrigger
         
         return null;
     }
-
-    /** Initialize the trigger with a value object.
-     *
-     * @param triggerData  Configuration data for the trigger
-     *
-     * @throws org.hyperic.hq.bizapp.server.trigger.InvalidTriggerDataException indicating that the triggerData
-     *                                     was invalid.
-     *
+    
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException {

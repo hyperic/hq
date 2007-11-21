@@ -39,7 +39,6 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
@@ -58,7 +57,7 @@ import org.hyperic.util.config.LongConfigOption;
  */
 
 public class DurationTrigger extends AbstractTrigger
-    implements RegisterableTriggerInterface, FrequencyTriggerInterface {
+    implements FrequencyTriggerInterface {
     private static final String CFG_COUNT      = "count";
 
     private Object  lock = new Object();
@@ -75,6 +74,9 @@ public class DurationTrigger extends AbstractTrigger
         log = LogFactory.getLog(DurationTrigger.class);
     }
 
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     */
     public ConfigSchema getConfigSchema() {
         ConfigSchema res = new ConfigSchema();
         IntegerConfigOption tid;
@@ -116,14 +118,8 @@ public class DurationTrigger extends AbstractTrigger
         return resp;
     }
 
-    /** 
-     * Initialize the trigger
-     *
-     * @param tval  Configuration data for the trigger
-     *
-     * @throws org.hyperic.hq.bizapp.server.trigger.InvalidTriggerDataException
-               indicating that the trigger config was invalid.
-     *
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
     public void init(RegisteredTriggerValue tval)
         throws InvalidTriggerDataException {
@@ -166,17 +162,8 @@ public class DurationTrigger extends AbstractTrigger
                              HeartBeatEvent.class };
     }
 
-    /** 
-     * Get a list of instance IDs specific to a class (as returned
-     * by getInterestedEventTypes) which the trigger is interested
-     * in seeing.  These values are specific to the event type, and
-     * represent things such as specific measurements.
-     *
-     * @param c Class to get the interested event IDs for
-     *
-     * @return An array of integers representing the instance IDs
-     *          for the specific event class
-     *
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
      */
     public Integer[] getInterestedInstanceIDs(Class c){
         if (c.equals(HeartBeatEvent.class)) {
