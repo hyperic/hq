@@ -875,7 +875,8 @@ public class AlertDefinitionManagerEJBImpl
                                          Boolean enabled, PageInfo pInfo) 
         throws PermissionException
     {
-        if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj)) {
+        if (!PermissionManagerFactory.getInstance()
+                .hasAdminPermission(subj.getId())) {
             throw new PermissionException("Only administrators can do this");
         }
         return getAlertDefDAO().findTypeBased(enabled, pInfo);

@@ -96,8 +96,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
         
-        if (!me.equals(user) && 
-            !permMan.hasAdminPermission(me.getAuthzSubjectValue()))
+        if (!me.equals(user) && !permMan.hasAdminPermission(me.getId()))
         {
             throw new PermissionException("You are unauthorized to see this " +
                                           "dashboard");
@@ -134,8 +133,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
         
-        if (!me.equals(user) && 
-            !permMan.hasAdminPermission(me.getAuthzSubjectValue()))
+        if (!me.equals(user) && !permMan.hasAdminPermission(me.getId()))
         {
             throw new PermissionException("You are unauthorized to create " + 
                                           "this dashboard");
@@ -203,7 +201,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
     public boolean isEditable(AuthzSubject me, DashboardConfig dash) { 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        if (permMan.hasAdminPermission(me.getAuthzSubjectValue()))  
+        if (permMan.hasAdminPermission(me.getId()))  
             return true;
 
         return dash.isEditable(me);
@@ -218,7 +216,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
         Collection res = new ArrayList();
 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        if (permMan.hasAdminPermission(me.getAuthzSubjectValue())) {
+        if (permMan.hasRoleDashboards() &&
+            permMan.hasAdminPermission(me.getId())) {
             res.addAll(_dashDAO.findAllRoleDashboards());
             res.add(getUserDashboard(me, me));
             return res; 
@@ -228,7 +227,9 @@ public class DashboardManagerEJBImpl implements SessionBean {
         if (cfg != null)
             res.add(cfg);
         
-        res.addAll(_dashDAO.findRolesFor(me));
+        if (permMan.hasRoleDashboards())
+            res.addAll(_dashDAO.findRolesFor(me));
+        
         return res;
     }
 

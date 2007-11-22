@@ -116,7 +116,7 @@ public class PermissionManagerImpl
                       String operation)
         throws PermissionException {}
 
-    public boolean hasAdminPermission(AuthzSubjectValue who) {
+    public boolean hasAdminPermission(Integer who) {
         return true;
     }
     
@@ -358,5 +358,9 @@ public class PermissionManagerImpl
                "join d.group g " +
                "join d.escalation e " +
          "where d.severityEnum >= :priority ";
+    }
+
+    public boolean hasRoleDashboards() {
+        return false;
     }
 }

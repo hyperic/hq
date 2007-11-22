@@ -95,8 +95,13 @@ public interface PermissionManager {
      *
      * @return true - if user has administerCAM operation false otherwise
      */
-    public boolean hasAdminPermission(AuthzSubjectValue who);
+    public boolean hasAdminPermission(Integer who);
 
+    /**
+     * Check to see if user can see role dashboards
+     */
+    public boolean hasRoleDashboards();
+    
     /**
      * Find the list of instance ids for which a given subject id 
      * has the named operation in one of their roles or owns a resource

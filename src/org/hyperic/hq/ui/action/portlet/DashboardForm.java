@@ -20,13 +20,17 @@ public class DashboardForm extends BaseValidatorForm {
 	public void setPopDialog(boolean dialog) {
 		_popDialog = dialog;
 	}
+	
+	public boolean isDashboardSelectable() {
+	    return _dashboards.size() > 1;
+	}
 
 	public List getDashboards() {
 		return _dashboards;
 	}
 
 	public void setDashboards(List dashboards) {
-		this._dashboards = dashboards;
+		_dashboards = dashboards;
 	}
 
 	public String getSelectedDashboardId() {
@@ -34,7 +38,7 @@ public class DashboardForm extends BaseValidatorForm {
 	}
 
 	public void setSelectedDashboardId(String selectedDashboardId) {
-		this._selectedDashboardId = selectedDashboardId;
+		_selectedDashboardId = selectedDashboardId;
 	}
 
 	public String getDefaultDashboard() {

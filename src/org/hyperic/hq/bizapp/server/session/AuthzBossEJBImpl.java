@@ -87,9 +87,9 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     public boolean hasAdminPermission(int sessionId)
         throws FinderException, 
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        return pm.hasAdminPermission(subject);
+        return pm.hasAdminPermission(subject.getId());
     }
 
     /**

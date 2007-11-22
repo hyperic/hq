@@ -412,7 +412,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         Resource resource = lookupResourcePojo(res);
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
 
-        if (pm.hasAdminPermission(whoami) ||
+        if (pm.hasAdminPermission(whoami.getId()) ||
             getResourceDAO().isOwner(resource, whoami.getId())) {
             resource.setOwner(lookupSubjectPojo(newOwner));
         }
