@@ -1737,24 +1737,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             stmt = conn.createStatement();
-            String metricUnion = MeasTabManagerUtil
-                .getUnionStatement((System.currentTimeMillis() - getPurgeRaw()),
-                                   timeAfter, id.intValue());
-            
+            String[] mdTables =
+                MeasTabManagerUtil.getMetricTables(System.currentTimeMillis() -
+                                                   getPurgeRaw(), timeAfter);
+
             // Create array of tables to go through
-            String[] tables = new String[] {
-                    metricUnion,
-                    TAB_DATA_1H,
-                    TAB_DATA_6H,
-                    TAB_DATA_1D
-            };
+            String[] tables = new String[mdTables.length + 3];
+            int i = 0;
+            for (; i < mdTables.length; i++) {
+                tables[i] = mdTables[i];
+            }
+            tables[i++] = TAB_DATA_1H;
+            tables[i++] = TAB_DATA_6H;
+            tables[i++] = TAB_DATA_1D;
             
-            for (int i = 0; i < tables.length; i++) {
+            for (i = 0; i < tables.length; i++) {
+                StopWatch watch = new StopWatch();
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
                                        " WHERE " +
-                                       " timestamp < " + timeAfter +
-                                       " and measurement_id = " + id +
+                                       " measurement_id = " + id +
                                        " and not value = 0");
                 
                 if (rs.next()) {
@@ -1764,6 +1766,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
                 
                 DBUtil.closeResultSet(logCtx, rs);
+                _log.info("getLastNonZero: " + watch.getElapsed());
             }
             
             // If all values are zero, then just return largest value

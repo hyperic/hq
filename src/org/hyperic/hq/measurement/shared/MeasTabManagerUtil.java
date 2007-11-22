@@ -95,6 +95,35 @@ public class MeasTabManagerUtil {
         sql.append(") ").append(TAB_DATA);
         return sql.toString();
     }
+    
+    /**
+     * Get the array of tables that fall in the time range
+     */
+    public static String[] getMetricTables(long begin, long end) {
+        List ranges = MeasRangeObj.getInstance().getRanges();
+        String[] tables = new String[ranges.size()];
+        
+        int i = 0;
+        for (Iterator it = ranges.iterator(); it.hasNext(); ) {
+            MeasRange range = (MeasRange) it.next();
+            long rBegin = range.getMinTimestamp(),
+                 rEnd   = range.getMaxTimestamp();
+
+            if (begin > rEnd || end < rBegin)
+                continue;
+            
+            tables[i++] = range.getTable();
+        }
+        
+        // Now we want to trim the empties
+        String[] retTables = new String[i];
+        
+        for (i = 0; i < retTables.length; i++) {
+            retTables[i] = tables[i];
+        }
+        
+        return retTables;
+    }
 
     /**
      * Get the UNION statement from the detailed measurement tables based on
@@ -110,7 +139,6 @@ public class MeasTabManagerUtil {
                                 getMeasInStmt(measIds, true);
         StringBuffer sql = new StringBuffer();
         sql.append("(");
-        Calendar cal = Calendar.getInstance();
         List ranges = MeasRangeObj.getInstance().getRanges();
         int joins = 0;
         for (Iterator i=ranges.iterator(); i.hasNext(); )
