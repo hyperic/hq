@@ -7412,6 +7412,17 @@ has already been defined.
                           columnType="VARCHAR2" />
     </schemaSpec>
 
+  <schemaSpec version="3.71">
+    <schema-directSQL>
+      <statement desc="create crispo IDs for role dashboards">
+        INSERT INTO EAM_CRISPO (ID) SELECT ID - 9000 FROM EAM_ROLE WHERE ID > 10000
+      </statement>
+      <statement desc="create role dashboards">
+        INSERT INTO EAM_DASH_CONFIG (ID, CONFIG_TYPE, NAME, CRISPO_ID, ROLE_ID) SELECT ID - 9000, 'ROLE', NAME || ' DASHBOARD', ID - 9000, ID FROM EAM_ROLE WHERE ID > 10000
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
