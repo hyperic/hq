@@ -25,6 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -71,4 +72,19 @@ public class TriggerDAO extends HibernateDAO {
     public RegisteredTrigger get(Integer id) {
         return (RegisteredTrigger) super.get(id);
     }
+    
+    /**
+     * Find all the registered triggers associated with the alert definition.
+     * 
+     * @param id The alert definition id.
+     * @return The list of associated registered triggers.
+     */
+    List findByAlertDefinitionId(Integer id) {
+        String sql = "from RegisteredTrigger rt where rt.alertDefinition.id = :defId";
+        
+        return getSession().createQuery(sql)
+            .setParameter("defId", id)
+            .list();
+    }    
+    
 }

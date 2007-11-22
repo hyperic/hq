@@ -679,6 +679,20 @@ public class AlertDefinitionManagerEJBImpl
         return badFindById(id, refresh);
     }
     
+    /**
+     * Check if an alert definition is a resource type alert definition.
+     * 
+     * @param id The alert def Id.
+     * @return <code>true</code> if the alert definition is a resource type 
+     *         alert definition.         
+     * @throws FinderException
+     * @ejb:interface-method
+     */
+    public boolean isResourceTypeAlertDefinition(Integer id) throws FinderException {
+        AlertDefinition ad = badFindById(id);
+        return ad.isResourceTypeDefinition();
+    }
+    
     /** 
      * Decide if a trigger should fire the alert
      *

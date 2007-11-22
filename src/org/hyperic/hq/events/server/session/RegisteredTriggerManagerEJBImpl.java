@@ -83,6 +83,17 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
         return triggerValues;
     }
+    
+    /**
+     * Get the registered trigger objects associated with a given alert definition.
+     * 
+     * @param id The alert def id.
+     * @return The registered trigger objects.
+     * @ejb:interface-method
+     */
+    public Collection getAllTriggersByAlertDefId(Integer id) {
+        return getTriggerDAO().findByAlertDefinitionId(id);
+    }
 
     /**
      * Create a new trigger
