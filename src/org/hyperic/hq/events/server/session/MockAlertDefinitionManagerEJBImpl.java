@@ -431,4 +431,10 @@ public class MockAlertDefinitionManagerEJBImpl implements
         alertDefinitionLastFiredTimeEvents.verify();
     }
 
+    public boolean isResourceTypeAlertDefinition(Integer id)
+        throws FinderException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
