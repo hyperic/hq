@@ -191,7 +191,7 @@ private class LogEventInserter extends Thread {
     	}  
   	}
  
-  	def getLogEventsByResource(appDefEntityId, numLogEvents, random) {
+  	private def getLogEventsByResource(appDefEntityId, numLogEvents, random) {
       	def logEvents = new ArrayList(numLogEvents)
       	def time = System.currentTimeMillis()
       	def level = LogTrackPlugin.LOGLEVEL_DEBUG
