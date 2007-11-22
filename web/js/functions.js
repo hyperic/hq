@@ -391,4 +391,31 @@ function accord8() {
   accord(8);
 }
 
+
+/* Escalation Admin */
+
+/* Display minutes or hours dependent on alert time */
+function formatWaitTime(el, time, hour, minute) {
+     var  actionWaitTime = time;
+        if (el==null && time!=null) {
+            if  (actionWaitTime > 3600000) {
+                actionWaitTime =  (actionWaitTime / 3600000) + " " + hour;
+                } else {
+                actionWaitTime =  (actionWaitTime / 60000) + " " + minute;
+             }
+         return actionWaitTime;
+       } else{
+        var formtdWaitTime;
+        var index = el.options[el.selectedIndex].value;
+            if  (index > 3600000) {
+                formtdWaitTime = (index / 3600000) + " " + hour;
+                } else {
+                formtdWaitTime =  (index / 60000) + " " + minute;
+             }
+   		return formtdWaitTime;
+   	}
+}
+
+
+
 /*-- END functions.js --*/
