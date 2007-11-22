@@ -1752,7 +1752,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             tables[i++] = TAB_DATA_1D;
             
             for (i = 0; i < tables.length; i++) {
-                StopWatch watch = new StopWatch();
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
                                        " WHERE " +
@@ -1766,7 +1765,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
                 
                 DBUtil.closeResultSet(logCtx, rs);
-                _log.info("getLastNonZero: " + watch.getElapsed());
             }
             
             // If all values are zero, then just return largest value
