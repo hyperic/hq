@@ -72,6 +72,13 @@ public final class GraphBuilder {
 
         // now add our dependents, recursively
         Collection args = mt.getMeasurementArgsBag();
+        
+        // Derived measurements can't have zero arguments
+        if (args.size() == 0) {
+            throw new InvalidGraphException("Template: " + mt.getId() +
+                                            " does not have any arguments");
+        }
+        
         for (Iterator i = args.iterator(); i.hasNext(); ) {
             MeasurementArg arg = (MeasurementArg)i.next();
             MeasurementTemplate templ = arg.getTemplateArg();

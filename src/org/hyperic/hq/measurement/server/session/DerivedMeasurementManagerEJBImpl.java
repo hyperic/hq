@@ -251,15 +251,14 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         try {
-            Graph[] graphs = new Graph[templates.length];
             for (int i = 0; i < templates.length; i++) {
                 Integer dTemplateId = templates[i];
                 long interval = intervals[i];
 
-                graphs[i] = GraphBuilder.buildGraph(dTemplateId);
+                Graph graph = GraphBuilder.buildGraph(dTemplateId);
 
                 DerivedNode derivedNode = (DerivedNode)
-                    graphs[i].getNode( dTemplateId.intValue() );
+                    graph.getNode( dTemplateId.intValue() );
                 MeasurementTemplate derivedTemplateValue =
                     derivedNode.getMeasurementTemplate();
 
@@ -290,24 +289,26 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                              rawTemplateValue.getId(),
                                              props);
                     }
-                    
-                    // if no DM already exists, then we need to create the
-                    // raw and derived and make note to schedule raw
-                    DerivedMeasurement dm;
-                    try {
-                        dm = updateMeasurementInterval(dTemplateId,
-                                                       instanceId, interval);
-                    } catch (FinderException e) {
-                        dm = createDerivedMeasurement(id, derivedTemplateValue,
-                                                      interval);
+                    else {
+                        try {
+                            argDm = updateMeasurementInterval(dTemplateId,
+                                                              instanceId,
+                                                              interval);
+                        } catch (FinderException e) {
+                            // Create the derived metric
+                        }
                     }
-
-                    argDm = dm;
+                    
+                    if (argDm == null)
+                        argDm = createDerivedMeasurement(id,
+                                                         derivedTemplateValue,
+                                                         interval);
+                        
                 } else {
                     // we're not an identity DM template, so we need
                     // to make sure that measurements are enabled for
                     // the whole graph
-                    for (Iterator graphNodes = graphs[i].getNodes().iterator();
+                    for (Iterator graphNodes = graph.getNodes().iterator();
                          graphNodes.hasNext();) {
                         Node node = (Node)graphNodes.next();
                         MeasurementTemplate templArg =
