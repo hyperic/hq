@@ -88,19 +88,25 @@ public class StatsCollector {
     }
 
     /**
-     * Get the timestamp of the oldest entry.
+     * Get the timestamp of the oldest entry (or -1 if there are no entries)
      */
     public long getOldestTime() {
         synchronized (LOCK) {
+            if (_numEnts == 0)
+                return -1;
+            
             return _timestamps[_start];
         }
     }
     
     /**
-     * Get the timestamp of the newest entry.
+     * Get the timestamp of the newest entry (or -1 if there are no entries)
      */
     public long getNewestTime() {
         synchronized (LOCK) {
+            if (_numEnts == 0)
+                return -1;
+                
             int idx = _start + (_numEnts - 1);
             if (idx >= _size)
                 idx -= _size;
