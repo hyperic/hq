@@ -37,6 +37,9 @@ public class StatsCollector {
     private int      _start;    // Head of ringbuffer -- points at oldest ent
     private int      _numEnts;  // # entries used in the arrays
     private int      _size;     // Size allocated for the arrays
+   
+    // Running stats
+    private double   _total;    // Sum of everything in the values array
     
     /**
      * Create a new collector which is able to internally store 'size'
@@ -48,6 +51,7 @@ public class StatsCollector {
         _start      = 0;
         _numEnts    = 0;
         _size       = size;
+        _total      = 0;
     }
 
     /**
@@ -58,6 +62,7 @@ public class StatsCollector {
         synchronized (LOCK) {
             if (_numEnts == _size) {
                 // Remove oldest entry at _values[_start]
+                _total -= _values[_start];
                 _values[_start]     = value;
                 _timestamps[_start] = timestamp;
                 _start++;
@@ -69,6 +74,7 @@ public class StatsCollector {
                 _timestamps[insertIdx] = timestamp;
                 _numEnts++;
             }
+            _total += value;
         }
     }
 
@@ -76,16 +82,8 @@ public class StatsCollector {
      * Get the sum of all values.
      */
     public double getTotal() {
-        double res = 0;
-        
         synchronized (LOCK) {
-            int idx = _start;
-            for (int i = 0; i<_numEnts; i++) {
-                res += _values[idx++];
-                if (idx == _size)
-                    idx = 0;
-            }
-            return res;
+            return _total;
         }
     }
 
