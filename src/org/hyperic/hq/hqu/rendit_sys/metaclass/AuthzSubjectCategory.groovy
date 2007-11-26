@@ -8,6 +8,6 @@ class AuthzSubjectCategory {
     static boolean isSuperUser(AuthzSubject subject) {
 		PermissionManagerFactory
 			.getInstance()
-			.hasAdminPermission(subject.authzSubjectValue)
+			.hasAdminPermission(subject.id)
     }
 }
