@@ -94,7 +94,7 @@ def runTest(alertDefId2EventGenerator,
     inserterThreads.each {
       totalNumInserted+=it.getNumAlertEventsInserted() 
       println(it.toString()+" thread is still active ="+it.isAlive()+
-              ", total num log events inserted="+it.getNumAlertEventsInserted())
+              ", total num events inserted="+it.getNumAlertEventsInserted())
     }
     
     println("Resource alert inserters ran for "+
