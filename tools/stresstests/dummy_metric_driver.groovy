@@ -1,6 +1,7 @@
 import org.hyperic.hq.measurement.server.session.DataPoint
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl as dM
+import org.hyperic.hq.measurement.server.session.MeasurementStartupListener
 
 /**
  * This script loads the data manager with dummy metric data points, 
@@ -148,6 +149,7 @@ private class DataInserter extends Thread {
  
   	void run() {   
     	def random = new Random()
+    	def dataInserter = MeasurementStartupListener.getDataInserter();
 
     	while (running) {
       		Thread.sleep(pauseTime)
@@ -161,8 +163,9 @@ private class DataInserter extends Thread {
         		def backfilledDpts = dataPoints.subList(0, random.nextInt(dataPoints.size()))
         		dM.one.addData(backfilledDpts, false)        
       		}
-      
-      		dM.one.addData(dataPoints)      
+      		
+      		// use the data inserter for metric insertion
+      		dataInserter.insertMetrics(dataPoints)      
     	}  
   	}
  
