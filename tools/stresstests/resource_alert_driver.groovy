@@ -250,8 +250,8 @@ private class ResourceAlertEventInserter extends Thread {
   	    
   	    for (i in 1..numAlertEvents) {
   	        triggers.each {
-  	  	        def event = generator(it, random)
-  	  	        alertEvents.addAll(event)  	            
+  	  	        def events = generator(it, random)
+  	  	        alertEvents.addAll(events)  	            
   	        }
   	    }
   	    
