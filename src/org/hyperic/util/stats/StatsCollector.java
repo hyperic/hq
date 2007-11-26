@@ -125,6 +125,15 @@ public class StatsCollector {
         }
     }
     
+    /**
+     * Get the # of elements in the collector
+     */
+    public int getSize() {
+        synchronized (LOCK) {
+            return _numEnts;
+        }
+    }
+    
     public String dump() {
         synchronized (LOCK) {
             StringBuffer res = new StringBuffer();
