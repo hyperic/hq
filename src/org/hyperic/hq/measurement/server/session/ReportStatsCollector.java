@@ -29,6 +29,7 @@ import java.util.Date;
 
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.StatsCollector;
 
 public class ReportStatsCollector {
@@ -53,14 +54,14 @@ public class ReportStatsCollector {
                                                    DateFormat.LONG);
                 long start = getCollector().getOldestTime();
                 long end   = getCollector().getNewestTime();
-                
+                double nMetrics = getCollector().valPerTimestamp() * 60;
+                PrintfFormat pfmt = new PrintfFormat("%.3f");
                 return "Metric Report Data\n" + 
                      "    Start:     " + fmt.format(new Date(start)) + "\n" +
                      "    End:       " + fmt.format(new Date(end)) + "\n" +
-                     "    # points:  " + getCollector().getSize() + "\n" +
-                     "    Rate:      " + 
-                     (getCollector().valPerTimestamp() * 1000 * 60) +
-                     " / min";
+                     "    Samples:   " + getCollector().getSize() + "\n" +
+                     "    Rate:      " + pfmt.sprintf(nMetrics) +  
+                     " kMetrics / min";
             }
         });
     }
