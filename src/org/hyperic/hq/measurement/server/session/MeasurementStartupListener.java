@@ -26,13 +26,17 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -40,6 +44,11 @@ import org.hyperic.hq.zevents.ZeventManager;
 public class MeasurementStartupListener
     implements StartupListener
 {
+    private static final String PROP_REPSTATS_SIZE = "REPORT_STATS_SIZE";
+    
+    private final Log _log = 
+        LogFactory.getLog(MeasurementStartupListener.class);
+    
     private static final Object LOCK = new Object();
     private static DataInserter _dataInserter;
     private static DefaultMetricEnableCallback _defEnableCallback;
@@ -83,6 +92,22 @@ public class MeasurementStartupListener
                 man.metricDeleted(m);
             }
         });
+
+        initReportsStats();
+    } 
+    
+    private void initReportsStats() {
+        Properties cfg = new Properties();
+
+        try {
+            cfg = ServerConfigManagerEJBImpl.getOne().getConfig();
+        } catch(Exception e) {
+            _log.warn("Error getting server config", e);
+        }
+        
+        int repSize = Integer.parseInt(cfg.getProperty(PROP_REPSTATS_SIZE, 
+                                                       "1000"));
+        ReportStatsCollector.getInstance().initialize(repSize);
     }
     
     public static void setDataInserter(DataInserter d) {

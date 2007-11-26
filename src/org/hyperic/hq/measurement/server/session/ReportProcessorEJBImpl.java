@@ -225,7 +225,10 @@ public class ReportProcessorEJBImpl
         DataInserter d = MeasurementStartupListener.getDataInserter();
 
         try {
-            d.insertMetrics(dataPoints); 
+            d.insertMetrics(dataPoints);
+            int size = dataPoints.size();
+            long ts = System.currentTimeMillis() / 1000 / 60;
+            ReportStatsCollector.getInstance().getCollector().add(size, ts);
         } catch(InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + 
                                       "insert data");
