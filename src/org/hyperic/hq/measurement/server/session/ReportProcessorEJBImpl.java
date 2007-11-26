@@ -227,7 +227,7 @@ public class ReportProcessorEJBImpl
         try {
             d.insertMetrics(dataPoints);
             int size = dataPoints.size();
-            long ts = System.currentTimeMillis() / 1000 / 60;
+            long ts = System.currentTimeMillis();
             ReportStatsCollector.getInstance().getCollector().add(size, ts);
         } catch(InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + 

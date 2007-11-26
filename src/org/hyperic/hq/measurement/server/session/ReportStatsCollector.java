@@ -37,13 +37,7 @@ public class ReportStatsCollector {
     private static final Object LOCK = new Object();
     private StatsCollector _stats;
     
-    private ReportStatsCollector() {}
-    
-    public void initialize(int numEnts) {
-        synchronized (LOCK) {
-            _stats = new StatsCollector(numEnts);
-        }
-        
+    private ReportStatsCollector() {
         DiagnosticThread.addDiagnosticObject(new DiagnosticObject() {
             public String getName() {
                 return "Metric Reports Stats";
@@ -57,17 +51,24 @@ public class ReportStatsCollector {
                 DateFormat fmt = 
                     DateFormat.getDateTimeInstance(DateFormat.LONG,  
                                                    DateFormat.LONG);
-                long start = getCollector().getOldestTime() * 1000 * 60;
-                long end   = getCollector().getNewestTime() * 1000 * 60;
+                long start = getCollector().getOldestTime();
+                long end   = getCollector().getNewestTime();
                 
                 return "Metric Report Data\n" + 
                      "    Start:     " + fmt.format(new Date(start)) + "\n" +
                      "    End:       " + fmt.format(new Date(end)) + "\n" +
                      "    # points:  " + getCollector().getSize() + "\n" +
-                     "    Rate:      " + getCollector().valPerTimestamp() +
+                     "    Rate:      " + 
+                     (getCollector().valPerTimestamp() * 1000 * 60) +
                      " / min";
             }
         });
+    }
+    
+    public void initialize(int numEnts) {
+        synchronized (LOCK) {
+            _stats = new StatsCollector(numEnts);
+        }
     }
     
     public StatsCollector getCollector() {
