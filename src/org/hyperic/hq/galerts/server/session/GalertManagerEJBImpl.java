@@ -64,6 +64,7 @@ import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
+import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
@@ -244,6 +245,35 @@ public class GalertManagerEJBImpl
      */
     public GalertAuxLog findAuxLogById(Integer id) {
         return _auxLogDAO.findById(id);
+    }
+    
+    /**
+     * Retrieve the Gtriggers for a partition in the given galert def.
+     * 
+     * @param id The galert def id.
+     * @param partition The partition.
+     * @return The list of Gtriggers.
+     * @ejb:interface-method 
+     */
+    public List getTriggersById(Integer id, GalertDefPartition partition) {
+        List triggers = new ArrayList();
+        
+        GalertDef def = findById(id);     
+        
+        ExecutionStrategyInfo strategy = def.getStrategy(partition);
+        
+        if (strategy != null) {
+            List triggerInfos = strategy.getTriggers();
+            
+            for (Iterator it = triggerInfos.iterator(); it.hasNext();) {
+                GtriggerInfo triggerInfo = (GtriggerInfo) it.next();
+                Gtrigger trigger = triggerInfo.getTrigger();
+                trigger.setGroup(def.getGroup());                
+                triggers.add(trigger);
+            }
+        }
+        
+        return triggers;
     }
     
     /**
