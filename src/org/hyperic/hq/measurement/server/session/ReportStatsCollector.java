@@ -78,7 +78,7 @@ public class ReportStatsCollector {
         });
     }
     
-    private void createHQHibernateStatMBean()
+    private void createStatsMBean()
         throws MalformedObjectNameException, InstanceAlreadyExistsException,
                MBeanRegistrationException, NotCompliantMBeanException
     {
@@ -110,7 +110,7 @@ public class ReportStatsCollector {
                 INSTANCE.initialize(2);  // Dummy initialization
                 
                 try {
-                    INSTANCE.createHQHibernateStatMBean();
+                    INSTANCE.createStatsMBean();
                 } catch(Exception e) {
                     _log.warn("Unable to register Reports Stats mbean", e);
                 }
