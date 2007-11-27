@@ -38,6 +38,7 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -240,8 +241,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * @param ids An array of ID's of removed resources
      * @ejb:interface-method
      */
-    public void handleResourceDelete(Set opts, String[] ids) {
-
+    public void handleResourceDelete(Set opts, AppdefEntityID[] ids) {
         CrispoManagerLocal cm = CrispoManagerEJBImpl.getOne();
 
         for (Iterator i = opts.iterator(); i.hasNext(); ) {
@@ -255,8 +255,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
                 if (!val.equals(newVal)) {
                     cm.updateOption(o, newVal);
-                        _log.debug("Update option key=" + o.getKey() +
-                                   " old =" + val + " new =" + newVal);
+                    _log.debug("Update option key=" + o.getKey() +
+                               " old =" + val + " new =" + newVal);
                 }
             }
         }
@@ -289,9 +289,9 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * Yanked from DashboardUtils so we don't need to include anything other
      * than server and session in the server hq.jar
      */
-    private String removeResources(String[] ids, String val) {
+    private String removeResources(AppdefEntityID[] ids, String val) {
 	    for (int i = 0; i < ids.length; i++) {
-	        String resource = ids[i];
+	        String resource = ids[i].getAppdefKey();
 	        val = StringUtil.remove(val, resource);
 	        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
                                      Constants.DASHBOARD_DELIMITER);

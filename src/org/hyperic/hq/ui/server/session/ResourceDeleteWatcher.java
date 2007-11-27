@@ -2,6 +2,7 @@ package org.hyperic.hq.ui.server.session;
 
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 
 import java.util.Set;
@@ -48,11 +49,10 @@ public class ResourceDeleteWatcher implements ZeventListener {
     }
 
     public void processEvents(List events) {
-
-        String[] ids = new String[events.size()];
+        AppdefEntityID[] ids = new AppdefEntityID[events.size()];
         for (int i = 0; i < events.size(); i++ ) {
             ResourceDeletedZevent e = (ResourceDeletedZevent)events.get(i);
-            ids[i] = e.getAppdefEntityID().getAppdefKey();
+            ids[i] = e.getAppdefEntityID();
         }
 
         DashboardManagerLocal dm = DashboardManagerEJBImpl.getOne();
