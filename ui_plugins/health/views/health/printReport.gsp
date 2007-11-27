@@ -3,7 +3,7 @@
 -- HQ Health Report --
 ${reportTime}
 ${userName} @ ${fqdn}
-
+System ID: ${guid}
 
 -- HQ Load --
 # agents:    ${numAgents}

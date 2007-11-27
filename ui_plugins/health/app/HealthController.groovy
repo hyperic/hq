@@ -1,4 +1,5 @@
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
@@ -190,6 +191,7 @@ class HealthController
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
             fqdn:             s.getFQDN(),
+            guid:             SCM.one.getGUID(),
             reportTime:       dateFormat.format(System.currentTimeMillis()),
             userName:         user.fullName,
             numAgents:        AgentManagerEJBImpl.one.agentCount,
