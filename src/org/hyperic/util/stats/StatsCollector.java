@@ -117,15 +117,21 @@ public class StatsCollector {
     /**
      * Get the value per timestamp increment.  I.e:
      * 
-     *   getTotal() / (getNewestTime() - getOldestTime())
+     *   getTotal() / (endTime - getOldestTime())
      */
-    public double valPerTimestamp() {
+    public double valPerTimestamp(long newestTime) {
         synchronized (LOCK) {
             if (_numEnts < 2)
                 return Double.NaN;
             
-            long runtime = getNewestTime() - getOldestTime();
+            long runtime = newestTime - getOldestTime();
             return getTotal() / runtime;
+        }
+    }
+    
+    public double valPerTimestamp() {
+        synchronized (LOCK) {
+            return valPerTimestamp(getNewestTime());
         }
     }
     
