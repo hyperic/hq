@@ -1,4 +1,5 @@
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -129,7 +130,7 @@ class HealthController
     def getSystemStats(params) {
         def s = Humidor.instance.sigar
         def loadAvgFmt = new PrintfFormat('%.2f')
-        def dateFormat = DateFormat.getDateTimeInstance();
+        def dateFormat = DateFormat.getDateTimeInstance()
         
         def cpu      = s.cpuPerc
         def sysMem   = s.mem
@@ -176,5 +177,21 @@ class HealthController
                 jvmMaxMem:     formatBytes(runtime.maxMemory()),
                 jvmPercMem:    (int)((runtime.maxMemory() - runtime.freeMemory()) * 100 / runtime.maxMemory()),
         ]
+    }
+    
+    private printReport(params) {
+        def s = Humidor.instance.sigar
+        def dateFormat = DateFormat.dateTimeInstance
+            
+        def locals = [
+            numCpu:           Runtime.runtime.availableProcessors(),
+            fqdn:             s.getFQDN(),
+            reportTime:       dateFormat.format(System.currentTimeMillis()),
+            userName:         user.fullName,
+            numAgents:        AgentManagerEJBImpl.one.agentCount,
+            metricsPerMinute: metricsPerMinute,
+            diagnostics:      DiagnosticThread.diagnosticObjects,
+        ] + getSystemStats([:])
+    	render(locals: locals)
     }
 }

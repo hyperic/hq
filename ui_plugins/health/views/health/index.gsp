@@ -149,7 +149,6 @@ getSystemStats();
 </div>
 
 <div class="metricGroupBlock">
-
   <div id="processInfo" class="metricGroup">
     <div class="metricCatLabel">${l.procInfo}</div>
     <table class="metricTable">
@@ -175,6 +174,13 @@ getSystemStats();
       <td>${l.procCpu}:</td><td><div class="barContainer"><div id="procCpuBar" class="bar"><span id="procCpu"></span>%</div></div></td>
     </tr>
     </table>
+  </div>
+  
+  <div id="mailLinks" class="metricGroup">
+    <div class="metricCatLabel">Actions</div>
+      <blockquote>
+        <span>${linkTo('Print', [action:'printReport'])}</span>
+      </blockquote>
   </div>
 </div>
 
@@ -216,7 +222,7 @@ getSystemStats();
 </div>
 <div id="fullBody" style="clear:both">
   <div dojoType="TabContainer" id="bodyTabContainer" style="width: 100%; height:500px;">
-    <div dojoType="ContentPane" label="Diagnostics">
+    <div dojoType="ContentPane" label="${l.diagnostics}">
       <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
       <% for (d in diags) { %>
         <option value='${d.shortName}'>${h d.name}</option>
