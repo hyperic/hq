@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.zevents;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,26 +44,44 @@ class QueueProcessor
     private final Log _log = LogFactory.getLog(ZeventManager.class);
 
     private final BlockingQueue _eventQueue;
-    private final ZeventManager _manager;  
-
-    QueueProcessor(ZeventManager manager, BlockingQueue eventQueue){
+    private final ZeventManager _manager;
+    private final int           _batchSize;
+    private final Object        DATA_LOCK = new Object();        
+    
+    QueueProcessor(ZeventManager manager, BlockingQueue eventQueue,
+                   int batchSize)
+    {
         _manager    = manager;
         _eventQueue = eventQueue;
+        _batchSize  = batchSize;
     }
 
     public void run() {
         while (true) {
-            try {
-                Zevent e = (Zevent)_eventQueue.take();
+            processBatch();
+        }
+    }
+    
+    private void processBatch() {
+        try {
+            // We use take() to get the first element, since this will block
+            // until the queue has data.  We then use drainTo(), since it
+            // is not blocking but will allow us to batch.
+            List batch = new ArrayList(_batchSize);
+            batch.add(_eventQueue.take());
+            _eventQueue.drainTo(batch, _batchSize - 1);
 
+            for (Iterator i=batch.iterator(); i.hasNext(); ) {
+                Zevent e = (Zevent)i.next();
                 e.leaveQueue();
-                _manager.dispatchEvent(e);
-            } catch(InterruptedException exc) {
-                _log.warn("Thread interrupted.  I'm dying");
-                return;
-            } catch(Exception exc) {
-                _log.warn("Unable to dequeue and dispatch", exc);
             }
+            
+            _manager.dispatchEvents(batch);
+        } catch(InterruptedException exc) {
+            _log.warn("Thread interrupted.  I'm dying");
+            return;
+        } catch(Exception exc) {
+            _log.warn("Unable to dequeue and dispatch", exc);
         }
     }
 }
