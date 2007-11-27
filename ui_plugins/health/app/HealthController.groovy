@@ -237,10 +237,12 @@ class HealthController
              query: "select l.mode, transaction, l.granted, " + 
                     "now() - query_start as time, current_query " + 
                     "from pg_locks l, pg_stat_activity a " + 
-                    "where l.pid=a.procpid and now() - query_start > '00:00:01'"], 
+                    "where l.pid=a.procpid " + 
+                    " and now() - query_start > '00:00:01'"],
           pgStatActivity: [ 
              name: localeBundle['queryPostgresActivity'], 
-             query: "select * from pg_stat_activity"],
+             query: "select * from pg_stat_activity " + 
+                    "where current_query != '<IDLE>' order by query_start desc"],
         ]
     }
     
@@ -257,7 +259,8 @@ class HealthController
         def query = databaseQueries[id].query
         def name  = databaseQueries[id].name
         def start = now()
-        
+
+        log.info("Running query [${query}]")
         def res = withConnection() { conn ->
             def sql    = new Sql(conn)
             def output = new StringBuffer()
@@ -288,7 +291,6 @@ class HealthController
         }
         
         def queryData = "${name} executed in ${now() - start} ms<br/>"
-        log.info([ queryData: queryData + res ])
         [ queryData: queryData + res ]
     }
 }
