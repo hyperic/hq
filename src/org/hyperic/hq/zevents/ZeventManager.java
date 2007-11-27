@@ -413,7 +413,7 @@ public class ZeventManager {
                .append("ZEvent Listener Diagnostics:\n");
             synchronized (_listenerLock) {
                 PrintfFormat fmt = 
-                    new PrintfFormat("        %-30s max=%-3.2f avg=%-3.2f\n");
+                    new PrintfFormat("        %-30s max=%-7.2f avg=%-3.2f\n");
                 
                 for (Iterator i=_listeners.entrySet().iterator(); i.hasNext();){ 
                     Map.Entry ent = (Map.Entry)i.next();
