@@ -70,6 +70,21 @@ public class JBossUtil {
     private static final String JNDI_FACTORY =
         "org.jboss.security.jndi.JndiLoginInitialContextFactory";
 
+    private static final String PROP_JNP_TIMEOUT =
+        "jnp.timeout";
+
+    private static final String PROP_JNP_SOTIMEOUT =
+        "jnp.sotimeout";
+
+    private static final String DEFAULT_JNP_TIMEOUT =
+        System.getProperty(PROP_JNP_TIMEOUT,
+                           String.valueOf(30 * 1000));
+
+    private static final String DEFAULT_JNP_SOTIMEOUT =
+        System.getProperty(PROP_JNP_SOTIMEOUT,
+                           DEFAULT_JNP_TIMEOUT);
+
+    //http://wiki.jboss.org/wiki/Wiki.jsp?page=NamingContextFactory
     private static final String[][] NAMING_PROPS = {
         {
             PROP_NAMING_CONNECTOR,
@@ -84,9 +99,16 @@ public class JBossUtil {
             "org.jboss.naming:org.jnp.interfaces"
         },
         {
-            //http://wiki.jboss.org/wiki/Wiki.jsp?page=NamingContextFactory
             "jnp.disableDiscovery",
             "true"
+        },
+        {
+            PROP_JNP_TIMEOUT,
+            DEFAULT_JNP_TIMEOUT
+        },
+        {
+            PROP_JNP_SOTIMEOUT,
+            DEFAULT_JNP_SOTIMEOUT
         }
     };
 
