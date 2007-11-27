@@ -131,30 +131,32 @@ public class MetricDataCache {
         // Could be an availability metric
         if (_downCache.isKeyInCache(mid)) {
             Element el = _downCache.get(mid);
-            MetricValue val = (MetricValue) el.getObjectValue();
-            if (mval.getValue() == 1) {
-                if (val == null ||  // place holder or is now available
-                        val.getTimestamp() < mval.getTimestamp()) {
-                    _downCache.remove(mid);
+            synchronized(el) {
+                MetricValue val = (MetricValue) el.getObjectValue();
+                if (mval.getValue() == 1) {
+                    if (val == null ||  // place holder or is now available
+                            val.getTimestamp() < mval.getTimestamp()) {
+                        _downCache.remove(mid);
 
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Remove available metric: " + mid);
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("Remove available metric: " + mid);
+                        }
                     }
                 }
-            }
-            else if (mval.getValue() == 0) {
-                if (val == null) {
-                    _downCache.put(new Element(mid, mval));
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Add unavailable metric: " + mid +
-                                   " at " + mval.getTimestamp());
+                else if (mval.getValue() == 0) {
+                    if (val == null) {
+                        _downCache.put(new Element(mid, mval));
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("Add unavailable metric: " + mid +
+                                       " at " + mval.getTimestamp());
+                        }
                     }
-                }
-                else {
-                    val.setTimestamp(mval.getTimestamp());
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Update unavailable metric: " + mid +
-                                   " to " + mval.getTimestamp());
+                    else {
+                        val.setTimestamp(mval.getTimestamp());
+                        if (_log.isDebugEnabled()) {
+                            _log.debug("Update unavailable metric: " + mid +
+                                       " to " + mval.getTimestamp());
+                        }
                     }
                 }
             }
