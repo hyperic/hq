@@ -7423,6 +7423,10 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.28">
+    <schema-insert table="EAM_CONFIG_PROPS" dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (59, 'REPORT_STATS_SIZE', '1000', '1000', '0')"/>
+  </schemaSpec>
 </dbupgrade>
 </target>
 

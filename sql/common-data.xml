@@ -176,6 +176,9 @@
         <data ID="58" PROPKEY="BATCH_AGGREGATE_QUEUE" PROPVALUE="20000" 
               DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
               
+        <data ID="59" PROPKEY="REPORT_STATS_SIZE" PROPVALUE="1000" 
+              DEFAULT_PROPVALUE="1000" FREAD_ONLY="FALSE"/>
+              
     </table>
 
 </Covalent.DBSetup>
