@@ -31,6 +31,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -509,6 +510,17 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         }
     }
 
+    /**
+     * Get all the {@link ConfigProperty}s
+     * @ejb:interface-method
+     */
+    public Collection getConfigProperties() {
+        ConfigPropertyDAO dao =
+            DAOFactory.getDAOFactory().getConfigPropertyDAO();
+        
+        return dao.findAll();
+    }
+    
     private Collection getProps(ConfigPropertyDAO ccLH,
                                 String prefix) throws FinderException {
         if ( prefix == null ) {
