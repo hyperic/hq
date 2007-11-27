@@ -182,6 +182,7 @@
         <copy todir="@{eardir}/hq.war/hqu">
           <fileset dir="${basedir}/ui_plugins">
             <exclude name="scaffold/**"/>
+            <exclude name="extra/**"/>
             <exclude name="old/**"/>
           </fileset>
         </copy>
