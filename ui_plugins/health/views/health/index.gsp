@@ -239,6 +239,22 @@ getSystemStats();
     <div dojoType="ContentPane" label="${l.load}">
       ${l.metricsPerMinute}: ${metricsPerMinute}
     </div>  
+    
+    <% if (showDatabaseTab) { %>
+      <div dojoType="ContentPane" label="${l.database}">
+        <div id="querySelectControls">
+          <select id="querySelect" onchange='selectQuery(options[selectedIndex].value)'>
+            <option value='none'>-- ${l.selectQuery} --</option>
+          <% for (q in databaseQueries) { %>
+            <option value='${q.key}'>${h q.value.name}</option>
+          <% } %>
+          </select>
+          <img src="/images/arrow_refresh.png" onclick="loadQuery()"/>
+        </div>
+        <div id="queryData">
+        </div>
+      </div>  
+    <% } %>
 
   </div>
 </div>
@@ -272,4 +288,33 @@ function refreshDiag() {
 }
 
 refreshDiag();
+
+function selectQuery(q) {
+  if (q == 'none') {
+    dojo.byId('queryData').innerHTML = '';
+    return;
+  }
+    
+  dojo.io.bind({
+    url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
+      dojo.byId('queryData').innerHTML = data.queryData;
+    },
+  });
+}
+
+function loadQuery() {
+  var selectDrop = document.getElementById('querySelect');
+  selectQuery(selectDrop.options[selectDrop.selectedIndex].value);
+}
+
+function refreshQuery() {
+  loadQuery();
+  setTimeout("refreshQuery()", 1000 * 60);
+}
+
+refreshQuery();
+
 </script>

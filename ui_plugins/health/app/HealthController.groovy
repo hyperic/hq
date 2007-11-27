@@ -13,9 +13,18 @@ import org.hyperic.sigar.Sigar
 import org.hyperic.sigar.CpuPerc
 import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
+import org.hyperic.util.jdbc.DBUtil
+
 
 import java.text.DateFormat;
+import java.sql.Connection
+import javax.naming.InitialContext
+import javax.sql.DataSource
+
+import groovy.sql.Sql
+
 import net.sf.ehcache.CacheManager
+
 
 class HealthController 
 	extends BaseController
@@ -28,7 +37,7 @@ class HealthController
             }
             return false
         })
-        setJSONMethods(['getSystemStats', 'getDiag', 'cacheData'])
+        setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 'runQuery'])
     }
     
     private getCacheSchema() {
@@ -97,9 +106,17 @@ class HealthController
 	def index(params) {
     	render(locals:[ diags: diagnostics,
     	                cacheSchema: cacheSchema,
-    	                metricsPerMinute: metricsPerMinute])
+    	                metricsPerMinute: metricsPerMinute,
+    	                showDatabaseTab: showDatabaseTab,
+    	                databaseQueries: databaseQueries ])
     }
     
+	private getShowDatabaseTab() {
+        return withConnection() { conn ->
+            return DBUtil.isPostgreSQL(conn)          
+        }
+	}
+	
 	private getMetricsPerMinute() {
 	    def vals  = DMM.one.findMetricCountSummaries()
 	    def total = 0.0
@@ -114,7 +131,7 @@ class HealthController
         def diagName = params.getOne('diag')
         for (d in diagnostics) {
             if (d.shortName == diagName) {
-                return [diagData: HtmlUtil.escapeHtml(d.status)]
+                return [diagData: h(d.status)]
             }
         }
     }
@@ -199,5 +216,79 @@ class HealthController
             diagnostics:      diagnostics,
         ] + getSystemStats([:])
     	render(locals: locals)
+    }
+    
+    private withConnection(Closure c) {
+        def ctx  = new InitialContext()
+        def ds   = ctx.lookup("java:/HypericDS")
+        def conn
+        
+        try {
+            conn = ds.connection
+            return c.call(conn)
+        } finally {
+            if (conn != null) conn.close()
+        }
+    }
+    
+    private getDatabaseQueries() {
+        [ pgLocks: [ 
+             name: localeBundle['queryPostgresLocks'], 
+             query: "select l.mode, transaction, l.granted, " + 
+                    "now() - query_start as time, current_query " + 
+                    "from pg_locks l, pg_stat_activity a " + 
+                    "where l.pid=a.procpid and now() - query_start > '00:00:01'"], 
+          pgStatActivity: [ 
+             name: localeBundle['queryPostgresActivity'], 
+             query: "select * from pg_stat_activity"],
+        ]
+    }
+    
+    private now() {
+        System.currentTimeMillis()
+    }
+    
+    private h(str) {
+        HtmlUtil.escapeHtml(str)
+    }
+    
+    def runQuery(params) {
+        def id    = params.getOne('query')
+        def query = databaseQueries[id].query
+        def name  = databaseQueries[id].name
+        def start = now()
+        
+        def res = withConnection() { conn ->
+            def sql    = new Sql(conn)
+            def output = new StringBuffer()
+            def rowIdx = 0
+            def md
+            
+            sql.eachRow(query) { rs ->
+                if (rowIdx++ == 0) {
+                    output << "<table><thead><tr>"
+                    md = rs.getMetaData()
+                    for (i in 1..md.columnCount) {
+                        output <<  "<td>${h md.getColumnLabel(i)}</td>"
+                    }
+                    output << "</tr></thead><tbody>"
+                }
+                output << "<tr>"
+                for (i in 0..<md.columnCount) {
+                    output << "<td>${rs[i]}</td>"
+                }
+                output << "</tr>"
+            }
+            output << "</tbody></table>"
+            if (!rowIdx) {
+                return localeBundle['noResultsFound']
+            } else {
+                return output
+            }
+        }
+        
+        def queryData = "${name} executed in ${now() - start} ms<br/>"
+        log.info([ queryData: queryData + res ])
+        [ queryData: queryData + res ]
     }
 }
