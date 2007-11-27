@@ -62,18 +62,8 @@ function getSystemStats() {
   setTimeout("getSystemStats()", 1000);
 }
 
-function selectDiag(d) {
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('diagData').innerHTML = data.diagData;
-    },
-  });
-}
-
 getSystemStats();
+
 </script>
 
 <div id="metrics">
@@ -217,32 +207,69 @@ getSystemStats();
     </tr>
     </table>
   </div>
-  
 </div>
 </div>
+
 <div id="fullBody" style="clear:both">
   <div dojoType="TabContainer" id="bodyTabContainer" style="width: 100%; height:500px;">
     <div dojoType="ContentPane" label="${l.diagnostics}">
-      <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
-      <% for (d in diags) { %>
-        <option value='${d.shortName}'>${h d.name}</option>
-      <% } %>
-      </select>
+      <div id="diagSelectControls">
+        <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
+          <option value='none'>-- ${l.selectDiag} --</option>
+        <% for (d in diags) { %>
+          <option value='${d.shortName}'>${h d.name}</option>
+        <% } %>
+        </select>
+        
+        <img src="/images/arrow_refresh.png" onclick="loadDiag()"/>
+        <span>${l.diagWatchNotice}</span>
+      </div>
       <pre>
         <div id="diagData">
         </div>
       </pre>
     </div>  
 
-    <div dojoType="ContentPane" label="Cache">
+    <div dojoType="ContentPane" label="${l.cache}">
       <%= dojoTable(id:'cacheTable', title:l.cache,
                     refresh:60, url:urlFor(action:'cacheData'),
                     schema:cacheSchema, numRows:500, pageControls:false) %>
     </div>  
 
-    <div dojoType="ContentPane" label="Load">
+    <div dojoType="ContentPane" label="${l.load}">
       ${l.metricsPerMinute}: ${metricsPerMinute}
     </div>  
 
   </div>
 </div>
+
+
+<script type="text/javascript">
+function selectDiag(d) {
+  if (d == 'none') {
+    dojo.byId('diagData').innerHTML = '';
+    return;
+  }
+    
+  dojo.io.bind({
+    url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
+      dojo.byId('diagData').innerHTML = data.diagData;
+    },
+  });
+}
+
+function loadDiag() {
+  var selectDrop = document.getElementById('diagSelect');
+  selectDiag(selectDrop.options[selectDrop.selectedIndex].value);
+}
+
+function refreshDiag() {
+  loadDiag();
+  setTimeout("refreshDiag()", 1000 * 60);
+}
+
+refreshDiag();
+</script>

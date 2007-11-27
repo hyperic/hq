@@ -89,8 +89,12 @@ class HealthController
 	    return res[startIdx..endIdx]
     }
 
+	private getDiagnostics() {
+	    DiagnosticThread.diagnosticObjects.sort {a, b -> a.name <=> b.name }
+	}
+	
 	def index(params) {
-    	render(locals:[ diags: DiagnosticThread.diagnosticObjects,
+    	render(locals:[ diags: diagnostics,
     	                cacheSchema: cacheSchema,
     	                metricsPerMinute: metricsPerMinute])
     }
@@ -107,7 +111,7 @@ class HealthController
 	
     def getDiag(params) {
         def diagName = params.getOne('diag')
-        for (d in DiagnosticThread.diagnosticObjects) {
+        for (d in diagnostics) {
             if (d.shortName == diagName) {
                 return [diagData: HtmlUtil.escapeHtml(d.status)]
             }
@@ -190,7 +194,7 @@ class HealthController
             userName:         user.fullName,
             numAgents:        AgentManagerEJBImpl.one.agentCount,
             metricsPerMinute: metricsPerMinute,
-            diagnostics:      DiagnosticThread.diagnosticObjects,
+            diagnostics:      diagnostics,
         ] + getSystemStats([:])
     	render(locals: locals)
     }
