@@ -45,5 +45,7 @@ Templates:
 
 <br/>
 Results:<br/>
+<pre>
 <div id='result'>
 </div>
+<pre>

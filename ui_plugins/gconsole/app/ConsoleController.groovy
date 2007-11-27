@@ -29,7 +29,7 @@ class ConsoleController extends BaseController {
 	        def fname = f.name[0..-8]
 	        res << fname
 	    }
-	    res
+	    res.sort()
 	}
 	
     def index(params) {
