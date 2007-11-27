@@ -243,7 +243,7 @@ public class AuthzSubjectManagerEJBImpl
                                AuthzConstants.rootSubjectId.intValue());
 
         // Call the subject remove callback before subject is actually removed
-        AuthzStartupListener.getSRCallbackObj().subjectRemoved(toDelete);
+        AuthzStartupListener.getSubjectRemoveCallback().subjectRemoved(toDelete);
         
         dao.remove(toDelete);
     }

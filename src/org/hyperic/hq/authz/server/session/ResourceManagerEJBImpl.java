@@ -383,7 +383,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                 boolean audit) 
         throws VetoException
     {
-        ResourceDeleteCallback cb = AuthzStartupListener.getCallbackObj();
+        ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
         ResourceDAO dao = getResourceDAO();
         long now = System.currentTimeMillis();
         

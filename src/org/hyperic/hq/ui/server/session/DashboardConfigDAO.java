@@ -91,5 +91,11 @@ class DashboardConfigDAO
         getSession().createQuery("delete UserDashboardConfig where user = :user")
             .setParameter("user", s)
             .executeUpdate();
+    }
+    
+    void handleRoleRemoval(Role r) {
+        getSession().createQuery("delete RoleDashboardConfig where role= :role")
+            .setParameter("role", r)
+            .executeUpdate();
     }   
 }

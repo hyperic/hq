@@ -44,6 +44,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -311,6 +312,14 @@ public class DashboardManagerEJBImpl implements SessionBean {
                  new SubjectRemoveCallback() {
                     public void subjectRemoved(AuthzSubject toDelete) {
                         _dashDAO.handleSubjectRemoval(toDelete);
+                    }
+                }
+            );
+        HQApp.getInstance()
+            .registerCallbackListener(RoleRemoveCallback.class,
+                new RoleRemoveCallback() {
+                    public void roleRemoved(Role r) {
+                        _dashDAO.handleRoleRemoval(r);
                     }
                 }
             );

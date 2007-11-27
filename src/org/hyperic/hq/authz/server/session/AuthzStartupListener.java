@@ -33,31 +33,40 @@ public class AuthzStartupListener
 {
     private static final Object LOCK = new Object();
     
-    private static ResourceDeleteCallback _callbacks;
-    
-    private static SubjectRemoveCallback _srcallbacks;
+    private static ResourceDeleteCallback _resourceDeleteCallback;
+    private static SubjectRemoveCallback  _subjectRemoveCallback;
+    private static RoleRemoveCallback     _roleRemoveCallback;
     
     public void hqStarted() {
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {
-            _callbacks = (ResourceDeleteCallback)
+            _resourceDeleteCallback = (ResourceDeleteCallback)
                 app.registerCallbackCaller(ResourceDeleteCallback.class);
             
-            _srcallbacks = (SubjectRemoveCallback)
+            _subjectRemoveCallback = (SubjectRemoveCallback)
                 app.registerCallbackCaller(SubjectRemoveCallback.class);
+            
+            _roleRemoveCallback = (RoleRemoveCallback)
+                app.registerCallbackCaller(RoleRemoveCallback.class);
         }
     }
     
-    static ResourceDeleteCallback getCallbackObj() {
+    static ResourceDeleteCallback getResourceDeleteCallback() {
         synchronized (LOCK) {
-            return _callbacks;
+            return _resourceDeleteCallback;
         }
     }
 
-    static SubjectRemoveCallback getSRCallbackObj() {
+    static SubjectRemoveCallback getSubjectRemoveCallback() {
         synchronized (LOCK) {
-            return _srcallbacks;
+            return _subjectRemoveCallback;
+        }
+    }
+    
+    static RoleRemoveCallback getRoleRemoveCallback() {
+        synchronized (LOCK) {
+            return _roleRemoveCallback;
         }
     }
 }

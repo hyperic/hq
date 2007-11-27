@@ -278,11 +278,10 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         Role role = getRoleDAO().findById(rolePk);
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(whoami.getId(), 
-                 role.getResource().getResourceType(),
-                 role.getId(),
-                 AuthzConstants.roleOpRemoveRole);
+        pm.check(whoami.getId(), role.getResource().getResourceType(), 
+                 role.getId(), AuthzConstants.roleOpRemoveRole);
 
+        AuthzStartupListener.getRoleRemoveCallback().roleRemoved(role);
         for (Iterator i=new ArrayList(role.getCalendars()).iterator();
              i.hasNext(); ) 
         {
