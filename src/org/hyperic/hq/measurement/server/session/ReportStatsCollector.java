@@ -66,7 +66,8 @@ public class ReportStatsCollector {
                                                    DateFormat.LONG);
                 long start = getCollector().getOldestTime();
                 long end   = getCollector().getNewestTime();
-                double nMetrics = getCollector().valPerTimestamp() * 60;
+                long now   = System.currentTimeMillis();
+                double nMetrics = getCollector().valPerTimestamp(now) * 60;
                 PrintfFormat pfmt = new PrintfFormat("%.3f");
                 return "Metric Report Data\n" + 
                      "    Start:     " + fmt.format(new Date(start)) + "\n" +
