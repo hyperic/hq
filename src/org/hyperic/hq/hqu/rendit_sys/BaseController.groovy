@@ -100,9 +100,11 @@ abstract class BaseController {
      * rendering, the view of the current action will be displayed.
      */
     def dispatchRequest() {
-		def params = invokeArgs.request.parameterMap
-		log.debug "Parameter map is ${params}"
 	    def start  = System.currentTimeMillis()
+		def params = invokeArgs.request.parameterMap
+		if (log.debugEnabled) {
+		    log.debug "Parameter map is ${params}"
+		}
 
 	    rendered = false
 	    
@@ -123,8 +125,10 @@ abstract class BaseController {
     		    }
 	        }
 	    } finally {
-    		log.debug "Executed $controllerName:$action in " +   
-	        	      "${System.currentTimeMillis() - start} ms"
+	        if (log.debugEnabled) {
+    		    log.debug "Executed $controllerName:$action in " +   
+    	        	      "${System.currentTimeMillis() - start} ms"
+	        }
 	    }
     }
     

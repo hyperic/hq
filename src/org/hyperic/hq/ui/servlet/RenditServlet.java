@@ -106,7 +106,11 @@ public class RenditServlet
 
         List fullPath = StringUtil.explode(reqUri, "/");
         int pathSize = fullPath.size();
-        _log.info("Request path [" + fullPath + "]");
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Request path [" + fullPath + "]");
+        }
+        
         if (pathSize < 4 || !fullPath.get(pathSize - 4).equals("hqu")) {
             throw new ServletException("Illegal request path [" + fullPath + 
                                        "]");
@@ -115,8 +119,10 @@ public class RenditServlet
         List subPath  = fullPath.subList(pathSize - 3, fullPath.size());
         
         String plugin = (String)subPath.get(0);
-        _log.info("Request for [" + plugin + "]: " + reqUri + 
-                  (queryStr == null ? "" : ("?" + queryStr)));
+        if (_log.isDebugEnabled()) {
+            _log.debug("Request for [" + plugin + "]: " + reqUri + 
+                       (queryStr == null ? "" : ("?" + queryStr)));
+        }
 
         int sessId = RequestUtils.getSessionIdInt(req);
         AuthzSubject user;
@@ -140,8 +146,8 @@ public class RenditServlet
         } catch(Exception e) {
             throw new ServletException(e);
         } finally {
-            _log.info("Processed request for [" + plugin + "] in " +
-                      (System.currentTimeMillis() - start) + " ms");
+            _log.debug("Processed request for [" + plugin + "] in " +
+                       (System.currentTimeMillis() - start) + " ms");
         }
     }
     
