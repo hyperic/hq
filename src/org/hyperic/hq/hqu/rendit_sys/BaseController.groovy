@@ -101,7 +101,7 @@ abstract class BaseController {
      */
     def dispatchRequest() {
 		def params = invokeArgs.request.parameterMap
-		log.info "Parameter map is ${params}"
+		log.debug "Parameter map is ${params}"
 	    def start  = System.currentTimeMillis()
 
 	    rendered = false
@@ -123,8 +123,8 @@ abstract class BaseController {
     		    }
 	        }
 	    } finally {
-    		log.info "Executed $controllerName:$action in " +   
-	        	     "${System.currentTimeMillis() - start} ms"
+    		log.debug "Executed $controllerName:$action in " +   
+	        	      "${System.currentTimeMillis() - start} ms"
 	    }
     }
     

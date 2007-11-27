@@ -17,7 +17,7 @@ class DefaultControllerDispatcher {
 	def invoke(HQUPlugin p, invokeArgs) {
         def path = invokeArgs.requestURI.split('/')[-3..-1]
 
-        log.info "Request: ${path}"
+        log.debug "Request: ${path}"
         if (path.size() < 3)
             return false
         
