@@ -143,13 +143,18 @@ public class MetricDataCache {
                 }
             }
             else if (mval.getValue() == 0) {
-                if (val == null || val.getTimestamp() > mval.getTimestamp())
-                {
+                if (val == null) {
                     _downCache.put(new Element(mid, mval));
-
                     if (_log.isDebugEnabled()) {
                         _log.debug("Add unavailable metric: " + mid +
                                    " at " + mval.getTimestamp());
+                    }
+                }
+                else {
+                    val.setTimestamp(mval.getTimestamp());
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Update unavailable metric: " + mid +
+                                   " to " + mval.getTimestamp());
                     }
                 }
             }
