@@ -1283,6 +1283,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public int getNumUnavailEntities() {
+        return MetricDataCache.getInstance().getUnavailableMetrics().size();
+    }
+    
+    /**
      * Get the list of DownMetricValues that represent the resources that are
      * currently down
      * 
