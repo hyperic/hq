@@ -199,7 +199,9 @@ class HealthController
     private printReport(params) {
         def s = Humidor.instance.sigar
         def dateFormat = DateFormat.dateTimeInstance
-            
+        def cmdLine = s.getProcArgs('$$')
+        def procEnv = s.getProcEnv('$$')
+        
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
             fqdn:             s.getFQDN(),
@@ -211,7 +213,10 @@ class HealthController
             diagnostics:      diagnostics,
             hqVersion:        PB.one.version,
             buildNumber:      PB.one.buildNumber,
-            schemaVersion:    SCM.one.config.getProperty('CAM_SCHEMA_VERSION')
+            jvmProps:         System.properties,
+            schemaVersion:    SCM.one.config.getProperty('CAM_SCHEMA_VERSION'),
+            cmdLine:          cmdLine,
+            procEnv:          procEnv,
         ] + getSystemStats([:])
     	render(locals: locals)
     }
