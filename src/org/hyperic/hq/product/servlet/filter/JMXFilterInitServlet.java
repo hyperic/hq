@@ -28,7 +28,6 @@ package org.hyperic.hq.product.servlet.filter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -70,8 +69,6 @@ public class JMXFilterInitServlet extends HttpServlet {
     
     private static Hashtable contextInfoByCL = new Hashtable(); 
 
-    private static Hashtable mbeans=new Hashtable(); 
-    
     public static void registerFilter( JMXFilter f ) {
         // XXX:  We could use the thread class loader to make sure we don't
         //       run into the classical classloader problem (where this 
@@ -110,8 +107,6 @@ public class JMXFilterInitServlet extends HttpServlet {
                                       ServletInfo bean ) 
     {
         try {
-            if( debug!=null ) 
-                log("REGISTER SERVLET ");
             //ClassLoader cl = Thread.currentThread().getContextClassLoader();
             //JMXContextInfo ci = (JMXContextInfo)contextInfoByCL.get(cl);
             //if( ci == null ) {
@@ -133,13 +128,10 @@ public class JMXFilterInitServlet extends HttpServlet {
                                               ":type=Servlet,name="
                                               + servletPath + 
                                               ",context=" + contextName);
-            
-            mServer.registerMBean(bean, oname); 
-        } catch (InstanceAlreadyExistsException ex) {
-            // 2 threads attempting to register the same object? JBNMAN-393
-            if (debug != null) {
-                log("Servlet mbean already registered: " + ex.toString(), ex);
+            if (mServer.isRegistered(oname)) {
+                mServer.unregisterMBean(oname);
             }
+            mServer.registerMBean(bean, oname);
         } catch(Exception ex) {
             log("Error registering servlet mbean: " + ex.toString(), ex);
         }
@@ -227,6 +219,9 @@ public class JMXFilterInitServlet extends HttpServlet {
                 return;
             }
 
+            if (contextName.endsWith("ROOT")) {
+                return; //XXX Available == 0??
+            }
             ContextInfo contextInfo = filter.getJMXContextInfo();
             
             contextInfo.setDocBase(docBase);
@@ -247,15 +242,13 @@ public class JMXFilterInitServlet extends HttpServlet {
                 new ObjectName(DOMAIN + ":type=Context,name=" + 
                                contextName);
             
-            mServer.registerMBean(contextInfo, oname); 
-
-            mbeans.put(cl, oname);
-            contextInfoByCL.put( cl, contextInfo);
-        } catch (InstanceAlreadyExistsException ex) {
-            // 2 threads attempting to register the same object? JBNMAN-393
-            if (debug != null) {
-                log("Context mbean already registered: " + ex.toString(), ex);
+            if (mServer.isRegistered(oname)) {
+                mServer.unregisterMBean(oname);
             }
+            mServer.registerMBean(contextInfo, oname);
+
+            contextInfoByCL.put( cl, contextInfo);
+            filter.getJMXContextInfo().setAvailable(1);
         } catch( Exception ex ) {
             log( "Error registering context mbean: " + ex.toString(), ex);
             ex.printStackTrace();
@@ -323,7 +316,6 @@ public class JMXFilterInitServlet extends HttpServlet {
             ServletContext ctx = getServletContext();
             
             registerContextMBean(ctx, filter);
-            
         } catch (Exception e) {
             log("[JMXFilterInitServlet] No mserver found " + e, e);
             e.printStackTrace();
@@ -331,17 +323,6 @@ public class JMXFilterInitServlet extends HttpServlet {
     }
     
     public void destroy() {
-        // need to unregister only the mbeans in the same context
-        if( mServer != null ) {
-            Iterator it=mbeans.values().iterator();
-            while( it.hasNext() ) {
-                ObjectName oname=(ObjectName)it.next();
-                try {
-                    mServer.unregisterMBean(oname);
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
-        }
+
     }
 }
