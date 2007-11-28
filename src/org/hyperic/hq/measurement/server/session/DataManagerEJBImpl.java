@@ -351,7 +351,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         Set failedToSaveMetrics = new HashSet();
         List left = data;
-        while (true && !left.isEmpty())
+        while (!left.isEmpty())
         {
             int numLeft = left.size();
             if (_log.isDebugEnabled()) {
