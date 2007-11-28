@@ -243,6 +243,12 @@ class HealthController
           aiqPlatform: [ 
              name: localeBundle['queryAIQPlatform'], 
              query: "select * from eam_aiq_platform"], 
+          aiqServer: [ 
+             name: localeBundle['queryAIQServer'], 
+             query: "select * from eam_aiq_server"],
+          aiqIP: [ 
+             name: localeBundle['queryAIQIP'], 
+             query: "select * from eam_aiq_ip"], 
         ]
         
         def res = [:]
