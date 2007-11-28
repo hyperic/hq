@@ -492,6 +492,7 @@
     <pathconvert targetos="unix" pathSep="," property="Class-Path">
       <path>
         <fileset dir="${ear.dir}" includes="hq.jar,hqee.jar" />
+        <fileset dir="${ear.dir}/lib" includes="sigar.jar" />
         <fileset dir="${ear.dir}/lib" includes="*.jar" />
       </path>
       <mapper>
