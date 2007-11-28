@@ -58,6 +58,7 @@ public class MetricDataCache {
     private static MetricDataCache _singleton = new MetricDataCache();
     
     private Object _cacheLock = new Object();
+    private Object _downCacheLock = new Object();
     
     /**
      * Singleton accessor
@@ -128,15 +129,21 @@ public class MetricDataCache {
             _cache.put(new Element(mid, mval));
         }
 
+        
         // Could be an availability metric
-        if (_downCache.isKeyInCache(mid)) {
-            Element el = _downCache.get(mid);
+        Cache dc;
+        synchronized(_downCacheLock) {
+            dc = _downCache;
+        }
+        
+        if (dc.isKeyInCache(mid)) {
+            Element el = dc.get(mid);
             synchronized(el) {
                 MetricValue val = (MetricValue) el.getObjectValue();
                 if (mval.getValue() == 1) {
                     if (val == null ||  // place holder or is now available
                             val.getTimestamp() < mval.getTimestamp()) {
-                        _downCache.remove(mid);
+                        dc.remove(mid);
 
                         if (_log.isDebugEnabled()) {
                             _log.debug("Remove available metric: " + mid);
@@ -145,7 +152,7 @@ public class MetricDataCache {
                 }
                 else if (mval.getValue() == 0) {
                     if (val == null) {
-                        _downCache.put(new Element(mid, mval));
+                        dc.put(new Element(mid, mval));
                         if (_log.isDebugEnabled()) {
                             _log.debug("Add unavailable metric: " + mid +
                                        " at " + mval.getTimestamp());
@@ -199,8 +206,13 @@ public class MetricDataCache {
      * @param mid The measurement id.
      */
     public void setAvailMetric(Integer mid) {
-        if (!_downCache.isKeyInCache(mid)) {
-            _downCache.put(new Element(mid, null));
+        Cache dc;
+        synchronized(_downCacheLock) {
+            dc = _downCache;
+        }
+
+        if (!dc.isKeyInCache(mid)) {
+            dc.put(new Element(mid, null));
         }
     }
     
