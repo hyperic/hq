@@ -228,7 +228,7 @@
               template="${OBJECT_NAME}:${alias}"
               units="none"/>
       <metric name="Current Thread Busy"
-              alias="currentThreadBusy"
+              alias="currentThreadsBusy"
               indicator="true"
               template="${OBJECT_NAME}:${alias}"
               units="none"/>
