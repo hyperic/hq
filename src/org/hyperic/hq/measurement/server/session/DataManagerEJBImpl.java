@@ -104,7 +104,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final long MINUTE = 60 * 1000;
         
     // Table names
-    private static final String TAB_DATA    = MeasurementConstants.TAB_DATA;
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
     private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
@@ -1754,8 +1753,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             for (i = 0; i < tables.length; i++) {
                 rs = stmt.executeQuery("SELECT max(timestamp) FROM " +
                                        tables[i] +
-                                       " WHERE " +
-                                       " measurement_id = " + id +
+                                       " WHERE timestamp < " + timeAfter +
+                                       " and measurement_id = " + id +
                                        " and not value = 0");
                 
                 if (rs.next()) {
