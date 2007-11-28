@@ -83,7 +83,9 @@ public class SST_Crisponizer extends SchemaSpecTask {
                                  String val) 
         throws SQLException
     {
-        PreparedStatement pstmt = null;
+        if (val == null || val.trim().equals(""))
+            return;
+
         Statement stmt = null;
         ResultSet optRs = null;
         int optId;
@@ -94,22 +96,17 @@ public class SST_Crisponizer extends SchemaSpecTask {
             optRs = stmt.executeQuery(sql);
             optRs.next();
             optId = optRs.getInt(1);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
-        }
-        
-        try {
-            String sql = "insert into " + CRISPO_OPT_TABLE + 
+
+            sql = "insert into " + CRISPO_OPT_TABLE + 
                 " (id, version_col, propkey, val, " + 
-                "crispo_id) VALUES (" + optId + ", 1, ?, ?, " + crispoId +
+                "crispo_id) VALUES (" + optId + ", 1, '" + key + "', " +
+                "'" + val + "', " + crispoId +
                 ")";
                 
-            pstmt = getConnection().prepareStatement(sql);
-            pstmt.setString(1, key);
-            pstmt.setString(2, val);
-            pstmt.execute();
+            stmt = getConnection().createStatement();
+            stmt.executeUpdate(sql);
         } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, pstmt, null);
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
         }
     }
 
@@ -254,7 +251,8 @@ public class SST_Crisponizer extends SchemaSpecTask {
             Dialect d = HibernateUtil.getDialect(conn);
             stmt = conn.createStatement();
             
-            rs = stmt.executeQuery("select id, " + _column + " from " + _table);
+            String sql = "select id, " + _column + " from " + _table;
+            rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 long fromId = rs.getLong(1);
                 byte[] b = rs.getBytes(2);

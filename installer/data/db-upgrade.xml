@@ -6679,7 +6679,7 @@ has already been defined.
             CREATE TABLE eam_dash_config (
                 id integer NOT NULL,
                 config_type VARCHAR2(255) NOT NULL,
-                version_col NUMBER(19, 0) NOT NULL,
+                version_col NUMBER(19, 0) default 0 NOT NULL,
                 name VARCHAR2(255) NOT NULL,
                 crispo_id integer NOT NULL,
                 role_id integer,
@@ -6728,7 +6728,7 @@ has already been defined.
       <schema-directSQL>
         <statement>
           insert into eam_dash_config (id, config_type, version_col, name, crispo_id, user_id) 
-              select id - 8999, 'USER', 0, 'user', tmp_crispo_id, id from eam_user_config_resp where id > 10
+              select id - 9000, 'USER', 0, 'user', tmp_crispo_id, id from eam_user_config_resp where id > 10
         </statement>
         <statement>
           insert into eam_dash_config (id, config_type, version_col, name, crispo_id, user_id) 
@@ -6808,7 +6808,7 @@ has already been defined.
                 nature integer NOT NULL,
                 purpose integer NOT NULL,
                 importance integer NOT NULL,
-                original boolean NOT NULL,
+                original NUMBER(1) NOT NULL,
                 field VARCHAR2(30),
                 old_val VARCHAR2(1000),
                 new_val VARCHAR2(1000),
@@ -6900,21 +6900,37 @@ has already been defined.
                      insertCmd="(ID, CID, INSTANCE_ID, RESOURCE_TYPE_ID, SUBJECT_ID, PROTO_ID, FSYSTEM) VALUES (1601, 1601, 2, 604, 0, 0, %%TRUE%%)"/>
 
       <schema-directSQL>
-        <statement>
+        <statement targetDB="oracle">
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 8000, 0, 601, id, id, 0, 0, name, sort_name, 1 
+            from eam_platform_type
+        </statement>
+        <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
             select id - 8000, 0, 601, id, id, 0, 0, name, sort_name, true 
             from eam_platform_type
         </statement>
-        <statement>
+        <statement targetDB="oracle">
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 7800, 0, 602, id, id, 0, 0, name, sort_name, 1 
+            from eam_server_type
+        </statement>
+        <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
             select id - 7800, 0, 602, id, id, 0, 0, name, sort_name, true 
             from eam_server_type
         </statement>
-        <statement>
+        <statement targetDB="oracle">
+            insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
+            select id - 7000, 0, 603, id, id, 0, 0, name, sort_name, 1 
+            from eam_service_type
+        </statement>
+        <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
             select id - 7000, 0, 603, id, id, 0, 0, name, sort_name, true 
             from eam_service_type
         </statement>
+
         <statement>
             update eam_resource set proto_id = (
                 select proto.id from eam_platform p
@@ -6945,7 +6961,7 @@ has already been defined.
                 join eam_application_type at on at.id = a.application_type_id
                 join eam_resource proto on proto.resource_type_id = 604 and proto.instance_id = at.id
                 where a.id = eam_resource.instance_id)
-            where eam_resource.resource_type_id = 308;
+            where eam_resource.resource_type_id = 308
         </statement>
       </schema-directSQL>                        
       <schema-alterColumn table="EAM_RESOURCE" column="PROTO_ID" 
@@ -7088,7 +7104,7 @@ has already been defined.
         </statement>
         <statement desc="Dropping unique constraint for EAM_SERVICE_REQUEST"
                    targetDB="oracle">
-          ALTER table EAM_SERVICE_REQUEST DROP unique (serviceid, url);
+          ALTER table EAM_SERVICE_REQUEST DROP unique (serviceid, url)
         </statement>
       </schema-directSQL>
     </schemaSpec>	
@@ -7210,215 +7226,215 @@ has already been defined.
 			       targetDB="postgresql" fail="false">
 		  ALTER TABLE eam_escalation_state DROP CONSTRAINT eam_escalation_state_escalation_id_key CASCADE			
         </statement> 
-		<statement desc="Dropping unique constraint to reorder columns" 
-			       targetDB="oracle">
-		  ALTER table eam_escalation_state DROP unique (escalation_id, alert_type, alert_def_id, alert_id)		
+          <statement desc="Dropping unique constraint to reorder columns" 
+                           targetDB="oracle">
+            ALTER table eam_escalation_state DROP unique (escalation_id, alert_type, alert_def_id, alert_id)
         </statement>
-		<statement desc="Create unique constraint with columns ordered highest cardinality first">
-		  ALTER TABLE eam_escalation_state ADD CONSTRAINT eam_escalation_state_escalation_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
-		</statement>		  
+        <statement desc="Create unique constraint with columns ordered highest cardinality first">
+          ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT eam_escalation_state_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
+        </statement>		  
 		
-		<statement desc="Drop primary key from eam_srn" 
-				   targetDB="oracle">
-		  ALTER TABLE eam_srn DROP primary key	  
-		</statement>
-		<statement desc="Drop primary key from eam_srn"
-                   targetDB="postgresql">
-		  ALTER TABLE eam_srn DROP CONSTRAINT eam_srn_pkey			  
-		</statement>
-		<statement desc="Add new primary key to eam_srn"
-                   targetDB="oracle">			
-		  ALTER TABLE eam_srn ADD CONSTRAINT eam_srn_pkey PRIMARY KEY ( instance_id, appdef_type )
-		</statement>
-		<statement desc="Add new primary key to eam_srn"
-                   targetDB="postgresql">
-		  ALTER TABLE eam_srn ADD PRIMARY KEY ( instance_id, appdef_type )			
-		</statement>
-		  
-
-		<statement desc="Dropping index from eam_measurement_data_1h">
-		  drop index measurement_data_1h_time_idx
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_1h"
+        <statement desc="Drop primary key from eam_srn" 
                    targetDB="oracle">
-		  alter table eam_measurement_data_1h drop primary key
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_1h"
-				   targetDB="postgresql">
-		  alter table eam_measurement_data_1h drop constraint eam_measurement_data_1h_pkey
-		</statement>		  
-		<statement desc="Add new primary key to eam_measurement_data_1h"
-				   targetDB="oracle">
-		  alter table EAM_MEASUREMENT_DATA_1H add
-		  constraint EAM_MEASUREMENT_DATA_1H_PKEY
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Add new primary key to eam_measurement_data_1h"
-				   targetDB="postgresql">
-		  alter table EAM_MEASUREMENT_DATA_1H add
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Creating index on eam_measurement_data_1h measurement_id"
-				   targetDB="oracle">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H (MEASUREMENT_ID)
-		</statement>		  
-		<statement desc="Creating index on eam_measurement_data_1h measurement_id"
-				   targetDB="postgresql">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H USING btree (MEASUREMENT_ID)
-		</statement>
-		  
+          ALTER TABLE EAM_SRN DROP primary key      
+        </statement>
+        <statement desc="Drop primary key from eam_srn"
+                   targetDB="postgresql">
+          ALTER TABLE EAM_SRN DROP CONSTRAINT eam_srn_pkey              
+        </statement>
+        <statement desc="Add new primary key to eam_srn"
+                   targetDB="oracle">            
+          ALTER TABLE EAM_SRN ADD CONSTRAINT eam_srn_pkey PRIMARY KEY ( instance_id, appdef_type )
+        </statement>
+        <statement desc="Add new primary key to eam_srn"
+                   targetDB="postgresql">
+          ALTER TABLE EAM_SRN ADD PRIMARY KEY ( instance_id, appdef_type )            
+        </statement>
+          
 
-		<statement desc="Dropping index from eam_measurement_data_6h">
-		  drop index measurement_data_6h_time_idx
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_6h"
-				   targetDB="oracle">
-		  alter table EAM_MEASUREMENT_DATA_6H drop primary key
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_6h"
-				   targetDB="postgresql">
-		  alter table EAM_MEASUREMENT_DATA_6H drop constraint eam_measurement_data_6h_pkey
-		</statement>
-		<statement desc="Add new primary key to eam_measurement_data_6h"
-				   targetDB="oracle">
-		  alter table EAM_MEASUREMENT_DATA_6H add
-		  constraint EAM_MEASUREMENT_DATA_6H_PKEY
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Add new primary key to eam_measurement_data_6h"
-				   targetDB="postgresql">
-		  alter table EAM_MEASUREMENT_DATA_6H add
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Creating index on eam_measurement_data_6h measurement_id"
-				   targetDB="oracle">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H(MEASUREMENT_ID)
-		</statement>
-		<statement desc="Creating index on eam_measurement_data_6h measurement_id" 
-				   targetDB="postgresql">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H USING btree (MEASUREMENT_ID)
-		</statement>
-		  
+        <statement desc="Dropping index from eam_measurement_data_1h">
+          drop index measurement_data_1h_time_idx
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_1h"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H drop primary key
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_1h"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_1H drop constraint eam_measurement_data_1h_pkey
+        </statement>          
+        <statement desc="Add new primary key to eam_measurement_data_1h"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1H add
+          constraint EAM_MEASUREMENT_DATA_1H_PKEY
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Add new primary key to eam_measurement_data_1h"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_1H add
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Creating index on eam_measurement_data_1h measurement_id"
+                   targetDB="oracle">
+          CREATE INDEX MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H (MEASUREMENT_ID)
+        </statement>          
+        <statement desc="Creating index on eam_measurement_data_1h measurement_id"
+                   targetDB="postgresql">
+          CREATE INDEX MEASUREMENT_DATA_1H_MID_IDX ON EAM_MEASUREMENT_DATA_1H USING btree (MEASUREMENT_ID)
+        </statement>
+          
 
-		<statement desc="Dropping index from eam_measurement_data_1d">
-		  drop index measurement_data_1d_time_idx
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_1d"
-				   targetDB="oracle">
-		  alter table EAM_MEASUREMENT_DATA_1D drop primary key
-		</statement>
-		<statement desc="Dropping primary key from eam_measurement_data_1d"
-				   targetDB="postgresql">
-		  alter table EAM_MEASUREMENT_DATA_1D drop constraint eam_measurement_data_1d_pkey
-		</statement>
-		<statement desc="Add new primary key to eam_measurement_data_1d"
-				   targetDB="oracle">
-		  alter table EAM_MEASUREMENT_DATA_1D add
-		  constraint EAM_MEASUREMENT_DATA_1D_PKEY
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Add new primary key to eam_measurement_data_1d"
-				   targetDB="postgresql">
-		  alter table EAM_MEASUREMENT_DATA_1D add
-		  primary key (TIMESTAMP, MEASUREMENT_ID)
-		</statement>
-		<statement desc="Creating index on eam_measurement_data_1d measurement_id"
-			       targetDB="oracle">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D(MEASUREMENT_ID)
-		</statement>
-		<statement desc="Creating index on eam_measurement_data_1d measurement_id"
-				   targetDB="postgresql">
-		  CREATE INDEX EAM_MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D USING btree (MEASUREMENT_ID)
-		</statement>
+        <statement desc="Dropping index from eam_measurement_data_6h">
+          drop index measurement_data_6h_time_idx
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_6h"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H drop primary key
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_6h"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_6H drop constraint eam_measurement_data_6h_pkey
+        </statement>
+        <statement desc="Add new primary key to eam_measurement_data_6h"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_6H add
+          constraint EAM_MEASUREMENT_DATA_6H_PKEY
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Add new primary key to eam_measurement_data_6h"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_6H add
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Creating index on eam_measurement_data_6h measurement_id"
+                   targetDB="oracle">
+          CREATE INDEX MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H(MEASUREMENT_ID)
+        </statement>
+        <statement desc="Creating index on eam_measurement_data_6h measurement_id" 
+                   targetDB="postgresql">
+          CREATE INDEX MEASUREMENT_DATA_6H_MID_IDX ON EAM_MEASUREMENT_DATA_6H USING btree (MEASUREMENT_ID)
+        </statement>
+          
+
+        <statement desc="Dropping index from eam_measurement_data_1d">
+          drop index measurement_data_1d_time_idx
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_1d"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D drop primary key
+        </statement>
+        <statement desc="Dropping primary key from eam_measurement_data_1d"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_1D drop constraint eam_measurement_data_1d_pkey
+        </statement>
+        <statement desc="Add new primary key to eam_measurement_data_1d"
+                   targetDB="oracle">
+          alter table EAM_MEASUREMENT_DATA_1D add
+          constraint EAM_MEASUREMENT_DATA_1D_PKEY
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Add new primary key to eam_measurement_data_1d"
+                   targetDB="postgresql">
+          alter table EAM_MEASUREMENT_DATA_1D add
+          primary key (TIMESTAMP, MEASUREMENT_ID)
+        </statement>
+        <statement desc="Creating index on eam_measurement_data_1d measurement_id"
+                   targetDB="oracle">
+          CREATE INDEX MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D(MEASUREMENT_ID)
+        </statement>
+        <statement desc="Creating index on eam_measurement_data_1d measurement_id"
+                   targetDB="postgresql">
+          CREATE INDEX MEASUREMENT_DATA_1D_MID_IDX ON EAM_MEASUREMENT_DATA_1D USING btree (MEASUREMENT_ID)
+        </statement>
       </schema-directSQL>
     </schemaSpec>	
 	
     <schemaSpec version="3.68">
       <schema-directSQL>
-		<statement desc="Drop foreign key constraint from eam_alert to reduce 
-						 contention between the alert and alert definition tables">			
-		  ALTER TABLE EAM_ALERT DROP CONSTRAINT fke5b216aeb5af9d12		  
-		</statement>
-	  </schema-directSQL>
-	</schemaSpec>	
+        <statement desc="Drop foreign key constraint from eam_alert to reduce 
+						 contention between the alert and alert definition tables">
+          ALTER TABLE EAM_ALERT DROP CONSTRAINT fke5b216aeb5af9d12
+        </statement>
+      </schema-directSQL>
+    </schemaSpec>	
 
   <schemaSpec version="3.69">
     <schema-directSQL>
       <statement desc="reserve two crispo IDs for the guest user">
-        INSERT INTO EAM_CRISPO (ID) VALUES ('2');
+        INSERT INTO EAM_CRISPO (ID) VALUES ('2')
       </statement>
       <statement>
-        INSERT INTO EAM_CRISPO (ID) VALUES ('3');
+        INSERT INTO EAM_CRISPO (ID) VALUES ('3')
       </statement>
-      <statement desc="create a guest subject">
-        INSERT INTO EAM_SUBJECT (CID,DSN,EMAIL_ADDRESS,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,PREF_CRISPO_ID) VALUES ('2','CAM','localhost',false,'Guest',false,false,'2','User','guest','3');
-      </statement>
-      <statement desc="add a resource for the guest subject">
-        INSERT INTO EAM_RESOURCE (CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('10',false,'10','2','0','1','0');
-      </statement>
+    </schema-directSQL>
+    <schema-insert table="EAM_SUBJECT" desc="create a guest subject"
+                   insertCmd="(CID,DSN,EMAIL_ADDRESS,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,PREF_CRISPO_ID) VALUES ('2','CAM','localhost',%%FALSE%%,'Guest',%%FALSE%%,%%FALSE%%,'2','User','guest','3')"/>
+    <schema-insert table="EAM_RESOURCE" desc="add a resource for the guest subject"
+                   insertCmd="(CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('10',%%FALSE%%,'10','2','0','1','0')"/>
+    <schema-directSQL>
       <statement>
-        UPDATE EAM_SUBJECT SET CID = '2',RESOURCE_ID = '10' WHERE CID = '2';
+        UPDATE EAM_SUBJECT SET CID = '2',RESOURCE_ID = '10' WHERE CID = '2'
       </statement>
       <statement desc="set the default dashboard for view only role">
-        INSERT INTO EAM_CRISPO_OPT (CRISPO_ID,ID,PROPKEY,VAL) VALUES ('3','2','.user.dashboard.default.id','2');
+        INSERT INTO EAM_CRISPO_OPT (CRISPO_ID,ID,PROPKEY,VAL) VALUES ('3','2','.user.dashboard.default.id','2')
       </statement>
-      <statement desc="Define a view only role which includes the guest user and has all the read operations availble on the authz resource group">
-        INSERT INTO EAM_ROLE (CID,FSYSTEM,ID,NAME) VALUES ('2',false,'2','Guest Role');
-      </statement>
-      <statement desc="add the role resource">
-        INSERT INTO EAM_RESOURCE (CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('11',false,'11','2','0','2','0');
-      </statement>
+    </schema-directSQL>
+    <schema-insert table="EAM_ROLE" desc="Define a view only role which includes the guest user and has all the read operations availble on the authz resource group"
+                   insertCmd="(CID,FSYSTEM,ID,NAME) VALUES ('2',%%FALSE%%,'2','Guest Role')"/>
+    <schema-insert table="EAM_RESOURCE" desc="add the role resource"
+                   insertCmd="(CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('11',%%FALSE%%,'11','2','0','2','0')"/>
+    <schema-directSQL>
       <statement>
-        UPDATE EAM_ROLE SET CID = '2',RESOURCE_ID = '11' WHERE CID = '2';
+        UPDATE EAM_ROLE SET CID = '2',RESOURCE_ID = '11' WHERE CID = '2'
       </statement>
       <statement desc="create the role dashboard">
-        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','Guest Role Dashboard','2');
+        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','Guest Role Dashboard','2')
       </statement>
       <statement desc="add the user to the root resource group">
-        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','10');
+        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','10')
       </statement>
       <statement desc="add the role to the root resource group">
-        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','11');
+        INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','11')
       </statement>
       <statement desc="add the guest user to view only role">
-        INSERT INTO EAM_SUBJECT_ROLE_MAP (CID,ROLE_ID,SUBJECT_ID) VALUES ('2','2','2');
+        INSERT INTO EAM_SUBJECT_ROLE_MAP (CID,ROLE_ID,SUBJECT_ID) VALUES ('2','2','2')
       </statement>
       <statement desc="the read operations for all resource types to the view only role">
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('71','8','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('71','8','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('72','16','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('72','16','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('73','28','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('73','28','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('74','305','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('74','305','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('75','311','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('75','311','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('76','315','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('76','315','2')
       </statement>
       <statement>
-        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('77','319','2');
+        INSERT INTO EAM_ROLE_OPERATION_MAP (CID,OPERATION_ID,ROLE_ID) VALUES ('77','319','2')
       </statement>
-	  </schema-directSQL>
-	</schemaSpec>	
+    </schema-directSQL>
+  </schemaSpec>	
 
-    <schemaSpec version="3.70">
-      <schema-alterColumn table="EAM_AUDIT" column="FIELD" precision="100"
-                          columnType="VARCHAR2" />
-    </schemaSpec>
+  <schemaSpec version="3.70">
+    <schema-alterColumn table="EAM_AUDIT" column="FIELD" precision="100"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
 
   <schemaSpec version="3.71">
     <schema-directSQL>
       <statement desc="create crispo IDs for role dashboards">
-        INSERT INTO EAM_CRISPO (ID) SELECT ID - 9000 FROM EAM_ROLE WHERE ID > 10000
+        INSERT INTO EAM_CRISPO (ID) SELECT ID - 8000 FROM EAM_ROLE WHERE ID > 10000
       </statement>
       <statement desc="create role dashboards">
-        INSERT INTO EAM_DASH_CONFIG (ID, CONFIG_TYPE, NAME, CRISPO_ID, ROLE_ID) SELECT ID - 9000, 'ROLE', NAME || ' DASHBOARD', ID - 9000, ID FROM EAM_ROLE WHERE ID > 10000
+        INSERT INTO EAM_DASH_CONFIG (ID, CONFIG_TYPE, NAME, CRISPO_ID, ROLE_ID) SELECT ID - 8000, 'ROLE', NAME || ' DASHBOARD', ID - 8000, ID FROM EAM_ROLE WHERE ID > 10000
       </statement>
     </schema-directSQL>
   </schemaSpec>

@@ -42,9 +42,18 @@ public class SST_Insert extends SchemaSpecTask {
 
     private String table = null;
     private String insertCmd = null;
+    private String desc = null;
     private boolean dupFail = true;
 
     public SST_Insert () {}
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String d) {
+        desc = d;
+    }
 
     public void setTable(String t) {
         table = t;
@@ -74,7 +83,9 @@ public class SST_Insert extends SchemaSpecTask {
                                            DBUtil.getBooleanValue(false, c));
 
             ps = c.prepareStatement(insertSql);
-            log(">>>>> Inserting into " + table + " " + insertCmd);
+            String buf = ((desc == null) ? "" : ">>>>> " + desc + "\n") +
+                         ">>>>> Inserting into " + table + " " + insertCmd;
+            log(buf);
             ps.executeUpdate();
         } catch (SQLException e) {
             if (dupFail ||
