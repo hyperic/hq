@@ -174,7 +174,8 @@ public class ResourceHubPortalAction extends BaseAction {
         
         Integer ff = hubForm.getFf();
         if (ff == null || ff.intValue() == 0) {
-            hubForm.setFf(new Integer(entityType));
+            ff = new Integer(entityType);
+            hubForm.setFf(ff);
         }
         else if (ff.intValue() != entityType) {
             entityType = ff.intValue();
