@@ -108,16 +108,9 @@ class HealthController
     	render(locals:[ diags: diagnostics,
     	                cacheSchema: cacheSchema,
     	                metricsPerMinute: metricsPerMinute,
-    	                showDatabaseTab: showDatabaseTab,
     	                databaseQueries: databaseQueries ])
     }
     
-	private getShowDatabaseTab() {
-        return withConnection() { conn ->
-            return DBUtil.isPostgreSQL(conn)          
-        }
-	}
-	
 	private getMetricsPerMinute() {
 	    def vals  = DMM.one.findMetricCountSummaries()
 	    def total = 0.0
@@ -233,8 +226,10 @@ class HealthController
     }
     
     private getDatabaseQueries() {
-        [ pgLocks: [ 
+        def queries = [ 
+          pgLocks: [ 
              name: localeBundle['queryPostgresLocks'], 
+             viewable: {conn -> DBUtil.isPostgreSQL(conn) },          
              query: "select l.mode, transaction, l.granted, " + 
                     "now() - query_start as time, current_query " + 
                     "from pg_locks l, pg_stat_activity a " + 
@@ -242,12 +237,26 @@ class HealthController
                     " and now() - query_start > '00:00:01'"],
           pgStatActivity: [ 
              name: localeBundle['queryPostgresActivity'], 
+             viewable: {conn -> DBUtil.isPostgreSQL(conn) },          
              query: "select * from pg_stat_activity " + 
                     "where current_query != '<IDLE>' order by query_start desc"],
           aiqPlatform: [ 
              name: localeBundle['queryAIQPlatform'], 
              query: "select * from eam_aiq_platform"], 
         ]
+        
+        def res = [:]
+        withConnection() { conn ->
+            for (q in queries.keySet()) {
+                def query = queries[q]
+                if (!query.viewable || 
+                    (query.viewable in Closure && query.viewable(conn))) 
+                {
+                    res[q] = query   
+                }
+            }
+        }
+        res
     }
     
     private now() {
