@@ -42,9 +42,9 @@ import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl as r
 // map of alert definition Ids to event generator closures
 def alertDefId2EventGenerator = [10005 : eventGenerator1]
 
-def numAlertEventsPerInserter = 10      // number of resource alert events inserted per thread
+def numAlertEventsPerInserter = 10      // number of resource alert events inserted per thread (batch size)
 
-def pauseTimeBetweenInserts = 1000      // per thread pause time between each alert event insert (msec)
+def pauseTimeBetweenInserts = 1000      // per thread pause time between each alert event batch insert (msec)
 
 def pauseBetweenInserterStarts = 2000   // pause time between starting each resource alert event inserter thread (msec)
 

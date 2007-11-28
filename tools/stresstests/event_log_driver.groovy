@@ -18,9 +18,9 @@ def appDefEntityIds = [new AppdefEntityID(3, 12448),
                        new AppdefEntityID(3, 12449), 
                        new AppdefEntityID(3, 12450)]  // the list of AppdefEntityIDs
 
-def numLogEventsPerInserter = 200       // number of resource log events inserted per thread
+def numLogEventsPerInserter = 200       // number of resource log events inserted per thread (batch size)
 
-def pauseTimeBetweenInserts = 1000      // per thread pause time between each log event insert (msec)
+def pauseTimeBetweenInserts = 1000      // per thread pause time between each log event batch insert (msec)
 
 def pauseBetweenInserterStarts = 2000   // pause time between starting each log event inserter thread (msec)
 

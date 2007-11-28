@@ -45,7 +45,7 @@ import org.hyperic.hq.product.MetricValue
 def alertDefId2EventGenerator = 
     [(new AlertDefIdAndPartition(10001, GalertDefPartition.NORMAL)) : eventGenerator1]
 
-def numZeventsPerInserter = 10      // number of zevents inserted per thread
+def numZeventsPerInserter = 10      	// number of zevents inserted per thread (batch size)
 
 def pauseTimeBetweenInserts = 1000      // per thread pause time between each batch of zevents inserted (msec)
 
