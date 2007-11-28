@@ -18,8 +18,9 @@ import org.hyperic.util.jdbc.DBUtil
 
 import java.text.DateFormat;
 import java.sql.Connection
-import javax.naming.InitialContext
+import java.sql.Types
 import javax.sql.DataSource
+import javax.naming.InitialContext
 
 import groovy.sql.Sql
 
@@ -243,6 +244,9 @@ class HealthController
              name: localeBundle['queryPostgresActivity'], 
              query: "select * from pg_stat_activity " + 
                     "where current_query != '<IDLE>' order by query_start desc"],
+          aiqPlatform: [ 
+             name: localeBundle['queryAIQPlatform'], 
+             query: "select * from eam_aiq_platform"], 
         ]
     }
     
@@ -278,7 +282,12 @@ class HealthController
                 }
                 output << "<tr>"
                 for (i in 0..<md.columnCount) {
-                    output << "<td>${rs[i]}</td>"
+                    def type = md.getColumnType(i + 1)
+                    if (type in [Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY]) {
+                        output << "<td>*binary*</td>"
+                    } else {
+                        output << "<td>${rs[i]}</td>"
+                    }
                 }
                 output << "</tr>"
             }
