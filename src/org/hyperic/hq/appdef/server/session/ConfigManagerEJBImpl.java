@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -62,12 +62,8 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -151,8 +147,7 @@ public class ConfigManagerEJBImpl
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv =
-                    getServerManagerLocal().findServerById(intID);
+                Server serv = getServerManagerLocal().findServerById(intID);
                 pname = serv.getServerType().getPlugin();
                 break;
 
@@ -165,8 +160,7 @@ public class ConfigManagerEJBImpl
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
                 throw new IllegalArgumentException("The passed entity type " +
-                    "does not support config " +
-                    "responses");
+                    "does not support config responses");
         }
 
         return pname;
@@ -242,7 +236,7 @@ public class ConfigManagerEJBImpl
         responseList = new byte[6][];
         responseIdx  = 0;
 
-        if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
+        if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             server = getServerStuffForService(id.getId());
             serverId = AppdefEntityID.newServerID(server.id);
             platform = getPlatformStuffForServer(serverId.getId());
@@ -252,7 +246,7 @@ public class ConfigManagerEJBImpl
             origReq = required;
             required = false;
             isServerOrService = true;
-        } else if(id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+        } else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             platform = getPlatformStuffForServer(id.getId());
             platformId = AppdefEntityID.newPlatformID(platform.id);
             serverId = id;
@@ -272,10 +266,8 @@ public class ConfigManagerEJBImpl
                 (isServerOrService) ? false : required;
 
             configValue = getConfigResponse(platformId);
-            data = this.getConfigForType(configValue,
-                                         ProductPlugin.TYPE_PRODUCT,
-                                         platformId,
-                                         platformConfigRequired);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
+                                    platformId, platformConfigRequired);
             responseList[responseIdx++] = data;
         
             if(!isProductType) {
@@ -283,9 +275,8 @@ public class ConfigManagerEJBImpl
                     // Skip merging of response time configuration
                     // since platforms don't have it.
                 } else {
-                    data = this.getConfigForType(configValue, productType,
-                                                 platformId,
-                                                 platformConfigRequired);
+                    data = getConfigForType(configValue, productType,
+                                            platformId, platformConfigRequired);
                     responseList[responseIdx++] = data;
                 }
             }
@@ -294,9 +285,8 @@ public class ConfigManagerEJBImpl
         // Server config (if necessary)
         if (serverId != null) {
             configValue = getConfigResponse(serverId);
-            data = this.getConfigForType(configValue,
-                                         ProductPlugin.TYPE_PRODUCT,
-                                         serverId, required);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
+                                    serverId, required);
             responseList[responseIdx++] = data;
 
             if(!isProductType) {
@@ -304,8 +294,8 @@ public class ConfigManagerEJBImpl
                     // Skip merging of response time configuration
                     // since servers don't have it.
                 } else {
-                    data = this.getConfigForType(configValue, productType,
-                                                 serverId, required);
+                    data = getConfigForType(configValue, productType, serverId,
+                                            required);
                     responseList[responseIdx++] = data;
                 }
             }
@@ -313,17 +303,18 @@ public class ConfigManagerEJBImpl
                                 
         // Service config (if necessary)
         if (serviceId != null) {
-            required = origReq;     // Reset the required flag
-            configValue  = this.getConfigResponse(id);
+            if(isProductType)
+                required = origReq;     // Reset the required flag
+            
+            configValue = getConfigResponse(id);
 
-            data = this.getConfigForType(configValue, 
-                                         ProductPlugin.TYPE_PRODUCT,
-                                         id, required);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
+                                    id, required);
             responseList[responseIdx++] = data;
         
             if(!isProductType){
-                data = this.getConfigForType(configValue, productType, id,
-                                             required);
+                required = origReq;     // Reset the required flag
+                data = getConfigForType(configValue, productType, id, required);
                 responseList[responseIdx++] = data;
             }
         }
@@ -340,19 +331,14 @@ public class ConfigManagerEJBImpl
 
         // Set platform attributes for all resources
         try {
-            res.setValue(ProductPlugin.PROP_PLATFORM_NAME,
-                         platform.name);
-            res.setValue(ProductPlugin.PROP_PLATFORM_FQDN,
-                         platform.fqdn);
-            res.setValue(ProductPlugin.PROP_PLATFORM_TYPE,
-                         platform.typeName);
-            res.setValue(ProductPlugin.PROP_PLATFORM_IP,
-                         platform.ip);
+            res.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.name);
+            res.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.fqdn);
+            res.setValue(ProductPlugin.PROP_PLATFORM_TYPE, platform.typeName);
+            res.setValue(ProductPlugin.PROP_PLATFORM_IP,   platform.ip);
             res.setValue(ProductPlugin.PROP_PLATFORM_ID,
                          String.valueOf(platform.id));
-        } catch(Exception exc){
-            this.log.warn("Error setting platform properies: " + exc,
-                          exc);
+        } catch (Exception exc) {
+            log.warn("Error setting platform properies: " + exc, exc);
         }
 
         // Set installpath attribute for server and service types.
@@ -361,8 +347,7 @@ public class ConfigManagerEJBImpl
                 res.setValue(ProductPlugin.PROP_INSTALLPATH,
                              server.installPath);
             } catch(Exception exc){
-                this.log.warn("Error setting installpath property: " + exc, 
-                              exc);
+                log.warn("Error setting installpath property: " + exc, exc);
             } 
         }
 
@@ -390,7 +375,6 @@ public class ConfigManagerEJBImpl
     public void setValidationError(AuthzSubjectValue subject,
                                    AppdefEntityID id,
                                    String validationError) {
-
         ConfigResponseDAO dao =
             DAOFactory.getDAOFactory().getConfigResponseDAO();
         ConfigResponseDB config;
@@ -435,8 +419,7 @@ public class ConfigManagerEJBImpl
     private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes,
                                       boolean overwrite, boolean force)
     {
-        if (force || (existingBytes == null) || (existingBytes.length == 0))
-        {
+        if (force || (existingBytes == null) || (existingBytes.length == 0)) {
             return newBytes;
         }
 
@@ -589,8 +572,8 @@ public class ConfigManagerEJBImpl
             // XXX: Need to cascade and send events for each resource that may
             // have been affected by this config update.
             if (sendConfigEvent) {
-                ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject,
-                                                                        appdefID);
+                ResourceUpdatedZevent event =
+                    new ResourceUpdatedZevent(subject, appdefID);
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
             
