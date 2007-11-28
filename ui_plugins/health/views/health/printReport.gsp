@@ -3,6 +3,8 @@
 -- HQ Health Report --
 ${reportTime}
 ${userName} @ ${fqdn}
+Version: ${hqVersion} # ${buildNumber}
+Schema: ${schemaVersion}
 System ID: ${guid}
 
 -- HQ Load --

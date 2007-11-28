@@ -1,4 +1,5 @@
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
 import org.hyperic.util.PrintfFormat
@@ -208,6 +209,9 @@ class HealthController
             numAgents:        AgentManagerEJBImpl.one.agentCount,
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
+            hqVersion:        PB.one.version,
+            buildNumber:      PB.one.buildNumber,
+            schemaVersion:    SCM.one.config.getProperty('CAM_SCHEMA_VERSION')
         ] + getSystemStats([:])
     	render(locals: locals)
     }
