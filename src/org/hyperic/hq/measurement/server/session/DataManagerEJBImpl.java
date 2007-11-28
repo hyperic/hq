@@ -1810,7 +1810,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private StringBuffer getLastDataPointsSQL(int len, long timestamp,
                                               Integer[] measIds)
     {
-        String tables = MeasTabManagerUtil.getUnionStatement(getPurgeRaw(), measIds);
+        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ?
+            MeasTabManagerUtil.getUnionStatement(
+                timestamp, System.currentTimeMillis(), measIds)
+            : MeasTabManagerUtil.getUnionStatement(getPurgeRaw(), measIds);
+
         StringBuffer sqlBuf = new StringBuffer(
             "SELECT measurement_id, value, timestamp" +
             " FROM " + tables + ", " +
@@ -1821,6 +1825,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         if (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED);
             sqlBuf.append(" AND timestamp >= ").append(timestamp);
+
         sqlBuf.append(" GROUP BY measurement_id) mt")
               .append(" WHERE timestamp = maxt AND measurement_id = id");
         return sqlBuf;
