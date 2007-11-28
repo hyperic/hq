@@ -46,6 +46,7 @@
   </c:when>
   <c:otherwise>
     <c:set var="removeImg" value="/images/tbb_removefromlist_gray.gif"/>
+    <c:set var="disableRemoveButton" value="true"/>
   </c:otherwise>
 </c:choose>
 
@@ -134,7 +135,14 @@
         <td width="40"><html:link href="${addToListUrl}"><html:img page="/images/tbb_addtolist.gif" width="85" height="16" border="0"/></html:link></td>
     </c:if>
     <c:if test="${showRemoveBtn}">
-    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><html:image page="${removeImg}" border="0" property="remove"/></div></td>
+        <c:choose>
+	    <c:when test="${disableRemoveButton}">
+	    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><html:img page="${removeImg}" border="0"/></div></td>
+	    </c:when>
+	    <c:otherwise>
+	    <td width="40" id="<c:out value="${widgetInstanceName}"/>DeleteButtonTd"><div id="<c:out value="${widgetInstanceName}"/>DeleteButtonDiv"><html:image page="${removeImg}" border="0" property="remove"/></div></td>
+	    </c:otherwise>
+	    </c:choose>
     </c:if>
 
 <c:if test="${not empty showIntervalControls and showIntervalControls}">
