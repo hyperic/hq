@@ -318,7 +318,9 @@ public class ConfigManagerEJBImpl
                                 
         // Service config (if necessary)
         if (serviceId != null) {
-            required = origReq;     // Reset the required flag
+            if (isProductType)
+                required = origReq;     // Reset the required flag
+
             configValue  = this.getConfigResponse(id);
 
             data = this.getConfigForType(configValue, 
@@ -326,7 +328,8 @@ public class ConfigManagerEJBImpl
                                          id, required);
             responseList[responseIdx++] = data;
         
-            if(!isProductType){
+            if (!isProductType) {
+                required = origReq;     // Reset the required flag
                 data = this.getConfigForType(configValue, productType, id,
                                              required);
                 responseList[responseIdx++] = data;
