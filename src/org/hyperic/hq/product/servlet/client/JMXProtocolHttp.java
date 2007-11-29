@@ -58,7 +58,7 @@ public class JMXProtocolHttp extends JMXProtocolRequest {
         URL url = new URL(scheme, host, port, path);
 
         HttpClient client = new HttpClient();
-        final int timeout = 1 * 1000; //1min
+        final int timeout = 30 * 1000; //30 seconds
         client.setTimeout(timeout);
         client.setConnectionTimeout(timeout);
 
