@@ -42,6 +42,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     public static final String PROP_OFFSET     = "read.offset";
     public static final String PROP_NUMBYTES   = "read.numBytes";
 
+    private static final String CMD_TIME       = "time";
     private static final String CMD_READ       = "read";
     private static final String CMD_CPUINFO    = "cpuinfo";
     private static final String CMD_CPU        = "cpu";
@@ -55,6 +56,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_WHO        = "who";
 
     private static final String _COMMANDS[] = {
+        CMD_TIME,
         CMD_READ,
         CMD_CPUINFO,
         CMD_CPU,
@@ -116,7 +118,9 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         Sigar sigar = new Sigar();
 
         try {
-            if (command.equals(CMD_READ)) {
+            if (command.equals(CMD_TIME)) {
+                return new TimeData(System.currentTimeMillis());
+            } else if (command.equals(CMD_READ)) {
                 return getReadData(config);
             } else if (command.equals(CMD_CPUINFO)) {
                 return sigar.getCpuInfoList();
