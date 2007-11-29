@@ -46,6 +46,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.measurement.shared.DataCompressLocal;
+import org.hyperic.hq.measurement.shared.DataCompressUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
@@ -452,6 +454,14 @@ public class DataCompressEJBImpl
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
     }
 
+    public static DataCompressLocal getOne() {
+        try {
+            return DataCompressUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
     /**
      * @ejb:create-method
      */
