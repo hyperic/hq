@@ -151,23 +151,35 @@ class HealthController
         def procMem  = s.getProcMem(pid)
         def procCpu  = s.getProcCpu(pid)
         def procTime = s.getProcTime(pid)
-        def loadAvg  = s.loadAverage
+        def NA       = 'N/A' //XXX localeBundle?
+        def loadAvg1 = NA
+        def loadAvg5 = NA
+        def loadAvg15 = NA
         def runtime  = Runtime.runtime
             
         try {
             procFds = s.getProcFd(pid).total
         } catch(Exception e) {
         }
-            
+
+        try {
+            def loadAvg = s.loadAverage
+            loadAvg1  = loadAvgFmt.sprintf(loadAvg[0])
+            loadAvg5  = loadAvgFmt.sprintf(loadAvg[1])
+            loadAvg15 = loadAvgFmt.sprintf(loadAvg[2])
+        } catch(Exception e) {
+            //SigarNotImplementedException on Windows
+        }
+
         return [sysUserCpu:    (int)(cpu.user * 100),
                 sysSysCpu:     (int)(cpu.sys * 100),
                 sysNiceCpu:    (int)(cpu.nice * 100),
                 sysIdleCpu:    (int)(cpu.idle * 100),
                 sysWaitCpu:    (int)(cpu.wait * 100),
                 sysPercCpu:    (int)(100 - cpu.idle * 100),
-                loadAvg1:      loadAvgFmt.sprintf(loadAvg[0]),
-                loadAvg5:      loadAvgFmt.sprintf(loadAvg[1]),
-                loadAvg15:     loadAvgFmt.sprintf(loadAvg[2]),
+                loadAvg1:      loadAvg1,
+                loadAvg5:      loadAvg5,
+                loadAvg15:     loadAvg15,
                 totalMem:      formatBytes(sysMem.total),
                 usedMem:       formatBytes(sysMem.used),
                 freeMem:       formatBytes(sysMem.free),
