@@ -164,15 +164,14 @@
         dojo.byId("dashSelect").value = '<c:out value="${DashboardForm.selectedDashboardId}"/>';
     }
     onloads.push(refreshPortlets);
-    if (dojo.byId("dashSelect")) {
-        dojo.require("dojo.widget.Dialog");
-	    dojo.event.connect(window, "onload", function(){
-	        var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
-	        if(<c:out value="${DashboardForm.popDialog}"/>){
-	            dialogWidget.show();
-	        }
-	        fixSelect();
-        }
+    dojo.require("dojo.widget.Dialog");
+	dojo.event.connect(window, "onload", function(){
+	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
+	    if(<c:out value="${DashboardForm.popDialog}"/>){
+	       dialogWidget.show();
+	    }
+	    fixSelect();
+	    
 	});
 
 </script>
