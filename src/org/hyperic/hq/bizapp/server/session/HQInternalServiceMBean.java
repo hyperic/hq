@@ -23,8 +23,13 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement.server.session;
+package org.hyperic.hq.bizapp.server.session;
 
-public interface ReportStatsServiceMBean {
-    double getInsertsPerMinute();
+public interface HQInternalServiceMBean {
+    double getMetricInsertsPerMinute();
+    int getPlatformCount();
+    int getAgentCount();
+    long getTransactionCount();
+    long getTransactionFailureCount();
+    double getMetricsCollectedPerMinute();
 }

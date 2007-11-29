@@ -24,12 +24,12 @@
  -->
 
 <plugin>
-  <service name="HQ Metric Report"
+  <service name="HQ Internals"
            server="JBoss"
            version="4.0">
 
     <property name="OBJECT_NAME"
-              value="hyperic.jmx:name=MetricReport"/>
+              value="hyperic.jmx:name=HQInternal"/>
 
     <plugin type="autoinventory"/>
 
@@ -41,10 +41,41 @@
     <metric name="Availability"
             indicator="true"/>
 
-    <metric name="Inserts Per Minute"
+    <metric name="Metric Inserts Per Minute"
             indicator="true" 
             interval="60000"
             category="THROUGHPUT"
             defaultOn="true"/>
+            
+    <metric name="Metrics Collected Per Minute"
+            indicator="true" 
+            interval="600000"
+            defaultOn="true"/>
+
+    <metric name="Platform Count"
+            indicator="true" 
+            interval="600000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Agent Count"
+            indicator="true" 
+            interval="600000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Transaction Count"
+            indicator="true" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Transaction Failure Count"
+            indicator="true" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+            
   </service>
 </plugin>

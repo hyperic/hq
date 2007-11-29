@@ -27,18 +27,10 @@ package org.hyperic.hq.measurement.server.session;
 import java.text.DateFormat;
 import java.util.Date;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.StatsCollector;
 
@@ -79,19 +71,6 @@ public class ReportStatsCollector {
         });
     }
     
-    private void createStatsMBean()
-        throws MalformedObjectNameException, InstanceAlreadyExistsException,
-               MBeanRegistrationException, NotCompliantMBeanException
-    {
-        MBeanServer server = MBeanUtil.getMBeanServer();
-
-        ObjectName on =
-            new ObjectName("hyperic.jmx:name=MetricReport");
-        ReportStatsService mbean = new ReportStatsService();
-        server.registerMBean(mbean, on);
-        _log.info("HQ Metric Report Statistics MBean registered " + on);
-    }
-    
     public void initialize(int numEnts) {
         synchronized (LOCK) {
             _stats = new StatsCollector(numEnts);
@@ -109,12 +88,6 @@ public class ReportStatsCollector {
             if (INSTANCE == null) {
                 INSTANCE = new ReportStatsCollector();
                 INSTANCE.initialize(2);  // Dummy initialization
-                
-                try {
-                    INSTANCE.createStatsMBean();
-                } catch(Exception e) {
-                    _log.warn("Unable to register Reports Stats mbean", e);
-                }
             }
             return INSTANCE;
         }
