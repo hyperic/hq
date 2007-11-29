@@ -345,4 +345,9 @@ public class PlatformDAO extends HibernateDAO {
         
         return getSession().createQuery(sql).list();
     }
+    
+    public Number getPlatformCount() {
+        return (Number)getSession().createQuery("select count(*) from Platform")
+            .uniqueResult();
+    }
 }
