@@ -38,7 +38,11 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
 
     public static final String PROP_PID        = "process.pid";
     public static final String PROP_SIGNAL     = "process.signal";
+    public static final String PROP_FILE       = "read.file";
+    public static final String PROP_OFFSET     = "read.offset";
+    public static final String PROP_NUMBYTES   = "read.numBytes";
 
+    private static final String CMD_READ       = "read";
     private static final String CMD_CPUINFO    = "cpuinfo";
     private static final String CMD_CPU        = "cpu";
     private static final String CMD_CPUPERC    = "cpuperc";
@@ -51,6 +55,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
     private static final String CMD_WHO        = "who";
 
     private static final String _COMMANDS[] = {
+        CMD_READ,
         CMD_CPUINFO,
         CMD_CPU,
         CMD_CPUPERC,
@@ -63,6 +68,34 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_WHO
     };
 
+    private ReadData getReadData(ConfigResponse config) 
+        throws PluginException
+    {
+        String file      = config.getValue(PROP_FILE);
+        String sOffset   = config.getValue(PROP_OFFSET);
+        String sNumBytes = config.getValue(PROP_NUMBYTES);
+        long offset;
+        int numBytes;
+        
+        if (file == null || sOffset == null || sNumBytes == null) {
+            throw new PluginException("Must specify " + PROP_FILE + ", " +
+                                      PROP_OFFSET + ", " + PROP_NUMBYTES);
+        }
+        
+        try {
+            offset = Long.parseLong(sOffset);
+        } catch(NumberFormatException e) {
+            throw new PluginException("Invalid offset: " + sOffset);
+        }
+        
+        try {
+            numBytes = Integer.parseInt(sNumBytes);
+        } catch(NumberFormatException e) {
+            throw new PluginException("Invalid numBytes: " + sNumBytes);
+        }
+        return ReadData.gather(file, offset, numBytes);
+    }
+    
     private long getPid(ConfigResponse config)
         throws PluginException {
 
@@ -83,7 +116,9 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         Sigar sigar = new Sigar();
 
         try {
-            if (command.equals(CMD_CPUINFO)) {
+            if (command.equals(CMD_READ)) {
+                return getReadData(config);
+            } else if (command.equals(CMD_CPUINFO)) {
                 return sigar.getCpuInfoList();
             } else if (command.equals(CMD_CPU)) {
                 return sigar.getCpuList();

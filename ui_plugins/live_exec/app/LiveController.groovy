@@ -11,7 +11,7 @@ import org.json.JSONArray
 class LiveController 
 	extends BaseController
 {
-    private FORBIDDEN = ['cpu', 'kill', 'process']
+    private FORBIDDEN = ['cpu', 'kill', 'process', 'read']
                          
     def LiveController() {
         setTemplate('standard')
