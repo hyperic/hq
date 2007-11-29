@@ -261,4 +261,18 @@ abstract class BaseController {
         def id = new AppdefEntityID(aeid)
         ResourceManagerEJBImpl.one.findResource(id)
     }
+
+    /**
+     * Adds a filter which only allows calls made by users in the Super User
+     * role to be processed.
+     */
+    protected onlyAllowSuperUsers() {
+        addBeforeFilter({ 
+            if (!user.isSuperUser()) {
+                render(inline: "Unauthorized")
+                return true
+            }
+            return false
+        })
+    }
 }
