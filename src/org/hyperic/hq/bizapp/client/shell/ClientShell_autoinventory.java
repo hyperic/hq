@@ -42,19 +42,11 @@ public class ClientShell_autoinventory extends MultiwordShellCommand {
     {   
         super.init(commandName, shell);
 
-        registerSubHandler("start",
-                           new ClientShell_autoinventory_command(_shell));
-        registerSubHandler("stop",
-                           new ClientShell_autoinventory_command(_shell));
-        registerSubHandler("status",
-                           new ClientShell_autoinventory_command(_shell));
         registerSubHandler("queue",
                            new ClientShell_autoinventory_queue(_shell));
-        registerSubHandler("runtime-scan",
-                           new ClientShell_autoinventory_runtimescan(_shell));
     }
 
     public String getUsageShort(){
-        return "Run scans, view queues, and approve changes";
+        return "View queues and approve changes";
     }
 }
