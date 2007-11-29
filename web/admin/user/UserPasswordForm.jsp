@@ -29,7 +29,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
+ <c:set var="passwordMessagesPresent" value="false"/>
+  <logic:messagesPresent property="currentPassword">
+  <c:set var="passwordMessagesPresent" value="true"/>
+  </logic:messagesPresent>
+  <logic:messagesPresent property="newPassword">
+  <c:set var="passwordMessagesPresent" value="true"/>
+  </logic:messagesPresent>
+  <logic:messagesPresent property="confirmPassword">
+  <c:set var="passwordMessagesPresent" value="true"/>
+  </logic:messagesPresent>
 
 <tiles:importAttribute name="userId" ignore="true"/>
 
@@ -52,46 +61,48 @@
         <c:when test="${administrator eq false}">  
           <fmt:message key="admin.user.changePassword.EnterCurrent"/><br>
           <input type="password" size="31" maxlength="40" name="currentPassword" tabindex="3"><br>
+             <logic:messagesPresent property="confirmPassword">
+       -<html:errors property="confirmPassword"/><br>
+      </logic:messagesPresent>
         </c:when>
       </c:choose>
     </c:if>
        
     <fmt:message key="admin.user.changePassword.EnterNew"/><br>
     <input type="password" size="31" maxlength="40" name="newPassword" tabindex="4"><br>
+        <c:if test="${passwordMessagesPresent}">
+        <div class="ErrorField">
+         <span class="ErrorFieldContent">
+     <logic:messagesPresent property="newPassword">
+       -<html:errors property="newPassword"/><br>
+      </logic:messagesPresent>
+     </div>
+      </c:if>
     <span class="CaptionText">
      <fmt:message key="admin.user.changePassword.NoSpaces"/><br>&nbsp;<br>
     </span>
     <fmt:message key="admin.user.changePassword.ConfirmNew"/><br>
-    <input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5">
+    <input type="password" size="31" maxlength="40" name="confirmPassword" tabindex="5"><br>
+        <c:if test="${passwordMessagesPresent}">
+        <div class="ErrorField">
+         <span class="ErrorFieldContent">
+     <logic:messagesPresent property="confirmPassword">
+       -<html:errors property="confirmPassword"/><br>
+      </logic:messagesPresent>
+     </div>
+      </c:if>
    </td>
   </tr>
 
-  <%-- we need to display the yellow box below if there are password
-       messages --%>
-  <c:set var="passwordMessagesPresent" value="false"/>
-  <logic:messagesPresent property="currentPassword">
-  <c:set var="passwordMessagesPresent" value="true"/>
-  </logic:messagesPresent>
-  <logic:messagesPresent property="newPassword">
-  <c:set var="passwordMessagesPresent" value="true"/>
-  </logic:messagesPresent>
-  <logic:messagesPresent property="confirmPassword">
-  <c:set var="passwordMessagesPresent" value="true"/>
-  </logic:messagesPresent>
-
-  <c:if test="${passwordMessagesPresent}">
+  <%-- we need to display the yellow box below if there is a  password
+       message for current password is incorrect --%>
+    <c:if test="${passwordMessagesPresent}">
    <tr valign="top"> 
     <td class="BlockLabel">&nbsp;</td>
     <td class="ErrorField">
      <span class="ErrorFieldContent">
       <logic:messagesPresent property="currentPassword">
        -<html:errors property="currentPassword"/><br>
-      </logic:messagesPresent>
-      <logic:messagesPresent property="newPassword">
-       -<html:errors property="newPassword"/><br>
-      </logic:messagesPresent>
-      <logic:messagesPresent property="confirmPassword">
-       -<html:errors property="confirmPassword"/><br>
       </logic:messagesPresent>
      </span>
     </td>
