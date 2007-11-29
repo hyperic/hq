@@ -41,7 +41,7 @@ loadDBPort () {
 
   TMPPROPFILE="${SERVER_HOME}/hqdb/data/.postgresql.conf.tmp"
   DBCONF="${SERVER_HOME}/hqdb/data/postgresql.conf"
-  cat ${DBCONF} | grep port | tr -d ' \t' | grep -v '^#' > ${TMPPROPFILE}
+  cat ${DBCONF} | grep port | tr -d ' \t' | grep -v '^#' | sed 's/#.*//g' > ${TMPPROPFILE}
   . ${TMPPROPFILE}
   rm -f ${TMPPROPFILE}
   if [ "x${port}" = "x" ] ; then
