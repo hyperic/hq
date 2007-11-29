@@ -32,13 +32,7 @@ class HealthController
 	extends BaseController
 {
     def HealthController() {
-        addBeforeFilter({ 
-            if (!user.isSuperUser()) {
-                render(inline: "Unauthorized")
-                return true
-            }
-            return false
-        })
+        onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 'runQuery'])
     }
     
