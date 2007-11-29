@@ -464,8 +464,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
         
         for (Iterator i=vals.iterator(); i.hasNext(); ) {
             Object[] v = (Object[])i.next();
-            BigInteger total = (BigInteger)v[0];
-            BigInteger interval = (BigInteger)v[1];
+            java.lang.Number total = (java.lang.Number)v[0];
+            java.lang.Number interval = (java.lang.Number)v[1];
             String metricName = (String)v[2];
             String resourceName = (String)v[3];
             
