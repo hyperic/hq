@@ -51,10 +51,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
+import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.shared.DashboardManagerUtil;
@@ -63,6 +63,7 @@ import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * @ejb:bean name="DashboardManager"
@@ -319,6 +320,22 @@ public class DashboardManagerEJBImpl implements SessionBean {
             .registerCallbackListener(RoleRemoveCallback.class,
                 new RoleRemoveCallback() {
                     public void roleRemoved(Role r) {
+                        RoleDashboardConfig cfg = _dashDAO.findDashboard(r);
+                        
+                        CrispoManagerLocal crispMgr =
+                            CrispoManagerEJBImpl.getOne();
+                        
+                        List opts = crispMgr.findOptionByKey(
+                            Constants.DEFAULT_DASHBOARD_ID);
+                        
+                        for (Iterator it = opts.iterator(); it.hasNext(); ) {
+                            CrispoOption opt = (CrispoOption) it.next();
+                            if (Integer.valueOf(opt.getValue()).equals(
+                                cfg.getCrispo().getId())) {
+                                crispMgr.updateOption(opt, null);
+                            }
+                        }
+                        
                         _dashDAO.handleRoleRemoval(r);
                     }
                 }
