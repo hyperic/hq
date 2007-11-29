@@ -16,6 +16,9 @@ System Load Average:
 - ${l.fiveMin}: ${loadAvg5}
 - ${l.fifteenMin}: ${loadAvg15}
     
+System Processors: <% for (c in cpuInfos) { %>
+- ${c.vendor} ${c.model} ${c.mhz} <% } %>
+
 System Memory:
 - ${l.total}: ${totalMem}
 - ${l.used}: ${usedMem}

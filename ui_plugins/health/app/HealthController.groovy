@@ -16,7 +16,6 @@ import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
 import org.hyperic.util.jdbc.DBUtil
 
-
 import java.text.DateFormat;
 import java.sql.Connection
 import java.sql.Types
@@ -223,6 +222,7 @@ class HealthController
             schemaVersion:    SCM.one.config.getProperty('CAM_SCHEMA_VERSION'),
             cmdLine:          cmdLine,
             procEnv:          procEnv,
+            cpuInfos:         s.cpuInfoList,
         ] + getSystemStats([:])
     	render(locals: locals)
     }
