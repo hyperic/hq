@@ -66,6 +66,10 @@ public class HQApp {
     private File               _resourceDir;
     private File               _webAccessibleDir;
     
+    private final Object       STAT_LOCK = new Object();
+    private long               _numTx;
+    private long               _numTxErrors;
+    
     static {
         TxSnatch.setSnatcher(new Snatcher());
     }
@@ -156,13 +160,39 @@ public class HQApp {
         }
     }
     
+    void incrementTxCount(boolean txFailed) {
+        synchronized (STAT_LOCK) {
+            _numTx++;
+            if (txFailed)
+                _numTxErrors++;
+        }
+    }
+
+    /**
+     * Get the # of transactions which have been run since the start of the
+     * application
+     */
+    public long getTransactions() {
+        synchronized (STAT_LOCK) {
+            return _numTx;
+        }
+    }
+    
+    /**
+     * Get the # of transactions which have failed since the start of the
+     * application
+     */
+    public long getTransactionsFailed() {
+        synchronized (STAT_LOCK) {
+            return _numTxErrors;
+        }
+    }
+    
     private static class TxSynch implements Synchronization, Serializable {
         private javax.transaction.Transaction _me;
-        private Session _sess;
         
-        private TxSynch(javax.transaction.Transaction me, Session s) {
+        private TxSynch(javax.transaction.Transaction me) {
             _me   = me;
-            _sess = s;
         }
         
         public void afterCompletion(int status) {
@@ -172,13 +202,16 @@ public class HQApp {
                                "but can't find myself.  Where am I?");
                 }
             }
-            
+        
             if (status != Status.STATUS_COMMITTED) {
+                HQApp.getInstance().incrementTxCount(true);
                 if (_log.isTraceEnabled()) {
                     _log.trace("Transaction [" + _me + "] failed!");
                 }
                 // Failed Tx -- kill the session.
                 SessionManager.cleanupSession(false);
+            } else {
+                HQApp.getInstance().incrementTxCount(false);
             }
         }
 
@@ -201,7 +234,7 @@ public class HQApp {
             }
             if (newSynch) {
                 try {
-                    tx.registerSynchronization(new TxSynch(tx, s));
+                    tx.registerSynchronization(new TxSynch(tx));
                 } catch(Exception e) {
                     _log.error("Unable to register synchronization!", e);
                 }
