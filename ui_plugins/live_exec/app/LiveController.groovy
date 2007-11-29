@@ -26,7 +26,6 @@ class LiveController
         } else {
             members = [r]
         }
-        log.info "Returning ${members}"
         members
     }
     
