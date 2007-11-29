@@ -360,7 +360,7 @@ public class PermissionManagerImpl
          "where d.severityEnum >= :priority ";
     }
 
-    public boolean hasRoleDashboards() {
+    public boolean hasGuestRole() {
         return false;
     }
 }

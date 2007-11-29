@@ -180,19 +180,6 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     }
 
     /**
-     * Return the full <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
-     * @ejb:interface-method
-     */
-    public PageList getAllSubjects(Integer sessionId)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
-        return getAllSubjects(sessionId, null, null);
-    }
-
-    /**
      * Return a sorted, paged <code>List</code> of
      * <code>ResourceGroupValue</code> objects representing every
      * resource type in the system that the user is allowed to view.

@@ -100,7 +100,7 @@ public interface PermissionManager {
     /**
      * Check to see if user can see role dashboards
      */
-    public boolean hasRoleDashboards();
+    public boolean hasGuestRole();
     
     /**
      * Find the list of instance ids for which a given subject id 

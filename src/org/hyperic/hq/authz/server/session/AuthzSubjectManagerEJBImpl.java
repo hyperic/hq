@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ejb.CreateException;
@@ -324,6 +325,12 @@ public class AuthzSubjectManagerEJBImpl
             pm.check(whoami.getId(), getRootResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
+            
+            if (!pm.hasGuestRole()) {
+                if (excludes == null)
+                    excludes = new ArrayList(1);
+                excludes.add(AuthzConstants.guestId);
+            }
         } catch (PermissionException e) {
             PageList plist = new PageList();
 

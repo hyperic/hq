@@ -218,7 +218,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
         Collection res = new ArrayList();
 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        if (permMan.hasRoleDashboards() &&
+        if (permMan.hasGuestRole() &&
             permMan.hasAdminPermission(me.getId())) {
             res.addAll(_dashDAO.findAllRoleDashboards());
             res.add(getUserDashboard(me, me));
@@ -229,7 +229,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
         if (cfg != null)
             res.add(cfg);
         
-        if (permMan.hasRoleDashboards())
+        if (permMan.hasGuestRole())
             res.addAll(_dashDAO.findRolesFor(me));
         
         return res;
