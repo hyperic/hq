@@ -35,14 +35,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -82,7 +81,7 @@ public class AIStartupListener
 
                 // Only servers have runtime AI.
                 if (!id.isServer()) {
-                    return;
+                    continue;
                 }
 
                 if (isUpdate) {
@@ -92,18 +91,18 @@ public class AIStartupListener
                         aiManager.toggleRuntimeScan(subject, id,
                                                     s.isRuntimeAutodiscovery());
                     } catch (Exception e) {
-                        throw new SystemException("Error toggling " +
-                                                  "Runtime-AI for " +
-                                                  "server [" + id + "]", e);    
+                        _log.warn("Error toggling runtime-ai for server [" +
+                                  id + "]", e);
+                        continue;
                     }
                 } else {
                     _log.info("Enabling Runtime-AI for " + id);
                     try {
                         aiManager.toggleRuntimeScan(subject, id, true);
                     } catch (Exception e) {
-                        throw new SystemException("Error enabling " +
-                                                  "Runtime-AI for " +
-                                                  "server [" + id + "]", e);
+                        _log.warn("Error enabling runtime-ai for server [" +
+                                  id + "]", e);
+                        continue;
                     }
                 }
             }
