@@ -328,77 +328,39 @@ public class ZeventManager {
     }
     
     /**
-     * Returns the listeners which have specifically registered for the
-     * specified event type.  This method does not return global event listeners.
-     * 
-     * If the event type was never registered, null will be returned, otherwise 
-     * a list of {@link ZeventListener}s (of potentially size=0)
-     */
-    private List getTypeListeners(Zevent z) {
-        synchronized (_listenerLock) {
-            return (List)_listeners.get(z.getClass());
-        }
-    }
-    
-    /**
      * Internal method to dispatch events.  Called by the 
-     * {@link QueueProcessor}. 
-     * 
-     * The strategy used in this method creates mini-batches of events
-     * to send to each listener.  There is no defined order for listener
-     * execution.  
+     * {@link QueueProcessor}
      */
-    void dispatchEvents(List events) {
+    void dispatchEvent(Zevent e) {
+        long timeInQueue = e.getQueueExitTime() - e.getQueueEntryTime();
+        List listeners;
+
         synchronized (INIT_LOCK) {
-            for (Iterator i=events.iterator(); i.hasNext(); ) {
-                Zevent z = (Zevent)i.next();
-                
-                long timeInQueue = z.getQueueExitTime() - z.getQueueEntryTime();
-                if (timeInQueue > _maxTimeInQueue)
-                    _maxTimeInQueue = timeInQueue;
-                _numEvents++;
-            }
+            if (timeInQueue > _maxTimeInQueue)
+                _maxTimeInQueue = timeInQueue;
+            _numEvents++;
         }
-
-        List validEvents = new ArrayList(events.size());
-        Map listenerBatches;
+        
         synchronized (_listenerLock) {
-            listenerBatches = new HashMap(_globalListeners.size());
-            for (Iterator i=events.iterator(); i.hasNext(); ) {
-                Zevent z = (Zevent)i.next();
-                List typeListeners = getTypeListeners(z);
-                
-                if (typeListeners == null) {
-                    _log.warn("Unable to dispatch event of type [" + 
-                              z.getClass().getName() + "]:  Not registered");
-                    continue;
-                }
-                validEvents.add(z);
-                
-                for (Iterator j=typeListeners.iterator(); j.hasNext(); ) {
-                    ZeventListener listener = (ZeventListener)j.next();
-                    List batch = (List)listenerBatches.get(listener);
-                    
-                    if (batch == null) {
-                        batch = new ArrayList();
-                        listenerBatches.put(listener, batch);
-                    }
-                    batch.add(z);
-                }
-            }
-            
-            for (Iterator i=_globalListeners.iterator(); i.hasNext(); ) {
-                ZeventListener listener = (ZeventListener)i.next();
-                listenerBatches.put(listener, validEvents);
-            }
-        }
+            List typeListeners = (List)_listeners.get(e.getClass());
 
-        for (Iterator i=listenerBatches.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            ZeventListener listener = (ZeventListener)ent.getKey();
-            List batch = (List)ent.getValue();
+            if (typeListeners == null) {
+                _log.warn("Unable to dispatch event of type [" + 
+                          e.getClass().getName() + "]:  Not registered");
+                return;
+            }
+            listeners = new ArrayList(typeListeners.size() + 
+                                      _globalListeners.size());
+            listeners.addAll(typeListeners);
+            listeners.addAll(_globalListeners);
+        }
             
-            listener.processEvents(Collections.unmodifiableList(batch));
+        /* Eventually we may want to de-queue a bunch at a time (if they are
+         * the same event type, and pass those lists off all at once */
+        for (Iterator i=listeners.iterator(); i.hasNext(); ) {
+            ZeventListener listener = (ZeventListener)i.next();
+
+            listener.processEvents(Collections.singletonList(e));
         }
     }
 
@@ -525,8 +487,7 @@ public class ZeventManager {
             if (INSTANCE == null) {
                 INSTANCE = new ZeventManager();
                 QueueProcessor p = new QueueProcessor(INSTANCE, 
-                                                      INSTANCE._eventQueue,
-                                                      100);
+                                                      INSTANCE._eventQueue);
                 INSTANCE._queueProcessor = p;
                 INSTANCE._processorThread = new Thread(INSTANCE._threadGroup, 
                                                        p, "ZeventProcessor");
