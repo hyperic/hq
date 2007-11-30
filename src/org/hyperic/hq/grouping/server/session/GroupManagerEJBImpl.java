@@ -69,7 +69,7 @@ import org.hyperic.util.pager.SortAttribute;
   * @ejb:bean name="GroupManager"
   *           jndi-name="ejb/grouping/GroupManager"
   *           local-jndi-name="LocalGroupManager"
-  *           view-type="both"
+  *           view-type="local"
   *           type="Stateless"
   */
 public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
