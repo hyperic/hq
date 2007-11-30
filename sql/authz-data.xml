@@ -579,7 +579,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     <!-- Define a view only role which includes the guest user and
         has all the read operations availble on the authz resource group -->
     <table name="EAM_ROLE">
-        <data ID="2" CID="2" NAME="View Only Role" FSYSTEM="FALSE"/>
+        <data ID="2" CID="2" NAME="Guest Role" FSYSTEM="FALSE"/>
     </table>
 
     <!-- add the role resource -->
