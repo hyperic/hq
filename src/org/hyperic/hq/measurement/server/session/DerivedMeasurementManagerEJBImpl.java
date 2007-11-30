@@ -1343,8 +1343,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             Object[] vals = (Object[]) it.next();
             
             AppdefEntityID aeid =
-                new AppdefEntityID(((Integer) vals[0]).intValue(),
-                                   (Integer) vals[1]);
+                new AppdefEntityID(Integer.parseInt(vals[0].toString()),
+                                   Integer.parseInt(vals[1].toString()));
 
             AuthzSubject overlord =
                 AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
