@@ -53,13 +53,13 @@
             defaultOn="true"/>
 
     <metric name="Platform Count"
-            indicator="true" 
+            indicator="false" 
             interval="600000"
             collectionType="trendsup"
             defaultOn="true"/>
 
     <metric name="Agent Count"
-            indicator="true" 
+            indicator="false" 
             interval="600000"
             collectionType="trendsup"
             defaultOn="true"/>
