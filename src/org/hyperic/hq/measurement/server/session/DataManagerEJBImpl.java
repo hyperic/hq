@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -126,6 +126,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     // Purge intervals, loaded once on first invocation.
     private long purgeRaw, purge1h, purge6h;
+
+    private final long HOURS_PER_MEAS_TAB =
+        MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
     private Analyzer analyzer = null;
 
@@ -852,7 +855,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 DBUtil.closeStatement(logCtx, stmt);
             }
         }
-
         return left;
     }
 
@@ -891,7 +893,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return getDataTable(begin,end,empty);
     }
 
-    private boolean usesMetricUnion(long begin, long end)
+    private boolean usesMetricUnion(long begin)
     {
         long now = System.currentTimeMillis();
         if (MeasTabManagerUtil.getMeasTabStartTime(now - getPurgeRaw()) < begin)
@@ -901,12 +903,29 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private String getDataTable(long begin, long end, Object[] measIds)
     {
+        return getDataTable(begin, end, measIds, false);
+    }
+
+    /*
+     * @param begin beginning of the time range
+     * @param end end of the time range
+     * @param measIds the measurement_ids associated with the query.
+     *      This is only used for 'UNION ALL' queries
+     * @param useAggressiveRollup will use the rollup tables if
+     *      the timerange represents the same timerange as one
+     *      metric data table
+     */
+    private String getDataTable(long begin, long end, Object[] measIds,
+                                boolean useAggressiveRollup)
+    {
         long now = System.currentTimeMillis();
 
         if (!confDefaultsLoaded)
             loadConfigDefaults();
 
-        if (usesMetricUnion(begin, end)) {
+        if (useAggressiveRollup && (begin - end) < HOURS_PER_MEAS_TAB) {
+            return MeasTabManagerUtil.getUnionStatement(begin, end, measIds);
+        } else if (!useAggressiveRollup && usesMetricUnion(begin)) {
             return MeasTabManagerUtil.getUnionStatement(begin, end, measIds);
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
@@ -1071,7 +1090,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         switch(type)
         {
             case MeasurementConstants.COLL_TYPE_DYNAMIC:
-                if (usesMetricUnion(begin, end))
+                if (usesMetricUnion(begin))
                     return "AVG(value) AS value, " +
                            "MAX(value) AS peak, MIN(value) AS low";
                 else
@@ -1929,7 +1948,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // Use the already calculated min, max and average on
         // compressed tables.
         String minMax;
-        if (usesMetricUnion(begin, end)) {
+        if (usesMetricUnion(begin)) {
             minMax = " MIN(value), AVG(value), MAX(value), ";
         } else {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
@@ -1995,7 +2014,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // Use the already calculated min, max and average on
             // compressed tables.
             String minMax;
-            if (usesMetricUnion(begin, end)) {
+            if (usesMetricUnion(begin)) {
                 minMax = " MIN(value), AVG(value), MAX(value), ";
             } else {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
@@ -2051,14 +2070,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
-     * @param tids The id's of the Derived Measurement
+     * @param tids The template id's of the Derived Measurement
+     * @param iids The instance id's of the Derived Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
+     * @param useAggresiveRollup uses a measurement rollup table to fetch the
+     *      data if the time range spans more than one data table's max timerange
      * @return the Map of data points
      * @ejb:interface-method
      */
     public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
-                                        long begin, long end)
+                                        long begin, long end,
+                                        boolean useAggresiveRollup)
         throws DataNotAvailableException {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
@@ -2091,11 +2114,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             // The table to query from
             List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, measids.toArray());
+            String table = getDataTable(begin, end, measids.toArray(),
+                                        useAggresiveRollup);
             // Use the already calculated min, max and average on
             // compressed tables.
             String minMax;
-            if (usesMetricUnion(begin, end)) {
+            if (usesMetricUnion(begin)) {
                 minMax = " MIN(value), AVG(value), MAX(value) ";
             } else {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue) ";
@@ -2158,10 +2182,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param mids The id's of the Derived Measurement
      * @param begin The start of the time range
      * @param end The end of the time range
+     * @param useAggresiveRollup uses a measurement rollup table to fetch the 
+     *      data if the time range spans more than one data table's max timerange
      * @return the map of data points
      * @ejb:interface-method
      */
-    public Map getAggregateDataByMetric(Integer[] mids, long begin, long end)
+    public Map getAggregateDataByMetric(Integer[] mids, long begin,
+                                        long end, boolean useAggresiveRollup)
         throws DataNotAvailableException {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
@@ -2169,7 +2196,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // The table to query from
-        String table = getDataTable(begin, end, mids);
+        String table = getDataTable(begin, end, mids, useAggresiveRollup);
         // Result set
         HashMap resMap = new HashMap();
     
@@ -2189,7 +2216,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // Use the already calculated min, max and average on
         // compressed tables.
         String minMax;
-        if (usesMetricUnion(begin, end)) {
+        if (usesMetricUnion(begin)) {
             minMax = " MIN(value), AVG(value), MAX(value), ";
         } else {
             minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
