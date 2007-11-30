@@ -7387,9 +7387,6 @@ has already been defined.
       <statement>
         UPDATE EAM_ROLE SET CID = '2',RESOURCE_ID = '11' WHERE CID = '2'
       </statement>
-      <statement desc="create the role dashboard">
-        INSERT INTO EAM_DASH_CONFIG (CONFIG_TYPE,CRISPO_ID,ID,NAME,ROLE_ID) VALUES ('ROLE','2','2','Guest Role Dashboard','2')
-      </statement>
       <statement desc="add the user to the root resource group">
         INSERT INTO EAM_RES_GRP_RES_MAP (RESOURCE_GROUP_ID,RESOURCE_ID) VALUES ('1','10')
       </statement>
@@ -7429,19 +7426,12 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.71">
-    <schema-directSQL>
-      <statement desc="create crispo IDs for role dashboards">
-        INSERT INTO EAM_CRISPO (ID) SELECT ID - 8000 FROM EAM_ROLE WHERE ID > 10000
-      </statement>
-      <statement desc="create role dashboards">
-        INSERT INTO EAM_DASH_CONFIG (ID, CONFIG_TYPE, NAME, CRISPO_ID, ROLE_ID) SELECT ID - 8000, 'ROLE', NAME || ' DASHBOARD', ID - 8000, ID FROM EAM_ROLE WHERE ID > 10000
-      </statement>
-    </schema-directSQL>
+    <schema-insert table="EAM_CONFIG_PROPS" dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (59, 'REPORT_STATS_SIZE', '1000', '1000', '0')"/>
   </schemaSpec>
 
   <schemaSpec version="3.72">
-    <schema-insert table="EAM_CONFIG_PROPS" dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (59, 'REPORT_STATS_SIZE', '1000', '1000', '0')"/>
+    <roledashboarder></roledashboarder>
   </schemaSpec>
 </dbupgrade>
 </target>
