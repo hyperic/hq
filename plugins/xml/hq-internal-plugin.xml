@@ -55,13 +55,11 @@
     <metric name="Platform Count"
             indicator="false" 
             interval="600000"
-            collectionType="trendsup"
             defaultOn="true"/>
 
     <metric name="Agent Count"
             indicator="false" 
             interval="600000"
-            collectionType="trendsup"
             defaultOn="true"/>
 
     <metric name="Transaction Count"
