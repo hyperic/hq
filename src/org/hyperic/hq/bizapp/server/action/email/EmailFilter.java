@@ -52,9 +52,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -76,7 +76,7 @@ public class EmailFilter {
 
     private PlatformManagerLocal     pltMan;
     private ServerConfigManagerLocal configMan;
-    private AuthzSubject             overlord;
+    private AuthzSubjectValue        overlord;
     private SchedulerLocal           scheduler;
     
     public EmailFilter() {}
@@ -89,7 +89,7 @@ public class EmailFilter {
             pltMan = PlatformManagerEJBImpl.getOne();
             AuthzSubjectManagerLocal authzSubjectManager =
                 AuthzSubjectManagerEJBImpl.getOne();
-            overlord = authzSubjectManager.getOverlordPojo();
+            overlord = authzSubjectManager.getOverlord();
             return true;
         } catch (ObjectNotFoundException e) {
             // Then we'll keep those values null
