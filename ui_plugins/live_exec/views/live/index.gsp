@@ -137,7 +137,7 @@ function runCommand() {
         <ul>
         <% for (m in groupMembers) { %>
         <li>
-        <div class="groupMemberName"><span id="mem_${m.entityID}">&middot; ${h m.name}</span></div>
+        <div class="groupMemberName"><span id="mem_${m.entityID}">&middot;${h m.name}</span></div>
           <div id="clicker_${m.entityID}" style="float:right;display:inline;height:16px;width:20px;" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
             <br class="clearBoth">
         </li>
