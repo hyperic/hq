@@ -595,7 +595,7 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     </table>
 
     <table name="EAM_DASH_CONFIG">
-        <data ID="2" CONFIG_TYPE="ROLE" NAME="View Only Role" CRISPO_ID="2"
+        <data ID="2" CONFIG_TYPE="ROLE" NAME="Guest Role" CRISPO_ID="2"
               ROLE_ID="%EAM_ROLE.ID:2"/>
     </table>
 
