@@ -39,7 +39,6 @@ public class SST_RoleDashboard extends SchemaSpecTask {
 
     private static final String SUPER_USER_ROLE_NAME  = "Super User Role";
     private static final String RESOURCE_CREATOR_ROLE = "RESOURCE_CREATOR_ROLE";
-    private static final String GUEST_ROLE            = "Guest Role";
     
     public SST_RoleDashboard() {}
     
@@ -110,8 +109,7 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                 
                 String name = roleRS.getString(name_col);
                 if (name.equalsIgnoreCase(SUPER_USER_ROLE_NAME)
-                        || name.equalsIgnoreCase(RESOURCE_CREATOR_ROLE)
-                        || name.equalsIgnoreCase(GUEST_ROLE)) {
+                        || name.equalsIgnoreCase(RESOURCE_CREATOR_ROLE)) {
                     continue;
                 }
                 log("creating roleid");
