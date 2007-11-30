@@ -7431,7 +7431,7 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.72">
-    <roledashboarder></roledashboarder>
+    <roledashboard></roledashboard>
   </schemaSpec>
 </dbupgrade>
 </target>
