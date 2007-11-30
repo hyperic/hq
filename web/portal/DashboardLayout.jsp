@@ -246,7 +246,7 @@
 		            </div>
 		            <div class="fieldSetStacked" style="margin-bottom:8px;">
 		                <span class="DashboardSelectBoxLabel"><strong><fmt:message key="dash.home.DashboardSelectBoxLabel"/></strong></span>
-		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="11" style="width:285px;" styleId="defaultDash">
+		                <html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="9" style="width:285px;" styleId="defaultDash">
                             <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
                         </html:select>
 		            </div>
