@@ -197,7 +197,7 @@ startBuiltinDB () {
     debugOut "loading dbport..."
     DBPORT=`loadDBPort`
     debugOut "loaded dbport=${DBPORT}"
-    waitForPort ${DBPORT} "postmaster" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
+    waitForPort ${DBPORT} "post" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
     if [ $? -eq 0 ] ; then
       exit 1
     fi
