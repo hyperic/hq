@@ -237,8 +237,10 @@ public class DerivedMeasurementDAO extends HibernateDAO {
 
     List findByInstance(int type, int id)
     {
-        AppdefEntityID[] aeids = new AppdefEntityID[1];
-        AppdefEntityID appdef = new AppdefEntityID(type, id);
+        AppdefEntityID[] aeids = new AppdefEntityID[] {
+            new AppdefEntityID(type, id)
+        };
+
         Map map = findByInstance(aeids);
         Iterator it = map.entrySet().iterator();
         if (it.hasNext()) {
