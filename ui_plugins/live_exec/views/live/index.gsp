@@ -100,7 +100,7 @@ function runCommand() {
       processResult(data);
     },
     error: function(err, msg) {
-      alert('error! ' + err);
+      //alert('There has been an error:  ' + err);
     }
   });
 }
@@ -137,8 +137,9 @@ function runCommand() {
         <ul>
         <% for (m in groupMembers) { %>
         <li>
-        <div class="groupMemberName"><span id="mem_${m.entityID}">&middot;${h m.name}</span></div>
-          <div id="clicker_${m.entityID}" style="float:right;display:inline;height:16px;width:20px;" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div id="clicker_${m.entityID}" style="float:left;display:inline;height:16px;width:18px;" class="restingExec" onclick="showResult('${m.entityID}')" title="Click to view query information on this resource">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        <div class="groupMemberName"><span id="mem_${m.entityID}">${h m.name}</span></div>
+
             <br class="clearBoth">
         </li>
         <% } %>

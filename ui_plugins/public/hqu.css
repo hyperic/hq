@@ -357,7 +357,7 @@ font-weight:bold;
 /* Live Exec */
 .outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 .bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
-.leftbx {float:left;width:18%;margin-right:10px;height:400px;}
+.leftbx {float:left;width:20%;height:400px;}
 .BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
 #result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
 #result thead {width:100%;padding:0px;margin:0px;}
@@ -374,11 +374,11 @@ font-weight:bold;
 .grpmembertext{padding:3px;margin-top:10px;margin-bottom:5px;background-color:#868787;color:#FFFFFF;font-weight:bold;font-size: 12px;}
 #groupMembers {padding-bottom:5px;overflow-y:auto;overflow-x: hidden;height:298px;}
 #groupMembers ul {margin:0px;padding:0px;}
-#groupMembers li {padding:2px 3px;width:100%;list-style-type:none;}
-.groupMemberName {display:inline;float:left;width:80%;}
+#groupMembers li {padding:2px 0px;width:100%;list-style-type:none;}
+.groupMemberName {display:inline;float:left;width:86%;overflow:hidden;}
 .goodResults  {background: url("images/lightning_go.gif") no-repeat;cursor:pointer;}
 .errorResults {background: url("images/lightning_delete.gif") no-repeat;cursor:pointer;}
-
+ .restingExec {background: url("images/bullet_black.gif") no-repeat;}
 .metricGroup{
    margin-top:2px;
 }
