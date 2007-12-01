@@ -142,7 +142,7 @@ public class AuthenticateUserAction extends TilesAction {
         }
 
         // Load the user dashboard
-        session = loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss);
+        session = loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss, true);
 
         if (needsRegistration) {
             // will be cleaned out during registration
@@ -157,7 +157,8 @@ public class AuthenticateUserAction extends TilesAction {
                                                  ServletContext ctx,
                                                  WebUser webUser,
                                                  Map userOpsMap,
-                                                 AuthzBoss authzBoss)
+                                                 AuthzBoss authzBoss,
+                                                 boolean checkXlib)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, RemoteException, FinderException {
 
@@ -191,9 +192,10 @@ public class AuthenticateUserAction extends TilesAction {
             e.printStackTrace();
         } 
 
-        // See if graphics engine is present
         try {
-            new ResourceTree(1);
+            if (checkXlib) {
+                new ResourceTree(1);    // See if graphics engine is present
+            }
             session.setAttribute(Constants.XLIB_INSTALLED, Boolean.TRUE);
         } catch (Throwable t) {
             session.setAttribute(Constants.XLIB_INSTALLED, Boolean.FALSE);
@@ -322,7 +324,8 @@ public class AuthenticateUserAction extends TilesAction {
             Map userOpsMap = loadUserPermissions(sessionId, authzBoss);
 
             // Load the user dashboard
-            loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss);
+            loadUserDashboard(request, ctx, webUser, userOpsMap, authzBoss,
+                              false);
             
             return webUser;
         } catch (Exception e) {
