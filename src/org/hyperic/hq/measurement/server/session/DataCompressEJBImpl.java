@@ -289,6 +289,7 @@ public class DataCompressEJBImpl
 
             insStmt = conn.prepareStatement(
                     "INSERT INTO " + toTable +
+                    " (measurement_id, timestamp, value, minvalue, maxvalue)" +
                     " (SELECT measurement_id, ? AS timestamp, " + minMax +
                     "FROM " + fromTable +
                     " WHERE timestamp >= ? AND timestamp < ? " +
