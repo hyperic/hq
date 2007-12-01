@@ -224,7 +224,7 @@ public class MetricDataCache {
         Map downMetrics = new HashMap(keys.size());
         for (Iterator it = keys.iterator(); it.hasNext(); ) {
             Element el = _downCache.get(it.next());
-            if (el.getValue() != null) {
+            if (el != null && el.getValue() != null) {
                 downMetrics.put(el.getKey(), el.getValue());
             }
         }
