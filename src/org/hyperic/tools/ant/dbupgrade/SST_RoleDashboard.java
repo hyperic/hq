@@ -132,7 +132,7 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                             + DASH_CONFIG_TABLE
                             + " (id, config_type, version_col, name, crispo_id, role_id, user_id)"
                             + " values (" + seq + ", 'ROLE', 0, '"
-                            + name + "', " + +crispoId + ", " + roleId
+                            + name + " Dashboard', " + +crispoId + ", " + roleId
                             + ", null)";
                     log("executed query: " + insertSql);
                     int rows = dashStatement.executeUpdate(insertSql);
