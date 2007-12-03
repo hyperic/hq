@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -47,7 +46,6 @@ public class AuthzSubject extends AuthzNamedBean {
     private boolean    _htmlEmail = false;
     private Resource   _resource;
     private Collection _roles = new HashSet();
-    private Collection _userConfigs = new ArrayList();
     private Crispo     _prefs;
     
     private AuthzSubjectValue _valueObj;
@@ -205,7 +203,7 @@ public class AuthzSubject extends AuthzNamedBean {
         _roles.clear();
     }
 
-    protected Crispo getPrefs() {
+    public Crispo getPrefs() {
         return _prefs;
     }
     

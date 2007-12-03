@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
+import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -331,12 +332,37 @@ public class DashboardManagerEJBImpl implements SessionBean {
                         for (Iterator it = opts.iterator(); it.hasNext(); ) {
                             CrispoOption opt = (CrispoOption) it.next();
                             if (Integer.valueOf(opt.getValue()).equals(
-                                cfg.getCrispo().getId())) {
+                                cfg.getId())) {
                                 crispMgr.updateOption(opt, null);
                             }
                         }
                         
                         _dashDAO.handleRoleRemoval(r);
+                    }
+                }
+            );
+        HQApp.getInstance()
+            .registerCallbackListener(RoleRemoveFromSubjectCallback.class,
+                 new RoleRemoveFromSubjectCallback() {
+                    public void roleRemovedFromSubject(Role r,
+                                                       AuthzSubject from) {
+                        RoleDashboardConfig cfg = _dashDAO.findDashboard(r);
+                        CrispoManagerLocal crispMgr =
+                            CrispoManagerEJBImpl.getOne();
+                        Crispo c = from.getPrefs();
+                        if (c != null) {
+                            for (Iterator it = c.getOptions().iterator();
+                                 it.hasNext(); ) {
+                                CrispoOption opt = (CrispoOption) it.next();
+                                if (opt.getKey()
+                                        .equals(Constants.DEFAULT_DASHBOARD_ID)
+                                    && Integer.valueOf(opt.getValue())
+                                        .equals(cfg.getId())) {
+                                    crispMgr.updateOption(opt, null);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
             );

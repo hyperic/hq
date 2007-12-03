@@ -36,6 +36,7 @@ public class AuthzStartupListener
     private static ResourceDeleteCallback _resourceDeleteCallback;
     private static SubjectRemoveCallback  _subjectRemoveCallback;
     private static RoleRemoveCallback     _roleRemoveCallback;
+    private static RoleRemoveFromSubjectCallback _roleSubjRemoveCallback;
     
     public void hqStarted() {
         HQApp app = HQApp.getInstance();
@@ -49,6 +50,9 @@ public class AuthzStartupListener
             
             _roleRemoveCallback = (RoleRemoveCallback)
                 app.registerCallbackCaller(RoleRemoveCallback.class);
+            
+            _roleSubjRemoveCallback = (RoleRemoveFromSubjectCallback)
+                app.registerCallbackCaller(RoleRemoveFromSubjectCallback.class);
         }
     }
     
@@ -67,6 +71,12 @@ public class AuthzStartupListener
     static RoleRemoveCallback getRoleRemoveCallback() {
         synchronized (LOCK) {
             return _roleRemoveCallback;
+        }
+    }
+    
+    static RoleRemoveFromSubjectCallback getRoleRemoveFromSubjectCallback() {
+        synchronized (LOCK) {
+            return _roleSubjRemoveCallback;
         }
     }
 }

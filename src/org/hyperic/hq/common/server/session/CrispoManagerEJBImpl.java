@@ -26,20 +26,21 @@
 package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.common.shared.CrispoManagerUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * The CRISPO (Config Response Is Sweetly Persisted ... Oy!) Manager deals
@@ -144,6 +145,8 @@ public class CrispoManagerEJBImpl implements SessionBean {
     public void updateOption(CrispoOption o, String val) {
         if (val == null || val.matches("^\\s*$")) {
             getCrispoOptionDAO().remove(o);
+            Collection opts = o.getCrispo().getOptsSet();
+            opts.remove(o);
         } else {
             o.setValue(val);
             getCrispoOptionDAO().save(o);
