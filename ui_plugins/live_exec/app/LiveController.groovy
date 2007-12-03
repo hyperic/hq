@@ -38,8 +38,13 @@ class LiveController
             if (m.isGroup())  // We don't process sub-groups
                 continue
                 
-            if (m.entityID.isPlatform())
-                cmds.addAll(m.getLiveDataCommands(user))
+            if (m.entityID.isPlatform()) {
+                try {
+                    cmds.addAll(m.getLiveDataCommands(user))
+                } catch (Exception e) {
+                  // Not all platform types have live data
+                }
+            }
         }
         cmds.sort().unique()
     }
