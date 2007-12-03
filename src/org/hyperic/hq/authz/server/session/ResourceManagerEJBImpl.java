@@ -226,6 +226,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return rt;
     }
 
+    /**
+     * Find a resource, acting as a resource prototype.
+     * @ejb:interface-method
+     */
+    public Resource findResourcePrototypeByName(String name) {
+        return getResourceDAO().findResourcePrototypeByName(name);
+    }
     
     /**
      * Check if there are any resources of a given type
@@ -491,16 +498,25 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return resourceMap;
     }
 
-    
     /**
      * Find all the resources of an authz resource type
      * 
      * @param resourceType 301 for platforms, etc.
-     *
+     * @param pInfo A pager, using a sort field of {@link ResourceSortField}
+     * @return a list of {@link Resource}s
      * @ejb:interface-method
      */
     public List findResourcesOfType(int resourceType, PageInfo pInfo) { 
         return getResourceDAO().findResourcesOfType(resourceType, pInfo);
+    }
+
+    /**
+     * Find all the resources which have the specified prototype
+     * @return a list of {@link Resource}s
+     * @ejb:interface-method
+     */
+    public List findResourcesOfPrototype(Resource proto, PageInfo pInfo) { 
+        return getResourceDAO().findResourcesOfPrototype(proto, pInfo);
     }
     
     /**

@@ -490,4 +490,25 @@ public class ResourceDAO
             .setMaxResults(1)
             .list().isEmpty() == false;
     }
+    
+    List findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
+        String sql = "select r from Resource r " + 
+            "where r.prototype = :proto";
+        
+        return pInfo.pageResults(getSession().createQuery(sql)
+                                     .setParameter("proto", proto)).list();
+    }
+    
+    Resource findResourcePrototypeByName(String name) {
+        String sql = "select r from Resource r " + 
+            "where r.name = :name " +
+            " AND r.resourceType.id in (:platProto, :svrProto, :svcProto)"; 
+        
+        return (Resource)getSession().createQuery(sql)
+            .setParameter("name", name)
+            .setParameter("platProto", AuthzConstants.authzPlatformProto)
+            .setParameter("svrProto", AuthzConstants.authzServerProto)
+            .setParameter("svcProto", AuthzConstants.authzServiceProto)
+            .uniqueResult();
+    }
 }
