@@ -105,3 +105,10 @@ License: http://creativecommons.org/licenses/publicdomain
 - FAMFAMFAM -
 Information: http://www.famfamfam.com/lab/icons/silk/
 License: http://creativecommons.org/licenses/by/2.5/
+
+- Ehcache -
+Information: http://ehcache.sourceforge.net/
+
+- dojo -
+Information: http://dojotoolkit.org/
+License: http://svn.dojotoolkit.org/dojo/trunk/LICENSE
