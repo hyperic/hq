@@ -37,9 +37,6 @@ import org.snmp4j.util.ThreadPool;
 public class SNMPTrapReceiver
     implements CommandResponder {
 
-    static final String PROP_LISTEN_ADDRESS = "snmpTrapReceiver.listenAddress";
-    static final String DEFAULT_LISTEN_ADDRESS = "udp:0.0.0.0/162";
-
     private static SNMPTrapReceiver instance = null;
     private static final Log log =
         LogFactory.getLog(SNMPTrapReceiver.class.getName());
@@ -137,8 +134,10 @@ public class SNMPTrapReceiver
         throws IOException {
 
         String address =
-            props.getProperty(PROP_LISTEN_ADDRESS,
-                              DEFAULT_LISTEN_ADDRESS).trim();
+            props.getProperty("snmpTrapReceiver.listenAddress",
+                              "udp:0.0.0.0/162");
+
+        log.debug("Listen address=" + address);
 
         String numThreads =
             props.getProperty("snmpTrapReceiver.numThreads", "1");
@@ -151,16 +150,7 @@ public class SNMPTrapReceiver
             new MultiThreadedMessageDispatcher(_threadPool,
                                                new MessageDispatcherImpl());
 
-        try {
-            _listenAddress = GenericAddress.parse(address);
-            if (!_listenAddress.isValid()) {
-                throw new IllegalArgumentException();
-            }
-        } catch (Exception e) {
-            throw new IOException("Invalid " + PROP_LISTEN_ADDRESS + "=" + address);
-        }
-
-        log.debug(PROP_LISTEN_ADDRESS + "=" + address);
+        _listenAddress = GenericAddress.parse(address);
 
         TransportMapping transport;
         if (_listenAddress instanceof UdpAddress) {
