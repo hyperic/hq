@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -55,7 +56,6 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -129,6 +129,7 @@ public class LatherDispatcher
     private SessionManager  sessionManager  = SessionManager.getInstance();
     private Hashtable       agentTokenCache = new Hashtable();
     protected HashSet       secureCommands  = new HashSet();
+    private Set             noTxCommands    = new HashSet();
     private Object          tConnLock       = new Object();
     private TopicConnection tConn;
     private TopicSession    tSession;
@@ -137,6 +138,14 @@ public class LatherDispatcher
         for(int i=0; i<CommandInfo.SECURE_COMMANDS.length; i++){
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
         }
+        
+        for (int i=0; i<CommandInfo.NOTX_COMMANDS.length; i++) {
+            noTxCommands.add(CommandInfo.NOTX_COMMANDS[i]);
+        }
+    }
+    
+    public boolean methIsTransactional(String meth) {
+        return !noTxCommands.contains(meth);
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data)

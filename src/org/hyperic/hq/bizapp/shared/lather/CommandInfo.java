@@ -59,4 +59,8 @@ public class CommandInfo {
         CMD_CONTROL_GET_PLUGIN_CONFIG,
         CMD_CONTROL_SEND_COMMAND_RESULT,
     };
+    
+    public static final String[] NOTX_COMMANDS = {
+        CMD_AI_SEND_RUNTIME_REPORT,
+    };
 }

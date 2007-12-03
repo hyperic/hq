@@ -46,7 +46,36 @@ public class LatherBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
-    private LatherDispatcher dispatcher;
+    private LatherDispatcher _dispatcher = new LatherDispatcher();
+    private SessionContext _ctx;
+
+    /**
+     * @ejb:transaction type="REQUIRED"
+     * @ejb:interface-method
+     */
+    public LatherValue dispatchWithTx(LatherContext ctx, String method, 
+                                      LatherValue arg)
+        throws LatherRemoteException
+    {
+        return dispatchWithoutTx(ctx, method, arg);
+    }
+
+    /**
+     * @ejb:transaction type="NOTSUPPORTED"
+     * @ejb:interface-method
+     */
+    public LatherValue dispatchWithoutTx(LatherContext ctx, String method, 
+                                         LatherValue arg)
+        throws LatherRemoteException
+    {
+        try {
+            return _dispatcher.dispatch(ctx, method, arg);
+        } catch(RuntimeException exc){
+            _ctx.setRollbackOnly();
+            throw new LatherRemoteException("Runtime exception: " + 
+                                            exc.getMessage());
+        }
+    }
 
     /**
      * The main dispatch command which is called via the JBoss-lather 
@@ -60,31 +89,31 @@ public class LatherBossEJBImpl
      * @return an instantiated subclass of the LatherValue class, 
      *         representing the result of the invoked method
      *
+     * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
     public LatherValue dispatch(LatherContext ctx, String method, 
                                 LatherValue arg)
         throws LatherRemoteException
     {
-        try {
-            return dispatcher.dispatch(ctx, method, arg);
-        } catch(RuntimeException exc){
-            throw new LatherRemoteException("Runtime exception: " + 
-                                            exc.getMessage());
+        if (_dispatcher.methIsTransactional(method)) {
+            return dispatchWithTx(ctx, method, arg);
+        } else {
+            return dispatchWithoutTx(ctx, method, arg);
         }
     }
 
-    public void ejbCreate() {
-        this.dispatcher = new LatherDispatcher();
-    }
+    public void ejbCreate() {}
 
     public void ejbRemove() {
-        if (this.dispatcher != null) {
-            this.dispatcher.destroy();
+        if (_dispatcher != null) {
+            _dispatcher.destroy();
         }
     }
 
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
+    public void setSessionContext(SessionContext ctx) {
+        _ctx = ctx;
+    }
 }
