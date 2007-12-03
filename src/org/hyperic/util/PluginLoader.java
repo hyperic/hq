@@ -49,8 +49,7 @@ public class PluginLoader extends URLClassLoader {
     private String pluginClassName = null;
 
     private static String toFileURL(String file) {
-        //return "file:" + StringUtil.replace(file, " ", "%20"); //escape spaces        
-        return "file:" + file;
+        return "file:" + StringUtil.replace(file, " ", "%20"); //escape spaces        
     }
 
     private static URL toJarURL(String file)
