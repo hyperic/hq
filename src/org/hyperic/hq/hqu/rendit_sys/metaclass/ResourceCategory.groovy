@@ -13,6 +13,8 @@ import org.hyperic.util.config.ConfigResponse
 
 
 class ResourceCategory {
+    private static dman = DerivedMeasurementManagerEJBImpl.one
+    
     /**
      * Creates a URL for the resource.  This should typically only be called
      * via HtmlUtil.linkTo (or from a controller).  
@@ -54,8 +56,11 @@ class ResourceCategory {
     }
     
     static Collection getDesignatedMetrics(Resource r) {
-        def aeid = getEntityID(r)
-		DerivedMeasurementManagerEJBImpl.one.findDesignatedMeasurements(aeid)
+		dman.findDesignatedMeasurements(r.entityID)
+    }
+
+    static Collection getEnabledMetrics(Resource r) {
+        dman.findEnabledMeasurements(null, r.entityID, null)
     }
 
     static boolean isGroup(Resource r) {

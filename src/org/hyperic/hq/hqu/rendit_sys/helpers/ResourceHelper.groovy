@@ -6,45 +6,93 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
+import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl
 
 class ResourceHelper extends BaseHelper {
-    private rsrcMan = ResourceManagerEJBImpl.one
+    private rman = ResourceManagerEJBImpl.one
     private appBoss = AppdefBossEJBImpl.one
     
     ResourceHelper(AuthzSubject user) {
         super(user)
     }
 
-    def findPlatforms(PageInfo pInfo)  {
-        rsrcMan.findResourcesOfType(AuthzConstants.authzPlatform, pInfo)
+    /**
+     * Find a subset of all platforms
+     *
+     * @param pInfo a pager, using ResourceSortField for sorting
+     *
+     * @return a List of {@link Resource}s 
+     */
+    List findPlatforms(PageInfo pInfo)  {
+        rman.findResourcesOfType(AuthzConstants.authzPlatform, pInfo)
     }
     
-    def findAllPlatforms() {
+    /**
+     * Find all platforms, sorted by name
+     *
+     * @return a List of {@link Resource}s
+     */
+    List findAllPlatforms() {
         findPlatforms(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
-    def findServers(PageInfo pInfo)  {
-        rsrcMan.findResourcesOfType(AuthzConstants.authzServer, pInfo)
+    /**
+     * Find a subset of all servers
+     *
+     * @param pInfo a pager, using ResourceSortField for sorting
+     *
+     * @return a List of {@link Resource}s 
+     */
+    List findServers(PageInfo pInfo)  {
+        rman.findResourcesOfType(AuthzConstants.authzServer, pInfo)
     }
     
-    def findAllServers() {
+    /**
+     * Find all servers, sorted by name
+     *
+     * @return a List of {@link Resource}s
+     */
+    List findAllServers() {
         findServers(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
-    def findServices(PageInfo pInfo)  {
-        rsrcMan.findResourcesOfType(AuthzConstants.authzService, pInfo)
+    /**
+     * Find a subset of all services
+     *
+     * @param pInfo a pager, using ResourceSortField for sorting
+     *
+     * @return a List of {@link Resource}s 
+     */
+    List findServices(PageInfo pInfo)  {
+        rman.findResourcesOfType(AuthzConstants.authzService, pInfo)
     }
     
-    def findAllServices() {
+    /**
+     * Find all services, sorted by name
+     *
+     * @return a List of {@link Resource}s
+     */
+    List findAllServices() {
         findServices(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
-    def getDownResources(String typeId, PageInfo pInfo) {
+    List getDownResources(String typeId, PageInfo pInfo) {
         appBoss.getUnavailableResources(user, typeId, pInfo)
     }
     
-    def getDownResourcesMap() {
+    List getDownResourcesMap() {
     	appBoss.getUnavailableResourcesCount(user)
+    }
+    
+    List findResourcesOfType(String typeName, PageInfo pInfo) {
+        def rsrc = rman.findResourcePrototypeByName(typeName)
+        if (rsrc == null)
+            return []
+        rman.findResourcesOfPrototype(rsrc, pInfo)
+    }
+    
+    Resource findResourcePrototype(String name) {
+        rman.findResourcePrototypeByName(name)
     }
 }

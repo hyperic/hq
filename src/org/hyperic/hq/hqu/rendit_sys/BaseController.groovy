@@ -275,4 +275,18 @@ abstract class BaseController {
             return false
         })
     }
+    
+    /**
+     * Get the current time
+     */
+    protected long now() {
+        System.currentTimeMillis()
+    }
+    
+    /**
+     * Return a string with all HTML characters escaped
+     */
+    protected String escapeHtml(str) {
+        HtmlUtil.escapeHtml(str)
+    }
 }
