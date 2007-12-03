@@ -890,7 +890,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     /**
      * Look up a list of enabled derived measurements for a category
      *
-     * @return a list of DerivedMeasurement value
+     * @return a list of {@link DerivedMeasurement}
      * @ejb:interface-method
      */
     public List findEnabledMeasurements(AuthzSubjectValue subject,
