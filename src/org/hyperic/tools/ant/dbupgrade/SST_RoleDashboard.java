@@ -1,19 +1,12 @@
 package org.hyperic.tools.ant.dbupgrade;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
@@ -25,6 +18,8 @@ public class SST_RoleDashboard extends SchemaSpecTask {
 
     public static final Class LOGCTX = SST_RoleDashboard.class;
     
+    public static ConfigResponse props;
+    
     private static final String CRISPO_TABLE      = "EAM_CRISPO";
     private static final String CRISPO_OPT_TABLE  = "EAM_CRISPO_OPT";
     private static final String ROLE_TABLE        = "EAM_ROLE";
@@ -34,16 +29,53 @@ public class SST_RoleDashboard extends SchemaSpecTask {
     private static final String CRISPO_OPT_ID_SEQ = "EAM_CRISPO_OPT_ID_SEQ";
     private static final String DASH_CONFIG_SEQ   = "EAM_DASH_CONFIG_ID_SEQ";
     
-    private static final String PROPERTIES_FILE_DEV   = "web/WEB-INF/DefaultUserDashboardPreferences.properties";
-    private static final String PROPERTIES_FILE_PROD   = "../data/role-dashboard-preferences.properties";
-
     private static final String SUPER_USER_ROLE_NAME  = "Super User Role";
     private static final String RESOURCE_CREATOR_ROLE = "RESOURCE_CREATOR_ROLE";
+    
+    static{
+    	props = new ConfigResponse();
+    	props.setValue(".dashContent.autoDiscovery.range",  "5");
+    	props.setValue(".dashContent.problems.showIgnored", "false");
+    	
+    	props.setValue(".dashContent.controlActions.lastCompleted", "5");
+    	props.setValue(".dashContent.controlActions.mostFrequent",  "5");
+    	props.setValue(".dashContent.controlActions.nextScheduled", "5");
+    	props.setValue(".dashContent.controlActions.useLastCompleted", "true");
+    	props.setValue(".dashContent.controlActions.useMostFrequent",  "true");
+    	props.setValue(".dashContent.controlActions.useNextScheduled", "true");
+    	props.setValue(".dashContent.controlActions.past", "604800000");
+    	
+    	props.setValue(".dashContent.summaryCounts.application", "true");
+    	props.setValue(".dashContent.summaryCounts.platform", "true");
+    	props.setValue(".dashContent.summaryCounts.server", "true");
+    	props.setValue(".dashContent.summaryCounts.service", "true");
+    	
+    	props.setValue(".dashContent.summaryCounts.group.cluster", "true");
+    	props.setValue(".dashContent.summaryCounts.group.mixed", "true");
+    	props.setValue(".dashContent.summaryCounts.group.groups", "false");
+    	props.setValue(".dashContent.summaryCounts.group.plat.server.service", "false");
+    	props.setValue(".dashContent.summaryCounts.group.application", "false");
+    	
+    	props.setValue(".dashContent.resourcehealth.availability", "true");
+    	props.setValue(".dashContent.resourcehealth.throughput", "true");
+    	props.setValue(".dashContent.resourcehealth.performance", "false");
+    	props.setValue(".dashContent.resourcehealth.utilization", "true");
+    	
+    	props.setValue(".dashContent.recentlyApproved.range", "24");
+    	
+    	props.setValue(".dashContent.criticalalerts.numberOfAlerts", "5");
+    	props.setValue(".dashContent.criticalalerts.past", "86400000");
+    	props.setValue(".dashContent.criticalalerts.priority", "2");
+    	props.setValue(".dashContent.criticalalerts.selectedOrAll", "all");
+    	
+    	props.setValue(".dashcontent.portal.portlets.first", "|.dashContent.searchResources|.dashContent.savedCharts|.dashContent.recentlyApproved|.dashContent.availSummary");
+    	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions");
+    }
     
     public SST_RoleDashboard() {}
     
     public void execute() throws BuildException {
-        try {
+    	try {
             _execute();
         } catch(BuildException e) {
             e.printStackTrace();
@@ -62,7 +94,6 @@ public class SST_RoleDashboard extends SchemaSpecTask {
         ResultSet roleRS  = null;
         ResultSet checkRS = null;
         Connection conn   = null;
-        ConfigResponse properties = null;
 
         try
         {
@@ -93,13 +124,13 @@ public class SST_RoleDashboard extends SchemaSpecTask {
             int check_id_col = checkRS.findColumn("id");
             while (checkRS.next()) {
                 ignores.put(new Integer(checkRS.getInt(check_id_col)), "");
-                log("added ignore for: " + check_id_col);
+                System.out.println("added ignore for: " + check_id_col);
             }
             checkRS.close();
             checkStatement.close();
 
             String sql = "select id,name from " + ROLE_TABLE;
-            log("executed query: " + sql);
+            System.out.println("executed query: " + sql);
             roleRS = roleStatement.executeQuery(sql);
 
             int id_col = roleRS.findColumn("id");
@@ -112,16 +143,13 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                         || name.equalsIgnoreCase(RESOURCE_CREATOR_ROLE)) {
                     continue;
                 }
-                log("creating roleid");
+                System.out.println("creating roleid");
                 roleId = roleRS.getInt(id_col);
                 if (!ignores.containsKey(new Integer(roleId))) {
                     // create crispo
-                    if (properties == null) {
-                        properties = loadPropertiesFile();
-                    }
                     long crispoId;
-                    if (properties != null) {
-                        crispoId = createCrispo(d, properties, conn);
+                    if (props != null) {
+                        crispoId = createCrispo(d, props, conn);
                     } else
                         throw new BuildException();
 
@@ -134,49 +162,19 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                             + " values (" + seq + ", 'ROLE', 0, '"
                             + name + " Dashboard', " + +crispoId + ", " + roleId
                             + ", null)";
-                    log("executed query: " + insertSql);
+                    System.out.println("executed query: " + insertSql);
                     int rows = dashStatement.executeUpdate(insertSql);
-                    log("rows updated: " + rows);
+                    System.out.println("rows updated: " + rows);
                 }
             }
-            log("done");
+            System.out.println("done");
         } catch (SQLException e) {
-            throw new BuildException(e.getMessage(), e);
-        } catch(IOException e){
             throw new BuildException(e.getMessage(), e);
         } finally {
             // don't close the connection, it is shared for all tasks
             DBUtil.closeJDBCObjects(LOGCTX, null, roleStatement, roleRS);
             DBUtil.closeJDBCObjects(LOGCTX, null, dashStatement, null);
         }
-    }
-    
-    private ConfigResponse loadPropertiesFile() throws IOException{
-        Properties props = new Properties();
-        InputStream is = null;
-        File file = null;
-        try {
-            file = new File(PROPERTIES_FILE_DEV);
-            if (file.exists()) {
-                is = new FileInputStream(file);
-            } else
-                is = new FileInputStream(new File(PROPERTIES_FILE_PROD));
-        } catch (FileNotFoundException e) {
-            throw new BuildException("Role dashboard properties file not found");
-        }
-        props.load(is);
-        is.close();
-        ConfigResponse prefs = null;
-        if (props != null) {
-            prefs = new ConfigResponse();
-            Enumeration keys = props.keys();
-            while (keys.hasMoreElements()) {
-                String key = (String) keys.nextElement();
-                prefs.setValue(key, props.getProperty(key));
-            }
-            log("added properties");
-        }
-        return prefs;
     }
     
     private int createCrispo(Dialect d, ConfigResponse cr, Connection conn) 
@@ -230,7 +228,7 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                     + "crispo_id) VALUES (" + optId + ", 1, '" + key + "', "
                     + "'" + val + "', " + crispoId + ")";
 
-            log("executed query: " + sql);
+            System.out.println("executed query: " + sql);
             stmt.executeUpdate(sql);
         } finally {
             DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
