@@ -23,6 +23,7 @@ License: http://www.postgresql.org/licence.html
 - Apache Jakarta Project -
 Information: http://jakarta.apache.org
 License: http://www.apache.org/licenses/LICENSE-2.0
+Use: HttpClient in various plugins
 
 - Quartz Enterprise Job Scheduler - 
 Information: http://www.opensymphony.com/quartz/
@@ -39,15 +40,17 @@ License: http://www.jdom.org/docs/faq.html#a0030
 - MySQL Connector/J -
 Information: http://www.mysql.com/products/connector/j/
 License: http://www.gnu.org/licenses/gpl.txt
-Use: Connects HQ to the MySQL database server if that is the deployed database backend.  Also used for the MySQL plugin to gather metrics through JDBC directly from the server.
+xUse: Connects HQ to the MySQL database server if that is the deployed database backend.  Also used for the MySQL plugin to gather metrics through JDBC directly from the server.
 
 - MX4j - 
 Information: http://www.mx4j.org
 License: http://www.apache.org/licenses/LICENSE-2.0
+Use: javax.management.* client implementation for plugins when agent is run with 1.4 JRE
 
 - dnsjava -
 Information: http://www.dnsjava.org/
-License: http://www.dnsjava.org/README
+License: http://www.dnsjava.org/dnsjava-current/README
+Use: DNS service checks in netservices-plugin
 
 - JSch -
 Information: http://www.jcraft.com/jsch
@@ -56,6 +59,7 @@ License: http://www.jcraft.com/jsch/LICENSE.txt
 - SNMP4J -
 Information: http://www.snmp4j.org/index.html
 License: http://www.snmp4j.org/LICENSE-2_0.txt
+Use: SNMP based plugins and alert action
 
 - Rico -
 Information: http://www.openrico.org
