@@ -263,7 +263,7 @@ public class ConfigManagerEJBImpl
             // hardcode required=false for server/service types
             // e.g. unlikely that a platform will have control config
             boolean platformConfigRequired =
-                (isServerOrService) ? false : required;
+                isServerOrService ? false : required;
 
             configValue = getConfigResponse(platformId);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
@@ -284,12 +284,15 @@ public class ConfigManagerEJBImpl
         
         // Server config (if necessary)
         if (serverId != null) {
+            required = isProductType ? origReq : false;
+            
             configValue = getConfigResponse(serverId);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
                                     serverId, required);
             responseList[responseIdx++] = data;
 
             if(!isProductType) {
+                required = origReq; // Reset the required flag
                 if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                     // Skip merging of response time configuration
                     // since servers don't have it.
@@ -303,16 +306,14 @@ public class ConfigManagerEJBImpl
                                 
         // Service config (if necessary)
         if (serviceId != null) {
-            if(isProductType)
-                required = origReq;     // Reset the required flag
+            required = isProductType ? origReq : false;
             
             configValue = getConfigResponse(id);
-
-            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
-                                    id, required);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, id,
+                                    required);
             responseList[responseIdx++] = data;
         
-            if(!isProductType){
+            if (!isProductType) {
                 required = origReq;     // Reset the required flag
                 data = getConfigForType(configValue, productType, id, required);
                 responseList[responseIdx++] = data;
