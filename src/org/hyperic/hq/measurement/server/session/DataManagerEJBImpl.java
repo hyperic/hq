@@ -715,6 +715,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        HQDialect dialect = Util.getHQDialect();
+        boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
         {
@@ -724,8 +726,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             try
             {
-                HQDialect dialect = Util.getHQDialect();
-                if (dialect.supportsDuplicateInsertStmt()) {
+                if (supportsDupInsStmt) {
                     stmt = conn.prepareStatement(
                         "INSERT /*+ APPEND */ INTO " + table + 
                         " (measurement_id, timestamp, value) VALUES (?, ?, ?)" +
@@ -755,7 +756,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setBigDecimal(3, getDecimalInRange(bigDec));
 
-                    if (dialect.supportsDuplicateInsertStmt())
+                    if (supportsDupInsStmt)
                         stmt.setBigDecimal(4, getDecimalInRange(bigDec));
                     
                     stmt.addBatch();
