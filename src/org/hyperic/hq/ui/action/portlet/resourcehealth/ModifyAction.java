@@ -93,6 +93,8 @@ public class ModifyAction extends BaseAction {
                                 Constants.USERPREF_KEY_FAVORITE_RESOURCES,
                                 dashPrefs);
             forwardStr = "review";
+            ConfigurationProxy.getInstance().setDashboardPreferences(session,
+					user, boss, dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
