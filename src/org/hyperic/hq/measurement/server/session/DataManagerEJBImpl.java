@@ -101,7 +101,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private static final BigDecimal MAX_DB_NUMBER =
         new BigDecimal("10000000000000000000000");
     
-    private static final long MINUTE = 60 * 1000;
+    private static final long MINUTE = 60 * 1000,
+                              HOUR = 60 * MINUTE;
         
     // Table names
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
@@ -908,7 +909,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     {
         long now = System.currentTimeMillis();
         if (!useAggressiveRollup && usesMetricUnion(begin) ||
-            (useAggressiveRollup && (begin - end) < HOURS_PER_MEAS_TAB))
+            (useAggressiveRollup && ((end-begin)/HOUR) < HOURS_PER_MEAS_TAB))
             return true;
         return false;
     }
