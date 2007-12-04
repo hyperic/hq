@@ -1,0 +1,214 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Resources</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Resources
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 26, 2007 by <font color="#0050B2">megbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Resources-BrowsingResources"></a><a name="ui-Resources-top"></a>Browsing Resources</h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen allows users to can locate and navigate information about all the HQ's <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>. Resources are organized by <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-invlevel">inventory level</a>, and their metrics are determined by universally applied selections on the "<a href="ui-Admin.Monitor.MetricTemplate.html" title="ui-Admin.Monitor.MetricTemplate">Monitoring Defaults</a>" screen.</p>
+
+<ul>
+	<li><a href="#ui-Resources-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Resources-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<h3><a name="ui-Resources-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p><b>To change or filter the displayed list of resources:</b></p>
+<ol>
+	<li>To display all resources of a certain <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-invlevel">inventory level</a>, click that level in the bar at the top of the list of resources.<br/>
+That bar displays all inventory levels currently in the HQ inventory and the total resource count at each level.</li>
+	<li>Filter the list of resources in two ways:
+	<ul>
+		<li>By <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>: Select the type in <ins>View</ins>.</li>
+		<li>By <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-group">group</a> membership: Select the group name in <ins>Group</ins>.</li>
+	</ul>
+	</li>
+</ol>
+
+
+<p><b>To search for specific resources:</b></p>
+<ul>
+	<li>Type part or all of the resource's name in <ins>Search</ins> and click <img src="../16127/dash-button_go-arrow.gif" align="absmiddle" border="0" />.<br/>
+HQ supports a case-insensitive partial-term search of both the resource name and description.  </li>
+</ul>
+
+
+<p><b>To sort the results by resource name:</b></p>
+<ul>
+	<li>Click the column heading.</li>
+</ul>
+
+
+<p><b>To view resources graphically:</b></p>
+<ul>
+	<li>Click <img src="../16127/SubHub_ChartView_off.gif" align="absmiddle" border="0" /> in the upper right-hand corner.</li>
+</ul>
+
+
+<p><b>To view resources textually:</b></p>
+<ul>
+	<li>Click <img src="../16127/SubHub_ListView_off.gif" align="absmiddle" border="0" /> in the upper right-hand corner.</li>
+</ul>
+
+
+<p><b>To navigate to a resource's inventory, monitoring, alert, or control pages directly:</b></p>
+<ul>
+	<li>Click the appropriate icon next to the resource name. For monitoring, users can also simply click the resource name.<br/>
+Not all icons are available for all inventory levels and resource types. If the icon isn't available, the associated screens aren't available.
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Icon</th>
+<th class='confluenceTh'>Action</th>
+</tr>
+<tr>
+<td class='confluenceTd'><img src="../16127/icon_hub_m.png" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>"<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Monitor</a>" screen</td>
+</tr>
+<tr>
+<td class='confluenceTd'><img src="../16127/icon_hub_i.png" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>Inventory screen (for a <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">platform</a>, <a href="ui-Inventory.Server.html" title="ui-Inventory.Server">server</a>, <a href="ui-Inventory.Service.html" title="ui-Inventory.Service">service</a>, <a href="ui-Inventory.Group.html" title="ui-Inventory.Group">group</a>, <a href="ui-Inventory.Application.html" title="ui-Inventory.Application">application</a>)</td>
+</tr>
+<tr>
+<td class='confluenceTd'><img src="../16127/icon_hub_a.gif" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>"<a href="ui-Alert.ListDefinition.html" title="ui-Alert.ListDefinition">Alert</a>" screen</td>
+</tr>
+<tr>
+<td class='confluenceTd'><img src="../16127/icon_hub_c.png" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>"<a href="ui-Control.html" title="ui-Control">Control</a>" screen</td>
+</tr>
+<tr>
+<td class='confluenceTd'><img src="../16127/icon_hub_locked.png" align="absmiddle" border="0" /></td>
+<td class='confluenceTd'>Indicates this feature is not available due to permissions.</td>
+</tr>
+<tr>
+</tr>
+</tbody></table></li>
+</ul>
+
+
+<p><b>To create a group:</b></p>
+<ul>
+	<li>To create a group out of listed resources, check the resources and click <img src="../16127/tbb_group.gif" align="absmiddle" border="0" /> and proceed to the "<a href="ui-Inventory.Group.New.html" title="ui-Inventory.Group.New">New Group</a>" screen.<br/>
+This group will already have the selected resources as members.</li>
+	<li>To create a group from scratch, click <b>New Group</b> in the Tools Menu at top-right and proceed to the "<a href="ui-Inventory.Group.New.html" title="ui-Inventory.Group.New">New Group</a>" screen.<br/>
+This group will start with no member resources.</li>
+</ul>
+
+
+<p><b>To delete a resource from the HQ inventory:</b></p>
+<ul>
+	<li>Check the resource and click <img src="../16127/tbb_delete.gif" align="absmiddle" border="0" />.<br/>
+The resource is permanently removed from the HQ inventory (and therefore cannot be monitored or controlled).</li>
+</ul>
+
+
+<p><em><a href="#ui-Resources-top">back to top</a></em></p>
+
+<p><a name="ui-Resources-Navigating"></a></p>
+<h3><a name="ui-Resources-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Dashboard</b> </td>
+<td class='confluenceTd'> Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Resources</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the "<a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a>" screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for the resource). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Analyze</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Reporting</b> <font color="red">&#42;</font> (takes users to the "<a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a>" screen, where they can generate all reports available in HQ), <b>Alert Center</b> (takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Administration</b> </td>
+<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the "<a href="ui-Admin.html" title="ui-Admin">Administration</a>" screen, where they can manage the system-wide settings </td>
+</tr>
+</tbody></table>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
+<p><em><a href="#ui-Resources-top">back to top</a></em></p>
+
+<p><br clear="all" /></p>
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>The resources are grouped in this screen according to HQ's <a href="http://support.hyperic.com/confluence/display/DOC/Inventory+Model" title="Inventory Model">Inventory Model</a></p>
+</div></div>
+</tr></tbody></table>
+
+<h5><a name="ui-Resources-ReturntotheDashboarduiDashboard."></a>Return to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/icon_hub_c.png">icon_hub_c.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/icon_hub_i.png">icon_hub_i.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/view_by_type.gif">view_by_type.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/icon_hub_locked.png">icon_hub_locked.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/icon_hub_m.png">icon_hub_m.png</a> (image/png)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/icon_hub_a.gif">icon_hub_a.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/SubHub_ListView_off.gif">SubHub_ListView_off.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/SubHub_ChartView_off.gif">SubHub_ChartView_off.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/dash-button_go-arrow.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/tbb_group.gif">tbb_group.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16127/tbb_delete.gif">tbb_delete.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 03, 2007 18:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

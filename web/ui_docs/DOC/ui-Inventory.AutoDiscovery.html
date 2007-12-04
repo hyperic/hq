@@ -1,0 +1,99 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Inventory.AutoDiscovery</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Inventory.AutoDiscovery
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 21, 2007 by <font color="#0050B2">mbartelt</font>.
+				    </div>
+
+				    <p><a name="ui-Inventory.AutoDiscovery-top"></a></p>
+<h1><a name="ui-Inventory.AutoDiscovery-InitiatinganAutoDiscoveryScanonaPlatform"></a>Initiating an Auto-Discovery Scan on a Platform</h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen allows users to initiate an <a href="http://support.hyperic.com/confluence/display/DOC/Auto-Discovery" title="Auto-Discovery">auto-discovery scan</a> &#8212; either an <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-autoscan">Auto Scan</a> or a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-filescan">File Scan</a> &#8212; on a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a>. In order to scan a platform, an Agent must be installed on the platform. (An exception is <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkdevice">network devices</a> and <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-networkhost">network hosts</a>, which can be scanned but do not have Agents on them. In those cases, the connection is proxied through a machine with an Agent running on it.)</p>
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='infoMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Availability of This Screen</b><br /><br/>
+This UI screen is available for most platforms (Linux, Windows, and Solaris), but not for Cisco platforms because agents do not run on Cisco devices. In addition, for network devices, because some (though not all) run agents, this screen <em>is</em> available, but without the list of servers. </td></tr></table>
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-Inventory.AutoDiscovery-Tasks"></a></p>
+<h3><a name="ui-Inventory.AutoDiscovery-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do the following tasks:</p>
+
+<p><b>To initiate a "quick" (Auto) scan on the platform:</b></p>
+<ul>
+	<li>Click <img src="../16386/fb_ok.gif" align="absmiddle" border="0" /> at the top of the screen.</li>
+</ul>
+
+
+<p><b>To view the results of the last Auto Scan on any managed platform:</b></p>
+<ul>
+	<li>Click <b>View Last Scan Results</b> just under "Quick Auto Discovery Scan" and proceed to the "Auto-Discovery Results" screen.<br/>
+The "Auto-Discovery Results" screen shows the results of the most recently performed auto-discovery scan on <em>any</em> platform, not necessarily the platform viewed on this screen.</li>
+</ul>
+
+
+<p><b>To initiate an "extended" (File) scan on the platform:</b></p>
+<ol>
+	<li>Check all the <ins>Server Types</ins> that HQ should look for on the platform.<br/>
+This list includes all the managed servers in HQ.</li>
+	<li>In <ins>ScanDirs</ins>, specify the directories that HQ should scan in.</li>
+	<li>In <ins>ExcludeDirs</ins>, specify the directories that HQ should <em>not</em> scan in.<br/>
+Both <ins>Scandirs</ins> and <ins>ExcludeDirs</ins> are prepopulated by HQ with the default locations for software installs on the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform type</a> in question.</li>
+	<li>In <ins>fsTypes</ins>, select the type of file system to scan: local disks, network-mounted disks, or both ("All Disks"; this can result in a slow scan).</li>
+	<li>In <ins>depth</ins>, specify the depth in the directory structure to which HQ should scan.</li>
+	<li>To have HQ follow symlinks when scanning, check <ins>Should symlinks be followed</ins>.<br/>
+If the symlink and its target are not in the same directory, not following the symlinks will result in the target file not being found.</li>
+	<li>Click <img src="../16386/fb_ok.gif" align="absmiddle" border="0" /> at the bottom of the screen.</li>
+</ol>
+
+
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p><a href="ui-Inventory.AutoDiscovery.Results.html" title="ui-Inventory.AutoDiscovery.Results">View the results</a> of the auto-discovery scan.</p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>An explanation of the <a href="http://support.hyperic.com/confluence/display/DOC/Auto-Discovery" title="Auto-Discovery">auto-discovery process</a></p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Inventory.AutoDiscovery-ReturntotheplatforminventoryuiInventory.Platform."></a>Return to <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">the platform inventory</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16386/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 03, 2007 18:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
