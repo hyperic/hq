@@ -22,11 +22,16 @@ public class DirWatcher
     private final File               _dir;
     private final DirWatcherCallback _cback;
     
-    private final List _lastList = new ArrayList();
-    
-    public DirWatcher(File dir, DirWatcherCallback callback) {
+    private final List _lastList;
+
+    public DirWatcher(File dir, DirWatcherCallback callback, List lastList) {
         _dir      = dir;
         _cback    = callback;
+        _lastList = lastList;
+    }
+
+    public DirWatcher(File dir, DirWatcherCallback callback) {
+        this(dir, callback, new ArrayList());
     }
     
     public void run() { 
