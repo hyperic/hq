@@ -25,6 +25,7 @@
 package org.hyperic.hq.ui.server.session;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,9 +44,6 @@ public class UIStartupListener implements StartupListener {
 
     private static final Object INIT_LOCK = new Object();
     private static boolean INITIALIZED;
-    
-    private static DirWatcher _watcher;
-    private static Thread     _watcherThread;
 
     public void hqStarted() {
         ZeventManager.getInstance().addListener(ResourceDeletedZevent.class,
@@ -80,15 +78,16 @@ public class UIStartupListener implements StartupListener {
             _log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
             _log.info("Watching for HQU plugins in [" + 
                       pluginDir.getAbsolutePath() + "]");
-            _watcher = new DirWatcher(pluginDir, new DirWatcherCallback() {
+
+            DirWatcherCallback cb = new DirWatcherCallback() {
                 public void fileAdded(File f) {
                     if (f.getName().equals("public"))
                         return;
-                    
+
                     try {
                         RenditServer.getInstance().addPluginDir(f);
                     } catch(Exception e) {
-                        _log.warn("Unable to add plugin in [" + 
+                        _log.warn("Unable to add plugin in [" +
                                   f.getAbsolutePath() + "]", e);
                     }
                 }
@@ -96,12 +95,21 @@ public class UIStartupListener implements StartupListener {
                 public void fileRemoved(File f) {
                     if (f.getName().equals("public"))
                         return;
-                    
+
                     RenditServer.getInstance().removePluginDir(f.getName());
                 }
-            });
-            
-            _watcherThread = new Thread(_watcher);
+            };
+
+
+            File[] plugins = pluginDir.listFiles();
+            for (int i = 0; i < plugins.length; i++) {
+                cb.fileAdded(plugins[i]);
+            }
+
+            // Watch for plugin updates
+            DirWatcher _watcher = new DirWatcher(pluginDir, cb,
+                                                 Arrays.asList(plugins));
+            Thread _watcherThread = new Thread(_watcher);
             _watcherThread.setDaemon(true);
             _watcherThread.start();
                 

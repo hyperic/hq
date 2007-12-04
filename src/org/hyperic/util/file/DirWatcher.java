@@ -27,7 +27,8 @@ public class DirWatcher
     public DirWatcher(File dir, DirWatcherCallback callback, List lastList) {
         _dir      = dir;
         _cback    = callback;
-        _lastList = lastList;
+        _lastList = new ArrayList();
+        _lastList.addAll(lastList);
     }
 
     public DirWatcher(File dir, DirWatcherCallback callback) {
