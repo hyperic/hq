@@ -111,4 +111,6 @@ Information: http://ehcache.sourceforge.net/
 
 - dojo -
 Information: http://dojotoolkit.org/
-License: http://svn.dojotoolkit.org/dojo/trunk/LICENSE
+License: http://svn.dojotoolkit.org/dojo/trunk/LICENSE - New BSD License
+Use: Dojo javascript toolkit provides some of the HQ client User Interface widgets and ajax 
+behavior. Dojo is distributed by Hyperic as part of the HQ installer bundle.
