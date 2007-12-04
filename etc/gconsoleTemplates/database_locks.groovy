@@ -16,5 +16,6 @@ sql.eachRow("select l.mode, transaction, l.granted, now() - query_start as time,
   output += "${it.time} ${it.current_query}"
 
 }
+conn.close();
 
 return output;
