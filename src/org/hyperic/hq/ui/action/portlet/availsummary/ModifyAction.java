@@ -80,6 +80,8 @@ public class ModifyAction extends BaseAction {
         if(pForm.isRemoveClicked()){
             DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
             forwardStr = "review";
+            ConfigurationProxy.getInstance().setDashboardPreferences(session,
+					user, boss, dashPrefs);
         }
 
         ActionForward forward = checkSubmit(request, mapping, form);
