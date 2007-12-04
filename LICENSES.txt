@@ -40,7 +40,7 @@ License: http://www.jdom.org/docs/faq.html#a0030
 - MySQL Connector/J -
 Information: http://www.mysql.com/products/connector/j/
 License: http://www.gnu.org/licenses/gpl.txt
-xUse: Connects HQ to the MySQL database server if that is the deployed database backend.  Also used for the MySQL plugin to gather metrics through JDBC directly from the server.
+Use: Connects HQ to the MySQL database server if that is the deployed database backend.  Also used for the MySQL plugin to gather metrics through JDBC directly from the server.
 
 - MX4j - 
 Information: http://www.mx4j.org
