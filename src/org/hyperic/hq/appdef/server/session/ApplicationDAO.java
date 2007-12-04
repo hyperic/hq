@@ -224,6 +224,8 @@ public class ApplicationDAO extends HibernateDAO
                    "order by a.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, serviceId.intValue())
+            .setCacheable(true)
+            .setCacheRegion("Application.findByServiceId_orderName")
             .list();
     }
 
