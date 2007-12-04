@@ -6,15 +6,17 @@ The Hyperic engineering team would like to thank all the communities
 of the projects listed below for their contributions. 
 ---------------------------------------------------------------------
 
-- JBoss Group - 
-Information: http://www.jboss.org
+- JBoss Application Server - 
+Information: http://labs.jboss.com/jbossas
 License: http://www.jboss.org/company/opensouce_aboutlgpl
+Use: JBoss Application Server is the enterprise application server that the HQ server application is deployed into.  JBoss Application Server is distributed by Hyperic as part of the HQ installer bundle.
 
 - Apache Struts - 
 Information: http://struts.apache.org
 License: http://www.apache.org/licenses/LICENSE-2.0
+Use: MVC architecture that is used for the client user interface for display logic.
 
-- PostgreSQL Development Group -
+- PostgreSQL -
 Information: http://www.postgresql.org
 License: http://www.postgresql.org/licence.html
 
@@ -37,6 +39,7 @@ License: http://www.jdom.org/docs/faq.html#a0030
 - MySQL Connector/J -
 Information: http://www.mysql.com/products/connector/j/
 License: http://www.gnu.org/licenses/gpl.txt
+Use: Connects HQ to the MySQL database server if that is the deployed database backend.  Also used for the MySQL plugin to gather metrics through JDBC directly from the server.
 
 - MX4j - 
 Information: http://www.mx4j.org
@@ -57,18 +60,22 @@ License: http://www.snmp4j.org/LICENSE-2_0.txt
 - Rico -
 Information: http://www.openrico.org
 License: http://www.apache.org/licenses/LICENSE-2.0.html
+Use: Rico is a javascript toolkit that enables some client user interface components and Ajax calls.
 
 - Prototype -
 Information: http://prototype.conio.net
 License: http://prototype.conio.net
+Use: Prototype is a Javascript library that Rico relies on.
 
 - script.aculo.us -
 Information: http://script.aculo.us
 License: http://script.aculo.us/downloads
+Use: Scriptaculous provides some of the client user interface widgets and Ajax behavior.
 
 - InstantJ -
 Information: http://instantj.sourceforge.net/
 License: http://www.gnu.org/licenses/lgpl.txt
+Use: Dynamically evaluate some Java expressions used to calculate metric values.
 
 - GNU getopt Java port -
 Information: http://www.urbanophile.com/arenn/hacking/download.html
@@ -77,6 +84,7 @@ License: http://www.gnu.org/licenses/lgpl.txt
 - PrintfFormat.java -
 Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
 License: within src/org/hyperic/util/PrintfFormat.java 
+Use: Format text and numbers coming from plugins.
 
 - JBoss Messaging -
 Information: http://labs.jboss.com/portal/jbossmessaging/
@@ -85,6 +93,7 @@ License: http://www.jboss.org/company/opensouce_aboutlgpl
 - ANTLR 2 -
 Information: http://www.antlr.org
 License: http://www.antlr.org/license.html
+Use: Used by Hibernate to parse query strings
 
 - Hibernate -
 Information: http://hibernate.org
@@ -97,20 +106,23 @@ License: http://www.dom4j.org/license.html
 - Prototype Window Class -
 Information: http://prototype-window.xilinus.com
 License: http://prototype-window.xilinus.com/index.html
+Use: Javascript library that is used to display some HTML dialogs
 
 - bockport-util-concurrent -
 Information:  http://dcl.mathcs.emory.edu/util/backport-util-concurrent
 License: http://creativecommons.org/licenses/publicdomain
+Use: The concurrency APIs provided in Java 1.5, backported to 1.4 (which is the minimum JVM we require and support.)  This is used for concurrency and threading functions.
 
 - FAMFAMFAM -
 Information: http://www.famfamfam.com/lab/icons/silk/
 License: http://creativecommons.org/licenses/by/2.5/
+Use: FAMFAMFAM provides some of the graphic icons used in the client user interface.
 
 - Ehcache -
 Information: http://ehcache.sourceforge.net/
+License: http://ehcache.sourceforge.net/license.html
 
 - dojo -
 Information: http://dojotoolkit.org/
 License: http://svn.dojotoolkit.org/dojo/trunk/LICENSE - New BSD License
-Use: Dojo javascript toolkit provides some of the HQ client User Interface widgets and ajax 
-behavior. Dojo is distributed by Hyperic as part of the HQ installer bundle.
+Use: Dojo javascript toolkit provides some of the client user interface widgets and Ajax behavior.
