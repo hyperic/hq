@@ -25,17 +25,11 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -45,14 +39,16 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
-import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 
 /**
- * Stores Events to and deletes Events from storage
+ * Maintains the event state for each trigger.
+ * 
  * @ejb:bean name="EventTracker"
  *      jndi-name="ejb/events/EventTracker"
  *      local-jndi-name="LocalEventTracker"
@@ -62,265 +58,145 @@ import org.hyperic.util.jdbc.DBUtil;
  * @ejb:transaction type="NOTSUPPORTED"
  */
 public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
-    private final String logCtx =
-        "org.hyperic.hq.events.server.session.EventTrackerEJBImpl";
-    private final Log log = LogFactory.getLog(logCtx);
 
-    private final String SEQ_EVENT = "EAM_EVENT_ID_SEQ";
-    private final String TAB_EVENT = "EAM_EVENT";
-    private final String TAB_TRIGGER_EVENT = "EAM_TRIGGER_EVENT";
-    private final String SQL_CLEANUP =
-        "DELETE FROM " + TAB_EVENT +
-        " WHERE ctime < ? AND 0 = (SELECT COUNT(*) FROM " +
-             TAB_TRIGGER_EVENT + " WHERE event_id = id)";
-    
-    private SessionContext ctx = null;
+    private final Log log = LogFactory.getLog(EventTrackerEJBImpl.class);    
 
-    ///////////////////////////////////////
-    // operations
-
-    /** Add a reference from a Trigger to an Event
+    /** 
+     * Add a reference from a trigger to an event. The event object id will be 
+     * set to the id for the newly created trigger event.
+     * 
+     * @param tid The trigger id.
+     * @param eventObject The event object.
+     * @param expiration The number of milliseconds from now when the event will 
+     *                   will expire (zero means no expiration).
+     * @return The id for the newly created trigger event (also the eventObject id).                  
      * @ejb:interface-method
-     * @param tid the Trigger ID
-     * @param event the referenced Event
      */
-    public void addReference(Integer tid, AbstractEvent event, long expiration)
-        throws SQLException, IOException {
+    public Long addReference(Integer tid, AbstractEvent eventObject, long expiration) {
         if (log.isDebugEnabled())
-            log.debug("Add reference for trigger ID: " + tid);
-            
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        StringBuffer strBuf;
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-
-            // XXX: Need to make the two inserts atomic
-            if (event.getId() == null) {
-                // Get the next Event ID
-                event.setId(getNextId(SEQ_EVENT)); 
-
-                ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-                ObjectOutputStream p = new ObjectOutputStream(ostream);
-                p.writeObject(event);
-                p.flush();
-                ostream.close();
-
-                strBuf = new StringBuffer()
-                    .append("INSERT INTO ")
-                    .append(TAB_EVENT)
-                    .append(" (ID, EVENT_OBJECT, CTIME) VALUES (?,?,?)");
-
-                try {
-                    stmt = conn.prepareStatement(strBuf.toString());
-
-                    // Insert into Event table first
-                    int i = 1;
-                    stmt.setLong(i++, event.getId().longValue());
-                    stmt.setBytes(i++, ostream.toByteArray());
-                    stmt.setLong(i++, event.getTimestamp());
-                    stmt.execute();
-                } finally {
-                    DBUtil.closeStatement(logCtx, stmt);
-                }
-            }
-
-            // Now add the Trigger to Event relationship
-            strBuf = new StringBuffer()
-                .append("INSERT INTO ")
-                .append(TAB_TRIGGER_EVENT)
-                .append(" (trigger_id, event_id, expiration) ")
-                .append("VALUES (?,?,?)");
-
-            try {
-                stmt = conn.prepareStatement(strBuf.toString());
-
-                int i = 0;
-                stmt.setInt(++i, tid.intValue());
-                stmt.setLong(++i, event.getId().longValue());
-                long expire = (expiration == 0 ? Long.MAX_VALUE :
-                                expiration + System.currentTimeMillis());
-                stmt.setLong(++i, expire);
-                stmt.execute();
-            } finally {
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            log.debug("Add referenced event for trigger id: " + tid);
+        
+        long expire = 0;
+        
+        if (expiration == 0) {
+            expire = Long.MAX_VALUE;
+        } else {
+            expire = expiration + System.currentTimeMillis();
         }
-    } // end addReference        
+                
+        TriggerEvent triggerEvent = new TriggerEvent(eventObject, 
+                                                     tid, 
+                                                     eventObject.getTimestamp(), 
+                                                     expire);
+        
+        
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        
+        triggerEventDAO.save(triggerEvent);
+        
+        // Need to flush the session immediately so that the insert may 
+        // be seen by all concurrent sessions.
+        triggerEventDAO.flushSession();
+        
+        Long teid = triggerEvent.getId();
+        eventObject.setId(teid);
+        
+        return teid;
+    }
 
-
-    ///////////////////////////////////////
-    // operations
-
-    /** Add a reference from a Trigger to an Event
+    /** 
+     * Update the event object referenced by a trigger. The event object id will 
+     * be set to the trigger event id.
+     * 
+     * NOTE: Since we don't use an optimistic locking strategy at the database 
+     * level, it is important that all updates to referenced event streams are 
+     * performed serially at the application level.
+     * 
+     * @param teid The id for the trigger event that should be updated with the 
+     *             new event object.
+     * @param eventObject The new event object.
      * @ejb:interface-method
-     * @param tid the Trigger ID
-     * @param event the referenced Event
      */
-    public void updateReference(Integer tid, Long eid, AbstractEvent event)
-        throws SQLException, IOException {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        StringBuffer strBuf;
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-
-            // Now update the new event
-            event.setId(eid);
-
-            ByteArrayOutputStream ostream = new ByteArrayOutputStream();
-            ObjectOutputStream p = new ObjectOutputStream(ostream);
-            p.writeObject(event);
-            p.flush();
-            ostream.close();
-
-            strBuf = new StringBuffer()
-                .append("UPDATE ")
-                .append(TAB_EVENT)
-                .append(" SET EVENT_OBJECT = ?, CTIME = ?")
-                .append(" WHERE ID = ?");
-
-            try {
-                stmt = conn.prepareStatement(strBuf.toString());
-
-                // Insert into Event table first
-                int i = 1;
-                stmt.setBytes(i++, ostream.toByteArray());
-                stmt.setLong(i++, event.getTimestamp());
-                stmt.setLong(i++, eid.longValue());
-                stmt.execute();
-            } finally {
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-            
-            // Clean up the old events
-            /*
-            try {
-                stmt = conn.prepareStatement(SQL_CLEANUP);
-                stmt.setLong(1, System.currentTimeMillis() - 10000);
-                stmt.execute();
-            } finally {
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-            */
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }
-    } // end addReference        
-
-
-    /** Remove all references of a Trigger
-     * @ejb:interface-method
-     * @param tid the Trigger ID
-     */
-    public void deleteReference(Integer tid) throws SQLException {
+    public void updateReference(Long teid, AbstractEvent eventObject) {        
         if (log.isDebugEnabled())
-            log.debug("Delete references for trigger ID: " + tid);
+            log.debug("Updating the event object for trigger event id: " + teid);            
 
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        StringBuffer strBuf;
-        try {
-            long current = System.currentTimeMillis();
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-
-            // First delete the trigger references
-            strBuf = new StringBuffer()
-                .append("DELETE FROM ") 
-                .append(TAB_TRIGGER_EVENT)
-                .append(" WHERE trigger_id = ? OR expiration < ?");
-
-            try {
-                stmt = conn.prepareStatement(strBuf.toString());
-                    
-                int i = 1;
-                stmt.setInt(i++, tid.intValue());
-                stmt.setLong(i++, current);
-                stmt.execute();
-            } finally {
-                // Close the statement
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-
-            // Next, get the events to be deleted.  Only delete events from
-            // 10 seconds ago to avoid deleting event created in addRef(), but
-            // have not been referenced by the triggers yet
-            try {
-                stmt = conn.prepareStatement(SQL_CLEANUP);
-                stmt.setLong(1, current - 10000);
-                stmt.execute();
-            } finally {
-                // Close the statement
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }
-    } // end dispose        
+        TriggerEvent triggerEvent = getTriggerEventDAO().findById(teid);
+        
+        triggerEvent.setEventObject(eventObject);
+        triggerEvent.setCtime(eventObject.getTimestamp());
+        
+        // Need to flush the session immediately so that the update may 
+        // be seen by all concurrent sessions.
+        getTriggerEventDAO().flushSession();
+        
+        eventObject.setId(teid);
+    }
 
 
-    /** Get the list of Events that are referenced by a given Trigger in order
-     * of reference creation
+    /** 
+     * Delete all events referenced by a trigger.
+     * 
+     * @param tid The trigger id.
      * @ejb:interface-method
-     * @param tid the Trigger ID
-     * @return the list of ObjectInputStream's (Events) referenced by Trigger
      */
-    public LinkedList getReferencedEventStreams(Integer tid)
-        throws SQLException, IOException {
+    public void deleteReference(Integer tid) {
         if (log.isDebugEnabled())
-            log.debug("Get references for trigger ID: " + tid);
-
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        StringBuffer strBuf;
-        LinkedList events = new LinkedList();
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE);
-
-            // Order by event_id, since it's sequential
-            strBuf = new StringBuffer()
-                .append("SELECT event_object FROM ")
-                .append(TAB_EVENT)
-                .append(" e, ")
-                .append(TAB_TRIGGER_EVENT)
-                .append(" t WHERE e.id=t.event_id AND t.trigger_id = ? AND ")
-                .append("t.expiration > ? ORDER BY ctime");
-
-            stmt = conn.prepareStatement(strBuf.toString());
-
-            int i = 0;
-            stmt.setInt(++i, tid.intValue());
-            stmt.setLong(++i, System.currentTimeMillis());
-            rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                // Materialize the blob using the java.sql.Blob which
-                // should help the driver understand it needs to return
-                // the locater - not the data.
-                byte [] data = DBUtil.getBlobColumn(rs, 1);
-
-                ByteArrayInputStream istream = new ByteArrayInputStream(data);
-                events.add(new ObjectInputStream(istream));
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            log.debug("Delete referenced events for trigger id: " + tid);
+        
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        
+        // If you don't flush the session, then its possible that a 
+        // trigger_event reference just added in the same Hibernate 
+        // session will not be deleted here. It appears that the inserts 
+        // and deletes have been reordered.
+        triggerEventDAO.flushSession();
+        
+        triggerEventDAO.deleteByTriggerId(tid);        
+        
+        // To reduce contention on the trigger_event table we are going to reduce 
+        // the number of times we try to delete expired trigger_events.
+        if (ExpiredEventsDeletionScheduler.getInstance()
+                .shouldDeleteExpiredEvents()) {
+            triggerEventDAO.deleteExpired();
         }
+    }
 
-        return events;
-    } // end storeEvent
+
+    /** 
+     * Get the list of events that are referenced by a given trigger in order
+     * of reference creation.
+     * 
+     * @param tid The trigger id.
+     * @return The list of {@link EventObjectDeserializer EventObjectDeserializers} 
+     *         containing the events referenced by the trigger. Each event will 
+     *         have its id set to the trigger event id.
+     * @ejb:interface-method
+     */
+    public LinkedList getReferencedEventStreams(Integer tid) throws IOException {
+        boolean debug = log.isDebugEnabled();
+        
+        if (debug) {
+            log.debug("Get referenced events for trigger id: " + tid);                
+        }
+        
+        List triggerEvents = getTriggerEventDAO().findUnexpiredByTriggerId(tid);
+        
+        LinkedList eventObjectDeserializers = new LinkedList();
+        
+        // When returning the events, we link the event to the trigger_event.
+        for (Iterator it = triggerEvents.iterator(); it.hasNext();) {
+            TriggerEvent triggerEvent = (TriggerEvent) it.next();
+            eventObjectDeserializers.add(new EventToTriggerEventLinker(triggerEvent));
+        }
+        
+        if (debug) {
+            log.debug("Retrieved " + eventObjectDeserializers.size() + 
+                      " referenced events for trigger id: " + tid);            
+        }
+        
+        return eventObjectDeserializers;
+    }
 
     public static EventTrackerLocal getOne() {
         try {
@@ -337,11 +213,14 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}
-    public void ejbRemove() { this.ctx = null; }
+    public void ejbRemove() {}
     public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
+        throws EJBException, RemoteException {}
+    
+    private TriggerEventDAO getTriggerEventDAO() {
+        return new TriggerEventDAO(DAOFactory.getDAOFactory());
     }
+    
 }
 
 
