@@ -78,6 +78,11 @@ public class RegisteredDispatcherEJBImpl
 {
     private final Log log =
         LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
+    
+    
+    private static interface EventsHandler {
+        void handleEvents(List events);
+    }
 
     /**
      * Dispatch the event to interested triggers.
@@ -268,11 +273,7 @@ public class RegisteredDispatcherEJBImpl
                                false);            
 
     }
-    
-    private static interface EventsHandler {
-        void handleEvents(List events);
-    }
-    
+        
     /**
      * Register the handler to handle the events post commit. If registration 
      * fails and the flag is set to force events handling, handle the events 
