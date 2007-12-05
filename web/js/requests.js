@@ -669,7 +669,7 @@ function unCheck() {
 }
 
 var BrowserDetect = {
-	init: function () {
+	initBrowser: function () {
 		this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
 		this.version = this.searchVersion(navigator.userAgent)
 			|| this.searchVersion(navigator.appVersion)
@@ -772,4 +772,4 @@ var BrowserDetect = {
 	]
 
 };
-BrowserDetect.init();
+BrowserDetect.initBrowser();
