@@ -196,6 +196,15 @@ public class RenditServer {
         PluginWrapper plugin = getPlugin(pluginName);
         return plugin.getAttachmentDescriptor(a, ent, u);
     }
+
+    public Object invokeMethod(String plugin, 
+                               InvokeMethodInvocationBindings b)
+        throws Exception
+    {
+        PluginWrapper p = getPlugin(plugin);
+        return p.invokeMethod(b);
+    }
+    
     
     /**
      * Renders a template (.gsp file) to a Writer

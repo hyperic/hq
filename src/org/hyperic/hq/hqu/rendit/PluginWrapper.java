@@ -176,12 +176,11 @@ public class PluginWrapper {
         }
     }
 
-    void invokeMethod(final InvokeMethodInvocationBindings b) {
+    Object invokeMethod(final InvokeMethodInvocationBindings b) {
         try {
-            doInContext(new Runnee() {
+            return doInContext(new Runnee() {
                 public Object run() {
-                    _dispatcher.invokeMethod(b);
-                    return null;
+                    return _dispatcher.invokeMethod(b);
                 }
             });
         } catch(Exception e) {

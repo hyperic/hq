@@ -52,7 +52,7 @@ public interface IDispatcher {
     
     void handleRequest(RequestInvocationBindings b);
     
-    void invokeMethod(InvokeMethodInvocationBindings invokeArgs);
+    Object invokeMethod(InvokeMethodInvocationBindings invokeArgs);
     
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
                                                  AuthzSubject u);

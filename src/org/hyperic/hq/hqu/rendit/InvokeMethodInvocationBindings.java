@@ -31,8 +31,8 @@ public class InvokeMethodInvocationBindings {
     private String _methName;
     private List   _args;
     
-    protected InvokeMethodInvocationBindings(String className, String methName, 
-                                             List args) 
+    public InvokeMethodInvocationBindings(String className, String methName, 
+                                          List args) 
     {
         _className = className;
         _methName  = methName;

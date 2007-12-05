@@ -50,10 +50,10 @@ class Dispatcher implements IDispatcher {
     def Dispatcher() {
     }
 	
-    void invokeMethod(InvokeMethodInvocationBindings invokeArgs) {
+    Object invokeMethod(InvokeMethodInvocationBindings invokeArgs) {
         def dispatcher = new InvokeMethodDispatcher()
         use (*CATEGORIES) {
-        	dispatcher.invoke(plugin.pluginDir, invokeArgs)
+        	return dispatcher.invoke(plugin.pluginDir, invokeArgs)
         }
     }
     
