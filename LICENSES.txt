@@ -19,6 +19,7 @@ Use: MVC architecture that is used for the client user interface for display log
 - PostgreSQL -
 Information: http://www.postgresql.org
 License: http://www.postgresql.org/licence.html
+Use: PostgreSQL is the embedded database storage engine for the HQ server.  PostgreSQL binaries have been compiled by Hyperic and are distributed by Hyperic as part of the HQ installer bundle.
 
 - Apache Jakarta Project -
 Information: http://jakarta.apache.org
@@ -28,14 +29,17 @@ Use: HttpClient in various plugins
 - Quartz Enterprise Job Scheduler - 
 Information: http://www.opensymphony.com/quartz/
 License: http://www.apache.org/licenses/LICENSE-2.0
+Use: Quartz is used by the application to perform scheduling functions.
 
 - XDoclet -
 Information: http://xdoclet.sourceforge.net/
 License: http://xdoclet.sourceforge.net/xdoclet/licenses/xdoclet-license.html
+Use: XDoclet is used during compile time to use annotations notation to automatically generate code.
 
 - JDOM -
 Information: http://www.jdom.org/
 License: http://www.jdom.org/docs/faq.html#a0030
+Use: JDOM is used in various parts of the application to parse XML files.
 
 - MySQL Connector/J -
 Information: http://www.mysql.com/products/connector/j/
@@ -55,6 +59,8 @@ Use: DNS service checks in netservices-plugin
 - JSch -
 Information: http://www.jcraft.com/jsch
 License: http://www.jcraft.com/jsch/LICENSE.txt
+Use: The HQ client shell provides a function that allows the user to remotely transfer
+files and execute commands through JSch.
 
 - SNMP4J -
 Information: http://www.snmp4j.org/index.html
@@ -84,15 +90,12 @@ Use: Dynamically evaluate some Java expressions used to calculate metric values.
 - GNU getopt Java port -
 Information: http://www.urbanophile.com/arenn/hacking/download.html
 License: http://www.gnu.org/licenses/lgpl.txt
+Use: The HQ Client Shell uses getopt to parse user parameters.
 
 - PrintfFormat.java -
 Information: http://java.sun.com/developer/technicalArticles/Programming/sprintf/PrintfFormat.java
 License: within src/org/hyperic/util/PrintfFormat.java 
 Use: Format text and numbers coming from plugins.
-
-- JBoss Messaging -
-Information: http://labs.jboss.com/portal/jbossmessaging/
-License: http://www.jboss.org/company/opensouce_aboutlgpl
 
 - ANTLR 2 -
 Information: http://www.antlr.org
@@ -102,10 +105,12 @@ Use: Used by Hibernate to parse query strings
 - Hibernate -
 Information: http://hibernate.org
 License: http://www.gnu.org/licenses/lgpl.txt
+Use: Hibernate is used as the data access object technology for the HQ server.
 
 - Dom4j -
 Information: http://www.dom4j.org
 License: http://www.dom4j.org/license.html
+Use: Dom4j is used in various parts of the application to parse XML files.
 
 - Prototype Window Class -
 Information: http://prototype-window.xilinus.com
@@ -125,6 +130,7 @@ Use: FAMFAMFAM provides some of the graphic icons used in the client user interf
 - Ehcache -
 Information: http://ehcache.sourceforge.net/
 License: http://ehcache.sourceforge.net/license.html
+Use: Ehcache is implemented as the secondary cache for Hibernate.
 
 - dojo -
 Information: http://dojotoolkit.org/
