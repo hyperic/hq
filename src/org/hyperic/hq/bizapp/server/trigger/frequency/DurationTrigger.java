@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
-import java.io.ObjectInputStream;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -41,6 +40,7 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigResponse;
@@ -182,8 +182,6 @@ public class DurationTrigger extends AbstractTrigger
      */
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException {
-        AbstractEvent tfe;
-        LinkedList events;
 
         // Bug #8781.  In most cases, the event that satisfies the
         // duration trigger will be the last event fired.  When this
@@ -200,34 +198,35 @@ public class DurationTrigger extends AbstractTrigger
                 "Invalid event type passed, expected TriggerFiredEvent, " +
                 " TriggerNotFiredEvent, or HeartBeatEvent");
 
-        tfe = (AbstractEvent) event;
+        AbstractEvent tfe = (AbstractEvent) event;
         if (!(tfe instanceof HeartBeatEvent) &&
             !tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
                                          triggerId);
 
-        // Let's see if we might fire, if we have some saved data
-        if (savedInit) {
-            if (savedLast == null) {
-                if (tfe instanceof HeartBeatEvent ||
-                    tfe instanceof TriggerNotFiredEvent)
-                    return;
-            }
-            else {
-                if (tfe instanceof HeartBeatEvent) {
-                    if (savedLast instanceof TriggerFiredEvent) {
-                        if (tfe.getTimestamp() - savedLast.getTimestamp() +
-                                savedTotal < count)
-                        return;
-                    }
-                }
-                else if (tfe.getClass().equals(savedLast.getClass()))
-                    return;
-            }
-        }
         
         synchronized (lock) {
+            // Let's see if we might fire, if we have some saved data
+            if (savedInit) {
+                if (savedLast == null) {
+                    if (tfe instanceof HeartBeatEvent ||
+                        tfe instanceof TriggerNotFiredEvent)
+                        return;
+                }
+                else {
+                    if (tfe instanceof HeartBeatEvent) {
+                        if (savedLast instanceof TriggerFiredEvent) {
+                            if (tfe.getTimestamp() - savedLast.getTimestamp() +
+                                    savedTotal < count)
+                            return;
+                        }
+                    }
+                    else if (tfe.getClass().equals(savedLast.getClass()))
+                        return;
+                }
+            }
+        
             EventTrackerLocal eTracker = EventTrackerEJBImpl.getOne();
 
             boolean track = false;
@@ -235,17 +234,19 @@ public class DurationTrigger extends AbstractTrigger
             
             try {
                 // Now find out if we have the specified # within the interval
-                events = eTracker.getReferencedEventStreams(getId());
+                LinkedList eventObjectDesers = 
+                    eTracker.getReferencedEventStreams(getId());
                 savedInit = true;   // We've looked up previously saved events
                 savedTotal = 0;
                 
                 if (log.isDebugEnabled())
                     log.debug("Look up events for trigger: " + getId());
 
-                if (events.size() > 0) {
+                if (eventObjectDesers.size() > 0) {
                     // Get the last event
-                    ObjectInputStream p = (ObjectInputStream) events.getLast();
-                    AbstractEvent last = deserializeEventFromStream(p, true);
+                    EventObjectDeserializer deser = 
+                        (EventObjectDeserializer) eventObjectDesers.getLast();
+                    AbstractEvent last = deserializeEvent(deser, true);
 
                     // Bug #8781.  If the current event is a
                     // TriggerNotFiredEvent, we want to use the
@@ -262,13 +263,13 @@ public class DurationTrigger extends AbstractTrigger
                         
                         // Iterate and add up the time
                         AbstractEvent next;
-                        for (Iterator i = events.iterator(); i.hasNext();) {
+                        for (Iterator i = eventObjectDesers.iterator(); i.hasNext();) {
                             // Deserialize each one, reuse variables
-                            p = (ObjectInputStream) i.next();
+                            deser = (EventObjectDeserializer) i.next();
 
                             // If last, then we've already deserialized it                            
                             if (i.hasNext())
-                                next = deserializeEventFromStream(p, true);
+                                next = deserializeEvent(deser, true);
                             else
                                 next = last;
 
@@ -329,39 +330,28 @@ public class DurationTrigger extends AbstractTrigger
 
             if (track) {
                 // Throw it into the event tracker with a buffer of 30 seconds
-                try {
-                    eTracker.addReference(getId(), tfe,
-                                          timeRange + 30000);
-                    savedLast = tfe;
-                    
-                    if (log.isDebugEnabled())
-                        log.debug("Save last " + tfe.getClass() + " for id: " +
-                                  getId());
-                } catch (Exception exc) {
-                    throw new ActionExecuteException(
-                        "Error adding event reference for trigger id="+getId()+
-                        " : " + exc);
-                }
+                eTracker.addReference(getId(), tfe,
+                                      timeRange + 30000);
+                savedLast = tfe;
+                
+                if (log.isDebugEnabled())
+                    log.debug("Save last " + tfe.getClass() + " for id: " +
+                              getId());
+
                 return;         // We're done
             }
 
             if (fire) {
-                try {
-                    // Get ready to fire, reset EventTracker
-                    eTracker.deleteReference(getId());
-                } catch (Exception exc) {
-                    throw new ActionExecuteException
-                        ("Failed to delete referenced events for trigger Id="+
-                         getId()+" : " + exc);
-                }
+                // Get ready to fire, reset EventTracker
+                eTracker.deleteReference(getId());
+            } else {
+                return;                
             }
-            else
-                return;
+            
+            // Reset the cached values
+            savedLast = null;
+            savedTotal = 0;
         }
-
-        // Reset the cached values
-        savedLast = null;
-        savedTotal = 0;
 
         TriggerFiredEvent myEvent =
             new TriggerFiredEvent(getId(), rootEvent);
