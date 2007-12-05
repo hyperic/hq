@@ -723,6 +723,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             Map.Entry entry = (Map.Entry) it.next();
             String table = (String) entry.getKey();
             List dpts = (List) entry.getValue();
+            List removeIdxs = new ArrayList();
 
             try
             {
@@ -738,7 +739,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
                 }
 
-                for (Iterator i=dpts.iterator(); i.hasNext(); )
+                int idx=0;
+                removeIdxs.clear();
+                for (Iterator i=dpts.iterator(); i.hasNext(); idx++)
                 {
                     DataPoint pt = (DataPoint)i.next();
                     Integer metricId  = pt.getMetricId();
@@ -750,6 +753,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     } catch(NumberFormatException e) {  // infinite, or NaN
                         _log.warn("Unable to insert infinite or NaN for " +
                                   "metric id=" + metricId);
+                        removeIdxs.add(new Integer(idx));
                         continue;
                     }
                     stmt.setInt(1, metricId.intValue());
@@ -762,6 +766,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.addBatch();
                 }
 
+                // must do this in order to avoid the getRemainingDataPoints()
+                // method from querying the status of an insert which never
+                // occurred
+                for (Iterator i=removeIdxs.iterator(); i.hasNext(); ) {
+                    dpts.remove(((Integer)i.next()).intValue());
+                }
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
             }
@@ -808,6 +818,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        List removeIdxs = new ArrayList();
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -819,6 +830,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     "UPDATE " + table + 
                     " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
 
+                int idx=0;
+                removeIdxs.clear();
                 for (Iterator i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = (DataPoint) i.next();
                     Integer metricId  = pt.getMetricId();
@@ -838,6 +851,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.addBatch();
                 }
 
+                // must do this in order to avoid the getRemainingDataPoints()
+                // method from querying the status of an insert which never
+                // occurred
+                for (Iterator i=removeIdxs.iterator(); i.hasNext(); ) {
+                    dpts.remove(((Integer)i.next()).intValue());
+                }
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
             } catch (BatchUpdateException e) {
