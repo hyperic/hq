@@ -25,46 +25,78 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.io.Serializable;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
+import org.hyperic.hibernate.LongIdPersistedObject;
+import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.util.ArrayUtil;
 
-/**
- * This class is currently not really used.  It has been auto-generated, and
- * is only a placeholder until a full conversion of Hibernate is finished.
- * 
- * We really only use the hbm file to initialze the database.
- */
-public class TriggerEvent  
-    implements Serializable 
-{
-    private TriggerEventId _id;
-    private long           _expiration;
+public class TriggerEvent extends LongIdPersistedObject {
+    private byte[]     _eventObject;
+    private Integer    _triggerId;
+    private long       _ctime;
+    private long       _expiration;
 
-    public TriggerEvent() {
-    }
+    protected TriggerEvent(AbstractEvent eventObject, 
+                           Integer triggerId, 
+                           long ctime, 
+                           long expiration) {
 
-    public TriggerEvent(TriggerEventId id) {
-        _id = id;
-    }
-
-    public TriggerEvent(TriggerEventId id, long expiration) {
-        _id         = id;
-        _expiration = expiration;
-    }
-   
-    public TriggerEventId getId() {
-        return _id;
+        setEventObject(eventObject);
+        setTriggerId(triggerId);
+        setCtime(ctime);
+        setExpiration(expiration);
     }
     
-    public void setId(TriggerEventId id) {
-        _id = id;
+    protected TriggerEvent() {
     }
-
+    
+    public byte[] getEventObject() {
+        return ArrayUtil.clone(_eventObject);
+    }
+    
+    protected void setEventObject(AbstractEvent eventObject) { 
+        ByteArrayOutputStream baOs = new ByteArrayOutputStream();
+        
+        try {
+            ObjectOutputStream objectOs = new ObjectOutputStream(baOs);
+            objectOs.writeObject(eventObject);
+            objectOs.flush();    
+            setEventObject(baOs.toByteArray());
+        } catch (IOException e) {
+            assert false : "Shouldn't have IOException since we are " +
+            		       "writing to a byte array stream.";
+        }        
+    }
+    
+    protected void setEventObject(byte[] eventObject) {
+        _eventObject = eventObject;
+    }
+    
+    public Integer getTriggerId() {
+        return _triggerId;
+    }
+    
+    protected void setTriggerId(Integer triggerId) {
+        _triggerId = triggerId;
+    }
+    
+    public long getCtime() {
+        return _ctime;
+    }
+    
+    protected void setCtime(long ctime) {
+        _ctime = ctime;
+    }
+    
     public long getExpiration() {
         return _expiration;
     }
     
-    public void setExpiration(long expiration) {
+    protected void setExpiration(long expiration) {
         _expiration = expiration;
-    }
+    }    
+
 }
