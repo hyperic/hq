@@ -26,7 +26,6 @@
 package org.hyperic.hq.events.ext;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 
 import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
@@ -62,6 +61,7 @@ import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -186,7 +186,9 @@ public abstract class AbstractTrigger
             }
             
             EscalatableCreator creator = 
-                new ClassicEscalatableCreator(alertDef, event);
+                new ClassicEscalatableCreator(alertDef, 
+                                              event, 
+                                              getAlertDefLastFiredCallback());
             
             // Now start escalation
             if (alertDef.getEscalation() != null) {
@@ -284,13 +286,13 @@ public abstract class AbstractTrigger
     }
     
     /**
-     * Deserialize an event from the input stream, providing optional recovery 
-     * from stream corruption. The stream may become corrupted during upgrade 
-     * scenarios since we started providing serialization version control on 
-     * events only in HQEE 3.1.1 (Refer to ticket HQ-824). In this case, we 
-     * would want to clear out the old events and start fresh.
+     * Deserialize an event, providing optional recovery from stream corruption. 
+     * The stream may become corrupted during upgrade scenarios since we started 
+     * providing serialization version control on events only in HQEE 3.1.1 
+     * (Refer to ticket HQ-824). In this case, we would want to clear out the 
+     * old events and start fresh.
      * 
-     * @param is The input stream.
+     * @param deser The event object deserializer.
      * @param recoverFromCorruption <code>true</code> to delete all events 
      *                              associated with this trigger if the event 
      *                              stream is corrupted; <code>false</code> to 
@@ -300,15 +302,15 @@ public abstract class AbstractTrigger
      * @throws IOException if the event stream is corrupted.
      * @throws ClassNotFoundException if the event stream is corrupted.
      */
-    protected final AbstractEvent deserializeEventFromStream(ObjectInputStream is, 
-                                                    boolean recoverFromCorruption)
+    protected final AbstractEvent deserializeEvent(EventObjectDeserializer deser, 
+                                                   boolean recoverFromCorruption)
         throws IOException, ClassNotFoundException {
                 
         boolean isStreamCorrupted = false;    
         AbstractEvent event = null;
         
         try {
-            event = (AbstractEvent) is.readObject();                            
+            event = deser.deserializeEventObject();                            
         } catch (IOException e) {
             isStreamCorrupted = true;
             throw e;
