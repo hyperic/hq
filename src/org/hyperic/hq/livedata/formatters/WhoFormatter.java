@@ -67,7 +67,7 @@ public class WhoFormatter
         StringBuffer r = new StringBuffer();
         DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, 
                                                         DateFormat.SHORT);
-        
+
         r.append("<div class='who_livedata'><table cellpadding='0' cellspacing='0'><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.who.head.user"))
@@ -85,19 +85,26 @@ public class WhoFormatter
 
         for (int i=0; i<w.length; i++) {
             String dateStr;
-            
+            String hostStr;
+
             if (w[i].getTime() == 0)
                 dateStr = "unknown";
             else
                 dateStr = fmt.format(new Date(w[i].getTime() * 1000));
-            r.append("<tr><td>")
+
+             if (w[i].getHost() == null || w[i].getHost().trim().length() == 0)
+                hostStr = "&nbsp;";
+              else
+                 hostStr = w[i].getHost();
+
+              r.append("<tr><td>")
              .append(w[i].getUser())
              .append("</td><td>")
              .append(w[i].getDevice())
              .append("</td><td>")
              .append(dateStr)
              .append("</td><td>")
-             .append(w[i].getHost())
+             .append(hostStr)
              .append("</td></tr>");
         }
         r.append("</tbody></table></div>");
