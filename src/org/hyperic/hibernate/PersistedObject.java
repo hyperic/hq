@@ -28,16 +28,20 @@ package org.hyperic.hibernate;
 import java.io.Serializable;
 
 /**
- * Base class for all HQ persisted objects.
+ * Base class for HQ persisted objects with Integer value ids.
  * 
  * Some of these methods are marked as protected.  This allows Hibernate to
  * pull & set values (due to its fancy runtime subclassing), but also 
  * restricts other rogue objects from doing bad things like setting the ID
  * & version #.
+ * 
+ * @see LongIdPersistedObject
  */
 public abstract class PersistedObject 
-    implements Serializable 
+    implements Serializable
 {
+    private final LogicalIdentityHelper idHelper = new LogicalIdentityHelper();
+    
     private Integer _id;
 
     // for hibernate optimistic locks -- don't mess with this.
@@ -65,23 +69,10 @@ public abstract class PersistedObject
     }
 
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof PersistedObject)) {
-            return false;
-        }
-        PersistedObject o = (PersistedObject)obj;
-        
-        return _id == o.getId() ||
-               (_id != null && o.getId() != null && _id.equals(o.getId()));
+        return idHelper.equals(this, obj);
     }
 
     public int hashCode() {
-        int result = 17;
-
-        result = 37*result + (_id != null ? _id.hashCode() : 0);
-
-        return result;
+        return idHelper.hashCode(this);
     }
 }
