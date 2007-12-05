@@ -280,10 +280,6 @@ class HealthController
         res
     }
     
-    private now() {
-        System.currentTimeMillis()
-    }
-    
     private h(str) {
         HtmlUtil.escapeHtml(str)
     }
