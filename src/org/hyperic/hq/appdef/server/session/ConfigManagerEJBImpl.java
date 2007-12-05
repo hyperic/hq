@@ -284,7 +284,8 @@ public class ConfigManagerEJBImpl
         
         // Server config (if necessary)
         if (serverId != null) {
-            required = isProductType ? origReq : false;
+            if (id.isServer())
+                required = isProductType ? origReq : false;
             
             configValue = getConfigResponse(serverId);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
@@ -292,7 +293,8 @@ public class ConfigManagerEJBImpl
             responseList[responseIdx++] = data;
 
             if(!isProductType) {
-                required = origReq; // Reset the required flag
+                required = id.isServer() && origReq; // Reset the required flag
+
                 if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                     // Skip merging of response time configuration
                     // since servers don't have it.
