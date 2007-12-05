@@ -102,7 +102,7 @@ public class DurationTrigger extends AbstractTrigger
     }
 
     /**
-     * @see org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface#getConfigResponse(Integer, long, int)
+     * @see org.hyperic.hq.bizapp.server.trigger.frequency.FrequencyTriggerInterface#getConfigResponse(java.lang.Integer, long, long)
      */
     public ConfigResponse getConfigResponse(Integer tid,
                                             long range, long count)
