@@ -97,9 +97,6 @@ public class DatabaseInitializer {
         
         routines.add(new CommonRoutines());
         
-        if (DBUtil.isPostgreSQL(conn))
-            routines.add(new PostgresRoutines());
-        
         if (DBUtil.isMySQL(conn))
             routines.add(new MySQLRoutines());
         
@@ -149,50 +146,6 @@ public class DatabaseInitializer {
                 DBUtil.closeStatement(logCtx, stmt);
             }
         } 
-    }
-    
-    class PostgresRoutines implements DatabaseRoutines {
-        public void runRoutines(Connection conn) throws SQLException {
-            Statement stmt = null;
-            ResultSet rs = null;
-            
-            String function =
-                "CREATE OR REPLACE FUNCTION add_data" +
-                        "(in_id INT, in_time BIGINT, in_value NUMERIC) " + 
-                "RETURNS VOID AS " +
-                "$$ " +
-                "BEGIN " +                
-                "LOOP " +
-                "UPDATE eam_measurement_data SET value = in_value " +
-                "WHERE measurement_id = in_id AND timestamp = in_time; " +
-                "IF found THEN RETURN; " +
-                "END IF; " +
-                "BEGIN " +
-                "INSERT INTO eam_measurement_data" +
-                        "(measurement_id,timestamp,value) VALUES " +
-                        "(in_id, in_time, in_value); " +
-                "RETURN; " +
-                "EXCEPTION WHEN unique_violation THEN END; " +
-                "END LOOP; " +
-                "END; " +
-                "$$ " +
-                "LANGUAGE plpgsql;";
-
-            try {
-                stmt = conn.createStatement();
-                rs = stmt.executeQuery("SELECT * FROM pg_language " +
-                                       "WHERE lanname = 'plpgsql'");
-                
-                if (!rs.next()) {
-                    stmt.execute("CREATE LANGUAGE plpgsql");
-                }
-                
-                stmt.execute(function);
-            } finally {
-                DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
-            }
-        }
-        
     }
 
     class MySQLRoutines implements DatabaseRoutines {
