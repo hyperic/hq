@@ -31,9 +31,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +55,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -415,23 +414,13 @@ public class MultiConditionTrigger
                 break;
             }
         }
-                
-        try {
-            // Clean up unused event
-            if (toDelete != null) {
-                etracker.updateReference(getId(), toDelete.getId(), event);
-            } else {
-                etracker.addReference(getId(), event, getTimeRange());
-            }            
-        } catch (SQLException e) {
-            throw new ActionExecuteException(
-                    "Failed to update referenced streams for trigger id="+
-                     getId()+" : " + e);
-        } catch (IOException e) {
-            // shouldn't happen since we are writing to a byte array stream
-            assert false : "This shouldn't happen since we are writing " +
-            		        "to a byte array stream: "+e.getMessage();
-        }
+
+        // Clean up unused event
+        if (toDelete != null) {
+            etracker.updateReference(toDelete.getId(), event);
+        } else {
+            etracker.addReference(getId(), event, getTimeRange());
+        }  
         
         return new ArrayList(fulfilled.values());
     }
@@ -441,14 +430,14 @@ public class MultiConditionTrigger
         List events = new ArrayList();
         
         try {
-            Collection streams =
+            Collection eventObjectDesers =
                 etracker.getReferencedEventStreams(getId());
             if (log.isDebugEnabled())
                 log.debug("Get prior events for trigger id="+getId());
         
-            for (Iterator iter = streams.iterator(); iter.hasNext(); ) {
-                ObjectInputStream p = (ObjectInputStream) iter.next();
-                events.add(deserializeEventFromStream(p, true));
+            for (Iterator iter = eventObjectDesers.iterator(); iter.hasNext(); ) {
+                EventObjectDeserializer deser = (EventObjectDeserializer) iter.next();
+                events.add(deserializeEvent(deser, true));
             }
         } catch(Exception exc) {
             throw new ActionExecuteException(
@@ -511,7 +500,7 @@ public class MultiConditionTrigger
             try {
                 etracker.deleteReference(getId());
                 succeeded = true;
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 lastException = e;
                 
                 if (enableExponentialBackoff) {

@@ -25,11 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Locale;
 
 import javax.ejb.CreateException;
@@ -45,6 +42,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -172,15 +170,15 @@ public class ValueChangeTrigger extends AbstractTrigger
             if (last == null) {
                 try {
                     // Now find out if there was a previous event
-                    Collection events =
+                    LinkedList eventObjectDesers =
                         eTracker.getReferencedEventStreams(getId());
 
-                    if (events.size() > 0) {
+                    if (eventObjectDesers.size() > 0) {
                         // We only need the first event
-                        ObjectInputStream p =
-                            (ObjectInputStream) events.iterator().next();
+                        EventObjectDeserializer deser =
+                            (EventObjectDeserializer) eventObjectDesers.getFirst();
                         
-                        last = (MeasurementEvent) deserializeEventFromStream(p, true);
+                        last = (MeasurementEvent) deserializeEvent(deser, true);
                     }
                 } catch(Exception exc){
                     throw new ActionExecuteException(
@@ -191,16 +189,8 @@ public class ValueChangeTrigger extends AbstractTrigger
             
             // If we still have nothing
             if (last == null) {
-                try {
-                    eTracker.addReference(getId(), me, 0);
-                    last = me;      // Update the last reference
-                } catch (SQLException e) {
-                    throw new ActionExecuteException
-                        ("Error adding event reference.", e);
-                } catch (IOException e) {
-                    throw new ActionExecuteException
-                        ("Error adding event reference.", e);
-                }
+                eTracker.addReference(getId(), me, 0);
+                last = me;      // Update the last reference
             } else if (last.getValue().getValue() != me.getValue().getValue() && 
                        last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
                 // Get ready to fire                
@@ -214,16 +204,8 @@ public class ValueChangeTrigger extends AbstractTrigger
                 MESSAGE_FMT.format(fmtValues, sb, null);
                 myEvent.setMessage( sb.toString() );
 
-                try {
-                    eTracker.updateReference(getId(), last.getId(), me);
-                    last = me;      // Update the last reference
-                } catch (IOException e) {
-                    throw new ActionExecuteException
-                        ("Error updating event reference.", e);
-                } catch (SQLException e) {
-                    throw new ActionExecuteException
-                        ("Failed to update referenced events.", e);
-                }
+                eTracker.updateReference(last.getId(), me);
+                last = me;      // Update the last reference
             }
         }
 
