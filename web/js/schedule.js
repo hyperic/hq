@@ -219,7 +219,9 @@ function getSelectIndex(selId) {
 
 function getSelectValue(sel) {
   var indexSel = sel.selectedIndex;
+  if (indexSel) {
   return sel[indexSel].value;
+  }
 }
 
 function changeMonthDropdown (monthDropDown, selectedMonthValue, startMonthIndex){

@@ -49,7 +49,7 @@
   </title>
     <script type="text/javascript">
         var onloads = [];
-         function init() {
+         function initOnloads() {
 
             if (arguments.callee.done) return;
             arguments.callee.done = true;
@@ -61,7 +61,7 @@
 
         /* for Mozilla/Opera9 */
         if (document.addEventListener) {
-            document.addEventListener("DOMContentLoaded", init, false);
+            document.addEventListener("DOMContentLoaded", initOnloads, false);
         }
 
         /* for Internet Explorer */
@@ -71,7 +71,7 @@
             var script = document.getElementById("__ie_onload");
             script.onreadystatechange = function() {
                 if (this.readyState == "complete") {
-                    init(); // call the onload handler
+                    initOnloads(); // call the onload handler
                 }
             };
         /*@end @*/
@@ -80,13 +80,13 @@
         /*if (/WebKit/i.test(navigator.userAgent)) { // sniff
             var _timer = setInterval(function() {
                 if (/loaded|complete/.test(document.readyState)) {
-                    init(); // call the onload handler
+                    initOnloads(); // call the onload handler
                 }
             }, 10);
         }*/
 
         /* for other browsers */
-        window.onload = init;
+        window.onload = initOnloads;
 
     </script>
 </head>
