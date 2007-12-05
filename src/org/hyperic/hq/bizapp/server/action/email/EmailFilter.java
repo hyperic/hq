@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -142,8 +142,8 @@ public class EmailFilter {
     }
     
     void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
-                   String subject, String body, String htmlBody, int priority,
-                   boolean filter)
+                   String subject, String[] body, String[] htmlBody,
+                   int priority, boolean filter)
     {
         if (appEnt == null) {
             // Go ahead and just send the alert
@@ -153,10 +153,9 @@ public class EmailFilter {
         }
 
         // Replace the resource name
-        String[] replStrs = new String[] { subject, body };
+        String[] replStrs = new String[] { subject };
         replaceAppdefEntityHolders(appEnt, replStrs);
         subject = replStrs[0];
-        body = replStrs[1];
             
         // See if alert needs to be filtered
         if (filter && init()) {
@@ -207,7 +206,7 @@ public class EmailFilter {
                                 }
     
                                 msg.incrementEntries();
-                                msg.append(body, htmlBody);
+                                msg.append(body[i], htmlBody[i]);
                                 cache.put(addresses[i], msg);
                             }
     
@@ -261,7 +260,7 @@ public class EmailFilter {
     }
     
     private void sendEmail(EmailRecipient[] addresses, String subject, 
-                           String body, String htmlBody, Integer priority)
+                           String[] body, String[] htmlBody, Integer priority)
     {
         Session session;
         try {
@@ -310,9 +309,9 @@ public class EmailFilter {
                                addresses[i].getAddress());
                 
                 if (addresses[i].useHtml()) {
-                    m.setContent(htmlBody, "text/html");
+                    m.setContent(htmlBody[i], "text/html");
                 } else {
-                    m.setContent(body, "text/plain");
+                    m.setContent(body[i], "text/plain");
                 }
                 
                 Transport.send(m);
@@ -351,12 +350,14 @@ public class EmailFilter {
             if (msg.getNumEnts() == 1 && addr.useHtml()) {
                 sendEmail(new EmailRecipient[] { addr },
                           "[HQ] Filtered Notifications for " + platName,
-                          "", msg.getHtml(), null);
+                          new String[] { "" }, new String[] { msg.getHtml() },
+                          null);
             } else {
                 addr.setHtml(false);
                 sendEmail(new EmailRecipient[] { addr },
                           "[HQ] Filtered Notifications for " + platName,
-                          msg.getText(), "", null);
+                           new String[] { msg.getText() }, new String[] { "" },
+                           null);
             }
         }
     }

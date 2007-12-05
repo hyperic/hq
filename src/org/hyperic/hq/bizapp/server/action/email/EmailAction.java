@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,11 +28,10 @@ package org.hyperic.hq.bizapp.server.action.email;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.mail.internet.AddressException;
@@ -105,7 +104,8 @@ public class EmailAction extends EmailActionConfig
 
     private String createText(AlertDefinitionInterface alertdef,
                               ActionExecutionInfo info, AppdefEntityID aeid, 
-                              AlertInterface alert, String templateName)
+                              AlertInterface alert, String templateName,
+                              AuthzSubject user)
         throws MeasurementNotFoundException
     {
         File templateDir = new File(HQApp.getInstance().getResourceDir(),
@@ -121,6 +121,7 @@ public class EmailAction extends EmailActionConfig
         params.put("action", info);
         params.put("resource", rDao.findByInstanceId(aeid.getAuthzTypeId(),
                                                      aeid.getId()));
+        params.put("user", user);
         
         try {
             RenditServer.getInstance().renderTemplate(templateFile, params, 
@@ -142,9 +143,9 @@ public class EmailAction extends EmailActionConfig
         throws ActionExecuteException 
     {
         try {
-            EmailRecipient[] to = lookupEmailAddr();
+            Map addrs = lookupEmailAddr();
             
-            if (to.length == 0) {
+            if (addrs.isEmpty()) {
                 return "No valid users or emails found to send alert";
             }
 
@@ -154,20 +155,21 @@ public class EmailAction extends EmailActionConfig
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
 
-            String body, htmlBody;
+            String[] body = new String[addrs.size()];
+            String[] htmlBody = new String[addrs.size()];
+            EmailRecipient[] to = (EmailRecipient[])
+                addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
             
-            if (isSms()) {
-                body = createText(alertDef, info, appEnt, alert, 
-                                  "sms_email.gsp");
-                htmlBody = "";
-                for (int i=0; i<to.length; i++) {
-                    to[i].setHtml(false);
+            for (int i = 0; i < to.length; i++) {
+                AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
+                if (to[i].useHtml()) {
+                    htmlBody[i] = createText(alertDef, info, appEnt, alert,
+                                             "html_email.gsp", user);
+                } else {
+                    body[i] = createText(alertDef, info, appEnt, alert, 
+                                         isSms() ? "sms_email.gsp" :
+                                                   "text_email.gsp", user);
                 }
-            } else {
-                body = createText(alertDef, info, appEnt, alert, 
-                                  "text_email.gsp");
-                htmlBody = createText(alertDef, info, appEnt, alert,
-                                      "html_email.gsp");
             }
 
             filter.sendAlert(appEnt, to, createSubject(alertDef), body,
@@ -204,23 +206,23 @@ public class EmailAction extends EmailActionConfig
         return result;
     }
 
-    protected EmailRecipient[] lookupEmailAddr()
+    protected Map lookupEmailAddr()
         throws ActionExecuteException
     {
         // First, look up the addresses
-        Integer uid;
         int i = 0;
         HashSet prevRecipients = new HashSet();
-        List validRecipients = new ArrayList();
+        Map validRecipients = new HashMap();
         for (Iterator it = getUsers().iterator(); it.hasNext(); i++) {
             try {
                 InternetAddress addr;
                 boolean useHtml = false;
+                AuthzSubject who = null;
                 
                 switch (getType()) {
                 case TYPE_USERS:
-                    uid = (Integer) it.next();
-                    AuthzSubject who = getSubjMan().getSubjectById(uid);
+                    Integer uid = (Integer) it.next();
+                    who = getSubjMan().getSubjectById(uid);
                     
                     if (who == null) {
                         _log.warn("User not found: " + uid);
@@ -233,7 +235,7 @@ public class EmailAction extends EmailActionConfig
                         addr = new InternetAddress(who.getEmailAddress());
                     }
                     addr.setPersonal(who.getName());
-                    useHtml = who.isHtmlEmail();
+                    useHtml = isSms() ? false : who.isHtmlEmail();
                     break;
                 default:
                 case TYPE_EMAILS:
@@ -244,7 +246,7 @@ public class EmailAction extends EmailActionConfig
                 
                 // Don't send duplicate notifications
                 if (prevRecipients.add(addr)) {
-                    validRecipients.add(new EmailRecipient(addr, useHtml));
+                    validRecipients.put(new EmailRecipient(addr, useHtml), who);
                 }
             } catch (AddressException e) {
                 _log.warn("Mail address invalid", e);
@@ -259,10 +261,7 @@ public class EmailAction extends EmailActionConfig
             }
         }
 
-        // Convert the valid addresses
-        EmailRecipient[] to = (EmailRecipient[])
-            validRecipients.toArray(new EmailRecipient[validRecipients.size()]);
-        return to;
+        return validRecipients;
     }
 
     public void setParentActionConfig(AppdefEntityID ent, ConfigResponse cfg)
@@ -277,16 +276,23 @@ public class EmailAction extends EmailActionConfig
     {
         PerformsEscalations def = alert.getDefinition();
         
-        EmailRecipient[] to = lookupEmailAddr();
+        Map addrs = lookupEmailAddr();
 
         EmailFilter filter = new EmailFilter();
 
-        for (int i=0; i<to.length; i++) {
-            to[i].setHtml(false);
+        for (Iterator it = addrs.keySet().iterator(); it.hasNext(); ) {
+            EmailRecipient rec = (EmailRecipient) it.next();
+            rec.setHtml(false);
         }
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
+        String[] messages = new String[addrs.size()];
+        Arrays.fill(messages, message);
+        
+        EmailRecipient[] to = (EmailRecipient[])
+        addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
+
         filter.sendAlert(getResource(defInfo), to, 
                          createSubject(defInfo) + " " + change.getDescription(), 
-                         message, message, defInfo.getPriority(), false);
+                         messages, messages, defInfo.getPriority(), false);
     }
 }
