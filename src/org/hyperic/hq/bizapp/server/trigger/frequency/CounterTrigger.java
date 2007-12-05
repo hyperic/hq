@@ -161,15 +161,13 @@ public class CounterTrigger extends AbstractTrigger
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException
     {
-        TriggerFiredEvent tfe;
-        Collection events;
-
+        
         // If we didn't fulfill the condition, then don't fire
         if(!(event instanceof TriggerFiredEvent))
             throw new EventTypeException("Invalid event type passed, " +
                                          "expected TriggerFiredEvent");
 
-        tfe = (TriggerFiredEvent) event;
+        TriggerFiredEvent tfe = (TriggerFiredEvent) event;
         if(!tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
@@ -184,10 +182,12 @@ public class CounterTrigger extends AbstractTrigger
         } catch(CreateException exc){
             return; // No fire since we can't track the events
         }
+        
+        Collection eventObjectDesers;
 
         try {
             // Now find out if we have the specified # within the interval
-            events = eTracker.getReferencedEventStreams(getId());
+            eventObjectDesers = eTracker.getReferencedEventStreams(getId());
         } catch(Exception exc){
             throw new ActionExecuteException("Failed to get referenced " +
                                              "streams for trigger id="+
@@ -197,20 +197,14 @@ public class CounterTrigger extends AbstractTrigger
         /* Make sure we only write once (either delete or add) in this function
            otherwise, we have to make sure that things are in the same
            user transaction, which is a pain */
-        if ((events.size() + 1) >= count){
-            try {
-                // Get ready to fire, reset EventTracker
-                eTracker.deleteReference(getId());
-            } catch(Exception exc){
-                throw new ActionExecuteException("Failed to delete referenced " +
-                                                 "events for trigger id="+
-                                                 getId()+" : " + exc);
-            }
-
+        if ((eventObjectDesers.size() + 1) >= count){
+            // Get ready to fire, reset EventTracker
+            eTracker.deleteReference(getId());
+            
             TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
 
             myEvent.setMessage("Event " + triggerId + " occurred " +
-                               (events.size() + 1) + " times within " +
+                               (eventObjectDesers.size() + 1) + " times within " +
                                timeRange / 1000 + " seconds");
             try {
                 super.fireActions(myEvent);
@@ -218,16 +212,9 @@ public class CounterTrigger extends AbstractTrigger
                 throw new ActionExecuteException("Error firing actions: " +
                                                  exc);
             }
-        }
-        else {
+        } else {
             // Throw it into the event tracker
-            try {
-                eTracker.addReference(getId(), tfe, timeRange);
-            } catch(Exception exc){
-                throw new ActionExecuteException(
-                    "Error adding event reference for trigger id="+
-                    getId()+" : " + exc);
-            }
+            eTracker.addReference(getId(), tfe, timeRange);
             
             // Now send a NotFired event
             notFired();

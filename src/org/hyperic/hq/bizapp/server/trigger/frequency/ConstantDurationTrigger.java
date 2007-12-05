@@ -25,8 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
-import java.io.ObjectInputStream;
-import java.util.List;
+import java.util.LinkedList;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -38,6 +37,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -150,8 +150,6 @@ public class ConstantDurationTrigger extends AbstractTrigger
      */
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException {
-        AbstractEvent tfe;
-        List events;
 
         // If we didn't fulfill the condition, then don't fire
         if(!(event instanceof TriggerFiredEvent ||
@@ -160,7 +158,7 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 "Invalid event type passed, expected TriggerFiredEvent " +
                 "or TriggerNotFiredEvent");
 
-        tfe = (AbstractEvent) event;
+        AbstractEvent tfe = (AbstractEvent) event;
         if(!tfe.getInstanceId().equals(triggerId))
             throw new EventTypeException("Invalid instance ID passed (" +
                                          tfe.getInstanceId() + ") expected " +
@@ -184,15 +182,16 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 }
                 else {
                     // Now find out if we have a long enough duration
-                    events =
+                    LinkedList eventObjectDesers =
                         eTracker.getReferencedEventStreams(getId());
 
-                    if (events.size() > 0) {
+                    if (eventObjectDesers.size() > 0) {
                         // We only need the first event
-                        ObjectInputStream p = (ObjectInputStream) events.get(0);
+                        EventObjectDeserializer deser =
+                            (EventObjectDeserializer) eventObjectDesers.getFirst();
 
                         TriggerFiredEvent last =
-                            (TriggerFiredEvent) deserializeEventFromStream(p, true);
+                            (TriggerFiredEvent) deserializeEvent(deser, true);
 
                         // Let's see if we have a chance to fire
                         long duration =
@@ -217,23 +216,18 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 notFired();
                 return;
             }
-            
-            try {
-                // Get ready to fire, reset EventTracker
-                eTracker.deleteReference(getId());
-            } catch (Exception exc) {
-                throw new ActionExecuteException(
-                    "Failed to delete referenced" + " events: " + exc);
-            }
 
-            myEvent.setMessage("Event " + triggerId + " occurred " +
-                               " for " + timeRange / 1000 +" seconds");
-            try {
-                super.fireActions(myEvent);
-            } catch (Exception exc) {
-                throw new ActionExecuteException(
-                    "Error firing actions: " + exc);
-            }
+            // Get ready to fire, reset EventTracker
+            eTracker.deleteReference(getId());            
+        }    
+
+        myEvent.setMessage("Event " + triggerId + " occurred " +
+                           " for " + timeRange / 1000 +" seconds");
+        try {
+            super.fireActions(myEvent);
+        } catch (Exception exc) {
+            throw new ActionExecuteException(
+                "Error firing actions: " + exc);
         }
     }
 }

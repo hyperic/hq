@@ -32,9 +32,7 @@
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -49,6 +47,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -114,18 +113,20 @@ public class AvertTrigger extends AbstractTrigger {
                 }
 
                 // Now get the references
-                Collection events =
+                LinkedList eventObjectDesers =
                     etracker.getReferencedEventStreams(getId());
 
                 if (event instanceof HeartBeatEvent) {
                     // Check to see if we need to fire
-                    if (events.size() > 0) {
+                    if (eventObjectDesers.size() > 0) {
                         HeartBeatEvent heartbeat = (HeartBeatEvent) event;
-                        Iterator i = events.iterator();
-                        ObjectInputStream p = (ObjectInputStream) i.next();
+                        
+                        // We only need the first event
+                        EventObjectDeserializer deser =
+                            (EventObjectDeserializer) eventObjectDesers.getFirst();
 
                         TriggerFiredEvent tracked =
-                            (TriggerFiredEvent) deserializeEventFromStream(p, true);        
+                            (TriggerFiredEvent) deserializeEvent(deser, true);        
 
                         // Check to see if enough time has elapsed
                         if ((tracked.getTimestamp() + getTimeRange()) <
@@ -140,7 +141,7 @@ public class AvertTrigger extends AbstractTrigger {
                     }
                 } else {
                     // Track it if we don't have any events yet
-                    if (events.size() == 0)
+                    if (eventObjectDesers.size() == 0)
                         etracker.addReference(getId(), event, 0);
                 }
             }
@@ -151,8 +152,6 @@ public class AvertTrigger extends AbstractTrigger {
         } catch (NamingException e) {
             return; // No fire since we can't track the events
         } catch (CreateException e) {
-            return; // No fire since we can't track the events
-        } catch (java.sql.SQLException e) {
             return; // No fire since we can't track the events
         }
 
