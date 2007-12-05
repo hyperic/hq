@@ -339,6 +339,8 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
                 return "NUMBER(1)";
+            case DBUtil.DATABASE_MYSQL5:
+                return "BIT";
             default:
                 return "BOOLEAN";
         }
@@ -370,6 +372,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_MYSQL5:
                 return bool ? "1" : "0";
             default:
                 return bool ? "true" : "false";
@@ -392,6 +395,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_MYSQL5:
                 ps.setInt(idx, (bool) ? 1 : 0);
                 return;
             default:
