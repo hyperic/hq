@@ -299,11 +299,17 @@ public class ZeventManager {
      */
     public void enqueueEventsAfterCommit(List inEvents) {
         final List events = new ArrayList(inEvents);
-        HQApp.getInstance().addTransactionListener(new TransactionListener() {
+        TransactionListener txListener = new TransactionListener() {
             public void afterCommit(boolean success) {
                 try {
-                    if (success)
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("Listener[" + this + "] after tx " + 
+                                   "enqueueing=" + success);
+                    }
+                    
+                    if (success) {
                         enqueueEvents(events);
+                    }
                 } catch(InterruptedException e) {
                     _log.warn("Interrupted while enqueueing events");
                 }
@@ -311,7 +317,13 @@ public class ZeventManager {
 
             public void beforeCommit() {
             }
-        });
+        };
+
+        if (_log.isDebugEnabled()) {
+            _log.debug("Listener[" + txListener + "] Enqueueing events: " + 
+                       inEvents);
+        }
+        HQApp.getInstance().addTransactionListener(txListener);
     }
     
     public void enqueueEvent(Zevent event) throws InterruptedException {
