@@ -41,14 +41,17 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -67,18 +70,25 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocalHome;
 import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -93,6 +103,7 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -114,7 +125,11 @@ import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.dao.AIHistoryDAO;
+import org.hyperic.hq.hqu.rendit.InvokeMethodInvocationBindings;
+import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -766,6 +781,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Called by agents to report resources detected at runtime via 
      * monitoring-based autoinventory scans.
+     * 
      * There are some interesting situations that can occur related
      * to synchronization between the server and agent.  If runtime scans
      * are turned off for a server, but the agent is never notified (for
@@ -775,11 +791,16 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * it and take the opportunity to tell the agent again that it should not
      * perform runtime AI scans for that server.
      * Any resources reported by that server will be ignored.
-     * A similar situation occurs when the appdef server
-     * has been deleted but the agent was never notified to turn off
-     * runtime AI.  We handle this in the same way, by telling the agent
-     * to turn off runtime scans for that server, and ignoring anything in
-     * the report from that server.
+     * 
+     * A similar situation occurs when the appdef server has been deleted but 
+     * the agent was never notified to turn off runtime AI.  We handle this in 
+     * the same way, by telling the agent to turn off runtime scans for that 
+     * server, and ignoring anything in the report from that server.
+     * 
+     * This method will process all platform and server merging, given by
+     * the report.  Any services will be added to Zevent queue to be 
+     * processed in their own transactions.
+     * 
      * @param agentToken The token identifying the agent that sent 
      * the report.
      * @param crrr The CompositeRuntimeResourceReport that was generated
@@ -793,23 +814,136 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         throws AutoinventoryException, PermissionException, ValidationException,
                ApplicationException 
     {
-        // In the future we may want this method to act as
-        // another user besides "admin".  It might make sense to have 
-        // a user per-agent, so that actions that are agent-initiated 
-        // can be tracked.  Of course, this will be difficult when the
-        // agent is reporting itself to the server for the first time.
-        // In that case, we'd have to act as admin and be careful about 
-        // what we allow that codepath to do.
+        List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
+        List evts = new ArrayList(serviceMerges.size());
+        
+        for (Iterator i=serviceMerges.iterator(); i.hasNext(); ) {
+            ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
+            evts.add(new MergeServiceReportZevent(sInfo));
+        }
+        
+        ZeventManager.getInstance().enqueueEventsAfterCommit(evts);
+    }
+
+    /**
+     * Merge platforms and servers from the runtime report.  
+     * 
+     * @return a List of {@link ServiceMergeInfo} -- information from the
+     *         report about services still needing to be processed
+     * 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public List mergePlatformsAndServers(String agentToken, 
+                                         CompositeRuntimeResourceReport crrr)
+        throws ApplicationException, AutoinventoryException
+    {
         AuthzSubjectValue subject = getOverlord();
 
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
             rrp.processRuntimeReport(subject, agentToken, crrr);
+            return rrp.getServiceMerges();
         } catch (CreateException e) {
             throw new SystemException(e);
         }
     }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRESNEW"
+     */
+    public void mergeService(ServiceMergeInfo sInfo) throws CreateException {
+        ServiceValue foundAppdefService;
+        AIServiceValue aiservice = sInfo.aiservice;
+        ServerValue server = sInfo.server;
+        ServiceManagerLocal serviceMan = ServiceManagerEJBImpl.getOne();
+        ConfigManagerLocal configMan = ConfigManagerEJBImpl.getOne(); 
+        CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
 
+        if (aiservice.getId() != null) {
+            foundAppdefService = 
+                serviceMan.getServiceById(aiservice.getId()).getServiceValue();
+        } else {
+            foundAppdefService = null;
+        }
+        
+        boolean update;
+
+        try {
+            if (foundAppdefService == null) {
+                update = false;
+                // CREATE SERVICE
+                log.info("Creating new service: " + aiservice.getName());
+
+                try {
+                    foundAppdefService
+                    = AIConversionUtil.convertAIServiceToService(aiservice,
+                                                                 serviceMan);
+                } catch (FinderException e) {
+                    // Most likely a plugin bug
+                    log.error("Unable to find reported resource type: " + 
+                              aiservice.getServiceTypeName() + " for " +
+                              "resource: " + aiservice.getName() +
+                    ", ignoring");
+                    return;
+                }
+
+                Integer serviceTypePK
+                    = foundAppdefService.getServiceType().getId();
+                Integer pk  = serviceMan.createService(sInfo.subject,
+                                                       server.getId(),
+                                                       serviceTypePK,
+                                                       foundAppdefService);
+                try {
+                    foundAppdefService = 
+                        serviceMan.getServiceById(sInfo.subject, pk);
+                } catch (ServiceNotFoundException e) {
+                    log.fatal("Unable to find service we just created.", e);
+                    throw new SystemException("Unable to find service we "
+                                              + "just created", e);
+                }
+                log.debug("New service created: " + foundAppdefService);
+            } else {
+                update = true;
+                // UPDATE SERVICE
+                log.info("Updating service: " + foundAppdefService.getName());
+
+                foundAppdefService
+                    = AIConversionUtil.mergeAIServiceIntoService(aiservice,
+                                                                 foundAppdefService);
+                serviceMan.updateService(sInfo.subject, foundAppdefService);
+            }
+                
+            // CONFIGURE SERVICE
+            configMan.configureResource(sInfo.subject,
+                                        foundAppdefService.getEntityId(),
+                                        aiservice.getProductConfig(),
+                                        aiservice.getMeasurementConfig(),
+                                        aiservice.getControlConfig(),
+                                        aiservice.getResponseTimeConfig(),
+                                        null,
+                                        update,
+                                        false);
+                
+            // SET CUSTOM PROPERTIES FOR SERVICE
+            if (aiservice.getCustomProperties() != null) {
+                int typeId =
+                    foundAppdefService.getServiceType().getId().intValue();
+                cpropMan.setConfigResponse(foundAppdefService.getEntityId(),
+                                           typeId,
+                                           aiservice.getCustomProperties());            
+            }
+        } catch (ApplicationException e) {
+            log.error("Failed to merge service: " + aiservice, e);
+            log.info("Skipping merging of service: " + aiservice);
+        } catch (FinderException e) {
+            log.error("Failed to merge service: " + aiservice, e);
+            log.info("Skipping merging of service: " + aiservice);
+        }
+    }
+    
     public void setSessionContext(javax.ejb.SessionContext ctx) { 
         sessionCtx = ctx;
     }

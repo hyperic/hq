@@ -26,7 +26,10 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -61,11 +64,15 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -83,21 +90,24 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class RuntimeReportProcessor {
-    private Log log = LogFactory.getLog(RuntimeReportProcessor.class);
-    private AutoinventoryManagerLocal aiMgr = 
+    private Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
+    private AutoinventoryManagerLocal _aiMgr = 
         AutoinventoryManagerEJBImpl.getOne();
-    private PlatformManagerLocal platformMgr = 
+    private PlatformManagerLocal _platformMgr = 
         PlatformManagerEJBImpl.getOne();
-    private ServerManagerLocal  serverMgr = 
+    private ServerManagerLocal  _serverMgr = 
         ServerManagerEJBImpl.getOne();
-    private ServiceManagerLocal  serviceMgr = 
+    private ServiceManagerLocal  _serviceMgr = 
         ServiceManagerEJBImpl.getOne();
-    private ConfigManagerLocal configMgr = 
+    private ConfigManagerLocal _configMgr = 
         ConfigManagerEJBImpl.getOne();
-    private AuthzSubjectManagerLocal subjectMgr =
+    private AuthzSubjectManagerLocal _subjectMgr =
         AuthzSubjectManagerEJBImpl.getOne();
-    private CPropManagerLocal cpropMgr =
+    private CPropManagerLocal _cpropMgr =
         CPropManagerEJBImpl.getOne();
+    
+    private AuthzSubject _overlord;
+    private List         _serviceMerges = new ArrayList();
     
     public RuntimeReportProcessor () {}
 
@@ -108,6 +118,7 @@ public class RuntimeReportProcessor {
                PermissionException, ValidationException, 
                ApplicationException 
     {
+        _overlord = _subjectMgr.getOverlordPojo();
         Agent agent = AgentManagerEJBImpl.getOne().getAgentPojo(agentToken);
         Audit audit = AIAudit.newRuntimeImportAudit(agent); 
         boolean pushed = false;
@@ -132,7 +143,7 @@ public class RuntimeReportProcessor {
     {
         long startTime = System.currentTimeMillis();
 
-        log.info("Processing Runtime AI Report: " + crrr.simpleSummary());
+        _log.info("Processing Runtime AI Report: " + crrr.simpleSummary());
 
         // Before we queue or approve anything, verify that all
         // servers used in the scan both (a) exist in appdef
@@ -157,9 +168,9 @@ public class RuntimeReportProcessor {
 
             // Check that reporting server still exists.
             serverId = new Integer(serverReport.getServerId());
-            Server server = serverMgr.getServerById(serverId);
+            Server server = _serverMgr.getServerById(serverId);
             if (server == null) {
-                log.error("Error finding existing server: " + serverId);
+                _log.error("Error finding existing server: " + serverId);
                 turnOffRuntimeDiscovery(subject, serverId, 
                                         agentToken);
                 appdefServers[i] = null;
@@ -171,7 +182,7 @@ public class RuntimeReportProcessor {
             // Even if it does exist, make sure runtime reporting is turned
             // on for the server
             if (!appdefServers[i].getRuntimeAutodiscovery()) {
-                log.warn("Server reported a runtime report, but " +
+                _log.warn("Server reported a runtime report, but " +
                          "autodiscovery should be off, turning off.");
                 turnOffRuntimeDiscovery(subject, serverId, 
                                         agentToken);
@@ -181,7 +192,7 @@ public class RuntimeReportProcessor {
 
         // Now, for each server report that had a corresponding appdef server,
         // process that report.
-        log.info("Merging server reports into appdef " +
+        _log.info("Merging server reports into appdef " +
                  "(server count=" + appdefServers.length + ")");
         for (i=0; i<appdefServers.length; i++) {
 
@@ -190,7 +201,7 @@ public class RuntimeReportProcessor {
             aiplatforms = serverReport.getAIPlatforms();
             if (aiplatforms == null) continue;
 
-            log.info("Merging platforms " +
+            _log.info("Merging platforms " +
                      "(platform count=" + aiplatforms.length +
                      ", reported by serverId=" + appdefServers[i].getId() +
                      ") into appdef...");
@@ -219,13 +230,13 @@ public class RuntimeReportProcessor {
                                                appdefServers[i]); 
                     Util.flushCurrentSession();
                 } else {
-                    log.error("Runtime Report from server: " + appdefServers[i].getName() 
+                    _log.error("Runtime Report from server: " + appdefServers[i].getName() 
                             + " contained null aiPlatform. Skipping.");
                 }
             }
         }
         long endTime = System.currentTimeMillis() - startTime;
-        log.info("Completed processing Runtime AI report in: " +
+        _log.info("Completed processing Runtime AI report in: " +
                  endTime/1000 + " seconds.");
     }
 
@@ -237,30 +248,30 @@ public class RuntimeReportProcessor {
 
         AIServerValue[] aiservers = aiplatform.getAIServerValues();
 
-        log.info("Merging platform into appdef: " + aiplatform.getFqdn());
+        _log.info("Merging platform into appdef: " + aiplatform.getFqdn());
 
         // Does this platform exist (by fqdn) ?
         PlatformValue appdefPlatform;
         String fqdn = aiplatform.getFqdn();
         try {
-            Platform p = platformMgr.findPlatformByFqdn(subject, fqdn);
+            Platform p = _platformMgr.findPlatformByFqdn(subject, fqdn);
             appdefPlatform = p.getPlatformValue();
         } catch (PlatformNotFoundException e) {
             // Platform doesn't exist by fqdn, so let's try by IP address.
             // This is needed for servers like weblogic, which report platforms 
             // for node servers with an IP address, and not an FQDN.
-            PageList platforms = platformMgr.findPlatformsByIpAddr(subject, 
+            PageList platforms = _platformMgr.findPlatformsByIpAddr(subject, 
                                                                    fqdn, null);
             if (platforms.size() == 1) {
                 appdefPlatform = (PlatformValue) platforms.get(0);
 
             } else if (platforms.size() > 1) {
-                log.warn("Multiple platforms have IP address " + fqdn +
+                _log.warn("Multiple platforms have IP address " + fqdn +
                          ", could not determine a definitive platform");
                 appdefPlatform = null;
 
             } else {
-                log.warn("Could not find a platform with FQDN or IP " +
+                _log.warn("Could not find a platform with FQDN or IP " +
                          "address that matched: " + fqdn);
                 appdefPlatform = null;
             }
@@ -268,9 +279,9 @@ public class RuntimeReportProcessor {
 
         if (appdefPlatform == null) {
             // Add the platform
-            log.info("Creating new platform: " + aiplatform);
+            _log.info("Creating new platform: " + aiplatform);
             Platform platform =
-                platformMgr.createPlatform(subject, aiplatform);
+                _platformMgr.createPlatform(subject, aiplatform);
             appdefPlatform = platform.getPlatformValue();
         } else {
             // Platform already exists, don't update it, only update servers
@@ -278,7 +289,7 @@ public class RuntimeReportProcessor {
         }
 
         PageList appdefServerList =
-            serverMgr.getServersByPlatform(subject, appdefPlatform.getId(),
+            _serverMgr.getServersByPlatform(subject, appdefPlatform.getId(),
                                            false, PageControl.PAGE_ALL);
 
         if (aiservers == null) return;
@@ -289,7 +300,7 @@ public class RuntimeReportProcessor {
                                          appdefServerList, reportingServer);
                 Util.flushCurrentSession();
             } else {
-                log.error("Platform: " + appdefPlatform.getName() + 
+                _log.error("Platform: " + appdefPlatform.getName() + 
                           " reported null aiServer. Skipping.");
             }
         }
@@ -303,22 +314,22 @@ public class RuntimeReportProcessor {
             // ServerLightValue objects, so we lookup the full value object.
             ServerValue serverValue = null;
             try {
-                serverValue = serverMgr.getServerById(subject,
+                serverValue = _serverMgr.getServerById(subject,
                                                       appdefServer.getId());
                 if (serverValue.getWasAutodiscovered()) {
                     serverValue.setAutodiscoveryZombie(true);
-                    serverMgr.updateServer(subject, serverValue);
+                    _serverMgr.updateServer(subject, serverValue);
                 }
             } catch (AppdefDuplicateNameException e) {
-                log.warn("Error updating server: "
+                _log.warn("Error updating server: "
                          + serverValue + ": " + e.getMessage());
             } catch (UpdateException e) {
-                log.error("Error updating server: " + serverValue, e);
+                _log.error("Error updating server: " + serverValue, e);
             } catch (ServerNotFoundException e) {
-                log.error("Error updating server: " + serverValue, e);
+                _log.error("Error updating server: " + serverValue, e);
             }
         }
-        log.info("Completed Merging platform into appdef: " +
+        _log.info("Completed Merging platform into appdef: " +
                  aiplatform.getFqdn());
     }
 
@@ -337,7 +348,6 @@ public class RuntimeReportProcessor {
                                           ServerValue reportingServer)
         throws CreateException, PermissionException, ValidationException
     {
-        int i;
         ServerValue appdefServer;
         ServerValue foundAppdefServer = null;
         Integer serverTypePK;
@@ -347,10 +357,10 @@ public class RuntimeReportProcessor {
         aiServerAIID = aiserver.getAutoinventoryIdentifier();
         Integer aiserverId = aiserver.getId();
 
-        log.info("Merging Server into inventory: name: " +
+        _log.info("Merging Server into inventory: name: " +
                  aiserver.getName() + " AIIdentifier: " +
                  aiserver.getAutoinventoryIdentifier());
-        for (i=0; i<appdefServers.size(); i++) {
+        for (int i=0; i<appdefServers.size(); i++) {
             appdefServer = (ServerValue) appdefServers.get(i);
 
             // We can match either on autoinventory identifier, or if
@@ -362,20 +372,20 @@ public class RuntimeReportProcessor {
                  aiserverId.equals(appdefServer.getId()))) {
                 try {
                     foundAppdefServer
-                        = serverMgr.getServerById(subject,
+                        = _serverMgr.getServerById(subject,
                                                   appdefServer.getId());
-                    log.info("Found existing server: " +
+                    _log.info("Found existing server: " +
                              foundAppdefServer.getName() + " as match for: " +
                              aiserver.getAutoinventoryIdentifier());
                     appdefServerAIID =
                         foundAppdefServer.getAutoinventoryIdentifier();
                     if (!appdefServerAIID.equals(aiServerAIID)) {
-                        log.info("Setting AIID to existing=" +
+                        _log.info("Setting AIID to existing=" +
                                  appdefServerAIID);
                         aiserver.setAutoinventoryIdentifier(appdefServerAIID);
                     }
                 } catch (ServerNotFoundException e) {
-                    log.error("Error finding server: " + appdefServer);
+                    _log.error("Error finding server: " + appdefServer);
                     throw new SystemException(e);
                 }
                 appdefServers.remove(i);
@@ -395,12 +405,12 @@ public class RuntimeReportProcessor {
                                        reportingServer.getName());
 
                 aiserver.setName(newServerName);
-                log.info("Creating new server: name: " + aiserver.getName() +
+                _log.info("Creating new server: name: " + aiserver.getName() +
                          "AIIdentifier: " +
                          aiserver.getAutoinventoryIdentifier());
                 foundAppdefServer
                     = AIConversionUtil.convertAIServerToServer(aiserver, 
-                                                               serverMgr);
+                                                               _serverMgr);
             
                 foundAppdefServer.setWasAutodiscovered(true);
 
@@ -409,34 +419,34 @@ public class RuntimeReportProcessor {
                 // The server will be owned by whomever owns the platform
                 String serverOwnerName = platform.getOwner();
                 AuthzSubjectValue serverOwner
-                    = subjectMgr.findSubjectByName(subject, serverOwnerName);
+                    = _subjectMgr.findSubjectByName(subject, serverOwnerName);
                 Integer platformPK = platform.getId();
-                Server server = serverMgr.createServer(serverOwner,
+                Server server = _serverMgr.createServer(serverOwner,
                                                        platformPK,
                                                        serverTypePK,
                                                        foundAppdefServer);
 
-                log.info("New server created: " + foundAppdefServer.getName() +
+                _log.info("New server created: " + foundAppdefServer.getName() +
                          " (id=" + server.getId() + ")");
                 // Refresh the light value to include all attributes
                 foundAppdefServer = server.getServerValue();
             } else {
                 update = true;
                 // UPDATE SERVER
-                log.info("Updating server: " + foundAppdefServer.getName());
+                _log.info("Updating server: " + foundAppdefServer.getName());
 
                 foundAppdefServer
                     = AIConversionUtil.mergeAIServerIntoServer(aiserver,
                                                                foundAppdefServer);
-                serverMgr.updateServer(subject, foundAppdefServer);
+                _serverMgr.updateServer(subject, foundAppdefServer);
             }
         } catch (ApplicationException e) {
-            log.error("Failed to merge server: " + aiserver, e);
-            log.info("Server: " + aiserver + " will be skipped.");
+            _log.error("Failed to merge server: " + aiserver, e);
+            _log.info("Server: " + aiserver + " will be skipped.");
             return;
         } catch (FinderException e) {
-            log.error("Failed to merge server: " + aiserver, e);
-            log.info("Server: " + aiserver + " will be skipped.");
+            _log.error("Failed to merge server: " + aiserver, e);
+            _log.info("Server: " + aiserver + " will be skipped.");
             return;
         }
 
@@ -453,7 +463,7 @@ public class RuntimeReportProcessor {
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                configMgr.configureResource(subject,
+                _configMgr.configureResource(subject,
                                             foundAppdefServer.getEntityId(),
                                             aiserver.getProductConfig(),
                                             aiserver.getMeasurementConfig(),
@@ -463,7 +473,7 @@ public class RuntimeReportProcessor {
                                             update,
                                             false);
             } catch (Exception e) {
-                log.error("Error configuring server: " 
+                _log.error("Error configuring server: " 
                           + foundAppdefServer.getId() + ": " + e, e);
             }
         }
@@ -476,186 +486,107 @@ public class RuntimeReportProcessor {
             // SET CUSTOM PROPERTIES FOR SERVER
             int typeId =
                 foundAppdefServer.getServerType().getId().intValue();
-            cpropMgr.setConfigResponse(foundAppdefServer.getEntityId(),
+            _cpropMgr.setConfigResponse(foundAppdefServer.getEntityId(),
                                        typeId,
                                        aiserver.getCustomProperties());
         } catch (Exception e) {
-            log.warn("Error setting server custom properties: " + e, e);
+            _log.warn("Error setting server custom properties: " + e, e);
         }
 
         if (aiserverExt != null) {
 
-            log.info("Updating services for server: " +
+            _log.info("Updating services for server: " +
                      foundAppdefServer.getName());
 
-            AIServiceValue[] aiservices;
             List appdefServices;
 
-            aiservices = ((AIServerExtValue) aiserver).getAIServiceValues();
-            if (aiservices != null) {
-                // ServerValue.getServiceValues not working here for some reason,
-                // get the services explicitly from the ServiceManager.
-                try {
-                    appdefServices = 
-                        serviceMgr.getServicesByServer(subject,
-                                                       foundAppdefServer.getId(),
-                                                       PageControl.PAGE_ALL);
-                } catch (Exception e) {
-                    appdefServices = new ArrayList();
-                }
+            // ServerValue.getServiceValues not working here for some reason,
+            // get the services explicitly from the ServiceManager.
+            try {
+                appdefServices = 
+                    _serviceMgr.getServicesByServer(subject,
+                                                    foundAppdefServer.getId(),
+                                                    PageControl.PAGE_ALL);
+            } catch (Exception e) {
+                appdefServices = new ArrayList();
+            }
 
-                for (i=0; i<aiservices.length; i++) {
-                    if(aiservices[i] != null) {
-                        mergeServiceIntoInventory(subject, foundAppdefServer,
-                                                  aiservices[i],
-                                                  appdefServices,
-                                                  reportingServer);
-                        Util.flushCurrentSession();
-                    } else {
-                        log.error("Server: " + reportingServer.getName() + 
-                                  " reported null aiservice. Skipping.");
+            List aiServices = 
+                ((AIServerExtValue) aiserver).getAIServiceValuesAsList();
+
+            // Change the service names if they require expansion. 
+            for (Iterator i=aiServices.iterator(); i.hasNext(); ) {
+                AIServiceValue aiSvc = (AIServiceValue)i.next();
+                String newName = StringUtil.replace(aiSvc.getName(),
+                                                    "%serverName%",
+                                                 foundAppdefServer.getName());
+                aiSvc.setName(newName);
+                
+                // Service IDs are initially set to null, and later set to
+                // the id of the real resource, if they are found
+                aiSvc.setId(null); 
+            }
+            
+            
+            // Filter out and mark zombie services
+            for (Iterator i=appdefServices.iterator(); i.hasNext(); ) {
+                ServiceValue appdefSvc = (ServiceValue)i.next();
+                boolean found = false;
+                
+                for (Iterator j=aiServices.iterator(); j.hasNext(); ) {
+                    AIServiceValue aiSvc = (AIServiceValue)j.next();
+                    
+                    if (aiSvc.getName().equals(appdefSvc.getName())) {
+                        found = true;
+                        aiSvc.setId(appdefSvc.getId());
+                        break;
                     }
                 }
-
-                // any services that we haven't handled, we should mark them
-                // as AI-zombies.
-                ServiceValue appdefService;
-                for (i=0; i<appdefServices.size(); i++) {
-                    appdefService = (ServiceValue) appdefServices.get(i);
-                    try {
-                        appdefService.setAutodiscoveryZombie(true);
-                        serviceMgr.updateService(subject, appdefService);
-                        Util.flushCurrentSession();
-                    } catch (ApplicationException e) {
-                        log.error("Error marking service as zombie: " +
-                                  appdefService.getName(), e);
-                    } 
+                
+                if (!found) {
+                    Service svc = _serviceMgr.getServiceById(appdefSvc.getId());
+                    _log.info("Service id=" + svc.getId() + " name=" + 
+                              svc.getName() + " has become a zombie");
+                    _serviceMgr.updateServiceZombieStatus(_overlord, svc, true); 
                 }
             }
+            
+            for (Iterator i=aiServices.iterator(); i.hasNext(); ) {
+                AIServiceValue aiService = (AIServiceValue)i.next();
+                ServiceMergeInfo sInfo = new ServiceMergeInfo();
+                sInfo.subject         = subject;
+                sInfo.server          = foundAppdefServer;
+                sInfo.aiservice       = aiService;
+                sInfo.reportingServer = reportingServer;
+                _serviceMerges.add(sInfo);
+                Util.flushCurrentSession();
+            }
         }
-        log.info("Completed merging server: " + reportingServer.getName() +
+        _log.info("Completed merging server: " + reportingServer.getName() +
                  " into inventory");
     }
 
-    private void mergeServiceIntoInventory(AuthzSubjectValue subject,
-                                           ServerValue server,
-                                           AIServiceValue aiservice,
-                                           List appdefServices,
-                                           ServerValue reportingServer)
-        throws CreateException, PermissionException, ValidationException {
-
-        int i;
-        ServiceValue appdefService;
-        ServiceValue foundAppdefService = null;
-
-        String newServerName = StringUtil.replace(aiservice.getName(),
-                                                  "%serverName%",
-                                                  server.getName());
-        aiservice.setName(newServerName);
-
-        // Does this service exist (by name) ?
-        for (i=0; i<appdefServices.size(); i++) {
-            appdefService = (ServiceValue) appdefServices.get(i);
-            if (appdefService.getName().equals(aiservice.getName())) {
-                foundAppdefService = appdefService;
-                // Remove from list so all that's left are zombies
-                appdefServices.remove(i);
-                break;
-            }
-        }
-
-        boolean update;
-
-        try {
-            if (foundAppdefService == null) {
-                update = false;
-                // CREATE SERVICE
-                log.info("Creating new service: " + aiservice.getName());
-
-                try {
-                    foundAppdefService
-                        = AIConversionUtil.convertAIServiceToService(aiservice,
-                                                                     serviceMgr);
-                } catch (FinderException e) {
-                    // Most likely a plugin bug
-                    log.error("Unable to find reported resource type: " + 
-                              aiservice.getServiceTypeName() + " for " +
-                              "resource: " + aiservice.getName() +
-                              ", ignoring");
-                    return;
-                }
-
-                Integer serviceTypePK
-                    = foundAppdefService.getServiceType().getId();
-                String serviceOwnerName = server.getOwner();
-                AuthzSubjectValue serviceOwner
-                    = subjectMgr.findSubjectByName(subject, serviceOwnerName);
-                Integer pk  = serviceMgr.createService(serviceOwner,
-                                                       server.getId(),
-                                                       serviceTypePK,
-                                                       foundAppdefService);
-                try {
-                    foundAppdefService = serviceMgr.getServiceById(serviceOwner,
-                                                               pk);
-                } catch (ServiceNotFoundException e) {
-                    log.fatal("Unable to find service we just created.", e);
-                    throw new SystemException("Unable to find service we "
-                                                 + "just created", e);
-                }
-                log.debug("New service created: " + foundAppdefService);
-            } else {
-                update = true;
-                // UPDATE SERVICE
-                log.info("Updating service: " + foundAppdefService.getName());
-
-                foundAppdefService
-                    = AIConversionUtil.mergeAIServiceIntoService(aiservice,
-                                                                 foundAppdefService);
-                serviceMgr.updateService(subject, foundAppdefService);
-            }
-            
-            // CONFIGURE SERVICE
-            configMgr.configureResource(subject,
-                                        foundAppdefService.getEntityId(),
-                                        aiservice.getProductConfig(),
-                                        aiservice.getMeasurementConfig(),
-                                        aiservice.getControlConfig(),
-                                        aiservice.getResponseTimeConfig(),
-                                        null,
-                                        update,
-                                        false);
-            
-            // SET CUSTOM PROPERTIES FOR SERVICE
-            if (aiservice.getCustomProperties() != null) {
-                int typeId =
-                    foundAppdefService.getServiceType().getId().intValue();
-                cpropMgr.setConfigResponse(foundAppdefService.getEntityId(),
-                                           typeId,
-                                           aiservice.getCustomProperties());            
-            }
-        } catch (ApplicationException e) {
-            log.error("Failed to merge service: " + aiservice, e);
-            log.info("Skipping merging of service: " + aiservice);
-        } catch (FinderException e) {
-            log.error("Failed to merge service: " + aiservice, e);
-            log.info("Skipping merging of service: " + aiservice);
-        }
+    public static class ServiceMergeInfo {
+        public AuthzSubjectValue subject;
+        public ServerValue       server;
+        public AIServiceValue    aiservice;
+        public ServerValue       reportingServer;
+    }
+    
+    public List getServiceMerges() {
+        return _serviceMerges;
     }
 
     private boolean turnOffRuntimeDiscovery(AuthzSubjectValue subject,
                                             Integer serverId,
                                             String agentToken ) {
-        AppdefEntityID aid =
-            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                               serverId);
-
-        log.info("Disabling RuntimeDiscovery for server: " + serverId);
+        AppdefEntityID aid = AppdefEntityID.newServerID(serverId.intValue());
+        _log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
-            aiMgr.turnOffRuntimeDiscovery(subject, aid, agentToken);
+            _aiMgr.turnOffRuntimeDiscovery(subject, aid, agentToken);
             return true;
-            
         } catch (Exception e) {
-            log.error("Error turning off runtime scans for " +
+            _log.error("Error turning off runtime scans for " +
                       "server: " + serverId, e);
             return false;
         }

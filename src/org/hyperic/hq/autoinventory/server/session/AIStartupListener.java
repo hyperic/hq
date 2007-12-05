@@ -41,6 +41,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.autoinventory.server.session.MergeServiceReportZevent.MergeServiceReportZeventPayload;
+import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -61,8 +63,34 @@ public class AIStartupListener
         events.add(ResourceUpdatedZevent.class);
         ZeventManager.getInstance().
             addBufferedListener(events, new RuntimeAIEnabler());
+        
+        events = new HashSet();
+        events.add(MergeServiceReportZevent.class);
+        ZeventManager.getInstance().addBufferedListener(events, 
+                                                        new ServiceMerger());
     }
 
+    /**
+     * Merges in services which have been discovered via runtime AI
+     */
+    private class ServiceMerger implements ZeventListener {
+        public void processEvents(List events) {
+            AutoinventoryManagerLocal aiMan = 
+                AutoinventoryManagerEJBImpl.getOne();
+            
+            for (Iterator i=events.iterator(); i.hasNext(); ) {
+                MergeServiceReportZevent evt = (MergeServiceReportZevent)i.next();
+                ServiceMergeInfo sInfo = evt.getMergeInfo();
+            
+                try {
+                    aiMan.mergeService(sInfo);
+                } catch(Exception e) {
+                    _log.warn("Error merging service", e);
+                }
+            }
+        }
+    }
+    
     /**
      * Listener class that enables runtime-AI on newly created resources.
      */
