@@ -122,7 +122,7 @@ public class PluginDiscoverer implements ScanListener {
     public void scanComplete(ScanState state)
         throws AutoinventoryException, SystemException {
 
-        this.servers = state.getAllServers(null);
+        this.servers = state.getAllServers(this.log);
     }
 
     private void addScanners(ScanConfiguration scanConfig,
@@ -463,6 +463,7 @@ public class PluginDiscoverer implements ScanListener {
         System.out.println("\nServer: " + server.getName() +
                            " [" + server.getInstallPath() + "]" +
                            getDescription(server.getDescription()));
+        System.out.println(" AIID....." + server.getAutoinventoryIdentifier());
         dumpConfig(config, metricConfig, controlConfig, cprops, " ");
 
         if (config == null) {
