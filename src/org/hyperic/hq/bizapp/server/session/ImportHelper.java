@@ -777,7 +777,7 @@ class ImportHelper
         try {
             schema = _prodBoss.getConfigSchema(_subject, id,
                                                ghettoConfig.getType(),
-                                               true);
+                                               false);
         } catch(PermissionException exc){
             throw new BatchImportException("Permission denied, " +
                                            "configuring " + fullName + 
