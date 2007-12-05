@@ -31,9 +31,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
-import java.io.ObjectInputStream;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -46,6 +44,7 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -102,18 +101,19 @@ public class EscalateTrigger extends AbstractTrigger {
                     EventTrackerUtil.getLocalHome().create();
 
                 // Now get the references
-                Collection events =
+                LinkedList eventObjectDesers =
                     eTracker.getReferencedEventStreams(getId());
 
                 TriggerFiredEvent tracked = null;
                 
                 // Check to see if we need to fire
-                if (events.size() > 0) {
-                    // Only need to look at the first event
-                    Iterator i = events.iterator();
-                    ObjectInputStream p = (ObjectInputStream) i.next();
+                if (eventObjectDesers.size() > 0) {
+                    // Only need to look at the first event                    
+                    EventObjectDeserializer deser = 
+                        (EventObjectDeserializer) eventObjectDesers.getFirst();
+                    
                     tracked = 
-                        (TriggerFiredEvent) deserializeEventFromStream(p, true);
+                        (TriggerFiredEvent) deserializeEvent(deser, true);
 
                     if ((tracked.getTimestamp() + getAfter()) >
                         event.getTimestamp())
@@ -139,8 +139,6 @@ public class EscalateTrigger extends AbstractTrigger {
         } catch (NamingException e) {
             return; // No fire since we can't track the events
         } catch (CreateException e) {
-            return; // No fire since we can't track the events
-        } catch (java.sql.SQLException e) {
             return; // No fire since we can't track the events
         }
 
