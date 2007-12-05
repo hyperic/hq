@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.server.mdb;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -170,7 +171,7 @@ public class RegisteredDispatcherEJBImpl
                 log.error("Failed to flush state for multi conditional trigger", e);
             }
             
-            publishEnqueuedEvents();
+            dispatchEnqueuedEvents();
         }
     }
     
@@ -212,65 +213,109 @@ public class RegisteredDispatcherEJBImpl
         
     }
     
-    private void publishEnqueuedEvents() {
+    private void dispatchEnqueuedEvents() {
         List enqueuedEvents = Messenger.drainEnqueuedMessages();
         
-        if (!enqueuedEvents.isEmpty()) {
-            LinkedList eventsToPublish = new LinkedList();
-            LinkedList alertDefLastFiredEventsToPublish = new LinkedList();
-            
-            for (Iterator iter = enqueuedEvents.iterator(); iter.hasNext();) {
-                AbstractEvent event = (AbstractEvent) iter.next();
-                
-                if (event.isAlertDefinitionLastFiredUpdateEvent()) {
-                    alertDefLastFiredEventsToPublish.add(event);
-                } else {
-                    eventsToPublish.add(event);
+        if (enqueuedEvents.isEmpty()) {
+            return;
+        }
+        
+        LinkedList eventsToPublish = new LinkedList();
+        LinkedList alertDefLastFiredEventsToPublish = new LinkedList();
+    
+        for (Iterator iter = enqueuedEvents.iterator(); iter.hasNext();) {
+            AbstractEvent event = (AbstractEvent) iter.next();
+    
+            if (event.isAlertDefinitionLastFiredUpdateEvent()) {
+                alertDefLastFiredEventsToPublish.add(event);
+            } else {
+                eventsToPublish.add(event);
+            }
+        }
+    
+        EventsHandler eventsPublishHandler = 
+            new EventsHandler() {
+            public void handleEvents(List events) {
+                Messenger sender = new Messenger();
+                sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+                                      (Serializable)events);
+            }
+        };
+        
+        handleEventsPostCommit(eventsToPublish, 
+                               eventsPublishHandler, 
+                               true);
+    
+    
+        EventsHandler lastFiredTimeEventsHandler = 
+            new EventsHandler() {
+            public void handleEvents(List events) {
+                try {
+                    AlertDefinitionLastFiredTimeUpdater
+                        .getInstance().enqueueEvents(events);
+                } catch (InterruptedException e) {
+                    // we've been interrupted - oh well
                 }
             }
-            
-            publishOnEventsTopicNow(eventsToPublish);
-            
-            // To reduce contention on the alert def table, publish alert def 
-            // last fired time updates post commit.
-            publishAlertDefLastFiredEventsPostCommit(alertDefLastFiredEventsToPublish);
-            
-        }        
-    }
-    
-    private void publishOnEventsTopicNow(List events) {
-        if (!events.isEmpty()) {
-            Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, (Serializable)events);                   
-        }        
-    }
-    
-    private void publishAlertDefLastFiredEventsPostCommit(final List events) {
-        if (!events.isEmpty()) {
-            try {
-                HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                    public void afterCommit(boolean success) {
-                        try {
-                            AlertDefinitionLastFiredTimeUpdater.getInstance()
-                                .enqueueEvents(events);
-                        } catch (InterruptedException e) {
-                            // we've been interrupted - oh well
-                        }
-                    }
+        };
 
-                    public void beforeCommit() {
-                    }
-                });                    
-            } catch (Throwable t) {
-                // We want to complete the current txn even if registering 
-                // the post commit listener fails.
-                log.warn("Failed to publish the alert definition last fired " +
-                		"events. The last fired time may not be updated immediately " +
-                		"for some alert definitions: "+events, t);
+        // To reduce contention on the alert def table, publish alert def 
+        // last fired time updates post commit. If publishing fails, just 
+        // drop the events. Updating the alert def last fired time is not 
+        // critical!
+        handleEventsPostCommit(alertDefLastFiredEventsToPublish, 
+                               lastFiredTimeEventsHandler, 
+                               false);            
+
+    }
+    
+    private static interface EventsHandler {
+        void handleEvents(List events);
+    }
+    
+    /**
+     * Register the handler to handle the events post commit. If registration 
+     * fails and the flag is set to force events handling, handle the events 
+     * immediately.
+     * 
+     * @param events The events to be handled.
+     * @param handler The events handler.
+     * @param forceEventsHandling <code>true</code> to handle the events 
+     *                            immediately if registration fails.
+     */
+    private void handleEventsPostCommit(final List events, 
+                                        final EventsHandler handler, 
+                                        boolean forceEventsHandling) {
+        
+        if (events.isEmpty()) {
+            return;
+        }
+        
+        try {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                public void afterCommit(boolean success) {
+                    handler.handleEvents(events);
+                }
+
+                public void beforeCommit() {
+                }
+            });                
+        } catch (Throwable t) {
+            log.warn("Failed to register events to be handled post commit: "+events, t);
+
+            if (forceEventsHandling) {            
+                ArrayList copyOfEvents = new ArrayList(events);
+    
+                // We want to make sure we don't handle the events twice. 
+                // To be sure, clear the list of events handled post commit.
+                events.clear();
+
+                log.warn("Forcing events to be handled now!");
+                handler.handleEvents(copyOfEvents);
             }
-        }        
+        }
     }
-
+    
     /**
      * @ejb:create-method
      */
