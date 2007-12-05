@@ -30,6 +30,6 @@ public class ResourceAuxLog
     }
 
     public String getURL() {
-        return "/Resource.do?eid=" + _ent.getId();
+        return "/Resource.do?eid=" + _ent.getAppdefKey();
     }
 }
