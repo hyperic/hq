@@ -1243,6 +1243,19 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @ejb:interface-method
      */
+    public void updateServiceZombieStatus(AuthzSubject subject, Service svc,
+                                          boolean zombieStatus)
+        throws PermissionException
+    {
+        checkModifyPermission(subject.getAuthzSubjectValue(), svc.getEntityId());
+        svc.setModifiedBy(subject.getName());
+        svc.setModifiedTime(new Long(System.currentTimeMillis()));
+        svc.setAutodiscoveryZombie(zombieStatus);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
     public Service updateService(AuthzSubjectValue subject,
                                  ServiceValue existing)
         throws PermissionException, UpdateException, 
