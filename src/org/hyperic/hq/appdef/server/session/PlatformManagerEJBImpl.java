@@ -324,7 +324,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
 
             // now remove the resource for the platform
-            removeAuthzResource(subject, aeid, false);
+            removeAuthzResource(subject, aeid);
 
             getPlatformDAO().remove(platform);
 

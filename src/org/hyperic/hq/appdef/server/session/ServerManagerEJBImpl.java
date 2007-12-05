@@ -304,7 +304,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Integer cid = server.getConfigResponseId();
 
             // Remove authz resource
-            removeAuthzResource(subject, aeid, false);
+            removeAuthzResource(subject, aeid);
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();

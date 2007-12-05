@@ -90,7 +90,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         PagerProcessor_resource.class.getName();
     private final String RES_TYPE_PAGER =
         PagerProcessor_resourceType.class.getName();
-    
+
     /**
      * Create a ResourceType.
      * @param whoami The current running user.
@@ -373,21 +373,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return getResourceDAO().findByInstanceId(id.getAuthzTypeId(), 
                                                  id.getId());
     }
-    
+
     /**
      * @ejb:interface-method
      */
-    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids) 
-        throws VetoException
-    {
-        removeResources(subject, ids, true);
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids,
-                                boolean audit) 
+    public void removeResources(AuthzSubject subject, AppdefEntityID[] ids)
         throws VetoException
     {
         ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
@@ -398,9 +388,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             Resource r = dao.findByInstanceId(ids[i].getAuthzTypeId(), 
                                               ids[i].getId());
             cb.preResourceDelete(r);
-            if (audit) {
-                ResourceAudit.deleteResource(r, subject, now, now);
-            }
+            ResourceAudit.deleteResource(r, subject, now, now);
         }
         getResourceDAO().deleteByInstances(ids);
     }

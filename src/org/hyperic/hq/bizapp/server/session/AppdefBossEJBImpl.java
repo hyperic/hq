@@ -1618,10 +1618,7 @@ public class AppdefBossEJBImpl
             
             // now, remove the platform.
             getPlatformManager().removePlatform(subject, platformId);
-
-            // Last, remove authz resources
-            getResourceManager().removeResources(subjectPojo,
-                                                 toDeleteResourceIds);
+            
         } catch (RemoveException e) {
             log.error("Caught EJB RemoveException",e);
             throw new SystemException(e);
