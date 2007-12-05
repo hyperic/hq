@@ -250,12 +250,20 @@ public class HQApp {
             String methName       = meth.getName();
             Class c               = meth.getDeclaringClass();
             String className      = c.getName();
-            boolean sessCreated   = false;
             boolean readWrite     = false;
             boolean flush         = true;
-            sessCreated = SessionManager.setupSession(methName);
+            boolean sessCreated   = SessionManager.setupSession(methName);
+            
+            if (sessCreated && _log.isDebugEnabled()) {
+                _log.debug("Created session, executing [" + methName + 
+                           "] on [" + className + "]");
+            }
                                                   
             try {
+                if (_log.isTraceEnabled()) {
+                    _log.trace("invokeNext: tx=" + v.getTransaction() + 
+                               " meth=" + methName);
+                }
                 if (v.getTransaction() != null) {
                     attemptRegisterSynch(v.getTransaction(), 
                                          SessionManager.currentSession());
@@ -361,13 +369,24 @@ public class HQApp {
     private void scheduleCommitCallback() {
         Transaction t = 
             Util.getSessionFactory().getCurrentSession().getTransaction();
-
+        final long commitNo = getTransactions();
+        final boolean debug = _log.isDebugEnabled();
+        
+        if (debug) {
+            _log.debug("Scheduling commit callback " + commitNo);
+        }
         t.registerSynchronization(new Synchronization() {
             public void afterCompletion(int status) {
+                if (debug) {
+                    _log.debug("Running post-commit for commitNo: " + commitNo);
+                }
                 runPostCommitListeners(status == Status.STATUS_COMMITTED);
             }
 
             public void beforeCompletion() {
+                if (debug) {
+                    _log.debug("Running pre-commit for commitNo: " + commitNo);
+                }
                 runPreCommitListeners();
             }
         });
