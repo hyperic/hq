@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 
@@ -58,6 +61,24 @@ public class AIServerExtValue  extends AIServerValue {
 
     public void setAIServiceValues (AIServiceValue[] aiservices) {
         _aiservices = aiservices;
+    }
+    
+    public List getAIServiceValuesAsList() {
+        List res;
+        if (_aiservices == null) { 
+            res = new ArrayList();
+        } else {
+            res = new ArrayList(_aiservices.length);
+            for (int i=0; i<_aiservices.length; i++) {
+                if (_aiservices[i] == null) {
+                    // Strange behaviour, but not the end of the world.
+                    continue;
+                } else {
+                    res.add(_aiservices[i]);
+                }
+            }
+        }
+        return res;
     }
 
     public void addAIServiceValue (AIServiceValue aiservice) {
