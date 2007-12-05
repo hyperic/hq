@@ -358,7 +358,8 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                InvalidConfigException, ConfigFetchException,
                AppdefEntityNotFoundException
     {
-        this.setConfigResponse(subject, id, response, type, true);
+        this.setConfigResponse(subject, id, response, type,
+        					   type.equals(ProductPlugin.TYPE_PRODUCT));
     }
 
     /**
