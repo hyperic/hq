@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -83,46 +84,11 @@ public class EmailAction extends EmailActionConfig
         return subjMan;
     }
 
-    private String createPriority(AlertDefinitionInterface alertdef) {
-        StringBuffer pri = new StringBuffer();
-        for (int i = 0; i < alertdef.getPriority(); i++) {
-            pri.append('!');
-        }
-        return pri.toString();
-    }
-
-    private String createSubject(AlertDefinitionInterface alertdef) {
-        // XXX - Where can I get product name?
-        StringBuffer subj = new StringBuffer("[HQ] ")
-            .append(createPriority(alertdef))
-            .append(" - ")
-            .append(alertdef.getName())
-            .append(" ")
-            .append(RES_NAME_HOLDER);
-        return subj.toString();
-    }
-
-    private String createText(AlertDefinitionInterface alertdef,
-                              ActionExecutionInfo info, AppdefEntityID aeid, 
-                              AlertInterface alert, String templateName,
-                              AuthzSubject user)
-        throws MeasurementNotFoundException
-    {
+    private String renderTemplate(String filename, Map params) {
         File templateDir = new File(HQApp.getInstance().getResourceDir(),
                                     "alertTemplates");
-        File templateFile = new File(templateDir, templateName);
+        File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
-        Map params = new HashMap();
-        
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        
-        params.put("alertDef", alertdef);
-        params.put("alert", alert);
-        params.put("action", info);
-        params.put("resource", rDao.findByInstanceId(aeid.getAuthzTypeId(),
-                                                     aeid.getId()));
-        params.put("user", user);
-        
         try {
             RenditServer.getInstance().renderTemplate(templateFile, params, 
                                                       output);
@@ -133,6 +99,32 @@ public class EmailAction extends EmailActionConfig
             _log.warn("Unable to render template", e);
         }
         return output.toString();
+    }
+
+    private String createSubject(AlertDefinitionInterface alertdef,
+                                 Resource resource) {
+        Map params = new HashMap();
+        params.put("resource", resource);
+        params.put("alertDef", alertdef);
+
+        return renderTemplate("subject.gsp", params);
+    }
+
+    private String createText(AlertDefinitionInterface alertdef,
+                              ActionExecutionInfo info, Resource resource, 
+                              AlertInterface alert, String templateName,
+                              AuthzSubject user)
+        throws MeasurementNotFoundException
+    {
+        Map params = new HashMap();
+        
+        params.put("alertDef", alertdef);
+        params.put("alert", alert);
+        params.put("action", info);
+        params.put("resource", resource);
+        params.put("user", user);
+        
+        return renderTemplate(templateName, params);
     }
     
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
@@ -155,6 +147,10 @@ public class EmailAction extends EmailActionConfig
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
 
+            ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+            Resource resource = rDao.findByInstanceId(appEnt.getAuthzTypeId(),
+                                                      appEnt.getId());
+
             String[] body = new String[addrs.size()];
             String[] htmlBody = new String[addrs.size()];
             EmailRecipient[] to = (EmailRecipient[])
@@ -163,17 +159,17 @@ public class EmailAction extends EmailActionConfig
             for (int i = 0; i < to.length; i++) {
                 AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
                 if (to[i].useHtml()) {
-                    htmlBody[i] = createText(alertDef, info, appEnt, alert,
+                    htmlBody[i] = createText(alertDef, info, resource, alert,
                                              "html_email.gsp", user);
                 } else {
-                    body[i] = createText(alertDef, info, appEnt, alert, 
+                    body[i] = createText(alertDef, info, resource, alert, 
                                          isSms() ? "sms_email.gsp" :
                                                    "text_email.gsp", user);
                 }
             }
 
-            filter.sendAlert(appEnt, to, createSubject(alertDef), body,
-                             htmlBody, alertDef.getPriority(),
+            filter.sendAlert(appEnt, to, createSubject(alertDef, resource),
+                             body, htmlBody, alertDef.getPriority(),
                              alertDef.isNotifyFiltered());
 
             StringBuffer result = getLog(to);
@@ -291,8 +287,14 @@ public class EmailAction extends EmailActionConfig
         EmailRecipient[] to = (EmailRecipient[])
         addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
 
+        AppdefEntityID appEnt = getResource(defInfo);
+        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+        Resource resource = rDao.findByInstanceId(appEnt.getAuthzTypeId(),
+                                                  appEnt.getId());
+
         filter.sendAlert(getResource(defInfo), to, 
-                         createSubject(defInfo) + " " + change.getDescription(), 
+                         createSubject(defInfo, resource) + " " +
+                         change.getDescription(), 
                          messages, messages, defInfo.getPriority(), false);
     }
 }
