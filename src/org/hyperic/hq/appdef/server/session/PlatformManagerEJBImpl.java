@@ -1018,6 +1018,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Get the platforms that have an IP with the specified address.
+     * 
+     * @return a list of {@link Platform}s
+     * @ejb:interface-method
+     */
+    public Collection findPlatformPojosByIpAddr(String addr) {
+        return getPlatformDAO().findByIpAddr(addr);
+    }
+
+    /**
      * Update an existing Platform. Requires all Ip's to have been 
      * re-added via the platformValue.addIpValue(IpValue) method due
      * to bug 4924
