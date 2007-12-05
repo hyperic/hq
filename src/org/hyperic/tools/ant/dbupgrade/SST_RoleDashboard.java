@@ -19,6 +19,7 @@ public class SST_RoleDashboard extends SchemaSpecTask {
     public static final Class LOGCTX = SST_RoleDashboard.class;
     
     public static ConfigResponse props;
+    public static ConfigResponse guestRoleProps;
     
     private static final String CRISPO_TABLE      = "EAM_CRISPO";
     private static final String CRISPO_OPT_TABLE  = "EAM_CRISPO_OPT";
@@ -31,6 +32,7 @@ public class SST_RoleDashboard extends SchemaSpecTask {
     
     private static final String SUPER_USER_ROLE_NAME  = "Super User Role";
     private static final String RESOURCE_CREATOR_ROLE = "RESOURCE_CREATOR_ROLE";
+    private static final String GUEST_ROLE_NAME = "Guest Role";
     
     static{
     	props = new ConfigResponse();
@@ -70,6 +72,12 @@ public class SST_RoleDashboard extends SchemaSpecTask {
     	
     	props.setValue(".dashcontent.portal.portlets.first", "|.dashContent.searchResources|.dashContent.savedCharts|.dashContent.recentlyApproved|.dashContent.availSummary");
     	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions");
+    	
+    	//Need this to prevent Guest Roles from having a default selection dialog
+    	guestRoleProps = new ConfigResponse();
+		guestRoleProps.merge(props, true);
+		guestRoleProps.setValue(".user.dashboard.default.id", "2");
+    	
     }
     
     public SST_RoleDashboard() {}
@@ -149,7 +157,11 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                     // create crispo
                     long crispoId;
                     if (props != null) {
-                        crispoId = createCrispo(d, props, conn);
+                    	if (name.equalsIgnoreCase(GUEST_ROLE_NAME)) {
+                    		crispoId = createCrispo(d, guestRoleProps, conn);
+						} else {
+							crispoId = createCrispo(d, props, conn);
+						}
                     } else
                         throw new BuildException();
 
