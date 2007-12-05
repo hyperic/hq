@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.hyperic.hq.events.server.session">
 
-  <class name="TriggerEvent" table="EAM_TRIGGER_EVENT">
-    <composite-id name="id" class="TriggerEventId">
-      <key-property name="triggerId" type="integer">
-        <column name="TRIGGER_ID" not-null="true"/>
-      </key-property>
+  <!-- We prevent concurrent updates at the application level. Each trigger 
+	   reads then updates event objects serially with an exclusive lock. Thus, 
+	   we don't need an optimistic locking strategy and the associated overhead. -->
+  <class name="TriggerEvent" table="EAM_TRIGGER_EVENT" optimistic-lock="none">
+    <id name="id" type="long">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_TRIGGER_EVENT_ID_SEQ</param>
+      </generator>
+    </id>
 
-      <key-many-to-one name="eventId" class="Event">
-        <column name="EVENT_ID" not-null="true" index="TRIGGER_EVENT_ID_IDX"/>
-      </key-many-to-one>
-    </composite-id>
+    <property lazy="true" name="eventObject" type="binary">
+      <column name="EVENT_OBJECT" not-null="true" length="256"/>
+    </property>
+
+    <property name="triggerId" type="integer">
+      <column name="TRIGGER_ID" not-null="true" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
+    </property>	  
+	  
+    <property name="ctime" type="long">
+      <column name="CTIME" not-null="true" index="TRIGGER_EVENT_CTIME_IDX"/>
+    </property>
 
     <property name="expiration" type="long">
-      <column name="EXPIRATION" index="TRIGGER_EXPIRATION_IDX"/>
+      <column name="EXPIRATION" not-null="true" index="TRIGGER_EVENT_EXPIRATION_IDX"/>
     </property>
   </class>
 
