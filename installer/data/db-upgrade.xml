@@ -7501,7 +7501,21 @@ has already been defined.
         </statement>						
     </schema-directSQL>  	  
   </schemaSpec>
-	
+
+  <schemaSpec version="3.73">
+    <schema-directSQL>
+        <statement desc="Enable the batch aggregate data inserter by default">
+            update EAM_CONFIG_PROPS set propvalue=5 where id=56
+        </statement>
+        <statement desc="Set default batch size to 2000">
+            update EAM_CONFIG_PROPS set propvalue=2000 where id=57
+        </statement>
+        <statement>
+            update EAM_CONFIG_PROPS set propvalue=100000 where id=58
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
