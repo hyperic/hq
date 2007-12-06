@@ -56,14 +56,8 @@ public class SST_DropTable extends SchemaSpecTask {
 
             // Check to see if the table exists.  If it's already there,
             // then don't re-add it.
-            Connection newC = null;
-            boolean foundTable = false;
-            try {
-                newC = getNewConnection();
-                foundTable = DBUtil.checkTableExists(newC, table);
-            } finally {
-                DBUtil.closeConnection(_ctx, newC);
-            }
+            boolean foundTable = DBUtil.checkTableExists(c, table);
+            
             if ( !foundTable ) {
                 log(">>>>> Not dropping table: " + table
                     + " because it does not exist");
