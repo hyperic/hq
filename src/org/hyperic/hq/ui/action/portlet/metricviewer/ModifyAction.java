@@ -70,6 +70,8 @@ public class ModifyAction extends BaseAction {
                 .removeResources(pForm.getIds(),
                                  PropertiesForm.RESOURCES,
                                  dashPrefs);
+            ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
+            		boss, dashPrefs);
             forwardStr = "review";
         }
 
@@ -107,7 +109,7 @@ public class ModifyAction extends BaseAction {
         // clear out the resources
         try {
             if (!resourceType.equals(dashPrefs.getValue(resTypeKey))) {
-                user.setPreference(resKey, "");
+                dashPrefs.setValue(resKey, "");
             }
         } catch (InvalidOptionException e) {
             // Ok, not set yet..
