@@ -166,12 +166,13 @@
     onloads.push(refreshPortlets);
     dojo.require("dojo.widget.Dialog");
 	dojo.event.connect(window, "onload", function(){
+	<c:if test="${DashboardForm.dashboardSelectable}">
 	    var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
 	    if(<c:out value="${DashboardForm.popDialog}"/>){
 	       dialogWidget.show();
 	    }
 	    fixSelect();
-	    
+	 </c:if>
 	});
 
 </script>
@@ -214,9 +215,10 @@
     <td class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
     <td class="rowSpanLeft"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
     <td colspan="2">
-        <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
+  <c:choose>
+  <c:when test="${DashboardForm.dashboardSelectable}">
+  <html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
         <div class="messagePanel dashboard">
-  <c:if test="${DashboardForm.dashboardSelectable}">
 	        <span style="font-weight: bold; margin-right: 4px;"><fmt:message key="dash.home.SelectDashboard"/></span>
 	        <html:select property="selectedDashboardId" name="selectedDashboardId" value="selectedDashboardId" onchange="changeDashboard('DashboardForm');" styleId="dashSelect">
 	            <html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
@@ -257,9 +259,13 @@
 		           </div>
 		        </div>
 		    </div>
-    </c:if>
-		</div>
-        </html:form>
+	  </div>
+	  </html:form>
+    </c:when>
+    <c:otherwise>
+    	<div style="border-top:1px solid gray;margin-bottom: 4px;"></div>
+    </c:otherwise>
+    </c:choose>
     </td>
     <td class="rowSpanRight"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
   </tr>
