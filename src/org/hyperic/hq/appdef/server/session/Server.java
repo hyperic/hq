@@ -114,6 +114,10 @@ public class Server extends ServerBase
     public void setServices(Collection services) {
         _services = services;
     }
+    
+    public void addService(Service s) {
+        _services.add(s);
+    }
 
     /**
      * @deprecated use getConfigResponse().getId()
