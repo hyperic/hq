@@ -105,7 +105,19 @@ public class DfFormatter
             FileSystemData fd = (FileSystemData)i.next();
             FileSystemUsage stat = fd.getStat();
             FileSystem fs = fd.getConfig();
-            long pct = (long)(stat.getUsePercent() * 100);
+            long total, used, avail, pct;
+
+            if (stat == null) {
+                //e.g. cdrom drive
+                total = used = avail = pct = 0;
+            }
+            else {
+                total = stat.getTotal();
+                used = stat.getUsed();
+                avail = stat.getAvail();
+                pct = (long)(stat.getUsePercent() * 100);
+            }
+
             String spct;
             
             if (pct == 0)
@@ -116,11 +128,11 @@ public class DfFormatter
             r.append("<tr><td>")
              .append(h(fs.getDevName()))
              .append("</td><td>")
-             .append(formatBytes(stat.getTotal()))
+             .append(formatBytes(total))
              .append("</td><td>")
-             .append(formatBytes(stat.getUsed()))
+             .append(formatBytes(used))
              .append("</td><td>")
-             .append(formatBytes(stat.getAvail()))
+             .append(formatBytes(avail))
              .append("</td><td>")
              .append(spct)
              .append("</td><td>")
