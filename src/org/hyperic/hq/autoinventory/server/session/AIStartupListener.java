@@ -88,6 +88,11 @@ public class AIStartupListener
                 }
             }
         }
+        
+        
+        public String toString() {
+            return "RuntimeAIServiceMerger";
+        }
     }
     
     /**
