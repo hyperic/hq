@@ -29,9 +29,11 @@ function showResult(eid) {
     var r = results[i];
     if (r.rid == eid) {
       if (r.result) {
-        dojo.byId('result').innerHTML = r.result;
+      hideErrorPanel();
+      dojo.byId('result').innerHTML = r.result;
       } else {
-        dojo.byId('result').innerHTML = r.error;
+      handleError(r.error);
+      //dojo.byId('result').innerHTML = r.error;
       }
       break;
     }
@@ -105,12 +107,26 @@ function runCommand() {
   });
 }
 
+function handleError(er) {
+var msgPanelObj = dojo.byId("messagePanel");
+            if(msgPanelObj.style.display != "block") {
+            msgPanelObj.style.display = "block";
+            dojo.byId("messagePanelMessage").innerHTML = er;
+         } else {
+           dojo.byId("messagePanelMessage").innerHTML = er;
+         }
+}
+
+function hideErrorPanel() {
+      var msgPanelObj = dojo.byId("messagePanel");
+            if(msgPanelObj.style.display = "block") {
+            msgPanelObj.style.display = "none";
+            dojo.byId("messagePanelMessage").innerHTML = '';
+            }
+}
 </script>
-<style>
-
-</style>
-
-<div class="outerLiveDataCont">
+<div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
+<div class="outerLiveDataCont" style="clear:both;">
 
   <div class="leftbx">
 

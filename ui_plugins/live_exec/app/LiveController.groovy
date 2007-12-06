@@ -107,6 +107,7 @@ class LiveController
                     txt = HtmlUtil.escapeHtml(txt)
                 
                 val = [rid: "${l.appdefEntityID}", result: txt] as JSONObject
+                
             }
             res.put(val)
         }
