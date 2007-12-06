@@ -15,10 +15,6 @@ class ThrashController
     def index(params) {
     }
 
-    private now() {
-        System.currentTimeMillis()
-    }
-    
     def compressData(params) {
         def start = now()
         DataCompressUtil.localHome.create().compressData()
