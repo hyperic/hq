@@ -26,6 +26,8 @@
 package org.hyperic.hq.ha.server.session;
 
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.common.server.mbean.ProductConfigService;
+import org.hyperic.hq.ha.server.mbean.HAService;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +57,7 @@ public class HAStartupListener
     {
         ObjectName o =
             new ObjectName("hyperic.jmx:type=Service,name=HAService");
-        server.createMBean("org.hyperic.hq.ha.server.mbean.HAService", o);
+        server.registerMBean(new HAService(), o);
 
         server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
     }
@@ -65,7 +67,7 @@ public class HAStartupListener
     {
         ObjectName o =
             new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-        server.createMBean("org.hyperic.hq.common.server.mbean.ProductConfigService", o);
+        server.registerMBean(new ProductConfigService(), o);
 
         server.invoke(o, "start", new Object[] {}, new String[] {});
     }
