@@ -39,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MetricValue;
 
-    /**
+/**
  * The MetricDataCache caches the last measurement keyed on the derived
  * measurement id.  The purpose of this cache is to avoid needing to go to
  * the database when looking up the last value for a metric.
@@ -220,7 +220,7 @@ public class MetricDataCache {
      * Get the map of unavailable metrics
      */
     public Map getUnavailableMetrics() {
-        List keys = _downCache.getKeysWithExpiryCheck();
+        List keys = _downCache.getKeys();
         Map downMetrics = new HashMap(keys.size());
         for (Iterator it = keys.iterator(); it.hasNext(); ) {
             Element el = _downCache.get(it.next());
