@@ -1,3 +1,4 @@
+org.hyperic.hq.product.server.session.ProductStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.authz.server.session.AuthzStartupListener
 org.hyperic.hq.common.server.session.CommonStartupListener
@@ -10,7 +11,6 @@ org.hyperic.hq.galerts.server.session.GalertStartupListener
 org.hyperic.hq.events.server.session.EventsStartupListener
 org.hyperic.hq.escalation.server.session.EscalationStartupListener
 org.hyperic.hq.control.server.session.ControlStartupListener
-org.hyperic.hq.product.server.session.ProductStartupListener
 org.hyperic.hq.ui.server.session.UIStartupListener
 org.hyperic.hq.bizapp.server.session.BossStartupListener
 org.hyperic.hq.ha.server.session.HAStartupListener
