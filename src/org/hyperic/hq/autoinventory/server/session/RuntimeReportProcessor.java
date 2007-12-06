@@ -547,9 +547,8 @@ public class RuntimeReportProcessor {
                 AIServiceValue aiService = (AIServiceValue)i.next();
                 ServiceMergeInfo sInfo = new ServiceMergeInfo();
                 sInfo.subject         = subject;
-                sInfo.server          = foundAppdefServer;
+                sInfo.serverId        = foundAppdefServer.getId();
                 sInfo.aiservice       = aiService;
-                sInfo.reportingServer = reportingServer;
                 _serviceMerges.add(sInfo);
                 Util.flushCurrentSession();
             }
@@ -560,9 +559,8 @@ public class RuntimeReportProcessor {
 
     public static class ServiceMergeInfo {
         public AuthzSubjectValue subject;
-        public ServerValue       server;
+        public Integer           serverId;
         public AIServiceValue    aiservice;
-        public ServerValue       reportingServer;
     }
     
     public List getServiceMerges() {

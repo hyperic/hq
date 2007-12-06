@@ -863,7 +863,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                FinderException
     {
         AIServiceValue aiservice = sInfo.aiservice;
-        ServerValue serverVal = sInfo.server;
         
         Service service = null;
         if (aiservice.getId() != null) {
@@ -879,7 +878,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             String typeName = aiservice.getServiceTypeName();
             ServiceType serviceType = 
                 _serviceMan.findPojoServiceTypeByName(typeName);
-            Server server = _serverMan.getServerById(serverVal.getId());
+            Server server = _serverMan.getServerById(sInfo.serverId);
             service = _serviceMan.createService(sInfo.subject, server, 
                                                 serviceType, 
                                                 aiservice.getName(),
