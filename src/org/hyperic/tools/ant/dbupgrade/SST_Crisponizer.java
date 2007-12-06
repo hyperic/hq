@@ -44,7 +44,7 @@ import org.hyperic.util.jdbc.DBUtil;
 /**
  * Converts an old-style serialized ConfigResponse into a Crispo
  */
-public class SST_Crisponizer extends SchemaSpecTask {
+public class SST_Crisponizer extends CrispoTask {
     private static final Class LOGCTX = SST_Crisponizer.class;
     private static final String CRISPO_ID_SEQ     = "EAM_CRISPO_ID_SEQ";
     private static final String CRISPO_TABLE      = "EAM_CRISPO";
@@ -77,77 +77,6 @@ public class SST_Crisponizer extends SchemaSpecTask {
     
     public void setRewriteConfigResponse(String val) {
         _rewriteConfigResponse = val;
-    }
-    
-    private void createCrispoOpt(Dialect d, int crispoId, String key, 
-                                 String val) 
-        throws SQLException
-    {
-        if (val == null || val.trim().equals(""))
-            return;
-
-        Statement stmt = null;
-        ResultSet optRs = null;
-        int optId;
-        
-        try {
-            String sql = d.getSequenceNextValString(CRISPO_OPT_ID_SEQ);
-            stmt = getConnection().createStatement();
-            optRs = stmt.executeQuery(sql);
-            optRs.next();
-            optId = optRs.getInt(1);
-
-            sql = "insert into " + CRISPO_OPT_TABLE + 
-                " (id, version_col, propkey, val, " + 
-                "crispo_id) VALUES (" + optId + ", 1, '" + key + "', " +
-                "'" + val + "', " + crispoId +
-                ")";
-                
-            stmt = getConnection().createStatement();
-            stmt.executeUpdate(sql);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
-        }
-    }
-
-    private int createCrispo(Dialect d, ConfigResponse cr) 
-        throws SQLException
-    {
-        Statement stmt = null;
-        ResultSet cidRs = null;
-        int crispoId;
-        
-        try {
-            String sql = d.getSequenceNextValString(CRISPO_ID_SEQ);
-            stmt  = getConnection().createStatement();
-            cidRs = stmt.executeQuery(sql);
-            cidRs.next();
-            crispoId = cidRs.getInt(1);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, cidRs);
-        }
-
-        try {
-            stmt = getConnection().createStatement();
-            String sql = "insert into " + CRISPO_TABLE +  
-                         " (id, version_col) VALUES (" + crispoId + 
-                         ", 1)";
-            stmt.execute(sql);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, null);
-        }
-        
-        for (Iterator i=cr.getKeys().iterator(); i.hasNext(); ) {
-            String key = (String)i.next();
-            String val = cr.getValue(key);
-            
-            if (_onlyProperties != null && !keyMatchesFilter(key))  
-                continue;
-                
-            createCrispoOpt(d, crispoId, key, val);
-        }
-        
-        return crispoId;
     }
     
     private boolean keyMatchesFilter(String key) {

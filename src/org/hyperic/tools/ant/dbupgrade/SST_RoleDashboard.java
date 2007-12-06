@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
@@ -14,7 +13,7 @@ import org.hyperic.hibernate.HibernateUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
-public class SST_RoleDashboard extends SchemaSpecTask {
+public class SST_RoleDashboard extends CrispoTask {
 
     public static final Class LOGCTX = SST_RoleDashboard.class;
     
@@ -26,8 +25,6 @@ public class SST_RoleDashboard extends SchemaSpecTask {
     private static final String ROLE_TABLE        = "EAM_ROLE";
     private static final String DASH_CONFIG_TABLE = "EAM_DASH_CONFIG";
     
-    private static final String CRISPO_ID_SEQ     = "EAM_CRISPO_ID_SEQ";
-    private static final String CRISPO_OPT_ID_SEQ = "EAM_CRISPO_OPT_ID_SEQ";
     private static final String DASH_CONFIG_SEQ   = "EAM_DASH_CONFIG_ID_SEQ";
     
     private static final String SUPER_USER_ROLE_NAME  = "Super User Role";
@@ -158,9 +155,9 @@ public class SST_RoleDashboard extends SchemaSpecTask {
                     long crispoId;
                     if (props != null) {
                     	if (name.equalsIgnoreCase(GUEST_ROLE_NAME)) {
-                    		crispoId = createCrispo(d, guestRoleProps, conn);
+                    		crispoId = createCrispo(d, guestRoleProps);
 						} else {
-							crispoId = createCrispo(d, props, conn);
+							crispoId = createCrispo(d, props);
 						}
                     } else
                         throw new BuildException();
@@ -189,61 +186,5 @@ public class SST_RoleDashboard extends SchemaSpecTask {
         }
     }
     
-    private int createCrispo(Dialect d, ConfigResponse cr, Connection conn) 
-        throws SQLException {
-        Statement stmt = null;
-        ResultSet cidRs = null;
-        int crispoId;
-
-        try {
-            String sql = d.getSequenceNextValString(CRISPO_ID_SEQ);
-            stmt = conn.createStatement();
-            cidRs = stmt.executeQuery(sql);
-            cidRs.next();
-            crispoId = cidRs.getInt(1);
-
-            sql = "insert into " + CRISPO_TABLE +
-                  " (id, version_col) VALUES (" + crispoId + ", 1)";
-            stmt.execute(sql);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, cidRs);
-        }
-
-        for (Iterator i = cr.getKeys().iterator(); i.hasNext();) {
-            String key = (String) i.next();
-            String val = cr.getValue(key);
-            createCrispoOpt(d, crispoId, key, val, conn);
-        }
-
-        return crispoId;
-    }
-
-    private void createCrispoOpt(Dialect d, int crispoId, String key, 
-            String val, Connection conn)
-            throws SQLException {
-        if (val == null || val.trim().equals(""))
-            return;
-
-        Statement stmt = null;
-        ResultSet optRs = null;
-        int optId;
-
-        try {
-            String sql = d.getSequenceNextValString(CRISPO_OPT_ID_SEQ);
-            stmt = conn.createStatement();
-            optRs = stmt.executeQuery(sql);
-            optRs.next();
-            optId = optRs.getInt(1);
-
-            sql = "insert into " + CRISPO_OPT_TABLE
-                    + " (id, version_col, propkey, val, "
-                    + "crispo_id) VALUES (" + optId + ", 1, '" + key + "', "
-                    + "'" + val + "', " + crispoId + ")";
-
-            System.out.println("executed query: " + sql);
-            stmt.executeUpdate(sql);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
-        }
-    }
+    
 }
