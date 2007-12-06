@@ -251,7 +251,9 @@ public abstract class AppdefSessionEJB
                                        AppdefEntityID aeid)
         throws RemoveException, PermissionException, VetoException 
     {
-        log.debug("Removing authz resource: " + aeid);
+        if (log.isDebugEnabled())
+            log.debug("Removing authz resource: " + aeid);
+        
         ResourceManagerLocal rm = getResourceManager();
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
@@ -308,9 +310,11 @@ public abstract class AppdefSessionEJB
                                    Integer id, String operation)
         throws PermissionException 
     {
-        log.debug("Checking Permission for operation: " +
-                  operation + " ResourceType: " + rtV.getName() +
-                  " Id: " + id + " Subject: " + subject.getName());
+        if (log.isDebugEnabled()) {
+            log.debug("Checking Permission for operation: " +
+                      operation + " ResourceType: " + rtV.getName() +
+                      " Id: " + id + " Subject: " + subject.getName());
+        }
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         Integer opId = getOpIdByResourceType(rtV, operation);
         permMgr.check(subject.getId(), rtV.getId(), id, opId);
@@ -1041,8 +1045,10 @@ public abstract class AppdefSessionEJB
     protected List getViewableServers(AuthzSubjectValue whoami) 
         throws FinderException, NamingException, PermissionException
     {
-        log.debug("Checking viewable servers for subject: " +
-                  whoami.getName());
+        if (log.isDebugEnabled()) {
+            log.debug("Checking viewable servers for subject: " +
+                      whoami.getName());
+        }
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op =
             getOperationByName(getServerResourceType(), 
@@ -1050,7 +1056,9 @@ public abstract class AppdefSessionEJB
         List idList =  pm.findOperationScopeBySubject(whoami, op.getId(),
                                                       PageControl.PAGE_ALL);
 
-        log.debug("There are: " + idList.size() + " viewable servers");
+        if (log.isDebugEnabled()) {
+            log.debug("There are: " + idList.size() + " viewable servers");
+        }
         List keyList = new ArrayList(idList.size());
         for(int i=0; i < idList.size(); i++) {
             keyList.add(idList.get(i));
@@ -1156,7 +1164,11 @@ public abstract class AppdefSessionEJB
     protected List getViewableGroups(AuthzSubjectValue whoami) 
         throws FinderException, AppdefGroupNotFoundException,
                PermissionException {
-        log.debug("Checking viewable groups for subject: " + whoami.getName());
+        
+        if (log.isDebugEnabled())
+            log.debug("Checking viewable groups for subject: " + 
+                      whoami.getName());
+        
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op =
             getOperationByName(getGroupResourceType(), 
