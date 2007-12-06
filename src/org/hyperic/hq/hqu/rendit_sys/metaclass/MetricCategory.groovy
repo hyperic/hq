@@ -18,16 +18,16 @@ class MetricCategory {
         
         int i = 0;
         for (Iterator it = c.iterator(); it.hasNext(); i++) {
-            DerivedMeasurement m = (DerivedMeasurement) it.next();
-            mids[i] = m.getId();
-            idToMetric[mids[i]] = m
+            def m = it.next();
+            mids[i] = m.id;
+            idToMetric[m.id] = m
         }
         
         def vals = DataManagerEJBImpl.one.getLastDataPoints(mids, timeWindow)
         def res  = [:]
-        for (kv in vals) {
-            def metric = idToMetric[kv.key]
-            res[metric] = kv.value
+        mids.each { mid ->
+            def metric = idToMetric[mid]
+            res[metric] = vals[mid]
         }
         res
     }
