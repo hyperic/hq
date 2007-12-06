@@ -41,7 +41,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.autoinventory.server.session.MergeServiceReportZevent.MergeServiceReportZeventPayload;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
