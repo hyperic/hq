@@ -119,6 +119,39 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
 
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Service createService(AuthzSubjectValue subject, Server server,
+                                 ServiceType type, String name, 
+                                 String desc, String location, Service parent) 
+        throws PermissionException
+    {
+        name     = name.trim();
+        desc     = desc == null ? "" : desc.trim();
+        location = location == null ? "" : location.trim();
+        
+        Service service = getServiceDAO().create(type, server, name, desc, 
+                                                 subject.getName(), location, 
+                                                 subject.getName(), parent);
+                   
+        // Create the authz resource type.  This also does permission checking
+        if (server.getServerType().isVirtual()) {
+            createAuthzService(name, service.getId(), 
+                               server.getPlatform().getId(), false, subject, 
+                               type); 
+        } else {
+            createAuthzService(name, service.getId(), server.getId(),
+                               true, subject, type);
+        }
+
+        ResourceCreatedZevent zevent =
+            new ResourceCreatedZevent(subject, service.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+        return service;
+    }
+
     /**
      * Create a Service which runs on a given server
      * @return ServiceValue - the saved value object
@@ -165,10 +198,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
 
             return service.getId();
-        } catch (FinderException e) {
-            log.error("Unable to find ServiceType", e);
-            throw new CreateException("Unable to find ServiceType: " +
-                                      serviceTypeId + " : " + e.getMessage());
         } catch (PermissionException e) {
             // make sure that if there is a permission exception during
             // service creation, rollback the whole service creation process;
@@ -186,26 +215,30 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     private void createAuthzService(String serviceName, Integer serviceId,
                                     Integer parentId, boolean isServer,
                                     AuthzSubjectValue subject, ServiceType st)
-        throws CreateException, FinderException, PermissionException 
+        throws PermissionException 
     {
         log.debug("Begin Authz CreateService");
-        // check to see that the user has permission to addServices
-        if (isServer) {
-            // to the server in question
-            checkPermission(subject, getServerResourceType(), parentId,
-                            AuthzConstants.serverOpAddService);
-        } else {
-            // to the platform in question
-            checkPermission(subject, getPlatformResourceType(), parentId,
-                            AuthzConstants.platformOpAddServer);
-        }
+        try {
+            // check to see that the user has permission to addServices
+            if (isServer) {
+                // to the server in question
+                checkPermission(subject, getServerResourceType(), parentId,
+                                AuthzConstants.serverOpAddService);
+            } else {
+                // to the platform in question
+                checkPermission(subject, getPlatformResourceType(), parentId,
+                                AuthzConstants.platformOpAddServer);
+            }
 
-        ResourceType serviceProto = getServicePrototypeResourceType();
-        Resource prototype = ResourceManagerEJBImpl.getOne() 
-            .findResourcePojoByInstanceId(serviceProto, st.getId());
+            ResourceType serviceProto = getServicePrototypeResourceType();
+            Resource prototype = ResourceManagerEJBImpl.getOne() 
+                .findResourcePojoByInstanceId(serviceProto, st.getId());
         
-        createAuthzResource(subject, getServiceResourceType(), prototype, 
-                            serviceId, serviceName);
+            createAuthzResource(subject, getServiceResourceType(), prototype, 
+                                serviceId, serviceName);
+        } catch(FinderException e) {
+            throw new SystemException("Unable to find authz resource type", e);
+        }
     }
 
     /**
@@ -351,6 +384,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
         
         return st.getServiceTypeValue();
+    }
+
+    /**
+     * Find service type by name
+     * @ejb:interface-method
+     */
+    public ServiceType findPojoServiceTypeByName(String name) { 
+        return getServiceTypeDAO().findByName(name);
     }
 
     /**     
