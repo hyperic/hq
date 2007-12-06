@@ -7433,6 +7433,75 @@ has already been defined.
   <schemaSpec version="3.72">
     <roledashboard></roledashboard>
   </schemaSpec>
+	
+  <schemaSpec version="3.73">
+    <schema-directSQL>
+        <statement desc="Creating new EAM_TRIGGER_EVENT table" 
+                   targetDB="oracle">
+            create table NEW_EAM_TRIGGER_EVENT (
+              ID number(19,0) not null,
+              EVENT_OBJECT blob not null,
+              TRIGGER_ID number(10,0) not null,
+              CTIME number(19,0) not null,
+              EXPIRATION number(19,0) not null,
+              primary key (ID)
+            )
+        </statement>		
+        <statement desc="Creating new EAM_TRIGGER_EVENT table" 
+                   targetDB="postgresql">
+			create table NEW_EAM_TRIGGER_EVENT (
+			  ID int8 not null,
+			  EVENT_OBJECT bytea not null,
+			  TRIGGER_ID int4 not null,
+			  CTIME int8 not null,
+			  EXPIRATION int8 not null,
+			  primary key (ID)
+			)
+        </statement>		
+        <statement desc="Creating EAM_TRIGGER_EVENT_ID_SEQ sequence" 
+                   targetDB="oracle">
+            create sequence EAM_TRIGGER_EVENT_ID_SEQ start with 10001 increment by 1
+        </statement>		
+        <statement desc="Creating EAM_TRIGGER_EVENT_ID_SEQ sequence" 
+                   targetDB="postgresql">
+			create sequence EAM_TRIGGER_EVENT_ID_SEQ start 10001 increment 1
+        </statement>        
+    </schema-directSQL>
+	<migrateTriggerEvents table="NEW_EAM_TRIGGER_EVENT" sequence="EAM_TRIGGER_EVENT_ID_SEQ"/>
+	<schema-dropTable table="EAM_TRIGGER_EVENT"/>  
+    <schema-dropTable table="EAM_EVENT"/>
+    <schema-dropSequence sequence="EAM_EVENT_ID_SEQ"/>
+	<schema-directSQL>
+        <statement desc="Rename the new EAM_TRIGGER_EVENT table">
+			alter table NEW_EAM_TRIGGER_EVENT rename to EAM_TRIGGER_EVENT
+        </statement>
+        <statement desc="Creating index on EAM_TRIGGER_EVENT ctime"
+                   targetDB="oracle">
+			create index TRIGGER_EVENT_CTIME_IDX on EAM_TRIGGER_EVENT (CTIME)
+        </statement>          
+        <statement desc="Creating index on EAM_TRIGGER_EVENT ctime"
+                   targetDB="postgresql">
+			create index TRIGGER_EVENT_CTIME_IDX on EAM_TRIGGER_EVENT using btree (CTIME)
+        </statement>
+        <statement desc="Creating index on EAM_TRIGGER_EVENT trigger_id"
+                   targetDB="oracle">
+            create index TRIGGER_EVENT_TRIGGER_ID_IDX on EAM_TRIGGER_EVENT (TRIGGER_ID)
+        </statement>          
+        <statement desc="Creating index on EAM_TRIGGER_EVENT trigger_id"
+                   targetDB="postgresql">
+            create index TRIGGER_EVENT_TRIGGER_ID_IDX on EAM_TRIGGER_EVENT using btree (TRIGGER_ID)
+        </statement>
+        <statement desc="Creating index on EAM_TRIGGER_EVENT expiration"
+                   targetDB="oracle">
+            create index TRIGGER_EVENT_EXPIRATION_IDX on EAM_TRIGGER_EVENT (EXPIRATION)
+        </statement>          
+        <statement desc="Creating index on EAM_TRIGGER_EVENT expiration"
+                   targetDB="postgresql">
+            create index TRIGGER_EVENT_EXPIRATION_IDX on EAM_TRIGGER_EVENT using btree (EXPIRATION)
+        </statement>						
+    </schema-directSQL>  	  
+  </schemaSpec>
+	
 </dbupgrade>
 </target>
 
