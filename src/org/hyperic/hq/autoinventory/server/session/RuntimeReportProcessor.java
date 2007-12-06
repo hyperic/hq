@@ -26,15 +26,26 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AIAudit;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
@@ -51,28 +62,14 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.server.session.AIAudit;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
@@ -84,10 +81,6 @@ import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.hibernate.Util;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class RuntimeReportProcessor {
     private Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
@@ -108,6 +101,7 @@ public class RuntimeReportProcessor {
     
     private AuthzSubject _overlord;
     private List         _serviceMerges = new ArrayList();
+    private String       _agentToken;
     
     public RuntimeReportProcessor () {}
 
@@ -118,15 +112,17 @@ public class RuntimeReportProcessor {
                PermissionException, ValidationException, 
                ApplicationException 
     {
-        _overlord = _subjectMgr.getOverlordPojo();
-        Agent agent = AgentManagerEJBImpl.getOne().getAgentPojo(agentToken);
+        _overlord   = _subjectMgr.getOverlordPojo();
+        _agentToken = agentToken;
+        
+        Agent agent = AgentManagerEJBImpl.getOne().getAgentPojo(_agentToken);
         Audit audit = AIAudit.newRuntimeImportAudit(agent); 
         boolean pushed = false;
         
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true; 
-            _processRuntimeReport(subject, agentToken, crrr); 
+            _processRuntimeReport(subject, crrr); 
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(false);
@@ -135,7 +131,6 @@ public class RuntimeReportProcessor {
     }
 
     private void _processRuntimeReport(AuthzSubjectValue subject,
-                                       String agentToken,
                                        CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, CreateException, 
                PermissionException, ValidationException, 
@@ -153,7 +148,6 @@ public class RuntimeReportProcessor {
         // reported by servers that shouldn't be doing runtime scans.
         // (we don't keep track of which server reports other platforms
         // and servers)
-        int i, j;
         ServerValue[] appdefServers;
         RuntimeResourceReport[] serverReports;
         RuntimeResourceReport serverReport;
@@ -162,7 +156,7 @@ public class RuntimeReportProcessor {
 
         serverReports = crrr.getServerReports();
         appdefServers = new ServerValue[serverReports.length];
-        for (i=0; i<serverReports.length; i++) {
+        for (int i=0; i<serverReports.length; i++) {
 
             serverReport = serverReports[i];
 
@@ -171,8 +165,7 @@ public class RuntimeReportProcessor {
             Server server = _serverMgr.getServerById(serverId);
             if (server == null) {
                 _log.error("Error finding existing server: " + serverId);
-                turnOffRuntimeDiscovery(subject, serverId, 
-                                        agentToken);
+                turnOffRuntimeDiscovery(subject, serverId);
                 appdefServers[i] = null;
                 continue;
             } else {
@@ -184,8 +177,7 @@ public class RuntimeReportProcessor {
             if (!appdefServers[i].getRuntimeAutodiscovery()) {
                 _log.warn("Server reported a runtime report, but " +
                          "autodiscovery should be off, turning off.");
-                turnOffRuntimeDiscovery(subject, serverId, 
-                                        agentToken);
+                turnOffRuntimeDiscovery(subject, serverId);
                 appdefServers[i] = null;
             }
         }
@@ -194,7 +186,7 @@ public class RuntimeReportProcessor {
         // process that report.
         _log.info("Merging server reports into appdef " +
                  "(server count=" + appdefServers.length + ")");
-        for (i=0; i<appdefServers.length; i++) {
+        for (int i=0; i<appdefServers.length; i++) {
 
             if (appdefServers[i] == null) continue;
             serverReport = serverReports[i];
@@ -205,7 +197,7 @@ public class RuntimeReportProcessor {
                      "(platform count=" + aiplatforms.length +
                      ", reported by serverId=" + appdefServers[i].getId() +
                      ") into appdef...");
-            for (j=0; j<aiplatforms.length; j++) {
+            for (int j=0; j<aiplatforms.length; j++) {
                 if(aiplatforms[j] != null) {
                     if (aiplatforms[j].getAgentToken() == null) {
                         // reassociate agent to the auto discoverred platform
@@ -224,7 +216,7 @@ public class RuntimeReportProcessor {
                         // 3. delete the "data" directory on the agent
                         // 4. start the agent.
 
-                        aiplatforms[j].setAgentToken(agentToken);
+                        aiplatforms[j].setAgentToken(_agentToken);
                     }
                     mergePlatformIntoInventory(subject, aiplatforms[j],
                                                appdefServers[i]); 
@@ -578,12 +570,12 @@ public class RuntimeReportProcessor {
     }
 
     private boolean turnOffRuntimeDiscovery(AuthzSubjectValue subject,
-                                            Integer serverId,
-                                            String agentToken ) {
+                                            Integer serverId) 
+    {
         AppdefEntityID aid = AppdefEntityID.newServerID(serverId.intValue());
         _log.info("Disabling RuntimeDiscovery for server: " + serverId);
         try {
-            _aiMgr.turnOffRuntimeDiscovery(subject, aid, agentToken);
+            _aiMgr.turnOffRuntimeDiscovery(subject, aid, _agentToken);
             return true;
         } catch (Exception e) {
             _log.error("Error turning off runtime scans for " +
