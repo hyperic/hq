@@ -77,11 +77,11 @@ class ResourceHelper extends BaseHelper {
         findServices(PageInfo.getAll(ResourceSortField.NAME, true))
     }
 
-    List getDownResources(String typeId, PageInfo pInfo) {
+    Collection getDownResources(String typeId, PageInfo pInfo) {
         appBoss.getUnavailableResources(user, typeId, pInfo)
     }
     
-    List getDownResourcesMap() {
+    Map getDownResourcesMap() {
     	appBoss.getUnavailableResourcesCount(user)
     }
     
