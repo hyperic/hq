@@ -87,6 +87,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -142,14 +143,17 @@ import org.hyperic.util.config.ConfigResponse;
  *      view-type="both"
  *      type="Stateless"
  * @ejb:util generate="physical"
- * @TODO AUTHZ Integration
  */
 public class AutoinventoryManagerEJBImpl implements SessionBean {
-
     protected Log log = LogFactory.getLog(AutoinventoryManagerEJBImpl.
                                           class.getName());
     protected static final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
+    private ServiceManagerLocal _serviceMan = ServiceManagerEJBImpl.getOne();
+    private ServerManagerLocal _serverMan = ServerManagerEJBImpl.getOne();
+    private ConfigManagerLocal _configMan = ConfigManagerEJBImpl.getOne(); 
+    private CPropManagerLocal _cpropMan = CPropManagerEJBImpl.getOne();
+    
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
     private SessionContext             sessionCtx;
@@ -854,93 +858,64 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void mergeService(ServiceMergeInfo sInfo) throws CreateException {
-        ServiceValue foundAppdefService;
+    public void mergeService(ServiceMergeInfo sInfo) 
+        throws CreateException, PermissionException, ApplicationException,
+               FinderException
+    {
         AIServiceValue aiservice = sInfo.aiservice;
-        ServerValue server = sInfo.server;
-        ServiceManagerLocal serviceMan = ServiceManagerEJBImpl.getOne();
-        ConfigManagerLocal configMan = ConfigManagerEJBImpl.getOne(); 
-        CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
-
+        ServerValue serverVal = sInfo.server;
+        
+        Service service = null;
         if (aiservice.getId() != null) {
-            foundAppdefService = 
-                serviceMan.getServiceById(aiservice.getId()).getServiceValue();
-        } else {
-            foundAppdefService = null;
+            service = _serviceMan.getServiceById(aiservice.getId()); 
         }
         
-        boolean update;
+        boolean update = false;
 
-        try {
-            if (foundAppdefService == null) {
-                update = false;
-                // CREATE SERVICE
-                log.info("Creating new service: " + aiservice.getName());
+        if (service == null) {
+            // CREATE SERVICE
+            log.info("Creating new service: " + aiservice.getName());
 
-                try {
-                    foundAppdefService
-                    = AIConversionUtil.convertAIServiceToService(aiservice,
-                                                                 serviceMan);
-                } catch (FinderException e) {
-                    // Most likely a plugin bug
-                    log.error("Unable to find reported resource type: " + 
-                              aiservice.getServiceTypeName() + " for " +
-                              "resource: " + aiservice.getName() +
-                    ", ignoring");
-                    return;
-                }
+            String typeName = aiservice.getServiceTypeName();
+            ServiceType serviceType = 
+                _serviceMan.findPojoServiceTypeByName(typeName);
+            Server server = _serverMan.getServerById(serverVal.getId());
+            service = _serviceMan.createService(sInfo.subject, server, 
+                                                serviceType, 
+                                                aiservice.getName(),
+                                                aiservice.getDescription(), "", 
+                                                null);
 
-                Integer serviceTypePK
-                    = foundAppdefService.getServiceType().getId();
-                Integer pk  = serviceMan.createService(sInfo.subject,
-                                                       server.getId(),
-                                                       serviceTypePK,
-                                                       foundAppdefService);
-                try {
-                    foundAppdefService = 
-                        serviceMan.getServiceById(sInfo.subject, pk);
-                } catch (ServiceNotFoundException e) {
-                    log.fatal("Unable to find service we just created.", e);
-                    throw new SystemException("Unable to find service we "
-                                              + "just created", e);
-                }
-                log.debug("New service created: " + foundAppdefService);
-            } else {
-                update = true;
-                // UPDATE SERVICE
-                log.info("Updating service: " + foundAppdefService.getName());
-
-                foundAppdefService
-                    = AIConversionUtil.mergeAIServiceIntoService(aiservice,
-                                                                 foundAppdefService);
-                serviceMan.updateService(sInfo.subject, foundAppdefService);
-            }
+            log.debug("New service created: " + service);
+        } else {
+            update = true;
+            // UPDATE SERVICE
+            log.info("Updating service: " + service.getName());
+            if (aiservice.getName() != null)
+                service.setName(aiservice.getName().trim());
+            if (aiservice.getDescription() != null)
+                service.setDescription(aiservice.getDescription().trim());
+            
+            //_serviceMan.updateService(sInfo.subject, foundAppdefService);
+        }
                 
-            // CONFIGURE SERVICE
-            configMan.configureResource(sInfo.subject,
-                                        foundAppdefService.getEntityId(),
-                                        aiservice.getProductConfig(),
-                                        aiservice.getMeasurementConfig(),
-                                        aiservice.getControlConfig(),
-                                        aiservice.getResponseTimeConfig(),
-                                        null,
-                                        update,
-                                        false);
+        // CONFIGURE SERVICE
+        _configMan.configureResource(sInfo.subject,
+                                     service.getEntityId(),
+                                     aiservice.getProductConfig(),
+                                     aiservice.getMeasurementConfig(),
+                                     aiservice.getControlConfig(),
+                                     aiservice.getResponseTimeConfig(),
+                                     null,
+                                     update,
+                                     false);
                 
-            // SET CUSTOM PROPERTIES FOR SERVICE
-            if (aiservice.getCustomProperties() != null) {
-                int typeId =
-                    foundAppdefService.getServiceType().getId().intValue();
-                cpropMan.setConfigResponse(foundAppdefService.getEntityId(),
-                                           typeId,
-                                           aiservice.getCustomProperties());            
-            }
-        } catch (ApplicationException e) {
-            log.error("Failed to merge service: " + aiservice, e);
-            log.info("Skipping merging of service: " + aiservice);
-        } catch (FinderException e) {
-            log.error("Failed to merge service: " + aiservice, e);
-            log.info("Skipping merging of service: " + aiservice);
+        // SET CUSTOM PROPERTIES FOR SERVICE
+        if (aiservice.getCustomProperties() != null) {
+            int typeId = service.getServiceType().getId().intValue();
+            _cpropMan.setConfigResponse(service.getEntityId(),
+                                        typeId,
+                                        aiservice.getCustomProperties());            
         }
     }
     

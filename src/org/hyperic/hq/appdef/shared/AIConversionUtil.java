@@ -91,21 +91,6 @@ public class AIConversionUtil {
     }
 
     /**
-     * Merge an AIServiceValue into an existing ServiceValue.
-     * @param aiservice The AIServiceValue object.
-     * @param service The ServiceValue object representing an existing service.
-     * @return an equivalent ServiceValue object.
-     */
-    public static ServiceValue mergeAIServiceIntoService(AIServiceValue aiservice,
-                                                         ServiceValue service) {
-        if(aiservice.getDescription() != null) 
-            service.setDescription(aiservice.getDescription());
-        if(aiservice.getName() != null) 
-            service.setName(aiservice.getName());
-        return service;
-    }
-
-    /**
      * Generate an ServerValue given an AIServerValue.
      * @param aiserver The AIServerValue object.
      * @return an equivalent ServerValue object.
@@ -129,25 +114,6 @@ public class AIConversionUtil {
                            + " (" + System.currentTimeMillis() + ")");
         }
         return server;
-    }
-
-    /**
-     * Generate a ServiceValue given an AIServiceValue.
-     * @return an equivalent ServiceValue object.
-     */
-    public static ServiceValue convertAIServiceToService(AIServiceValue aiservice,
-                                                         ServiceManagerLocal serviceMgr) 
-        throws FinderException {
-
-        ServiceTypeValue stValue =
-            serviceMgr.findServiceTypeByName(aiservice.getServiceTypeName());
-
-        ServiceValue service = new ServiceValue();
-        service.setDescription(aiservice.getDescription());
-        service.setName(aiservice.getName());
-        service.setServiceType(stValue);
-        service.setAutodiscoveryZombie(false);
-        return service;
     }
 
     public static void sendCreateEvent(AuthzSubjectValue subject,
