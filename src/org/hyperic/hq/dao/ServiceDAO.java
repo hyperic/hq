@@ -63,6 +63,33 @@ public class ServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
+    public Service create(ServiceType type, Server server, String name, 
+                          String desc, String modifiedBy, String location, 
+                          String owner, Service parent)  
+    {
+        ConfigResponseDB configResponse =
+            DAOFactory.getDAOFactory().getConfigResponseDAO().create();
+
+        Service s = new Service();
+        s.setName(name);
+        s.setAutodiscoveryZombie(false);
+        s.setServiceRt(false);
+        s.setEndUserRt(false);
+        s.setDescription(desc);
+        s.setModifiedBy(modifiedBy);
+        s.setLocation(location);
+        s.setOwner(owner);
+        s.setParentService(parent);
+        s.setServiceType(type);
+        s.setServer(server);
+        s.setConfigResponse(configResponse);
+        save(s);
+        
+        server.addService(s);
+        
+        return s;
+    }
+
     public Service create(ServiceValue sv, Server parent) {
         ConfigResponseDB configResponse =
             DAOFactory.getDAOFactory().getConfigResponseDAO().create();
