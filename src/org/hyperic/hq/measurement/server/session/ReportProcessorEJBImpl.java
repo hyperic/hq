@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -75,13 +77,19 @@ public class ReportProcessorEJBImpl
         MeasurementProcessorEJBImpl.getOne();
     private Integer _debugId;
     
-    private void addPoint(List points, Integer metricId, MetricValue[] vals) { 
-        for (int i=0; i<vals.length; i++) {
+    private void addPoint(List points, Integer metricId, MetricValue[] vals)
+    {
+        for (int i=0; i<vals.length; i++)
+        {
             try {
+                //this is just to check if the metricvalue is valid
+                //will throw a NumberFormatException if there is a problem
+                BigDecimal bigDec = new BigDecimal(vals[i].getValue());
                 DataPoint pt = new DataPoint(metricId, vals[i]);
                 points.add(pt);
             } catch(NumberFormatException e) {
-                // continue .. this may be NaN?
+                log.warn("Unable to insert: " + e.getMessage() +
+                         ", metric id=" + metricId);
             }
         }
     }
@@ -109,7 +117,8 @@ public class ReportProcessorEJBImpl
         if (trace) {
             setDebugID();
         }
-        for (int i = 0; i < dpts.length; i++) {
+        for (int i = 0; i < dpts.length; i++)
+        {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
             if (isPassThrough) {

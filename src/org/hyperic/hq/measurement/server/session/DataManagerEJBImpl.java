@@ -213,6 +213,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Save the new MetricValue to the database
      *
      * @param dp the new MetricValue
+     * @throws NumberFormatException if the value from the
+     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue dp, boolean overwrite) {
@@ -226,6 +228,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Write metric data points to the DB with transaction
      * 
      * @param data       a list of {@link DataPoint}s 
+     * @throws NumberFormatException if the value from the
+     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
      * @ejb:interface-method
      */
@@ -296,6 +300,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                   of the data fails (i.e. it already exists). You may
      *                   not want to over-write values when, for instance, the 
      *                   back filler is inserting data.
+     * @throws NumberFormatException if the value from the
+     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
      * @ejb:interface-method
      */
@@ -593,13 +599,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch(NumberFormatException e) {  // infinite, or NaN
-                        _log.warn("Unable to insert infinite or NaN for " +
-                                  "metric id=" + metricId);
-                        continue;
-                    }
+                    bigDec = new BigDecimal(val.getValue());
                     rowsToUpdate++;
                     values.append("(").append(val.getTimestamp()).append(", ")
                           .append(metricId.intValue()).append(", ")
@@ -723,7 +723,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             Map.Entry entry = (Map.Entry) it.next();
             String table = (String) entry.getKey();
             List dpts = (List) entry.getValue();
-            List removeIdxs = new ArrayList();
 
             try
             {
@@ -739,23 +738,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
                 }
 
-                int idx=0;
-                removeIdxs.clear();
-                for (Iterator i=dpts.iterator(); i.hasNext(); idx++)
+                for (Iterator i=dpts.iterator(); i.hasNext(); )
                 {
                     DataPoint pt = (DataPoint)i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
-
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch(NumberFormatException e) {  // infinite, or NaN
-                        _log.warn("Unable to insert infinite or NaN for " +
-                                  "metric id=" + metricId);
-                        removeIdxs.add(new Integer(idx));
-                        continue;
-                    }
+                    bigDec = new BigDecimal(val.getValue());
                     stmt.setInt(1, metricId.intValue());
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setBigDecimal(3, getDecimalInRange(bigDec));
@@ -766,12 +755,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.addBatch();
                 }
 
-                // must do this in order to avoid the getRemainingDataPoints()
-                // method from querying the status of an insert which never
-                // occurred
-                for (Iterator i=removeIdxs.iterator(); i.hasNext(); ) {
-                    dpts.remove(((Integer)i.next()).intValue());
-                }
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
             }
@@ -818,7 +801,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         PreparedStatement stmt = null;
         List left = new ArrayList();
         Map buckets = MeasRangeObj.getInstance().bucketData(data);
-        List removeIdxs = new ArrayList();
         
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -830,33 +812,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     "UPDATE " + table + 
                     " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
 
-                int idx=0;
-                removeIdxs.clear();
                 for (Iterator i = dpts.iterator(); i.hasNext();) {
                     DataPoint pt = (DataPoint) i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
-
-                    try {
-                        bigDec = new BigDecimal(val.getValue());
-                    } catch(NumberFormatException e) {  // infinite, or NaN
-                        _log.warn("Unable to update infinite or NaN for " +
-                                  "metric id=" + metricId);
-                        continue;
-                    }
+                    bigDec = new BigDecimal(val.getValue());
                     stmt.setBigDecimal(1, getDecimalInRange(bigDec));
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setInt(3, metricId.intValue());
                     stmt.addBatch();
                 }
 
-                // must do this in order to avoid the getRemainingDataPoints()
-                // method from querying the status of an insert which never
-                // occurred
-                for (Iterator i=removeIdxs.iterator(); i.hasNext(); ) {
-                    dpts.remove(((Integer)i.next()).intValue());
-                }
                 int[] execInfo = stmt.executeBatch();
                 left.addAll(getRemainingDataPoints(dpts, execInfo));
             } catch (BatchUpdateException e) {
