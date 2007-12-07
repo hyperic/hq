@@ -23,20 +23,21 @@ def groupName = "Group X"
 
 // The script starts here. Do not edit below this line.
 
+def output = new StringBuffer()
 
 // Get the group by name
 appdefGroupValue = getAppdefGroupValue(userName, groupName)
 
 // Save all the platforms to the group
-saveAllPlatformsToGroup(userName, appdefGroupValue)
+saveAllPlatformsToGroup(userName, appdefGroupValue, output)
 
 // Save all the servers to the group
-saveAllNonVirtualServersToGroup(userName, appdefGroupValue)
+saveAllNonVirtualServersToGroup(userName, appdefGroupValue, output)
 
 // Save all the services to the group
-saveAllServicesToGroup(userName, appdefGroupValue)
+saveAllServicesToGroup(userName, appdefGroupValue, output)
 
-
+return output.toString()
 
 // Script Functions
 
@@ -45,43 +46,52 @@ def getAppdefGroupValue(userName, groupName) {
     return appdefBoss.one.findGroupByName(sessionId, groupName)
 }
 
-def saveAllPlatformsToGroup(userName, appdefGroupValue) {
+def saveAllPlatformsToGroup(userName, appdefGroupValue, output) {
     def platformIds = findAllPlatformIds()
+       
+    def numSaved = 
+        saveResourcesToGroup(userName, appdefGroupValue, platformIds, AppdefEntityConstants.APPDEF_TYPE_PLATFORM)
     
-    println("Saving "+platformIds.size()+" platforms to group "+appdefGroupValue.name)
-    
-    saveResourcesToGroup(userName, appdefGroupValue, platformIds, AppdefEntityConstants.APPDEF_TYPE_PLATFORM)
+    output.append("Saved "+numSaved+" platforms to group "+appdefGroupValue.name+"\n")
 }  
 
-def saveAllNonVirtualServersToGroup(userName, appdefGroupValue) {
+def saveAllNonVirtualServersToGroup(userName, appdefGroupValue, output) {
     def serverIds = findAllNonVirtualServerIds()
     
-    println("Saving "+serverIds.size()+" servers to group "+appdefGroupValue.name)    
+    def numSaved = 
+        saveResourcesToGroup(userName, appdefGroupValue, serverIds, AppdefEntityConstants.APPDEF_TYPE_SERVER)
     
-    saveResourcesToGroup(userName, appdefGroupValue, serverIds, AppdefEntityConstants.APPDEF_TYPE_SERVER)
+    output.append("Saved "+numSaved+" servers to group "+appdefGroupValue.name+"\n")        
 }  
 
-def saveAllServicesToGroup(userName, appdefGroupValue) {
+def saveAllServicesToGroup(userName, appdefGroupValue, output) {
     def serviceIds = findAllServiceIds()
+        
+    def numSaved = 
+        saveResourcesToGroup(userName, appdefGroupValue, serviceIds, AppdefEntityConstants.APPDEF_TYPE_SERVICE)
     
-    println("Saving "+serviceIds.size()+" services to group "+appdefGroupValue.name)    
-    
-    saveResourcesToGroup(userName, appdefGroupValue, serviceIds, AppdefEntityConstants.APPDEF_TYPE_SERVICE)
+    output.append("Saved "+numSaved+" services to group "+appdefGroupValue.name+"\n")
 }  
 
 
 // Helper Functions
 
 def saveResourcesToGroup(userName, appdefGroupValue, entityIds, entityType) {
+    def numSaved = 0
+    
     entityIds.each {
         def entity = new AppdefEntityID(entityType, it)
         
-        if (!appdefGroupValue.existsAppdefEntity(entity))
+        if (!appdefGroupValue.existsAppdefEntity(entity)) {
             appdefGroupValue.addAppdefEntity(entity)
+            numSaved++
+        }    
     }
     
     def sessionId = SessionManager.getInstance().getIdFromUsername(userName)
     appdefBoss.one.saveGroup(sessionId, appdefGroupValue)
+    
+    return numSaved
 }
 
 def findAllPlatformIds() {
