@@ -285,26 +285,6 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /**
-     * Synchronize the alert definitions last fired times with their associated 
-     * alerts. If an alert definition exists with a null last fired time or 
-     * a last fired time that is less than the greatest ctime for the associated 
-     * alerts, then set that alert definition's last fired time to the alert 
-     * ctime.
-     * 
-     * @ejb:interface-method
-     */
-    public void synchAlertDefinitionsLastFiredTimes() {
-        List events = getAlertDefDAO()
-                        .getEventsForAlertDefinitionsWithOldLastFiredTimes();
-
-        try {
-            AlertDefinitionLastFiredTimeUpdater.getInstance().enqueueEvents(events);
-        } catch (InterruptedException e) {
-            // do nothing
-        }        
-    }
-        
-    /**
      * Update just the basics
      * @throws PermissionException 
      *

@@ -66,8 +66,6 @@ public class EventsStartupListener
 
         loadConfigProps("triggers");
         loadConfigProps("actions");
-        
-        synchAlertDefinitionsLastFiredTimes();
     }
         
     private void loadConfigProps(String prop) {
@@ -111,16 +109,6 @@ public class EventsStartupListener
             // Swallow all exceptions
             _log.error("Encountered error initializing " + prop, e);
         }
-    }
-    
-    /**
-     * We need to make sure that the alert definition last fired times are 
-     * up to date.
-     */
-    private void synchAlertDefinitionsLastFiredTimes() {
-        _log.debug("Synching the alert definition last fired times.");
-
-        AlertDefinitionManagerEJBImpl.getOne().synchAlertDefinitionsLastFiredTimes();
     }
     
     static TriggerChangeCallback getChangedTriggerCallback() {

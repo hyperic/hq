@@ -28,13 +28,16 @@
       <column name="ALERT_DEFINITION_ID" not-null="true" index="ALERT_ALERTDEFINITION_IDX"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="actionLogBag" table="EAM_ALERT_ACTION_LOG" order-by="TIMESTAMP, ID" optimistic-lock="false">
+    <bag inverse="true" cascade="all" name="actionLogBag" 
+         table="EAM_ALERT_ACTION_LOG" order-by="TIMESTAMP, ID" 
+         optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_ID"/>
       <one-to-many class="AlertActionLog"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="conditionLogBag" order-by="id" table="EAM_ALERT_CONDITION_LOG" optimistic-lock="false">
+    <bag inverse="true" cascade="all" name="conditionLogBag" order-by="id" 
+         table="EAM_ALERT_CONDITION_LOG" optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_ID"/>
       <one-to-many class="AlertConditionLog"/>

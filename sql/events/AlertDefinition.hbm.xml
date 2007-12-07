@@ -88,9 +88,7 @@
       <column name="DELETED" not-null="true"/>
     </property>
 
-    <property name="lastFired">
-      <column name="LAST_FIRED" not-null="false"/>
-    </property>
+    <property name="lastFired" formula="(select max(a.ctime) from EAM_ALERT a where a.alert_definition_id = id)"/>
 
     <many-to-one name="escalation">
       <column name="ESCALATION_ID" not-null="false"/>
@@ -100,19 +98,19 @@
       <column name="RESOURCE_ID"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="actionsBag" table="EAM_ACTION">
+    <bag inverse="true" cascade="all" name="actionsBag" table="EAM_ACTION">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_DEFINITION_ID"/>
       <one-to-many class="Action"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="conditionsBag" order-by="id" table="EAM_ALERT_CONDITION">
+    <bag inverse="true" cascade="all" name="conditionsBag" order-by="id" table="EAM_ALERT_CONDITION">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_DEFINITION_ID"/>
       <one-to-many class="AlertCondition"/>
     </bag>
 
-    <bag inverse="true" cascade="save-update,delete,evict,persist,merge" name="triggersBag" table="EAM_REGISTERED_TRIGGER">
+    <bag inverse="true" cascade="all" name="triggersBag" table="EAM_REGISTERED_TRIGGER">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="ALERT_DEFINITION_ID"/>
       <one-to-many class="RegisteredTrigger"/>

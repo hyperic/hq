@@ -7516,6 +7516,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.74">
+    <schema-directSQL>
+        <statement>
+          ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN LAST_FIRED
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
