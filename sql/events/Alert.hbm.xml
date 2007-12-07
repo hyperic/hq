@@ -41,8 +41,8 @@
     </bag>
     
     
-    <property name="stateId" formula="(select e.id from EAM_ESCALATION_STATE e where                          e.alert_id = id and e.alert_def_id = alert_definition_id                         and e.alert_type = -559038737)"/>
-    <property name="ackedBy" formula="(select e.acknowledged_by from EAM_ESCALATION_STATE e where                          e.alert_id = id and e.alert_def_id = alert_definition_id                         and e.alert_type = -559038737)"/>
+    <property name="stateId" formula="(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737)"/>
+    <property name="ackedBy" formula="(select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737)"/>
   </class>
 
 </hibernate-mapping>

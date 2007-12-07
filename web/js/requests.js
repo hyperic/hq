@@ -265,7 +265,7 @@
         // Refresh in 60 seconds
         unCheck();
 
-        ToggleRecentAlertButton(FixAlertsForm);
+        ToggleRecentAlertButton(document.FixAlertsForm);
     }
 
     function showAvailSummary(originalRequest) {

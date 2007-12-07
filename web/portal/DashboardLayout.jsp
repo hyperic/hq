@@ -137,14 +137,12 @@
                         var getId = alertTblId.split('_');
                         var alertIdPart = getId[1];
 
+                        var alertIdToken = '';
                         if (alertIdPart) {
                             var alertIdToken = '_' + alertIdPart;
-
-                            setInterval("requestRecentAlerts" + alertIdToken + "()", 30000);
-                        } else {
-                            setInterval("requestRecentAlerts()", 30000);
                         }
 
+                        setInterval("requestRecentAlerts" + alertIdToken + "()", 30000);
                     }
                 }
             }
