@@ -1,6 +1,6 @@
 import org.hyperic.hibernate.Util
 import org.hyperic.hq.auth.shared.SessionManager
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as appdefBoss
+import org.hyperic.hq.bizapp.shared.AppdefBossUtil
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 
@@ -9,8 +9,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants
  * to a preexisting group. The user must be logged in as a user assigned the 
  * "Super User" role and that user name and group name must be configured before 
  * executing the script.
- */
-
+ */ 
 
 // Configure the following parameters:
 
@@ -43,7 +42,7 @@ return output.toString()
 
 def getAppdefGroupValue(userName, groupName) {	
     def sessionId = SessionManager.getInstance().getIdFromUsername(userName)
-    return appdefBoss.one.findGroupByName(sessionId, groupName)
+    return getAppdefBoss().findGroupByName(sessionId, groupName)
 }
 
 def saveAllPlatformsToGroup(userName, appdefGroupValue, output) {
@@ -89,7 +88,7 @@ def saveResourcesToGroup(userName, appdefGroupValue, entityIds, entityType) {
     }
     
     def sessionId = SessionManager.getInstance().getIdFromUsername(userName)
-    appdefBoss.one.saveGroup(sessionId, appdefGroupValue)
+    getAppdefBoss().saveGroup(sessionId, appdefGroupValue)
     
     return numSaved
 }
@@ -138,6 +137,14 @@ def findAllServiceIds() {
     }
 
     return serviceIds        
+}
+
+/**
+ * Older versions of HQ (3.1 for example), do not have the static 
+ * getOne() operation on on the AppdefBossEJBImpl.
+ */ 
+def getAppdefBoss() {
+    return AppdefBossUtil.getLocalHome().create()
 }
 
 
