@@ -1448,7 +1448,24 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         try {
             if (id.isPlatform() || id.isServer() | id.isService()) {
                 AppdefEntityValue av = new AppdefEntityValue(id, subject);
-                mtype = av.getMonitorableType();
+                try {
+                    mtype = av.getMonitorableType();
+                } catch (AppdefEntityNotFoundException e) {
+                    // Non existent resource, we should actually remove its
+                    // metrics
+                    MetricDeleteCallback cb = 
+                        MeasurementStartupListener.getMetricDeleteCallbackObj();
+                    DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+
+                    for (Iterator i = dao.findByInstance(id.getType(),
+                                                         id.getID()).iterator();
+                         i.hasNext(); ) {
+                        DerivedMeasurement dm = (DerivedMeasurement)i.next();
+                        cb.beforeMetricDelete(dm);
+                        dao.remove(dm);
+                    }
+                    return;
+                }
             }
             else {
                 return;
