@@ -19,57 +19,63 @@ public class CrispoTask extends SchemaSpecTask {
     private static final String CRISPO_ID_SEQ     = "EAM_CRISPO_ID_SEQ";
     private static final String CRISPO_OPT_ID_SEQ = "EAM_CRISPO_OPT_ID_SEQ";
     
-    public int createCrispo(Dialect d, ConfigResponse cr) throws SQLException {
+    public int createCrispo(Dialect d, ConfigResponse cr)
+        throws SQLException
+    {
         Statement stmt = null;
-        ResultSet cidRs = null;
+        ResultSet rs = null;
         int crispoId;
 
         try {
             String sql = d.getSequenceNextValString(CRISPO_ID_SEQ);
             stmt = getConnection().createStatement();
-            cidRs = stmt.executeQuery(sql);
-            cidRs.next();
-            crispoId = cidRs.getInt(1);
+            rs = stmt.executeQuery(sql);
+            rs.next();
+            crispoId = rs.getInt(1);
 
             sql = "insert into " + CRISPO_TABLE + " (id, version_col) VALUES ("
                     + crispoId + ", 1)";
+            log(sql);
             stmt.execute(sql);
         } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, cidRs);
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
         }
 
         for (Iterator i = cr.getKeys().iterator(); i.hasNext();) {
             String key = (String) i.next();
             String val = cr.getValue(key);
-            createCrispoOpt(d, crispoId, key, val, stmt);
+            createCrispoOpt(d, crispoId, key, val);
         }
 
         return crispoId;
     }
 
-    public void createCrispoOpt(Dialect d, int crispoId, String key,
-            String val, Statement stmt) throws SQLException {
+    public void createCrispoOpt(Dialect d, int crispoId, String key, String val)
+        throws SQLException
+    {
         if (val == null || val.trim().equals(""))
             return;
 
-        ResultSet optRs = null;
-        int optId;
+        Statement stmt = null;
+        ResultSet rs = null;
+        int id;
 
         try {
             String sql = d.getSequenceNextValString(CRISPO_OPT_ID_SEQ);
-            optRs = stmt.executeQuery(sql);
-            optRs.next();
-            optId = optRs.getInt(1);
+            stmt = getConnection().createStatement();
+            rs = stmt.executeQuery(sql);
+            rs.next();
+            id = rs.getInt(1);
 
             sql = "insert into " + CRISPO_OPT_TABLE
                     + " (id, version_col, propkey, val, "
-                    + "crispo_id) VALUES (" + optId + ", 1, '" + key + "', "
+                    + "crispo_id) VALUES (" + id + ", 1, '" + key + "', "
                     + "'" + val + "', " + crispoId + ")";
 
             System.out.println("executed query: " + sql);
             stmt.executeUpdate(sql);
         } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, optRs);
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
         }
     }
 }

@@ -31,6 +31,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -135,7 +137,9 @@ public class SST_Crisponizer extends CrispoTask {
         }
     }
 
-    public void execute() throws BuildException {
+    public void execute()
+        throws BuildException
+    {
         try {
             _execute();
         } catch(BuildException e) {
@@ -147,7 +151,9 @@ public class SST_Crisponizer extends CrispoTask {
         }
     }
     
-    private void _execute() throws BuildException {
+    private void _execute()
+        throws BuildException
+    {
         Statement stmt  = null;
         ResultSet rs    = null;
 
@@ -155,8 +161,18 @@ public class SST_Crisponizer extends CrispoTask {
             throw new BuildException("table, column, and crispoColumn " +
                                      "must be specified");
         }
-        
-        try {
+
+        checkDBCols();
+        Map idMap = new HashMap();
+        setCRIds(idMap);
+        updateCrispos(idMap);
+    }
+
+    private void checkDBCols()
+        throws BuildException
+    {
+        try
+        {
             if (!DBUtil.checkColumnExists(LOGCTX.getName(), getConnection(), 
                                           _table, _column)) 
             {
@@ -174,26 +190,57 @@ public class SST_Crisponizer extends CrispoTask {
         } catch(SQLException e) {
             throw new BuildException(e.getMessage(), e);
         }
-                        
-        try {
+    }
+
+    private void setCRIds(Map idMap)
+        throws BuildException
+    {
+        Statement stmt  = null;
+        ResultSet rs    = null;
+        try
+        {
             Connection conn = getConnection();
-            Dialect d = HibernateUtil.getDialect(conn);
             stmt = conn.createStatement();
             
             String sql = "select id, " + _column + " from " + _table;
             rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                long fromId = rs.getLong(1);
-                byte[] b = rs.getBytes(2);
-
+            int id_col = rs.findColumn("id"),
+                col2 = rs.findColumn(_column);
+            while (rs.next())
+            {
+                long fromId = rs.getLong(id_col);
+                byte[] b = rs.getBytes(col2);
                 ConfigResponse cr;
-                
                 if (b == null)
                     cr = new ConfigResponse();
                 else
                     cr = ConfigResponse.decode(b);
 
-                long crispoId = createCrispo(d, cr);
+                idMap.put(new Long(fromId), cr);
+            }
+        } catch (EncodingException e) {
+            throw new BuildException(e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new BuildException(e.getMessage(), e);
+        } finally {
+            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
+        }
+    }
+
+    private void updateCrispos(Map idMap)
+        throws BuildException
+    {
+        try
+        {
+            Connection conn = getConnection();
+            Dialect dialect = HibernateUtil.getDialect(conn);
+            for (Iterator i=idMap.entrySet().iterator(); i.hasNext(); )
+            {
+                Map.Entry entry = (Map.Entry)i.next();
+                long fromId = ((Long)entry.getKey()).longValue();
+                ConfigResponse cr = (ConfigResponse)entry.getValue();
+
+                long crispoId = createCrispo(dialect, cr);
                 updateRowWithCrispo(fromId, crispoId);
                 
                 if (_rewriteConfigResponse != null &&
@@ -207,12 +254,11 @@ public class SST_Crisponizer extends CrispoTask {
                 log(_table + " (id=" + fromId + ") now has " + _crispoColumn + 
                     "=" + crispoId);
             }
+
         } catch (EncodingException e) {
             throw new BuildException(e.getMessage(), e);
         } catch (SQLException e) {
             throw new BuildException(e.getMessage(), e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOGCTX, null, stmt, rs);
         }
     }
 }
