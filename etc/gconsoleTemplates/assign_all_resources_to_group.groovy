@@ -6,14 +6,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 
 /**
  * This script assigns all currently existing platforms, servers, and services 
- * to a preexisting group. The user must be logged in as the admin user and the 
- * admin user name and group name must be configured before executing the script.
+ * to a preexisting group. The user must be logged in as a user assigned the 
+ * "Super User" role and that user name and group name must be configured before 
+ * executing the script.
  */
 
 
 // Configure the following parameters:
 
-// Set currently logged in admin user name for permissioning purposes
+// Set currently logged in "Super User" user name for permissioning purposes
 def userName = "hqadmin"
 
 // Set the group name
