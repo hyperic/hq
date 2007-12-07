@@ -80,10 +80,6 @@ public class RegisteredDispatcherEJBImpl
         LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
     
     
-    private static interface EventsHandler {
-        void handleEvents(List events);
-    }
-
     /**
      * Dispatch the event to interested triggers.
      * 
