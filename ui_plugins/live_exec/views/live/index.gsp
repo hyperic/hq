@@ -138,9 +138,9 @@ function hideErrorPanel() {
 
       <div class="fivepad">
 
-        <div class="">
+        <div>
             <div class="instruction1">Please select a query to run:</div>
-        <select id="commandSelect" onchange="runCommand()">
+        <select id="commandSelect" onchange="runCommand()" style="margin-bottom:5px;">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
