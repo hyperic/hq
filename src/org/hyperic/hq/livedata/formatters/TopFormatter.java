@@ -123,10 +123,9 @@ public class TopFormatter
                                  "" + ps.getTotal(), "" + ps.getRunning(), 
                                  "" + ps.getSleeping(), "" + ps.getStopped(), 
                                  "" + ps.getZombie())))
-         .append("<br/>");
+         .append("<br/><br/>");     
         
-        
-        r.append("</div><table cellpadding='0' cellspacing='0'><thead><tr><td>")
+        r.append("</div><table cellpadding='0' cellspacing='0' width='100%'><thead><tr><td>")
          .append(BUNDLE.format("formatter.top.proc.pid"))
          .append("</td><td>")
          .append(BUNDLE.format("formatter.top.proc.user"))
@@ -150,13 +149,17 @@ public class TopFormatter
          
         for (Iterator i=t.getProcesses().iterator(); i.hasNext(); ) {
             ProcessData d = (ProcessData)i.next();
+            char[] buf = new char[1];
+            buf[0] = d.getState();
+            String str = new String(buf);
+            char stateStr = ((str.trim().length() == 0) ? '-' : d.getState());
             r.append("<tr><td>").append(d.getPid()).append("</td>")
              .append("<td>").append(d.getOwner()).append("</td>")    
              .append("<td>").append(d.getFormattedStartTime()).append("</td>") 
              .append("<td>").append(d.getFormattedSize()).append("</td>")
              .append("<td>").append(d.getFormattedResident()).append("</td>")  
              .append("<td>").append(d.getFormattedShare()).append("</td>")      
-             .append("<td>").append(d.getState()).append("</td>")                           
+             .append("<td>").append(stateStr).append("</td>")                           
              .append("<td>").append(d.getFormattedCpuTotal()).append("</td>")                           
              .append("<td>").append(d.getFormattedCpuPerc()).append("</td>")                           
              .append("<td>").append(h(d.getBaseName())).append("</td></tr>");                           
