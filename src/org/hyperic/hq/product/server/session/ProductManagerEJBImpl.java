@@ -163,6 +163,28 @@ public class ProductManagerEJBImpl
     /**
      * @ejb:interface-method
      */
+    public boolean isReady() {
+        MBeanServer server = MBeanUtil.getMBeanServer();
+        ObjectName deployer;
+
+        try {
+            deployer = new ObjectName(PLUGIN_DEPLOYER);
+        } catch (MalformedObjectNameException e) {
+            //wont happen.
+            throw new SystemException(e.getMessage(), e);
+        }
+
+        try {
+            return ((Boolean)server.getAttribute(deployer, "Ready")).booleanValue();
+        } catch (Exception e) {
+            log.error("Unable to determine deployer state", e);
+            return false;
+        }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
     public TypeInfo getTypeInfo(AppdefEntityValue value)
         throws PermissionException, AppdefEntityNotFoundException
     {

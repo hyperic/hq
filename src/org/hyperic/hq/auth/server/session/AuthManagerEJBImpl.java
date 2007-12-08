@@ -52,6 +52,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.PrincipalDAO;
+import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.util.ConfigPropertyException;
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
@@ -72,12 +73,9 @@ public class AuthManagerEJBImpl implements SessionBean {
 
     public AuthManagerEJBImpl() {}
 
-    /**
-     * Set the JAAS configuration options
-     * @ejb:interface-method
-     */
-    public void setConfigurationOptions(HashMap options)
-    {
+
+    private boolean isReady() {
+        return ProductManagerEJBImpl.getOne().isReady();
     }
 
     /**
@@ -94,7 +92,11 @@ public class AuthManagerEJBImpl implements SessionBean {
     {
         if(password == null)
             throw new LoginException("No password was given");
-            
+
+        if (!isReady()) {
+            throw new LoginException("Server still starting");
+        }
+
         UsernamePasswordHandler handler =
             new UsernamePasswordHandler(user, password.toCharArray());
 
