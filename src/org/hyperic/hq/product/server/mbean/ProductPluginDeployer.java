@@ -203,7 +203,8 @@ public class ProductPluginDeployer
             }
         }
 
-        ProductStartupListener.getPluginsDeployedCaller().pluginsDeployed();
+        ProductStartupListener
+            .getPluginsDeployedCaller().pluginsDeployed(_plugins);
         
         _plugins.clear();
 

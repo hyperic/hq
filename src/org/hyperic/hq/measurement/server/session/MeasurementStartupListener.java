@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -26,6 +26,8 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -38,7 +40,8 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
-import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
+import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
+import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -86,16 +89,25 @@ public class MeasurementStartupListener
             }
 
             public void beforeMetricDelete(DerivedMeasurement m) {
-                MetricAuxLogManagerLocal man = 
-                    MetricAuxLogManagerEJBImpl.getOne();
-                
-                man.metricDeleted(m);
+                MetricAuxLogManagerEJBImpl.getOne().metricDeleted(m);
+            }
+        });
+
+        app.registerCallbackListener(PluginsDeployedCallback.class,
+                                     new PluginsDeployedCallback() {
+            public void pluginsDeployed(List plugins) {
+                DerivedMeasurementManagerLocal dman =
+                    DerivedMeasurementManagerEJBImpl.getOne();
+                for (Iterator i = plugins.iterator(); i.hasNext();) {
+                    String pluginName = (String)i.next();
+                    dman.syncPluginMetrics(pluginName);
+                }
             }
         });
 
         initReportsStats();
-    } 
-    
+    }
+
     private void initReportsStats() {
         Properties cfg = new Properties();
 

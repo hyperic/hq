@@ -24,10 +24,12 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.util.List;
+
 public interface PluginsDeployedCallback {
     /**
      * Called when the server has started up and the plugins have been
      * fully deployed.
      */
-    void pluginsDeployed();
+    void pluginsDeployed(List plugins);
 }

@@ -61,7 +61,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.PluginDAO;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -301,11 +300,6 @@ public class ProductManagerEJBImpl
             }
             else {
                 pluginDeployed(pInfo);
-                
-                // Make sure all entities are sync'ed up with metrics
-                DerivedMeasurementManagerEJBImpl.getOne()
-                    .syncPluginMetrics(pluginName);
-
                 return;
             }
         } else {
@@ -393,10 +387,6 @@ public class ProductManagerEJBImpl
                     }
                 }
             }
-            // Make sure all entities are sync'ed up with metrics
-            DerivedMeasurementManagerEJBImpl.getOne()
-                    .syncPluginMetrics(pluginName);
-
             log.info(pluginName + " deployment took: " + timer + " seconds");
 
             pluginDeployed(pInfo);

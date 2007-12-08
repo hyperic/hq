@@ -26,6 +26,7 @@ package org.hyperic.hq.ui.server.session;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +58,7 @@ public class UIStartupListener implements StartupListener {
     private static class UIPluginInitializer 
         implements PluginsDeployedCallback
     {
-        public void pluginsDeployed() {
+        public void pluginsDeployed(List plugins) {
             initPlugins();
         }
     }
