@@ -171,7 +171,7 @@ public class AppdefEntityValue {
     private Service getService()
         throws AppdefEntityNotFoundException {
         if (service == null)
-            service = getServiceManager().getServiceById(_id.getId());
+            service = getServiceManager().findServiceById(_id.getId());
 
         return service;
     }
