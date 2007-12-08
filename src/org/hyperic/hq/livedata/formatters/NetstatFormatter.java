@@ -83,11 +83,26 @@ public class NetstatFormatter
          .append("</td>")
          .append("<td>")
          .append(BUNDLE.format("formatter.netstat.head.state"))
+         .append("</td>")
+         .append("<td>")
+         .append(BUNDLE.format("formatter.netstat.head.process"))
          .append("</td></tr></thead><tbody>");
 
         for (Iterator i=d.getConnections().iterator(); i.hasNext(); ) {
             NetConnectionData c = (NetConnectionData)i.next();
-            
+            String formattedState;
+            String formattedProcessName;
+
+             if (h(c.getFormattedState()) == null || h(c.getFormattedState()).trim().length() == 0)
+                formattedState = "-";
+              else
+                formattedState = h(c.getFormattedState());
+
+             if (h(c.getFormattedProcessName()) == null || h(c.getFormattedProcessName()).trim().length() == 0)
+                formattedProcessName = "-";
+              else
+                formattedProcessName = h(c.getFormattedProcessName());
+
             r.append("<tr><td>")
              .append(c.getProtocol())
              .append("</td><td>")
@@ -95,9 +110,9 @@ public class NetstatFormatter
              .append("</td><td>")
              .append(h(c.getFormattedRemoteAddress()))
              .append("</td><td>")
-             .append(h(c.getFormattedState()))
+             .append(formattedState)
              .append("</td><td>")
-             .append(h(c.getFormattedProcessName()))
+             .append(formattedProcessName)
              .append("</td></tr>");
         }
         r.append("</tbody></table></div>");
