@@ -76,7 +76,7 @@ public class DfFormatter
     private String formatHtml(ConfigResponse cfg, DfData df) {
         StringBuffer r = new StringBuffer();
         
-        r.append("<div class='df_livedata'><table cellpadding='0' cellspacing='0'><thead><tr>");
+        r.append("<div class='df_livedata'><table cellpadding='0' cellspacing='0' width='100%'><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.df.head.name"))
          .append("</td>")
