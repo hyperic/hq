@@ -257,13 +257,13 @@ class HealthController
                     "where current_query != '<IDLE>' order by query_start desc"],
           aiqPlatform: [ 
              name: localeBundle['queryAIQPlatform'], 
-             query: "select * from eam_aiq_platform"], 
+             query: "select * from EAM_AIQ_PLATFORM"], 
           aiqServer: [ 
              name: localeBundle['queryAIQServer'], 
-             query: "select * from eam_aiq_server"],
+             query: "select * from EAM_AIQ_SERVER"],
           aiqIP: [ 
              name: localeBundle['queryAIQIP'], 
-             query: "select * from eam_aiq_ip"], 
+             query: "select * from EAM_AIQ_IP"], 
         ]
         
         def res = [:]
