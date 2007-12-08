@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -71,10 +71,10 @@ public class PermissionManagerImpl
         "(SELECT rt.id FROM EAM_RESOURCE_TYPE rt WHERE rt.name = ?) ";
 
     private static final String VIEWABLE_BYNAME_SQL =
-        " AND (lower(EAM_RESOURCE.name) like '%'||lower(?)||'%' OR " +
+        " AND (lower(EAM_RESOURCE.name) like lower('%$$resName$$') OR " +
         " EAM_RESOURCE.instance_id in (SELECT appdef_id FROM EAM_CPROP, " +
         " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND " +
-        " appdef_type = ? AND lower(propvalue) like '%'||lower(?)||'%'))";
+        " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))";
 
     private static final String ALL_RESOURCE_SQL = 
         "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
@@ -197,7 +197,10 @@ public class PermissionManagerImpl
             sql += VIEWABLE_CLAUSE;
             
             if (resName != null)
+            {
                 sql += VIEWABLE_BYNAME_SQL;
+                sql = StringUtil.replace(sql, "$$resName$$", resName);
+            }
             
             sql += "ORDER BY EAM_RESOURCE.sort_name ";
 
@@ -219,9 +222,7 @@ public class PermissionManagerImpl
                 // Support wildcards
                 resName = resName.replace('*', '%');
                 resName = resName.replace('?', '_');
-                stmt.setString(i++, resName);
                 stmt.setInt(i++, AppdefUtil.resNameToAppdefTypeId(resType));
-                stmt.setString(i++, resName);
             }
             
             _log.debug("Viewable SQL: " + sql);
