@@ -158,7 +158,7 @@ public class MetricDataCache {
                                        " at " + mval.getTimestamp());
                         }
                     }
-                    else {
+                    else if (val.getTimestamp() > mval.getTimestamp()) {
                         val.setTimestamp(mval.getTimestamp());
                         if (_log.isDebugEnabled()) {
                             _log.debug("Update unavailable metric: " + mid +
