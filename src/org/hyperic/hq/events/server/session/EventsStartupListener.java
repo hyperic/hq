@@ -35,7 +35,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.ShutdownCallback;
 import org.hyperic.hq.application.StartupListener;
 
 public class EventsStartupListener 
@@ -54,11 +53,6 @@ public class EventsStartupListener
         
         HQApp app = HQApp.getInstance();
         
-        // Register the alert def last fired time updater with the 
-        // shutdown hook.
-        app.registerCallbackListener(ShutdownCallback.class, 
-                    AlertDefinitionLastFiredTimeUpdater.getInstance());
-
         synchronized (LOCK) {
             _changeCallback = (TriggerChangeCallback)
                 app.registerCallbackCaller(TriggerChangeCallback.class);

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +53,6 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
-import org.hyperic.hq.events.server.session.AlertDefinitionLastFiredTimeUpdater;
 
 
 /** The RegisteredDispatcher Message-Drive Bean registers Triggers and
@@ -220,20 +218,7 @@ public class RegisteredDispatcherEJBImpl
         if (enqueuedEvents.isEmpty()) {
             return;
         }
-        
-        LinkedList eventsToPublish = new LinkedList();
-        LinkedList alertDefLastFiredEventsToPublish = new LinkedList();
-    
-        for (Iterator iter = enqueuedEvents.iterator(); iter.hasNext();) {
-            AbstractEvent event = (AbstractEvent) iter.next();
-    
-            if (event.isAlertDefinitionLastFiredUpdateEvent()) {
-                alertDefLastFiredEventsToPublish.add(event);
-            } else {
-                eventsToPublish.add(event);
-            }
-        }
-    
+            
         EventsHandler eventsPublishHandler = 
             new EventsHandler() {
             public void handleEvents(List events) {
@@ -243,31 +228,9 @@ public class RegisteredDispatcherEJBImpl
             }
         };
         
-        handleEventsPostCommit(eventsToPublish, 
+        handleEventsPostCommit(enqueuedEvents, 
                                eventsPublishHandler, 
                                true);
-    
-    
-        EventsHandler lastFiredTimeEventsHandler = 
-            new EventsHandler() {
-            public void handleEvents(List events) {
-                try {
-                    AlertDefinitionLastFiredTimeUpdater
-                        .getInstance().enqueueEvents(events);
-                } catch (InterruptedException e) {
-                    // we've been interrupted - oh well
-                }
-            }
-        };
-
-        // To reduce contention on the alert def table, publish alert def 
-        // last fired time updates post commit. If publishing fails, just 
-        // drop the events. Updating the alert def last fired time is not 
-        // critical!
-        handleEventsPostCommit(alertDefLastFiredEventsToPublish, 
-                               lastFiredTimeEventsHandler, 
-                               false);            
-
     }
         
     /**

@@ -56,11 +56,9 @@ public class ClassicEscalatableCreator
     
     private final AlertDefinition   _def;
     private final TriggerFiredEvent _event;
-    private final AlertDefinitionLastFiredCallback _callback;
     
     /**
-     * Creates an instance that sets the alert definition last fired time 
-     * immediately when the alert is created.
+     * Creates an instance.
      *
      * @param def The alert definition.
      * @param event The event that triggered the escalation.
@@ -69,26 +67,8 @@ public class ClassicEscalatableCreator
                                      TriggerFiredEvent event) { 
         _def   = def;
         _event = event;
-        _callback = null;
     }
-    
-    /**
-     * Creates an instance that registers a callback to be notified when a new 
-     * value should be set for the alert definition last fired time. This value 
-     * is not actually set on the alert definition.
-     *
-     * @param def The alert definition.
-     * @param event The event that triggered the escalation.
-     * @param callback The callback.
-     */
-    public ClassicEscalatableCreator(AlertDefinition def,
-                                     TriggerFiredEvent event,
-                                     AlertDefinitionLastFiredCallback callback) { 
-        _def   = def;
-        _event = event;
-        _callback = callback;
-    }
-    
+        
     /**
      * In the classic escalatable architecture, we still need to support the
      * execution of the actions defined for the regular alert defintion 
@@ -108,13 +88,7 @@ public class ClassicEscalatableCreator
         }
     
         // Now create the alert
-        Alert alert = null;
-        
-        if (_callback == null) {
-            alert = alertMan.createAlert(_def, _event.getTimestamp());            
-        } else {
-            alert = alertMan.createAlert(_def, _event.getTimestamp(), _callback); 
-        }
+        Alert alert = alertMan.createAlert(_def, _event.getTimestamp());
 
         // Create a alert condition logs for every condition that triggered the alert
         Collection conds = _def.getConditions();
