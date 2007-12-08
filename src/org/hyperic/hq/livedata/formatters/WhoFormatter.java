@@ -68,7 +68,7 @@ public class WhoFormatter
         DateFormat fmt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, 
                                                         DateFormat.SHORT);
 
-        r.append("<div class='who_livedata'><table cellpadding='0' cellspacing='0'><thead><tr>");
+        r.append("<div class='who_livedata'><table cellpadding='0' cellspacing='0' width='100%'><thead><tr>");
         r.append("<td>")
          .append(BUNDLE.format("formatter.who.head.user"))
          .append("</td>")
