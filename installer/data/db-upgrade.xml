@@ -7551,18 +7551,16 @@ has already been defined.
   </schemaSpec>    
 
   <!-- Now let's set the correct name for the unique constraint on the 
-	   EAM_ESCALATION_STATE table. -->		
+	   EAM_ESCALATION_STATE table. We can't use the eam_escalation_state_escalation_id_key 
+	   name for Oracle since that name is too long. -->		
   <schemaSpec version="3.78">
     <schema-directSQL>		                 
-		<statement desc="Dropping old unique constraint to create with correct name" 
-                   targetDB="oracle">
-		  ALTER table EAM_ESCALATION_STATE DROP unique (escalation_id, alert_def_id, alert_id, alert_type)
-        </statement>
         <statement desc="Dropping old unique constraint to create with correct name" 
                    targetDB="postgresql">
           ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT eam_escalation_state_id_key CASCADE           
         </statement>
-        <statement desc="Create unique constraint with correct name">
+        <statement desc="Create unique constraint with correct name" 
+				   targetDB="postgresql">
           ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT eam_escalation_state_escalation_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
         </statement> 
     </schema-directSQL>
@@ -7661,7 +7659,7 @@ has already been defined.
         </statement>
 	  </schema-directSQL>       
   </schemaSpec> 
- 	  
+	 
 </dbupgrade>
 </target>
 
