@@ -25,35 +25,24 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-public class ScheduleRevNum implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
+public class ScheduleRevNum implements Serializable {
+
     private SrnId _id;
-    private long _version;
-    private int _srn;
-    private long _minInterval = 0;
-    private long _lastReported = 0;
-    private boolean _pending;
+    private long  _version;
+    private int   _srn;
+    private long  _minInterval = 0;
+    private long  _lastReported = 0;
     
-    // Constructors
     public ScheduleRevNum() {
     }
 
     public ScheduleRevNum(SrnId id, int srn) {
-        _id = id;
+        _id  = id;
         _srn = srn;
     }
 
-    public ScheduleRevNum(SrnId id, int srn, long minInterval,
-                          long lastReported, boolean pending) {
-        _id = id;
-        _srn = srn;
-        _minInterval = minInterval;
-        _lastReported = lastReported;
-        _pending = pending;
-    }
-   
-    // Property accessors
     public SrnId getId() {
         return _id;
     }

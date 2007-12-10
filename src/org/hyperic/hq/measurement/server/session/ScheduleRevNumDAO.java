@@ -64,10 +64,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     public ScheduleRevNum create(int entType, int entId) {
         
         SrnId srnId = new SrnId(entType, entId);
-        ScheduleRevNum srn = new ScheduleRevNum();
-
-        srn.setId(srnId);
-        srn.setSrn(1);
+        ScheduleRevNum srn = new ScheduleRevNum(srnId, 1);
         save(srn);
         return srn;
     }
