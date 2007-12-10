@@ -70,7 +70,9 @@
       <% if (resource.supportsMonitoring) { %>
            Previous Indicator Metrics:<br>
            <% for (i in resource.designatedMetrics.getLastDataPoints(MeasurementConstants.ACCEPTABLE_LIVE_MILLIS)) { %>
+               <% if (i.value != null) { %>
              &nbsp;&nbsp;&nbsp;${i.key.template.name}: <b>${i.key.template.formatValue(i.value)}</b><br>
+               <% } %>
            <% } %>
       <% } %>
       ${auxLogInfo}

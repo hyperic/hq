@@ -223,8 +223,10 @@ public class MeasurementTemplate
      * Format a metric value, based on the units specified by this template
      */
     public String formatValue(MetricValue val) {
+        if (val == null)
+            return "";
+        
         FormattedNumber th = UnitsConvert.convert(val.getValue(), getUnits());
-                                                  
         return th.toString();
     }
     

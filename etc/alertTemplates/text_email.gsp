@@ -14,7 +14,9 @@
       indicatorStr << "\nPrevious Indicator Metrics:  \n"
       def window = MeasurementConstants.ACCEPTABLE_LIVE_MILLIS
       for (i in resource.designatedMetrics.getLastDataPoints(window)) {
-          indicatorStr << "    ${i.key.template.name}: ${i.key.template.formatValue(i.value)}\n"
+          if (i.value != null) {
+                indicatorStr << "    ${i.key.template.name}: ${i.key.template.formatValue(i.value)}\n"
+          }
       }
   }
 
