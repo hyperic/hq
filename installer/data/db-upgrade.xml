@@ -7502,7 +7502,15 @@ has already been defined.
     </schema-directSQL>  	  
   </schemaSpec>
 
-  <schemaSpec version="3.73">
+  <schemaSpec version="3.74">
+    <schema-directSQL>
+        <statement>
+          ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN LAST_FIRED
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.75">
     <schema-directSQL>
         <statement desc="Enable the batch aggregate data inserter by default">
             update EAM_CONFIG_PROPS set propvalue=5 where id=56
@@ -7514,15 +7522,7 @@ has already been defined.
             update EAM_CONFIG_PROPS set propvalue=100000 where id=58
         </statement>
     </schema-directSQL>
-  </schemaSpec>
-
-  <schemaSpec version="3.74">
-    <schema-directSQL>
-        <statement>
-          ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN LAST_FIRED
-        </statement>
-    </schema-directSQL>
-  </schemaSpec>
+  </schemaSpec>	  
 
 </dbupgrade>
 </target>
