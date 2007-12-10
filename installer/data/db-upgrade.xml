@@ -7226,7 +7226,7 @@ has already been defined.
 			       targetDB="postgresql" fail="false">
 		  ALTER TABLE eam_escalation_state DROP CONSTRAINT eam_escalation_state_escalation_id_key CASCADE			
         </statement> 
-          <statement desc="Dropping unique constraint to reorder columns" 
+        <statement desc="Dropping unique constraint to reorder columns" 
                            targetDB="oracle">
             ALTER table eam_escalation_state DROP unique (escalation_id, alert_type, alert_def_id, alert_id)
         </statement>
@@ -7522,8 +7522,146 @@ has already been defined.
             update EAM_CONFIG_PROPS set propvalue=100000 where id=58
         </statement>
     </schema-directSQL>
-  </schemaSpec>	  
+  </schemaSpec>
+	
+  <!-- Some of the postgres changes in schema spec 3.67 may have failed because of 
+       the connection being rolled back when dropping the unique constraint 
+       on the EAM_ESCALATION_STATE table. Drop the unique constraint again 
+       in its own schema spec version so the statement uses its own connection. -->     
+  <schemaSpec version="3.76">
+    <schema-directSQL>
+        <statement desc="Dropping unique constraint to reorder columns" 
+                   targetDB="postgresql" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT eam_mescalation_state_escalation_id_key CASCADE          
+        </statement>
+    </schema-directSQL>
+  </schemaSpec> 
 
+  <!-- Some of the postgres changes in schema spec 3.67 may have failed because of 
+       the connection being rolled back when dropping the unique constraint 
+       on the EAM_ESCALATION_STATE table. Drop the unique constraint again 
+       in its own schema spec version so the statement uses its own connection. -->         
+  <schemaSpec version="3.77">
+    <schema-directSQL>                 
+        <statement desc="Dropping unique constraint to reorder columns" 
+                   targetDB="postgresql" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT eam_escalation_state_escalation_id_key CASCADE           
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>    
+
+  <!-- Now let's set the correct name for the unique constraint on the 
+	   EAM_ESCALATION_STATE table. -->		
+  <schemaSpec version="3.78">
+    <schema-directSQL>		                 
+		<statement desc="Dropping old unique constraint to create with correct name" 
+                   targetDB="oracle">
+		  ALTER table EAM_ESCALATION_STATE DROP unique (escalation_id, alert_def_id, alert_id, alert_type)
+        </statement>
+        <statement desc="Dropping old unique constraint to create with correct name" 
+                   targetDB="postgresql">
+          ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT eam_escalation_state_id_key CASCADE           
+        </statement>
+        <statement desc="Create unique constraint with correct name">
+          ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT eam_escalation_state_escalation_id_key UNIQUE ( escalation_id, alert_def_id, alert_id, alert_type )
+        </statement> 
+    </schema-directSQL>
+  </schemaSpec>	
+
+  <!-- Now rerun the postgres changes in schema spec 3.67 before the failed drop of the 
+       unique constraint on the EAM_ESCALATION_STATE table caused the connection 
+       to be rolled back. None of these changes should fail. -->    
+  <schemaSpec version="3.79">
+      <schema-directSQL>
+        <statement desc="Dropping unnecessary index from EAM_ROLE_CALENDAR"
+                   targetDB="postgresql">
+          DROP INDEX calendar_role_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_OPERATION" 
+                   targetDB="postgresql">
+          DROP INDEX eam_opname_idx
+        </statement>    
+        <statement desc="Dropping unnecessary index from EAM_RESOURCE" 
+                   targetDB="postgresql">
+          DROP INDEX eam_resource_idx_type_idx
+        </statement>                      
+        <statement desc="Dropping unnecessary index from EAM_SERVER" 
+                   targetDB="postgresql">
+          DROP INDEX eam_server_platform_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_EVENT_LOG" 
+                   targetDB="postgresql">
+          DROP INDEX event_log_timestamp_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_MEASUREMENT_BL" 
+                   targetDB="postgresql">
+          DROP INDEX metric_baseline_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_METRIC_PROB" 
+                   targetDB="postgresql">
+          DROP INDEX metric_prob_id_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_MONITORABLE_TYPE" 
+                   targetDB="postgresql">
+          DROP INDEX mtype_idx_appdeftype_idx
+        </statement>          
+        <statement desc="Dropping unnecessary index from EAM_MEASUREMENT_TEMPL" 
+                   targetDB="postgresql">
+          DROP INDEX templ_monitorable_type_idx
+        </statement>              
+          
+        <statement desc="Dropping index from EAM_AUTOINV_SCHEDULE to reorder columns" 
+                   targetDB="postgresql">
+          DROP INDEX ai_schedule_entity_idx
+        </statement>         
+        <statement desc="Create index for EAM_AUTOINV_SCHEDULE with highest cardinality column first" 
+                   targetDB="postgresql">   
+          CREATE INDEX ai_schedule_entity_idx ON EAM_AUTOINV_SCHEDULE USING btree ( entity_id, entity_type )                  
+        </statement>
+
+        <statement desc="Dropping index from EAM_CONTROL_SCHEDULE to reorder columns" 
+                   targetDB="postgresql">
+          DROP INDEX ctl_schedule_entity_idx
+        </statement>         
+        <statement desc="Create index for EAM_CONTROL_SCHEDULE with columns ordered highest cardinality first" 
+                   targetDB="postgresql">
+          CREATE INDEX ctl_schedule_entity_idx ON EAM_CONTROL_SCHEDULE USING btree ( entity_id, entity_type )             
+        </statement>                  
+                  
+        <statement desc="Dropping index from EAM_EVENT_LOG to reorder columns" 
+                   targetDB="postgresql">
+          DROP INDEX event_log_idx
+        </statement>                  
+        <statement desc="Create index for EAM_EVENT_LOG with columns ordered highest cardinality first" 
+                   targetDB="postgresql">
+          CREATE INDEX event_log_idx ON EAM_EVENT_LOG USING btree ( timestamp, entity_id, entity_type )           
+        </statement>
+          
+        <statement desc="Dropping index from EAM_ESCALATION_STATE to reorder columns" 
+                   targetDB="postgresql">
+          DROP INDEX state_idx
+        </statement>                   
+        <statement desc="Create index for EAM_ESCALATION_STATE with columns ordered highest cardinality first" 
+                   targetDB="postgresql">
+          CREATE INDEX state_idx ON EAM_ESCALATION_STATE USING btree ( alert_def_id, alert_type )       
+        </statement>
+          
+        <statement desc="Dropping index from EAM_MEASUREMENT_TEMPL since we do not need to index monitorable_type_id" 
+                   targetDB="postgresql">
+          DROP INDEX templ_desig_mt_idx
+        </statement>                   
+        <statement desc="Create index for EAM_MEASUREMENT_TEMPL" 
+                   targetDB="postgresql"> 
+          CREATE INDEX templ_desig_idx ON EAM_MEASUREMENT_TEMPL USING btree ( designate )           
+        </statement>                     
+                  
+        <statement desc="Create index for EAM_ACTION for faster lookup by parent"
+                   targetDB="postgresql">
+          CREATE INDEX action_child_idx ON EAM_ACTION USING btree ( parent_id ) 
+        </statement>
+	  </schema-directSQL>       
+  </schemaSpec> 
+ 	  
 </dbupgrade>
 </target>
 
