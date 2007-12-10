@@ -231,6 +231,13 @@ public class ZeventManager {
         return bListen;
     }
     
+    public ZeventListener addBufferedListener(Class eventClass,
+                                              ZeventListener listener)
+    {
+        return addBufferedListener(Collections.singleton(eventClass),
+                                   listener);
+    }
+    
     /**
      * Add a listener for a specific type of event.
      * 
