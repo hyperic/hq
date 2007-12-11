@@ -39,10 +39,7 @@ import java.io.Serializable;
  */
 public abstract class PersistedObject 
     implements Serializable
-{
-    private final static LogicalIdentityHelper idHelper =
-        new LogicalIdentityHelper();
-    
+{    
     private Integer _id;
 
     // for hibernate optimistic locks -- don't mess with this.
@@ -70,10 +67,10 @@ public abstract class PersistedObject
     }
 
     public boolean equals(Object obj) {
-        return idHelper.equals(this, obj);
+        return LogicalIdentityHelper.equals(this, obj);
     }
 
     public int hashCode() {
-        return idHelper.hashCode(this);
+        return LogicalIdentityHelper.hashCode(this);
     }
 }

@@ -26,13 +26,13 @@
 package org.hyperic.hibernate;
 
 /**
- * A helper class used to check equality and generate hash codes for persisted 
+ * A utility class for checking equality and generating hash codes for persisted 
  * objects that use a numeric primary key as their logical identifier.
  */
 class LogicalIdentityHelper {
     
     
-    public LogicalIdentityHelper() {
+    private LogicalIdentityHelper() {
     }
     
     /**
@@ -42,8 +42,8 @@ class LogicalIdentityHelper {
      * @param toCheck The object to check.
      * @return <code>true</code> if the object to check is equal to this object.
      */
-    public boolean equals(PersistedObject thisObject, Object toCheck) {
-        if (this == toCheck) {
+    public static boolean equals(PersistedObject thisObject, Object toCheck) {
+        if (thisObject == toCheck) {
             return true;
         }
         if (toCheck == null || !(toCheck instanceof PersistedObject)) {
@@ -61,8 +61,8 @@ class LogicalIdentityHelper {
      * @param toCheck The object to check.
      * @return <code>true</code> if the object to check is equal to this object.
      */
-    public boolean equals(LongIdPersistedObject thisObject, Object toCheck) {
-        if (this == toCheck) {
+    public static boolean equals(LongIdPersistedObject thisObject, Object toCheck) {
+        if (thisObject == toCheck) {
             return true;
         }
         if (toCheck == null || !(toCheck instanceof LongIdPersistedObject)) {
@@ -73,7 +73,7 @@ class LogicalIdentityHelper {
         return equals(thisObject.getId(), o.getId());
     }
     
-    private boolean equals(Number thisObjectId, Number toCheckObjectId) {
+    private static boolean equals(Number thisObjectId, Number toCheckObjectId) {
         return thisObjectId == toCheckObjectId ||
                (thisObjectId != null && 
                 toCheckObjectId != null && 
@@ -86,7 +86,7 @@ class LogicalIdentityHelper {
      * @param thisObject This object.
      * @return The hash code for this object.
      */
-    public int hashCode(PersistedObject thisObject) {
+    public static int hashCode(PersistedObject thisObject) {
         return hashCode(thisObject.getId());
     }    
 
@@ -96,11 +96,11 @@ class LogicalIdentityHelper {
      * @param thisObject This object.
      * @return The hash code for this object.
      */
-    public int hashCode(LongIdPersistedObject thisObject) {
+    public static int hashCode(LongIdPersistedObject thisObject) {
         return hashCode(thisObject.getId());
     }
     
-    private int hashCode(Number num) {
+    private static int hashCode(Number num) {
         int result = 17;
         
         result = 37*result + (num != null ? num.hashCode() : 0);

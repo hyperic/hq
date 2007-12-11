@@ -35,8 +35,6 @@ import java.io.Serializable;
 public abstract class LongIdPersistedObject 
     implements Serializable {
     
-    private final LogicalIdentityHelper idHelper = new LogicalIdentityHelper();
-    
     private Long _id;
 
     // for hibernate optimistic locks -- don't mess with this.
@@ -64,11 +62,11 @@ public abstract class LongIdPersistedObject
     }
     
     public boolean equals(Object obj) {
-        return idHelper.equals(this, obj);
+        return LogicalIdentityHelper.equals(this, obj);
     }
 
     public int hashCode() {
-        return idHelper.hashCode(this);
+        return LogicalIdentityHelper.hashCode(this);
     }  
     
 }
