@@ -18,16 +18,15 @@ public class SST_RoleDashboard extends CrispoTask {
     public static final Class LOGCTX = SST_RoleDashboard.class;
     
     public static ConfigResponse props;
-    public static ConfigResponse guestRoleProps;
     
     private static final String CRISPO_TABLE      = "EAM_CRISPO";
     private static final String CRISPO_OPT_TABLE  = "EAM_CRISPO_OPT";
     private static final String ROLE_TABLE        = "EAM_ROLE";
     private static final String DASH_CONFIG_TABLE = "EAM_DASH_CONFIG";
+    private static final String USER_TABLE        = "EAM_SUBJECT";
     
     private static final String DASH_CONFIG_SEQ   = "EAM_DASH_CONFIG_ID_SEQ";
     
-    private static final String SUPER_USER_ROLE_NAME  = "Super User Role";
     private static final String RESOURCE_CREATOR_ROLE = "RESOURCE_CREATOR_ROLE";
     private static final String GUEST_ROLE_NAME = "Guest Role";
     
@@ -52,7 +51,8 @@ public class SST_RoleDashboard extends CrispoTask {
     	props.setValue(".dashContent.summaryCounts.group.cluster", "true");
     	props.setValue(".dashContent.summaryCounts.group.mixed", "true");
     	props.setValue(".dashContent.summaryCounts.group.groups", "false");
-    	props.setValue(".dashContent.summaryCounts.group.plat.server.service", "false");
+    	props.setValue(".dashContent.summaryCounts.group.plat.server.service",
+    	               "false");
     	props.setValue(".dashContent.summaryCounts.group.application", "false");
     	
     	props.setValue(".dashContent.resourcehealth.availability", "true");
@@ -68,13 +68,7 @@ public class SST_RoleDashboard extends CrispoTask {
     	props.setValue(".dashContent.criticalalerts.selectedOrAll", "all");
     	
     	props.setValue(".dashcontent.portal.portlets.first", "|.dashContent.searchResources|.dashContent.savedCharts|.dashContent.recentlyApproved|.dashContent.availSummary");
-    	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions");
-    	
-    	//Need this to prevent Guest Roles from having a default selection dialog
-    	guestRoleProps = new ConfigResponse();
-		guestRoleProps.merge(props, true);
-		guestRoleProps.setValue(".user.dashboard.default.id", "2");
-    	
+    	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions");    	
     }
     
     public SST_RoleDashboard() {}
@@ -117,10 +111,9 @@ public class SST_RoleDashboard extends CrispoTask {
             }
 
             Dialect d = HibernateUtil.getDialect(conn);
-            roleStatement = conn.createStatement();
-            dashStatement = conn.createStatement();
             String check_sql = "select id from " + ROLE_TABLE
-                    + " where id in (select role_id from " + DASH_CONFIG_TABLE + ")";
+                    + " where id in (select role_id from " + DASH_CONFIG_TABLE
+                    + ")";
             checkStatement = conn.createStatement();
             log("executed query: " + check_sql);
             checkRS = checkStatement.executeQuery(check_sql);
@@ -131,16 +124,17 @@ public class SST_RoleDashboard extends CrispoTask {
                 ignores.put(new Integer(checkRS.getInt(check_id_col)), "");
                 System.out.println("added ignore for: " + check_id_col);
             }
-            checkRS.close();
-            checkStatement.close();
+            DBUtil.closeJDBCObjects(LOGCTX, null, checkStatement, checkRS);
 
             String sql = "select id,name from " + ROLE_TABLE;
             System.out.println("executed query: " + sql);
+            roleStatement = conn.createStatement();
             roleRS = roleStatement.executeQuery(sql);
 
             int id_col = roleRS.findColumn("id");
             int name_col = roleRS.findColumn("name");
             int roleId;
+            dashStatement = conn.createStatement();
             while (roleRS.next()) {
                 
                 String name = roleRS.getString(name_col);
@@ -153,26 +147,44 @@ public class SST_RoleDashboard extends CrispoTask {
                     // create crispo
                     long crispoId;
                     if (props != null) {
-                    	if (name.equalsIgnoreCase(GUEST_ROLE_NAME)) {
-                    		crispoId = createCrispo(d, guestRoleProps);
-						} else {
-							crispoId = createCrispo(d, props);
-						}
+                        crispoId = createCrispo(d, props);
                     } else
                         throw new BuildException();
 
                     // insert role dash pref
-                    String seq = d.getSelectSequenceNextValString(DASH_CONFIG_SEQ);
+                    String seq = d.getSequenceNextValString(DASH_CONFIG_SEQ);
+                    
+                    ResultSet rs = dashStatement.executeQuery(seq);
+                    rs.next();
+                    long id = rs.getInt(1);
+                    DBUtil.closeResultSet(LOGCTX, rs);
                     
                     String insertSql = "insert into "
                             + DASH_CONFIG_TABLE
                             + " (id, config_type, version_col, name, crispo_id, role_id, user_id)"
-                            + " values (" + seq + ", 'ROLE', 0, '"
+                            + " values (" + id + ", 'ROLE', 0, '"
                             + name + " Dashboard', " + +crispoId + ", " + roleId
                             + ", null)";
                     System.out.println("executed query: " + insertSql);
                     int rows = dashStatement.executeUpdate(insertSql);
                     System.out.println("rows updated: " + rows);
+                    
+                    // Need this to prevent Guest Roles from having a default 
+                    // selection dialog
+                    if (name.equalsIgnoreCase(GUEST_ROLE_NAME)) {
+                        // Need to get the dashboard config ID
+                        
+                        ConfigResponse guestRoleProps = new ConfigResponse();
+                        guestRoleProps.setValue(".user.dashboard.default.id",
+                                                id);
+                        long prefCrispoId = createCrispo(d, guestRoleProps);
+                        
+                        // Set the crispo ID as the guest user's preference
+                        dashStatement.executeUpdate("update " + USER_TABLE
+                                                  + " set pref_crispo_id = "
+                                                  + prefCrispoId
+                                                  + " where id = 2");
+                    }
                 }
             }
             System.out.println("done");
