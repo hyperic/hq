@@ -7676,7 +7676,30 @@ has already been defined.
   <schemaSpec version="3.81">
     <schema-alterColumn table="EAM_AUDIT" column="KLAZZ" precision="255"
                         columnType="VARCHAR2" nullable="not null" />
-  </schemaSpec>		
+  </schemaSpec>	
+	
+  <schemaSpec version="3.82">
+	<schema-directSQL>
+        <statement desc="Dropping index on EAM_CONFIG_RESPONSE validationerr field 
+						 before changing the field size">
+          DROP INDEX cresp_err_idx
+        </statement>
+	</schema-directSQL>	  
+	  
+    <schema-alterColumn table="EAM_CONFIG_RESPONSE" column="VALIDATIONERR" 
+						precision="512" columnType="VARCHAR2"/>
+	
+	<schema-directSQL>
+        <statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr" 
+                   targetDB="oracle">
+          CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE (validationerr)
+        </statement>
+		<statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr"
+				   targetDB="postgresql">
+		  CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE USING btree (validationerr)
+		</statement>
+	</schema-directSQL>	  
+  </schemaSpec> 
 	 
 </dbupgrade>
 </target>
