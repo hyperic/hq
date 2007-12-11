@@ -1733,15 +1733,40 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
+     * Handle calcuation of downtime when a resource is marked as down.
+     *
+     * @ejb:interface-method
+     * @param events The list of events to process.  
+     */
+    public void handleDownMetricEvents(List events) {
+        MetricDataCache cache = MetricDataCache.getInstance();
+        for (Iterator i = events.iterator(); i.hasNext(); ) {
+            DownMetricZevent e = (DownMetricZevent)i.next();
+            Integer mid = e.getMetricId();
+            MetricValue mv = cache.getAvailMetric(mid);
+
+            if (mv == null) {
+                _log.warn("No availability metric for for id " + mid +
+                          " in down metrics cache.");
+                continue;
+            }
+
+            long last = getLastNonZeroTimestamp(mid, mv.getTimestamp());
+            if (last < mv.getTimestamp()) {
+                mv.setTimestamp(last);
+            }
+        }
+    }
+
+    /**
      * Fetch the most recent non-zero data point for a particular
      * DerivedMeasurement.
      *
      * @param id the ID of the DerivedMeasurement
      * @param timeAfter the result timestamps are greater than this value
      * @return a long time value
-     * @ejb:interface-method
      */
-    public long getLastNonZeroTimestamp(Integer id, long timeAfter)
+    private long getLastNonZeroTimestamp(Integer id, long timeAfter)
     {
         Connection conn  = null;
         Statement  stmt  = null;

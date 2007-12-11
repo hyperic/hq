@@ -74,6 +74,11 @@ public class MeasurementStartupListener
                      .addBufferedListener(listenEvents,
                                           new MeasurementEnabler());
 
+        listenEvents = new HashSet();
+        listenEvents.add(DownMetricZevent.class);
+        ZeventManager.getInstance().
+            addBufferedListener(listenEvents, new DownMetricsCalculator());
+
         HQApp app = HQApp.getInstance();
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)

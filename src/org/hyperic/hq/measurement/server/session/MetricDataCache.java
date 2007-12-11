@@ -38,6 +38,7 @@ import net.sf.ehcache.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * The MetricDataCache caches the last measurement keyed on the derived
@@ -56,10 +57,10 @@ public class MetricDataCache {
     private static Cache _downCache;
 
     private static MetricDataCache _singleton = new MetricDataCache();
-    
-    private Object _cacheLock = new Object();
-    private Object _downCacheLock = new Object();
-    
+
+    private final Object _cacheLock = new Object();
+    private final Object _downCacheLock = new Object();
+
     /**
      * Singleton accessor
      */
@@ -110,7 +111,7 @@ public class MetricDataCache {
      * @param mval The MetricValue to store.
      * @return true if the MetricValue was added to the cache, false otherwise.
      */
-    public boolean add(Integer mid, MetricValue mval) {
+    private boolean add(Integer mid, MetricValue mval) {
         // Need to synchronize on cache update since the back filler  
         // may be updating the cache concurrently with the data inserter.
         // Without synchronization, a race condition could cause the latest 
@@ -156,6 +157,15 @@ public class MetricDataCache {
                         if (_log.isDebugEnabled()) {
                             _log.debug("Add unavailable metric: " + mid +
                                        " at " + mval.getTimestamp());
+                        }
+                        // Queue up DownMetricsCalculator to find the last
+                        // time this resource was available.
+                        DownMetricZevent e = new DownMetricZevent(mid);
+                        try {
+                            ZeventManager.getInstance().enqueueEvent(e);
+                        } catch (InterruptedException ex) {
+                            _log.warn("Interrupted queueing down metric event",
+                                      ex);
                         }
                     }
                     else if (val.getTimestamp() > mval.getTimestamp()) {
@@ -206,18 +216,32 @@ public class MetricDataCache {
      * @param mid The measurement id.
      */
     public void setAvailMetric(Integer mid) {
+        synchronized(_downCacheLock) {
+            if (!_downCache.isKeyInCache(mid)) {
+                _downCache.put(new Element(mid, null));
+            }
+        }
+    }
+
+    /**
+     * Get the availability metric for the given metric id
+     */
+    public MetricValue getAvailMetric(Integer mid) {
         Cache dc;
         synchronized(_downCacheLock) {
             dc = _downCache;
         }
 
-        if (!dc.isKeyInCache(mid)) {
-            dc.put(new Element(mid, null));
+        Element e = dc.get(mid);
+        if (e != null) {
+            return (MetricValue)e.getObjectValue();
         }
+        return null;
     }
     
     /**
      * Get the map of unavailable metrics
+     * @return A map of unavailable MetricValues, keyed by metric id.
      */
     public Map getUnavailableMetrics() {
         List keys = _downCache.getKeys();
