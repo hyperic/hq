@@ -7699,7 +7699,12 @@ has already been defined.
 		  CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE USING btree (validationerr)
 		</statement>
 	</schema-directSQL>	  
-  </schemaSpec> 
+  </schemaSpec>
+	
+  <schemaSpec version="3.83">
+	<schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
+                        columnType="VARCHAR2" nullable="not null" />
+  </schemaSpec>	 
 	 
 </dbupgrade>
 </target>
