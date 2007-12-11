@@ -21,7 +21,7 @@
     </version>
 
     <property name="klazz" insert="false" update="false">
-      <column name="KLAZZ" length="20" not-null="true"/>
+      <column name="KLAZZ" not-null="true"/>
     </property>
 
     <property name="startTime">
