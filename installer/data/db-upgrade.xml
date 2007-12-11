@@ -7675,7 +7675,10 @@ has already been defined.
 	
   <schemaSpec version="3.81">
     <schema-alterColumn table="EAM_AUDIT" column="KLAZZ" precision="255"
-                        columnType="VARCHAR2" nullable="not null" />
+                        targetDB="postgresql" columnType="VARCHAR2"
+                        nullable="not null" />
+    <schema-alterColumn table="EAM_AUDIT" column="KLAZZ" precision="255"
+                        targetDB="oracle" columnType="VARCHAR2" />
   </schemaSpec>	
 
   <!-- For Postgres the SST_AlterColumn task will create a new column, copy the 
@@ -7686,17 +7689,20 @@ has already been defined.
     <schema-alterColumn table="EAM_CONFIG_RESPONSE" column="VALIDATIONERR" 
 						precision="512" columnType="VARCHAR2"/>
 	
-	<schema-directSQL>
-		<statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr"
-				   targetDB="postgresql">
-		  CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE USING btree (validationerr)
-		</statement>
-	</schema-directSQL>	  
+    <schema-directSQL>
+      <statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr"
+                 targetDB="postgresql">
+        CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE USING btree (validationerr)
+      </statement>
+    </schema-directSQL>	  
   </schemaSpec>
-	
+
   <schemaSpec version="3.83">
-	<schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
-                        columnType="VARCHAR2" nullable="not null" />
+    <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
+                        targetDB="postgresql" columnType="VARCHAR2"
+                        nullable="not null" />
+    <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
+                        targetDB="oracle" columnType="VARCHAR2" />
   </schemaSpec>
 
   <!-- For Postgres the SST_AlterColumn task will create a new column, copy the 
