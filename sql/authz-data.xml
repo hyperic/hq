@@ -545,8 +545,9 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
         <data CID="51" OPERATION_ID="%EAM_OPERATION.ID:0" ROLE_ID="%EAM_ROLE.ID:1"/>
     </table>
 
-    <!-- reserve two crispo IDs for the guest user -->
+    <!-- reserve two crispo IDs for the super and guest user dashboards -->
     <table name="EAM_CRISPO">
+        <data ID="0"/>
         <data ID="2"/>
         <data ID="3"/>
     </table>
@@ -595,6 +596,8 @@ org.hyperic.hq.authz.server.AuthzConstants. make sure they're in sync.
     </table>
 
     <table name="EAM_DASH_CONFIG">
+        <data ID="0" CONFIG_TYPE="ROLE" NAME="Super User Role" CRISPO_ID="0"
+              ROLE_ID="%EAM_ROLE.ID:0"/>
         <data ID="2" CONFIG_TYPE="ROLE" NAME="Guest Role" CRISPO_ID="2"
               ROLE_ID="%EAM_ROLE.ID:2"/>
     </table>

@@ -69,7 +69,7 @@ class DashboardConfigDAO
     }
     
     Collection findAllRoleDashboards() {
-        return getSession().createQuery("from RoleDashboardConfig")
+        return getSession().createQuery("from RoleDashboardConfig order by name")
             .setCacheable(true)
             .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
             .list();

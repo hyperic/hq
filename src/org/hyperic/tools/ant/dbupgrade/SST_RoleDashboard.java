@@ -144,8 +144,7 @@ public class SST_RoleDashboard extends CrispoTask {
             while (roleRS.next()) {
                 
                 String name = roleRS.getString(name_col);
-                if (name.equalsIgnoreCase(SUPER_USER_ROLE_NAME)
-                        || name.equalsIgnoreCase(RESOURCE_CREATOR_ROLE)) {
+                if (name.equalsIgnoreCase(RESOURCE_CREATOR_ROLE)) {
                     continue;
                 }
                 System.out.println("creating roleid");
