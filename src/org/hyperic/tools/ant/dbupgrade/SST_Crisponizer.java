@@ -48,11 +48,7 @@ import org.hyperic.util.jdbc.DBUtil;
  */
 public class SST_Crisponizer extends CrispoTask {
     private static final Class LOGCTX = SST_Crisponizer.class;
-    private static final String CRISPO_ID_SEQ     = "EAM_CRISPO_ID_SEQ";
-    private static final String CRISPO_TABLE      = "EAM_CRISPO";
-    private static final String CRISPO_OPT_ID_SEQ = "EAM_CRISPO_OPT_ID_SEQ";
-    private static final String CRISPO_OPT_TABLE  = "EAM_CRISPO_OPT";
-    
+
     private String  _table;
     private String  _column;
     private String  _crispoColumn;
@@ -144,7 +140,7 @@ public class SST_Crisponizer extends CrispoTask {
             _execute();
         } catch(BuildException e) {
             e.printStackTrace();
-            throw (BuildException)e;
+            throw e;
         } catch(RuntimeException e) {
             e.printStackTrace();
             throw e;
@@ -154,9 +150,6 @@ public class SST_Crisponizer extends CrispoTask {
     private void _execute()
         throws BuildException
     {
-        Statement stmt  = null;
-        ResultSet rs    = null;
-
         if (_table == null || _column == null || _crispoColumn == null) {
             throw new BuildException("table, column, and crispoColumn " +
                                      "must be specified");
