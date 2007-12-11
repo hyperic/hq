@@ -7677,23 +7677,16 @@ has already been defined.
     <schema-alterColumn table="EAM_AUDIT" column="KLAZZ" precision="255"
                         columnType="VARCHAR2" nullable="not null" />
   </schemaSpec>	
-	
-  <schemaSpec version="3.82">
-	<schema-directSQL>
-        <statement desc="Dropping index on EAM_CONFIG_RESPONSE validationerr field 
-						 before changing the field size">
-          DROP INDEX cresp_err_idx
-        </statement>
-	</schema-directSQL>	  
-	  
+
+  <!-- For Postgres the SST_AlterColumn task will create a new column, copy the 
+	   data, then drop the old column. Hence, we need to create the index again 
+	   on the EAM_CONFIG_RESPONSE validationerr column. We don't need to worry 
+	   about creating the index for Oracle since we are truly altering the column. -->		
+  <schemaSpec version="3.82">	  
     <schema-alterColumn table="EAM_CONFIG_RESPONSE" column="VALIDATIONERR" 
 						precision="512" columnType="VARCHAR2"/>
 	
 	<schema-directSQL>
-        <statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr" 
-                   targetDB="oracle">
-          CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE (validationerr)
-        </statement>
 		<statement desc="Creating index on EAM_CONFIG_RESPONSE validationerr"
 				   targetDB="postgresql">
 		  CREATE INDEX cresp_err_idx ON EAM_CONFIG_RESPONSE USING btree (validationerr)
@@ -7704,7 +7697,24 @@ has already been defined.
   <schemaSpec version="3.83">
 	<schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
                         columnType="VARCHAR2" nullable="not null" />
-  </schemaSpec>	 
+  </schemaSpec>
+
+  <!-- For Postgres the SST_AlterColumn task will create a new column, copy the 
+       data, then drop the old column. Hence, we need to create the FK constraint 
+	   again on the EAM_SUBJECT pref_crispo_id column. We don't need to worry 
+       about the FK constraint for Oracle since we are truly altering the column. -->  	
+  <schemaSpec version="3.84">
+	<schema-alterColumn table="EAM_SUBJECT" column="PREF_CRISPO_ID" 
+					    columnType="INTEGER"/>
+
+	<schema-directSQL>
+		<statement desc="Creating FK constraint on EAM_SUBJECT pref_crispo_id" 
+			       targetDB="postgresql">
+			ALTER TABLE EAM_SUBJECT add constraint fk8e4d1fe6e3c7cb1 
+            FOREIGN KEY (pref_crispo_id) REFERENCES EAM_CRISPO(id)
+		</statement>	  
+	</schema-directSQL>  		     
+  </schemaSpec>
 	 
 </dbupgrade>
 </target>
