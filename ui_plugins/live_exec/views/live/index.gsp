@@ -108,13 +108,15 @@ function runCommand() {
 }
 
 function handleError(er) {
-var msgPanelObj = dojo.byId("messagePanel");
-            if(msgPanelObj.style.display != "block") {
-            msgPanelObj.style.display = "block";
-            dojo.byId("messagePanelMessage").innerHTML = er;
-         } else {
-           dojo.byId("messagePanelMessage").innerHTML = er;
-         }
+    var msgPanelObj = dojo.byId("messagePanel");
+    if(msgPanelObj.style.display != "block") {
+        msgPanelObj.style.display = "block";
+    }
+
+    if (er.search(/Unknown command/) < 0)
+        dojo.byId("messagePanelMessage").innerHTML = er;
+    else
+        dojo.byId("messagePanelMessage").innerHTML = "${l.agentUnknownCommand}";
 }
 
 function hideErrorPanel() {
