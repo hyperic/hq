@@ -115,7 +115,7 @@ public class AvailabilityCheckService
         watch.markTimeBegin("getEnabledAvailabilityMetrics");
         List dmList = getDMManager().
             findMeasurementsByCategory(MeasurementConstants.CAT_AVAILABILITY);
-        MetricDataCache metCache = MetricDataCache.getInstance();
+        MetricDataCache cache = MetricDataCache.getInstance();
         watch.markTimeEnd("getEnabledAvailabilityMetrics");
         
         if (log.isDebugEnabled())
@@ -131,7 +131,6 @@ public class AvailabilityCheckService
         // Let's be safe and reset the time to current
         current = System.currentTimeMillis();
 
-        MetricDataCache cache = MetricDataCache.getInstance();
         for (Iterator it = dmList.iterator(); it.hasNext(); ) {
             DerivedMeasurement dm = (DerivedMeasurement) it.next();
             if (!dm.getTemplate().getAlias().toUpperCase()
@@ -195,7 +194,7 @@ public class AvailabilityCheckService
             // Check SRN to see if somehow the agent lost the schedule
             if (theMissing.length > 0) {
                 // First see if it was reported recently
-                if (metCache.get(dm.getId(),
+                if (cache.get(dm.getId(),
                     theMissing[theMissing.length - 1] + 1) != null)
                     continue;
                 
