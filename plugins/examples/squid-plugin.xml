@@ -233,7 +233,7 @@
     <help>
     <![CDATA[
     <p>
-    <a href="http://www.squid-cache.org/Doc/FAQ/FAQ-18.html#ss18.2">
+    <a href="http://wiki.squid-cache.org/SquidFaq/SquidSnmp">
     Squid SNMP support must be enabled
     </a>
     </p>
