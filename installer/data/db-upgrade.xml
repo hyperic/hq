@@ -7659,6 +7659,19 @@ has already been defined.
         </statement>
 	  </schema-directSQL>       
   </schemaSpec> 
+	
+  <!-- Need to rename the primary key for the EAM_TRIGGER_EVENT table so that 
+       the migration in schema spec 3.73 is the same as a fresh install. 
+	   Don't worry about this for Oracle since it uses an auto-generated primary 
+	   key name. -->                      
+  <schemaSpec version="3.80">
+    <schema-directSQL>
+        <statement desc="Rename the primary key on EAM_TRIGGER_EVENT" 
+                   targetDB="postgresql">
+		  ALTER INDEX new_eam_trigger_event_pkey rename TO eam_trigger_event_pkey
+        </statement>
+    </schema-directSQL>
+  </schemaSpec> 	
 	 
 </dbupgrade>
 </target>
