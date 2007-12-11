@@ -16,6 +16,14 @@ Information: http://struts.apache.org
 License: http://www.apache.org/licenses/LICENSE-2.0
 Use: MVC architecture that is used for the client user interface for display logic.
 
+- Apache Jakarta ORO -
+Information: http://jakarta.apache.org/oro/index.html
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+- Apache Ant -
+Information: http://ant.apache.org/
+License: http://www.apache.org/licenses/LICENSE-2.0
+
 - PostgreSQL -
 Information: http://www.postgresql.org
 License: http://www.postgresql.org/licence.html
@@ -136,3 +144,7 @@ Use: Ehcache is implemented as the secondary cache for Hibernate.
 Information: http://dojotoolkit.org/
 License: http://svn.dojotoolkit.org/dojo/trunk/LICENSE - New BSD License
 Use: Dojo javascript toolkit provides some of the client user interface widgets and Ajax behavior.
+
+- Xerces -
+Information: http://xerces.apache.org/
+License: http://www.apache.org/licenses/LICENSE-2.0
