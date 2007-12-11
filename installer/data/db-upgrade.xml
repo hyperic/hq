@@ -7671,7 +7671,12 @@ has already been defined.
 		  ALTER INDEX new_eam_trigger_event_pkey rename TO eam_trigger_event_pkey
         </statement>
     </schema-directSQL>
-  </schemaSpec> 	
+  </schemaSpec> 
+	
+  <schemaSpec version="3.81">
+    <schema-alterColumn table="EAM_AUDIT" column="KLAZZ" precision="255"
+                        columnType="VARCHAR2" nullable="not null" />
+  </schemaSpec>		
 	 
 </dbupgrade>
 </target>
