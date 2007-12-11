@@ -82,6 +82,7 @@
         <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
       </case>
       <case value="MySQL">
+		<property name="include.hq.sequence.table" value="true" />
         <property name="hyperic.dialect" value="MySQL5InnoDB" />
         <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.${hyperic.dialect}Dialect" />
       </case>
@@ -106,7 +107,10 @@
     <mkdir dir="${build.dir}/dd/hibernate/sql" />
 
     <copy todir="${build.dir}/classes/META-INF">
-      <fileset dir="${hq.home}/sql" includes="**/*.hbm.xml"/>
+      <fileset dir="${hq.home}/sql">
+		<include name="**/*.hbm.xml"/>
+		<exclude name="**/Sequence.hbm.xml" unless="include.hq.sequence.table"/>
+	  </fileset>	
     </copy>
     
     <!-- export hibernate properties (these values can be from .hq/build.properties file) -->
