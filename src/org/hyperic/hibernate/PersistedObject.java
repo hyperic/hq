@@ -40,7 +40,8 @@ import java.io.Serializable;
 public abstract class PersistedObject 
     implements Serializable
 {
-    private final LogicalIdentityHelper idHelper = new LogicalIdentityHelper();
+    private final static LogicalIdentityHelper idHelper =
+        new LogicalIdentityHelper();
     
     private Integer _id;
 
