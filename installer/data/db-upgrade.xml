@@ -7715,6 +7715,11 @@ has already been defined.
 		</statement>	  
 	</schema-directSQL>  		     
   </schemaSpec>
+  
+  <!-- Oracle and Postgres do not need the HQ_SEQUENCE table. -->	
+  <schemaSpec version="3.85">
+    <schema-dropTable table="HQ_SEQUENCE"/>           
+  </schemaSpec>	
 	 
 </dbupgrade>
 </target>
