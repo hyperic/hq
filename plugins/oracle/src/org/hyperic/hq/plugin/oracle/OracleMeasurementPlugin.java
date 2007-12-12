@@ -29,6 +29,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
 
 import java.util.HashMap;
@@ -48,8 +49,15 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.SchemaBuilder;
 import org.hyperic.util.jdbc.DBUtil;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+
 public class OracleMeasurementPlugin
     extends JDBCMeasurementPlugin {
+
+    private static String logCtx = OracleMeasurementPlugin.class.getName();
+    private static Log _log = LogFactory.getLog(logCtx);
 
     public static final String PROP_URL      = "jdbcUrl";
     public static final String PROP_USER     = "jdbcUser";
@@ -375,6 +383,11 @@ public class OracleMeasurementPlugin
         String tablespace = metric.getObjectProperties().
             getProperty(PROP_TABLESPACE);
         if (tablespace != null) {
+            if (tablespaceIsOffline(tablespace, metric)) {
+                _log.debug("Tablespace " + tablespace +
+                           " is offline, will return 0 for all metrics.");
+                return "select 0 from dual";
+            }
             query = StringUtil.replace(query, "%tablespace%", tablespace);
         }
 
@@ -385,6 +398,34 @@ public class OracleMeasurementPlugin
         query = StringUtil.replace(query, "%instance%", instance);
 
         return query;
+    }
+
+    private boolean tablespaceIsOffline(String tablespace, Metric metric)
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try
+        {
+            conn = getCachedConnection(metric);
+            stmt = conn.createStatement();
+            String sql = "select lower(status) as status" +
+                         " FROM dba_tablespaces " +
+                         " WHERE lower(tablespace_name) = " +
+                         "lower('"+tablespace+"')";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                return (rs.getString("status").equals("offline")) ? true : false;
+            }
+        } catch (SQLException e) {
+            // not sure what we can do if this happens, so just log the error
+            _log.error(e.getMessage(), e);
+        } finally {
+            // don't close the conn, since it is shared
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
+        }
+        // we don't want to collect any metrics if the tablespace does not exist
+        return true;
     }
 
     /**
