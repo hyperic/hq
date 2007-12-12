@@ -63,6 +63,11 @@
     <plugin type="autoinventory"
             class="org.hyperic.hq.product.SNMPDetector"/>
 
+    <properties>
+      <property name="cacheAdmin" description="Admin"/>
+      <property name="cacheVersionId" description="Version"/>
+    </properties>
+
     <metric name="Availability"
             template="${snmp.template},Avail=true:cacheUptime"
             indicator="true"/>
