@@ -189,8 +189,8 @@
       <replacefilter token="@@@server.database-user@@@" value="${hq.jdbc.user}"/>
       <replacefilter token="@@@server.database-password@@@" value="${hq.jdbc.password}"/>
       <replacefilter token="@@@server.database-minpoolsize@@@" value="5"/>
-      <replacefilter token="@@@server.database-maxpoolsize@@@" value="500"/>
-      <replacefilter token="@@@server.database-blockingtimeout@@@" value="5000"/>
+      <replacefilter token="@@@server.database-maxpoolsize@@@" value="90"/>
+      <replacefilter token="@@@server.database-blockingtimeout@@@" value="10000"/>
       <replacefilter token="@@@server.database-idletimeout@@@" value="15"/>
     </replace>
 

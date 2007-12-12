@@ -54,8 +54,8 @@ public class HQMain {
         { "server.jms.highmemory", "350" },
         { "server.jms.maxmemory", "400" },
         { "server.database-minpoolsize", "5" },
-        { "server.database-maxpoolsize", "500" },
-        { "server.database-blockingtimeout", "5000" },
+        { "server.database-maxpoolsize", "90" },
+        { "server.database-blockingtimeout", "10000" },
         { "server.database-idletimeout", "15"}
     };
 
