@@ -66,26 +66,30 @@ onloads.push(setSelectedOption);
             <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.AlertType}:</strong></span>
-              <select id="alertSelect" 
+              <div><select id="alertSelect" 
                       onchange='selectAlertType(options[selectedIndex].value)'>
                 <option value='1'>${l.ClassicAlertsSelect}</option>
                 <option value='2'>${l.GroupAlertsSelect}</option>
-              </select>          
+              </select>
+              </div>          
             </div>
             <% } %>
           
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.MinPriority}</strong></span>
-              <%= selectList(severities, 
+              <div><%= selectList(severities, 
      	                     [id:'alertSevSelect',
      	                      onchange:'refreshAlertTables();']) %>
+     	      </div>
             </div>          
 
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.InTheLast}</strong></span>
-       	      <%= selectList(lastDays, 
+       	      <div><%= selectList(lastDays, 
      	                     [id:'alertTimeSelect',
      	                      onchange:'refreshAlertTables();']) %>
+     	                      
+     	      </div>
             </div>          
             </div>
         </div>
@@ -115,14 +119,15 @@ onloads.push(setSelectedOption);
             <% if (isEE) { %>
             <div class="fieldSetStacked" style="margin-bottom:8px;">
               <span><strong>${l.DefType}:</strong></span>
-              <select id="defSelect"
+              <div><select id="defSelect"
                       onchange='selectDefType(options[selectedIndex].value)'>
                 <option value='1'>${l.ClassicDefsSelect}</option>
                 <option value='3'>${l.GroupDefsSelect}</option>
                 <% if (superUser) { %>
                   <option value='2'>${l.TypeBasedDefsSelect}</option>
                 <% } %>
-              </select>          
+              </select>
+              </div>          
             </div>
             
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
