@@ -296,9 +296,8 @@ font-weight:bold;
 }
 
 /* Down Systems Page */
-.expand {width:18px;height:18px;background: url( "images/expand_plus.gif" ) no-repeat}
-.expand {background-position:bottom right}
-.unexpand {background: url( "images/expand_minus.gif" ) no-repeat right bottom;}
+.expand {width:18px;height:18px;background: url( "images/expand_plus.gif" ) no-repeat right bottom;}
+.collapse {background: url( "images/expand_minus.gif" ) no-repeat right bottom;}
 .leftbxblueborder {border:1px solid #7BAFFF;}
 .downList{margin-right: 10px; width: 22%; float:left;display:inline;height: 400px;}
 .downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: right;display:inline; width: 75%; height: 442px;}
@@ -306,11 +305,15 @@ font-weight:bold;
  .boxLinks {padding:3px 3px 0px 5px;display:inline;}
  .right{float:right;}
  .left{float:left;}
- .tree {padding:3px;height:98%;}
- .topCat {font-weight:bold;cursor:pointer;padding:3px;border:1px solid #dddddd;}
+ .tree {padding:8px 0px 0px;height:98%;}
+ .topCat {font-weight:bold;cursor:pointer;padding:3px 0px 3px 0px;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
-.listItem {padding:3px; cursor:pointer;}
+#functionPanel {
+	background-color:#EBEDF2;
+	padding-bottom: 3px;
+}
+.listItem {padding:3px 0px 3px 0px; cursor:pointer; margin-left:3px;}
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 #results_msg {width:78%;float:right;padding:3px;padding-bottom:5px;font-weight:bold;}
 .countLinksActive{color: rgb(0, 51, 153); font-weight: bold; cursor: pointer;}

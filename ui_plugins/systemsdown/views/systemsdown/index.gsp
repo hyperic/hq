@@ -7,19 +7,21 @@
 
     plugin.accordion.swapVis = function(elem) {
         plugin.accordion.disableSelection(elem);
-        var sib = elem.nextSibling;
+        var sib = elem.parentNode.nextSibling;
         if (dojo.html.getStyleProperty(sib, 'display') == 'none') {
             sib.style.display = 'block';
+            elem.className="collapse";
         } else {
             sib.style.display = 'none';
+            elem.className="expand";
         }
-        plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+        //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
     }
 
     plugin.accordion.swapSelected = function(elem) {
         plugin.accordion.disableSelection(elem);
         if (selectedItem && typeof(selectedItem) == 'object') {
-            selectedItem.style.padding = '3px';
+            selectedItem.style.padding = '3px 0px 3px 0px';
             selectedItem.style.border = '';
             selectedItem.style.background = '';
         }
@@ -30,7 +32,7 @@
     }
 
     plugin.accordion.setSelected = function(elem) {
-        elem.style.padding = '2px';
+        elem.style.padding = '3px 0px 3px 0px';
         elem.style.border = '1px solid #dddddd';
         elem.style.background = '#88BDEE none repeat scroll 0%';
     }
@@ -143,7 +145,7 @@
     <div class="downList">
         <div class="leftbxblueborder">
             <div class="BlockTitle" style="text-align:left;">${l.ResType}</div>
-                <div>
+                <div id="functionPanel">
                     <div class="boxLinks left">
                         <a href="javascript:plugin.accordion.closeAll();">${l.CollAll}</a>
                     </div>
