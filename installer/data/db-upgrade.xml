@@ -7556,7 +7556,7 @@ has already been defined.
   <schemaSpec version="3.78">
     <schema-directSQL>		                 
         <statement desc="Dropping old unique constraint to create with correct name" 
-                   targetDB="postgresql">
+                   targetDB="postgresql" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT eam_escalation_state_id_key CASCADE           
         </statement>
         <statement desc="Create unique constraint with correct name" 
