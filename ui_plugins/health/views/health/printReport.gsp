@@ -68,6 +68,16 @@ ${d.status}
 
 
 <% } %>
+
+
+<% if (jvmSupportsTraces) { %>
+-- Thread Dump --
+  <% for (ent in Thread.allStackTraces) { %>
+    <%= h(ent.key) %>
+    <% for (elem in ent.value) { %> <%= h(elem) %> 
+    <% } %>
+  <% } %>
+<% } %>
     
   </pre>
 </div>

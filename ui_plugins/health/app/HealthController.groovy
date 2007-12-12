@@ -102,7 +102,8 @@ class HealthController
     	render(locals:[ diags: diagnostics,
     	                cacheSchema: cacheSchema,
     	                metricsPerMinute: metricsPerMinute,
-    	                databaseQueries: databaseQueries ])
+    	                databaseQueries: databaseQueries,
+    	                jvmSupportsTraces: getJVMSupportsTraces() ])
     }
     
 	private getMetricsPerMinute() {
@@ -223,6 +224,7 @@ class HealthController
             cmdLine:          cmdLine,
             procEnv:          procEnv,
             cpuInfos:         s.cpuInfoList,
+            jvmSupportsTraces: getJVMSupportsTraces(),
         ] + getSystemStats([:])
     	render(locals: locals)
     }
@@ -282,6 +284,11 @@ class HealthController
     
     private h(str) {
         HtmlUtil.escapeHtml(str)
+    }
+    
+    private getJVMSupportsTraces() {
+        def ver = System.getProperty('java.version')[0..2]
+        ver != '1.3' && ver != '1.4' 
     }
     
     def runQuery(params) {
