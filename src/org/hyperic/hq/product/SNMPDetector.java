@@ -75,9 +75,29 @@ public class SNMPDetector extends DaemonDetector {
         throws PluginException {
 
         log.debug("discoverServices(" + config + ")");
+        String[] keys = getCustomPropertiesSchema().getOptionNames();
+        ConfigResponse cprops = new ConfigResponse();
         SNMPSession session;
         try {
             session = new SNMPClient().getSession(config);
+
+            //custom properties discovery for the server
+            for (int i=0; i<keys.length; i++) {
+                String key = keys[i];
+                if (SNMPClient.getOID(key) == null) {
+                    log.debug("Cannot resolve '" + key + "'");
+                    continue;
+                }
+                try {
+                    cprops.setValue(key,
+                                    session.getSingleValue(key).toString());
+                } catch (SNMPException e) {
+                    log.warn("Error getting '" + key + "': " +
+                             e.getMessage());            
+                }
+            }
+            setCustomProperties(cprops);
+
             if (type == null) {
                 //discover services for existings server
                 return discoverServices(this, config, session);
