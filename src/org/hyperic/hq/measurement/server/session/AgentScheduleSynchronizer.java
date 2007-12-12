@@ -22,23 +22,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.measurement.server.mdb;
+package org.hyperic.hq.measurement.server.session;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
@@ -49,15 +44,7 @@ import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
-import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.GraphBuilder;
-import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.server.session.RawMeasurement;
-import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 
 /**
@@ -66,92 +53,50 @@ import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
  */
 public class AgentScheduleSynchronizer {
     
-    private static final Log log =
+    private static final Log _log =
         LogFactory.getLog(AgentScheduleSynchronizer.class.getName());
 
-    private static AgentScheduleSynchronizer singleton =
+    private static AgentScheduleSynchronizer SINGLETON =
         new AgentScheduleSynchronizer();
 
     public static AgentScheduleSynchronizer getInstance() {
-        return AgentScheduleSynchronizer.singleton;
+        return AgentScheduleSynchronizer.SINGLETON;
     }
 
     private AgentScheduleSynchronizer() {
-        // Singleton class, private constructor
     }
 
-    private HashMap dmMap = new HashMap();
-
-    private void cacheDM(DerivedMeasurement dmVo) {
-        Integer tid = dmVo.getTemplate().getId();
-        if (!dmMap.containsKey(tid)) {
-            dmMap.put(tid, new HashMap());
-        }
-
-        HashMap tmplMap = (HashMap) dmMap.get(tid);
-        tmplMap.put(dmVo.getInstanceId(), dmVo);
+    private AuthzSubjectValue getOverlord() {
+        return AuthzSubjectManagerEJBImpl.getOne().getOverlord();
     }
 
-    private AuthzSubjectValue subject = null;
-    private AuthzSubjectValue getSubject() throws SubjectNotFoundException {
-        if (subject == null)
-            subject = AuthzSubjectManagerEJBImpl.getOne().findOverlord();
-                
-        return subject;
-    }
-
-    private MeasurementProcessorLocal measurementProc = null;
-    private MeasurementProcessorLocal getMeasurementProcessor() {
-        if (measurementProc == null) {
-            measurementProc = MeasurementProcessorEJBImpl.getOne();
-        }
-
-        return measurementProc;
-    }
-
-    private DerivedMeasurementManagerLocal dman = null;
     private DerivedMeasurementManagerLocal getDMan() {
-        if (dman == null)
-            dman = DerivedMeasurementManagerEJBImpl.getOne();
-        return dman; 
+        return DerivedMeasurementManagerEJBImpl.getOne();
     }
 
-    private RawMeasurementManagerLocal rman = null;
-    private RawMeasurementManagerLocal getRMan() {
-        if (rman == null)
-            rman = RawMeasurementManagerEJBImpl.getOne();
-        return rman;
+    private DerivedMeasurement 
+        getDMByTemplateAndInstance(DerivedMeasurementManagerLocal dman, 
+                                   Integer tid, Integer instanceId)
+        throws MeasurementNotFoundException
+    {
+        return dman.findMeasurement(tid, instanceId);
     }
 
-    private DerivedMeasurement getDMByTemplateAndInstance(
-        Integer tid, Integer instanceId)
-        throws MeasurementNotFoundException, CreateException,
-               SubjectNotFoundException {
-        HashMap tmplMap = (HashMap) this.dmMap.get(tid);
-        if (tmplMap != null && tmplMap.containsKey(instanceId)) {
-            return (DerivedMeasurement) tmplMap.get(instanceId);
-        }
-
-        // Otherwise, we need to look it up
-        DerivedMeasurement dmVo = getDMan().findMeasurement(tid, instanceId);
-        cacheDM(dmVo);
-        
-        return dmVo;
-    }
-    
-
-    private RawMeasurement getRMByTemplateAndInstance(Integer tid,
-                                                      Integer instanceId) {
-        return getRMan().findMeasurement(tid, instanceId);
+    private RawMeasurement 
+        getRMByTemplateAndInstance(RawMeasurementManagerLocal rMan, Integer tid,
+                                   Integer instanceId) 
+    {
+        return rMan.findMeasurement(tid, instanceId);
     }
 
     private void reschedule(AppdefEntityID entId, List dmVos)
         throws InvalidGraphException, PermissionException,
-               MeasurementScheduleException, MonitorAgentException,
-               SubjectNotFoundException {
+               MeasurementScheduleException, MonitorAgentException
+    {
+        RawMeasurementManagerLocal rMan = RawMeasurementManagerEJBImpl.getOne();
+        DerivedMeasurementManagerLocal dMan = getDMan();
         
         HashSet agentSchedule  = new HashSet();
-        HashSet serverSchedule = new HashSet();
         Graph[] graphs = new Graph[dmVos.size()];
 
         Iterator it = dmVos.iterator();
@@ -159,7 +104,6 @@ public class AgentScheduleSynchronizer {
             DerivedMeasurement dmVo = (DerivedMeasurement) it.next();
             MeasurementTemplate tmpl = dmVo.getTemplate();
             
-            // Build the graph
             graphs[i] = GraphBuilder.buildGraph(tmpl);
             
             DerivedNode derivedNode = (DerivedNode)
@@ -173,20 +117,17 @@ public class AgentScheduleSynchronizer {
                 RawNode rawNode = (RawNode)
                     derivedNode.getOutgoing().iterator().next();
 
-                // Now grab the raw measurement template
                 MeasurementTemplate rawTemplate =
                     rawNode.getMeasurementTemplate();
 
-                // Set the new interval time
                 derivedNode.setInterval(dmVo.getInterval());
 
-                // Check the raw node
                 RawMeasurement rmVal =
-                    getRMByTemplateAndInstance(rawTemplate.getId(),
+                    getRMByTemplateAndInstance(rMan, rawTemplate.getId(),
                                                dmVo.getInstanceId());
 
                 if (rmVal == null) {    // Don't reschedule if no raw metric
-                    log.error("AgentScheduleSynchronizer: Cannot look up " +
+                    _log.error("AgentScheduleSynchronizer: Cannot look up " +
                               "raw metric by template and instance IDs");
                     continue;
                 }
@@ -194,9 +135,6 @@ public class AgentScheduleSynchronizer {
                 // Add the raw measurement to the schedule
                 agentSchedule.add( rmVal.getId() );
             } else {
-                // First add to server schedule
-                serverSchedule.add(dmVo.getId());
-
                 // we're not an identity DM template, so we need
                 // to make sure that measurements are enabled for
                 // the whole graph
@@ -213,7 +151,7 @@ public class AgentScheduleSynchronizer {
                     if (node instanceof DerivedNode) {
                         try {
                             DerivedMeasurement tmpDm =
-                                getDMByTemplateAndInstance(
+                                getDMByTemplateAndInstance(dMan, 
                                     templArg.getId(), dmVo.getInstanceId());
                             long targetInterval = tmpDm.getInterval();
 
@@ -221,41 +159,42 @@ public class AgentScheduleSynchronizer {
                                 dmVo = tmpDm;
 
                             ( (DerivedNode)node ).setInterval(targetInterval);
-                        } catch (CreateException e) {
-                            // Move on to the next one
-                            continue;
                         } catch (MeasurementNotFoundException e) {
                             continue;
                         }
                     } else {
                         // we are a raw node
                         RawMeasurement rmVal =
-                            getRMByTemplateAndInstance(templArg.getId(), 
+                            getRMByTemplateAndInstance(rMan, templArg.getId(), 
                                                        dmVo.getInstanceId());
 
                         agentSchedule.add( rmVal.getId() );
-                    } // end if template arg is DM else RM
-                } // end for each template arg
-            } // end if identity else
+                    } 
+                } 
+            } 
         }
 
-        getMeasurementProcessor().schedule(entId, graphs, agentSchedule,
-                                           serverSchedule);
+        MeasurementProcessorEJBImpl.getOne().schedule(entId, graphs, 
+                                                      agentSchedule);
     }
     
     private void unschedule(AppdefEntityID eid)
-        throws MeasurementUnscheduleException, PermissionException {
-        log.debug("Unschedule metrics for " + eid);
-        getMeasurementProcessor().unschedule(eid);
+        throws MeasurementUnscheduleException, PermissionException 
+    {
+        if (_log.isDebugEnabled())
+            _log.debug("Unschedule metrics for " + eid);
+        MeasurementProcessorEJBImpl.getOne().unschedule(eid);
     }
 
     public void reschedule(AppdefEntityID eid)
         throws InvalidGraphException, MeasurementScheduleException,
                MonitorAgentException, PermissionException,
-               MeasurementUnscheduleException, SubjectNotFoundException 
+               MeasurementUnscheduleException
     {
-        log.debug("Reschedule metrics for " + eid);
-        List dms = getDMan().findEnabledMeasurements(getSubject(), eid, null);
+        if (_log.isDebugEnabled())
+            _log.debug("Reschedule metrics for " + eid);
+        
+        List dms = getDMan().findEnabledMeasurements(getOverlord(), eid, null);
                 
         if (dms.size() > 0)
             reschedule(eid, dms);
@@ -264,25 +203,10 @@ public class AgentScheduleSynchronizer {
     }
 
     public static void schedule(AppdefEntityID eid) {
-        synchronized (log) {
-            try {
-                AgentScheduleSynchronizer.singleton.reschedule(eid);
-            } catch (PermissionException e) {
-                log.debug("No permission to look up agent", e);
-            } catch (MonitorAgentException e) {
-                log.error("Unable to communicate with agent for entity: " +
-                          eid.getID() + " to refresh metric schedule");
-            } catch (MeasurementScheduleException e) {
-                log.debug("Schedule exception", e);
-            } catch (MeasurementUnscheduleException e) {
-                log.debug("Unschedule exception", e);
-            } catch (SystemException e) {
-                log.debug("Unable to look up measurement processor", e);
-            } catch (InvalidGraphException e) {
-                log.debug("Unable to create valid measurement graphs");
-            } catch (SubjectNotFoundException e) {
-                log.debug("Unable to look up super user");
-            }
+        try {
+            AgentScheduleSynchronizer.SINGLETON.reschedule(eid);
+        } catch(Exception e) {
+            _log.warn("Exception, scheduling [" + eid + "]", e);
         }
     }
 }

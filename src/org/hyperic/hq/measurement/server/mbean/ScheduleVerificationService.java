@@ -48,9 +48,9 @@ import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.monitor.MonitorCreateException;
-import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
-import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 
@@ -171,8 +171,6 @@ public class ScheduleVerificationService
                 _log.debug("Scheduling error during rescheduling of " + entId);
             } catch (MeasurementUnscheduleException e) {
                 _log.debug("Scheduling error during unscheduling of " + entId);
-            } catch (SubjectNotFoundException e) {
-                // No measurements to reschedule
             } catch (InvalidGraphException e) {
                 _log.debug("Invalid graph for rescheduling of " + entId);
             }

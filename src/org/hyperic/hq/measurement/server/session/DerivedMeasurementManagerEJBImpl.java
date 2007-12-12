@@ -80,7 +80,7 @@ import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.measurement.server.mdb.AgentScheduleSynchronizer;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;

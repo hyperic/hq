@@ -112,9 +112,10 @@ public class MeasurementProcessorEJBImpl
      * @param graphs the graph for measurement
      */
     public void schedule(AppdefEntityID entId, Graph[] graphs,
-                         Set agentSchedule, Set serverSchedule)
+                         Set agentSchedule)
         throws PermissionException, MeasurementScheduleException,
-               MonitorAgentException {
+               MonitorAgentException 
+    {
         long scheduleTime = System.currentTimeMillis();
 
         SRNManagerLocal srnManager = getSRNManager();
@@ -386,72 +387,6 @@ public class MeasurementProcessorEJBImpl
         // Then schedule
         monitor.schedule(aconn, srn, aSched);
         logTime("schedule.talk2Agent",talk2AgentStart);
-    }
-
-    private void scheduleDerivedMeasurement(List dmvals, Set serverSchedule)
-        throws SchedulerException {
-        for (Iterator it = dmvals.iterator(); it.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement) it.next();
-                
-            // Only schedule if not identity expression
-            // and if it hasn't already been scheduled.
-            if (serverSchedule.contains(dm.getId())) {
-    
-                // if no job yet exists for this derived measurement,
-                // schedule one
-                String jobName =
-                    CalculateDerivedMeasurementJob.getJobName(dm);
-                String schedName
-                    = CalculateDerivedMeasurementJob.getScheduleName(dm);
-                Object job = getScheduler().getJobDetail
-                    (jobName, CalculateDerivedMeasurementJob.SCHEDULER_GROUP);
-                Object schedule = getScheduler().getTrigger
-                    (schedName, CalculateDerivedMeasurementJob.SCHEDULER_GROUP);
-    
-                // if either the job exists without the schedule, or
-                // the schedule exists without the job, remove the
-                // part that exists so that we can properly schedule
-                // the job
-                if (null == job) {
-                    if (null != schedule) {
-                        // schedule exists, job doesn't
-                        if (log.isDebugEnabled()) {
-                            log.debug("Schedule " + schedName +
-                                      " exists without job; removing it.");
-                        }
-                        getScheduler().unscheduleJob(
-                            schedName,
-                            CalculateDerivedMeasurementJob.SCHEDULER_GROUP);
-                        schedule = null;
-                    }
-                } else {
-                    if (null == schedule) {
-                        // job exists, schedule doesn't
-                        if (log.isDebugEnabled()) {
-                            log.debug("Job " + jobName +
-                                      " exists without schedule; removing it.");
-                        }
-                        getScheduler().deleteJob(
-                            jobName,
-                            CalculateDerivedMeasurementJob.SCHEDULER_GROUP);
-                        job = null;
-                    }
-                }
-
-                // schedule the job if it is not already scheduled
-                if (null == job && null == schedule) {
-                    long scheduleStart = System.currentTimeMillis();
-                    getScheduler().scheduleJob
-                        (CalculateDerivedMeasurementJob.getJob(dm),
-                         CalculateDerivedMeasurementJob.getSchedule(dm));
-                    logTime("schedule.scheduleJob",scheduleStart);
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("DM " + dm.getId() + " is already scheduled.");
-                }
-            }
-        }
     }
 
     private DerivedMeasurement getDMByTemplateAndInstance(Integer tid,
