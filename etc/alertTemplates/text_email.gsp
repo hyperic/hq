@@ -24,7 +24,7 @@
   if (alertDef.performsEscalations()) {
        def lastFix = EscalationManagerEJBImpl.one.getLastFix(alertDef)
        if (lastFix) 
-           lastFixStr = "\n- Previous Fix: ${lastFix}"
+           lastFixStr = "\n- Previous Fix:            ${lastFix}"
   }
 
   def addAuxLogs(prefix, logs, buf) {
@@ -50,12 +50,13 @@ ${resource.name} has generated the following alert:
 ------------------------------------------
 
 ALERT DETAIL
-- Resource Name: ${resource.name}
-- Alert Name: ${alertDef.name}
-- Alert Description: <%= alertDef.description ? alertDef.description : "" %>
+- Resource Name:     ${resource.name}
+- Alert Name:        ${alertDef.name}<%
+if (alertDef.description) { %>
+- Alert Description: ${alertDef.description} <% } %>
 - Alert Date / Time: ${alertTime}
 - Triggering Condition(s): ${action.longReason}
-- Alert Severity: ${EventConstants.getPriority(alertDef.priority)}${lastFixStr}
+- Alert Severity:    ${EventConstants.getPriority(alertDef.priority)}${lastFixStr}
 ${auxLogInfo}${indicatorStr}
 
 ------------------------------------------

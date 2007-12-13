@@ -53,28 +53,50 @@
   </tr>
   <tr>
     <td style="padding-top:5px;padding-left:10px;">
-      ALERT DETAIL:
+      <b>ALERT DETAIL:</b>
     </td>
   </tr>
   <tr>
     <td style="padding-top:5px;padding-bottom:10px;padding-left:10px;border-bottom:4px solid #A5D9EE;">
-      Resource Name: <b>${resource.name}</b><br>
-      Alert Name: <b>${alertDef.name}</b><br>
-      Alert Description: <b><%= alertDef.description ? alertDef.description : "" %></b><br>
-      Alert Date / Time: <b>${alertTime}</b><br>
-      Triggering Condition(s): ${action.longReason}<br>
-      Alert Severity: <b>${EventConstants.getPriority(alertDef.priority)}</b><br>
+      <table width="100%" style="border: none; padding: 0px;">
+      <tr>
+      <td width="10%" nowrap>Resource Name:</td><td> <b>${resource.name}</b></td>
+      </tr>
+      <tr>
+      <td nowrap>Alert Name:</td><td> <b>${alertDef.name}</b></td>
+      </tr>
+      <tr>
+      <% if (alertDef.description) { %>
+      <td nowrap>Alert Description:</td><td> <b>${alertDef.description}</b></td>
+      </tr>
+      <% } %>
+      <tr>
+      <td nowrap>Alert Date / Time:</td><td> <b>${alertTime}</b></td>
+      </tr>
+      <tr>
+      <td nowrap>Triggering Condition(s):</td><td> ${action.longReason}</td>
+      </tr>
+      <tr>
+      <td nowrap>Alert Severity:</td><td> <b>${EventConstants.getPriority(alertDef.priority)}</b></td>
+      </tr>
       <% if (lastFix) { %>
-           Previous Resolution: <b>${lastFix}</b><br>
+      <tr>
+           <td nowrap>Previous Resolution:</td><td> <b>${lastFix}</b></td>
+      </tr>
       <% } %>
       <% if (resource.supportsMonitoring) { %>
-           Previous Indicator Metrics:<br>
+      <tr>
+           <td valign="top" nowrap>Previous Indicator Metrics:</td>
+           <td>
            <% for (i in resource.designatedMetrics.getLastDataPoints(MeasurementConstants.ACCEPTABLE_LIVE_MILLIS)) { %>
                <% if (i.value != null) { %>
              &nbsp;&nbsp;&nbsp;${i.key.template.name}: <b>${i.key.template.formatValue(i.value)}</b><br>
                <% } %>
            <% } %>
+           </td>
+      </tr>
       <% } %>
+      </table>
       ${auxLogInfo}
     </td>
   </tr>
