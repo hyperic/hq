@@ -3629,6 +3629,10 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
         List unavailEnts = getMetricManager().getUnavailEntities(null);
+        
+        if (unavailEnts.size() == 0)
+            return unavailEnts;
+        
         DownResSortField sortField = (DownResSortField) info.getSort();
         Set ret = new TreeSet(sortField.getComparator(!info.isAscending()));
         
@@ -3645,9 +3649,15 @@ public class AppdefBossEJBImpl
             }
         }
         
+        List viewables = findViewableEntityIds(user.getAuthzSubjectValue(),
+                                               APPDEF_TYPE_UNDEFINED,
+                                               null, null, null);
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             AppdefEntityID entityId = dmv.getEntityId();
+            if (!viewables.contains(entityId))
+                continue;
+            
             AppdefEntityValue res = new AppdefEntityValue(entityId, user);
                         
             // Look up the resource type
@@ -3696,10 +3706,20 @@ public class AppdefBossEJBImpl
         ret.put(SERVERS,   new ArrayList());
         ret.put(SERVICES,  new ArrayList());
         
+        if (unavailEnts.size() == 0)
+            return ret;
+        
+        List viewables = findViewableEntityIds(user.getAuthzSubjectValue(),
+                                               APPDEF_TYPE_UNDEFINED,
+                                               null, null, null);
         for (Iterator it = unavailEnts.iterator(); it.hasNext(); ) {
             DownMetricValue dmv = (DownMetricValue) it.next();
             
             AppdefEntityID aeid = dmv.getEntityId();
+            
+            if (!viewables.contains(aeid))
+                continue;
+            
             List list;
             
             if (aeid.isPlatform()) {
