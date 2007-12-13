@@ -39,7 +39,7 @@ public class WebsphereServerCollector extends WebsphereCollector {
             double total = getStatCount(jvmStats, "HeapSize");
             double used  = getStatCount(jvmStats, "UsedMemory");
             values.put("totalMemory", new Double(total));
-            values.put("usedMemory", new Double(total));
+            values.put("usedMemory", new Double(used));
             values.put("freeMemory", new Double(total-used));
         }
     }
