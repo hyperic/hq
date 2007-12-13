@@ -127,6 +127,12 @@ public class DisplayDashboardAction extends TilesAction {
 				dForm.setSelectedDashboardId(dashboardConfig.getId()
 						.toString());
 			}
+        } else if (dashboardCollection.size() == 1) {
+            // No need to select a default - only one available
+            dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
+            session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
+                    dashboardConfig.getId());
+            dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 		} else if (selectedDashboard != null) {
 			// TODO grab the selected dash by id
 			// if it doesn't exist pop dialog
@@ -139,12 +145,6 @@ public class DisplayDashboardAction extends TilesAction {
 				dForm.setSelectedDashboardId(dashboardConfig.getId()
 								.toString());
 			}
-		} else if (dashboardCollection.size() == 1) {
-			// No need to select a default - only one available
-			dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-					dashboardConfig.getId());
-			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
 		} else {
 			// many dashboards and no default or selected - pop default dialog
 			// set the background dashboard to the user dashboard
