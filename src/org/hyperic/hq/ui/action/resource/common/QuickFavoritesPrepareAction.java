@@ -25,18 +25,25 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -54,8 +61,14 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
 		// All we need to do is check our preferences to see if this resource 
 		// is in there.
+        HttpSession session = request.getSession();
+        ServletContext ctx = getServlet().getServletContext();
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+                (Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+                user, boss);
 		isFavorite = QuickFavoritesUtil
-				.isFavorite(user.getPreferences(), arv.getEntityId());
+				.isFavorite(dashConfig.getConfig(), arv.getEntityId());
 
 		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
 				.getAppdefKey());

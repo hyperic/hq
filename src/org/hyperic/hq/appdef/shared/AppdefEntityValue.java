@@ -291,10 +291,8 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getAppdefResourceType().getName();
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            throw new IllegalArgumentException("Application type name not " +
-                                               "yet supported");
+            return getAppdefResourceType().getName();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             return getGroupType().getName();
         default:
