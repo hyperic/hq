@@ -7727,6 +7727,26 @@ has already been defined.
     <schema-dropTable table="HQ_SEQUENCE"/>           
   </schemaSpec>	
 	 
+  <schemaSpec version="3.86">
+	  <schema-directSQL>
+		  <statement desc="Clear out UI attachment">
+          delete from eam_ui_attachment
+      </statement>
+		  <statement desc="Clear out UI admin view table">
+          delete from eam_ui_view_admin
+      </statement>
+		  <statement desc="Clear out UI masthead view table">
+          delete from eam_ui_view_masthead
+      </statement>
+		  <statement desc="Clear out UI view table">
+          delete from eam_ui_view
+      </statement>
+		  <statement desc="Clear out UI plugin table">
+          delete from eam_ui_plugin
+      </statement>
+	  </schema-directSQL>
+  </schemaSpec>	
+
 </dbupgrade>
 </target>
 
