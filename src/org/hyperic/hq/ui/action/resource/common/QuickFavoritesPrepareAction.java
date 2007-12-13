@@ -43,6 +43,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -66,8 +67,7 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
                 (Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
                 user, boss);
-        if (dashConfig != null)
-            isFavorite = QuickFavoritesUtil
+		isFavorite = QuickFavoritesUtil
 				.isFavorite(dashConfig.getConfig(), arv.getEntityId());
 
 		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
