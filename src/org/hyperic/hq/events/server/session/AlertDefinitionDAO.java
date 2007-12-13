@@ -39,7 +39,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -366,71 +365,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
         Query q = getSession().createQuery(sql);
         
         return pInfo.pageResults(q).list();
-    }
-    
-    /**
-     * Update in batch the alert definitions last fired times for each of the 
-     * provided events, using batch size specified by the 
-     * <code>hibernate.jdbc.batch_size</code> configuration property.
-     * 
-     * @param events The update events.
-     */
-    void updateAlertDefinitionsLastFiredTimes(AlertDefinitionLastFiredUpdateEvent[] events) {
-        // We want to retrieve the alert definition objects, then update the 
-        // object state so that the 2nd level cache is updated appropriately.
-        Session session = getSession();
-        FlushMode flushMode = session.getFlushMode();
-                
-        try {
-            session.setFlushMode(FlushMode.MANUAL);
-            
-            for (int i = 0, count = 0; i < events.length; i++) {
-                AlertDefinitionLastFiredUpdateEvent event = events[i];
-                AlertDefinition ad = get(event.getAlertDefinitionId());
-                
-                if (ad != null) {
-                    Long currentLastFiredTime = ad.getLastFired();
-                    
-                    if (currentLastFiredTime == null || 
-                        currentLastFiredTime.longValue() < event.getLastFiredTime()) {
-                        ad.setLastFired(new Long(event.getLastFiredTime()));
-                    }
-                    
-                    if (++count % 100 == 0) {
-                        session.flush();
-                    }                    
-                }
-            }
-            
-            session.flush();
-        } finally {
-            session.setFlushMode(flushMode);
-        }
-    }
-
-    /** 
-     * Find all alerts with ctimes greater than the last fired time in the 
-     * associated alert definition. Return the alert ctimes as alert definition 
-     * last fired time update events. This method is used to confirm that alert 
-     * definitions have last fired times at least equal to the ctimes specified 
-     * for their associated alerts.
-     * 
-     * @return The list of {@link AlertDefinitionLastFiredUpdateEvent update events}.
-     */
-    List getEventsForAlertDefinitionsWithOldLastFiredTimes() {
-        String sql = "select ad.id, a.ctime from Alert a join a.alertDefinition ad " +
-        		     "where ad.lastFired is null or ad.lastFired < a.ctime";
-        
-        List results = getSession().createQuery(sql).list();
-        List events = new ArrayList(results.size());
-        
-        for (Iterator iter = results.iterator(); iter.hasNext();) {
-            Object[] result = (Object[]) iter.next();
-            events.add(new AlertDefinitionLastFiredUpdateEvent((Integer)result[0], 
-                                                   ((Long)result[1]).longValue()));
-        }
-        
-        return events;
     }
 
 }

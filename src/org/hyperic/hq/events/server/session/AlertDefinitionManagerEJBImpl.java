@@ -56,7 +56,6 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
-import org.hyperic.hq.events.AlertDefinitionLastFiredUpdateEvent;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -269,19 +268,6 @@ public class AlertDefinitionManagerEJBImpl
         // we must explicitly save them
         adDAO.save(res);
         return res.getAlertDefinitionValue();
-    }
-    
-    /** 
-     * Update alert definitions last fired times for each of the provided 
-     * update events.
-     * 
-     * @param events The update events.
-     * @ejb:interface-method
-     */
-    public void updateAlertDefinitionsLastFiredTimes(AlertDefinitionLastFiredUpdateEvent[] events) {
-        
-        getAlertDefDAO().updateAlertDefinitionsLastFiredTimes(events);
-        
     }
     
     /**

@@ -72,8 +72,5 @@ public abstract class AbstractEvent implements Serializable {
     public boolean isLoggingSupported() {
         return this instanceof LoggableInterface;
     }
-    
-    public boolean isAlertDefinitionLastFiredUpdateEvent() {
-        return this instanceof AlertDefinitionLastFiredUpdateEvent;
-    }
+
 }
