@@ -92,7 +92,9 @@ public class ScheduleVerificationService
         super.hit(lDate);
     }
     
-    protected void hitInSession(final Date lDate) {        
+    protected void hitInSession(final Date lDate) {
+        SRNManagerLocal srnMan = SRNManagerEJBImpl.getOne();
+        
         // Skip first schedule verification, let the server warm up a bit
         // XXX: We should add a wait attribute for this, similar to the
         //      AvailCheckService --RPM
@@ -149,7 +151,7 @@ public class ScheduleVerificationService
                 }
 
                 // Now reschedule all metrics for this entity
-                agentSync.reschedule(entId);
+                srnMan.reschedule(entId);
             } catch (AgentNotFoundException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "Agent not found for " + entId);

@@ -27,6 +27,11 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,6 +51,9 @@ import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.RawMeasurementManagerLocal;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity.
@@ -59,6 +67,13 @@ public class AgentScheduleSynchronizer {
     private static AgentScheduleSynchronizer SINGLETON =
         new AgentScheduleSynchronizer();
 
+    /**
+     * Cache of {@link AppdefEntityID}s onto themselves, of ents which are
+     * currently in the zevent queue for processing. 
+     */
+    private final Cache _inQueueCache = 
+        CacheManager.getInstance().getCache("AgentScheduleInQueue");
+    
     public static AgentScheduleSynchronizer getInstance() {
         return AgentScheduleSynchronizer.SINGLETON;
     }
@@ -66,147 +81,64 @@ public class AgentScheduleSynchronizer {
     private AgentScheduleSynchronizer() {
     }
 
-    private AuthzSubjectValue getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().getOverlord();
-    }
 
-    private DerivedMeasurementManagerLocal getDMan() {
-        return DerivedMeasurementManagerEJBImpl.getOne();
-    }
-
-    private DerivedMeasurement 
-        getDMByTemplateAndInstance(DerivedMeasurementManagerLocal dman, 
-                                   Integer tid, Integer instanceId)
-        throws MeasurementNotFoundException
-    {
-        return dman.findMeasurement(tid, instanceId);
-    }
-
-    private RawMeasurement 
-        getRMByTemplateAndInstance(RawMeasurementManagerLocal rMan, Integer tid,
-                                   Integer instanceId) 
-    {
-        return rMan.findMeasurement(tid, instanceId);
-    }
-
-    private void reschedule(AppdefEntityID entId, List dmVos)
-        throws InvalidGraphException, PermissionException,
-               MeasurementScheduleException, MonitorAgentException
-    {
-        RawMeasurementManagerLocal rMan = RawMeasurementManagerEJBImpl.getOne();
-        DerivedMeasurementManagerLocal dMan = getDMan();
-        
-        HashSet agentSchedule  = new HashSet();
-        Graph[] graphs = new Graph[dmVos.size()];
-
-        Iterator it = dmVos.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            DerivedMeasurement dmVo = (DerivedMeasurement) it.next();
-            MeasurementTemplate tmpl = dmVo.getTemplate();
-            
-            graphs[i] = GraphBuilder.buildGraph(tmpl);
-            
-            DerivedNode derivedNode = (DerivedNode)
-                graphs[i].getNode( tmpl.getId().intValue() );
-
-            // first handle simple IDENTITY derived case
-            if (MeasurementConstants.TEMPL_IDENTITY.equals(tmpl.getTemplate()))
-            {
-                // If this node is an identity, there's only one node below...
-                // the raw node. Fetch it.
-                RawNode rawNode = (RawNode)
-                    derivedNode.getOutgoing().iterator().next();
-
-                MeasurementTemplate rawTemplate =
-                    rawNode.getMeasurementTemplate();
-
-                derivedNode.setInterval(dmVo.getInterval());
-
-                RawMeasurement rmVal =
-                    getRMByTemplateAndInstance(rMan, rawTemplate.getId(),
-                                               dmVo.getInstanceId());
-
-                if (rmVal == null) {    // Don't reschedule if no raw metric
-                    _log.error("AgentScheduleSynchronizer: Cannot look up " +
-                              "raw metric by template and instance IDs");
-                    continue;
-                }
-                
-                // Add the raw measurement to the schedule
-                agentSchedule.add( rmVal.getId() );
-            } else {
-                // we're not an identity DM template, so we need
-                // to make sure that measurements are enabled for
-                // the whole graph
-                for (Iterator graphNodes = graphs[i].getNodes().iterator();
-                     graphNodes.hasNext();) {
-
-                    // we don't yet know whether its an RM or DM
-                    Node node = (Node)graphNodes.next();
-
-                    // Fetch the template
-                    MeasurementTemplate templArg =
-                        node.getMeasurementTemplate();
-
-                    if (node instanceof DerivedNode) {
-                        try {
-                            DerivedMeasurement tmpDm =
-                                getDMByTemplateAndInstance(dMan, 
-                                    templArg.getId(), dmVo.getInstanceId());
-                            long targetInterval = tmpDm.getInterval();
-
-                            if ( dmVo.getId().equals( templArg.getId() ) )
-                                dmVo = tmpDm;
-
-                            ( (DerivedNode)node ).setInterval(targetInterval);
-                        } catch (MeasurementNotFoundException e) {
-                            continue;
-                        }
-                    } else {
-                        // we are a raw node
-                        RawMeasurement rmVal =
-                            getRMByTemplateAndInstance(rMan, templArg.getId(), 
-                                                       dmVo.getInstanceId());
-
-                        agentSchedule.add( rmVal.getId() );
-                    } 
-                } 
-            } 
-        }
-
-        MeasurementProcessorEJBImpl.getOne().schedule(entId, graphs, 
-                                                      agentSchedule);
-    }
-    
-    private void unschedule(AppdefEntityID eid)
-        throws MeasurementUnscheduleException, PermissionException 
-    {
-        if (_log.isDebugEnabled())
-            _log.debug("Unschedule metrics for " + eid);
-        MeasurementProcessorEJBImpl.getOne().unschedule(eid);
-    }
-
-    public void reschedule(AppdefEntityID eid)
-        throws InvalidGraphException, MeasurementScheduleException,
-               MonitorAgentException, PermissionException,
-               MeasurementUnscheduleException
-    {
-        if (_log.isDebugEnabled())
-            _log.debug("Reschedule metrics for " + eid);
-        
-        List dms = getDMan().findEnabledMeasurements(getOverlord(), eid, null);
-                
-        if (dms.size() > 0)
-            reschedule(eid, dms);
-        else
-            unschedule(eid);
-    }
-
-    public static void schedule(AppdefEntityID eid) {
+    public static void scheduleSynchronous(AppdefEntityID eid) {
         try {
-            AgentScheduleSynchronizer.SINGLETON.reschedule(eid);
+            SRNManagerEJBImpl.getOne().reschedule(eid);
         } catch(Exception e) {
             _log.warn("Exception, scheduling [" + eid + "]", e);
         }
+    }
+
+    void initialize() {
+        ZeventListener l = new ZeventListener() {
+            public void processEvents(List events) {
+                for (Iterator i=events.iterator(); i.hasNext(); ) {
+                    AgentScheduleSyncZevent z = 
+                        (AgentScheduleSyncZevent)i.next();
+                    
+                    if (_inQueueCache.remove(z.getEntityId()) == false) {
+                        _log.warn("Received eid=[" + z.getEntityId() + 
+                                  "] but was not found in cache");
+                    }
+                    scheduleSynchronous(z.getEntityId());
+                }
+            }
+            
+            public String toString() {
+                return "AgentScheduleSyncListener";
+            }
+        };
+        
+        ZeventManager.getInstance()
+            .addBufferedListener(AgentScheduleSyncZevent.class, l);
+    }
+    
+    private void _scheduleBuffered(AppdefEntityID eid) {
+        /**
+         * The following is done immediately (not in a tx listener), since
+         * otherwise we will need to make sure that the entire thing behaves
+         * transactionally.  The worst case, here (if the tx is rolled back)
+         * is that we have excess things in the queue.
+         */
+        synchronized (_inQueueCache) {
+            if (_inQueueCache.get(eid) != null)
+                return;
+    
+            Element e = new Element(eid, eid);
+            _inQueueCache.put(e);
+        }
+        
+        Zevent z = new AgentScheduleSyncZevent(eid);
+        try {
+            ZeventManager.getInstance().enqueueEvent(z);
+        } catch(InterruptedException e) {
+            _inQueueCache.remove(eid);
+            _log.warn("Interrupted while trying to enqueue event");
+        }
+    }
+    
+    public static void scheduleBuffered(AppdefEntityID eid) {
+        AgentScheduleSynchronizer.SINGLETON._scheduleBuffered(eid);
     }
 }

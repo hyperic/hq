@@ -111,6 +111,7 @@ public class MeasurementStartupListener
         });
 
         initReportsStats();
+        AgentScheduleSynchronizer.getInstance().initialize();
     }
 
     private void initReportsStats() {

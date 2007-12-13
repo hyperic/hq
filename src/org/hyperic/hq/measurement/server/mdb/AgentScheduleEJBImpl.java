@@ -25,24 +25,20 @@
 
 package org.hyperic.hq.measurement.server.mdb;
 
-import javax.ejb.CreateException;
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.UnScheduleArgs;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 
 /**
  * <p>The AgentSchedule class runs as a daemon that asynchronously schedules
@@ -76,7 +72,7 @@ public class AgentScheduleEJBImpl
             Object o = om.getObject();
 
             if (o instanceof AppdefEntityID) {
-                AgentScheduleSynchronizer.schedule((AppdefEntityID) o);
+                AgentScheduleSynchronizer.scheduleSynchronous((AppdefEntityID) o);
             }
             else if (o instanceof UnScheduleArgs) {
                 UnScheduleArgs args = (UnScheduleArgs) o;

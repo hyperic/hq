@@ -1397,7 +1397,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
                     log.info("Refreshing metric schedule for [" + id + "]");
-                    AgentScheduleSynchronizer.schedule(id);
+                    AgentScheduleSynchronizer.scheduleBuffered(id);
                     continue;
                 }
     
