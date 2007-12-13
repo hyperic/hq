@@ -7368,12 +7368,12 @@ has already been defined.
       </statement>
     </schema-directSQL>
     <schema-insert table="EAM_SUBJECT" desc="create a guest subject"
-                   insertCmd="(CID,DSN,EMAIL_ADDRESS,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,PREF_CRISPO_ID) VALUES ('2','CAM','localhost',%%FALSE%%,'Guest',%%FALSE%%,%%FALSE%%,'2','User','guest','3')"/>
+                   insertCmd="(CID,DSN,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,PREF_CRISPO_ID) VALUES ('2','CAM',%%FALSE%%,'Guest',%%FALSE%%,%%FALSE%%,'2','User','guest','3')"/>
     <schema-insert table="EAM_RESOURCE" desc="add a resource for the guest subject"
                    insertCmd="(CID,FSYSTEM,ID,INSTANCE_ID,PROTO_ID,RESOURCE_TYPE_ID,SUBJECT_ID) VALUES ('10',%%FALSE%%,'10','2','0','1','0')"/>
     <schema-directSQL>
       <statement>
-        UPDATE EAM_SUBJECT SET CID = '2',RESOURCE_ID = '10' WHERE CID = '2'
+        UPDATE EAM_SUBJECT SET CID = '2', RESOURCE_ID = '10', EMAIL_ADDRESS = (SELECT EMAIL_ADDRESS FROM EAM_SUBJECT WHERE CID = 1) WHERE CID = 2
       </statement>
       <statement desc="set the default dashboard for view only role">
         INSERT INTO EAM_CRISPO_OPT (CRISPO_ID,ID,PROPKEY,VAL) VALUES ('3','2','.user.dashboard.default.id','2')
