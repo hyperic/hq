@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2007], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -168,6 +168,9 @@
 	<fmt:message key="admin.user.generalProperties.ToAccess"/></span>
       </td>
     </c:when>
+    <c:otherwise>
+      <td class="BlockContent" colspan="2">&nbsp;</td>
+    </c:otherwise>
   </c:choose>
       <td class="BlockLabel" valign="top"><fmt:message key="admin.user.generalProperties.Department"/></td>
       <td class="BlockContent" valign="top"><html:text size="31" maxlength="50" property="department" tabindex="10"/></td>
