@@ -51,6 +51,10 @@
     <property name="appdefType" type="integer">
       <column name="APPDEF_TYPE" not-null="true" index="ALERT_DEF_RES_IDX"/>
     </property>
+	  
+    <property name="active" type="boolean">
+      <column name="ACTIVE" not-null="true"/>
+    </property>		  
 
     <property name="enabled" type="boolean">
       <column name="ENABLED" not-null="true"/>
