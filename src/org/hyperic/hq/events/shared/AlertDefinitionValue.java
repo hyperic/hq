@@ -48,6 +48,8 @@ public class AlertDefinitionValue
    private boolean parentIdHasBeenSet = false;
    private java.lang.String description;
    private boolean descriptionHasBeenSet = false;
+   private boolean active;
+   private boolean activeHasBeenSet = false;
    private boolean enabled;
    private boolean enabledHasBeenSet = false;
    private boolean willRecover;
@@ -82,46 +84,6 @@ public class AlertDefinitionValue
    {
    }
 
-   public AlertDefinitionValue( Integer id,String name,long ctime,long mtime,Integer parentId,java.lang.String description,boolean enabled,boolean willRecover,boolean notifyFiltered,boolean controlFiltered,int priority,int appdefId,int appdefType,int frequencyType,long count,long range,int actOnTriggerId,boolean deleted )
-   {
-	  this.id = id;
-	  idHasBeenSet = true;
-	  this.name = name;
-	  nameHasBeenSet = true;
-	  this.ctime = ctime;
-	  ctimeHasBeenSet = true;
-	  this.mtime = mtime;
-	  mtimeHasBeenSet = true;
-	  this.parentId = parentId;
-	  parentIdHasBeenSet = true;
-	  this.description = description;
-	  descriptionHasBeenSet = true;
-	  this.enabled = enabled;
-	  enabledHasBeenSet = true;
-	  this.willRecover = willRecover;
-	  willRecoverHasBeenSet = true;
-	  this.notifyFiltered = notifyFiltered;
-	  notifyFilteredHasBeenSet = true;
-	  this.controlFiltered = controlFiltered;
-	  controlFilteredHasBeenSet = true;
-	  this.priority = priority;
-	  priorityHasBeenSet = true;
-	  this.appdefId = appdefId;
-	  appdefIdHasBeenSet = true;
-	  this.appdefType = appdefType;
-	  appdefTypeHasBeenSet = true;
-	  this.frequencyType = frequencyType;
-	  frequencyTypeHasBeenSet = true;
-	  this.count = count;
-	  countHasBeenSet = true;
-	  this.range = range;
-	  rangeHasBeenSet = true;
-	  this.actOnTriggerId = actOnTriggerId;
-	  actOnTriggerIdHasBeenSet = true;
-	  this.deleted = deleted;
-	  deletedHasBeenSet = true;
-   }
-
    //TODO Cloneable is better than this !
    public AlertDefinitionValue( AlertDefinitionValue otherValue )
    {
@@ -137,6 +99,8 @@ public class AlertDefinitionValue
 	  parentIdHasBeenSet = true;
 	  this.description = otherValue.description;
 	  descriptionHasBeenSet = true;
+	  this.active = otherValue.active;
+	  activeHasBeenSet = true;
 	  this.enabled = otherValue.enabled;
 	  enabledHasBeenSet = true;
 	  this.willRecover = otherValue.willRecover;
@@ -270,6 +234,23 @@ public class AlertDefinitionValue
    public boolean descriptionHasBeenSet(){
 	  return descriptionHasBeenSet;
    }
+   
+   public boolean getActive()
+   {
+      return this.active;
+   }
+
+   public void setActive( boolean active )
+   {
+      this.active = active;
+      activeHasBeenSet = true;
+
+   }
+   
+   public boolean activeHasBeenSet(){
+       return activeHasBeenSet;
+    }
+   
    public boolean getEnabled()
    {
 	  return this.enabled;
@@ -635,7 +616,7 @@ public class AlertDefinitionValue
    {
 	  StringBuffer str = new StringBuffer("{");
 
-	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "parentId=" + getParentId() + " " + "description=" + getDescription() + " " + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + "actOnTriggerId=" + getActOnTriggerId() + " " + "deleted=" + getDeleted());
+	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "parentId=" + getParentId() + " " + "description=" + getDescription() + " " + "active" + getActive() + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + "actOnTriggerId=" + getActOnTriggerId() + " " + "deleted=" + getDeleted());
 	  str.append('}');
 
 	  return(str.toString());
@@ -714,6 +695,7 @@ public class AlertDefinitionValue
 		 {
 			lEquals = lEquals && this.description.equals( that.description );
 		 }
+		 lEquals = lEquals && this.active == that.active;
 		 lEquals = lEquals && this.enabled == that.enabled;
 		 lEquals = lEquals && this.willRecover == that.willRecover;
 		 lEquals = lEquals && this.notifyFiltered == that.notifyFiltered;
@@ -788,6 +770,8 @@ public class AlertDefinitionValue
 
       result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
 
+      result = 37*result + (active ? 0 : 1);
+      
       result = 37*result + (enabled ? 0 : 1);
 
       result = 37*result + (willRecover ? 0 : 1);
