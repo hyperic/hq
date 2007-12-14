@@ -59,6 +59,7 @@ public class AlertDefinition
     private int               _priority;  // XXX -- Needs to default to 1
     private int               _appdefId;
     private int               _appdefType;
+    private boolean           _active;   // XXX -- Needs to default to true     
     private boolean           _enabled;   // XXX -- Needs to default to true
     private int               _frequencyType;
     private Long              _count;  // can't use primitive.
@@ -229,11 +230,70 @@ public class AlertDefinition
     void setAppdefType(int appdefType) {
         _appdefType = appdefType;
     }
-
+        
+    /**
+     * Check if an alert definition is enabled.
+     * 
+     * @return <code>true</code> if the alert definition is enabled; 
+     *         <code>false</code> if disabled.
+     */
     public boolean isEnabled() {
         return _enabled;
     }
+    
+    /**
+     * Check if an alert definition is active.
+     * 
+     * @return <code>true</code> if the alert definition is active;
+     *          <code>false</code> if inactive.
+     */    
+    boolean isActive() {
+        return _active;
+    }
+    
+    /**
+     * As an application user, set the alert definition enabled status. Also 
+     * sets the active status to the same value.
+     * 
+     * @param enabled <code>true</code> to enable the alert definition;
+     *                <code>false</code> to disable the alert definition.
+     */
+    public void setEnabledByUser(boolean enabled) {
+        setEnabled(enabled);
+        setActive(enabled);
+    }
 
+    /**
+     * As the system, set the alert definition enabled status. The enabled 
+     * status will not be set if an application user has already disabled the 
+     * alert definition.
+     * 
+     * @param enabled <code>true</code> to enable the alert definition;
+     *                <code>false</code> to disable the alert definition.
+     * @return <code>true</code> if the enabled status was set;
+     *         <code>false</code> if it wasn't set.                     
+     */
+    public boolean setEnabledBySystem(boolean enabled) {
+        boolean statusSet = false;
+        
+        if (isActive()) {
+            setEnabled(enabled);
+            statusSet = true;
+        }
+        
+        return statusSet;
+    }
+    
+    /**
+     * For Hibernate persistence only. Do not call directly.
+     */
+    void setActive(boolean active) {
+        _active = active;
+    }
+    
+    /**
+     * For Hibernate persistence only. Do not call directly.
+     */
     void setEnabled(boolean enabled) {
         _enabled = enabled;
     }
@@ -425,6 +485,7 @@ public class AlertDefinition
         _value.setParentId(getParent() == null ? null : getParent().getId());
         _value.setDescription(getDescription());
         _value.setEnabled(isEnabled());
+        _value.setActive(isActive());
         _value.setWillRecover(isWillRecover());
         _value.setNotifyFiltered(isNotifyFiltered());
         _value.setControlFiltered(isControlFiltered());
