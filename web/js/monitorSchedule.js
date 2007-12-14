@@ -60,7 +60,7 @@ function changeMonitorDropDown(monthId, dateId, yearId) {
 	var monthDropDown = document.getElementById(monthId);
 	var dateDropDown = document.getElementById(dateId);
 	var yearDropDown = document.getElementById(yearId);
-	
+
 	var selectedMonthValue = getSelectValue(monthDropDown);
 	var selectedDateValue = getSelectValue(dateDropDown);
 	var selectedYearValue = getSelectValue(yearDropDown);
@@ -69,16 +69,28 @@ function changeMonitorDropDown(monthId, dateId, yearId) {
 	var startDateIndex = 0;
 	
 	changeDateDropdown (dateDropDown, selectedMonthValue, selectedDateValue, selectedYearValue, startDateIndex);
-	
+
 	if (monthId == "startMonth") {
 		var endMonthDropDown = document.getElementById("endMonth");
 		var endDateDropDown = document.getElementById("endDay");
 		var endYearDropDown = document.getElementById("endYear");
-		
+
 		endMonthDropDown.selectedIndex = selectedMonthValue;
 		changeDateDropdown (endDateDropDown, selectedMonthValue, selectedDateValue, selectedYearValue, startDateIndex);
-		endYearDropDown.selectedIndex = selectedYearValue - yearArr[0];
-	}
+
+            if (yearDropDown.selectedIndex < endYearDropDown.selectedIndex)  {
+            endYearDropDown.selectedIndex = 0;
+            }
+        }
+
+    if (monthId == "endMonth") {
+		    var startYearDropDown = document.getElementById("startYear");
+            var endYearDropDown = document.getElementById("endYear");
+            if (startYearDropDown.selectedIndex < endYearDropDown.selectedIndex)  {
+            endYearDropDown.selectedIndex = 0;
+            }
+        }
+
 }
 
 function calMonitor(monthId, dateId, yearId) {

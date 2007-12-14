@@ -132,10 +132,11 @@ document.EditMetricBaselineForm.submit();
 		<option value="30">30</option>
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
-		<html:select property="startYear" styleId="startYear"> 
+		<html:select property="startYear" styleId="startYear" styleClass="logo">
 		    <script language="JavaScript" type="text/javascript">
 		        for (i=0; i<SEL_NUMYEARS; i++) {
-			    document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
+                var startYear =  document.getElementById('startYear');
+                startYear.options[i] = new Option(yearArr[i], yearArr[i]);
 			}
 		    </script>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('startMonth','startDay','startYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
@@ -208,7 +209,8 @@ document.EditMetricBaselineForm.submit();
 		<html:select property="endYear" styleId="endYear"> 
 		    <script language="JavaScript" type="text/javascript">
 		        for (i=0; i<SEL_NUMYEARS; i++) {
-			    document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
+                var endYear =  document.getElementById('endYear');
+                endYear.options[i] = new Option(yearArr[i], yearArr[i]);
 			}
 		    </script>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('endMonth','endDay','endYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
