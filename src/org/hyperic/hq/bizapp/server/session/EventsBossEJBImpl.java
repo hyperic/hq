@@ -756,16 +756,16 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * Enable/Disable a collection of alert definitions
+     * Activate/deactivate a collection of alert definitions
      *
      * @ejb:interface-method
      */
-    public void enableAlertDefinitions(int sessionID, Integer[] ids,
-                                       boolean enable)
+    public void activateAlertDefinitions(int sessionID, Integer[] ids,
+                                         boolean activate)
         throws SessionNotFoundException, SessionTimeoutException, 
                FinderException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
-        getADM().updateAlertDefinitionsEnable(subject, ids, enable);
+        getADM().updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
 
     /**
@@ -775,12 +775,12 @@ public class EventsBossEJBImpl
      */
     public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId,
                                            String name, String desc,
-                                           int priority, boolean enabled)
+                                           int priority, boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, RemoveException, PermissionException {
         AuthzSubjectValue subject = manager.getSubject(sessionID);
         getADM().updateAlertDefinitionBasic(subject, alertDefId, name, desc,
-                                            priority, enabled);
+                                            priority, activate);
     }
 
     /**
@@ -1130,12 +1130,12 @@ public class EventsBossEJBImpl
     }
     
     /**
-     * Enable or disable alert definitions by agent
-     * @param enable - true if enable false if disable
+     * Activate or deactivate alert definitions by agent.
+     * 
      * @ejb:interface-method
      */
     public void updateAlertsByAgent(int sessionID, AppdefEntityID platId,
-                                    boolean enable)
+                                    boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException
     {
@@ -1144,7 +1144,7 @@ public class EventsBossEJBImpl
         AlertDefinitionManagerLocal adm = getADM();
         for (Iterator it = allAlerts.iterator(); it.hasNext();) {
             AlertDefinition ad = (AlertDefinition) it.next();
-            adm.updateAlertDefinitionEnable(subject, ad, enable);
+            adm.updateAlertDefinitionActiveStatus(subject, ad, activate);
         }
     }
     

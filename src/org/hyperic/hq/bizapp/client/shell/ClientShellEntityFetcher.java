@@ -370,12 +370,12 @@ public class ClientShellEntityFetcher {
         return boss.deleteAlerts(this.auth.getAuthToken(), begin, end);
     }
     
-    public void enableAlertDefinitions(Integer[] ids, boolean enable)
+    public void activateAlertDefinitions(Integer[] ids, boolean activate)
         throws ClientShellAuthenticationException, NamingException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, RemoteException, FinderException {
         EventsBoss boss = bossManager.getEventsBoss();
-        boss.enableAlertDefinitions(auth.getAuthToken(), ids, enable);
+        boss.activateAlertDefinitions(auth.getAuthToken(), ids, activate);
     }
     
     public void flushRegisteredTriggers()

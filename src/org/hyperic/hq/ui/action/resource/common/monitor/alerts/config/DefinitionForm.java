@@ -63,6 +63,8 @@ public class DefinitionForm extends ResourceForm  {
     private String description;
     private int priority;
     private boolean active;
+    private boolean enabled;
+    
     // conditions
     private List conditions;
     
@@ -155,6 +157,14 @@ public class DefinitionForm extends ResourceForm  {
     
     public void setActive(boolean active) {
         this.active = active;
+    }
+    
+    public boolean isEnabled() {
+        return enabled;
+    }
+    
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     /*----------------------------------------------------------------
@@ -466,7 +476,16 @@ public class DefinitionForm extends ResourceForm  {
         setName( adv.getName() );
         setDescription( adv.getDescription() );
         setPriority( adv.getPriority() );
+        
+        // HHQ-1396: When we expose the difference between 
+        // active and enabled states in the UI, need to 
+        // set active correctly on the form bean.
+        // Uncomment this code at this point and remove 
+        // the other setActive().
+        // setActive( adv.getActive() );
         setActive( adv.getEnabled() );
+        
+        setEnabled( adv.getEnabled() );
     }
 
     /**
@@ -477,7 +496,16 @@ public class DefinitionForm extends ResourceForm  {
         adv.setId( getAd() );
         adv.setName( getName() );
         adv.setDescription( getDescription() );
+        
+        // HHQ-1396: When we expose the difference between 
+        // active and enabled states in the UI, need to 
+        // set enabled correctly on the value object.
+        // Uncomment this code at this point and remove 
+        // the other adv.setEnabled().
+        // adv.setEnabled( this.isEnabled() );      
         adv.setEnabled( this.isActive() );
+        
+        adv.setActive( this.isActive() );
         adv.setPriority( getPriority() );
     }
 
@@ -659,6 +687,7 @@ public class DefinitionForm extends ResourceForm  {
         description = null;
         priority = EventConstants.PRIORITY_MEDIUM;
         active = true;
+        enabled = true;
         resetConditions();
         whenEnabled = 0;
         numTimesNT = null;

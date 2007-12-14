@@ -159,8 +159,7 @@ public class AlertDefinitionManagerEJBImpl
         watch.markTimeBegin("mark deleted");
         alertdef.setDeleted(true);
         
-        // This is a user initiated action.
-        alertdef.setEnabledByUser(false);
+        alertdef.setActiveStatus(false);
         
         for (Iterator it = alertdef.getActions().iterator();
              it.hasNext(); ) {
@@ -280,7 +279,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public void updateAlertDefinitionBasic(AuthzSubjectValue subj, Integer id,
                                            String name, String desc,
-                                           int priority, boolean enable)
+                                           int priority, boolean activate)
         throws PermissionException
     {
         List alertdefs = new ArrayList(1);
@@ -298,8 +297,7 @@ public class AlertDefinitionManagerEJBImpl
             ad.setDescription(desc);
             ad.setPriority(priority);
             
-            // This is a user initiated action.
-            ad.setEnabledByUser(enable);
+            ad.setActiveStatus(activate);
             
             ad.setMtime(System.currentTimeMillis());
         }
@@ -390,12 +388,13 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Enable/Disable alert definitions.
+     * Activate/deactivate an alert definitions.
+     * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionsEnable(AuthzSubjectValue subj,
-                                             Integer[] ids, 
-                                             boolean enable)
+    public void updateAlertDefinitionsActiveStatus(AuthzSubjectValue subj,
+                                                   Integer[] ids, 
+                                                   boolean activate)
         throws FinderException, PermissionException 
     {
         List alertdefs = new ArrayList();
@@ -410,32 +409,27 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            updateAlertDefinitionEnable(subj, (AlertDefinition) i.next(), enable);
+            updateAlertDefinitionActiveStatus(subj, (AlertDefinition) i.next(), activate);
         }
     }
 
     /** 
-     * Enable/Disable an alert definition.
+     * Activate/deactivate an alert definition.
+     * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionEnable(AuthzSubjectValue subj,
-                                            AlertDefinition def, 
-                                            boolean enable)
+    public void updateAlertDefinitionActiveStatus(AuthzSubjectValue subj,
+                                                  AlertDefinition def, 
+                                                  boolean activate)
         throws PermissionException {
         
         canManageAlerts(subj, def);
         
-        // If this is a new enabled status then set the mtime. In either case 
-        // we need to set enabled by user to make sure the active bit is set 
-        // correctly.
-        boolean isNewEnabledStatus = def.isEnabled() != enable;
-        
-        // This is a user initiated action.
-        def.setEnabledByUser(enable);
-        
-        if (isNewEnabledStatus) {
+        if (def.isActive() != activate || def.isEnabled() != activate) {
+            def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());            
-        }        
+        }
+       
     }
     
     /** 
@@ -454,7 +448,7 @@ public class AlertDefinitionManagerEJBImpl
         
         if (def.isEnabled() != enable) {
             canManageAlerts(subj, def);
-            def.setEnabledBySystem(enable);
+            def.setEnabledStatus(enable);
             succeeded = true;
         }
         

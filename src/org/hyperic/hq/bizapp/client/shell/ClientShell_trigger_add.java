@@ -28,19 +28,15 @@ package org.hyperic.hq.bizapp.client.shell;
 import java.io.PrintStream;
 import java.util.Hashtable;
 
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.shell.ShellCommandBase;
-import org.hyperic.util.shell.ShellCommandUsageException;
-import org.hyperic.util.shell.ShellCommandExecException;
-
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.IntegerConfigOption;
 import org.hyperic.util.config.StringConfigOption;
+import org.hyperic.util.shell.ShellCommandBase;
+import org.hyperic.util.shell.ShellCommandExecException;
+import org.hyperic.util.shell.ShellCommandUsageException;
 
 public class ClientShell_trigger_add extends ShellCommandBase {
     private final String BASELINE_THRESHOLD = "BaselineThreshold";
@@ -91,9 +87,7 @@ public class ClientShell_trigger_add extends ShellCommandBase {
         eventsBoss = this.owner.getEventsBoss();
         authToken  = this.auth.getAuthToken();
 
-        try {
-            String emailClass;
-            
+        try {            
             // First setup the trigger
             ConfigSchema schema = eventsBoss.getRegisteredTriggerConfigSchema(authToken,
                                                                               mClass);
@@ -146,6 +140,7 @@ public class ClientShell_trigger_add extends ShellCommandBase {
                 adval.setDescription(cr.getValue("desc"));
                 adval.setPriority(1);
                 adval.setEnabled(true);
+                adval.setActive(true);
                 adval.setAppdefType(Integer.parseInt(cr.getValue("type")));
                 adval.setAppdefId(Integer.parseInt(cr.getValue("id")));
                 adval.setNotifyFiltered(cr.getValue("notify").toUpperCase()

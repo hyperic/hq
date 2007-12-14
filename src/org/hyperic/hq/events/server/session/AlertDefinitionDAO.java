@@ -283,8 +283,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
         def.setDescription(val.getDescription());
         
-        // This is a user initiated action.
-        def.setEnabledByUser(val.getEnabled());
+        def.setActiveStatus(val.getEnabled());
         
         def.setWillRecover(val.getWillRecover());
         def.setNotifyFiltered(val.getNotifyFiltered() );

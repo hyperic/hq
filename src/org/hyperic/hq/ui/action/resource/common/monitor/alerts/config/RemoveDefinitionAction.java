@@ -104,7 +104,7 @@ public class RemoveDefinitionAction extends BaseAction {
                 }
                 gBoss.enable(sessionId.intValue(), defPojos, enable);
             } else {
-                boss.enableAlertDefinitions(sessionId.intValue(), defs, enable);
+                boss.activateAlertDefinitions(sessionId.intValue(), defs, enable);
             }
                 
             RequestUtils.setConfirmation(request,

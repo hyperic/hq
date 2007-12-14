@@ -51,7 +51,7 @@ public class ClientShell_alertdef_disable extends ShellCommandBase {
         }
         
         try {
-            _entityFetcher.enableAlertDefinitions(ids, false);
+            _entityFetcher.activateAlertDefinitions(ids, false);
         } catch (Exception e) {
             throw new ShellCommandExecException(
                 "Unable to disable alert definitions", e);

@@ -37,23 +37,22 @@ public class AlertDefinition_test extends TestCase {
     }
     
     /**
-     * Test an application user enabling/disabling the alert definition. The 
-     * operation will always succeed.
+     * Test activating/deactivating an alert definition.
      */
-    public void testSetEnabledByUser() {
+    public void testActivatingAlertDefinition() {
         AlertDefinition def = new AlertDefinition();
         
         assertFalse(def.isEnabled());
         
         assertFalse(def.isActive());
         
-        def.setEnabledByUser(true);
+        def.setActiveStatus(true);
         
         assertTrue(def.isEnabled());
 
         assertTrue(def.isActive());
         
-        def.setEnabledByUser(false);
+        def.setActiveStatus(false);
         
         assertFalse(def.isEnabled());
         
@@ -61,26 +60,25 @@ public class AlertDefinition_test extends TestCase {
     }
     
     /**
-     * Test a system user enabling/disabling the alert definition after an 
-     * application user has enabled the alert definition. The operation will 
-     * always succeed.
+     * Test activating an alert definition then enable/disable the alert 
+     * definition. The operation will always succeed.
      */
-    public void testSetEnabledBySystemWithEnabledByUser() {
+    public void testEnablingActivatedAlertDefinition() {
         AlertDefinition def = new AlertDefinition();
         
-        def.setEnabledByUser(true);
+        def.setActiveStatus(true);
         
         assertTrue(def.isEnabled());
         
         assertTrue(def.isActive());
         
-        assertTrue(def.setEnabledBySystem(true));
+        assertTrue(def.setEnabledStatus(true));
         
         assertTrue(def.isEnabled());
         
         assertTrue(def.isActive());
 
-        assertTrue(def.setEnabledBySystem(false));
+        assertTrue(def.setEnabledStatus(false));
         
         assertFalse(def.isEnabled());
         
@@ -88,26 +86,25 @@ public class AlertDefinition_test extends TestCase {
     }
     
     /**
-     * Test a system user enabling/disabling the alert definition after 
-     * an application user has disabled the alert definition. The operation 
-     * will never succeed.
+     * Test deactivating an alert definition then attempting to enable/disable 
+     * the alert definition. The operation will never succeed.
      */
-    public void testSetEnabledBySystemWithDisabledByUser() {
+    public void testEnablingDeactivatedAlertDefinition() {
         AlertDefinition def = new AlertDefinition();
         
-        def.setEnabledByUser(false);
+        def.setActiveStatus(false);
         
         assertFalse(def.isEnabled());
         
         assertFalse(def.isActive());
         
-        assertFalse(def.setEnabledBySystem(true));
+        assertFalse(def.setEnabledStatus(true));
         
         assertFalse(def.isEnabled());
 
         assertFalse(def.isActive());
         
-        assertFalse(def.setEnabledBySystem(false));
+        assertFalse(def.setEnabledStatus(false));
         
         assertFalse(def.isEnabled());
         

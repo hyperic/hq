@@ -172,8 +172,9 @@ public class ClientShell_alertdef_create extends ClientShellCommand {
         }
         alertdef.setPriority(pri);
         
-        // Enable it, of course
+        // Enable and activate it, of course
         alertdef.setEnabled(true);
+        alertdef.setActive(true);
         
         return alertdef;
     }

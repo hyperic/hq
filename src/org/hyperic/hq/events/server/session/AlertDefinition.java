@@ -247,33 +247,31 @@ public class AlertDefinition
      * @return <code>true</code> if the alert definition is active;
      *          <code>false</code> if inactive.
      */    
-    boolean isActive() {
+    public boolean isActive() {
         return _active;
     }
     
     /**
-     * As an application user, set the alert definition enabled status. Also 
-     * sets the active status to the same value.
+     * Activate or deactivate an alert definition.
      * 
-     * @param enabled <code>true</code> to enable the alert definition;
-     *                <code>false</code> to disable the alert definition.
+     * @param activate <code>true</code> to activate the alert definition;
+     *                <code>false</code> to deactivate the alert definition.
      */
-    public void setEnabledByUser(boolean enabled) {
-        setEnabled(enabled);
-        setActive(enabled);
+    public void setActiveStatus(boolean activate) {
+        setEnabled(activate);
+        setActive(activate);
     }
 
     /**
-     * As the system, set the alert definition enabled status. The enabled 
-     * status will not be set if an application user has already disabled the 
-     * alert definition.
+     * Enable or disable the alert definition. This operation will not succeed 
+     * if the alert definition is not active.
      * 
      * @param enabled <code>true</code> to enable the alert definition;
      *                <code>false</code> to disable the alert definition.
-     * @return <code>true</code> if the enabled status was set;
-     *         <code>false</code> if it wasn't set.                     
+     * @return <code>true</code> if the operation succeeded, meaning the enabled 
+     *          status was set; <code>false</code> if it wasn't set.                     
      */
-    public boolean setEnabledBySystem(boolean enabled) {
+    public boolean setEnabledStatus(boolean enabled) {
         boolean statusSet = false;
         
         if (isActive()) {

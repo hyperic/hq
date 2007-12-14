@@ -150,7 +150,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         AlertDefinition def = alert.getAlertDefinition();
         
         if (def.isWillRecover() && !def.isEnabled()) {
-            def.setEnabledBySystem(true);
+            def.setEnabledStatus(true);
         }
     }
     
