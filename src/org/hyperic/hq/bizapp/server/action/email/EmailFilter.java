@@ -30,6 +30,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Date;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -44,7 +45,6 @@ import javax.rmi.PortableRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -53,7 +53,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -67,76 +66,60 @@ import org.hyperic.util.collection.IntHashMap;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 
 public class EmailFilter {
-    protected Log log = LogFactory.getLog(EmailFilter.class);
-    private static final String     JOB_GROUP  = "EmailFilterGroup";
-    private static final IntHashMap alertBuffer = new IntHashMap();
+    private Log _log = LogFactory.getLog(EmailFilter.class);
 
-    private PlatformManagerLocal     pltMan;
-    private ServerConfigManagerLocal configMan;
-    private AuthzSubjectValue        overlord;
-    private SchedulerLocal           scheduler;
-    
+    private static final String     JOB_GROUP  = "EmailFilterGroup";
+    private static final IntHashMap _alertBuffer = new IntHashMap();
+    private static final Object SCHEDULER_LOCK = new Object();
+
     public EmailFilter() {}
 
-    private boolean init() {
-        if (pltMan != null && overlord != null)
-            return true;
-            
-        try {
-            pltMan = PlatformManagerEJBImpl.getOne();
-            AuthzSubjectManagerLocal authzSubjectManager =
-                AuthzSubjectManagerEJBImpl.getOne();
-            overlord = authzSubjectManager.getOverlord();
-            return true;
-        } catch (ObjectNotFoundException e) {
-            // Then we'll keep those values null
-        }
-        return false;
-    }
-
     public String getAppdefEntityName(AppdefEntityID appEnt) {
-        if (init()) {
-            try {
-                AppdefEntityValue entVal =
-                    new AppdefEntityValue(appEnt, overlord);
-                return entVal.getName();
-            } catch (AppdefEntityNotFoundException e) {
-                log.error("Entity ID invalid: " + e);
-            } catch (PermissionException e) {
-                // Should never happen, because we are overlord
-                log.error("Overlord not allowed to lookup resource: " + e);
-            }
+        AuthzSubjectValue overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+        try {
+            AppdefEntityValue entVal =
+                new AppdefEntityValue(appEnt, overlord);
+            return entVal.getName();
+        } catch (AppdefEntityNotFoundException e) {
+            _log.error("Entity ID invalid: " + e);
+        } catch (PermissionException e) {
+            // Should never happen, because we are overlord
+            _log.error("Overlord not allowed to lookup resource: " + e);
         }
+
         return appEnt.toString();
     }
     
     private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
                                             String[] strs) {
-        if (init()) {
-            try {
-                AppdefEntityValue entVal =
-                    new AppdefEntityValue(appEnt, overlord);
-                String name = entVal.getName();
-                String desc = entVal.getDescription();
-                
-                if (desc == null) {
-                    desc = "";
-                }
-                
-                for (int i = 0; i < strs.length; i++) {
-                    strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
-                                                 name);
-                    strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
-                                                 desc);
-                }
-            } catch (AppdefEntityNotFoundException e) {
-                log.error("Entity ID invalid", e);
-            } catch (PermissionException e) {
-                // Should never happen, because we are overlord
-                log.error("Overlord not allowed to lookup resource", e);
+        AuthzSubjectValue overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlord();
+
+        try {
+            AppdefEntityValue entVal =
+                new AppdefEntityValue(appEnt, overlord);
+            String name = entVal.getName();
+            String desc = entVal.getDescription();
+
+            if (desc == null) {
+                desc = "";
             }
+
+            for (int i = 0; i < strs.length; i++) {
+                strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER,
+                                             name);
+                strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER,
+                                             desc);
+            }
+        } catch (AppdefEntityNotFoundException e) {
+            _log.error("Entity ID invalid", e);
+        } catch (PermissionException e) {
+            // Should never happen, because we are overlord
+            _log.error("Overlord not allowed to lookup resource", e);
         }
     }
     
@@ -157,7 +140,9 @@ public class EmailFilter {
         body = replStrs[1];
             
         // See if alert needs to be filtered
-        if (filter && init()) {
+        if (filter) {
+            PlatformManagerLocal pltMan =
+                PlatformManagerEJBImpl.getOne();
             try {
                 // Now let's look up the platform ID
                 Integer platId;
@@ -178,20 +163,18 @@ public class EmailFilter {
                 }
 
                 filter = false;
-                boolean scheduleJob = false;
                 
                 // Let's see if we are adding or sending
                 if (platId != null) {
-                    synchronized (alertBuffer) {
-                        if (alertBuffer.containsKey(platId.intValue())) {
+                    synchronized (_alertBuffer) {
+                        if (_alertBuffer.containsKey(platId.intValue())) {
                             // Queue it up
-                            Map cache = (Map)alertBuffer.get(platId.intValue());
+                            Map cache = (Map) _alertBuffer.get(platId.intValue());
                             
                             if (cache == null) {
                                 // Make sure we check again in 5 minutes
                                 cache = new Hashtable();
-                                alertBuffer.put(platId.intValue(), cache);
-                                scheduleJob = true;
+                                _alertBuffer.put(platId.intValue(), cache);
                             }
 
                             for (int i = 0; i < addresses.length; i++) {
@@ -211,28 +194,23 @@ public class EmailFilter {
     
                             filter = true;
                         } else {
-                            // Add new job to send filtered e-mail in 5 minutes
-                            scheduleJob = true;
-    
                             // Add a new queue
-                            alertBuffer.put(platId.intValue(), new Hashtable());
+                            _alertBuffer.put(platId.intValue(), new Hashtable());
                         }
                     }
                 }
-                
-                if (scheduleJob) {
-                    try {
-                        scheduleJob(platId);
-                    } catch (SchedulerException e) {
-                        //  Job probably already exists
-                        log.error("Unable to reschedule job " + platId, e);
-                    }
+
+                try {
+                    scheduleJob(platId);
+                } catch (SchedulerException e) {
+                    //  Job probably already exists
+                    _log.error("Unable to reschedule job " + platId, e);
                 }
     
                 if (filter)
                     return;
             } catch (PlatformNotFoundException e) {
-                log.error("Entity ID invalid: " + e);
+                _log.error("Entity ID invalid: " + e);
             }
         }
             
@@ -240,20 +218,18 @@ public class EmailFilter {
     }
     
     private InternetAddress getFromAddress() {
+        ServerConfigManagerLocal configMan =
+            ServerConfigManagerEJBImpl.getOne();
         try {
-            if (this.configMan == null) {
-                this.configMan = ServerConfigManagerEJBImpl.getOne();
-            }
-            
-            Properties props = this.configMan.getConfig();
+            Properties props = configMan.getConfig();
             String from = props.getProperty(HQConstants.EmailSender);
             if (from != null) {
                 return new InternetAddress(from);
             }
         } catch (ConfigPropertyException e) {
-            log.error("ConfigPropertyException fetch FROM address", e);
+            _log.error("ConfigPropertyException fetch FROM address", e);
         } catch (AddressException e) {
-            log.error("Bad FROM address", e);
+            _log.error("Bad FROM address", e);
         }
         return null;
     }
@@ -283,9 +259,9 @@ public class EmailFilter {
 
             m.setSubject(subject);
             
-            if (log.isDebugEnabled()) {
-                log.debug("Sending Alert Email: " + body);
-                log.debug("Sending HTML Alert Email: " + htmlBody);
+            if (_log.isDebugEnabled()) {
+                _log.debug("Sending Alert Email: " + body);
+                _log.debug("Sending HTML Alert Email: " + htmlBody);
             }
 
             // Send to each recipient individually (for D.B. SMS)
@@ -302,25 +278,25 @@ public class EmailFilter {
                 Transport.send(m);
             }
         } catch (MessagingException e) {
-            log.error("Error sending email: " + subject);
-            log.debug("Messaging Error sending email", e);
+            _log.error("Error sending email: " + subject);
+            _log.debug("Messaging Error sending email", e);
         }
     }
     
     void sendFiltered(int platId) {
         Hashtable cache;
         
-        synchronized (alertBuffer) {
-            if (!alertBuffer.containsKey(platId))
+        synchronized (_alertBuffer) {
+            if (!_alertBuffer.containsKey(platId))
                 return;
 
-            cache = (Hashtable) alertBuffer.remove(platId);
+            cache = (Hashtable) _alertBuffer.remove(platId);
         
             if (cache == null || cache.size() == 0)
                 return;
         
             // Insert key again so that we continue filtering
-            alertBuffer.put(platId, null);
+            _alertBuffer.put(platId, null);
         }
         
         AppdefEntityID platEntId = AppdefEntityID.newPlatformID(platId); 
@@ -347,27 +323,36 @@ public class EmailFilter {
 
     private void scheduleJob(Integer platId) throws SchedulerException {
         // Create new job name with the appId
-        String name = EmailFilterJob.class.getName() + platId;
-            
-        // Create job detail
-        JobDetail jd = new JobDetail(name + "Job", JOB_GROUP, 
-                                     EmailFilterJob.class);
-            
-        String appIdStr = platId.toString();
-            
-        jd.getJobDataMap().put(EmailFilterJob.APP_ID, appIdStr);
-            
-        // Create trigger
-        GregorianCalendar next = new GregorianCalendar();
-        next.add(GregorianCalendar.MINUTE, 5);
-        SimpleTrigger t = new SimpleTrigger(name + "Trigger", JOB_GROUP,
-                                            next.getTime());
-        
-        // Now schedule with EJB
-        if (scheduler == null) {
-            scheduler = SchedulerEJBImpl.getOne();
+        String name = EmailFilterJob.class.getName() + platId + "Job";
+
+        SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
+
+        synchronized (SCHEDULER_LOCK) {
+
+            Trigger[] triggers = scheduler.getTriggersOfJob(name, JOB_GROUP);
+            if (triggers.length == 0) {
+                JobDetail jobDetail = new JobDetail(name, JOB_GROUP,
+                                                    EmailFilterJob.class);
+
+                String appIdStr = platId.toString();
+
+                jobDetail.getJobDataMap().put(EmailFilterJob.APP_ID, appIdStr);
+
+                // XXX: Make this time configurable?
+                GregorianCalendar next = new GregorianCalendar();
+                next.add(GregorianCalendar.MINUTE, 5);
+                SimpleTrigger t = new SimpleTrigger(name + "Trigger", JOB_GROUP,
+                                                    next.getTime());
+
+                Date nextfire = scheduler.scheduleJob(jobDetail, t);
+                _log.debug("Will queue alerts for platform " +
+                           platId + " until " + nextfire);
+            } else {
+                // Already scheduled, there will only be a single trigger.
+                _log.debug("Already queing alerts for platform " +
+                           platId + ", will fire at " +
+                           triggers[0].getNextFireTime());
+            }
         }
-            
-        scheduler.scheduleJob(jd, t);
     }
 }
