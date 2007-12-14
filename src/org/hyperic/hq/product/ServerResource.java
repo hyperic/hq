@@ -104,6 +104,10 @@ public class ServerResource {
         this.resource.setAutoinventoryIdentifier(name);
     }
 
+    public String getIdentifier() {
+        return this.resource.getAutoinventoryIdentifier();
+    }
+
     public void setType(GenericPlugin plugin) {
         this.resource.setServerTypeName(plugin.getTypeInfo().getName());
     }

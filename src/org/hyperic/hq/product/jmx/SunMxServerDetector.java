@@ -95,7 +95,10 @@ public class SunMxServerDetector extends MxServerDetector {
                     ServerResource server =
                         createServerResource(installpath);
                     server.setName(server.getName() + " " + name);
-                    server.setIdentifier(identifier);
+                    if (!server.getIdentifier().equals(installpath)) {
+                        //only if INVENTORY_ID was not set
+                        server.setIdentifier(identifier);    
+                    }
                     getLog().debug(server.getName() + " identifier=" + identifier);
                     setProductConfig(server, config);
                     server.setMeasurementConfig();
