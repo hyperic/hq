@@ -62,16 +62,14 @@ import org.quartz.spi.JobFactory;
  * The Scheduler session bean is a proxy to the Quartz scheduler MBean that is 
  * used for scheduling jobs to be executed within the application server.
  *
- * @ejb.bean
+ * @ejb:bean
  *      name            = "Scheduler"
  *      jndi-name       = "ejb/scheduler/Scheduler"
  *      local-jndi-name = "LocalQuartzScheduler"
  *      view-type       = "local"
  *      type            = "Stateless"
- * @ejb.util
- *      generate = "physical"
- * @ejb.transaction
- *      type = "REQUIRED"
+ * @ejb:util generate = "physical"
+ * @ejb:transaction type = "REQUIRED"
  */
 public class SchedulerEJBImpl
    implements SessionBean,
@@ -110,9 +108,7 @@ public class SchedulerEJBImpl
     *
     * @see SchedulerServiceMBean#getQuartzProperties()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Properties getQuartzProperties()
    {
@@ -130,9 +126,7 @@ public class SchedulerEJBImpl
     *
     * @see SchedulerServiceMBean#setQuartzProperties(Properties)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void setQuartzProperties(final Properties quartzProps)
        throws SchedulerException
@@ -140,18 +134,12 @@ public class SchedulerEJBImpl
       getSchedulerService().setQuartzProperties(quartzProps);
    }
 
-   //---------------------------------------------------------------------
-   //-- Scheduler interface methods
-   //---------------------------------------------------------------------
-
    /**
     * Delegates to the Quartz scheduler.
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getSchedulerName()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String getSchedulerName()
        throws SchedulerException
@@ -164,9 +152,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getSchedulerInstanceId()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String getSchedulerInstanceId()
        throws SchedulerException
@@ -179,9 +165,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getContext()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public SchedulerContext getContext()
        throws SchedulerException
@@ -194,9 +178,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getMetaData()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public SchedulerMetaData getMetaData()
        throws SchedulerException
@@ -209,9 +191,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#start()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void start()
        throws SchedulerException
@@ -224,9 +204,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#startScheduler()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void startScheduler()
        throws SchedulerException
@@ -240,9 +218,7 @@ public class SchedulerEJBImpl
     * @see        org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#pause()
     * @deprecated
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pause()
        throws SchedulerException
@@ -256,9 +232,7 @@ public class SchedulerEJBImpl
     * @see        org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#isPaused()
     * @deprecated
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean isPaused()
        throws SchedulerException
@@ -271,9 +245,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#shutdown()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void shutdown()
        throws SchedulerException
@@ -286,9 +258,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#shutdown(boolean)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void shutdown(boolean waitForJobsToComplete)
        throws SchedulerException
@@ -301,9 +271,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#isShutdown()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean isShutdown()
        throws SchedulerException
@@ -316,9 +284,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getCurrentlyExecutingJobs()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public List getCurrentlyExecutingJobs()
        throws SchedulerException
@@ -331,16 +297,13 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#scheduleJob(org.quartz.JobDetail,org.quartz.Trigger)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public Date scheduleJob(JobDetail jobDetail,
-                            Trigger   trigger)
+   public Date scheduleJob(JobDetail jobDetail, Trigger trigger)
        throws SchedulerException
    {
       if (log.isDebugEnabled()) {
-         log.debug("Job details: " + jobDetail);
+          log.debug("Job details: " + jobDetail);
       }
 
       return getSchedulerService().scheduleJob(jobDetail, trigger);
@@ -351,9 +314,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#scheduleJob(org.quartz.Trigger)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Date scheduleJob(Trigger trigger)
        throws SchedulerException
@@ -366,12 +327,9 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addJob(org.quartz.JobDetail, boolean)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public void addJob(JobDetail jobDetail,
-                       boolean   replace)
+   public void addJob(JobDetail jobDetail, boolean replace)
        throws SchedulerException
    {
       getSchedulerService().addJob(jobDetail, replace);
@@ -382,12 +340,9 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#deleteJob(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public boolean deleteJob(String jobName,
-                             String groupName)
+   public boolean deleteJob(String jobName, String groupName)
        throws SchedulerException
    {
       return getSchedulerService().deleteJob(jobName, groupName);
@@ -398,12 +353,9 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#unscheduleJob(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public boolean unscheduleJob(String triggerName,
-                                 String groupName)
+   public boolean unscheduleJob(String triggerName, String groupName)
        throws SchedulerException
    {
       return getSchedulerService().unscheduleJob(triggerName, groupName);
@@ -414,9 +366,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#triggerJob(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void triggerJob(String jobName,
                            String groupName)
@@ -431,9 +381,7 @@ public class SchedulerEJBImpl
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#triggerJobWithVolatileTrigger(java.lang.String,
     *      java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void triggerJobWithVolatileTrigger(String jobName,
                                               String groupName)
@@ -447,9 +395,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#pauseTrigger(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pauseTrigger(String triggerName,
                              String groupName)
@@ -463,9 +409,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#pauseTriggerGroup(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pauseTriggerGroup(String groupName)
        throws SchedulerException
@@ -478,9 +422,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#pauseJob(java.lang.String, java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pauseJob(String jobName,
                          String groupName)
@@ -494,9 +436,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#pauseJobGroup(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pauseJobGroup(String groupName)
        throws SchedulerException
@@ -509,9 +449,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#resumeTrigger(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void resumeTrigger(String triggerName,
                               String groupName)
@@ -525,9 +463,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#resumeTriggerGroup(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void resumeTriggerGroup(String groupName)
        throws SchedulerException
@@ -540,9 +476,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#resumeJob(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void resumeJob(String jobName,
                           String groupName)
@@ -556,9 +490,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#resumeJobGroup(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void resumeJobGroup(String groupName)
        throws SchedulerException
@@ -571,9 +503,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getJobGroupNames()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String[] getJobGroupNames()
        throws SchedulerException
@@ -586,9 +516,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getJobNames(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String[] getJobNames(String groupName)
        throws SchedulerException
@@ -601,9 +529,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTriggersOfJob(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Trigger[] getTriggersOfJob(String jobName,
                                       String groupName)
@@ -617,9 +543,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTriggerGroupNames()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String[] getTriggerGroupNames()
        throws SchedulerException
@@ -632,9 +556,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTriggerNames(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String[] getTriggerNames(String groupName)
        throws SchedulerException
@@ -647,9 +569,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getJobDetail(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public JobDetail getJobDetail(String jobName,
                                   String jobGroup)
@@ -663,12 +583,9 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTrigger(java.lang.String,java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public Trigger getTrigger(String triggerName,
-                              String triggerGroup)
+   public Trigger getTrigger(String triggerName, String triggerGroup)
        throws SchedulerException
    {
       return getSchedulerService().getTrigger(triggerName, triggerGroup);
@@ -679,9 +596,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#deleteCalendar(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean deleteCalendar(String calName)
        throws SchedulerException
@@ -694,9 +609,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getCalendar(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Calendar getCalendar(String calName)
        throws SchedulerException
@@ -709,9 +622,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getCalendarNames()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public String[] getCalendarNames()
        throws SchedulerException
@@ -724,9 +635,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addGlobalJobListener(org.quartz.JobListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void addGlobalJobListener(JobListener jobListener)
        throws SchedulerException
@@ -739,9 +648,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addJobListener(org.quartz.JobListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void addJobListener(JobListener jobListener)
        throws SchedulerException
@@ -754,9 +661,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#removeGlobalJobListener(org.quartz.JobListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean removeGlobalJobListener(JobListener jobListener)
        throws SchedulerException
@@ -769,9 +674,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#removeJobListener(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean removeJobListener(String name)
        throws SchedulerException
@@ -784,9 +687,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getGlobalJobListeners()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public List getGlobalJobListeners()
        throws SchedulerException
@@ -799,9 +700,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getJobListenerNames()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Set getJobListenerNames()
        throws SchedulerException
@@ -814,9 +713,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getJobListener(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public JobListener getJobListener(String name)
        throws SchedulerException
@@ -829,9 +726,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addGlobalTriggerListener(org.quartz.TriggerListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void addGlobalTriggerListener(TriggerListener triggerListener)
        throws SchedulerException
@@ -844,9 +739,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addTriggerListener(org.quartz.TriggerListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void addTriggerListener(TriggerListener triggerListener)
        throws SchedulerException
@@ -859,9 +752,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#removeGlobalTriggerListener(org.quartz.TriggerListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean removeGlobalTriggerListener(TriggerListener triggerListener)
        throws SchedulerException
@@ -874,9 +765,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#removeTriggerListener(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean removeTriggerListener(String name)
        throws SchedulerException
@@ -889,9 +778,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getGlobalTriggerListeners()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public List getGlobalTriggerListeners()
        throws SchedulerException
@@ -904,9 +791,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTriggerListenerNames()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Set getTriggerListenerNames()
        throws SchedulerException
@@ -919,9 +804,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getTriggerListener(java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public TriggerListener getTriggerListener(String name)
        throws SchedulerException
@@ -934,9 +817,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#addSchedulerListener(org.quartz.SchedulerListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void addSchedulerListener(SchedulerListener schedulerListener)
        throws SchedulerException
@@ -949,9 +830,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#removeSchedulerListener(org.quartz.SchedulerListener)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean removeSchedulerListener(SchedulerListener schedulerListener)
        throws SchedulerException
@@ -964,9 +843,7 @@ public class SchedulerEJBImpl
     *
     * @see org.hyperic.hq.scheduler.server.mbean.SchedulerServiceMBean#getSchedulerListeners()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public List getSchedulerListeners()
        throws SchedulerException
@@ -981,17 +858,14 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#addCalendar(java.lang.String, org.quartz.Calendar, boolean, boolean)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public void addCalendar(String   calName,
-                            Calendar calendar,
-                            boolean  replace,
-                            boolean  updateTriggers)
+   public void addCalendar(String calName, Calendar calendar, boolean replace,
+                           boolean updateTriggers)
        throws SchedulerException
    {
-      getSchedulerService().addCalendar(calName, calendar, replace, updateTriggers);
+      getSchedulerService().addCalendar(calName, calendar, replace,
+                                        updateTriggers);
    }
 
    /**
@@ -999,9 +873,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#getPausedTriggerGroups()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public Set getPausedTriggerGroups()
        throws SchedulerException
@@ -1014,9 +886,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#getTriggerState(java.lang.String, java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public int getTriggerState(String triggerName,
                                String triggerGroup)
@@ -1030,20 +900,15 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#interrupt(java.lang.String, java.lang.String)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean interrupt(String jobName,
                              String groupName)
    throws UnableToInterruptJobException
    {
-      try
-      {
+      try {
          return getSchedulerService().interrupt(jobName, groupName);
-      }
-      catch (SchedulerException e)
-      {
+      } catch (SchedulerException e) {
          throw new UnableToInterruptJobException(e);
       }
    }
@@ -1053,9 +918,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#isInStandbyMode()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public boolean isInStandbyMode()
        throws SchedulerException
@@ -1068,9 +931,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#pauseAll()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void pauseAll()
        throws SchedulerException
@@ -1083,16 +944,14 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#rescheduleJob(java.lang.String, java.lang.String, org.quartz.Trigger)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public Date rescheduleJob(String  triggerName,
-                              String  groupName,
-                              Trigger newTrigger)
+   public Date rescheduleJob(String triggerName, String groupName,
+                             Trigger newTrigger)
        throws SchedulerException
    {
-      return getSchedulerService().rescheduleJob(triggerName, groupName, newTrigger);
+      return getSchedulerService().rescheduleJob(triggerName, groupName,
+                                                 newTrigger);
    }
 
    /**
@@ -1100,9 +959,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#resumeAll()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void resumeAll()
        throws SchedulerException
@@ -1115,9 +972,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#setJobFactory(org.quartz.spi.JobFactory)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void setJobFactory(JobFactory factory)
        throws SchedulerException
@@ -1130,9 +985,7 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#standby()
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
    public void standby()
        throws SchedulerException
@@ -1145,13 +998,9 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#triggerJob(java.lang.String, java.lang.String, org.quartz.JobDataMap)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public void triggerJob(String     jobName,
-                           String     groupName,
-                           JobDataMap data)
+   public void triggerJob(String jobName, String groupName, JobDataMap data)
        throws SchedulerException
    {
       getSchedulerService().triggerJob(jobName, groupName, data);
@@ -1162,69 +1011,28 @@ public class SchedulerEJBImpl
     *
     * @see org.quartz.Scheduler#triggerJobWithVolatileTrigger(String, String, org.quartz.JobDataMap)
     *
-    * @ejb.interface-method
-    * @ejb.transaction
-    *      type = "REQUIRED"
+    * @ejb:interface-method
     */
-   public void triggerJobWithVolatileTrigger(String     jobName,
-                                              String     groupName,
-                                              JobDataMap data)
+   public void triggerJobWithVolatileTrigger(String jobName, String groupName,
+                                             JobDataMap data)
        throws SchedulerException
    {
       getSchedulerService().triggerJob(jobName, groupName, data);
    }
 
-   //---------------------------------------------------------------------
-   //-- SessionBean interface methods
-   //---------------------------------------------------------------------
-   /**
-    * no-op.
-    *
-    * @throws CreateException
-    */
-   public void ejbCreate()
-   throws CreateException
-   {
-   }
+   public void ejbCreate() throws CreateException {}
 
-   /**
-    * no-op.
-    */
-   public void ejbRemove()
-   {
-   }
+   public void ejbRemove() {}
 
-   /**
-    * no-op.
-    */
-   public void ejbActivate()
-   {
-   }
+   public void ejbActivate() {}
 
-   /**
-    * no-op.
-    */
-   public void ejbPassivate()
-   {
-   }
+   public void ejbPassivate() {}
 
-   /**
-    * Sets the EJB session context.
-    *
-    * @param ctx
-    */
-   public void setSessionContext(SessionContext ctx)
-   {
+   public void setSessionContext(SessionContext ctx) {
       sessCtx = ctx;
    }
 
-   /**
-    * Returns the EJB session context.
-    *
-    * @return the context
-    */
-   public SessionContext getSessionContext()
-   {
+   public SessionContext getSessionContext() {
       return sessCtx;
    }
    
