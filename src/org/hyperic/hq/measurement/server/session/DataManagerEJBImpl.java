@@ -448,10 +448,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * Convert a decimal value to something suitable for being thrown into the database
      * with a NUMERIC(24,5) definition
      */
-    private BigDecimal getDecimalInRange(BigDecimal val) {
+    private BigDecimal getDecimalInRange(BigDecimal val, Integer metricId) {
         val = val.setScale(5, BigDecimal.ROUND_HALF_EVEN);
         if (val.compareTo(MAX_DB_NUMBER) == 1) {
-            _log.warn("Value [" + val + "] is too big to put into the DB.  Truncating to [" + 
+            _log.warn("Value [" + val + "] for metric id=" + metricId +
+                      "is too big to put into the DB.  Truncating to [" +
                       MAX_DB_NUMBER+ "]");
             return MAX_DB_NUMBER;
         }
@@ -603,7 +604,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     rowsToUpdate++;
                     values.append("(").append(val.getTimestamp()).append(", ")
                           .append(metricId.intValue()).append(", ")
-                          .append(getDecimalInRange(bigDec)+"),");
+                          .append(getDecimalInRange(bigDec, metricId)+"),");
                 }
                 String sql = "insert into "+table+" (timestamp, measurement_id, "+
                              "value) values "+values.substring(0, values.length()-1);
@@ -747,10 +748,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     bigDec = new BigDecimal(val.getValue());
                     stmt.setInt(1, metricId.intValue());
                     stmt.setLong(2, val.getTimestamp());
-                    stmt.setBigDecimal(3, getDecimalInRange(bigDec));
+                    stmt.setBigDecimal(3, getDecimalInRange(bigDec, metricId));
 
                     if (supportsDupInsStmt)
-                        stmt.setBigDecimal(4, getDecimalInRange(bigDec));
+                        stmt.setBigDecimal(4, getDecimalInRange(bigDec,
+                                                                metricId));
                     
                     stmt.addBatch();
                 }
@@ -818,7 +820,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
                     bigDec = new BigDecimal(val.getValue());
-                    stmt.setBigDecimal(1, getDecimalInRange(bigDec));
+                    stmt.setBigDecimal(1, getDecimalInRange(bigDec, metricId));
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setInt(3, metricId.intValue());
                     stmt.addBatch();
