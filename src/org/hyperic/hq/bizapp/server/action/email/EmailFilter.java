@@ -362,11 +362,11 @@ public class EmailFilter {
                                                     next.getTime());
 
                 Date nextfire = scheduler.scheduleJob(jobDetail, t);
-                _log.info("Will queue alerts for platform " +
-                          platId + " until " + nextfire);
+                _log.debug("Will queue alerts for platform " +
+                           platId + " until " + nextfire);
             } else {
                 // Already scheduled, there will only be a single trigger.
-                _log.info("Already queing alerts for platform " +
+                _log.debug("Already queing alerts for platform " +
                            platId + ", will fire at " +
                            triggers[0].getNextFireTime());
             }
