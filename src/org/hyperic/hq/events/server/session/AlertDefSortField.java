@@ -116,7 +116,7 @@ public abstract class AlertDefSortField
         }
         
         String getSortString(String def, String resource) {
-            return def + ".lastFired";
+            return def + ".alertDefinitionState.lastFired";
         }
     };
 

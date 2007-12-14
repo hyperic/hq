@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="org.hyperic.hq.events.server.session">
+
+  <class name="AlertDefinitionState" table="EAM_ALERT_DEF_STATE">
+    <id name="id" type="integer">
+      <column name="ID" not-null="true"/>
+      <generator class="sequence">
+        <param name="sequence">EAM_ALERT_DEF_STATE_ID_SEQ</param>
+      </generator>
+    </id>
+
+    <many-to-one name="alertDefinition" column="alert_definition_id" unique="true"
+                 not-null="true" foreign-key="none"/>
+
+    <property name="lastFired" type="long">
+      <column name="last_fired" not-null="true"/>
+    </property>
+  </class>
+
+</hibernate-mapping>

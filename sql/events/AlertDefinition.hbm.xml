@@ -88,8 +88,6 @@
       <column name="DELETED" not-null="true"/>
     </property>
 
-    <property name="lastFired" formula="(select max(a.ctime) from EAM_ALERT a where a.alert_definition_id = id)"/>
-
     <many-to-one name="escalation">
       <column name="ESCALATION_ID" not-null="false"/>
     </many-to-one>
@@ -115,6 +113,9 @@
       <key on-delete="cascade" column="ALERT_DEFINITION_ID"/>
       <one-to-many class="RegisteredTrigger"/>
     </bag>
+
+    <one-to-one name="alertDefinitionState" class="AlertDefinitionState"
+                property-ref="alertDefinition"/>
   </class>
 
 </hibernate-mapping>

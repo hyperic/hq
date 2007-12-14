@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -221,5 +221,18 @@ public class AlertDAO extends HibernateDAO {
     
     void save(Alert alert) { 
         super.save(alert);
+        
+        AlertDefinition def = alert.getAlertDefinition();
+        
+        // Update the last fired time
+        if (def.getAlertDefinitionState() == null) {
+            AlertDefinitionState state =
+                new AlertDefinitionState(def, alert.getCtime());
+            def.setAlertDefinitionState(state);
+            super.save(state);
+        }
+
+        if (def.getLastFired() < alert.getCtime())
+            def.setLastFired(alert.getCtime());
     }
 }

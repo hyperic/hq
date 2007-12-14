@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -73,7 +73,7 @@ public class AlertDefinition
     private Collection        _actions = new ArrayList();
     private Escalation        _escalation;
     private Resource          _resource;
-    private Long              _lastFired;
+    private AlertDefinitionState _state;
 
     private AlertDefinitionValue      _value;
     
@@ -395,14 +395,25 @@ public class AlertDefinition
     /**
      * Get the time that the alert definition last fired.
      */
-    public Long getLastFired() {
-        return _lastFired;
+    public long getLastFired() {
+        if (_state != null)
+            return _state.getLastFired();
+        
+        return 0;
     }
     
-    protected void setLastFired(Long lastFired) {
-        _lastFired = lastFired;
+    void setLastFired(long lastFired) {
+        _state.setLastFired(lastFired);
     }
     
+    public AlertDefinitionState getAlertDefinitionState() {
+        return _state;
+    }
+    
+    void setAlertDefinitionState(AlertDefinitionState state) {
+        _state = state;
+    }
+
     public AlertDefinitionValue getAlertDefinitionValue() {
         if (_value == null)
             _value = new AlertDefinitionValue();
