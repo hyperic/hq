@@ -24,11 +24,11 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.FlushMode;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
@@ -282,7 +282,10 @@ public class AlertDefinitionDAO extends HibernateDAO {
             def.setParent(aDAO.findById(val.getParentId()));
         }
         def.setDescription(val.getDescription());
-        def.setEnabled(val.getEnabled());
+        
+        // This is a user initiated action.
+        def.setEnabledByUser(val.getEnabled());
+        
         def.setWillRecover(val.getWillRecover());
         def.setNotifyFiltered(val.getNotifyFiltered() );
         def.setControlFiltered(val.getControlFiltered() );
