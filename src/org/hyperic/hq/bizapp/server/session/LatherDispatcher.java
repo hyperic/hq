@@ -130,7 +130,7 @@ public class LatherDispatcher
     private Hashtable       agentTokenCache = new Hashtable();
     protected HashSet       secureCommands  = new HashSet();
     private Set             noTxCommands    = new HashSet();
-    private Object          tConnLock       = new Object();
+    private final Object    tConnLock       = new Object();
     private TopicConnection tConn;
     private TopicSession    tSession;
 
@@ -164,9 +164,8 @@ public class LatherDispatcher
                         ctx.lookup(Messenger.CONN_FACTORY_JNDI);
                 } catch(NamingException exc){
                     log.error("Error looking up " + 
-                                   Messenger.CONN_FACTORY_JNDI + 
-                                   " while sending a message to " + msgTopic,
-                                   exc);
+                              Messenger.CONN_FACTORY_JNDI +
+                              " while sending a message to " + msgTopic, exc);
                     throw new LatherRemoteException("Unable to lookup " +
                                                     "message queue '" + 
                                                     msgTopic + "'");
@@ -719,13 +718,12 @@ public class LatherDispatcher
         if(secureCommands.contains(method)){
             if(!(arg instanceof SecureAgentLatherValue)){
                 log.warn("Authenticated call made from " +
-                              ctx.getCallerIP() + " which did not subclass " +
-                              "the correct authentication class");
+                         ctx.getCallerIP() + " which did not subclass " +
+                         "the correct authentication class");
                 throw new LatherRemoteException("Unauthorized agent denied");
             }
 
-            validateAgent(ctx,
-                               ((SecureAgentLatherValue)arg).getAgentToken());
+            validateAgent(ctx, ((SecureAgentLatherValue)arg).getAgentToken());
         }
 
         if(method.equals(CommandInfo.CMD_PING)){
