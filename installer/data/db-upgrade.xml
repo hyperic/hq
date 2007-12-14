@@ -7747,6 +7747,33 @@ has already been defined.
 	  </schema-directSQL>
   </schemaSpec>	
 
+  <schemaSpec version="3.87">
+	  <schema-directSQL>
+        <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="oracle">
+          create table EAM_ALERT_DEF_STATE (
+              ID number(10,0) not null,
+              alert_definition_id number(10,0) not null unique,
+              last_fired number(19,0) not null,
+              primary key (ID)
+          )
+        </statement>		
+        <statement targetDB="oracle">
+          create sequence EAM_ALERT_DEF_STATE_ID_SEQ start with 10001 increment by 1
+        </statement>
+        <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="postgresql">
+          create table EAM_ALERT_DEF_STATE (
+              ID int4 not null,
+              alert_definition_id int4 not null unique,
+              last_fired int8 not null,
+              primary key (ID)
+          )
+        </statement>		
+        <statement targetDB="postgresql">
+          create sequence EAM_ALERT_DEF_STATE_ID_SEQ start 10001 increment 1
+        </statement>		
+	  </schema-directSQL>
+  </schemaSpec>	
+
 </dbupgrade>
 </target>
 
