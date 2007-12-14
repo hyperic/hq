@@ -7797,8 +7797,13 @@ has already been defined.
           </initializer>
       </schema-addColumn>
       <schema-directSQL>
-          <statement desc="The root resource type alert should be inactive">
+          <statement desc="The root resource type alert should be inactive"
+			         targetDB="postgresql">
             UPDATE EAM_ALERT_DEFINITION SET ACTIVE=FALSE WHERE ID=0
+          </statement>
+		  <statement desc="The root resource type alert should be inactive"
+			         targetDB="oracle">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=0 WHERE ID=0
           </statement>
       </schema-directSQL>
       <schema-alterColumn table="EAM_ALERT_DEFINITION"
