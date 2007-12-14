@@ -88,13 +88,16 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
             "EAM_AGENT", "EAM_IP", "EAM_MEASUREMENT_ARG", "EAM_MEASUREMENT", 
             "EAM_SRN", "EAM_RESOURCE", "EAM_CPROP_KEY" };
+    
+    
+    
 
     private final String[] DATA_TABLES 
         = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
             "EAM_MEASUREMENT_DATA_1H", "HQ_METRIC_DATA_COMPAT",
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
-            "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP" };
+            "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_TRIGGER_EVENT" };
                          
     public final String logCtx
         = "org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl";
@@ -458,7 +461,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     /**
      * Run database-specific cleanup routines on appdef tables -- on PostgreSQL 
-     * we do a VACUUM ANALYZE against the relevant appdef, authz and measurement
+     * we do a VACUUM ANALYZE against the relevant appdef, authz and measurement 
      * tables.  On other databases we just return -1.
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      * database is not PostgreSQL.
