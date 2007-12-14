@@ -158,7 +158,9 @@ public class AlertDefinitionManagerEJBImpl
 
         watch.markTimeBegin("mark deleted");
         alertdef.setDeleted(true);
-        alertdef.setEnabled(false);
+        
+        // This is a user initiated action.
+        alertdef.setEnabledByUser(false);
         
         for (Iterator it = alertdef.getActions().iterator();
              it.hasNext(); ) {
@@ -278,7 +280,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public void updateAlertDefinitionBasic(AuthzSubjectValue subj, Integer id,
                                            String name, String desc,
-                                           int priority, boolean enabled)
+                                           int priority, boolean enable)
         throws PermissionException
     {
         List alertdefs = new ArrayList(1);
@@ -295,7 +297,10 @@ public class AlertDefinitionManagerEJBImpl
             ad.setName(name);
             ad.setDescription(desc);
             ad.setPriority(priority);
-            ad.setEnabled(enabled);
+            
+            // This is a user initiated action.
+            ad.setEnabledByUser(enable);
+            
             ad.setMtime(System.currentTimeMillis());
         }
     }
@@ -385,11 +390,12 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /** 
-     * Enable/Disable alert definitions
+     * Enable/Disable alert definitions.
      * @ejb:interface-method
      */
     public void updateAlertDefinitionsEnable(AuthzSubjectValue subj,
-                                             Integer[] ids, boolean enable)
+                                             Integer[] ids, 
+                                             boolean enable)
         throws FinderException, PermissionException 
     {
         List alertdefs = new ArrayList();
@@ -404,27 +410,36 @@ public class AlertDefinitionManagerEJBImpl
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            updateAlertDefinitionEnable(subj, (AlertDefinition) i.next(),
-                                        enable);
+            updateAlertDefinitionEnable(subj, (AlertDefinition) i.next(), enable);
         }
     }
 
     /** 
-     * Enable/Disable alert definitions
+     * Enable/Disable an alert definition.
      * @ejb:interface-method
      */
     public void updateAlertDefinitionEnable(AuthzSubjectValue subj,
-                                            AlertDefinition def, boolean enable)
+                                            AlertDefinition def, 
+                                            boolean enable)
         throws PermissionException {
-        if (def.isEnabled() != enable) {
-            canManageAlerts(subj, def);
-            def.setEnabled(enable);
-            def.setMtime(System.currentTimeMillis());
-        }
+        
+        canManageAlerts(subj, def);
+        
+        // If this is a new enabled status then set the mtime. In either case 
+        // we need to set enabled by user to make sure the active bit is set 
+        // correctly.
+        boolean isNewEnabledStatus = def.isEnabled() != enable;
+        
+        // This is a user initiated action.
+        def.setEnabledByUser(enable);
+        
+        if (isNewEnabledStatus) {
+            def.setMtime(System.currentTimeMillis());            
+        }        
     }
     
     /** 
-     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * Enable/Disable an alert definition. For internal use only where the mtime 
      * does not need to be reset on each update.
      * 
      * @return <code>true</code> if the enable/disable succeeded.
@@ -439,7 +454,7 @@ public class AlertDefinitionManagerEJBImpl
         
         if (def.isEnabled() != enable) {
             canManageAlerts(subj, def);
-            def.setEnabled(enable);
+            def.setEnabledBySystem(enable);
             succeeded = true;
         }
         
@@ -447,7 +462,7 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /** 
-     * Enable/Disable alert definitions. For internal use only where the mtime 
+     * Enable/Disable an alert definition. For internal use only where the mtime 
      * does not need to be reset on each update.
      * 
      * @return <code>true</code> if the enable/disable succeeded.
