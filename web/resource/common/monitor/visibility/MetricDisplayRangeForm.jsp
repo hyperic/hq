@@ -168,7 +168,7 @@
             </html:select>&nbsp;/&nbsp;
             <html:select property="startYear" styleId="startYear" onchange="toggleRadio('a', 1); changeMonitorDropDown('startMonth', 'startDay', 'startYear');"> 
               <html:options property="yearOptions"/>
-            </html:select>&nbsp;<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('startMonth', 'startDay', 'startYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
+            </html:select>&nbsp;<!--<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('startMonth', 'startDay', 'startYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>-->
             &nbsp;@&nbsp;
             <html:text property="startHour" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="startMin" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
             <html:select property="startAmPm" onchange="toggleRadio('a', 1);"> 
@@ -230,7 +230,7 @@
             </html:select>&nbsp;/&nbsp;
             <html:select property="endYear" styleId="endYear" onchange="toggleRadio('a', 1); changeMonitorDropDown('endMonth', 'endDay', 'endYear');">
               <html:options property="yearOptions"/>
-            </html:select>&nbsp;<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('endMonth', 'endDay', 'endYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
+            </html:select>&nbsp;<!--<html:link href="#" onclick="toggleRadio('a', 1); calMonitor('endMonth', 'endDay', 'endYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>-->
             &nbsp;@&nbsp;
             <html:text property="endHour" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;:&nbsp;<html:text property="endMin" size="2" maxlength="2" onfocus="toggleRadio('a', 1);"/>&nbsp;
             <html:select property="endAmPm" onchange="toggleRadio('a', 1);">
