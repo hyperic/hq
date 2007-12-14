@@ -7773,6 +7773,24 @@ has already been defined.
         </statement>		
 	  </schema-directSQL>
   </schemaSpec>	
+	
+  <schemaSpec version="3.88">
+      <schema-addColumn table="EAM_ALERT_DEFINITION"
+                        column="ACTIVE"
+                        columnType="boolean">
+          <initializer>
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=TRUE
+          </initializer>
+      </schema-addColumn>
+      <schema-directSQL>
+          <statement desc="The root resource type alert should be inactive">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=FALSE WHERE ID=0
+          </statement>
+      </schema-directSQL>
+      <schema-alterColumn table="EAM_ALERT_DEFINITION"
+                          column="ACTIVE"
+                          nullable="NOT NULL"/> 
+  </schemaSpec>	
 
 </dbupgrade>
 </target>
