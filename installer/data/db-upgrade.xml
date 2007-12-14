@@ -7771,6 +7771,20 @@ has already been defined.
         <statement targetDB="postgresql">
           create sequence EAM_ALERT_DEF_STATE_ID_SEQ start 10001 increment 1
         </statement>		
+        <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="mysql">
+          create table EAM_ALERT_DEF_STATE (
+              ID integer not null,
+              alert_definition_id integer not null unique,
+              last_fired bigint not null,
+              primary key (ID)
+          ) ENGINE=InnoDB
+        </statement>		
+        <statement targetDB="mysql">
+          INSERT INTO HQ_SEQUENCE (seq_name,seq_val) VALUES ('EAM_ALERT_DEF_STATE_ID_SEQ', 10001)
+        </statement>		
+        <statement desc="Drop unused column LAST_FIRED from EAM_ALERT_DEFINITION.">
+          ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN LAST_FIRED
+        </statement>
 	  </schema-directSQL>
   </schemaSpec>	
 	
