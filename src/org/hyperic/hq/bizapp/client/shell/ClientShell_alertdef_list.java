@@ -45,8 +45,8 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
         ClientShell_resource.PARAM_SERVICE,
     };
     
-    private static final String PARAM_ENABLED  = "-enabled";
-    private static final String PARAM_DISABLED = "-disabled";
+    private static final String PARAM_ACTIVE  = "-active";
+    private static final String PARAM_INACTIVE = "-inactive";
 
     private ClientShell              shell;
     private ClientShellEntityFetcher entityFetcher;
@@ -64,7 +64,7 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
         PrintStream out = getOutStream();
         List data = null;
 
-        Boolean enabled = null;
+        Boolean active = null;
 
         // Need at least -type <id> arguments
         if (args.length < 2) {
@@ -84,9 +84,9 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
                     ClientShell_resource.paramToEntityType(resourceType);
                 data = this.findResourceAlertDefinitions(appdefType, args[++i]);
             }
-            else if (args[i].equals(PARAM_ENABLED) ||
-                     args[i].equals(PARAM_DISABLED)) {
-                enabled = new Boolean(args[i].equals(PARAM_ENABLED));
+            else if (args[i].equals(PARAM_ACTIVE) ||
+                     args[i].equals(PARAM_INACTIVE)) {
+                active = new Boolean(args[i].equals(PARAM_ACTIVE));
             }
             else {
                 throw new ShellCommandUsageException(this.getUsageHelp(null));
@@ -105,7 +105,7 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
         }
         
         PrintfFormat pFmt = new PrintfFormat("%-6s %-15s %-7s %s");
-        out.println(pFmt.sprintf(new String[] { "ID", "Name", "Enabled",
+        out.println(pFmt.sprintf(new String[] { "ID", "Name", "Active",
                                                 "Description"}));
         out.println(pFmt.sprintf(new String[] { "--", "----", "-------",
                                                 "-----------"}));
@@ -120,12 +120,20 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
         for(int i=0; i<vals.length; i++){
             AlertDefinitionValue val = vals[i];
             
-            if (enabled != null && enabled.booleanValue() != val.getEnabled())
+            if (active != null && active.booleanValue() != val.getActive())
                 continue;
 
             fArgs[0] = val.getId();
             fArgs[1] = val.getName();
+            
+        	// HHQ-1396: When we expose the difference between 
+        	// active and enabled states in the UI, need to 
+        	// get enabled correctly.
+        	// Uncomment this code at this point and remove 
+        	// the other fArgs[2] initialization.
+            // fArgs[2] = new Boolean(val.getActive());
             fArgs[2] = new Boolean(val.getEnabled());
+            
             fArgs[3] = val.getDescription();
             try {
                 StringBuffer buf = new StringBuffer();
@@ -180,7 +188,7 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
     
     public String getSyntaxArgs(){
         return "<" + ClientShell_resource.generateArgList(PARAM_VALID_RESOURCE) +
-            " > <resource> [-enabled | -disabled]";
+            " > <resource> [-active | -inactive]";
     }
 
     public String getUsageShort(){
@@ -189,7 +197,7 @@ public class ClientShell_alertdef_list extends ShellCommandBase {
 
     public String getUsageHelp(String[] args) {
         return "\n    " + this.getUsageShort() + ".\n\n" +
-               "    -enabled    Show enabled alert definitions only\n" +
-               "    -disabled   Show disabled alert definitions only\n";
+               "    -active    Show active alert definitions only\n" +
+               "    -inactive   Show inactive alert definitions only\n";
     }
 }
