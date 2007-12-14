@@ -50,9 +50,6 @@ import org.hibernate.cfg.Environment;
 
 import org.hibernate.dialect.Dialect;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
-import org.hyperic.hibernate.dialect.Oracle9Dialect;
-import org.hyperic.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.function.ClassicAvgFunction;
 import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
@@ -63,10 +60,8 @@ import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.jdbc.DBUtil;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -129,9 +124,9 @@ public class Util {
         // Add ehcache statistics to the diagnostics
         DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
             private PrintfFormat _fmt = 
-                new PrintfFormat("%-50s %-6d %-6d %-6d %6d");
+                new PrintfFormat("%-55s %-6d %-6d %6d");
             private PrintfFormat _hdr = 
-                new PrintfFormat("%-50s %-6s %-6s %-6s %6s");
+                new PrintfFormat("%-55s %-6s %-6s %6s");
 
             public String getName() {
                 return "EhCache Diagnostics";
@@ -163,41 +158,31 @@ public class Util {
             
             public String getStatus() {
                 String separator = System.getProperty("line.separator");
-                long totalBytes = 0;
                 StringBuffer buf = new StringBuffer(separator);
                 Object[] fmtArgs = new Object[5];
 
                 fmtArgs[0] = "Cache";
                 fmtArgs[1] = "Size";
-                fmtArgs[2] = "Bytes";
-                fmtArgs[3] = "Hits";
-                fmtArgs[4] = "Misses";
+                fmtArgs[2] = "Hits";
+                fmtArgs[3] = "Misses";
                 buf.append(_hdr.sprintf(fmtArgs))
                    .append(separator);
                 fmtArgs[0] = "=====";
                 fmtArgs[1] = "====";
-                fmtArgs[2] = "=====";
-                fmtArgs[3] = "====";
-                fmtArgs[4] = "=====";
+                fmtArgs[2] = "====";
+                fmtArgs[3] = "=====";
                 buf.append(_hdr.sprintf(fmtArgs));
 
                 for (Iterator i=getSortedCaches().iterator(); i.hasNext(); ) {
                     Cache cache = (Cache)i.next();
-                    long inMemoryBytes = cache.calculateInMemorySize();
-                    totalBytes += inMemoryBytes;
-                    fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 50);
+                    fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 55);
                     fmtArgs[1] = new Integer(cache.getSize());
-                    fmtArgs[2] = new Long(inMemoryBytes);
-                    fmtArgs[3] = new Integer(cache.getHitCount());
-                    fmtArgs[4] = new Integer(cache.getMissCountNotFound());
+                    fmtArgs[2] = new Long(cache.getStatistics().getCacheHits());
+                    fmtArgs[3] = new Long(cache.getStatistics().getCacheMisses());
                             
                     buf.append(separator)
                        .append(_fmt.sprintf(fmtArgs));
                 }
-                buf.append(separator).
-                    append("Total mapped cache size=").
-                    append(totalBytes).
-                    append(" bytes");
 
                 return buf.toString();
             }
