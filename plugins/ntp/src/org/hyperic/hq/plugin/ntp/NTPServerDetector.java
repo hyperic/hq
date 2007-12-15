@@ -128,7 +128,7 @@ public class NTPServerDetector
 
             productConfig.setValue(NTPDCollector.PROP_NTPDC, ntpdc);
             productConfig.setValue("process.query", query);
-            productConfig.setValue(NTPDCollector.PROP_TIMEOUT, "10");
+            productConfig.setValue(NTPDCollector.PROP_TIMEOUT, "1");
             server.setProductConfig(productConfig);
 
             server.setMeasurementConfig();

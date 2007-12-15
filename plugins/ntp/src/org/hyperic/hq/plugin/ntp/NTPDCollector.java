@@ -53,15 +53,6 @@ public class NTPDCollector extends Collector {
         return true;
     }
 
-    //override old default timeout of 1 second.
-    public int getTimeout() {
-        int timeout = super.getTimeout();
-        if (timeout == 1) {
-            timeout = getDefaultTimeout();
-        }
-        return timeout;
-    }
-
     protected void init() throws PluginException {
         String ntpdc = getProperty(PROP_NTPDC, "");
         if (!new File(ntpdc).exists()) {
@@ -80,8 +71,9 @@ public class NTPDCollector extends Collector {
 
         ByteArrayOutputStream output = 
             new ByteArrayOutputStream();
+        //peer timeout is short, use longer timeout for the exec
         ExecuteWatchdog wdog =
-            new ExecuteWatchdog(timeout);
+            new ExecuteWatchdog(15 * 1000);
         Execute exec =
             new Execute(new PumpStreamHandler(output), wdog);
 
