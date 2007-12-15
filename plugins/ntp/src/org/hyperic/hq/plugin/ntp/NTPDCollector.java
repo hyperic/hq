@@ -26,13 +26,17 @@
 package org.hyperic.hq.plugin.ntp;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 
 public class NTPDCollector extends Collector {
 
@@ -67,26 +71,32 @@ public class NTPDCollector extends Collector {
 
     public void collect() {
         String ntpdc = getProperty(PROP_NTPDC);
-        int timeout = getTimeout();
+        int timeout = getTimeoutMillis();
+        String argv[] = new String[ARGS.length + 3];
+        argv[0] = ntpdc;
+        argv[1] = "-c";
+        argv[2] = "'timeout " + timeout + "'";
+        System.arraycopy(ARGS, 0, argv, 3, ARGS.length);
 
-        Process proc;
+        ByteArrayOutputStream output = 
+            new ByteArrayOutputStream();
+        ExecuteWatchdog wdog =
+            new ExecuteWatchdog(timeout);
+        Execute exec =
+            new Execute(new PumpStreamHandler(output), wdog);
+
+        exec.setCommandline(argv);
+
         try {
-            String argv[] = new String[ARGS.length + 3];
-            argv[0] = ntpdc;
-            argv[1] = "-c";
-            argv[2] = "'timeout " + timeout + "000'";
-            System.arraycopy(ARGS, 0, argv, 3, ARGS.length);
-
-            proc = Runtime.getRuntime().exec(argv);
-        } catch (IOException e) {
+            exec.execute();
+        } catch (Exception e) {
             setErrorMessage("Unable to exec process: " + e);
             return;
         }
 
         BufferedReader in = null;
         try {
-            in = new BufferedReader(new InputStreamReader(proc.
-                                                          getInputStream()));
+            in = new BufferedReader(new StringReader(output.toString()));
             boolean seenPeerHeader = false;
             double peers      = 0;
             double peerDelay  = 0;
