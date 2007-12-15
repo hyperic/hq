@@ -7813,7 +7813,7 @@ has already been defined.
   <schemaSpec version="3.89">
 	<schema-directSQL>
     <statement targetDB="postgresql">
-      create table eam_ai_agent_report (
+      create table EAM_AI_AGENT_REPORT (
           id integer not null,
           version_col bigint DEFAULT 0 NOT NULL,
           agent_id integer not null,
@@ -7825,7 +7825,7 @@ has already been defined.
       CREATE SEQUENCE eam_ai_agent_report_id_seq start 10001 increment 1
     </statement>
     <statement targetDB="mysql">
-      create table eam_ai_agent_report (
+      create table EAM_AI_AGENT_REPORT (
           id integer not null,
           version_col bigint not null,
           agent_id integer not null,
@@ -7834,27 +7834,27 @@ has already been defined.
        ) ENGINE=InnoDB
     </statement>
     <statement targetDB="oracle">
-      create table eam_ai_agent_report (
-          id integer not null,
-          version_col bigint not null,
-          agent_id number(10,0) not null,
-          report_time bigint not null,
-          service_dirty boolean not null
+      create table EAM_AI_AGENT_REPORT (
+          id INTEGER not null,
+          version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
+          agent_id NUMBER(10,0) not null,
+          report_time NUMBER(19,0) not null,
+          service_dirty NUMBER(1) not null
        ) 
     </statement>
     <statement targetDB="oracle">
       create sequence eam_ai_agent_report_id_seq start with 10001 increment by 1
     </statement>
     <statement>
-      ALTER TABLE eam_ai_agent_report
+      ALTER TABLE EAM_AI_AGENT_REPORT
          ADD CONSTRAINT eam_ai_agent_report_pkey PRIMARY KEY (id)
     </statement>
     <statement>
-      ALTER TABLE eam_ai_agent_report
-        ADD CONSTRAINT eam_ai_agent_report_agent_id_key UNIQUE (agent_id)
+      ALTER TABLE EAM_AI_AGENT_REPORT
+        ADD CONSTRAINT eam_ai_agent_id_key UNIQUE (agent_id)
     </statement>
     <statement>
-      ALTER TABLE ONLY eam_ai_agent_report
+      ALTER TABLE EAM_AI_AGENT_REPORT
         ADD CONSTRAINT fk9723a177559691a3 FOREIGN KEY (agent_id) 
         REFERENCES eam_agent(id)
     </statement>
