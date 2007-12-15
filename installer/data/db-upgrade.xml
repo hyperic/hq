@@ -7889,6 +7889,9 @@ has already been defined.
                     FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
                     ON DELETE CASCADE
       </statement>
+      <schema-alterColumn table="EAM_CRISPO_OPT"
+                        column="VAL"
+                        nullable="NULL"/>
     </schema-directSQL>    
   </schemaSpec>
   
