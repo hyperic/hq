@@ -121,13 +121,10 @@ import org.hyperic.util.security.SecurityUtil;
 public class LatherDispatcher
     extends BizappSessionEJB
 {
-    private static final int AGENTCACHE_TIMEOUT = 60 * 1000;
-
     protected final Log log = 
         LogFactory.getLog(LatherDispatcher.class.getName());
 
     private SessionManager  sessionManager  = SessionManager.getInstance();
-    private Hashtable       agentTokenCache = new Hashtable();
     protected HashSet       secureCommands  = new HashSet();
     private Set             noTxCommands    = new HashSet();
     private final Object    tConnLock       = new Object();
@@ -201,22 +198,13 @@ public class LatherDispatcher
                                  boolean useCache)
         throws LatherRemoteException
     {
-        Long initTime = (Long)agentTokenCache.get(agentToken);
-        long now;
-
-        now = System.currentTimeMillis();
-        if(useCache == false || initTime == null ||
-           (initTime.longValue() + AGENTCACHE_TIMEOUT) < now)
-        {
-            log.debug("Validating agent token");
-            try {
-                getAgentManager().checkAgentAuth(agentToken);
-            } catch(AgentUnauthorizedException exc){
-                log.warn("Unauthorized agent from " +
-                              ctx.getCallerIP() + " denied");
-                throw new LatherRemoteException("Unauthorized agent denied");
-            }
-            agentTokenCache.put(agentToken, new Long(now));
+        log.debug("Validating agent token");
+        try {
+            getAgentManager().checkAgentAuth(agentToken);
+        } catch (AgentUnauthorizedException exc) {
+            log.warn("Unauthorized agent from " +
+                ctx.getCallerIP() + " denied");
+            throw new LatherRemoteException("Unauthorized agent denied");
         }
     }
 
