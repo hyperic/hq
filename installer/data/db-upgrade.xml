@@ -7781,9 +7781,6 @@ has already been defined.
         <statement targetDB="mysql">
           INSERT INTO HQ_SEQUENCE (seq_name,seq_val) VALUES ('EAM_ALERT_DEF_STATE_ID_SEQ', 10001)
         </statement>		
-        <statement desc="Drop unused column LAST_FIRED from EAM_ALERT_DEFINITION.">
-          ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN LAST_FIRED
-        </statement>
 	  </schema-directSQL>
   </schemaSpec>	
 	
@@ -7889,10 +7886,10 @@ has already been defined.
                     FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
                     ON DELETE CASCADE
       </statement>
-      <schema-alterColumn table="EAM_CRISPO_OPT"
+    </schema-directSQL>    
+    <schema-alterColumn table="EAM_CRISPO_OPT"
                         column="VAL"
                         nullable="NULL"/>
-    </schema-directSQL>    
   </schemaSpec>
   
 </dbupgrade>
