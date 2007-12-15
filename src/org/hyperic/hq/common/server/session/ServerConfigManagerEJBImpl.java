@@ -31,7 +31,6 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -60,8 +59,6 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-import org.safehaus.uuid.EthernetAddress;
-import org.safehaus.uuid.UUIDGenerator;
 import org.hibernate.mapping.Table;
 
 /**
