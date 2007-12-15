@@ -25,21 +25,34 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PersistedObject;
 
 public class CrispoOption 
     extends PersistedObject
 {
+    Log log = LogFactory.getLog(CrispoOption.class.getName());
+    
+    private static final String[] _arrayDiscriminators = {".resources", ".portlets."};
+    private static final String _arrayDelimiter = "|";
+    
     private Crispo _crispo;
     private String _key;
     private String _val;
+    
+    private List _array = new ArrayList(0);
     
     protected CrispoOption() {}
     
     CrispoOption(Crispo crispo, String key, String val) {
         _crispo = crispo;
         _key    = key;
-        _val    = val;
+        setValue(val);
     }
 
     public Crispo getCrispo() {
@@ -58,12 +71,56 @@ public class CrispoOption
         _key = key;
     }
     
-    public String getValue() {
+    protected String getOptionValue() {
         return _val == null ? "" : _val;
     }
     
-    protected void setValue(String val) {
+    protected void setOptionValue(String val) {
         _val = val;
+    }
+    
+    public String getValue() {
+        if (_val != null && _val.trim().length() > 0) {
+            return _val;
+        } else if (_val == null && _array.size() == 0) {
+            return "";
+        } else {
+            Iterator itr = _array.iterator();
+            StringBuilder val = new StringBuilder();
+            while (itr.hasNext()) {
+                String item = (String) itr.next();
+                if (item != null && item.length() > 0) {
+                    val.append(_arrayDelimiter).append(item);
+                }
+            }
+            return val.toString();
+        }
+    }
+    
+    protected void setValue(String val) {
+        //TODO
+        if (_key.contains(_arrayDiscriminators[0]) ||
+            _key.contains(_arrayDiscriminators[1])) {
+            if (val != null && val.trim().length() > 0) {
+                _array = new ArrayList(0);
+                String[] elem = val.split("\\" + _arrayDelimiter);
+                for (int i = 0; i < elem.length; i++) {
+                    if (elem[i] != null && elem[i].trim().length() > 0)
+                        _array.add(elem[i]);
+                        log.debug("Adding: {"+val+"}");
+                }
+            }
+            _val = null;
+        } else
+            _val = val;
+    }
+    
+    protected void setArray(List array) {
+        _array = array;
+    }
+    
+    protected List getArray() {
+        return _array;
     }
     
     public int hashCode() {
@@ -71,6 +128,7 @@ public class CrispoOption
         
         result = 37*result + _crispo.hashCode();
         result = 37*result + _key.hashCode();
+        result = 37*result + _array.hashCode();
         return result;
     }
 
@@ -82,6 +140,8 @@ public class CrispoOption
             return false;
         
         CrispoOption opt = (CrispoOption)obj;
-        return opt.getKey().equals(_key) && opt.getCrispo().equals(_crispo);
+        return opt.getKey().equals(_key) && opt.getCrispo().equals(_crispo) 
+               && opt.getArray().equals(_array);
     }
+    
 }

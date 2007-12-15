@@ -2044,7 +2044,7 @@ has already been defined.
                 id integer NOT NULL,
                 version_col bigint DEFAULT 0 NOT NULL,
                 "key" character varying(255) NOT NULL,
-                val character varying(255) NOT NULL,
+                val character varying(255),
                 crispo_id integer NOT NULL
             )
         </statement>
@@ -2053,7 +2053,7 @@ has already been defined.
                 id integer NOT NULL,
                 version_col NUMBER(19,0) DEFAULT 0 NOT NULL,
                 key VARCHAR2(255) NOT NULL,
-                val VARCHAR2(255) NOT NULL,
+                val VARCHAR2(255),
                 crispo_id integer NOT NULL
             )
         </statement>
@@ -7699,8 +7699,7 @@ has already been defined.
 
   <schemaSpec version="3.83">
     <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
-                        targetDB="postgresql" columnType="VARCHAR2"
-                        nullable="not null" />
+                        targetDB="postgresql" columnType="VARCHAR2" />
     <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
                         targetDB="oracle" columnType="VARCHAR2" />
   </schemaSpec>
@@ -7726,7 +7725,7 @@ has already been defined.
   <schemaSpec version="3.85">
     <schema-dropTable table="HQ_SEQUENCE"/>           
   </schemaSpec>	
-	 
+
   <schemaSpec version="3.86">
 	  <schema-directSQL>
 		  <statement desc="Clear out UI attachment">
@@ -7861,6 +7860,38 @@ has already been defined.
     </statement>
 	</schema-directSQL>
   </schemaSpec>
+
+  <schemaSpec version="3.90">
+    <schema-directSQL>
+      <statement desc="Creating new EAM_CRISPO_ARRAY table">
+        create table EAM_CRISPO_ARRAY (
+          OPT_ID int not null,
+          VAL varchar (255) not null,
+          IDX int not null,
+          primary key (OPT_ID, IDX)
+        )
+      </statement>
+      
+      <statement desc="Creating fk constraint to match the hbm-ddl constraint on EAM_CRISPO_ARRAY table" targetDB="oracle">
+        alter table EAM_CRISPO_ARRAY add constraint fkee7dcb20ef4e2527 
+                    FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
+                    ON DELETE CASCADE
+      </statement>
+      
+      <statement desc="Creating fk constraint to match the hbm-ddl constraint on EAM_CRISPO_ARRAY table" targetDB="postgresql">
+        alter table EAM_CRISPO_ARRAY add constraint fkee7dcb20ef4e2527 
+                    FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
+                    ON DELETE CASCADE
+      </statement>
+      
+      <statement desc="Creating fk constraint to match the hbm-ddl constraint on EAM_CRISPO_ARRAY table" targetDB="mysql">
+        alter table EAM_CRISPO_ARRAY add constraint FKEE7DCB20EF4E2527
+                    FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
+                    ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>    
+  </schemaSpec>
+  
 </dbupgrade>
 </target>
 

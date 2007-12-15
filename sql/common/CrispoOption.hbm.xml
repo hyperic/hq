@@ -17,12 +17,19 @@
       <column name="PROPKEY" not-null="true"/>
     </property>
     
-    <property name="value">
-      <column name="VAL" not-null="true" length="4000"/>
+    <property name="optionValue">
+      <column name="VAL" not-null="false" length="4000"/>
     </property>
 
     <many-to-one name="crispo">
       <column name="CRISPO_ID" index="CRISPO_IDX" not-null="true"/>
     </many-to-one>
+    
+    <list name="array" table="EAM_CRISPO_ARRAY">
+        <key column="OPT_ID"/>
+        <list-index column="IDX"/>
+        <element type="string" column="VAL" not-null="true"/>
+    </list>    
+       
   </class>
 </hibernate-mapping>
