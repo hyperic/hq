@@ -47,8 +47,6 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class SigarMeasurementPlugin extends MeasurementPlugin {
 
-    protected static final Double VALUE_NOTIMPL = new Double(Double.NaN);
-
     public static final String DOMAIN      = "sigar";
     public static final String PTQL_DOMAIN = "sigar.ptql";
     public static final String PTQL_CONFIG = "process.query";
@@ -205,6 +203,8 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             synchronized (sigar) {
                 systemValue = invoker.invoke(attr);
             }
+        } catch (SigarNotImplementedException e) {
+            return MetricValue.NONE;
         } catch (SigarException e) {
             if (isAvail) {
                 return new MetricValue(Metric.AVAIL_DOWN);
@@ -256,7 +256,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                                                 " be handled");
         }
         if (useVal.doubleValue() == Sigar.FIELD_NOTIMPL) {
-            useVal = VALUE_NOTIMPL;
+            return MetricValue.NONE;
         }
         return new MetricValue(useVal, System.currentTimeMillis());
     }
