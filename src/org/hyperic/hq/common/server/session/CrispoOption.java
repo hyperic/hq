@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -36,10 +36,11 @@ import org.hyperic.hibernate.PersistedObject;
 public class CrispoOption 
     extends PersistedObject
 {
-    Log log = LogFactory.getLog(CrispoOption.class.getName());
+    Log _log = LogFactory.getLog(CrispoOption.class.getName());
     
-    private static final String[] _arrayDiscriminators = {".resources", ".portlets."};
-    private static final String _arrayDelimiter = "|";
+    private static final String[] ARRAY_DESCRIMINATORS = {".resources",
+                                                          ".portlets."};
+    private static final String ARRAY_DELIMITER = "|";
     
     private Crispo _crispo;
     private String _key;
@@ -86,11 +87,11 @@ public class CrispoOption
             return "";
         } else {
             Iterator itr = _array.iterator();
-            StringBuilder val = new StringBuilder();
+            StringBuffer val = new StringBuffer();
             while (itr.hasNext()) {
                 String item = (String) itr.next();
                 if (item != null && item.length() > 0) {
-                    val.append(_arrayDelimiter).append(item);
+                    val.append(ARRAY_DELIMITER).append(item);
                 }
             }
             return val.toString();
@@ -98,21 +99,25 @@ public class CrispoOption
     }
     
     protected void setValue(String val) {
-        //TODO
-        if (_key.contains(_arrayDiscriminators[0]) ||
-            _key.contains(_arrayDiscriminators[1])) {
-            if (val != null && val.trim().length() > 0) {
-                _array = new ArrayList(0);
-                String[] elem = val.split("\\" + _arrayDelimiter);
-                for (int i = 0; i < elem.length; i++) {
-                    if (elem[i] != null && elem[i].trim().length() > 0)
-                        _array.add(elem[i]);
-                        log.debug("Adding: {"+val+"}");
+        for (int i = 0; i < ARRAY_DESCRIMINATORS.length; i++) {
+            if (_key.indexOf(ARRAY_DESCRIMINATORS[i]) > -1) {
+                if (val != null && val.trim().length() > 0) {
+                    _array = new ArrayList();
+                    String[] elem = val.split("\\" + ARRAY_DELIMITER);
+                    for (int j = 0; j < elem.length; j++) {
+                        if (elem[j] != null && elem[j].trim().length() > 0)
+                            _array.add(elem[j]);
+                        
+                        if (_log.isDebugEnabled())
+                            _log.debug("Adding: {"+elem[j]+"}");
+                    }
                 }
+                _val = null;
+                return;
             }
-            _val = null;
-        } else
-            _val = val;
+        }
+
+        _val = val;
     }
     
     protected void setArray(List array) {
