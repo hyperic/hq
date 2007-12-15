@@ -25,52 +25,26 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
-import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
-import org.hyperic.hq.common.SystemException;
 
 public abstract class AgentConnectionUtil {
 
     public static SecureAgentConnection getClient(AppdefEntityID aid)
-        throws SystemException, PermissionException, AgentNotFoundException
+        throws AgentNotFoundException
     {
-        SecureAgentConnection conn;
-        AgentManagerLocal aManagerLocal;
         AgentValue agent;
 
-        try {
-            aManagerLocal = AgentManagerUtil.getLocalHome().create();
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(CreateException exc){
-            throw new SystemException(exc);
-        }
-
-        agent = aManagerLocal.getAgent(aid);
-        conn  = new SecureAgentConnection(agent);
-        return conn;
+        agent = AgentManagerEJBImpl.getOne().getAgent(aid);
+        return new SecureAgentConnection(agent);
     }
 
     public static SecureAgentConnection getClient(String agentToken)
-        throws SystemException, PermissionException, AgentNotFoundException
+        throws AgentNotFoundException
     {
-        SecureAgentConnection conn;
-        AgentManagerLocal aManagerLocal;
         AgentValue agent;
 
-        try {
-            aManagerLocal = AgentManagerUtil.getLocalHome().create();
-        } catch(NamingException exc){
-            throw new SystemException(exc);
-        } catch(CreateException exc){
-            throw new SystemException(exc);
-        }
-
-        agent = aManagerLocal.getAgent(agentToken);
-        conn  = new SecureAgentConnection(agent);
-        return conn;
+        agent = AgentManagerEJBImpl.getOne().getAgent(agentToken);
+        return new SecureAgentConnection(agent);
     }
 }

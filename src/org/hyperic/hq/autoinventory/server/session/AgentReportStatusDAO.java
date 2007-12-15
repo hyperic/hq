@@ -25,22 +25,46 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AgentConnectionUtil;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import java.util.Collection;
 
-public abstract class AIUtil {
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.dao.HibernateDAO;
 
-    public static AICommandsClient getClient(AppdefEntityID aid) 
-        throws PermissionException, AgentNotFoundException {
-        return new AICommandsClient(AgentConnectionUtil.getClient(aid));
+class AgentReportStatusDAO extends HibernateDAO {
+    AgentReportStatusDAO(DAOFactory f) {
+        super(AgentReportStatus.class, f);
     }
 
-    public static AICommandsClient getClient(String agentToken) 
-        throws AgentNotFoundException 
-    {
-        return new AICommandsClient(AgentConnectionUtil.getClient(agentToken));
+    void save(AgentReportStatus status) {
+        super.save(status);
+    }
+
+    /**
+     * Get or create a report status object for an associated agent.
+     */
+    AgentReportStatus getOrCreate(Agent a) {
+        String sql = "from AgentReportStatus where agent = :agent";
+        
+        AgentReportStatus res = (AgentReportStatus)getSession().createQuery(sql)
+            .setParameter("agent", a)
+            .uniqueResult();
+        
+        if (res == null) {
+            res = new AgentReportStatus();
+            res.setAgent(a);
+            save(res);
+        }
+        return res;
+    }
+    
+    /**
+     * Find a collection of {@link AgentReportStatus} where the services
+     * have not been totally processed.
+     */
+    Collection findDirtyStatus() {
+        String sql="from AgentReportStatus where serviceDirty = true";
+
+        return getSession().createQuery(sql).list();
     }
 }

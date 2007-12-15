@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE server>
+
+<server>
+  <mbean code="org.hyperic.hq.autoinventory.server.mbean.AgentAIScanService"
+         name="hyperic.jmx:type=Service,name=AgentAIScan">
+  </mbean>
+
+  <!-- Service is defined here, but started in HAService -->
+  <mbean code="org.jboss.varia.scheduler.Scheduler" 
+	 name="hyperic.jmx:service=Scheduler,name=AgentAIScan">
+    <depends>hyperic.jmx:type=Service,name=AgentAIScan</depends>
+    <attribute name="StartAtStartup">false</attribute>
+    <attribute name="SchedulableMBean">hyperic.jmx:type=Service,name=AgentAIScan</attribute>
+    <attribute name="SchedulableMBeanMethod">hit( DATE )</attribute>
+    <attribute name="InitialStartDate">NOW</attribute>
+    <attribute name="SchedulePeriod">300000</attribute>
+    <attribute name="InitialRepetitions">-1</attribute>
+  </mbean>
+
+</server>

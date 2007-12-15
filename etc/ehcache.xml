@@ -183,6 +183,15 @@
          memoryStoreEvictionPolicy="LRU">
   </cache>
 
+  <!-- Cache used outside of hibernate, which maintains a set of agents
+       which we are currently processing for AI services -->
+  <cache name="ServiceMergerWorking"
+         maxElementsInMemory="3000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU">
+  </cache>
+
   <!-- The SRN cache, used outside of hibernate -->
   <cache name="SRNCache"
          maxElementsInMemory="100000"

@@ -114,8 +114,6 @@ public class AICommandsClient {
                                              String typeName,
                                              String name,
                                              ConfigResponse response ) {
-        AgentRemoteValue rval = null;
-        
         AgentRemoteValue arv = new AgentRemoteValue();
         arv.setValue(ConfigStorage.PROP_TYPE, String.valueOf(type));
         arv.setValue(ConfigStorage.PROP_ID, String.valueOf(id));
@@ -137,9 +135,8 @@ public class AICommandsClient {
 
         log.debug("AICommandsClient.pushRuntimeDiscoveryConfig");
         try {
-            rval = agentConn.sendCommand(verAPI.command_pushRuntimeDiscoveryConfig,
-                                         verAPI.getVersion(), 
-                                         arv);
+            agentConn.sendCommand(verAPI.command_pushRuntimeDiscoveryConfig,
+                                  verAPI.getVersion(), arv); 
         } catch (AgentConnectionException ace) {
             log.error("Error connecting to agent to push runtime discovery "
                       + "config: " + ace.getMessage());

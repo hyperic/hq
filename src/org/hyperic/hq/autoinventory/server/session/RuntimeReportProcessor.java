@@ -549,6 +549,7 @@ public class RuntimeReportProcessor {
                 sInfo.subject         = subject;
                 sInfo.serverId        = foundAppdefServer.getId();
                 sInfo.aiservice       = aiService;
+                sInfo.agentToken      = _agentToken;
                 _serviceMerges.add(sInfo);
                 Util.flushCurrentSession();
             }
@@ -561,6 +562,7 @@ public class RuntimeReportProcessor {
         public AuthzSubjectValue subject;
         public Integer           serverId;
         public AIServiceValue    aiservice;
+        public String            agentToken;
     }
     
     public List getServiceMerges() {

@@ -108,8 +108,6 @@ public abstract class ControlJob extends BaseJob {
                                         commandHistory.getId(),
                                         action, args);
 
-        } catch (PermissionException e) {
-            errorMsg = "Permission denied: " + e.getMessage();
         } catch (AgentNotFoundException e) {
             errorMsg = "Agent not found: " + e.getMessage();
         } catch (AgentConnectionException e) {

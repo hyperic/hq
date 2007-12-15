@@ -23,4 +23,7 @@
   <module>
     <service>measurement-mbeans.sar</service>
   </module>
+  <module>
+    <service>autoinventory-mbeans.sar</service>
+  </module>
 </jboss-app> 

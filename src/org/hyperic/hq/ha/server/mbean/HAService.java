@@ -51,6 +51,7 @@ public class HAService
             startDataPurgeService(server);
             startHeartbeatService(server);
             startAvailCheckService(server);
+            startAgentAIScanService(server);
         } catch (Exception e) {
             _log.error("Error starting services", e);
         }
@@ -81,6 +82,13 @@ public class HAService
         throws Exception
     {
         invoke(server, "hyperic.jmx:service=Scheduler,name=AvailabilityCheck",
+               "startSchedule");
+    }
+
+    private void startAgentAIScanService(MBeanServer server)
+        throws Exception
+    {
+        invoke(server, "hyperic.jmx:service=Scheduler,name=AgentAIScan",
                "startSchedule");
     }
 
