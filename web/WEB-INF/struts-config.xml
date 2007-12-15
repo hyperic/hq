@@ -437,7 +437,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.EditUserFormPrepareAction">
         <set-property property="workflow" value="user/View"/>
-        <set-property property="title" value="Admin.Edit"/>
+        <set-property property="title" value="Admin.User.Edit"/>
       </action>
 
       <action path="/admin/user/EditPasswordFormPrepare"
@@ -465,7 +465,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
         <set-property property="workflow" value="user/New"/>
-        <set-property property="title" value="Admin.User.New"/>
+        <set-property property="title" value="ui-Admin.User.AssignRole"/>
       </action>
 
       <action path="/admin/user/Remove" 
@@ -604,7 +604,7 @@
               name="AddResourceGroupsForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
-        <set-property property="title" value="Group.AddResource"/>
+        <set-property property="title" value="Inventory.Group.AddResource"/>
       </action>
 
       <!-- resource common control -->
@@ -1570,7 +1570,7 @@
               name="AddGroupResourcesForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction">
-        <set-property property="title" value="Group.AddResource"/>
+        <set-property property="title" value="Inventory.Group.AddResource"/>
       </action>
 
       <action path="/resource/group/inventory/AddGroupResources"
