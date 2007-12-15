@@ -131,9 +131,7 @@ public class NTPServerDetector
             productConfig.setValue(NTPDCollector.PROP_TIMEOUT, "10");
             server.setProductConfig(productConfig);
 
-            // Due to the overhead in collection of NTP metrics, do not set the
-            // measurement config during the autoinventory scan.
-            // server.setMeasurementConfig();
+            server.setMeasurementConfig();
 
             servers.add(server);
         }
