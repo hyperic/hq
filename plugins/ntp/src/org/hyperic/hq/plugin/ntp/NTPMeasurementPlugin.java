@@ -34,7 +34,12 @@ public class NTPMeasurementPlugin
     extends MeasurementPlugin
 {
     public Properties getCollectorProperties(Metric metric) {
-        //rather than change the original metric templates
-        return metric.getProperties();
+        //XXX compat w/ original metric templates
+        if (metric.getObjectPropString().equals("Type=Server")) {
+            return metric.getProperties();
+        }
+        else {
+            return super.getCollectorProperties(metric);
+        }
     }
 }

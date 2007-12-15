@@ -131,6 +131,8 @@ public class NTPDCollector extends Collector {
             setValue("Peers", peers);
             setValue("PeerAverageDelay", peerDelay/peers);
             setValue("PeerAverageOffset", peerOffset/peers);
+            setValue("PeerAverageDisplacement", peerDisp/peers);
+            //XXX compat w/ old alias
             setValue("PeerAverageDisp", peerDisp/peers);
         } catch (IllegalArgumentException e) {
             setErrorMessage("Unable to parse ntpdc output: " + e);

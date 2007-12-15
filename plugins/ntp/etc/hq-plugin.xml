@@ -26,61 +26,40 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.ntp">
-  <!-- we use a dummy jmx object name -->
-  <filter name="domain" value="ntpd"/>
+
+  <filter name="template" value="ntpd:ntpdc=%ntpdc%,timeout=%timeout%:${alias}"/>
 
   <!-- Metrics from ntpdc -->
   <metrics name="ntpdc">
     <metric name="Jitter"
-            alias="Jitter"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="UTILIZATION"
-            units="sec"
-            collectionType="dynamic"/>
+            units="sec"/>
 
     <metric name="Peers"
-            alias="Peers"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="UTILIZATION"
-            indicator="true"
-            units="none"
-            collectionType="dynamic"/>
+            indicator="true"/>
 
     <metric name="Uptime"
-            alias="Uptime"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
-            category="AVAILABILITY"
             units="sec"
             collectionType="static"/>
 
     <metric name="Time Since Reset"
-            alias="TimeSinceReset"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="PERFORMANCE"
             units="sec"
             collectionType="static"/>
 
     <metric name="Peer Average Delay"
-            alias="PeerAverageDelay"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="PERFORMANCE"
-            units="sec"
-            collectionType="dynamic"/>
+            units="sec"/>
 
     <metric name="Peer Average Offset"
-            alias="PeerAverageOffset"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="PERFORMANCE"
             indicator="true"
-            units="sec"
-            collectionType="dynamic"/>
+            units="sec"/>
 
     <metric name="Peer Average Displacement"
-            alias="PeerAverageDisp"
-            template="${domain}:Type=Server:${alias}:ntpdc=%ntpdc%,timeout=%timeout%"
             category="PERFORMANCE"
-            units="sec"
-            collectionType="dynamic"/>
+            units="sec"/>
   </metrics>
 
   <!-- Process metrics -->
