@@ -167,6 +167,9 @@
     <plugin type="measurement"
             class="NTPMeasurementPlugin"/>
 
+    <plugin type="collector"
+            class="NTPDCollector"/>
+
     <plugin type="autoinventory"
             class="NTPServerDetector"/>
 

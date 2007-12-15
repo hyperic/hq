@@ -126,9 +126,9 @@ public class NTPServerDetector
 
             ConfigResponse productConfig = new ConfigResponse();
 
-            productConfig.setValue(NTPMeasurementPlugin.PROP_NTPDC, ntpdc);
+            productConfig.setValue(NTPDCollector.PROP_NTPDC, ntpdc);
             productConfig.setValue("process.query", query);
-            productConfig.setValue(NTPMeasurementPlugin.PROP_TIMEOUT, "1");
+            productConfig.setValue(NTPDCollector.PROP_TIMEOUT, "10");
             server.setProductConfig(productConfig);
 
             // Due to the overhead in collection of NTP metrics, do not set the
