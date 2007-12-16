@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,10 +27,8 @@ package org.hyperic.hq.ui.action.resource.common;
 
 import java.util.HashMap;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -56,13 +54,11 @@ public class QuickFavoritesAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-    	HttpSession session = request.getSession();
-        WebUser user = SessionUtils.getWebUser(request.getSession());
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+    	WebUser user = SessionUtils.getWebUser(request.getSession());
+        AuthzBoss boss =
+            ContextUtils.getAuthzBoss(getServlet().getServletContext());
+        DashboardConfig dashConfig =
+            DashboardUtils.findUserDashboard(user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
         String mode   = request.getParameter(Constants.MODE_PARAM);
@@ -101,7 +97,8 @@ public class QuickFavoritesAction extends BaseAction {
             return returnFailure(request, mapping, forwardParams);
         }
 
-        ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
+        ConfigurationProxy.getInstance()
+            .setUserDashboardPreferences(dashPrefs, boss, user );
         return returnSuccess(request, mapping, forwardParams, 
                              BaseAction.YES_RETURN_PATH);
     }

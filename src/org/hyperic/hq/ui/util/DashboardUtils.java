@@ -386,4 +386,16 @@ public class DashboardUtils {
 		}
 		return null;
 	}
+    
+    /**
+     * Find the user's dashboard
+     */
+    public static DashboardConfig findUserDashboard(WebUser user,
+                                                    AuthzBoss boss)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, RemoteException {
+        AuthzSubject me = boss.findSubjectById(user.getSessionId(),
+                                               user.getSubject().getId());
+        return DashboardManagerEJBImpl.getOne().getUserDashboard(me, me);
+    }
 }

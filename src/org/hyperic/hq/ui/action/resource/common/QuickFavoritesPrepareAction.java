@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
@@ -43,7 +41,6 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.util.config.ConfigResponse;
 
 public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
@@ -61,12 +58,10 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
 
 		// All we need to do is check our preferences to see if this resource 
 		// is in there.
-        HttpSession session = request.getSession();
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-                (Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-                user, boss);
+        AuthzBoss boss =
+            ContextUtils.getAuthzBoss(getServlet().getServletContext());
+        DashboardConfig dashConfig =
+            DashboardUtils.findUserDashboard(user, boss);
 		isFavorite = QuickFavoritesUtil
 				.isFavorite(dashConfig.getConfig(), arv.getEntityId());
 
