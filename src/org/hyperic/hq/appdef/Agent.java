@@ -25,104 +25,93 @@
 
 package org.hyperic.hq.appdef;
 
-import org.hyperic.hq.appdef.shared.AgentValue;
-
+import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- *
- */
-public class Agent extends AppdefBean
-{
-    private String address;
-    private Integer port;
-    private String authToken;
-    private String agentToken;
-    private String version;
-    private AgentType agentType;
-    private Collection platforms;
+import org.hyperic.hq.appdef.shared.AgentValue;
 
-    /**
-     * default constructor
-     */
-    public Agent()
-    {
-        super();
+public class Agent extends AppdefBean {
+    private String _address;
+    private Integer _port;
+    private String _authToken;
+    private String _agentToken;
+    private String _version;
+    private AgentType _agentType;
+    private Collection _platforms;
+
+    public Agent() {
     }
 
-    public String getAddress()
+    public Agent(AgentType type, String address, Integer port, String authToken,
+                 String agentToken, String version)
     {
-        return this.address;
+        _agentType  = type;
+        _address    = address;
+        _port       = port;
+        _authToken  = authToken;
+        _agentToken = agentToken;
+        _version    = version;
+        _platforms  = new ArrayList();
+    }
+    
+    public String getAddress() {
+        return _address;
     }
 
-    public void setAddress(String address)
-    {
-        this.address = address;
+    public void setAddress(String address) {
+        _address = address;
     }
 
-    public Integer getPort()
-    {
-        return this.port;
+    public Integer getPort() {
+        return _port;
     }
 
-    public void setPort(Integer port)
-    {
-        this.port = port;
+    public void setPort(Integer port) {
+        _port = port; 
     }
 
-    public void setPort(int port)
-    {
-        this.port = new Integer(port);
+    public void setPort(int port) {
+        _port = new Integer(port);
     }
 
-    public String getAuthToken()
-    {
-        return this.authToken;
+    public String getAuthToken() {
+        return _authToken;
     }
 
-    public void setAuthToken(String authToken)
-    {
-        this.authToken = authToken;
+    public void setAuthToken(String authToken) {
+        _authToken = authToken;
     }
 
-    public String getAgentToken()
-    {
-        return this.agentToken;
+    public String getAgentToken() {
+        return _agentToken;
     }
 
-    public void setAgentToken(String agentToken)
-    {
-        this.agentToken = agentToken;
+    public void setAgentToken(String agentToken) {
+        _agentToken = agentToken;
     }
 
-    public String getVersion()
-    {
-        return this.version;
+    public String getVersion() {
+        return _version;
     }
 
-    public void setVersion(String version)
-    {
-        this.version = version;
+    public void setVersion(String version) {
+        _version = version;
     }
 
-    public AgentType getAgentType()
-    {
-        return this.agentType;
+    public AgentType getAgentType() {
+        return _agentType;
     }
 
-    public void setAgentType(AgentType agentType)
-    {
-        this.agentType = agentType;
+    public void setAgentType(AgentType agentType) {
+        _agentType = agentType;
     }
 
-    public Collection getPlatforms()
-    {
-        return this.platforms;
+    public Collection getPlatforms() {
+        return _platforms;
     }
 
-    public void setPlatforms(Collection platforms)
-    {
-        this.platforms = platforms;
+    public void setPlatforms(Collection platforms) {
+        _platforms = platforms;
     }
 
     public boolean equals(Object obj)
@@ -131,20 +120,20 @@ public class Agent extends AppdefBean
             return false;
         }
         Agent o = (Agent)obj;
-        return (address == o.getAddress() ||
-                (address!=null && o.getAddress()!=null &&
-                 address.equals(o.getAddress())))
+        return (_address == o.getAddress() ||
+                (_address!=null && o.getAddress()!=null &&
+                 _address.equals(o.getAddress())))
                &&
-               (port == o.getPort() || (port!=null && o.getPort()!=null &&
-                                        port.equals(o.getPort())));
+               (_port == o.getPort() || (_port!=null && o.getPort()!=null &&
+                                        _port.equals(o.getPort())));
     }
 
     public int hashCode()
     {
         int result = super.hashCode();
 
-        result = 37*result + (address!=null ? address.hashCode() : 0);
-        result = 37*result + (port!=null ? port.hashCode() : 0);
+        result = 37*result + (_address!=null ? _address.hashCode() : 0);
+        result = 37*result + (_port!=null ? _port.hashCode() : 0);
 
         return result;
     }

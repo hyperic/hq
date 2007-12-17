@@ -340,7 +340,9 @@ public class LatherDispatcher
         } catch(AgentNotFoundException exc){
             log.info("Registering agent at " + agentIP + ":" + port);
             try {
-                getAgentManager().createAgent(agentVal);
+                getAgentManager().createAgent(agentIP, new Integer(port), 
+                                              args.getAuthToken(),
+                                              agentToken, version);
             } catch(AgentCreateException oexc){
                 log.error("Error creating agent", oexc);
                 return new RegisterAgent_result("Error creating agent: " + 

@@ -66,6 +66,7 @@ public class AIStartupListener
         events.add(MergeServiceReportZevent.class);
         ZeventManager.getInstance().addBufferedListener(events, 
                                                         new ServiceMerger());
+        AutoinventoryManagerEJBImpl.getOne().startup();
     }
 
     /**

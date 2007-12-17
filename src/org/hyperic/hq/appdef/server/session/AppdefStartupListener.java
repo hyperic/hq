@@ -34,7 +34,8 @@ public class AppdefStartupListener
 {
     private static final Object LOCK = new Object();
     
-    private static ClusterDeleteCallback _callbacks;
+    private static ClusterDeleteCallback _clusterDelCallback;
+    private static AgentCreateCallback   _agentCreateCallback;
     
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
@@ -43,15 +44,23 @@ public class AppdefStartupListener
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {
-            _callbacks = (ClusterDeleteCallback)
+            _clusterDelCallback = (ClusterDeleteCallback)
                 app.registerCallbackCaller(ClusterDeleteCallback.class);
+            _agentCreateCallback = (AgentCreateCallback)
+                app.registerCallbackCaller(AgentCreateCallback.class);
         }
         ApplicationManagerEJBImpl.getOne().startup();
     }
     
     static ClusterDeleteCallback getClusterDeleteCallback() {
         synchronized (LOCK) {
-            return _callbacks;
+            return _clusterDelCallback;
+        }
+    }
+    
+    static AgentCreateCallback getAgentCreateCallback() {
+        synchronized (LOCK) {
+            return _agentCreateCallback;
         }
     }
 }

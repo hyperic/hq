@@ -76,6 +76,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
@@ -85,6 +86,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
@@ -106,6 +108,7 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocalHome;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
@@ -988,11 +991,37 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             _log.error("Agent [" + agentToken + "] not found");
             return;
         }
+        
+        markServiceClean(a, true);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void markServiceClean(Agent agent, boolean serviceClean) {
         AgentReportStatusDAO statDAO = 
             new AgentReportStatusDAO(DAOFactory.getDAOFactory());
         
-        AgentReportStatus status = statDAO.getOrCreate(a);
-        status.markClean();
+        AgentReportStatus status = statDAO.getOrCreate(agent);
+        if (serviceClean)
+            status.markClean();
+        else
+            status.markDirty();
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public void startup() {
+        AgentCreateCallback listener = new AgentCreateCallback() {
+            public void agentCreated(Agent agent) {
+                markServiceClean(agent, false);
+            }
+        };
+        HQApp.getInstance().registerCallbackListener(AgentCreateCallback.class,
+                                                     listener);
     }
     
     public void setSessionContext(SessionContext ctx) {} 

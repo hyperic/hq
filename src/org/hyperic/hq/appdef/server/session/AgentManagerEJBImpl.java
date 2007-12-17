@@ -58,6 +58,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -207,13 +208,12 @@ public class AgentManagerEJBImpl
      * Create a new Agent object.  The type of the agent
      * that is created is the default 'cam-agent'
      *
-     * @param agentVal  The object containing the data to initialize with
-     *
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRED"
-     * @return A value object representing the agent just created
      */
-    public AgentValue createAgent(AgentValue agentVal)
+    public Agent createAgent(String address, Integer port, 
+                             String authToken, String agentToken, 
+                             String version)
         throws AgentCreateException
     {
         AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
@@ -221,8 +221,15 @@ public class AgentManagerEJBImpl
             throw new SystemException("Unable to find CAM agent type '" +
                                       CAM_AGENT_TYPE + "'");
         }
-        Agent agent = this.getAgentDAO().create(agentVal, type);
-        return agent.getAgentValue();
+        Agent agent = getAgentDAO().create(type, address, port, authToken,
+                                           agentToken, version);
+        
+        try {
+            AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
+        } catch(VetoException e) {
+            throw new AgentCreateException("Agent creation vetoed", e);
+        }
+        return agent;
     }
 
     private void validateAgentUpdate(String ip, int port, AgentValue agentVal){
@@ -337,6 +344,14 @@ public class AgentManagerEJBImpl
         throws AgentNotFoundException 
     {
         return getAgentInternal(agentToken);
+    }
+
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="REQUIRED"
+     */
+    public Agent findAgentPojo(Integer id) {
+        return getAgentDAO().findById(id);
     }
 
     /**
