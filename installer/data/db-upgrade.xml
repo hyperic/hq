@@ -7787,12 +7787,16 @@ has already been defined.
   <schemaSpec version="3.88">
       <schema-addColumn table="EAM_ALERT_DEFINITION"
                         column="ACTIVE"
-                        columnType="boolean">
-          <initializer>
-            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=TRUE
-          </initializer>
-      </schema-addColumn>
+                        columnType="boolean"/>
       <schema-directSQL>
+          <statement desc="Set all alert definitions to active by default"
+                     targetDB="postgresql">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=TRUE
+          </statement>
+          <statement desc="Set all alert definitions to active by default"
+                     targetDB="oracle">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=1
+          </statement>
           <statement desc="The root resource type alert should be inactive"
 			         targetDB="postgresql">
             UPDATE EAM_ALERT_DEFINITION SET ACTIVE=FALSE WHERE ID=0
