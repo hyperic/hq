@@ -57,7 +57,7 @@ function getSystemStats() {
       dojo.byId('jvmFreeMem').innerHTML   = data.jvmFreeMem
       dojo.byId('jvmMaxMem').innerHTML    = data.jvmMaxMem
       dojo.byId('jvmPercMem').innerHTML   = data.jvmPercMem
-    },
+    }
   });
   setTimeout("getSystemStats()", 3000);
 }
@@ -270,7 +270,7 @@ function selectDiag(d) {
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
       dojo.byId('diagData').innerHTML = data.diagData;
-    },
+    }
   });
 }
 
@@ -298,7 +298,7 @@ function selectQuery(q) {
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
       dojo.byId('queryData').innerHTML = data.queryData;
-    },
+    }
   });
 }
 
