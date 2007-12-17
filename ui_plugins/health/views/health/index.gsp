@@ -59,7 +59,7 @@ function getSystemStats() {
       dojo.byId('jvmPercMem').innerHTML   = data.jvmPercMem
     },
   });
-  setTimeout("getSystemStats()", 1000);
+  setTimeout("getSystemStats()", 3000);
 }
 
 getSystemStats();
