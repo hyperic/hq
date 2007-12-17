@@ -98,9 +98,14 @@ public class WindowsDetector
         ConfigResponse cprops = new ConfigResponse();     
         ServiceConfig config;
         Service service = null;
+        int status;
+        String statusString;
+
         try {
             service = new Service(serviceName);
             config = service.getConfig();
+            status = service.getStatus();
+            statusString = service.getStatusString();
         } catch (Win32Exception e) {
             String msg =
                 "Error getting config for service=" +
@@ -119,9 +124,14 @@ public class WindowsDetector
         }
 
         if (!exists) {
-            if (config.getStartType() == ServiceConfig.START_DISABLED) {
+            if (config.getStartType() != ServiceConfig.START_AUTO) {
                 log.debug("Skipping " + serviceName +
                           ", start type=" + config.getStartTypeString());
+                return null;
+            }
+            if (status != Service.SERVICE_RUNNING) {
+                log.debug("Skipping " + serviceName +
+                          ", status=" + statusString);
                 return null;
             }
         }
