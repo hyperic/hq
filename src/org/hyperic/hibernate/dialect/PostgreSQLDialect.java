@@ -32,6 +32,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+/**
+ * This class must be public for Hibernate to access it.
+ */
 public class PostgreSQLDialect 
     extends org.hibernate.dialect.PostgreSQLDialect
     implements HQDialect

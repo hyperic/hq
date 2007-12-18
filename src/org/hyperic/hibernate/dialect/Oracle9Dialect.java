@@ -38,6 +38,8 @@ import org.hyperic.util.jdbc.DBUtil;
  * HQ customized Oracle dialect to (re)define default
  * JDBC sql types to native db column type mapping
  * for backwards compatibility, :(
+ * 
+ * This class must be public for Hibernate to access it.
  */
 public class Oracle9Dialect 
     extends org.hibernate.dialect.Oracle9Dialect
