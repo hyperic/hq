@@ -180,29 +180,7 @@ public class MySQL5InnoDBDialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
-/*    
-    public boolean viewExists(Statement stmt, String viewName)
-        throws SQLException
-    {
-        ResultSet rs = null;
-        try
-        {
-            //no need to lower case here
-            String sql = "SHOW TABLES";
-            rs = stmt.executeQuery(sql);
-            while (rs.next())
-            {
-                String objName = rs.getString(1);
-                if (objName.equalsIgnoreCase(viewName))
-                    return true;
-            }
-            return false;
-        }
-        finally {
-            DBUtil.closeResultSet(logCtx, rs);
-        }
-    }
-*/    
+    
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }
@@ -432,36 +410,4 @@ public class MySQL5InnoDBDialect
         }
         return lastMap;
     }
-
-    /**
-     * hopefully this will be fixed one day,
-     * http://opensource.atlassian.com/projects/hibernate/browse/HHH-2155
-     * but untill then overriding this method is necessary
-     */
-/*
-    public String getAddForeignKeyConstraintString(String constraintName,
-                                                   String[] foreignKey,
-                                                   String referencedTable,
-                                                   String[] primaryKey,
-                                                   boolean referencesPrimaryKey)
-    {
-        String cols = StringUtil.implode(Arrays.asList(foreignKey), ", ");
-        return new StringBuffer(64)
-//.append(" add index ")
-//.append(constraintName)
-//.append(" (")
-//.append(cols)
-//.append("), add constraint ")
-            .append(" add constraint ")
-            .append(constraintName)
-            .append(" foreign key (")
-            .append(cols)
-            .append(") references ")
-            .append(referencedTable)
-            .append(" (")
-            .append( StringUtil.implode(Arrays.asList(primaryKey), ", ") )
-            .append(')')
-            .toString();
-    }
-*/
 }
