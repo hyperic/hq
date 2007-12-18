@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -32,16 +32,6 @@ import java.util.Map;
 
 public interface HQDialect
 {
-    /*
-     * Returns the delete statement with joins for
-     * a particular database
-     */
-    public String getDeleteJoinStmt(String deleteTable,
-                                    String commonKey,
-                                    String joinTables,
-                                    String joinKeys,
-                                    String condition,
-                                    int limit);
     /*
      * Returns the table optimize statement for
      * a particular database

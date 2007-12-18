@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -33,6 +33,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
+import org.hyperic.util.StringUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -40,6 +41,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -96,20 +98,6 @@ public class MySQL5InnoDBDialect
     public String getOptimizeStmt(String table, int cost)
     {
         return "ANALYZE TABLE "+table.toUpperCase();
-    }
-
-    public String getDeleteJoinStmt(String deleteTable,
-                                    String commonKey,
-                                    String joinTables,
-                                    String joinKeys,
-                                    String condition,
-                                    int limit)
-    {
-        String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
-        String limitCond = (limit <= 0) ? "" : " LIMIT "+limit;
-        return ("DELETE FROM "+deleteTable+" WHERE EXISTS"+
-               " (SELECT "+commonKey+" FROM "+joinTables+
-               " WHERE "+joinKeys+cond+")").toUpperCase();
     }
 
     public boolean supportsSequences() {
@@ -192,7 +180,29 @@ public class MySQL5InnoDBDialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
-  
+/*    
+    public boolean viewExists(Statement stmt, String viewName)
+        throws SQLException
+    {
+        ResultSet rs = null;
+        try
+        {
+            //no need to lower case here
+            String sql = "SHOW TABLES";
+            rs = stmt.executeQuery(sql);
+            while (rs.next())
+            {
+                String objName = rs.getString(1);
+                if (objName.equalsIgnoreCase(viewName))
+                    return true;
+            }
+            return false;
+        }
+        finally {
+            DBUtil.closeResultSet(logCtx, rs);
+        }
+    }
+*/    
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }
@@ -422,4 +432,36 @@ public class MySQL5InnoDBDialect
         }
         return lastMap;
     }
+
+    /**
+     * hopefully this will be fixed one day,
+     * http://opensource.atlassian.com/projects/hibernate/browse/HHH-2155
+     * but untill then overriding this method is necessary
+     */
+/*
+    public String getAddForeignKeyConstraintString(String constraintName,
+                                                   String[] foreignKey,
+                                                   String referencedTable,
+                                                   String[] primaryKey,
+                                                   boolean referencesPrimaryKey)
+    {
+        String cols = StringUtil.implode(Arrays.asList(foreignKey), ", ");
+        return new StringBuffer(64)
+//.append(" add index ")
+//.append(constraintName)
+//.append(" (")
+//.append(cols)
+//.append("), add constraint ")
+            .append(" add constraint ")
+            .append(constraintName)
+            .append(" foreign key (")
+            .append(cols)
+            .append(") references ")
+            .append(referencedTable)
+            .append(" (")
+            .append( StringUtil.implode(Arrays.asList(primaryKey), ", ") )
+            .append(')')
+            .toString();
+    }
+*/
 }

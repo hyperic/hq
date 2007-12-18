@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2007], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -106,19 +106,6 @@ public class PostgreSQLDialect
         }
     }
 
-    public String getDeleteJoinStmt(String deleteTable,
-                                    String commonKey,
-                                    String joinTables,
-                                    String joinKeys,
-                                    String condition,
-                                    int limit)
-    {
-        String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
-        return "DELETE FROM "+deleteTable+" WHERE EXISTS"+
-               " (SELECT "+commonKey+" FROM "+joinTables+
-               " WHERE "+joinKeys+cond+")";
-    }
-    
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }
