@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.HibernateUtil;
+import org.hyperic.hibernate.dialect.HibernateUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
