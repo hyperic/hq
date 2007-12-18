@@ -306,16 +306,26 @@ class EscalationRuntime {
     public void removeFromUncommittedEscalationStateCache(final PerformsEscalations def, 
                                                           boolean postTxnCommit) {        
         if (postTxnCommit) {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+            boolean addedTxnListener = false;
+            
+            try {
+                HQApp.getInstance().addTransactionListener(new TransactionListener() {
 
-                public void afterCommit(boolean success) {
+                    public void afterCommit(boolean success) {
+                        removeFromUncommittedEscalationStateCache(def, false);
+                    }
+
+                    public void beforeCommit() {
+                    }
+                    
+                });
+                
+                addedTxnListener = true;
+            } finally {
+                if (!addedTxnListener) {
                     removeFromUncommittedEscalationStateCache(def, false);
                 }
-
-                public void beforeCommit() {
-                }
-                
-            });
+            }
         } else {
             _uncomittedEscalatingEntities.remove(new EscalatingEntityIdentifier(def));            
         }
