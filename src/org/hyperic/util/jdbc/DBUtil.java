@@ -42,6 +42,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.dialect.HibernateUtil;
 import org.hyperic.util.pager.PageControl;
 
 public class DBUtil {
@@ -484,79 +486,21 @@ public class DBUtil {
     public static boolean checkTableExists(Connection conn, String table)
         throws SQLException {
 
-        int dbtype = getDBType(conn);
-        switch (dbtype) {
-            case DATABASE_ORACLE_8:
-            case DATABASE_ORACLE_9:
-            case DATABASE_ORACLE_10:
-                return checkTableExistsOracle(conn, table);
-            case DATABASE_POSTGRESQL_7:
-            case DATABASE_POSTGRESQL_8:
-                return checkTableExistsPostgresql(conn, table);
-            case DATABASE_MYSQL5:
-                return checkTableExistsMySQL(conn, table);
-            default:
-                return false;
+        HQDialect dialect = HibernateUtil.getHQDialect(conn);
+
+        Statement stmt = null;
+        boolean exists = false;
+        
+        try {
+            stmt = conn.createStatement();            
+            exists = dialect.tableExists(stmt, table);
+        } finally {
+            DBUtil.closeStatement(log, stmt);
         }
+        
+        return exists;
     }
 
-    private static boolean checkTableExistsOracle(Connection conn,
-                                                  String table)
-        throws SQLException
-    {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = conn.prepareStatement("SELECT COUNT(*) FROM " + table);
-            rs = ps.executeQuery();
-            return true;
-        } catch (SQLException e) {
-            if (e.getErrorCode() == 942) return false;
-            throw e;
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, ps, rs);
-        }
-    }
-
-    private static boolean checkTableExistsPostgresql(Connection conn,
-                                                      String table)
-        throws SQLException
-    {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = conn.prepareStatement("SELECT * FROM " + table +
-                                       " LIMIT 1");
-            rs = ps.executeQuery();
-            return true;
-        } catch (SQLException e) {
-            // No error code given on PGSQL, assume any error means that the
-            // table is not a
-            return false;
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, ps, rs);
-        }
-    }
-
-    private static boolean checkTableExistsMySQL(Connection conn,
-                                                 String table)
-        throws SQLException
-    {
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = conn.prepareStatement("SELECT * FROM " + table +
-                                       " LIMIT 1");
-            rs = ps.executeQuery();
-            return true;
-        } catch (SQLException e) {
-            if (e.getErrorCode() == 1146) return false;
-            throw e;
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, ps, rs);
-        }
-    }
-    
     /**
      * Creates a string that consists of the clause repeated a number
      * (iterations) of times, joined by the conjunction string
