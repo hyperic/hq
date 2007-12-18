@@ -7723,7 +7723,8 @@ has already been defined.
   
   <!-- Oracle and Postgres do not need the HQ_SEQUENCE table. -->	
   <schemaSpec version="3.85">
-    <schema-dropTable table="HQ_SEQUENCE"/>           
+    <schema-dropTable table="HQ_SEQUENCE" targetDB="oracle"/>           
+    <schema-dropTable table="HQ_SEQUENCE" targetDB="postgresql"/>           	  
   </schemaSpec>	
 
   <schemaSpec version="3.86">
