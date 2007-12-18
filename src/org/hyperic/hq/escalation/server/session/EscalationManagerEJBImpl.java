@@ -274,34 +274,39 @@ public class EscalationManagerEJBImpl
         boolean started = false;
         
         try {
-            // Get the lock right now!!! We have to be sure the escalation 
-            // was scheduled for post commit before letting anyone else through.
+            // HHQ-1395: It would be preferable to acquire the exclusive 
+            // lock until we schedule the escalation, but this may cause a 
+            // deadlock since creating the escalatable executes actions which 
+            // may take an arbitrary amount of time to execute.
+            // 
             // Assume we may throw an unchecked exception prior to scheduling.
-            // This is possible, especially when creating the escalatable.
+            // This is possible, especially when creating the escalatable. If 
+            // this happens, make sure to clear the uncommitted escalation 
+            // state cache.
             EscalationRuntime.getInstance().acquireMutex();
-
+            
             try {
                 if (escalationStateExists(def)) {
                     return started = false;
-                }
-                                
-                try {
-                    Escalatable alert = creator.createEscalatable();
-                    EscalationState curState = new EscalationState(alert);
-                    _stateDAO.save(curState);
-                    _log.debug("Escalation started: state=" + curState.getId());
-                    EscalationRuntime.getInstance().scheduleEscalation(curState);    
-                    started = true;
-                } finally {
-                    if (!started) {
-                        EscalationRuntime.getInstance()
-                            .removeFromUncommittedEscalationStateCache(def, false);
-                    }
-                }
-                
+                }                
             } finally {
                 EscalationRuntime.getInstance().releaseMutex();
-            }           
+            }
+            
+            try {
+                Escalatable alert = creator.createEscalatable();
+                EscalationState curState = new EscalationState(alert);
+                _stateDAO.save(curState);
+                _log.debug("Escalation started: state=" + curState.getId());
+                EscalationRuntime.getInstance().scheduleEscalation(curState);    
+                started = true;
+            } finally {
+                if (!started) {
+                    EscalationRuntime.getInstance()
+                        .removeFromUncommittedEscalationStateCache(def, false);
+                }
+            }
+        
         } catch (InterruptedException e) {
             _log.error("Failed to start escalation for " +
                        "alert def id="+def.getId()+
