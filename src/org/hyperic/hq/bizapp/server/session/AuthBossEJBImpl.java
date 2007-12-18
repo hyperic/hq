@@ -82,8 +82,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * Login a guest.
-     * @param username The name of the user.
-     * @param password The password.
+     *
      * @return An integer representing the session ID of the logged-in user.
      * @ejb:interface-method
      */
