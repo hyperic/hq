@@ -7842,9 +7842,17 @@ has already been defined.
       ALTER TABLE EAM_AI_AGENT_REPORT
          ADD CONSTRAINT eam_ai_agent_report_pkey PRIMARY KEY (id)
     </statement>
-    <statement>
+    <statement targetDB="oracle">
       ALTER TABLE EAM_AI_AGENT_REPORT
-        ADD CONSTRAINT eam_ai_agent_id_key UNIQUE (agent_id)
+        ADD CONSTRAINT SYS_C0070598 UNIQUE (agent_id)
+    </statement>
+    <statement targetDB="postgresql">
+      ALTER TABLE EAM_AI_AGENT_REPORT
+        ADD CONSTRAINT eam_agent_report_agent_id_key UNIQUE (agent_id)
+    </statement>
+    <statement targetDB="mysql">
+      ALTER TABLE EAM_AI_AGENT_REPORT
+        ADD CONSTRAINT eam_agent_report_agent_id_key UNIQUE (agent_id)
     </statement>
     <statement>
       ALTER TABLE EAM_AI_AGENT_REPORT
