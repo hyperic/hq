@@ -32,7 +32,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
-public class PostgreSQLDialect 
+class PostgreSQLDialect 
     extends org.hibernate.dialect.PostgreSQLDialect
     implements HQDialect
 {
@@ -76,7 +76,7 @@ public class PostgreSQLDialect
         ResultSet rs = null;
         try
         {
-            String sql = "SELECT tablename from pg_views"+
+            String sql = "SELECT tablename from pg_tables"+
                          " WHERE lower(tablename) = lower('"+tableName+"')";
             rs = stmt.executeQuery(sql);
             if (rs.next())

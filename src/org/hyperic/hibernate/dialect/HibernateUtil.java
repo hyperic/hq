@@ -23,15 +23,12 @@
  * USA.
  */
 
-package org.hyperic.hibernate;
+package org.hyperic.hibernate.dialect;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.MySQL5InnoDBDialect;
-import org.hyperic.hibernate.dialect.Oracle9Dialect;
-import org.hyperic.hibernate.dialect.PostgreSQLDialect;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class HibernateUtil {
@@ -47,5 +44,9 @@ public class HibernateUtil {
         } else {
             throw new IllegalArgumentException("Unsupported DB");
         }
+    }
+    
+    public static HQDialect getHQDialect(Connection conn) throws SQLException {
+        return (HQDialect)HibernateUtil.getDialect(conn);
     }
 }

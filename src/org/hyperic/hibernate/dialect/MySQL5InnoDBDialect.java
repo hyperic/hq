@@ -48,7 +48,7 @@ import java.util.Map;
 /**
  * HQ's version of MySQL5InnoDBDialect to create pseudo sequences
  */
-public class MySQL5InnoDBDialect
+class MySQL5InnoDBDialect
     extends org.hibernate.dialect.MySQL5InnoDBDialect
     implements HQDialect
 {
@@ -192,29 +192,7 @@ public class MySQL5InnoDBDialect
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
-/*    
-    public boolean viewExists(Statement stmt, String viewName)
-        throws SQLException
-    {
-        ResultSet rs = null;
-        try
-        {
-            //no need to lower case here
-            String sql = "SHOW TABLES";
-            rs = stmt.executeQuery(sql);
-            while (rs.next())
-            {
-                String objName = rs.getString(1);
-                if (objName.equalsIgnoreCase(viewName))
-                    return true;
-            }
-            return false;
-        }
-        finally {
-            DBUtil.closeResultSet(logCtx, rs);
-        }
-    }
-*/    
+  
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }

@@ -25,24 +25,19 @@
 
 package org.hyperic.hibernate.dialect;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.timer.StopWatch;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.util.jdbc.DBUtil;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  *
