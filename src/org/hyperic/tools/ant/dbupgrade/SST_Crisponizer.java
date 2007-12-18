@@ -30,15 +30,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HibernateUtil;
+import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
@@ -226,7 +226,7 @@ public class SST_Crisponizer extends CrispoTask {
         try
         {
             Connection conn = getConnection();
-            Dialect dialect = HibernateUtil.getDialect(conn);
+            Dialect dialect = HQDialectUtil.getDialect(conn);
             for (Iterator i=idMap.entrySet().iterator(); i.hasNext(); )
             {
                 Map.Entry entry = (Map.Entry)i.next();

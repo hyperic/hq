@@ -29,8 +29,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 
 import org.apache.tools.ant.BuildException;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HibernateUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_DropTable extends SchemaSpecTask {

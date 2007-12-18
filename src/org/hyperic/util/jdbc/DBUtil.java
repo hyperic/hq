@@ -43,7 +43,7 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HibernateUtil;
+import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.pager.PageControl;
 
 public class DBUtil {
@@ -486,7 +486,7 @@ public class DBUtil {
     public static boolean checkTableExists(Connection conn, String table)
         throws SQLException {
 
-        HQDialect dialect = HibernateUtil.getHQDialect(conn);
+        HQDialect dialect = HQDialectUtil.getHQDialect(conn);
 
         Statement stmt = null;
         boolean exists = false;

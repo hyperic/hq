@@ -31,7 +31,7 @@ import java.sql.Statement;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HibernateUtil;
+import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 public abstract class HibernateSchemaSpecTask extends SchemaSpecTask {
@@ -43,7 +43,7 @@ public abstract class HibernateSchemaSpecTask extends SchemaSpecTask {
     
     protected Dialect getDialect() {
         try {
-            return HibernateUtil.getDialect(getConnection());
+            return HQDialectUtil.getDialect(getConnection());
         } catch(Exception e) {
             throw new RuntimeException("Unable to get dialect", e);
         }

@@ -123,9 +123,8 @@ public class Oracle9Dialect
                            long begin, long end, String table) 
         throws SQLException
     {
-        HQDialectUtil util = new HQDialectUtil();
-        return util.getLastData(conn, minMax, resMap, lastMap,
-                                iids, begin, end, table);
+        return HQDialectUtil.getLastData(conn, minMax, resMap, lastMap,
+                                         iids, begin, end, table);
     }
 
     public Map getAggData(Connection conn, String minMax, Map resMap,
@@ -133,8 +132,7 @@ public class Oracle9Dialect
                           long begin, long end, String table) 
         throws SQLException
     {   
-        HQDialectUtil util = new HQDialectUtil();
-        return util.getAggData(conn, minMax, resMap, tids,
-                               iids, begin, end, table);
+        return HQDialectUtil.getAggData(conn, minMax, resMap, tids,
+                                        iids, begin, end, table);
     }
 }

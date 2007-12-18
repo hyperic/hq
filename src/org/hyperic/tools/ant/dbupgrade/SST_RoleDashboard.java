@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HibernateUtil;
+import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -110,7 +110,7 @@ public class SST_RoleDashboard extends CrispoTask {
                 throw new BuildException("Table eam_role doesn't exist");
             }
 
-            Dialect d = HibernateUtil.getDialect(conn);
+            Dialect d = HQDialectUtil.getDialect(conn);
             String check_sql = "select id from " + ROLE_TABLE
                     + " where id in (select role_id from " + DASH_CONFIG_TABLE
                     + ")";
