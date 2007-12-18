@@ -178,15 +178,17 @@ function handleEnter (field, event) {
 
       </display:table>
 
-      <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources"/> 
-      <c:if test="${not empty CriticalAlertsForm.token}">
-        <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
-      </c:if>
+      <c:choose>
+        <c:when test="${not empty CriticalAlertsForm.token}">
+          <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
+        </c:when>
+        <c:otherwise>
+          <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources"/> 
+        </c:otherwise>
+      </c:choose>
       <c:if test="${sessionScope.modifyDashboard}">
           <tiles:insert definition=".toolbar.addToList">
-              <tiles:put name="addToListUrl">
-                  <c:out value="${addToListUrl}"/>
-              </tiles:put>
+              <tiles:put name="addToListUrl" beanName="addToListUrl"/>
               <tiles:put name="listItems" beanName="criticalAlertsList"/>
               <tiles:put name="listSize" beanName="criticalAlertsList" beanProperty="totalSize"/>
               <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
