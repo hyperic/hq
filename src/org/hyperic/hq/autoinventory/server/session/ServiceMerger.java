@@ -17,6 +17,7 @@ import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.Servic
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.CollectionUtil;
 
 /**
  * Merges in services which have been discovered via runtime AI.  
@@ -26,6 +27,9 @@ import org.hyperic.hq.zevents.ZeventManager;
  * agent that it still needs to get a runtime service scan.
  */
 class ServiceMerger implements ZeventListener {
+    // Number of services which we attempt to merge in a single tx
+    public static final int BATCH_SIZE = 30;
+    
     private static final Log _log = LogFactory.getLog(ServiceMerger.class);
     
     /**
@@ -37,19 +41,34 @@ class ServiceMerger implements ZeventListener {
     
     
     public void processEvents(List events) {
-        AutoinventoryManagerLocal aiMan = AutoinventoryManagerEJBImpl.getOne(); 
+        AutoinventoryManagerLocal aiMan = AutoinventoryManagerEJBImpl.getOne();
+        events = new ArrayList(events); // Copy, since it's immutable
+        List batch = new ArrayList(BATCH_SIZE);
+        List sInfos = new ArrayList(BATCH_SIZE);
         
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            MergeServiceReportZevent evt = (MergeServiceReportZevent)i.next();
-            ServiceMergeInfo sInfo = evt.getMergeInfo();
-        
-            try {
-                aiMan.mergeService(sInfo);
-            } catch(Exception e) {
-                _log.warn("Error merging service", e);
+        while (!events.isEmpty()) {
+            batch.clear();
+            sInfos.clear();
+            CollectionUtil.transfer(events, batch, BATCH_SIZE);
+            
+            for (Iterator i=batch.iterator(); i.hasNext(); ) {
+                MergeServiceReportZevent zv = 
+                    (MergeServiceReportZevent)i.next();
+                ServiceMergeInfo sInfo = zv.getMergeInfo();
+                
+                sInfos.add(sInfo);
             }
             
-            decrementWorkingCache(sInfo.agentToken);
+            try {
+                aiMan.mergeServices(sInfos);
+            } catch(Exception e) {
+                _log.warn("Error merging services", e);
+            }
+            
+            for (Iterator i=sInfos.iterator(); i.hasNext(); ) {
+                ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
+                decrementWorkingCache(sInfo.agentToken);
+            }
         }
     }
 

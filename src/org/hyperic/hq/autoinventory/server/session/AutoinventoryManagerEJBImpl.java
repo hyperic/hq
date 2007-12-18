@@ -858,11 +858,23 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
     
     /**
+     * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
      * 
      * @ejb:interface-method
      * @ejb:transaction type="REQUIRESNEW"
      */
-    public void mergeService(ServiceMergeInfo sInfo) 
+    public void mergeServices(List mergeInfos)
+        throws CreateException, PermissionException, ApplicationException,
+               FinderException
+    {
+        for (Iterator i=mergeInfos.iterator(); i.hasNext(); ) {
+            ServiceMergeInfo sInfo = (ServiceMergeInfo)i.next();
+            
+            mergeService(sInfo);
+        }
+    }
+    
+    private void mergeService(ServiceMergeInfo sInfo) 
         throws CreateException, PermissionException, ApplicationException,
                FinderException
     {
