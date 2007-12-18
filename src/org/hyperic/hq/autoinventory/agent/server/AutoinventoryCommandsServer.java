@@ -29,29 +29,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentNotificationHandler;
 import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.sigar.OperatingSystem;
-import org.hyperic.util.ArrayUtil;
-import org.hyperic.util.StringUtil;
-import org.hyperic.util.config.ConfigResponse;
-
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfiguration;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -63,11 +58,10 @@ import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
 import org.hyperic.hq.autoinventory.scanimpl.NullScan;
 import org.hyperic.hq.autoinventory.scanimpl.WindowsRegistryScan;
-
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AutoinventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
@@ -76,36 +70,43 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.TypeInfo;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.sigar.OperatingSystem;
+import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 public class AutoinventoryCommandsServer 
-    implements AgentServerHandler, AgentNotificationHandler, ScanListener {
+    implements AgentServerHandler, AgentNotificationHandler, ScanListener 
+{
+    // max sleep is 1 hour between attempts to send AI report to server.
+    public static final long AIREPORT_MAX_SLEEP_WAIT = (60000 * 60);
 
-    private AICommandsAPI        verAPI;         // Common API specifics
-    protected AgentDaemon        agent;
-    private AgentStorageProvider storage;        // Agent storage
-    protected Log                log;            // Our log
-    protected AutoinventoryPluginManager  pluginManager;  // Plugin manager
-    protected RuntimeAutodiscoverer rtAutodiscoverer;
+    // we'll keep trying for 30 days to send our a report.
+    public static final long AIREPORT_MAX_TRY_TIME = AIREPORT_MAX_SLEEP_WAIT * 24 * 30;
+    
+    private AICommandsAPI               _verAPI;
+    private AgentDaemon                 _agent;
+    private AgentStorageProvider        _storage;        
+    private Log                         _log;            
+    private AutoinventoryPluginManager  _pluginManager;  
+    private RuntimeAutodiscoverer       _rtAutodiscoverer;
 
     // The CertDN uniquely identifies this agent
-    protected String certDN;
+    protected String _certDN;
 
-    private ScanManager scanManager = null;
-    private ScanState mostRecentState = null;
-    private ScanState lastCompletedDefaultScanState = null;
+    private ScanManager _scanManager;
+    private ScanState   _mostRecentState;
+    private ScanState   _lastCompletedDefaultScanState;
 
-    protected AutoinventoryCallbackClient client;
+    private AutoinventoryCallbackClient _client;
 
     public AutoinventoryCommandsServer(){
-        this.verAPI = new AICommandsAPI();
-        this.log    = LogFactory.getLog(AutoinventoryCommandsServer.class);
+        _verAPI = new AICommandsAPI();
+        _log    = LogFactory.getLog(AutoinventoryCommandsServer.class);
     }
 
     public AgentAPIInfo getAPIInfo(){
-        return this.verAPI;
+        return _verAPI;
     }
 
     public String[] getCommandSet(){
@@ -116,11 +117,11 @@ public class AutoinventoryCommandsServer
                                             InputStream in, OutputStream out)
         throws AgentRemoteException {
 
-        log.debug("AICommandsServer: asked to invoke cmd=" + cmd);
+        _log.debug("AICommandsServer: asked to invoke cmd=" + cmd);
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             return dispatchCommand_internal(cmd, args);
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
@@ -134,9 +135,9 @@ public class AutoinventoryCommandsServer
         // Anytime we get a request from the server, it means the server
         // is available.  So, if there is a scan sleeping in "scanComplete",
         // wake it up now
-        scanManager.interruptHangingScan();
+        _scanManager.interruptHangingScan();
 
-        if(cmd.equals(this.verAPI.command_startScan)){
+        if(cmd.equals(_verAPI.command_startScan)){
             
             ScanConfigurationCore scanConfig = null;
             try {
@@ -144,35 +145,37 @@ public class AutoinventoryCommandsServer
                 if ( scanConfig == null ) {
                     throw new AgentRemoteException("No scan configuration exists.");
                 }
-                this.startScan(new ScanConfiguration(scanConfig));
+                startScan(new ScanConfiguration(scanConfig));
 
             } catch ( AgentRemoteException are ) {
                 throw are;
 
             } catch ( Exception e ) {
-                log.error("Error starting scan.", e);
-                throw new AgentRemoteException("Error starting scan: " + e.toString());
+                _log.error("Error starting scan.", e);
+                throw new AgentRemoteException("Error starting scan: " + 
+                                               e.toString());
             }
             return null;
 
-        } else if(cmd.equals(this.verAPI.command_stopScan)){
+        } else if(cmd.equals(_verAPI.command_stopScan)){
 
             try {
-                if ( !this.stopScan() ) {
+                if ( !stopScan() ) {
                     throw new AgentRemoteException("No scan is currently running.");
                 }
             } catch ( Exception e ){
-                log.error("Error stopping scan.", e);
-                throw new AgentRemoteException("Error stopping scan: " + e.toString());
+                _log.error("Error stopping scan.", e);
+                throw new AgentRemoteException("Error stopping scan: " + 
+                                               e.toString());
             }
             return null;
 
-        } else if(cmd.equals(this.verAPI.command_getScanStatus)){
+        } else if(cmd.equals(_verAPI.command_getScanStatus)){
 
             AgentRemoteValue rval = new AgentRemoteValue();
             ScanState state = null;
             try {
-                state = this.getScanStatus();
+                state = getScanStatus();
 
                 // Fix bug 7004 -- set endtime so that duration appears 
                 // correctly on the serverside when viewing status
@@ -182,13 +185,14 @@ public class AutoinventoryCommandsServer
                 state.getCore().toAgentRemoteValue("scanState", rval);
 
             } catch ( Exception e ) {
-                log.error("Error getting scan state.", e);
-                throw new AgentRemoteException("Error getting scan status: " + e.toString());
+                _log.error("Error getting scan state.", e);
+                throw new AgentRemoteException("Error getting scan status: " + 
+                                               e.toString());
             }
             return rval;
 
-        } else if(cmd.equals(this.verAPI.command_pushRuntimeDiscoveryConfig)){
-            rtAutodiscoverer.updateConfig(args);
+        } else if(cmd.equals(_verAPI.command_pushRuntimeDiscoveryConfig)){
+            _rtAutodiscoverer.updateConfig(args);
             return null;
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
@@ -197,18 +201,17 @@ public class AutoinventoryCommandsServer
 
     public void startup (AgentDaemon agent) throws AgentStartException {
         try {
-            this.agent = agent;
-            this.storage = agent.getStorageProvider();
-            this.client = setupClient();
-            this.certDN = storage.getValue(AgentDaemon.PROP_CERTDN);
+            _agent   = agent;
+            _storage = agent.getStorageProvider();
+            _client  = setupClient();
+            _certDN  = _storage.getValue(AgentDaemon.PROP_CERTDN);
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here");
         }
 
         try {
-            this.pluginManager =
-                (AutoinventoryPluginManager)agent.
-                getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+            _pluginManager = (AutoinventoryPluginManager)
+                agent.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (Exception e) {
             throw new AgentStartException("Unable to get auto inventory " +
                                           "plugin manager: " + 
@@ -216,31 +219,29 @@ public class AutoinventoryCommandsServer
         }
 
         // Initialize the runtime autodiscoverer
-        rtAutodiscoverer = new RuntimeAutodiscoverer(this, 
-                                                     this.storage,
-                                                     this.agent, this.client);
+        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, 
+                                                      _agent, _client);
 
         // Fire up the scan manager
-        scanManager = new ScanManager(this, this.log, 
-                                      this.pluginManager, 
-                                      this.rtAutodiscoverer);
-        scanManager.startup();
+        _scanManager = new ScanManager(this, _log, _pluginManager,  
+                                      _rtAutodiscoverer);
+        _scanManager.startup();
 
         // Do we have a provider?
-        if ( CommandsAPIInfo.getProvider(this.storage) == null ) {
+        if ( CommandsAPIInfo.getProvider(_storage) == null ) {
             agent.registerNotifyHandler(this, 
                                         CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
-            rtAutodiscoverer.triggerDefaultScan();
+            _rtAutodiscoverer.triggerDefaultScan();
         }
 
-        this.log.info("Autoinventory Commands Server started up");
+        _log.info("Autoinventory Commands Server started up");
     }
 
     public void handleNotification(String msgClass, String msg) {
         if (msgClass.equals(CommandsAPIInfo.NOTIFY_SERVER_SET)) {
-            scanManager.interruptHangingScan();
-            rtAutodiscoverer.triggerDefaultScan();
+            _scanManager.interruptHangingScan();
+            _rtAutodiscoverer.triggerDefaultScan();
         }
     }
 
@@ -251,7 +252,7 @@ public class AutoinventoryCommandsServer
      * a DefaultScan (by default, every 15 mins)
      */
     protected void scheduleDefaultScan () {
-        log.debug("Scheduling DefaultScan...");
+        _log.debug("Scheduling DefaultScan...");
         ScanConfiguration scanConfig = new ScanConfiguration();
         
         scanConfig.setIsDefaultScan(true);
@@ -261,7 +262,7 @@ public class AutoinventoryCommandsServer
 
     private ServerSignature[] getAutoScanners(String type) {
         ArrayList sigs = new ArrayList();
-        Map plugins = this.pluginManager.getPlatformPlugins(type);
+        Map plugins = _pluginManager.getPlatformPlugins(type);
         //XXX hack.  we want the jboss plugin to run before tomcat
         //so jboss can drop a hint about the embedded tomcat.
         TreeSet detectors =
@@ -273,11 +274,9 @@ public class AutoinventoryCommandsServer
                 }
             });
 
-        for (Iterator it = plugins.entrySet().iterator();
-             it.hasNext();) {
+        for (Iterator i = plugins.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry)i.next();
             ServerDetector detector;
-            ServerSignature[] pluginSigs;
-            Map.Entry entry = (Map.Entry)it.next();
 
             if (!(entry.getValue() instanceof ServerDetector)) {
                 continue;
@@ -298,10 +297,8 @@ public class AutoinventoryCommandsServer
             detectors.add(detector);
         }
 
-        for (Iterator iter = detectors.iterator();
-             iter.hasNext();)
-        {
-            ServerDetector detector = (ServerDetector)iter.next();
+        for (Iterator i = detectors.iterator(); i.hasNext();) {
+            ServerDetector detector = (ServerDetector)i.next();
             sigs.add(detector.getServerSignature());
         }
 
@@ -310,13 +307,11 @@ public class AutoinventoryCommandsServer
 
     private ServerSignature[] getWindowsRegistryScanners() {
         ArrayList sigs = new ArrayList();
-        Map plugins = this.pluginManager.getPlatformPlugins();
+        Map plugins = _pluginManager.getPlatformPlugins();
 
-        for (Iterator it = plugins.entrySet().iterator();
-             it.hasNext();) {
-            ServerDetector detector;
-            ServerSignature[] pluginSigs;
+        for (Iterator it = plugins.entrySet().iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry)it.next();
+            ServerDetector detector;
 
             if (!(entry.getValue() instanceof RegistryServerDetector)) {
                 continue;
@@ -337,19 +332,17 @@ public class AutoinventoryCommandsServer
     }
 
     public void shutdown () {
-        this.log.info("Autoinventory Commands Server shutting down");
+        _log.info("Autoinventory Commands Server shutting down");
         // Give the scan manager 3 seconds to shut down.
-        synchronized ( scanManager ) {
-            scanManager.shutdown(3000);
+        synchronized ( _scanManager ) {
+            _scanManager.shutdown(3000);
         }
-        this.log.info("Autoinventory Commands Server shut down");
+        _log.info("Autoinventory Commands Server shut down");
     }
 
-    private AutoinventoryCallbackClient setupClient() 
-        throws AgentStartException {
-
+    private AutoinventoryCallbackClient setupClient() { 
         StorageProviderFetcher fetcher =
-            new StorageProviderFetcher(this.storage);
+            new StorageProviderFetcher(_storage);
 
         return new AutoinventoryCallbackClient(fetcher);
     }
@@ -403,17 +396,17 @@ public class AutoinventoryCommandsServer
             addScanners(scanConfig, new WindowsRegistryScan(), rgySigs);
         }
 
-        if (log.isDebugEnabled()) {
+        if (_log.isDebugEnabled()) {
             ServerSignature[] sigs = scanConfig.getServerSignatures();
             ArrayList types = new ArrayList();
             for (int i=0; i<sigs.length; i++) {
                 types.add(sigs[i].getServerTypeName());
             }
-            log.debug(type + " scan for: " + types);
+            _log.debug(type + " scan for: " + types);
         }
 
-        synchronized ( scanManager ) {
-            scanManager.queueScan(scanConfig);
+        synchronized ( _scanManager ) {
+            _scanManager.queueScan(scanConfig);
         }
     }
 
@@ -425,15 +418,15 @@ public class AutoinventoryCommandsServer
         // A best-effort attempt to grab the most recent scanState we can
         try { getScanStatus(); } catch ( Exception e ) {}
 
-        synchronized ( scanManager ) {
+        synchronized ( _scanManager ) {
             try {
-                return scanManager.stopScan();
+                return _scanManager.stopScan();
                 
             } catch ( AutoinventoryException e ) {
                 // Error stopping scan - restart the entire scan manager
-                log.error("Error stopping scan, restarting scan manager: " + e);
-                scanManager.shutdown(1000);
-                scanManager.startup();
+                _log.error("Error stopping scan, restarting scan manager: " + e);
+                _scanManager.shutdown(1000);
+                _scanManager.startup();
             }
             return true;
         }
@@ -441,24 +434,18 @@ public class AutoinventoryCommandsServer
 
     private ScanState getScanStatus () throws AutoinventoryException {
 
-        ScanState scanState = scanManager.getStatus();
+        ScanState scanState = _scanManager.getStatus();
         if ( scanState == null ) {
-            if ( mostRecentState == null ) {
+            if ( _mostRecentState == null ) {
                 throw new AutoinventoryException
                     ("No autoinventory scan has been started.");
             } else {
-                return mostRecentState;
+                return _mostRecentState;
             }
         }
-        mostRecentState = scanState;
+        _mostRecentState = scanState;
         return scanState; 
     }
-
-    // max sleep is 1 hour between attempts to send AI report to server.
-    public static final long AIREPORT_MAX_SLEEP_WAIT = (60000 * 60);
-
-    // we'll keep trying for 30 days to send our a report.
-    public static final long AIREPORT_MAX_TRY_TIME = AIREPORT_MAX_SLEEP_WAIT * 24 * 30;
 
     /**
      * This is where we report our autoinventory-detected data to
@@ -470,26 +457,26 @@ public class AutoinventoryCommandsServer
 
         // Special handling for periodic default scans
         if (scanState.getIsDefaultScan()) {
-            if (lastCompletedDefaultScanState != null) {
+            if (_lastCompletedDefaultScanState != null) {
                 try {
-                    if (lastCompletedDefaultScanState.isSameState(scanState)) {
+                    if (_lastCompletedDefaultScanState.isSameState(scanState)) {
                         // If this default scan is the same as the last one,
                         // don't send anything to the server
-                        log.debug("Default scan didn't find any changes, not "
+                        _log.debug("Default scan didn't find any changes, not "
                                   + "sending report to the server");
                         return;
                     }
                 } catch (AutoinventoryException e) {
                     // Just log it and continue, I guess we'll send the report
                     // to the server in this case
-                    log.error("Error comparing default scan states: " + e, e);
+                    _log.error("Error comparing default scan states: " + e, e);
                 }
             }
-            lastCompletedDefaultScanState = scanState;
+            _lastCompletedDefaultScanState = scanState;
         }
 
         // Anytime a scan completes, we update the most recent state
-        mostRecentState = scanState;
+        _mostRecentState = scanState;
 
         // Issue a warning if we could not even detect the platform
         if ( scanState.getPlatform() == null ) {
@@ -497,12 +484,12 @@ public class AutoinventoryCommandsServer
                 ByteArrayOutputStream errInfo = new ByteArrayOutputStream();
                 PrintStream errInfoPS = new PrintStream(errInfo);
                 scanState.printFullStatus(errInfoPS);
-                log.warn("AICommandsServer: scan completed, but we could not even "
+                _log.warn("AICommandsServer: scan completed, but we could not even "
                          + "detect the platform, so nothing will be reported "
                          + "to the server.  Here is some information about the error "
                          + "that occurred: \n" + errInfo.toString() + "\n");
             } catch ( Exception e ) {
-                log.warn("AICommandsServer: scan completed, but we could not even "
+                _log.warn("AICommandsServer: scan completed, but we could not even "
                          + "detect the platform, so nothing will be reported "
                          + "to the server.  More information would be provided, "
                          + "but this error occurred just trying to generate more "
@@ -512,21 +499,21 @@ public class AutoinventoryCommandsServer
 
         // But regardless, we always report back to the server, so it
         // knows the scan has been completed.
-        scanState.setCertDN(this.certDN);
+        scanState.setCertDN(_certDN);
 
         long sleepWaitMillis = 15000;
         long firstTryTime = System.currentTimeMillis();
         long diffTime;
         while ( true ) {
             try {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sending autoinventory report to server: "
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Sending autoinventory report to server: "
                              + scanState
                     /*+ "\nWITH SERVERS=" + StringUtil.iteratorToString(scanState.getAllServers(null).iterator())*/);
 
                 }
-                client.aiSendReport(scanState);
-                log.info("Autoinventory report " + 
+                _client.aiSendReport(scanState);
+                _log.info("Autoinventory report " + 
                          "successfully sent to server.");
                 break;
 
@@ -538,10 +525,10 @@ public class AutoinventoryCommandsServer
                         StringUtil.formatDuration(AIREPORT_MAX_TRY_TIME) +
                         ", giving up.  Error was: " + e.getMessage();
                         
-                    if(log.isDebugEnabled()){
-                        log.debug(eMsg, e);
+                    if(_log.isDebugEnabled()){
+                        _log.debug(eMsg, e);
                     } else {
-                        log.error(eMsg);
+                        _log.error(eMsg);
                     }
                     return;
                 }
@@ -550,10 +537,10 @@ public class AutoinventoryCommandsServer
                     String.valueOf(sleepWaitMillis/1000) + " secs before "+
                     "retrying.  Error: " + e.getMessage();
 
-                if(log.isDebugEnabled()){
-                    log.debug(eMsg, e);
+                if(_log.isDebugEnabled()){
+                    _log.debug(eMsg, e);
                 } else {
-                    log.error(eMsg);
+                    _log.error(eMsg);
                 }
 
                 try {
