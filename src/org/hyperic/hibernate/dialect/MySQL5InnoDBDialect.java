@@ -48,7 +48,7 @@ import java.util.Map;
 /**
  * HQ's version of MySQL5InnoDBDialect to create pseudo sequences
  */
-class MySQL5InnoDBDialect
+public class MySQL5InnoDBDialect
     extends org.hibernate.dialect.MySQL5InnoDBDialect
     implements HQDialect
 {

@@ -39,7 +39,7 @@ import org.hyperic.util.jdbc.DBUtil;
  * JDBC sql types to native db column type mapping
  * for backwards compatibility, :(
  */
-class Oracle9Dialect 
+public class Oracle9Dialect 
     extends org.hibernate.dialect.Oracle9Dialect
     implements HQDialect
 {

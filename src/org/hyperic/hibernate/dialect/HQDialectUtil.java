@@ -39,9 +39,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 
-/**
- *
- */
 public class HQDialectUtil
 {
     private final String logCtx = MySQL5InnoDBDialect.class.getName();

@@ -32,7 +32,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
-class PostgreSQLDialect 
+public class PostgreSQLDialect 
     extends org.hibernate.dialect.PostgreSQLDialect
     implements HQDialect
 {
@@ -114,7 +114,6 @@ class PostgreSQLDialect
                                     int limit)
     {
         String cond = (condition.matches("^\\s*$")) ? "" : " and "+condition;
-        String limitCond = (limit <= 0) ? "" : " LIMIT "+limit;
         return "DELETE FROM "+deleteTable+" WHERE EXISTS"+
                " (SELECT "+commonKey+" FROM "+joinTables+
                " WHERE "+joinKeys+cond+")";
