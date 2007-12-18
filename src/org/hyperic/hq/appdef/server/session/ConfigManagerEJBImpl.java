@@ -219,8 +219,8 @@ public class ConfigManagerEJBImpl
         int responseIdx;
         byte[] data;
         ServerConfigStuff server = null;
-        PlatformConfigStuff platform = null;
-        boolean origReq = false;
+        PlatformConfigStuff platform;
+        boolean origReq = required;
         boolean isServerOrService = false;
         boolean isProductType = productType.equals(ProductPlugin.TYPE_PRODUCT);
 
