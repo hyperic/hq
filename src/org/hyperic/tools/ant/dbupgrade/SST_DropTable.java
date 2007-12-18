@@ -26,15 +26,17 @@
 package org.hyperic.tools.ant.dbupgrade;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 import org.apache.tools.ant.BuildException;
+import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.dialect.HibernateUtil;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_DropTable extends SchemaSpecTask {
 
-    private String _table = null,
-                   _targetDB = null;
+    private String _table = null;
+    private String _targetDB = null;
 
     public SST_DropTable () {}
 
@@ -50,8 +52,8 @@ public class SST_DropTable extends SchemaSpecTask {
 
         validateAttributes();
 
-        Connection c = getConnection();
-        PreparedStatement ps = null;
+        Connection conn = getConnection();
+        Statement stmt = null;
         String sql = "DROP TABLE " + _table + " CASCADE ";
         
         try
@@ -59,30 +61,28 @@ public class SST_DropTable extends SchemaSpecTask {
             if (!targetDbIsValid(_targetDB)) {
                 return;
             }
-            if (DBUtil.isOracle(c)) {
+            if (DBUtil.isOracle(conn)) {
                 sql += "CONSTRAINTS";
             }
-
-            // Check to see if the table exists.  If it's already there,
-            // then don't re-add it.
-            boolean foundTable = DBUtil.checkTableExists(c, _table);
+            
+            boolean foundTable = DBUtil.checkTableExists(conn, _table);
             
             if ( !foundTable ) {
                 log(">>>>> Not dropping table: " + _table
                     + " because it does not exist");
                 return;
             }
+            
+            stmt = conn.createStatement();
 
-            // Add the column.
-            ps = c.prepareStatement(sql);
             log(">>>>> Dropping table " + _table);
-            ps.executeUpdate();
+            stmt.execute(sql);
 
         } catch ( Exception e ) {
             throw new BuildException("Error dropping table " 
                                      + _table + ": " + e, e);
         } finally {
-            DBUtil.closeStatement(_ctx, ps);
+            DBUtil.closeStatement(_ctx, stmt);
         }
         
     }
