@@ -33,12 +33,17 @@ import org.hyperic.util.jdbc.DBUtil;
 
 public class SST_DropTable extends SchemaSpecTask {
 
-    private String table = null;
+    private String _table = null,
+                   _targetDB = null;
 
     public SST_DropTable () {}
 
+    public void setTargetDB (String t) {
+        _targetDB = t;
+    }
+
     public void setTable (String t) {
-        table = t;
+        _table = t;
     }
 
     public void execute () throws BuildException {
@@ -47,31 +52,35 @@ public class SST_DropTable extends SchemaSpecTask {
 
         Connection c = getConnection();
         PreparedStatement ps = null;
-        String sql = "DROP TABLE " + table + " CASCADE ";
+        String sql = "DROP TABLE " + _table + " CASCADE ";
         
-        try {
+        try
+        {
+            if (!targetDbIsValid(_targetDB)) {
+                return;
+            }
             if (DBUtil.isOracle(c)) {
                 sql += "CONSTRAINTS";
             }
 
             // Check to see if the table exists.  If it's already there,
             // then don't re-add it.
-            boolean foundTable = DBUtil.checkTableExists(c, table);
+            boolean foundTable = DBUtil.checkTableExists(c, _table);
             
             if ( !foundTable ) {
-                log(">>>>> Not dropping table: " + table
+                log(">>>>> Not dropping table: " + _table
                     + " because it does not exist");
                 return;
             }
 
             // Add the column.
             ps = c.prepareStatement(sql);
-            log(">>>>> Dropping table " + table);
+            log(">>>>> Dropping table " + _table);
             ps.executeUpdate();
 
         } catch ( Exception e ) {
             throw new BuildException("Error dropping table " 
-                                     + table + ": " + e, e);
+                                     + _table + ": " + e, e);
         } finally {
             DBUtil.closeStatement(_ctx, ps);
         }
@@ -79,7 +88,7 @@ public class SST_DropTable extends SchemaSpecTask {
     }
 
     private void validateAttributes () throws BuildException {
-        if ( table == null )
+        if ( _table == null )
             throw new BuildException("SchemaSpec: dropTable: No 'table' attribute specified.");
     }
 }

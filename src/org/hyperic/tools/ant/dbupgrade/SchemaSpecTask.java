@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.tools.db.TypeMap;
+import org.hyperic.util.jdbc.DBUtil;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -104,5 +105,42 @@ public abstract class SchemaSpecTask extends Task {
             throw new BuildException("No type mapping for: " + typeName);
         }
         return mappedType;
+    }
+
+    boolean targetDbIsValid(String targetDB)
+        throws SQLException
+    {
+        Connection c = getConnection();
+        if (targetDB != null && targetDB.trim().length() != 0)
+        {
+            targetDB = targetDB.toLowerCase();
+            if (targetDB.equals("oracle")) {
+                if (!DBUtil.isOracle(c)) {
+                    log("target was oracle, but this is not oracle, returning.");
+                    return false;
+                } else {
+                    log("target is oracle.");
+                    return true;
+                }
+            } else if (-1 != targetDB.indexOf("postgres")) {
+                if (!DBUtil.isPostgreSQL(c)) {
+                    log("target was postgresql, but this is not pgsql, returning.");
+                    return false;
+                } else {
+                    log("target is postgres.");
+                    return true;
+                }
+            } else if (targetDB.equals("mysql")) {
+                if (!DBUtil.isMySQL(c)) {
+                    log("target was mysql, but this is not mysql, returning.");
+                    return false;
+                } else {
+                    log("target is mysql.");
+                    return true;
+                }
+            }
+        }
+        log("NOTE:  No DB target was specified, allowing task to proceed.");
+        return true;
     }
 }

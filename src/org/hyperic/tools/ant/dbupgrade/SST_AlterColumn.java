@@ -42,7 +42,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
     private String      _precision;
     private String      _nullable;
     private String      _defval;
-    private String      targetDB;
+    private String      _targetDB;
     private boolean     _quoteDefault = true; // Defaults to true
     private Initializer _initializer;
     private ForeignKey  _foreignKey;
@@ -50,7 +50,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
     public SST_AlterColumn () {}
 
     public void setTargetDB (String t) {
-        targetDB = t;
+        _targetDB = t;
     }
 
     public void setTable (String t) {
@@ -100,52 +100,18 @@ public class SST_AlterColumn extends SchemaSpecTask {
         return _foreignKey;
     }
 
-    private boolean targetDbIsValid()
-        throws SQLException
-    {
-        int dbType = getDBUtilType();
-        if (targetDB != null)
-        {
-            if (targetDB.equalsIgnoreCase("oracle")) {
-                if (!DBUtil.isOracle(dbType)) {
-                    log("target was oracle, but this is not oracle, returning.");
-                    return false;
-                } else {
-                    log("target is oracle.");
-                    return true;
-                }
-            } else if (targetDB.equalsIgnoreCase("postgresql")) {
-                if (!DBUtil.isPostgreSQL(dbType)) {
-                    log("target was postgresql, but this is not pgsql, returning.");
-                    return false;
-                } else {
-                    log("target is postgres.");
-                    return true;
-                }
-            } else if (targetDB.equalsIgnoreCase("mysql")) {
-                if (!DBUtil.isMySQL(dbType)) {
-                    log("target was mysql, but this is not mysql, returning.");
-                    return false;
-                } else {
-                    log("target is mysql.");
-                    return true;
-                }
-            }
-        }
-        log("NOTE:  No DB target was specified.");
-        return true;
-    }
-
     public void execute () throws BuildException {
         validateAttributes();
 
         Connection c = getConnection();
         try {
-            if (!targetDbIsValid()) {
+            if (!targetDbIsValid(_targetDB)) {
                 return;
             }
             if (DBUtil.isOracle(c))
                 alter_oracle(c);
+            else if (DBUtil.isMySQL(c))
+                alter_mysql(c);
             else if (DBUtil.isPostgreSQL(c))
                 alter_pgsql(c);
             else {
@@ -157,10 +123,19 @@ public class SST_AlterColumn extends SchemaSpecTask {
         }
     }
 
+    private void alter_mysql (Connection c) throws BuildException {
+        alterTable(c, false);
+    }
+
     private void alter_oracle (Connection c) throws BuildException {
+        alterTable(c, true);
+    }
+
+    private void alterTable (Connection c, boolean withParen) throws BuildException {
         String columnTypeName = null;
         String alterSql =
-            "ALTER TABLE " + _table + " MODIFY (" + _column;
+            "ALTER TABLE " + _table + " MODIFY " +
+            ( (withParen) ? "(" : "" ) + _column;
 
         if (_columnType != null) {
             columnTypeName =  getDBSpecificTypeName(_columnType);
@@ -178,7 +153,7 @@ public class SST_AlterColumn extends SchemaSpecTask {
         if (_nullable != null) {
             alterSql += " " + _nullable;
         }
-        alterSql += ")";
+        alterSql += (withParen) ? ")" : "";
 
         List sql = new ArrayList();
         sql.add(alterSql);
