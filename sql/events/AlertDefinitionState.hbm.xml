@@ -3,17 +3,15 @@
 
   <class name="AlertDefinitionState" table="EAM_ALERT_DEF_STATE">
     <id name="id" type="integer">
-      <column name="ID" not-null="true"/>
-      <generator class="sequence">
-        <param name="sequence">EAM_ALERT_DEF_STATE_ID_SEQ</param>
-      </generator>
+      <column name="ALERT_DEFINITION_ID" not-null="true"/>
+      <generator class="assigned"/>
     </id>
 
-    <many-to-one name="alertDefinition" column="alert_definition_id" unique="true"
-                 not-null="true" foreign-key="none"/>
+    <many-to-one name="alertDefinition" column="ALERT_DEFINITION_ID" unique="true"
+                 insert="false" update="false" foreign-key="none"/>
 
     <property name="lastFired" type="long">
-      <column name="last_fired" not-null="true"/>
+      <column name="LAST_FIRED" not-null="true"/>
     </property>
   </class>
 

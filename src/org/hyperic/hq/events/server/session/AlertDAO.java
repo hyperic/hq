@@ -225,13 +225,6 @@ public class AlertDAO extends HibernateDAO {
         AlertDefinition def = alert.getAlertDefinition();
         
         // Update the last fired time
-        if (def.getAlertDefinitionState() == null) {
-            AlertDefinitionState state =
-                new AlertDefinitionState(def, alert.getCtime());
-            def.setAlertDefinitionState(state);
-            super.save(state);
-        }
-
         if (def.getLastFired() < alert.getCtime())
             def.setLastFired(alert.getCtime());
     }

@@ -33,9 +33,10 @@ public class AlertDefinitionState extends PersistedObject {
 
     AlertDefinitionState() {}
     
-    AlertDefinitionState(AlertDefinition def, long ctime) {
+    AlertDefinitionState(AlertDefinition def) {
+        setId(def.getId());
         _alertDefinition = def;
-        _lastFired = ctime;
+        _lastFired = 0;
     }
     
     public AlertDefinition getAlertDefinition() {

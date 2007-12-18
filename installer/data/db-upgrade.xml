@@ -7750,37 +7750,29 @@ has already been defined.
 	  <schema-directSQL>
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="oracle">
           create table EAM_ALERT_DEF_STATE (
-              ID number(10,0) not null,
-              alert_definition_id number(10,0) not null unique,
-              last_fired number(19,0) not null,
-              primary key (ID)
+              ALERT_DEFINITION_ID number(10,0) not null unique,
+              LAST_FIRED number(19,0) not null,
+              primary key (ALERT_DEFINITION_ID)
           )
         </statement>		
-        <statement targetDB="oracle">
-          create sequence EAM_ALERT_DEF_STATE_ID_SEQ start with 10001 increment by 1
-        </statement>
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="postgresql">
           create table EAM_ALERT_DEF_STATE (
-              ID int4 not null,
-              alert_definition_id int4 not null unique,
-              last_fired int8 not null,
-              primary key (ID)
+              ALERT_DEFINITION_ID int4 not null unique,
+              LAST_FIRED int8 not null,
+              primary key (ALERT_DEFINITION_ID )
           )
-        </statement>		
-        <statement targetDB="postgresql">
-          create sequence EAM_ALERT_DEF_STATE_ID_SEQ start 10001 increment 1
         </statement>		
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="mysql">
           create table EAM_ALERT_DEF_STATE (
-              ID integer not null,
-              alert_definition_id integer not null unique,
-              last_fired bigint not null,
-              primary key (ID)
+              ALERT_DEFINITION_ID integer not null unique,
+              LAST_FIRED bigint not null,
+              primary key (ALERT_DEFINITION_ID)
           ) ENGINE=InnoDB
-        </statement>		
-        <statement targetDB="mysql">
-          INSERT INTO HQ_SEQUENCE (seq_name,seq_val) VALUES ('EAM_ALERT_DEF_STATE_ID_SEQ', 10001)
-        </statement>		
+        </statement>
+        <statement desc="Populate the EAM_ALERT_DEF_STATE table">
+          INSERT INTO EAM_ALERT_DEF_STATE (ALERT_DEFINITION_ID, LAST_FIRED)
+            SELECT ID, 0 FROM EAM_ALERT_DEFINITION
+        </statement>
 	  </schema-directSQL>
   </schemaSpec>	
 	

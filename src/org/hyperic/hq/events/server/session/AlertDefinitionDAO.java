@@ -58,6 +58,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
 
     void remove(AlertDefinition def) {
+        super.remove(def.getAlertDefinitionState());
         super.remove(def);
     }
 
@@ -204,8 +205,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
     
-    void save(AlertDefinition alert) {
-        super.save(alert);
+    void save(AlertDefinition def) {
+        super.save(def);
+
+        // Make sure there's a valid alert definition state
+        if (def.getAlertDefinitionState() == null) {
+            AlertDefinitionState state = new AlertDefinitionState(def);
+            def.setAlertDefinitionState(state);
+            super.save(state);
+        }
     }
     
     int deleteByEntity(AppdefEntityID ent) {
