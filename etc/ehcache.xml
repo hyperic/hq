@@ -527,12 +527,21 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <!-- The AlertDefinition and AlertDefinitionState caches should have 
+	   the same maxElementsInMemory setting since there is a one-to-one 
+	   relationship between these objects. -->	
   <cache name="org.hyperic.hq.events.server.session.AlertDefinition"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.AlertDefinitionState"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>	
   <cache name="org.hyperic.hq.events.server.session.AlertDefinition.actionsBag"
          maxElementsInMemory="5000"
          eternal="true"
