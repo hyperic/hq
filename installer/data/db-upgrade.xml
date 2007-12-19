@@ -6715,7 +6715,7 @@ has already been defined.
     
     <schemaSpec version="3.53">
       <schema-alterColumn table="EAM_CRISPO_OPT" column="VAL" precision="4000"
-                          columnType="VARCHAR2" />
+                          columnType="VARCHAR2" nullable="NULL"/>
       <schema-directSQL>
         <statement desc="Creating new EAM_CRISPO_ARRAY table">
           create table EAM_CRISPO_ARRAY (
@@ -6726,9 +6726,6 @@ has already been defined.
           )
         </statement>
       </schema-directSQL>
-      <schema-alterColumn table="EAM_CRISPO_OPT"
-                          column="VAL"
-                          nullable="NULL"/>
     </schemaSpec>
     
     <schemaSpec version="3.54">
@@ -7885,9 +7882,6 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.90">
-    <schema-alterColumn table="EAM_CRISPO_OPT"
-                        column="VAL"
-                        nullable="NULL"/>
     <schema-directSQL>
       <statement desc="Creating new EAM_CRISPO_ARRAY table" fail="false">
         create table EAM_CRISPO_ARRAY (
