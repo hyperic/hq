@@ -72,11 +72,11 @@ public abstract class GalertDefSortField
         }
     };
     
-    public static final GalertDefSortField ENABLED = 
-        new GalertDefSortField(3, "Enabled", "galertDef.sortField.enabled")
+    public static final GalertDefSortField ACTIVE = 
+        new GalertDefSortField(3, "Active", "galertDef.sortField.active")
     {
         String getSortString(String def, String group, String escalation) {
-            return def + ".enabled";
+            return def + ".active";
         }
 
         public boolean isSortable() {

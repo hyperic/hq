@@ -121,7 +121,7 @@ class AlertController
              label:{df.format(it.ctime)}],
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.ENABLED, width:'11%',
+            [field:AlertDefSortField.ACTIVE, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:AlertDefSortField.LAST_FIRED, width:'13%',
              label:{
@@ -160,7 +160,7 @@ class AlertController
              label:{df.format(it.ctime)}], 
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}], 
-            [field:AlertDefSortField.ENABLED, width:'11%',
+            [field:AlertDefSortField.ACTIVE, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:[getValue: {localeBundle.ResourceType },
                     description:'resourceType', sortable:false], width:'19%',
@@ -192,7 +192,7 @@ class AlertController
              label:{df.format(it.ctime)}],
             [field:GalertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}],
-            [field:GalertDefSortField.ENABLED, width:'11%',
+            [field:GalertDefSortField.ACTIVE, width:'11%',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
             [field:GalertDefSortField.LAST_FIRED, width:'13%',
              label:{

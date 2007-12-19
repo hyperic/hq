@@ -96,15 +96,15 @@ public abstract class AlertDefSortField
         }
     };
 
-    public static final AlertDefSortField ENABLED = 
-        new AlertDefSortField(5, "Enabled", "alertDef.sortField.enabled") 
+    public static final AlertDefSortField ACTIVE = 
+        new AlertDefSortField(5, "Active", "alertDef.sortField.active") 
     {
         public boolean isSortable() {
             return true;
         }
         
         String getSortString(String def, String resource) {
-            return def + ".enabled";
+            return def + ".active";
         }
     };
 
