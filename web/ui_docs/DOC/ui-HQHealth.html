@@ -1,0 +1,128 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-HQHealth</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-HQHealth
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Dec 18, 2007 by <font color="#0050B2">megbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-HQHealth-HQHealth"></a><a name="ui-HQHealth-top"></a>HQ Health</h1>
+
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen provides real-time diagnostic data for the machine on which the HQ Server is installed. This data is mostly useful for HQ Support to troubleshoot problems with the system and is not intended for customers to use on their own. This screen is available to Administrators only.</p>
+
+<p>This screen displays statistics from HQ's internal caches. This will usually be the easier way to view that data, instead of the methods described in <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Cache+Settings" title="HQ Cache Settings">HQ Cache Settings</a>. To modify cache configurations, though, you still need to follow the instructions on that page. </p>
+
+<ul>
+	<li><a href="#ui-HQHealth-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-HQHealth-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-HQHealth-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-HQHealth-Tasks"></a></p>
+
+<h3><a name="ui-HQHealth-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do one thing: print the displayed diagnostic data.</p>
+
+<p><b>To print the diagnostic data:</b></p>
+<ul>
+	<li>Click <b>Print</b>, located under the statistics displayed in the top of the page, in the center.<br/>
+Gathering all the data to be printed might take a few moments. When that is done, a simple text display of the statistics are displayed in a browser window, from which you can easily print.</li>
+</ul>
+
+
+<p><em><a href="#ui-HQHealth-top">back to top</a></em></p>
+
+<p><a name="ui-HQHealth-Sections"></a></p>
+
+<h3><a name="ui-HQHealth-SectionsonthisScreen"></a>Sections on this Screen</h3>
+
+<p>The top of the screen displays standard health statistics for a server. Below are three tabs that display more data about the state of the server and database:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Tab</th>
+<th class='confluenceTh'>What Data It Displays</th>
+</tr>
+<tr>
+<td class='confluenceTd'>Diagnostics</td>
+<td class='confluenceTd'>All the data in this tab is the same data that is printed out every 15 minutes into logs. Within this tab, a droplist provides the following choices:
+<ul>
+	<li>EhCache: Size and hit ratio of HQ caches</li>
+	<li>ZEvents: Status of the internal BUS</li>
+	<li>Batch Aggregate <font color="red">*</font>: Status of metric insertion in queues into the database. Available only if using the Bath Aggregate inserter.</li>
+	<li>Metric Reports Stats: A running average of how fast metrics are being pushed into the database</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'><a name="ui-HQHealth-cache"></a> Cache</td>
+<td class='confluenceTd'>The same data (less the "Bytes" column) displayed in the EhCache display in the Diagnostics tab, but in a more easily viewable format. This tab's data can be sorted. Learn more about <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Cache+Settings" title="HQ Cache Settings">HQ's caches</a>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Load</td>
+<td class='confluenceTd'>The load on the HQ Server's box, including the metric load.</td>
+</tr>
+</tbody></table>
+
+
+<p><em><a href="#ui-HQHealth-top">back to top</a></em></p>
+
+<p><a name="ui-HQHealth-Navigating"></a></p>
+
+<h3><a name="ui-HQHealth-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Dashboard</b> </td>
+<td class='confluenceTd'> Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Resources</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the "<a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a>" screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for the resource). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Analyze</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Reporting</b> <font color="red">&#42;</font> (takes users to the "<a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a>" screen, where they can generate all reports available in HQ), <b>Alert Center</b> (takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Administration</b> </td>
+<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the "<a href="ui-Admin.html" title="ui-Admin">Administration</a>" screen, where they can manage the system-wide settings </td>
+</tr>
+</tbody></table>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
+<p><em><a href="#ui-HQHealth-top">back to top</a></em></p>
+
+<h5><a name="ui-HQHealth-ReturntotheUIReference."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/UI+Reference" title="UI Reference">UI Reference</a>.</h5>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 18, 2007 17:43</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

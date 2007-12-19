@@ -1,0 +1,151 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Nagios</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Nagios
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Dec 18, 2007 by <font color="#0050B2">megbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Nagios-NagiosAvailability"></a><a name="ui-Nagios-top"></a>Nagios Availability</h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen mimics Nagios' <sup>TM</sup> "Service Detail" screen: It provides an overview of the current status of the monitored services and hosts. The screen automatically refreshes every minute.</p>
+
+<ul>
+	<li><a href="#ui-Nagios-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Nagios-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-Nagios-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-Nagios-Tasks"></a></p>
+<h3><a name="ui-Nagios-TasksonThisScreen"></a>Tasks on This Screen</h3>
+
+<p>On this screen, users can refresh the display of availability data.</p>
+
+<p><b>To refresh the list:</b></p>
+<ul>
+	<li>Click <img src="../6619148/arrow_refresh.gif" align="absmiddle" border="0" /> at the top right.</li>
+</ul>
+
+
+<p><em><a href="#ui-Nagios-top">back to top</a></em></p>
+
+<p><a name="ui-Nagios-Sections"></a></p>
+<h3><a name="ui-Nagios-SectionsonThisScreen"></a>Sections on This Screen</h3>
+
+<p>This screen displays the following information for each service for which Nagios checks the availability:</p>
+<ul>
+	<li><ins>Host</ins>: The box that the script is checking (as opposed to the box where Nagios is installed)</li>
+	<li><ins>Service</ins>: The Nagios service that was checked. (Nagios defines a service as "one of the central objects in the monitoring logic. Services are associated with hosts and can be:
+	<ul>
+		<li>Attributes of a host (CPU load, disk usage, uptime, etc.)</li>
+		<li>Services provided by the host (HTTP, POP3, FTP, SSH, etc.)</li>
+		<li>Other things associated with the host (DNS records, etc.)" <a href="http://nagios.sourceforge.net/docs/3_0/configobject.html">Source</a>)</li>
+	</ul>
+	</li>
+	<li><ins>Status</ins>: The exit status (displayed as "Return Code" in HQ metrics) of the Nagios script</li>
+	<li><ins>Last Check</ins>: The time the check was most recently executed</li>
+	<li><ins>Event Log</ins>: Output of the check script</li>
+</ul>
+
+
+<p><b>Color Coding</b></p>
+
+<p>This screen assigns a color to each listed service.</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Color</th>
+<th class='confluenceTh'>What It Means</th>
+</tr>
+<tr>
+<td class='confluenceTd'> Pink </td>
+<td class='confluenceTd'> Service is down </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Yellow </td>
+<td class='confluenceTd'> The service has triggered an alert, based on the Nagios threshold that the user sets in Nagios </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Green </td>
+<td class='confluenceTd'> Service is OK </td>
+</tr>
+</tbody></table>
+
+<p><em><a href="#ui-Nagios-top">back to top</a></em></p>
+
+<p><a name="ui-Nagios-Navigating"></a></p>
+
+<h3><a name="ui-Nagios-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Dashboard</b> </td>
+<td class='confluenceTd'> Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Resources</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the "<a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a>" screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for the resource). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Analyze</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Reporting</b> <font color="red">&#42;</font> (takes users to the "<a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a>" screen, where they can generate all reports available in HQ), <b>Alert Center</b> (takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Administration</b> </td>
+<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the "<a href="ui-Admin.html" title="ui-Admin">Administration</a>" screen, where they can manage the system-wide settings </td>
+</tr>
+</tbody></table>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
+<p><em><a href="#ui-Nagios-top">back to top</a></em></p>
+
+<p><br clear="all" /></p>
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Next Steps</b></div><div class="panelContent">
+<p>View trends in the "Return Code" metric and correlate it with the event log in the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen</p>
+</div></div>
+
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p>An explanation of <a href="http://support.hyperic.com/confluence/display/DOC/Nagios+Data" title="Nagios Data">Nagios Data in HQ</a></p>
+</div></div></tr></tbody></table>
+<h5><a name="ui-Nagios-ReturntotheUIReference."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/UI+Reference" title="UI Reference">UI Reference</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../6619148/arrow_refresh.gif">arrow_refresh.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 18, 2007 17:43</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

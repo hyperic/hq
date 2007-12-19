@@ -1,0 +1,169 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Inventory.Configuration</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Inventory.Configuration
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 26, 2007 by <font color="#0050B2">megbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Inventory.Configuration-EditingaResource%27sConfigurationProperties"></a><a name="ui-Inventory.Configuration-top"></a>Editing a Resource's Configuration Properties </h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This inventory screen allows users to edit a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resource's</a> configuration properties, that is, those data that HQ needs to properly monitor and, in some cases, control the resource. Users can also enable and disable <a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">log</a> and <a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">configuration tracking</a> for the resource.</p>
+
+<table cellpadding='5' width='85%' cellspacing='8px' class='infoMacro' border="0" align='center'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="./icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b class="strong">Product-Specific Configuration</b><br />
+<p>The configuration information displayed and available for editing in each section depends entirely on the resource type (product). Product-specific information can be found through the list of <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Managed+Products" title="Managed Products">products managed by HQ</a>. These pages list what metrics are gathered for a resource type, what control actions (if any) are available for the resource type, whether log and configuration tracking are supported, and any special configuration that users must perform in order for HQ to manage the product. All of this information is ultimately defined in the plugin for that product.</p></td></tr></table>
+
+<ul>
+	<li><a href="#ui-Inventory.Configuration-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Inventory.Configuration-Sections">Sections</a> on this screen</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-Inventory.Configuration-Tasks"></a></p>
+<h3><a name="ui-Inventory.Configuration-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do the following tasks:</p>
+
+<p><b>To enable or disable auto-discovery of this resource:</b> </p>
+<ul>
+	<li>Check <ins>Auto-Discover</ins> and click <img src="../16061/fb_ok.gif" align="absmiddle" border="0" />.</li>
+</ul>
+
+
+<p><b><a name="ui-Inventory.Configuration-track"></a>To enable and configure log tracking of this resource:</b></p>
+<ol>
+	<li>Check <ins>Enable Log Tracking</ins>.</li>
+	<li>In <ins>Track Event Log Level</ins>, select a log level. Only events of a level greater than or equal to this level will be tracked. The hierarchy of log levels, from greatest to least, is: Error, Warn, Info, Debug.<br/>
+<b>Mapping of error type to log-level:</b>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>error type</th>
+<th class='confluenceTh'>Log Level</th>
+</tr>
+<tr>
+<td class='confluenceTd'>emerg,alert,crit,error</td>
+<td class='confluenceTd'>Error</td>
+</tr>
+<tr>
+<td class='confluenceTd'>warn</td>
+<td class='confluenceTd'>Warn</td>
+</tr>
+<tr>
+<td class='confluenceTd'>info,notice</td>
+<td class='confluenceTd'>Info</td>
+</tr>
+<tr>
+<td class='confluenceTd'>debug</td>
+<td class='confluenceTd'>Debug</td>
+</tr>
+</tbody></table></li>
+	<li>In <ins>Log Pattern Match</ins>, provide a substring or a regular expression that must be matched by a log message. For more information, see java.util.regex.Pattern.</li>
+	<li>In <ins>Log Pattern Exclude</ins>, provide a substring that, if found in a log message, will cause the message to be excluded.</li>
+	<li>In <ins>Log Files</ins>, specify a comma-delimited list of log files to track.<br/>
+The HQ Agent must be able to read these files, so make sure permissions are set appropriately.</li>
+	<li>Click <img src="../16061/fb_ok.gif" align="absmiddle" border="0" />.</li>
+</ol>
+
+
+<p><b><a name="ui-Inventory.Configuration-config"></a>To enable and configure configuration tracking of this resource:</b></p>
+<ol>
+	<li>Check <ins>Enable Config Tracking</ins>.</li>
+	<li>In <ins>Configuration Files</ins>, specify a comma-delimited list of log files to track.</li>
+	<li>Click <img src="../16061/fb_ok.gif" align="absmiddle" border="0" />.</li>
+</ol>
+
+
+<p><em><a href="#ui-Inventory.Configuration-top">back to top</a></em></p>
+
+<p><a name="ui-Inventory.Configuration-Sections"></a></p>
+<h3><a name="ui-Inventory.Configuration-SectionsonThisScreen"></a>Sections on This Screen</h3>
+
+<h4><a name="ui-Inventory.Configuration-Top"></a>Top </h4>
+
+<p>The top of the screen displays this message: </p>
+<div class="preformatted"><div class="preformattedContent">
+<pre> Please verify that this resource has been enabled for monitoring by following the directions below.</pre>
+</div></div>
+<p>if log and configuration tracking are not already enabled on the resource or if the user must do something in order for HQ to monitor the resource. For example, the message would appear on a MySQL database resource if the username and password had not been provided. Click <b>directions below</b> to be taken directly to the place on the screen where the necessary instructions are listed.</p>
+
+<h4><a name="ui-Inventory.Configuration-Shared"></a>Shared</h4>
+
+<p>This section lists properties that apply to both "monitoring" and "control" aspects of the resource, in other words, general product configuration properties.</p>
+
+<h4><a name="ui-Inventory.Configuration-Monitoring"></a>Monitoring</h4>
+
+<p>This section lists all the information necessary to perform log and configuration tracking for a resource. Not all resource types support log and configuration tracking.</p>
+
+<p>In this section, users can also enable or disable auto-discovery of the resource. HQ's strength lies largely in its auto-discovery of network resources. The <em>Auto-Discovery</em> checkbox should thereful almost always be checked. On rare occasions, however, users might want to disable auto-discovery because it is being too "aggressive" in discovering things on the network. </p>
+
+<h4><a name="ui-Inventory.Configuration-Control"></a>Control</h4>
+
+<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions.</p>
+
+<p><b>Example</b><br/>
+For an Apache server, HQ can perform these control actions: start, stop, restart, graceful, startssl, and configtest. In order for HQ to do that, the user must provide the following information about the Apache installation:</p>
+<ul>
+	<li><ins>pidfile</ins>: The Apache httpd pid file</li>
+	<li><ins>program</ins>: The apache httpd control program</li>
+	<li><ins>prefix</ins>: Prefix arguments to the control program</li>
+	<li><ins>timeout</ins>: Timeout of control operations (measured in seconds)</li>
+</ul>
+
+
+<h4><a name="ui-Inventory.Configuration-TheRest"></a>The Rest</h4>
+
+<p>The rest of the screen provides resource type-specific (product-specific) configuration information (if it exists) necessary for HQ to monitor the resource. This information is also found on the product-specific pages in the <a href="http://support.hyperic.com/confluence/display/DOCSHQ30/Managed+Products" title="Managed Products">Managed Products</a> section of the help.</p>
+
+<p>Also, an explanation of the log- and configuration-tracking fields, as explained above, is provided.</p>
+
+<p><em><a href="#ui-Inventory.Configuration-top">back to top</a></em></p>
+
+<p><br clear="all" /></p>
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p><a href="http://support.hyperic.com/confluence/display/DOC/Plugin+Development+Center" title="Plugin Development Center">Learn how to understand and write product plugins</a><br/>
+<a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">Log Tracking</a><br/>
+<a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a></p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Inventory.Configuration-ReturntoUIReference."></a>Return to <a href="http://support.hyperic.com/confluence/display/DOC/UI+Reference" title="UI Reference">UI Reference</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16061/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 18, 2007 17:43</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,225 @@
+<html>
+    <head>
+        <title>Hyperic HQ Documentation : ui-Monitor.CurrentHealth.Chart</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ Documentation : ui-Monitor.CurrentHealth.Chart
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 26, 2007 by <font color="#0050B2">megbartelt</font>.
+				    </div>
+
+				    <h1><a name="ui-Monitor.CurrentHealth.Chart-MetricChart"></a><a name="ui-Monitor.CurrentHealth.Chart-top"></a>Metric Chart </h1>
+<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+
+<p>This screen allows users to view selected metric in chart form. Charts can be one of several <a href="http://support.hyperic.com/confluence/display/DOC/Charting+Metric+Data#ChartingMetricData-types">types</a>, dictated by the number of metrics and number of resources plotted.</p>
+
+<ul>
+	<li><a href="#ui-Monitor.CurrentHealth.Chart-Tasks">Tasks</a> available on this screen</li>
+	<li><a href="#ui-Monitor.CurrentHealth.Chart-Sections">Sections</a> on this screen</li>
+	<li><a href="#ui-Monitor.CurrentHealth.Chart-Reading">Reading</a> a chart</li>
+	<li><a href="#ui-Monitor.CurrentHealth.Chart-Navigating">Navigating</a> via the masthead menu</li>
+</ul>
+
+
+<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-Tasks"></a></p>
+<h3><a name="ui-Monitor.CurrentHealth.Chart-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+
+<p>On this screen, users can do the following tasks:</p>
+
+<p><b>To graph different kinds of data for a metric:</b></p>
+<ul>
+	<li>In the chart legend, check or uncheck the desired kinds of data (described <a href="#ui-Monitor.CurrentHealth.Chart-legend">below</a>) and click the <img src="../16167/fb_redraw.gif" align="absmiddle" border="0" /> button.<br/>
+The chart will be refreshed to reflect the new selections.</li>
+</ul>
+
+
+<p><b><a name="ui-Monitor.CurrentHealth.Chart-display"></a>To change the display range:</b></p>
+<ul>
+	<li>At the bottom right of the "Metric Chart" section, either:
+	<ul>
+		<li>To move forward or back eight hours, click <img src="../16167/tbb_pageright.gif" align="absmiddle" border="0" /> or <img src="../16167/tbb_pageleft.gif" align="absmiddle" border="0" />, respectively. The new display range is indicated.</li>
+		<li>For a specific date/time range:
+		<ol>
+			<li>Click <b>Edit Range</b>.</li>
+			<li>For a range counting back from the current time: Select a length of time.</li>
+			<li>For a date/time range: Select a date/time range.</li>
+			<li>Click <img src="../16167/fb_redraw.gif" align="absmiddle" border="0" /><br/>
+The metric charts on the screen automatically refresh to reflect the new display range. This display range value applies to all resource-monitoring screens. </li>
+		</ol>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p><b>To save the chart to the Dashboard:</b></p>
+<ul>
+	<li>At the top of the page, click <b>Save Chart to Dashboard</b>.<br/>
+The chart will now be available in the Dashboard's "<a href="ui-Dashboard.html#ui-Dashboard-SavedCharts">Saved Charts</a>" portlet.</li>
+</ul>
+
+
+<p><b>To save the chart in CSV format:</b></p>
+<ul>
+	<li>At the top of the page, click <b>Export to CSV</b>.</li>
+</ul>
+
+
+<h4><a name="ui-Monitor.CurrentHealth.Chart-ForSingleResources"></a>For Single Resources</h4>
+
+<p><b><a name="ui-Monitor.CurrentHealth.Chart-baseline"></a>To change the baseline or acceptable range of values for the charted metric:</b></p>
+<ol>
+	<li>In "Metric Baseline &amp; Expected Range," click <b>Change Value</b> next to the <ins>Baseline</ins>, <ins>High Range</ins>, or <ins>Low Range</ins>.</li>
+	<li>Either leave the displayed calculated value or enter another value.<br/>
+Enter the unit of measure appropriate for the selected metric. For example, % for the Availability metric or MB for the Free Memory metric.<br/>
+If specifying both high and low values, the low must be lower than the high.</li>
+	<li>Click <b>Save Value</b>.<br/>
+HQ automatically checks "Baseline," "High Range," or "Low Range" (depending on what was changed) in the chart legend and refreshes the chart with those values. </li>
+</ol>
+
+
+<p><em><a href="#ui-Monitor.CurrentHealth.Chart-top">back to top</a></em></p>
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-Sections"></a></p>
+<h3><a name="ui-Monitor.CurrentHealth.Chart-SectionsonThisScreen"></a>Sections on This Screen</h3>
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-legend"></a></p>
+<h4><a name="ui-Monitor.CurrentHealth.Chart-MetricChart"></a>Metric Chart</h4>
+
+<p>The chart legend allows users to select types of data to include in the chart:</p>
+<ul>
+	<li><ins>Actual</ins>: The observed metric value at any point in time</li>
+	<li><ins>Peak</ins>: The highest observed metric value (this will be a horizontal line)</li>
+	<li><ins>Average</ins>: The average of observed metric values across the entire graph (this will be a horizontal line)</li>
+	<li><ins>Low</ins>: The lowest observed metric value (this will be a horizontal line)</li>
+	<li><ins>Low Range</ins>: The user-specific lowest acceptable metric value (this will be a horizontal line)</li>
+	<li><ins>High Range</ins>: The user-specific highest acceptable metric value (this will be a horizontal line)</li>
+	<li><ins>Baseline</ins>: The HQ- or user-set baseline value (this will be a horizontal line)</li>
+	<li><ins>Control Actions</ins>: Indicates on the chart when control actions where performed on the resource (to help correlate the actions with changes in performance)</li>
+</ul>
+
+
+<h4><a name="ui-Monitor.CurrentHealth.Chart-ParticipatingResource"></a>Participating Resource</h4>
+
+<p>This section lists the resource and its metrics or the resources (in the case of charting a <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-group">group</a>) that are plotted in the chart. Users can change the individual resource's metrics or the set of group member resources that are included in the chart.</p>
+
+<h4><a name="ui-Monitor.CurrentHealth.Chart-MetricBaselineandExpectedRange"></a>Metric Baseline and Expected Range</h4>
+
+<p>This section allows the user to view and change the values current calculated or set for the metric <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">baseline</a> and the acceptable range of metric values (outside of which observed metric values will be considered "out-of-bounds" (or "OOB")). This section is available only when a single metric is charted.</p>
+
+<p><em><a href="#ui-Monitor.CurrentHealth.Chart-top">back to top</a></em></p>
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-Reading"></a></p>
+<h3><a name="ui-Monitor.CurrentHealth.Chart-ReadingaChart"></a>Reading a Chart</h3>
+
+<p>The Y-axis represents the metric value; the X-axis, time. Each column represents a 1/60 time slice of the selected metric display range. A chart can plot a maximum of 60 points. </p>
+
+<p>The chart displays:</p>
+<ul>
+	<li>The average, peak, and low observed values for the metric for the slice of time along the X-axis</li>
+	<li>If available, the established <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-baseline">baseline</a>, high range (highest acceptable), and low range (lowest acceptable) values</li>
+</ul>
+
+
+<p>Each column displays :</p>
+<ul>
+	<li>The observed metric value for that slice of time. For <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-dynamicmetric">dynamic metrics</a>, this can be an average. See details <a href="#ui-Monitor.CurrentHealth.Chart-dynamic">below</a>.</li>
+	<li>(In the case where the plotted point is an average) The range (represented by an I bar) of metric values collected in that slice of time</li>
+</ul>
+
+
+<h4><a name="ui-Monitor.CurrentHealth.Chart-TimeSlices"></a>Time Slices</h4>
+<p>The charts are divided into a maximum of 60 slices, where each slice represents the same amount of time, over any display range the user chooses. Here are a few examples to help explicate the use of time slices:</p>
+<ul>
+	<li>If the metric a user is viewing has a collection interval of 5 minutes and the selected display range is an hour long (making 12 observed metric values), then the chart will contain only 12 time slices, and each slice will represent a single observed metric value.</li>
+	<li>If the selected display range is 5 hours long (making 12 collections per hour x 5 hours = 60 observed metric values), then the chart will display 60 time slices, and each slice will represent a single observed metric value.</li>
+	<li>If the selected display range is 10 hours long (making 12 collections per hour x 10 hours = 120 observed metric values), then the chart will still display its maximum of 60 time slices, but each time slice represents an average of the two observed metric values leading up to the (slice of) time.</li>
+</ul>
+
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-dynamic"></a></p>
+<h4><a name="ui-Monitor.CurrentHealth.Chart-DisplayofDynamicDatavs.StaticData"></a>Display of Dynamic Data vs. Static Data</h4>
+<p>For <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-staticmetric">static metrics</a>, the plotted point represents a single metric value at one moment in time. For <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-dynamicmetric">dynamic metrics</a>, a point on the chart represents the average of the metric values observed over the period of time that <em>ended</em> at the specific time (X-axis value). How long is that period of time over which the value was averaged? That depends on the <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-range">display range</a>. For a display range of eight hours, each charted point represents the average of the preceding eight-minute period (8 hours / 60 time slices along the X-axis = 8 minutes). If the metric is collected every 60 seconds, and the chart's display range is 60 minutes, each of the 60 plotted points on the graph represents the single, observed value for the metric at a single point in time.</p>
+
+<h4><a name="ui-Monitor.CurrentHealth.Chart-DisplayofCumulativeData"></a>Display of Cumulative Data</h4>
+
+<p>The values for data that is cumulative (trending up or down) &#8212; such as bytes served, uptime, minimum response time, number of transactions &#8212; are not averaged. A point charted for this kind of data shows the maximum (or minimum) value for the time slice.</p>
+
+<p><em><a href="#ui-Monitor.CurrentHealth.Chart-top">back to top</a></em></p>
+
+<p><a name="ui-Monitor.CurrentHealth.Chart-Navigating"></a></p>
+<h3><a name="ui-Monitor.CurrentHealth.Chart-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Dashboard</b> </td>
+<td class='confluenceTd'> Takes users to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Resources</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the "<a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a>" screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for the resource). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Analyze</b> </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Reporting</b> <font color="red">&#42;</font> (takes users to the "<a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a>" screen, where they can generate all reports available in HQ), <b>Alert Center</b> (takes users to the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, where they can look at all alerts triggered across the system). </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Administration</b> </td>
+<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the "<a href="ui-Admin.html" title="ui-Admin">Administration</a>" screen, where they can manage the system-wide settings </td>
+</tr>
+</tbody></table>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
+
+<p><em><a href="#ui-Monitor.CurrentHealth.Chart-top">back to top</a></em></p>
+
+<p><br clear="all" /></p>
+<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
+<div class="panel"><div class="panelHeader"><b>Related Information</b></div><div class="panelContent">
+<p><a href="http://support.hyperic.com/confluence/display/DOC/Charting+Metric+Data" title="Charting Metric Data">Charting Metric Data</a><br/>
+<a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Overview" title="Monitoring Overview">Monitoring Overview</a></p>
+</div></div></tr></tbody></table>
+
+<h5><a name="ui-Monitor.CurrentHealth.Chart-Returntotheresource%27smetricsuiMonitor.CurrentHealth.Metrics."></a>Return to the <a href="ui-Monitor.CurrentHealth.Metrics.html" title="ui-Monitor.CurrentHealth.Metrics">resource's metrics</a>.</h5>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">Attachments:</a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16167/fb_redraw.gif">fb_redraw.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16167/tbb_pageleft.gif">tbb_pageleft.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="../16167/tbb_pageright.gif">tbb_pageright.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="border/border_bottom.gif"><img src="border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 18, 2007 17:43</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
