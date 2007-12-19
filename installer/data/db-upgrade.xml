@@ -7885,7 +7885,18 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.90">
+    <schema-alterColumn table="EAM_CRISPO_OPT"
+                        column="VAL"
+                        nullable="NULL"/>
     <schema-directSQL>
+      <statement desc="Creating new EAM_CRISPO_ARRAY table" fail="false">
+        create table EAM_CRISPO_ARRAY (
+          OPT_ID int not null,
+          VAL varchar (255) not null,
+          IDX int not null,
+          primary key (OPT_ID, IDX)
+        )
+      </statement>
       <statement desc="Creating fk constraint to match the hbm-ddl constraint on EAM_CRISPO_ARRAY table" targetDB="oracle">
         alter table EAM_CRISPO_ARRAY add constraint fkee7dcb20ef4e2527 
                     FOREIGN KEY (OPT_ID) REFERENCES EAM_CRISPO_OPT(id) 
@@ -7905,7 +7916,7 @@ has already been defined.
       </statement>
     </schema-directSQL>    
   </schemaSpec>
-  
+
 </dbupgrade>
 </target>
 
