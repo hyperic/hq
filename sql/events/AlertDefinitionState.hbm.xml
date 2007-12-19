@@ -2,13 +2,18 @@
 <hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <class name="AlertDefinitionState" table="EAM_ALERT_DEF_STATE">
-    <id name="id" type="integer">
-      <column name="ALERT_DEFINITION_ID" not-null="true"/>
-      <generator class="assigned"/>
+    <cache usage="read-write"/>	  
+	  
+    <id name="id" column="ALERT_DEFINITION_ID">
+      <generator class="foreign">
+		  <param name="property">alertDefinition</param>
+	  </generator>	  
     </id>
-
-    <many-to-one name="alertDefinition" column="ALERT_DEFINITION_ID" unique="true"
-                 insert="false" update="false" foreign-key="none"/>
+	  
+	<one-to-one name="alertDefinition" 
+				class="AlertDefinition" 
+				constrained="true" 
+				foreign-key="none"/>
 
     <property name="lastFired" type="long">
       <column name="LAST_FIRED" not-null="true"/>
