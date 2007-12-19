@@ -169,6 +169,14 @@ public class Alert
         return _ackable != null && _ackable.booleanValue();
     }
     
+    /**
+     * Need to have a way of invalidating the object so that we will not use
+     * Alert POJOs out of the query caches and the object cache.  This is
+     * necessary because we may be changing the escalation state, which serves
+     * as the value for the SQL formula-based field acakble.  Without a
+     * constraint relationship between the two objects, Hibernate will not know
+     * that the Alert should be evicted.
+     */
     protected void invalidate() {
         set_version_(new Long(get_version_() + 1));     // Invalidate caches
     }
