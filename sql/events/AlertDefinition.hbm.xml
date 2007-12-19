@@ -118,8 +118,7 @@
       <one-to-many class="RegisteredTrigger"/>
     </bag>
 
-    <one-to-one name="alertDefinitionState" class="AlertDefinitionState"
-                property-ref="alertDefinition"/>
+    <one-to-one name="alertDefinitionState" class="AlertDefinitionState" />
   </class>
 
 </hibernate-mapping>
