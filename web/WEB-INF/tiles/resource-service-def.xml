@@ -106,12 +106,12 @@
     </putList>
   </definition>  
   
-  <definition name=".tabs.resource.service.view"
+  <definition name=".tabs.resource.service.views"
       extends=".tabs.resource.service">  
     <put name="selectedIndex"  value="4" />
   </definition>  
   
-  <definition name=".tabs.resource.service.view.nocontrol"
+  <definition name=".tabs.resource.service.views.nocontrol"
       extends=".tabs.resource.service.nocontrol">  
     <put name="selectedIndex"  value="3" />
   </definition>  

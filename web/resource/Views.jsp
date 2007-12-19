@@ -116,69 +116,49 @@ var pageData = new Array();
 		</c:choose>    
 		
 	</c:when>
-	<c:when test="${CONST_PLATFORM == entityId.type}">
-	   
-	   <tiles:insert definition=".page.title.resource.platform.full">
+  <c:otherwise>
+    <c:choose>
+	    <c:when test="${CONST_PLATFORM == entityId.type}">
+        <c:set var="fullDef" value=".page.title.resource.platform.full"/>
+        <c:set var="viewsDef" value=".tabs.resource.platform.views"/>
+	    </c:when>
+	    <c:when test="${CONST_SERVER == entityId.type}">
+        <c:set var="fullDef" value=".page.title.resource.server.full"/>
+		    <c:choose>
+		      <c:when test="${canControl}">
+            <c:set var="viewsDef" value=".tabs.resource.server.views"/>
+		      </c:when>
+		      <c:otherwise>
+            <c:set var="viewsDef" value=".tabs.resource.server.views.nocontrol"/>
+		      </c:otherwise>
+        </c:choose>
+      </c:when>
+      <c:when test="${CONST_SERVICE == entityId.type}">
+        <c:set var="fullDef" value=".page.title.resource.service.full"/>
+ 		    <c:choose>
+		      <c:when test="${ canControl }">
+            <c:set var="viewsDef" value=".tabs.resource.service.views"/>
+		      </c:when>
+		      <c:otherwise>
+            <c:set var="viewsDef" value=".tabs.resource.service.views.nocontrol"/>
+		      </c:otherwise>
+		    </c:choose>
+     </c:when>
+    </c:choose>
+
+	   <tiles:insert beanName="fullDef">
 		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
 		  <tiles:put name="resource" beanName="Resource"/>
 		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
 		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
 		</tiles:insert>
 		
-		<tiles:insert definition=".tabs.resource.platform.views">
+ 		<tiles:insert beanName="viewsDef">
 		  <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
 		  <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
 		</tiles:insert>
-		
-	</c:when>
-	<c:when test="${CONST_SERVER == entityId.type}">
-	
-		<tiles:insert definition=".page.title.resource.server.full">
-		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
-		  <tiles:put name="resource" beanName="Resource"/>
-		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-		</tiles:insert>
-		<c:choose>
-		    <c:when test="${canControl}">
-		        <tiles:insert definition=".tabs.resource.server.views">
-		          <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-		          <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-		        </tiles:insert>
-		    </c:when>
-		    <c:otherwise>
-		        <tiles:insert definition=".tabs.resource.server.views.nocontrol">
-		          <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-		          <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-		        </tiles:insert>
-		    </c:otherwise>
-        </c:choose>
-        
-    </c:when>
-    <c:when test="${CONST_SERVICE == entityId.type}">
-    
-		<tiles:insert definition=".page.title.resource.service.full">
-		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
-		  <tiles:put name="resource" beanName="Resource"/>
-		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-		</tiles:insert>
-		<c:choose>
-		 <c:when test="${ canControl }">
-		  <tiles:insert definition=".tabs.resource.service.monitor.visibility">
-		   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-		   <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-		  </tiles:insert>
-		 </c:when>
-		 <c:otherwise>
-		  <tiles:insert definition=".tabs.resource.service.monitor.visibility.nocontrol">
-		   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-		   <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-		  </tiles:insert>
-		 </c:otherwise>
-		</c:choose>
-		
-    </c:when>
+
+	 </c:otherwise>
 </c:choose>
 
 <tiles:insert definition=".portlet.error"/>
