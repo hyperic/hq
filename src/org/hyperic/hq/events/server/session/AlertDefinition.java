@@ -454,14 +454,11 @@ public class AlertDefinition
      * Get the time that the alert definition last fired.
      */
     public long getLastFired() {
-        if (_state != null)
-            return _state.getLastFired();
-        
-        return 0;
+        return getAlertDefinitionState().getLastFired();
     }
     
     void setLastFired(long lastFired) {
-        _state.setLastFired(lastFired);
+        getAlertDefinitionState().setLastFired(lastFired);
     }
     
     public AlertDefinitionState getAlertDefinitionState() {
