@@ -18,6 +18,9 @@ public class EscalationStateChange
     public static final EscalationStateChange FIXED =
         new EscalationStateChange(2, "fixed",
                                   "escalation.state.fixed");
+    public static final EscalationStateChange ESCALATED =
+        new EscalationStateChange(3, "escalated",
+                                  "escalation.state.escalated");
     
     private EscalationStateChange(int code, String desc, String localeProp) {
         super(code, desc, localeProp, ResourceBundle.getBundle(BUNDLE)); 
@@ -33,5 +36,9 @@ public class EscalationStateChange
 
     public boolean isFixed() {
         return equals(FIXED);
+    }
+
+    public boolean isEscalated() {
+        return equals(ESCALATED);
     }
 }
