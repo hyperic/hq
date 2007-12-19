@@ -7790,6 +7790,10 @@ has already been defined.
                      targetDB="oracle">
             UPDATE EAM_ALERT_DEFINITION SET ACTIVE=1
           </statement>
+          <statement desc="Set all alert definitions to active by default"
+                     targetDB="mysql">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=1
+          </statement>		  
           <statement desc="The root resource type alert should be inactive"
 			         targetDB="postgresql">
             UPDATE EAM_ALERT_DEFINITION SET ACTIVE=FALSE WHERE ID=0
@@ -7798,6 +7802,10 @@ has already been defined.
 			         targetDB="oracle">
             UPDATE EAM_ALERT_DEFINITION SET ACTIVE=0 WHERE ID=0
           </statement>
+          <statement desc="The root resource type alert should be inactive"
+                     targetDB="mysql">
+            UPDATE EAM_ALERT_DEFINITION SET ACTIVE=0 WHERE ID=0
+          </statement>		  
       </schema-directSQL>
       <schema-alterColumn table="EAM_ALERT_DEFINITION"
                           column="ACTIVE"
