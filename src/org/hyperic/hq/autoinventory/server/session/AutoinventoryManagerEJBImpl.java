@@ -341,12 +341,10 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * runtime-autodiscovery
      * @param res The appdef entity ID of the server.
      * @param response The configuration info.
-     * @ejb:interface-method
-     * @ejb:transaction type="REQUIRED"
      */
-    public void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
-                                           AppdefResource res,
-                                           ConfigResponse response)
+    private void pushRuntimeDiscoveryConfig(AuthzSubjectValue subject,
+                                            AppdefResource res,
+                                            ConfigResponse response)
         throws PermissionException
     {
         AppdefEntityID aeid = res.getEntityId();

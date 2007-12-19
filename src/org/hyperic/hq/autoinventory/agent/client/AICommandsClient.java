@@ -67,26 +67,23 @@ public class AICommandsClient {
                AgentConnectionException, 
                AutoinventoryException {
 
-        AgentRemoteValue rval = null;
-        
         AgentRemoteValue configARV = new AgentRemoteValue();
         scanConfig.toAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, configARV);
 
         log.info("AICommandsClient.startScan for " + agentConn);
-        rval = agentConn.sendCommand(verAPI.command_startScan,
-                                     verAPI.getVersion(), 
-                                     configARV);
+        agentConn.sendCommand(AICommandsAPI.command_startScan,
+                              verAPI.getVersion(),
+                              configARV);
     }
 
     public void stopScan () 
         throws AgentRemoteException, AgentConnectionException {
 
-        AgentRemoteValue rval;
         AgentRemoteValue emptyParam = new AgentRemoteValue();
         log.info("CommandsClient.stopScan");
-        rval = agentConn.sendCommand(verAPI.command_stopScan,
-                                     verAPI.getVersion(),
-                                     emptyParam);
+        agentConn.sendCommand(AICommandsAPI.command_stopScan,
+                              verAPI.getVersion(),
+                              emptyParam);
     }
 
     public ScanStateCore getScanStatus () 
@@ -97,7 +94,7 @@ public class AICommandsClient {
         AgentRemoteValue rval;
         AgentRemoteValue emptyParam = new AgentRemoteValue();
         log.info("CommandsClient.getScanStatus");
-        rval = agentConn.sendCommand(verAPI.command_getScanStatus,
+        rval = agentConn.sendCommand(AICommandsAPI.command_getScanStatus,
                                      verAPI.getVersion(),
                                      emptyParam);
 
@@ -135,7 +132,7 @@ public class AICommandsClient {
 
         log.debug("AICommandsClient.pushRuntimeDiscoveryConfig");
         try {
-            agentConn.sendCommand(verAPI.command_pushRuntimeDiscoveryConfig,
+            agentConn.sendCommand(AICommandsAPI.command_pushRuntimeDiscoveryConfig,
                                   verAPI.getVersion(), arv); 
         } catch (AgentConnectionException ace) {
             log.error("Error connecting to agent to push runtime discovery "
