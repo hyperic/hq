@@ -71,21 +71,18 @@ public final class GalertEscalationAlertType
         gMan.update(def, escalation);
     }
 
-    protected void changeAlertState(Integer alertId, AuthzSubject who, 
+    protected void changeAlertState(Escalatable esc, AuthzSubject who, 
                                     EscalationStateChange newState) 
     {
-        GalertManagerLocal gMan = getGalertMan();
-        GalertLog alert = gMan.findAlertLog(alertId);
-
+        GalertLog alert = (GalertLog) esc.getAlertInfo();
         if (newState.isFixed()) 
-            gMan.fixAlert(alert);
+            getGalertMan().fixAlert(alert);
     }
 
-    protected void logActionDetails(Integer alertId, Action action, 
+    protected void logActionDetails(Escalatable esc, Action action, 
                                     String detail, AuthzSubject subject) 
     {
-        GalertLog alert = getGalertMan().findAlertLog(alertId);
-        
+        GalertLog alert = (GalertLog) esc.getAlertInfo();
         getGalertMan().createActionLog(alert, detail, action, subject);
     }
 

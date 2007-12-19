@@ -94,8 +94,7 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         try {
-            AlertDefinitionManagerLocal defMan = getDefMan();
-            AlertDefinition def = defMan.getByIdNoCheck(defId, false);
+            AlertDefinition def = getDefMan().getByIdNoCheck(defId, false);
             def.setEscalation(escalation);
             long mtime = System.currentTimeMillis();
             def.setMtime(mtime);
@@ -112,20 +111,22 @@ public final class ClassicEscalationAlertType
         }
     }
 
-    protected void changeAlertState(Integer alertId, AuthzSubject who,
+    protected void changeAlertState(Escalatable esc, AuthzSubject who,
                                     EscalationStateChange newState) 
     {
-        Alert alert = getAlertMan().findAlertById(alertId);
-
-        if (newState.isFixed()) 
+        Alert alert = (Alert) esc.getAlertInfo();
+        if (newState.isFixed()) {
             getAlertMan().setAlertFixed(alert);
+        }
+        else if (newState.isAcknowledged() || newState.isEscalated()) {
+            alert.invalidate();
+        }
     }
     
-    protected void logActionDetails(Integer alertId, Action action, 
+    protected void logActionDetails(Escalatable esc, Action action, 
                                     String detail, AuthzSubject subject) 
     {
-        Alert alert = getAlertMan().findAlertById(alertId);
-        
+        Alert alert = (Alert) esc.getAlertInfo();
         getAlertMan().logActionDetail(alert, action, detail, subject);
     }
 

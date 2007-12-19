@@ -71,11 +71,11 @@ public abstract class EscalationAlertType
      * Change the state of an alert.  This method should simply change the 
      * state, log it & not much else.
      *  
-     * @param alertId  AlertID to change state of
+     * @param esc      The escalatable (alert) to change state of
      * @param who      Person changing the state
      * @param newState New state
      */
-    protected abstract void changeAlertState(Integer alertId, AuthzSubject who,
+    protected abstract void changeAlertState(Escalatable esc, AuthzSubject who,
                                              EscalationStateChange newState); 
 
     /**
@@ -84,7 +84,7 @@ public abstract class EscalationAlertType
      * out some result text.  This method should put that result text into
      * the subsytem's log objects.
      */
-    protected abstract void logActionDetails(Integer alertId, Action action,
+    protected abstract void logActionDetails(Escalatable esc, Action action,
                                              String detail, 
                                              AuthzSubject subject);
     

@@ -36,6 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
@@ -460,17 +461,23 @@ public class EscalationManagerEJBImpl
         s.setAcknowledgedBy(null);
         
         EscalationRuntime.getInstance().scheduleEscalation(s);
-        
+
         try {
+            EscalationAlertType type = s.getAlertType();
+            
+            // Escalation state change
+            AuthzSubject overlord =
+                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            type.changeAlertState(esc, overlord,
+                                  EscalationStateChange.ESCALATED);
+
             ActionExecutionInfo execInfo = 
                 new ActionExecutionInfo(esc.getShortReason(),
                                         esc.getLongReason(),
                                         esc.getAuxLogs());
             
-            String detail = action.executeAction(esc.getAlertInfo(), execInfo);
-            
-            s.getAlertType().logActionDetails(esc.getId(), action, detail, 
-                                              null);
+            String detail = action.executeAction(esc.getAlertInfo(), execInfo);            
+            type.logActionDetails(esc, action, detail, null);
         } catch(Exception exc) {
             _log.error("Unable to execute action [" + 
                        action.getClassName() + "] for escalation definition [" +
@@ -640,9 +647,8 @@ public class EscalationManagerEJBImpl
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
             
             _log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
-            type.changeAlertState(alertId, subject,
-                                  EscalationStateChange.FIXED); 
-            type.logActionDetails(alertId, null, moreInfo, subject);
+            type.changeAlertState(esc, subject, EscalationStateChange.FIXED);
+            type.logActionDetails(esc, null, moreInfo, subject);
             if (state != null)
                 endEscalation(state);
         } else {
@@ -658,9 +664,9 @@ public class EscalationManagerEJBImpl
             }
             _log.debug(subject.getFullName() + " has acknowledged alertId=" + 
                        alertId);
-            type.changeAlertState(alertId, subject, 
+            type.changeAlertState(esc, subject,
                                   EscalationStateChange.ACKNOWLEDGED);
-            type.logActionDetails(alertId, null, 
+            type.logActionDetails(esc, null, 
                                   subject.getFullName() + " acknowledged " +
                                   "the alert" + moreInfo, subject);
                                   
