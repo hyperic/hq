@@ -7764,21 +7764,21 @@ has already been defined.
 	  <schema-directSQL>
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="oracle">
           create table EAM_ALERT_DEF_STATE (
-              ALERT_DEFINITION_ID number(10,0) not null unique,
+              ALERT_DEFINITION_ID number(10,0) not null,
               LAST_FIRED number(19,0) not null,
               primary key (ALERT_DEFINITION_ID)
           )
         </statement>		
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="postgresql">
           create table EAM_ALERT_DEF_STATE (
-              ALERT_DEFINITION_ID int4 not null unique,
+              ALERT_DEFINITION_ID int4 not null,
               LAST_FIRED int8 not null,
-              primary key (ALERT_DEFINITION_ID )
+              primary key (ALERT_DEFINITION_ID)
           )
         </statement>		
         <statement desc="Creating EAM_ALERT_DEF_STATE table" targetDB="mysql">
           create table EAM_ALERT_DEF_STATE (
-              ALERT_DEFINITION_ID integer not null unique,
+              ALERT_DEFINITION_ID integer not null,
               LAST_FIRED bigint not null,
               primary key (ALERT_DEFINITION_ID)
           ) ENGINE=InnoDB
