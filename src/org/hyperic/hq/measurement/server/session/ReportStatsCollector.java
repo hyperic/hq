@@ -83,6 +83,10 @@ public class ReportStatsCollector {
         }
     }
     
+    public String toString() {
+        return "ReportStatsCollector";
+    }
+    
     public static ReportStatsCollector getInstance() {
         synchronized (LOCK) {
             if (INSTANCE == null) {
