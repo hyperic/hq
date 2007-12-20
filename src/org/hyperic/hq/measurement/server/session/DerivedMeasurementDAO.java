@@ -438,7 +438,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                        "EAM_PLATFORM p, EAM_MEASUREMENT_TEMPL mt " +
                   "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
                         "m.APPDEF_TYPE = 1 AND p.PLATFORM_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) AS tbl " +
+                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
             "WHERE MID IS NULL UNION " +
             "SELECT DISTINCT APPDEF_TYPE, INSTANCE_ID " +
             "FROM (SELECT m.APPDEF_TYPE, s.ID AS INSTANCE_ID, " +
@@ -449,7 +449,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                        "EAM_SERVER s, EAM_MEASUREMENT_TEMPL mt " +
                   "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
                         "m.APPDEF_TYPE = 2 AND s.SERVER_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) AS tbl " +
+                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
             "WHERE MID IS NULL UNION " +
             "SELECT DISTINCT APPDEF_TYPE, INSTANCE_ID " +
             "FROM (SELECT m.APPDEF_TYPE, s.ID AS INSTANCE_ID, " +
@@ -460,7 +460,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                        "EAM_SERVICE s, EAM_MEASUREMENT_TEMPL mt " +
                   "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
                         "m.APPDEF_TYPE = 3 AND s.SERVICE_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) AS tbl " +
+                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
             "WHERE MID IS NULL")
             .setString("plugin", plugin)
             .list();
