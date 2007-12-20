@@ -7,7 +7,7 @@
       <meta attribute="scope-set"><![CDATA[private]]></meta>
       <meta attribute="use-in-equals"><![CDATA[true]]></meta>
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_CONTROL_SCHEDULE_ID_SEQ</param>
       </generator>
     </id>

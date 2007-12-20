@@ -4,7 +4,7 @@
   <class name="ControlHistory" table="EAM_CONTROL_HISTORY">
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_CONTROL_HISTORY_ID_SEQ</param>
       </generator>
     </id>

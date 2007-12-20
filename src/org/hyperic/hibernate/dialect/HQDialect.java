@@ -84,10 +84,16 @@ public interface HQDialect
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,
                            long begin, long end, String table)
-    throws SQLException;
+        throws SQLException;
 
     public Map getAggData(Connection conn, String minMax, Map resMap,
                           Integer[] tids, Integer[] iids,
                           long begin, long end, String table)
-    throws SQLException;
+        throws SQLException;
+    
+    /**
+     * If true, tells the ComboGenerator to use the SequenceGenerator, else
+     * uses the MultipleHiLoPerTableGenerator
+     */
+    public boolean usesSequenceGenerator();
 }

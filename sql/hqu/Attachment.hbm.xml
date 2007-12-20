@@ -12,7 +12,7 @@
     <id name="id" type="integer">
       <meta attribute="scope-set">private</meta>
       <column name="ID" not-null="true" />
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_UI_ATTACHMENT_ID_SEQ</param>
       </generator>
     </id>

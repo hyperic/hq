@@ -40,12 +40,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.MappingException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-import org.hyperic.util.StringUtil;
 
 /**
  * HQ's version of MySQL5InnoDBDialect to create pseudo sequences.
@@ -56,85 +55,31 @@ public class MySQL5InnoDBDialect
     extends org.hibernate.dialect.MySQL5InnoDBDialect
     implements HQDialect
 {
-    private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
     private static final String logCtx = MySQL5InnoDBDialect.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    private static final String TAB_MEAS = MeasurementConstants.TAB_MEAS;
-    private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
+    private static final String TAB_MEAS   = MeasurementConstants.TAB_MEAS;
+    private static final String TAB_DATA   = MeasurementConstants.TAB_DATA;
     private static final int IND_MIN       = MeasurementConstants.IND_MIN;
     private static final int IND_AVG       = MeasurementConstants.IND_AVG;
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+    private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
 
-    public MySQL5InnoDBDialect()
-    {
+    public MySQL5InnoDBDialect() {
         super();
         registerColumnType(Types.VARBINARY, 255, "blob");
     }
 
-    /*
-     * Database table and function to support sequences.  It is assumed that
-     * the database has already been prepped by running the following SQL.
-
-        CREATE TABLE `HQ_SEQUENCE` (
-            `seq_name` char(50) NOT NULL PRIMARY KEY,
-            `seq_val` int(11) DEFAULT NULL
-        );
+    public boolean supportsIdentityColumns() {
+        return false;
+    }
     
-        DELIMITER |
-        
-        CREATE FUNCTION nextseqval (iname CHAR(50))
-         RETURNS INT
-         DETERMINISTIC
-         BEGIN
-          SET @new_seq_val = 0;
-          UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1
-           WHERE seq_name=iname;
-          RETURN @new_seq_val;
-         END;
-
-        |
+    public boolean supportsInsertSelectIdentity() {
+        return false;
+    }
     
-     */
-
-    public String getOptimizeStmt(String table, int cost)
-    {
+    public String getOptimizeStmt(String table, int cost) {
         return "ANALYZE TABLE "+table.toUpperCase();
-    }
-
-    public boolean supportsSequences() {
-        return true;
-    }
-    private final static String SEQUENCE_TABLE = "HQ_SEQUENCE";
-    private final static String SEQUENCE_NAME  = "seq_name";
-    private final static String SEQUENCE_VALUE = "seq_val";
-
-    protected String getCreateSequenceString(String sequenceName)
-        throws MappingException {
-        return "INSERT INTO " + SEQUENCE_TABLE +
-               " (" + SEQUENCE_NAME + "," + SEQUENCE_VALUE + ") VALUES ('" +
-               sequenceName + "', " + HypericDialectConstants.SEQUENCE_START +
-               ")";
-    }
-
-    protected String getDropSequenceString(String sequenceName)
-        throws MappingException {
-        return "DELETE FROM " + SEQUENCE_TABLE + " WHERE " +
-               SEQUENCE_NAME + " = '" + sequenceName + "'";
-    }
-
-    public String getSequenceNextValString(String sequenceName)
-        throws MappingException {
-        return "SELECT " + getSelectSequenceNextValString(sequenceName);
-    }
-
-    public String getSelectSequenceNextValString(String sequenceName)
-        throws MappingException {
-        return "nextseqval('" + sequenceName + "')";
-    }
-
-    public String getQuerySequencesString() {
-        return "SELECT " + SEQUENCE_TABLE + " FROM " + SEQUENCE_TABLE;
     }
 
     public boolean supportsDuplicateInsertStmt() {
@@ -158,8 +103,7 @@ public class MySQL5InnoDBDialect
             if (rs.next())
                 return true;
             return false;
-        }
-        finally {
+        } finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
@@ -177,8 +121,7 @@ public class MySQL5InnoDBDialect
             if (rs.next())
                 return true;
             return false;
-        }
-        finally {
+        } finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
     }
@@ -440,5 +383,9 @@ public class MySQL5InnoDBDialect
             .append( StringUtil.implode(Arrays.asList(primaryKey), ", ") )
             .append(')')
             .toString();
+    }
+
+    public boolean usesSequenceGenerator() {
+        return false;
     }
 }

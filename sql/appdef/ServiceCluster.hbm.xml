@@ -6,7 +6,7 @@
     <id name="id" type="integer">
       <meta attribute="scope-set" inherit="true"><![CDATA[private]]></meta>
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_SVC_CLUSTER_ID_SEQ</param>
       </generator>
     </id>

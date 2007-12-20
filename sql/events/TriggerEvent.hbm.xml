@@ -7,7 +7,7 @@
   <class name="TriggerEvent" table="EAM_TRIGGER_EVENT" optimistic-lock="none">
     <id name="id" type="long">
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_TRIGGER_EVENT_ID_SEQ</param>
       </generator>
     </id>

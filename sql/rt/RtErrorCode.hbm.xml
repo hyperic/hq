@@ -4,7 +4,7 @@
   <class name="RtErrorCode" table="EAM_ERROR_CODE">
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_ERROR_CODE_ID_SEQ</param>
       </generator>
     </id>

@@ -4,7 +4,7 @@
   <class name="RtSvcReq" table="EAM_SERVICE_REQUEST">
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_SERVICE_REQUEST_ID_SEQ</param>
       </generator>
     </id>

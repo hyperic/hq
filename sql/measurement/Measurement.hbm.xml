@@ -7,7 +7,7 @@
 
     <id name="id" type="integer">
       <column name="ID" not-null="true" index="MEAS_ID_CLASS"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_MEASUREMENT_ID_SEQ</param>
       </generator>
     </id>

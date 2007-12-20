@@ -3,7 +3,7 @@
   <class name="GtriggerTypeInfo" table="EAM_GTRIGGER_TYPES">
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="sequence">
+      <generator class="org.hyperic.hibernate.id.ComboGenerator">
         <param name="sequence">EAM_GTRIGGER_TYPES_ID_SEQ</param>
       </generator>
     </id>

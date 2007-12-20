@@ -135,4 +135,9 @@ public class Oracle9Dialect
         return HQDialectUtil.getAggData(conn, minMax, resMap, tids,
                                         iids, begin, end, table);
     }
+    
+    public boolean usesSequenceGenerator() {
+        return true;
+    }
+    
 }
