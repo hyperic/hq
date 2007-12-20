@@ -221,14 +221,14 @@ public class Schedule {
 
         // We always add the first item to the list of returned objects
         base = (ScheduledItem) this.schedule.get(0);
-        baseNextTime = base.getNextTime();
+        baseNextTime = System.currentTimeMillis();
         res.add(base);
 
         // Now add other items if they occur at the same time 
         for(int i=1; i<size; i++){
             ScheduledItem other = (ScheduledItem) this.schedule.get(i);
 
-            if(other.getNextTime() == baseNextTime){
+            if(other.getNextTime() <= baseNextTime){
                 res.add(other);
             } else {
                 break;

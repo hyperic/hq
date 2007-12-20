@@ -31,6 +31,9 @@ package org.hyperic.hq.agent;
  */
 
 public class AgentAssertionException extends RuntimeException {
+    public AgentAssertionException(String msg, Throwable cause){
+        super(msg, cause);
+    }
     public AgentAssertionException(String msg){
         super(msg);
     }

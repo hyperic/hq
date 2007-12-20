@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,7 +28,9 @@ package org.hyperic.hq.measurement.agent.server;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -52,8 +54,10 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
+import org.hyperic.util.schedule.ScheduledItem;
 import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.UnscheduledItemException;
+import org.hyperic.util.TimeUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -154,7 +158,7 @@ public class ScheduleThread
                 } catch(UnscheduledItemException exc){
                     throw new AgentAssertionException("Tried to unschedule " +
                                                       "something which wasnt" +
-                                                      " scheduled");
+                                                      " scheduled", exc);
                 }
             }
             
@@ -204,7 +208,7 @@ public class ScheduleThread
                 newNextTime = this.schedule.getTimeOfNext();
             } catch(EmptyScheduleException exc){
                 throw new AgentAssertionException("Schedule should have at " +
-                                                  "least one entry");
+                                                  "least one entry", exc);
             }
         }
 
@@ -296,64 +300,106 @@ public class ScheduleThread
         parsedMetric.setCategory(category);
         return this.manager.getValue(plugin, parsedMetric);    
     }
-    
+
     /**
      * The main loop of the ScheduleThread, which watches the schedule
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
         this.myThread = Thread.currentThread();
-        List retry = new ArrayList();
+        ArrayList retry = new ArrayList();
+        boolean debug = log.isDebugEnabled();
 
-        while(this.shouldDie == false){
+        while(this.shouldDie == false)
+        {
             MetricValue data = null;
-            List             items;
-            long             timeToNext;
+            List items;
+            Map itemsMap;
+            long timeOfNext;
+            long currTime = System.currentTimeMillis();
             
             try {
-                synchronized(this.entSchedule){
-                    timeToNext = this.schedule.getTimeOfNext() - 
-                        System.currentTimeMillis();
+                synchronized(this.entSchedule) {
+                    timeOfNext = this.schedule.getTimeOfNext();
                 }
-            } catch(EmptyScheduleException exc){
-                timeToNext = ScheduleThread.POLL_PERIOD;
+            } catch(EmptyScheduleException exc) {
+                timeOfNext = ScheduleThread.POLL_PERIOD+currTime;
             }
 
-            if(timeToNext > 0){
-                //this.log.debug("Sleeping " + timeToNext +" to next batch");
-                synchronized(this.interrupter){
-                    try {
-                        this.interrupter.wait(timeToNext);
-                    } catch(InterruptedException exc){
+            if (timeOfNext > currTime)
+            {
+                String buf = TimeUtil.toString(currTime);
+                /*
+                this.log.debug(buf + "("+currTime+"): Sleeping " +
+                               (timeOfNext-System.currentTimeMillis()) +
+                               " to next batch");
+                */
+                synchronized(this.interrupter)
+                {
+                    try
+                    {
+                        while (timeOfNext > System.currentTimeMillis()) {
+                            this.interrupter.wait(
+                                timeOfNext - System.currentTimeMillis());
+                        }
+                    } catch(InterruptedException exc) {
                         this.log.debug("Schedule thread kicked");
                     }
                 }
             }
 
-            synchronized(this.entSchedule){
+            synchronized(this.entSchedule)
+            {
                 if(this.schedule.getNumItems() == 0)
                     continue;
                 
-                try {
+                try
+                {
                     if (System.currentTimeMillis() <
                         this.schedule.getTimeOfNext()) {
                         continue; // Not yet
                     }
-                    items = this.schedule.consumeNextItems();
+                    itemsMap = getUniqItemsMap(schedule.consumeNextItems());
+                    items = new ArrayList(itemsMap.values());
 
-                    if (retry.size() != 0) {
+                    if (retry.size() != 0)
+                    {
                         log.debug("Retrying " + retry.size() +
                                   " items (MetricValue.FUTUREs)");
-                        items.addAll(retry);
+                        for (Iterator i=retry.iterator(); i.hasNext(); )
+                        {
+                            ScheduledMeasurement meas =
+                                (ScheduledMeasurement)i.next();
+                            Integer dsnId = new Integer(meas.getDsnID());
+                            if (itemsMap.containsKey(dsnId))
+                                continue;
+                            items.add(meas);
+                            if (debug);
+                                log.debug("retrying -> "+meas);
+                        }
                         retry.clear();
                     }
-                } catch(EmptyScheduleException exc){
+                } catch(EmptyScheduleException exc) {
                     continue;
                 }
             }
 
-            for(int i=0; i<items.size() && this.shouldDie == false; i++){
+            /*
+            if (debug) {
+                String now = TimeUtil.toString(System.currentTimeMillis());
+                log.debug(now+": Start processing batch");
+            }
+            */
+
+            for(int i=0; i<items.size() && this.shouldDie == false; i++)
+            {
                 ScheduledMeasurement meas = (ScheduledMeasurement)items.get(i);
+                /*
+                if (debug) {
+                    String now = TimeUtil.toString(System.currentTimeMillis());
+                    log.debug(now+": Start processing meas=["+meas+"]");
+                }
+                */
                 AppdefEntityID aid = meas.getEntity();
                 String category = meas.getCategory();
                 int id = aid.getID();
@@ -367,14 +413,14 @@ public class ScheduleThread
                 getTime = System.currentTimeMillis();
 
                 Long lastFailed = (Long)unreachable.get(id);
-                if (lastFailed != null) {
+                if (lastFailed != null)
+                {
                     long elapsed = (getTime - lastFailed.longValue()); 
                     if (elapsed > UNREACHABLE_EXPIRE) {
                         unreachable.remove(id);
                         this.log.info("Re-enabling metrics for type=" + type + 
                                       " id=" + id);
-                    }
-                    else {
+                    } else {
                         if (!category.equals(MeasurementConstants.
                                              CAT_AVAILABILITY)) {
                             // Prevent stacktrace bombs if a resource is down,
@@ -411,6 +457,12 @@ public class ScheduleThread
                     this.logCache("Error getting measurement value",
                                   dsn, exc.toString(), exc, true);
                 }
+                /*
+                if (debug) {
+                    String now = TimeUtil.toString(System.currentTimeMillis());
+                    log.debug(now+": Done processing meas=["+meas+"]");
+                }
+                */
                 
                 // Stats stuff
                 timeDiff = System.currentTimeMillis() - getTime;
@@ -426,10 +478,12 @@ public class ScheduleThread
                                   "' took: " + timeDiff + "ms");
                 }
 
-                if(success){
-                    if (this.log.isDebugEnabled()) {
-                        this.log.debug("[" + type + ":" + id + ":" + category + 
-                                       "] Metric='" + dsn + "' -> " + data);
+                if(success)
+                {
+                    if (debug) {
+                        this.log.debug("[" + type + ":" + id + ":" + category +
+                                       "] Metric='" + dsn + "' -> " + data +
+                                       " timestamp=" + data.getTimestamp());
                     }
                     if (data.isNone()) {
                         //wouldn't be inserted into the database anyhow
@@ -452,7 +506,25 @@ public class ScheduleThread
                     this.stat_numMetricsFailed++;
                 }
             }
+            /*
+            if (debug) {
+                String now = TimeUtil.toString(System.currentTimeMillis());
+                log.debug(now+": Done processing batch");
+            }
+            */
         }
+    }
+
+    private Map getUniqItemsMap(List items)
+    {
+        Map rtn = new HashMap();
+        for (Iterator i=items.iterator(); i.hasNext(); )
+        {
+            ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
+            Integer dsnId = new Integer(meas.getDsnID());
+            rtn.put(dsnId, meas);
+        }
+        return rtn;
     }
 
     /**

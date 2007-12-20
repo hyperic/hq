@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -51,6 +51,17 @@ public class ScheduledMeasurement {
         this.dsnID     = dsnID;
         this.ent       = ent;
         this.category  = category;
+    }
+
+    public String toString()
+    {
+        int derviedId = getDerivedID(),
+            dsnId     = getDsnID();
+        String dsn    = getDSN();
+        StringBuffer buf = new StringBuffer(64);
+        buf.append("[derivedId=").append(getDerivedID()).
+            append("|dsnId=").append(getDsnID()).append("]");
+        return buf.toString();
     }
 
     public String getDSN(){
