@@ -6912,32 +6912,32 @@ has already been defined.
       <schema-directSQL>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 8000, 0, 601, id, id, 0, 0, name, sort_name, 1 
+            select id - 9000, 0, 601, id, id, 0, 0, name, sort_name, 1 
             from eam_platform_type
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 8000, 0, 601, id, id, 0, 0, name, sort_name, true 
+            select id - 9000, 0, 601, id, id, 0, 0, name, sort_name, true 
             from eam_platform_type
         </statement>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7800, 0, 602, id, id, 0, 0, name, sort_name, 1 
+            select id - 7000, 0, 602, id, id, 0, 0, name, sort_name, 1 
             from eam_server_type
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7800, 0, 602, id, id, 0, 0, name, sort_name, true 
+            select id - 7000, 0, 602, id, id, 0, 0, name, sort_name, true 
             from eam_server_type
         </statement>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7000, 0, 603, id, id, 0, 0, name, sort_name, 1 
+            select id - 5000, 0, 603, id, id, 0, 0, name, sort_name, 1 
             from eam_service_type
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7000, 0, 603, id, id, 0, 0, name, sort_name, true 
+            select id - 5000, 0, 603, id, id, 0, 0, name, sort_name, true 
             from eam_service_type
         </statement>
 
