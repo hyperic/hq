@@ -345,11 +345,14 @@
       <replacefilter token="@@@HYPERIC_EAR@@@" value="hq.ear"/>
     </replace>
 
+    <mkdir dir="${ear.dir}/autoinventory-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/events-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/common-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/measurement-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/scheduler-mbeans.sar/META-INF" />
 
+    <copy todir="${ear.dir}/autoinventory-mbeans.sar/META-INF" 
+          file="etc/jboss/autoinventory/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/events-mbeans.sar/META-INF" 
           file="etc/jboss/events/sar/jboss-service.xml" />
     <replace file="${ear.dir}/events-mbeans.sar/META-INF/jboss-service.xml">
