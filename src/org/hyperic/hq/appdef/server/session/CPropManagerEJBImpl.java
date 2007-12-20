@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.appdef.Cprop;
 import org.hyperic.hq.appdef.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -279,23 +280,15 @@ public class CPropManagerEJBImpl
             
             // Optionally add new values
             if(val != null){
-                Dialect dialect = Util.getDialect();
                 String[] chunks = chunk(val, CHUNKSIZE);
-                StringBuffer sql = new StringBuffer()
-                    .append("INSERT INTO ")
-                    .append(CPROP_TABLE);
+                StringBuffer sql = new StringBuffer("INSERT INTO " + 
+                                                    CPROP_TABLE);
 
-                // if the dialect supports sequences, then
-                // use sequence generator
-                if (dialect.supportsSequences()) {
-                    sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
-                        .append(dialect.getSelectSequenceNextValString(CPROP_SEQUENCE))
-                        .append(", ?, ?, ?, ?)");
-                } else {
-                    // assume sequence is generated in the db layer
-                    sql.append(" (keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
-                        .append("(?, ?, ?, ?)");
-                }
+                Cprop nprop = new Cprop();
+                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
+                   .append(Util.generateId("org.hyperic.hq.appdef.Cprop", nprop))
+                   .append(", ?, ?, ?, ?)");
+                
                 addStmt = conn.prepareStatement(sql.toString());
                 addStmt.setInt(1, keyId);
                 addStmt.setInt(2, aID.getID());

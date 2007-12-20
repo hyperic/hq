@@ -36,6 +36,7 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.shared.TriggerTrackerLocal;
 import org.hyperic.hq.events.shared.TriggerTrackerUtil;
@@ -109,24 +110,16 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
                 strBuf.append("UPDATE ")
                       .append(TAB_FIRED_TRIGGER)
                       .append(" SET timestamp = ? WHERE trigger_id = ?");
-            }
-            else {
+            } else {
                 // Insert
-                if (DBUtil.isOracle(conn)) {
-                    strBuf.append("INSERT INTO ")
-                        .append(TAB_FIRED_TRIGGER)
-                        .append(" (id, timestamp, trigger_id) VALUES")
-                        .append(" (EAM_FIRED_TRIGGER_ID_SEQ.nextval,?,?)");
-                } else if (DBUtil.isMySQL(conn)) {
-                    strBuf.append("INSERT INTO ")
-                        .append(TAB_FIRED_TRIGGER)
-                        .append(" (id, timestamp, trigger_id) VALUES")
-                        .append(" (nextseqval('EAM_FIRED_TRIGGER_ID_SEQ'),?,?)");
-                } else {
-                    strBuf.append("INSERT INTO ")
-                        .append(TAB_FIRED_TRIGGER)
-                        .append(" (timestamp, trigger_id) VALUES (?,?)");
-                }
+                Integer newId = 
+                    Util.generateId("org.hyperic.hq.events.server.session.FiredTrigger",
+                                    new FiredTrigger());
+                
+                strBuf.append("INSERT INTO ")
+                      .append(TAB_FIRED_TRIGGER)
+                      .append(" (id, timestamp, trigger_id) VALUES")
+                      .append(" (" + newId + ",?,?)");
             }
 
             // Now add the Trigger to Event relationship
@@ -153,7 +146,7 @@ public class TriggerTrackerEJBImpl extends SessionBase implements SessionBean {
         }
 
         return true;
-    } // end fire        
+    } // end fire (really?)
     
     /**
      * Removes any record of this trigger having fired
