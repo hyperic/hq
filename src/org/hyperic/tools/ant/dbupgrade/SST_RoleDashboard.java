@@ -68,7 +68,7 @@ public class SST_RoleDashboard extends CrispoTask {
     	props.setValue(".dashContent.criticalalerts.selectedOrAll", "all");
     	
     	props.setValue(".dashcontent.portal.portlets.first", "|.dashContent.searchResources|.dashContent.savedCharts|.dashContent.recentlyApproved|.dashContent.availSummary");
-    	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions");    	
+    	props.setValue(".dashcontent.portal.portlets.second", "|.dashContent.autoDiscovery|.dashContent.resourceHealth|.dashContent.criticalAlerts|.dashContent.controlActions|.dashContent.problemResources");    	
     }
     
     public SST_RoleDashboard() {}
