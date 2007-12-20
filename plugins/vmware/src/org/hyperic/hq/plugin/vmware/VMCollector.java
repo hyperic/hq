@@ -33,6 +33,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.sigar.ProcCpu;
+import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -40,7 +42,8 @@ import org.hyperic.sigar.vmware.VMwareException;
 
 public class VMCollector extends Collector {
 
-    private String config;
+    private String _config;
+    private Sigar _sigar;
     private static Map pidMap = new HashMap();
     private final static String VMWARE_VMX = "vmware-vmx";
     private static final String VMKLOAD_APP = "vmkload_app";
@@ -49,15 +52,14 @@ public class VMCollector extends Collector {
 
     //create a map of VM .vmx config file to process pid
     private void getPids() {
-        Sigar sigar = new Sigar();
         pidMap.clear();
 
         try {
-            long[] pids = sigar.getProcList();
+            long[] pids = _sigar.getProcList();
             for (int i=0; i<pids.length; i++) {
                 try {
                     ProcState state =
-                        sigar.getProcState(pids[i]);
+                        _sigar.getProcState(pids[i]);
                     String name = state.getName();
                     if (!(name.equals(VMWARE_VMX) ||
                           name.equals(VMKLOAD_APP)))
@@ -65,7 +67,7 @@ public class VMCollector extends Collector {
                         continue;
                     }
 
-                    String[] args = sigar.getProcArgs(pids[i]);
+                    String[] args = _sigar.getProcArgs(pids[i]);
                     for (int j=0; j<args.length; j++) {
                         String arg = args[j];
                         if (arg.endsWith(".vmx")) {
@@ -78,8 +80,6 @@ public class VMCollector extends Collector {
                 }
             }
         } catch (SigarException e) {
-        } finally {
-            sigar.close();
         }
 
         log.debug("Found " + pidMap.size() + " VM processes");
@@ -94,18 +94,52 @@ public class VMCollector extends Collector {
 
         try {
             Map values =
-                VMwareMetrics.getInstance(getProperties(), this.config);
+                VMwareMetrics.getInstance(getProperties(), _config);
 
             addValues(values);
         } catch (VMwareException e) {
             setErrorMessage(e.getMessage());
+        }
+
+        //vm.getPid() is gone in 3.0
+        Long pid = getPid(_config);
+        if (pid != null) {
+            getProcessMetrics(pid.longValue());
+        }
+    }
+
+    private void getProcessMetrics(long pid) {
+        try {
+            ProcMem mem = _sigar.getProcMem(pid);
+
+            setValue("ProcSize", mem.getSize());
+            setValue("ProcResident", mem.getResident());
+            setValue("ProcPageFaults", mem.getPageFaults());
+        } catch (SigarException e) {
+            String msg = "getProcMem(" + pid + "): " + e.getMessage();
+            log.error(msg);
+        }
+
+        try {
+            ProcCpu cpu = _sigar.getProcCpu(pid);            
+            long now = System.currentTimeMillis();
+            setValue("ProcUptime",
+                     now - cpu.getStartTime());
+            setValue("ProcSysTime", cpu.getSys());
+            setValue("ProcUserTime", cpu.getUser());
+            setValue("ProcTotalTime", cpu.getTotal());
+            setValue("ProcCpuUsage", cpu.getPercent());
+        } catch (SigarException e) {
+            String msg = "getProcCpu(" + pid + "): " + e.getMessage();
+            log.error(msg);
         }
     }
 
     protected void init() throws PluginException {
         VMwareProductPlugin.checkIsLoaded();
 
-        this.config = getProperty("Config");
-        setSource(new File(this.config).getName());
+        _config = getProperty("Config");
+        setSource(new File(_config).getName());
+        _sigar = new Sigar();
     }
 }

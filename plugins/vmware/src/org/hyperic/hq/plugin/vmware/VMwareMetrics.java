@@ -34,11 +34,6 @@ import org.hyperic.sigar.vmware.VM;
 import org.hyperic.sigar.vmware.VMwareException;
 import org.hyperic.sigar.vmware.VMwareServer;
 
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
-import org.hyperic.sigar.ProcMem;
-import org.hyperic.sigar.ProcCpu;
-
 import org.hyperic.hq.product.Metric;
 
 public class VMwareMetrics extends HashMap {
@@ -285,12 +280,6 @@ public class VMwareMetrics extends HashMap {
             vm.getProductInfo(VM.PRODINFO_PRODUCT) == VM.PRODUCT_ESX;
 
         if (isOn) {
-            //vm.getPid() is gone in 3.0
-            Long pid = VMCollector.getPid(config);
-            if (pid != null) {
-                getProcessMetrics(pid.longValue(), metrics);
-            }
-
             if (isESX) {
                 /* GSX does not support these metrics */
                 getResourceVars(vm, VM_VARS, metrics);
@@ -314,12 +303,6 @@ public class VMwareMetrics extends HashMap {
                             new Double(vm.getUptime()));
             }
         }
-        else {
-            //even if the vm is off or suspended, vm.getPid()
-            //still returns the id of a process, but one other than
-            //the vm itself.
-            noProcessMetrics(metrics);
-        }
 
         metrics.timestamp = timeNow;
 
@@ -327,41 +310,5 @@ public class VMwareMetrics extends HashMap {
         vm.dispose();
 
         return metrics;
-    }
-
-    private static void getProcessMetrics(long pid, Map metrics) {
-        Sigar sigar = new Sigar();
-
-        try {
-            ProcMem mem = sigar.getProcMem(pid);
-            ProcCpu cpu = sigar.getProcCpu(pid);
-
-            metrics.put("ProcSize", new Double(mem.getSize()));
-            metrics.put("ProcResident", new Double(mem.getResident()));
-            metrics.put("ProcPageFaults", new Double(mem.getPageFaults()));
-            long now = System.currentTimeMillis();
-            metrics.put("ProcUptime",
-                        new Double(now - cpu.getStartTime()));
-            metrics.put("ProcSysTime", new Double(cpu.getSys()));
-            metrics.put("ProcUserTime", new Double(cpu.getUser()));
-            metrics.put("ProcTotalTime", new Double(cpu.getTotal()));
-            metrics.put("ProcCpuUsage", new Double(cpu.getPercent()));
-        } catch (SigarException e) {
-            noProcessMetrics(metrics);
-        } finally {
-            sigar.close();
-        }
-    }
-
-    private static void noProcessMetrics(Map metrics) {
-        metrics.put("ProcSize", NO_VALUE);
-        metrics.put("ProcVsize", NO_VALUE);
-        metrics.put("ProcPageFaults", NO_VALUE);
-        metrics.put("ProcUptime", NO_VALUE);
-        metrics.put("ProcSysTime", NO_VALUE);
-        metrics.put("ProcUserTime", NO_VALUE);
-        metrics.put("ProcTotalTime", NO_VALUE);
-        metrics.put("ProcCpuUsage", NO_VALUE);
-        metrics.put("ProcResident", NO_VALUE);
     }
 }
