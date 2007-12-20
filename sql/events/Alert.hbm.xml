@@ -42,8 +42,10 @@
       <key on-delete="cascade" column="ALERT_ID"/>
       <one-to-many class="AlertConditionLog"/>
     </bag>
-
-    <property name="ackable" formula="(select e.acknowledged_by is null from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737)"/>
+    
+    
+    <property name="stateId" formula="(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737)"/>
+    <property name="ackedBy" formula="(select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737)"/>
   </class>
 
 </hibernate-mapping>

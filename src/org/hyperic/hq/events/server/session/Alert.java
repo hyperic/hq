@@ -34,7 +34,6 @@ import java.util.List;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -51,8 +50,9 @@ public class Alert
     private AlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
     private Collection      _conditionLog = new ArrayList();
+    private Long            _stateId;
+    private Long            _ackedBy;
     private AlertValue      _alertVal;
-    private Boolean         _ackable;
 
     protected Alert() {
     }
@@ -161,12 +161,24 @@ public class Alert
         _conditionLog.remove(acl);
     }
     
-    protected void setAckable(Boolean ackable) {
-        _ackable = ackable;
+    protected void setAckedBy(Long ackedBy) {
+        _ackedBy = ackedBy;
+    }
+    
+    protected Long getAckedBy() { 
+        return _ackedBy;
+    }
+    
+    protected void setStateId(Long stateId) {
+        _stateId = stateId;
+    }
+    
+    protected Long getStateId() {
+        return _stateId;
     }
     
     public boolean isAckable() {
-        return _ackable != null && _ackable.booleanValue();
+        return getStateId() != null && getAckedBy() == null;
     }
     
     /**
