@@ -41,6 +41,7 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
 import org.hibernate.Hibernate;
+import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.jmx.StatisticsService;
 import org.hibernate.cache.NoCacheProvider;
 import org.hibernate.transaction.JTATransactionFactory;
@@ -55,12 +56,14 @@ import org.hibernate.dialect.function.ClassicSumFunction;
 import org.hibernate.dialect.function.ClassicCountFunction;
 
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.SessionImplementor;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -385,5 +388,24 @@ public class Util {
 
     public static Iterator getTableMappings() {
         return configuration.getTableMappings();
+    }
+    
+    /**
+     * Generate a new ID for a class of the given type.
+     * 
+     * @param className the persisted class name, as per the .hbm descriptor:
+     *                  e.g. org.hyperic.hq.appdef.CpropKey
+     * @param o         The object which will be getting the new ID
+     * 
+     * @return an Integer id for the new object.  If your class uses Long IDs
+     *         then that's too bad ... we'll have to write another method.
+     */
+    public static Integer generateId(String className, Object o) {
+        SessionFactoryImplementor factImpl = 
+            (SessionFactoryImplementor)getSessionFactory();
+        IdentifierGenerator gen = factImpl.getIdentifierGenerator(className); 
+        SessionImplementor sessImpl = (SessionImplementor)
+            factImpl.getCurrentSession();
+        return (Integer)gen.generate(sessImpl, o);
     }
 }
