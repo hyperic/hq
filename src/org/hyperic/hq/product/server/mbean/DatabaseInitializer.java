@@ -26,7 +26,6 @@
 package org.hyperic.hq.product.server.mbean;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -36,9 +35,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -97,9 +95,6 @@ public class DatabaseInitializer {
         
         routines.add(new CommonRoutines());
         
-        if (DBUtil.isMySQL(conn))
-            routines.add(new MySQLRoutines());
-        
         return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
     }
     
@@ -146,177 +141,5 @@ public class DatabaseInitializer {
                 DBUtil.closeStatement(logCtx, stmt);
             }
         } 
-    }
-
-    class MySQLRoutines implements DatabaseRoutines {
-        public void runRoutines(Connection conn) throws SQLException {
-            Statement stmt = null;
-
-            final int batch = 1000;
-            final String createHqSeqMemTable =
-                "CREATE TABLE HQ_MEM_SEQUENCE ( " +
-                   "seq_name varchar(50) NOT NULL, " +
-                   "seq_val int(11) default NULL, " +
-                   "PRIMARY KEY using btree (seq_name, seq_val) " +
-                ") ENGINE=MEMORY;";
-
-            final String getNextHqSeqval =
-                "CREATE FUNCTION getNextHqSeqval(iname CHAR(50)) " +
-                "RETURNS INT " +
-                "DETERMINISTIC " +
-                "BEGIN " +
-                  "SET @new_seq_val = 0;" +
-                  "UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1 " +
-                    "WHERE seq_name=iname; " +
-                  "RETURN @new_seq_val;" +
-                "END;";
-
-            final String getNextMemSeqval =
-                "CREATE PROCEDURE getNextMemSeqVal(iname VARCHAR(50), " +
-                                         "OUT rtn_val INT) " +
-                "BEGIN " +
-                "DECLARE seq_count INT; " +
-                "DECLARE idx INT; " +
-                "DECLARE next_seq INT; " +
-                "DECLARE seq_max INT; " +
-                "DECLARE mem_seq_max INT; " +
-                "DECLARE tmp INT; " +
-                "SELECT get_lock(\"seq_lock\", 60) into tmp; " +
-                "SELECT count(*) into seq_count from HQ_MEM_SEQUENCE " +
-                    "WHERE seq_name = iname; " +
-                "IF seq_count <= 1 " +
-                "THEN " +
-                    "IF seq_count = 0 THEN " +
-                        "SELECT getNextHqSeqval(iname) into next_seq; " +
-                    "ELSE " +
-                        "SELECT max(seq_val) into next_seq " +
-                            "from HQ_MEM_SEQUENCE WHERE seq_name = iname; " +
-                        "SET next_seq = next_seq + 1; " +
-                    "END IF; " +
-                    "SET idx = next_seq; " +
-                    "SET tmp = next_seq + " + batch + "; " +
-                    "populate: LOOP " +
-                        "IF idx >= tmp THEN " +
-                            "LEAVE populate; " +
-                        "END IF; " +
-                        "insert into HQ_MEM_SEQUENCE (seq_name, seq_val) " +
-                            "values (iname, idx); " +
-                        "SET idx = idx + 1; " +
-                    "END LOOP populate; " +
-                    "UPDATE HQ_SEQUENCE set seq_val = idx " +
-                        "WHERE seq_name=iname; " +
-                "END IF; " +
-                "select min(seq_val) into rtn_val " +
-                    "from HQ_MEM_SEQUENCE WHERE seq_name = iname; " +
-                "delete from HQ_MEM_SEQUENCE " +
-                    "WHERE seq_name = iname AND seq_val = rtn_val; " +
-                "SELECT release_lock(\"seq_lock\") into tmp; " +
-                "END; ";
-
-            final String nextseqval =
-                "CREATE FUNCTION nextseqval(iname VARCHAR(50)) " +
-                "RETURNS INT " +
-                "READS SQL DATA " +
-                "BEGIN " +
-                     "DECLARE rtn_val INT; " +
-                     "set @tmp = 0; " +
-                     "call getNextMemSeqval(iname, @tmp); " +
-                     "select name_const('seq_val', @tmp) into rtn_val; " +
-                     "return (rtn_val); " +
-                "END;";
-
-            try {
-                // To see the reason for this refer to JIRA HHQ-1158
-                incrementSequenceIDs(conn, batch);
-                stmt = conn.createStatement();
-                updateSeqTableToMyISAM(stmt);
-                stmt.execute(getNextHqSeqval);
-                stmt.execute(getNextMemSeqval);
-                stmt.execute(nextseqval);
-                stmt.execute(createHqSeqMemTable);
-            } catch (SQLException e) {
-                // Function + Procedure already exist, continue
-                log.debug("MySQLRoutines SQLException (this is ok unless the db was just created)", e);
-            } finally {
-                DBUtil.closeStatement(logCtx, stmt);
-            }
-        }
-    }
-
-    /**
-     * If hibernate starts to support engine types
-     * in the hbm schema, we should get rid of this
-     */
-    private void updateSeqTableToMyISAM(Statement stmt)
-        throws SQLException
-    {
-        ResultSet rs = null;
-        try {
-            String sql = "select engine from information_schema.TABLES"+
-                         " WHERE table_name = 'HQ_SEQUENCE'";
-            rs = stmt.executeQuery(sql);
-            if (rs.next())
-            {
-                String engine = rs.getString("engine");
-                if (engine.equalsIgnoreCase("myisam"))
-                    return;
-            }
-            else {
-                log.error("Could not retrieve HQ_SEQUENCE engine type "+
-                          "from information_schema, this table must exist for "+
-                          "HQ on MySQL to function properly");
-                return;
-            }
-        }
-        finally {
-            DBUtil.closeResultSet(logCtx, rs);
-        }
-
-        String sql = "alter table HQ_SEQUENCE rename to HQ_SEQUENCE_bk";
-        stmt.execute(sql);
-
-        sql = "CREATE TABLE HQ_SEQUENCE ("+
-              " seq_name varchar(50) NOT NULL,"+
-              " seq_val int(11) NOT NULL,"+
-              " PRIMARY KEY using btree (seq_name, seq_val)"+
-              " ) engine=MyISAM;";
-        stmt.execute(sql);
-
-        sql = "insert into HQ_SEQUENCE select * from HQ_SEQUENCE_bk";
-        stmt.execute(sql);
-
-        sql = "drop table HQ_SEQUENCE_bk";
-        stmt.execute(sql);
-    }
-
-    private void incrementSequenceIDs(Connection conn, int batchSize)
-    {
-        if (!memTableExists(conn))
-            return;
-        Statement stmt = null;
-        try
-        {
-            String sql = "update HQ_SEQUENCE set seq_val = seq_val+"+batchSize;
-            stmt = conn.createStatement();
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
-        }
-    }
-
-    private boolean memTableExists(Connection conn)
-    {
-        Statement stmt = null;
-        try
-        {
-            stmt = conn.createStatement();
-            HQDialect dialect = Util.getHQDialect();
-            return dialect.tableExists(stmt, "HQ_MEM_SEQUENCE");
-        } catch (SQLException e) {
-        } finally {
-            DBUtil.closeStatement(logCtx, stmt);
-        }
-        return false;
     }
 }
