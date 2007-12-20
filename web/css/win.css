@@ -45,7 +45,7 @@ input.CompactButtonInactive {
 .logoSm{background-color: #d2d2d2;}
 
 /* PAGE TITLE */
-.PageTitle, .PageTitleBar, .PageTitleBar td {font-size: 13px; font-family: Verdana, sans-serif;color: #ffffff; font-weight: bold; background-color: #CCCCCC;}
+.PageTitle, .PageTitleBar, .PageTitleBar td {font-size: 12px; font-family: Verdana, sans-serif;color: #ffffff; font-weight: bold; background-color: #CCCCCC;}
 .PageTitleBar a, .PageTitleBar td a{color: #FFFFFF;}
 .PageTitleGroupBg, .PageTitleRoleBg, .PageTitleUserBg {background-color: #E5E5E5;}
 .PageTitleServerBg {background-color: #E4F2E4;}
