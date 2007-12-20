@@ -152,7 +152,7 @@
                     <div class="boxLinks right">
                         <a href="javascript:plugin.accordion.openAll();">${l.DispAll}</a>
                     </div>
-                    <div style="clear:both;height:1px;"></div>
+                    <div style="clear:both;height:1px;line-height:1px;"><!-- line-height hack for IE --></div>
                 </div>
                 <div class="leftbxht">
                     <div class="tree" id="resourceTree" >

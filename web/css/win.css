@@ -262,6 +262,7 @@ padding-top:5px;
     font-weight:bold;
     color:black;
     white-space: nowrap;
+    font-size:11px;
 }
 
 #recent a {
@@ -281,6 +282,10 @@ padding-top:5px;
     height:60px;
     border-top:1px solid #eeeeee;
     background-repeat:repeat-x;
+}
+
+.MastheadContent a{
+    font-size:11px;
 }
 
 

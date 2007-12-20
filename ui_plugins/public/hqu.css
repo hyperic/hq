@@ -301,18 +301,17 @@ font-weight:bold;
 .leftbxblueborder {border:1px solid #7BAFFF;}
 .downList{margin-right: 10px; width: 22%; float:left;display:inline;height: 400px;}
 .downTableContainer{border: 1px solid rgb(96, 165, 234); overflow-x: hidden; overflow-y: auto; float: right;display:inline; width: 75%; height: 442px;}
- .leftbxht {padding:3px;height: 400px;overflow-x: hidden; overflow-y: auto;}
- .boxLinks {padding:3px 3px 0px 5px;display:inline;}
- .right{float:right;}
- .left{float:left;}
- .tree {padding:8px 0px 0px;height:98%;}
+ .leftbxht {padding:3px;height: 398px;overflow-x: hidden; overflow-y: auto;
+ /* IE issue left filter box different height due to box model - do not remove */
+    *height: 400px;}
+ .boxLinks {padding:3px 3px 0px 5px;font-size: 10px;display:inline;}
+ .right {float:right;}
+ .left {float:left;}
+ .tree {padding:0px;height:99%;}
  .topCat {font-weight:bold;cursor:pointer;padding:3px 0px 3px 0px;}
  .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
-#functionPanel {
-	background-color:#EBEDF2;
-	padding-bottom: 3px;
-}
+#functionPanel {background-color:#EBEDF2;padding-bottom: 3px;}
 .listItem {padding:3px 0px 3px 0px; cursor:pointer; margin-left:3px;}
 .downContainer{margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
 #results_msg {width:78%;float:right;padding:3px;padding-bottom:5px;font-weight:bold;}
@@ -332,6 +331,7 @@ font-weight:bold;
 #downCont  table tbody tr.selected td {}
 #downCont table tbody tr:hover td {background: #a6c2e7;}
 #downCont table tbody tr.selected:hover td {}
+.alertListIcon {padding-left:8px;}
 
 
 /* Nagios page */
@@ -397,7 +397,7 @@ font-weight:bold;
     margin-bottom:20px;
     font-family:Verdana;
 }
-#metrics table,td,tr{
+#metrics table, #metrics td, #metrics tr{
 	font-family:Verdana;
 	font-size:11px;
 	margin-left:14px;
