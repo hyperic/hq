@@ -690,7 +690,11 @@ one or more answers of any value is considered a successful lookup.
     <service name="SNMP"
              description="SNMP Monitor">
 
-      <config include="snmp"/>
+      <config include="snmp">
+        <option name="oid"
+                description="OID"
+                optional="true"/>
+      </config>
 
       <metric name="Availability"
               template="${snmp.template},Avail=true:sysUpTime"
@@ -701,6 +705,10 @@ one or more answers of any value is considered a successful lookup.
               indicator="true"
               units="jiffys"
               collectionType="static"/>
+
+      <metric name="OID Value"
+              template="${snmp.template}:%oid%"
+              indicator="true"/>
     </service>
 
     <service name="RPC"
