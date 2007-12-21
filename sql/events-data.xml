@@ -5,6 +5,9 @@
     <data ID="0" VERSION_COL="0" NAME="Resource Type Alert" CTIME="0"
           MTIME="0" PRIORITY="0" APPDEF_ID="0" APPDEF_TYPE="0" ACTIVE="FALSE" ENABLED="FALSE" FREQUENCY_TYPE="0" WILL_RECOVER="FALSE" NOTIFY_FILTERED="FALSE" CONTROL_FILTERED="FALSE" DELETED="FALSE"/>
   </table>
+  <table name="EAM_ALERT_DEF_STATE ">
+    <data ALERT_DEFINITION_ID="0" LAST_FIRED="0" />
+  </table>	
   <table name="EAM_ESCALATION">
     <data ID="100" VERSION_COL="0" NAME="Default Escalation" CTIME="0"
           MTIME="0" DESCRIPTION="This is an Escalation Scheme created by HQ that performs no actions" ALLOW_PAUSE="FALSE" MAX_WAIT_TIME="300000" NOTIFY_ALL="FALSE"/>
