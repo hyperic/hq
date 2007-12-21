@@ -476,8 +476,8 @@ font-weight:bold;
 
 #diagSelectControls {padding:5px;}
 #querySelectControls {padding:5px;}
-#diagData {width:99%;padding:10px 5px;}
-#queryData {width:99%;padding:10px 5px;margin-left:auto;margin-right:auto;}
+#diagData {width:98%;padding:10px 5px;}
+#queryData {width:98%;padding:10px 5px;margin-left:auto;margin-right:auto;}
 
 #queryData table { font-size: 11px;width: 100%;border-right: 1px solid #ccc;border-top:1px solid #ccc;}
 #queryData thead {}
