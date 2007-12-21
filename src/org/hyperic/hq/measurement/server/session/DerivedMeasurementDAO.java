@@ -428,40 +428,19 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
     
     List findMetricsCountMismatch(String plugin) {
-        return getSession().createSQLQuery(
-            "SELECT DISTINCT APPDEF_TYPE, INSTANCE_ID " +
-            "FROM (SELECT m.APPDEF_TYPE, p.ID AS INSTANCE_ID, " +
-                         "(SELECT ID FROM EAM_MEASUREMENT " +
-                          "WHERE INSTANCE_ID = p.ID AND TEMPLATE_ID = mt.ID) " +
-                          "AS MID " +
-                  "FROM EAM_PLATFORM_TYPE t, EAM_MONITORABLE_TYPE m, " +
-                       "EAM_PLATFORM p, EAM_MEASUREMENT_TEMPL mt " +
-                  "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
-                        "m.APPDEF_TYPE = 1 AND p.PLATFORM_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
-            "WHERE MID IS NULL UNION " +
-            "SELECT DISTINCT APPDEF_TYPE, INSTANCE_ID " +
-            "FROM (SELECT m.APPDEF_TYPE, s.ID AS INSTANCE_ID, " +
-                         "(SELECT ID FROM EAM_MEASUREMENT " +
-                          "WHERE INSTANCE_ID = s.ID AND TEMPLATE_ID = mt.ID) " +
-                          "AS MID " +
-                  "FROM EAM_SERVER_TYPE t, EAM_MONITORABLE_TYPE m, " +
-                       "EAM_SERVER s, EAM_MEASUREMENT_TEMPL mt " +
-                  "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
-                        "m.APPDEF_TYPE = 2 AND s.SERVER_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
-            "WHERE MID IS NULL UNION " +
-            "SELECT DISTINCT APPDEF_TYPE, INSTANCE_ID " +
-            "FROM (SELECT m.APPDEF_TYPE, s.ID AS INSTANCE_ID, " +
-                         "(SELECT ID FROM EAM_MEASUREMENT " +
-                         "WHERE INSTANCE_ID = s.ID AND TEMPLATE_ID = mt.ID) " +
-                         "AS MID " +
-                  "FROM EAM_SERVICE_TYPE t, EAM_MONITORABLE_TYPE m, " +
-                       "EAM_SERVICE s, EAM_MEASUREMENT_TEMPL mt " +
-                  "WHERE t.PLUGIN = :plugin AND m.PLUGIN = t.PLUGIN AND " +
-                        "m.APPDEF_TYPE = 3 AND s.SERVICE_TYPE_ID = t.ID AND " +
-                        "mt.MONITORABLE_TYPE_ID = m.ID) tbl " +
-            "WHERE MID IS NULL")
+        return getSession().createSQLQuery("select appdef_type, instance_id " +
+            "from (select mt.id, mt.appdef_type, m.instance_id, " +
+                         "count(m.id) as count " +
+                  "from EAM_MONITORABLE_TYPE mt, EAM_MEASUREMENT_TEMPL t, " +
+                       "EAM_MEASUREMENT m " +
+                  "where monitorable_type_id = mt.id and template_id = t.id " +
+                        "and mt.plugin = :plugin " +
+                  "group by mt.id, mt.appdef_type, m.instance_id) mt, " +
+                 "(select mt.id, count(*) as count " +
+                  "from EAM_MONITORABLE_TYPE mt, EAM_MEASUREMENT_TEMPL t " +
+                  "where mt.id = t.monitorable_type_id and " +
+                        "mt.plugin = :plugin group by mt.id) t " +
+            "where mt.id = t.id and not mt.count = t.count")
             .setString("plugin", plugin)
             .list();
     }
