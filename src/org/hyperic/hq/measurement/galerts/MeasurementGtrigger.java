@@ -116,8 +116,16 @@ public class MeasurementGtrigger
         int numMatched;
         
         // Can't process anything unless we have all the resources
-        if (_processedEvents.size() != _groupSize)
-            return;
+        if (_processedEvents.size() != _groupSize) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("Processed events size ["+_processedEvents.size()+
+                            "] != group size ["+_groupSize+"] for alerting condition "+
+                            _metricName+" "+_comparator+" "+_metricVal);                
+            }            
+            
+            return;            
+        }
+
         
         numMatched = 0;
         for (Iterator i=_processedEvents.values().iterator(); i.hasNext(); ) {
@@ -246,6 +254,9 @@ public class MeasurementGtrigger
             List instanceIds = new ArrayList();
             
             _groupSize = g.getTotalSize();
+            
+            _log.debug("The group size was set to "+_groupSize+" for resource group id="+rg.getId());
+            
             for (Iterator i=g.getAppdefGroupEntries().iterator(); i.hasNext(); ) 
             {
                 AppdefEntityID ent = (AppdefEntityID)i.next();
