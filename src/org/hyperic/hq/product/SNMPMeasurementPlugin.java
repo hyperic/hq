@@ -253,6 +253,12 @@ public class SNMPMeasurementPlugin
 
         double value = 0;
         String varName = metric.getAttributeName();
+
+        if ((varName == null) || varName.equals("%oid%")) {
+            //special case for optional netservices.SNMP.OID Value metric
+            return MetricValue.NONE;
+        }
+
         String varOID = getProperty(varName);
         if (varOID != null) {
             if (isDebug) {
