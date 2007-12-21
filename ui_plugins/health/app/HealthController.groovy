@@ -321,7 +321,7 @@ class HealthController
                         output << "<td>*binary*</td>"
                     } else {
                        def trimmedCol = h(rs[i].toString().trim())
-                        if (trimmedCol == null || trimmedCol.length() == 0) {
+                        if (trimmedCol.length() == 0) {
                         output << "<td>&nbsp;</td>"
                         } else {
                          output << "<td>"
