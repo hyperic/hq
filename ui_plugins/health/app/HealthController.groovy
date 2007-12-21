@@ -120,7 +120,7 @@ class HealthController
         def diagName = params.getOne('diag')
         for (d in diagnostics) {
             if (d.shortName == diagName) {
-                return [diagData: h(d.status)]
+                return [diagData: '<pre>' + d.status + '</pre>']
             }
         }
     }
@@ -303,10 +303,11 @@ class HealthController
             def output = new StringBuffer()
             def rowIdx = 0
             def md
-            
+
+
             sql.eachRow(query) { rs ->
                 if (rowIdx++ == 0) {
-                    output << "<table><thead><tr>"
+                    output << "<table cellspadding=3 cellspacing=0 border=0 width=98%><thead><tr>"
                     md = rs.getMetaData()
                     for (i in 1..md.columnCount) {
                         output <<  "<td>${h md.getColumnLabel(i)}</td>"
@@ -319,7 +320,14 @@ class HealthController
                     if (type in [Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY]) {
                         output << "<td>*binary*</td>"
                     } else {
-                        output << "<td>${rs[i]}</td>"
+                       def trimmedCol = h(rs[i].toString().trim())
+                        if (trimmedCol == null || trimmedCol.length() == 0) {
+                        output << "<td>&nbsp;</td>"
+                        } else {
+                         output << "<td>"
+                         output << trimmedCol
+                         output << "</td>"
+                       }
                     }
                 }
                 output << "</tr>"
@@ -332,7 +340,7 @@ class HealthController
             }
         }
         
-        def queryData = "${name} executed in ${now() - start} ms<br/>"
+        def queryData = "${name} executed in ${now() - start} ms<br/><br/>"
         [ queryData: queryData + res ]
     }
 }

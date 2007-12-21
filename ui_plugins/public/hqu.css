@@ -393,9 +393,12 @@ font-weight:bold;
 }
 .metricGroupBlock{
 	float:left;
-    margin-right:30px;   
+    margin-right:20px;   
     margin-bottom:20px;
     font-family:Verdana;
+    border:1px solid #ccc;
+    padding:8px;
+    height:184px;
 }
 #metrics table, #metrics td, #metrics tr{
 	font-family:Verdana;
@@ -412,3 +415,85 @@ font-weight:bold;
 #bodyTabContainer .dojoTabPane{
     overflow:auto;
 }
+
+/* HQ Health */
+#cacheTable  {
+    font-family: Lucida Grande, Verdana;
+    font-size: 11px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    /* IE issue loosing table border on left side - do not remove */
+    *margin-left:1px;
+    cursor: default;}
+#cacheTable th {
+    font-weight: bold;
+    padding: 3px;
+    padding-left: 5px;
+    border-right: 1px solid #7bafff;
+    border-top: 1px solid #7bafff;
+}
+
+#cacheTable td {
+    padding: 3px;
+    font-weight: normal;
+    padding-left: 5px;
+}
+
+ #cacheTabletd, #cacheTable th {
+    background-image: url( "images/ft-head.gif" );
+    background-repeat: no-repeat;
+    background-position: top right;
+}
+
+#cacheTable td.selectedUp, #cacheTable th.selectedUp {
+    background-image: url( "images/ft-headup.gif" );
+}
+
+#cacheTable td.selectedDown, #cacheTable th.selectedDown {
+    background-image: url( "images/ft-headdown.gif" );
+}
+
+#cacheTable td {
+    border-bottom: 1px solid #ddd;
+}
+
+#cacheTable tr.alt td {
+    background: #eef4fc;
+}
+
+#cacheTable tr.selected td {
+
+}
+
+#alertsCont table tbody tr:hover td {
+    background: #a6c2e7;
+}
+
+#alertsCont table tbody tr.selected:hover td {
+
+}
+
+#diagSelectControls {padding:5px;}
+#querySelectControls {padding:5px;}
+#diagData {width:99%;padding:10px 5px;}
+#queryData {width:99%;padding:10px 5px;margin-left:auto;margin-right:auto;}
+
+#queryData table { font-size: 11px;width: 100%;border-right: 1px solid #ccc;border-top:1px solid #ccc;}
+#queryData thead {}
+#queryData td {border-left: 1px solid #ccc;border-bottom:1px solid #ccc;padding:2px;}
+pre {
+white-space: pre-wrap; /* css-3 */
+white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+white-space: -pre-wrap; /* Opera 4-6 */
+white-space: -o-pre-wrap; /* Opera 7 */
+word-wrap: break-word; /* Internet Explorer 5.5+ */
+_white-space: pre; /* IE only hack to re-specify in addition to word-wrap */
+font-family:monospace;
+font-size:12px;
+}
+.printButton {margin-top:5px;padding:3px 10px; border:1px solid #ccc; background-color:#eee;width:35px;}
+
+
+
+
