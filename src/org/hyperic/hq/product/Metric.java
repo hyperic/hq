@@ -355,10 +355,15 @@ public class Metric {
 
             //XXX workaround for hqagent "camAgent:availability" templates
             if (!st.hasMoreTokens()) {
-                metric.attributeName = metric.objectPropString;
-                metric.objectPropString = "DummyKey=DummyVal";
-                metric.objectName =
-                    metric.domainName + ":" + metric.objectPropString;
+                if (template.endsWith(":")) {
+                    metric.attributeName = ""; //e.g. optional snmp %oid%
+                }
+                else {
+                    metric.attributeName = metric.objectPropString;
+                    metric.objectPropString = "DummyKey=DummyVal";
+                    metric.objectName =
+                        metric.domainName + ":" + metric.objectPropString;
+                }
             }
             else {
                 metric.objectName =
