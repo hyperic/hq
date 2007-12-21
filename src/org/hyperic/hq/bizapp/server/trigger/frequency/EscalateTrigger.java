@@ -31,6 +31,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 import javax.ejb.CreateException;
@@ -100,42 +101,60 @@ public class EscalateTrigger extends AbstractTrigger {
                 EventTrackerLocal eTracker =
                     EventTrackerUtil.getLocalHome().create();
 
-                // Now get the references
-                LinkedList eventObjectDesers =
-                    eTracker.getReferencedEventStreams(getId());
-
                 TriggerFiredEvent tracked = null;
                 
-                // Check to see if we need to fire
-                if (eventObjectDesers.size() > 0) {
-                    // Only need to look at the first event                    
-                    EventObjectDeserializer deser = 
-                        (EventObjectDeserializer) eventObjectDesers.getFirst();
-                    
-                    tracked = 
-                        (TriggerFiredEvent) deserializeEvent(deser, true);
+                try {
+                    // Now get the references
+                    LinkedList eventObjectDesers =
+                        eTracker.getReferencedEventStreams(getId());
 
-                    if ((tracked.getTimestamp() + getAfter()) >
-                        event.getTimestamp())
-                        tracked = null;         // Not valid
+                    // Check to see if we need to fire
+                    if (eventObjectDesers.size() > 0) {
+                        // Only need to look at the first event                    
+                        EventObjectDeserializer deser = 
+                            (EventObjectDeserializer) eventObjectDesers.getFirst();
+                        
+                        tracked = 
+                            (TriggerFiredEvent) deserializeEvent(deser, true);
+
+                        if ((tracked.getTimestamp() + getAfter()) >
+                            event.getTimestamp())
+                            tracked = null;         // Not valid
+                    }
+                } catch(Exception exc) {
+                    throw new ActionExecuteException(
+                        "Failed to get referenced streams for trigger id="+
+                         getId(), exc);
                 }
+                
+                
+                
 
                 if (tracked == null) {          // Not firing
                     // We'll have to track this event
-                    eTracker.addReference(getId(), event, 0);
-                }
-                else {                          // Fire
+                    try {
+                        eTracker.addReference(getId(), event, 0);                       
+                    } catch (SQLException e) {
+                        throw new ActionExecuteException(
+                                "Failed to add event reference for trigger id="+
+                                getId(), e);                            
+                    }
+                    
+                    
+                } else {                        // Fire
                     tfe = tracked;
                     tfe.setInstanceId(getId());
 
-                    // Get ready to fire, reset EventTracker
-                    eTracker.deleteReference(getId());
+                    // Get ready to fire, reset EventTracker                    
+                    try {
+                        eTracker.deleteReference(getId());                          
+                    } catch (SQLException exc) {
+                        throw new ActionExecuteException(
+                                "Failed to delete event references for trigger id="+
+                                getId(), exc);                  
+                    }
                 }
             }
-        } catch (java.io.IOException e) {
-            return; // No fire since we can't track the events
-        } catch (ClassNotFoundException e) {
-            return; // No fire since we can't track the events
         } catch (NamingException e) {
             return; // No fire since we can't track the events
         } catch (CreateException e) {

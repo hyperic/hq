@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Locale;
@@ -183,13 +184,19 @@ public class ValueChangeTrigger extends AbstractTrigger
                 } catch(Exception exc){
                     throw new ActionExecuteException(
                         "Failed to get referenced streams for trigger id="+
-                         getId()+" : " + exc);
+                         getId(), exc);
                 }
             }
             
             // If we still have nothing
             if (last == null) {
-                eTracker.addReference(getId(), me, 0);
+                try {
+                    eTracker.addReference(getId(), me, 0);                    
+                } catch (SQLException e) {
+                    throw new ActionExecuteException(
+                            "Failed to add event reference for trigger id="+getId(), e);
+                }
+                
                 last = me;      // Update the last reference
             } else if (last.getValue().getValue() != me.getValue().getValue() && 
                        last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
@@ -204,7 +211,13 @@ public class ValueChangeTrigger extends AbstractTrigger
                 MESSAGE_FMT.format(fmtValues, sb, null);
                 myEvent.setMessage( sb.toString() );
 
-                eTracker.updateReference(last.getId(), me);
+                try {
+                    eTracker.updateReference(last.getId(), me);                    
+                } catch (SQLException e) {
+                    throw new ActionExecuteException(
+                            "Failed to update event reference for trigger id="+getId(), e);                    
+                }
+                
                 last = me;      // Update the last reference
             }
         }

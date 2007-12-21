@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -320,8 +321,7 @@ public class DurationTrigger extends AbstractTrigger
                 }
             } catch (Exception exc) {
                 throw new ActionExecuteException(
-                        "Failed to get referenced streams for trigger id="+
-                         getId()+" : " + exc);                
+                        "Failed to get referenced streams for trigger id="+getId(), exc);                
             }
             
             /* Make sure we only write once (either delete or add) in this 
@@ -330,8 +330,15 @@ public class DurationTrigger extends AbstractTrigger
 
             if (track) {
                 // Throw it into the event tracker with a buffer of 30 seconds
-                eTracker.addReference(getId(), tfe,
-                                      timeRange + 30000);
+                try {
+                    eTracker.addReference(getId(), tfe, timeRange + 30000);                        
+                } catch (SQLException e) {
+                    throw new ActionExecuteException(
+                            "Failed to add event reference for trigger id="+
+                            getId(), e);                            
+                }
+                
+                
                 savedLast = tfe;
                 
                 if (log.isDebugEnabled())
@@ -343,7 +350,13 @@ public class DurationTrigger extends AbstractTrigger
 
             if (fire) {
                 // Get ready to fire, reset EventTracker
-                eTracker.deleteReference(getId());
+                try {
+                    eTracker.deleteReference(getId());                          
+                } catch (SQLException exc) {
+                    throw new ActionExecuteException(
+                            "Failed to delete event references for trigger id="+getId(), exc);                  
+                }
+                
             } else {
                 return;                
             }

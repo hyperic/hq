@@ -27,8 +27,10 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.List;
 
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAOFactory;
 
 
 public class TriggerEventDAO extends HibernateDAO {
@@ -37,41 +39,43 @@ public class TriggerEventDAO extends HibernateDAO {
         super(TriggerEvent.class, f);
     }
     
-    void save(TriggerEvent event) {
-        super.save(event);
-    }    
-    
-    TriggerEvent findById(Long id) {
-        return (TriggerEvent)super.findById(id);
+    public Session getNewSession() {
+        return HibernateDAOFactory.getInstance()
+                .getSessionFactory().openSession();
+    }
+        
+    void save(TriggerEvent event, Session session) {                
+        session.saveOrUpdate(event);
     }
     
-    List findUnexpiredByTriggerId(Integer tid) {
+    TriggerEvent findById(Long id, Session session) {
+        return (TriggerEvent)session.load(getPersistentClass(), id);            
+    }
+    
+    List findUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "from TriggerEvent te where te.triggerId= :tid and " +
                       "te.expiration > :exp order by te.ctime";
-            
-        return getSession()
-            .createQuery(hql)
-            .setInteger("tid", tid.intValue())
-            .setLong("exp", System.currentTimeMillis())
-            .list();
+        
+        return session.createQuery(hql)
+                        .setInteger("tid", tid.intValue())
+                        .setLong("exp", System.currentTimeMillis())
+                        .list();            
     }
     
-    void deleteByTriggerId(Integer tid) {
+    void deleteByTriggerId(Integer tid, Session session) {
         String hql = "delete from TriggerEvent te where te.triggerId= :tid";
-        
-        getSession()
-            .createQuery(hql)
-            .setInteger("tid", tid.intValue())
-            .executeUpdate();
+
+        session.createQuery(hql)
+                .setInteger("tid", tid.intValue())
+                .executeUpdate();
     }
 
-    void deleteExpired() {
+    void deleteExpired(Session session) {
         String hql = "delete from TriggerEvent te where te.expiration < :exp";
         
-        getSession()
-            .createQuery(hql)
-            .setLong("exp", System.currentTimeMillis())
-            .executeUpdate();
+        session.createQuery(hql)
+                .setLong("exp", System.currentTimeMillis())
+                .executeUpdate();
     } 
     
 }

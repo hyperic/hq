@@ -32,6 +32,7 @@
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 import javax.ejb.CreateException;
@@ -101,7 +102,13 @@ public class AvertTrigger extends AbstractTrigger {
                 if (event instanceof TriggerFiredEvent) {
                     // Get rid of the references, we've averted
                     if (getAvertId().equals(event.getInstanceId())) {
-                        etracker.deleteReference(getId());
+                        
+                        try {
+                            etracker.deleteReference(getId());                            
+                        } catch (SQLException e) {
+                            throw new ActionExecuteException(
+                                    "Failed to delete reference for trigger id="+getId(), e);                            
+                        }
 
                         // Send a NotFired event
                         notFired();
@@ -113,9 +120,16 @@ public class AvertTrigger extends AbstractTrigger {
                 }
 
                 // Now get the references
-                LinkedList eventObjectDesers =
-                    etracker.getReferencedEventStreams(getId());
-
+                LinkedList eventObjectDesers = null;
+                
+                try {
+                    eventObjectDesers = etracker.getReferencedEventStreams(getId());    
+                } catch (Exception e) {
+                    throw new ActionExecuteException(
+                            "Failed to get referenced event streams for trigger id="+
+                            getId(), e);   
+                }
+                
                 if (event instanceof HeartBeatEvent) {
                     // Check to see if we need to fire
                     if (eventObjectDesers.size() > 0) {
@@ -136,13 +150,29 @@ public class AvertTrigger extends AbstractTrigger {
                             tfe.setInstanceId(getId());
 
                             // Get ready to fire, reset EventTracker
-                            etracker.deleteReference(getId());
+                            try {
+                                etracker.deleteReference(getId());
+    
+                            } catch (SQLException e) {
+                                throw new ActionExecuteException(
+                                        "Failed to delete reference for trigger id="+
+                                        getId(), e);
+                            }
                         }
                     }
                 } else {
                     // Track it if we don't have any events yet
-                    if (eventObjectDesers.size() == 0)
-                        etracker.addReference(getId(), event, 0);
+                    if (eventObjectDesers.size() == 0) {
+                        
+                        try {
+                            etracker.addReference(getId(), event, 0);                            
+                        } catch (SQLException e) {
+                            throw new ActionExecuteException(
+                                    "Failed to add event reference for trigger id="+
+                                    getId(), e);                            
+                        }
+                        
+                    }
                 }
             }
         } catch (IOException e) {

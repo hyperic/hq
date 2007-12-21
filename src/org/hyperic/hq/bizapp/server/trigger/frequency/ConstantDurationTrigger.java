@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 import javax.ejb.CreateException;
@@ -176,11 +177,16 @@ public class ConstantDurationTrigger extends AbstractTrigger
                 return; // No fire since we can't track the events
             }
 
-            try {
-                if (tfe instanceof TriggerNotFiredEvent) {
-                    eTracker.deleteReference(getId());
+
+            if (tfe instanceof TriggerNotFiredEvent) {
+                try {
+                    eTracker.deleteReference(getId());                            
+                } catch (SQLException exc) {
+                    throw new ActionExecuteException(
+                        "Failed to delete event references for trigger id="+getId(), exc);                  
                 }
-                else {
+            } else {
+                try {
                     // Now find out if we have a long enough duration
                     LinkedList eventObjectDesers =
                         eTracker.getReferencedEventStreams(getId());
@@ -196,21 +202,20 @@ public class ConstantDurationTrigger extends AbstractTrigger
                         // Let's see if we have a chance to fire
                         long duration =
                             tfe.getTimestamp() - last.getTimestamp();
-                        
+
                         // See if we've exceeded the time range
                         if (duration >= timeRange)
                             myEvent = new TriggerFiredEvent(getId(), event);
                     }
-                    
+
                     // Track it in the event tracker for twice the time range
-                    eTracker.addReference(getId(), tfe,
-                                               timeRange * 2);
+                    eTracker.addReference(getId(), tfe, timeRange * 2);                        
+                } catch (Exception exc) {
+                    throw new ActionExecuteException(
+                         "Failed to get/add referenced streams for trigger id="+getId(), exc);                
                 }
-            } catch (Exception exc) {
-                throw new ActionExecuteException(
-                        "Failed to get referenced streams for trigger id="+
-                         getId()+" : " + exc);                
             }
+
 
             if (myEvent == null) {            
                 notFired();
@@ -218,7 +223,13 @@ public class ConstantDurationTrigger extends AbstractTrigger
             }
 
             // Get ready to fire, reset EventTracker
-            eTracker.deleteReference(getId());            
+            try {
+                eTracker.deleteReference(getId());                            
+            } catch (SQLException exc) {
+                throw new ActionExecuteException(
+                        "Failed to delete event references for trigger id="+getId(), exc);                  
+            }
+            
         }    
 
         myEvent.setMessage("Event " + triggerId + " occurred " +

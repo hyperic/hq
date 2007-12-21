@@ -32,6 +32,7 @@
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import java.io.ObjectInputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -415,12 +416,17 @@ public class MultiConditionTrigger
             }
         }
 
-        // Clean up unused event
-        if (toDelete != null) {
-            etracker.updateReference(toDelete.getId(), event);
-        } else {
-            etracker.addReference(getId(), event, getTimeRange());
-        }  
+        try {
+            // Clean up unused event
+            if (toDelete != null) {
+                etracker.updateReference(toDelete.getId(), event);
+            } else {
+                etracker.addReference(getId(), event, getTimeRange());
+            }          
+        } catch (SQLException e) {
+            throw new ActionExecuteException(
+                    "Failed to update event references for trigger id="+getId(), e);
+        }
         
         return new ArrayList(fulfilled.values());
     }
@@ -441,8 +447,7 @@ public class MultiConditionTrigger
             }
         } catch(Exception exc) {
             throw new ActionExecuteException(
-                "Failed to get referenced streams for trigger id="+
-                 getId()+" : " + exc);
+                "Failed to get referenced streams for trigger id="+getId(), exc);
         }
         
         return events;

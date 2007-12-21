@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.trigger.frequency;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 import javax.ejb.CreateException;
@@ -199,8 +200,13 @@ public class CounterTrigger extends AbstractTrigger
            user transaction, which is a pain */
         if ((eventObjectDesers.size() + 1) >= count){
             // Get ready to fire, reset EventTracker
-            eTracker.deleteReference(getId());
-            
+            try {
+                eTracker.deleteReference(getId());                            
+            } catch (SQLException exc) {
+                throw new ActionExecuteException(
+                    "Failed to delete event references for trigger id="+getId(), exc);                  
+            }
+                        
             TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
 
             myEvent.setMessage("Event " + triggerId + " occurred " +
@@ -214,7 +220,13 @@ public class CounterTrigger extends AbstractTrigger
             }
         } else {
             // Throw it into the event tracker
-            eTracker.addReference(getId(), tfe, timeRange);
+            try {
+                eTracker.addReference(getId(), tfe, timeRange);                           
+            } catch (SQLException e) {
+                throw new ActionExecuteException(
+                        "Failed to add event reference for trigger id="+
+                        getId(), e);                            
+            }
             
             // Now send a NotFired event
             notFired();

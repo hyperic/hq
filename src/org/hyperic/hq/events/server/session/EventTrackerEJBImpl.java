@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,12 +40,14 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
-import org.hyperic.hq.events.shared.EventObjectDeserializer;
 
 /**
  * Maintains the event state for each trigger.
@@ -55,7 +58,7 @@ import org.hyperic.hq.events.shared.EventObjectDeserializer;
  *      view-type="local"
  *      type="Stateless"
  *      
- * @ejb:transaction type="NOTSUPPORTED"
+ * @ejb:transaction type="REQUIRESNEW"
  */
 public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
 
@@ -72,7 +75,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @return The id for the newly created trigger event (also the eventObject id).                  
      * @ejb:interface-method
      */
-    public Long addReference(Integer tid, AbstractEvent eventObject, long expiration) {
+    public Long addReference(Integer tid, AbstractEvent eventObject, long expiration) 
+        throws SQLException {
+        
         if (log.isDebugEnabled())
             log.debug("Add referenced event for trigger id: " + tid);
         
@@ -92,12 +97,26 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         
-        triggerEventDAO.save(triggerEvent);
+        Session session = triggerEventDAO.getNewSession();
         
-        // Need to flush the session immediately so that the insert may 
-        // be seen by all concurrent sessions.
-        triggerEventDAO.flushSession();
+        Transaction txn = null;
         
+        try {
+            txn = session.beginTransaction();
+            triggerEventDAO.save(triggerEvent, session);
+            txn.commit();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            
+            log.error("Failed to add referenced event for trigger id="+tid, e);     
+            throw new SQLException("Failed to add referenced event for trigger id="+tid);
+            
+        } finally {
+            session.close();
+        }
+                
         Long teid = triggerEvent.getId();
         eventObject.setId(teid);
         
@@ -117,18 +136,35 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param eventObject The new event object.
      * @ejb:interface-method
      */
-    public void updateReference(Long teid, AbstractEvent eventObject) {        
+    public void updateReference(Long teid, AbstractEvent eventObject) 
+        throws SQLException {        
         if (log.isDebugEnabled())
             log.debug("Updating the event object for trigger event id: " + teid);            
 
-        TriggerEvent triggerEvent = getTriggerEventDAO().findById(teid);
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         
-        triggerEvent.setEventObject(eventObject);
-        triggerEvent.setCtime(eventObject.getTimestamp());
+        Session session = triggerEventDAO.getNewSession();
         
-        // Need to flush the session immediately so that the update may 
-        // be seen by all concurrent sessions.
-        getTriggerEventDAO().flushSession();
+        Transaction txn = null;
+        
+        try {
+            txn = session.beginTransaction();
+            TriggerEvent triggerEvent = triggerEventDAO.findById(teid, session);
+            triggerEvent.setEventObject(eventObject);
+            triggerEvent.setCtime(eventObject.getTimestamp());
+            triggerEventDAO.save(triggerEvent, session);
+            txn.commit();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            
+            log.error("Failed to update event object for trigger event id="+teid, e);     
+            throw new SQLException("Failed to update event object for trigger event id="+teid);
+            
+        } finally {
+            session.close();
+        }
         
         eventObject.setId(teid);
     }
@@ -140,26 +176,40 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param tid The trigger id.
      * @ejb:interface-method
      */
-    public void deleteReference(Integer tid) {
+    public void deleteReference(Integer tid) throws SQLException {
         if (log.isDebugEnabled())
             log.debug("Delete referenced events for trigger id: " + tid);
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         
-        // If you don't flush the session, then its possible that a 
-        // trigger_event reference just added in the same Hibernate 
-        // session will not be deleted here. It appears that the inserts 
-        // and deletes have been reordered.
-        triggerEventDAO.flushSession();
+        Session session = triggerEventDAO.getNewSession();
         
-        triggerEventDAO.deleteByTriggerId(tid);        
+        Transaction txn = null;
         
-        // To reduce contention on the trigger_event table we are going to reduce 
-        // the number of times we try to delete expired trigger_events.
-        if (ExpiredEventsDeletionScheduler.getInstance()
-                .shouldDeleteExpiredEvents()) {
-            triggerEventDAO.deleteExpired();
-        }
+        try {
+            txn = session.beginTransaction();
+            triggerEventDAO.deleteByTriggerId(tid, session);        
+            
+            // To reduce contention on the trigger_event table we are going to reduce 
+            // the number of times we try to delete expired trigger_events.
+            if (ExpiredEventsDeletionScheduler.getInstance()
+                        .shouldDeleteExpiredEvents()) {
+                triggerEventDAO.deleteExpired(session);
+            }
+            
+            txn.commit();
+        } catch (Exception e) {
+            if (txn != null) {
+                txn.rollback();
+            }
+            
+            log.error("Failed to delete expired and referenced events for trigger id="+tid, e);     
+            throw new SQLException("Failed to delete expired and referenced events for trigger id="+tid);
+            
+        } finally {
+            session.close();
+        }        
+        
     }
 
 
@@ -171,23 +221,43 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @return The list of {@link EventObjectDeserializer EventObjectDeserializers} 
      *         containing the events referenced by the trigger. Each event will 
      *         have its id set to the trigger event id.
+     *         
+     * @ejb:transaction type="NOTSUPPORTED"
      * @ejb:interface-method
      */
-    public LinkedList getReferencedEventStreams(Integer tid) throws IOException {
+    public LinkedList getReferencedEventStreams(Integer tid) 
+        throws SQLException, IOException {
+        
         boolean debug = log.isDebugEnabled();
         
         if (debug) {
             log.debug("Get referenced events for trigger id: " + tid);                
         }
         
-        List triggerEvents = getTriggerEventDAO().findUnexpiredByTriggerId(tid);
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        
+        Session session = triggerEventDAO.getNewSession();
         
         LinkedList eventObjectDeserializers = new LinkedList();
         
-        // When returning the events, we link the event to the trigger_event.
-        for (Iterator it = triggerEvents.iterator(); it.hasNext();) {
-            TriggerEvent triggerEvent = (TriggerEvent) it.next();
-            eventObjectDeserializers.add(new EventToTriggerEventLinker(triggerEvent));
+        try {
+            List triggerEvents = getTriggerEventDAO()
+                                    .findUnexpiredByTriggerId(tid, session);
+
+            // When returning the events, we link the event to the trigger_event.
+            for (Iterator it = triggerEvents.iterator(); it.hasNext();) {
+                TriggerEvent triggerEvent = (TriggerEvent) it.next();
+                eventObjectDeserializers.add(new EventToTriggerEventLinker(triggerEvent));
+            }
+        
+        } catch (IOException e) {
+            log.error("Failed to get referenced events for trigger id="+tid, e); 
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to get referenced events for trigger id="+tid, e);     
+            throw new SQLException("Failed to get referenced events for trigger id="+tid);            
+        } finally {
+            session.close();
         }
         
         if (debug) {
