@@ -174,42 +174,72 @@ public class RegisteredDispatcherEJBImpl
         }
     }
     
-    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) 
-        throws EventTypeException, ActionExecuteException {
+    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) {
         
-        if (!visitedMCTriggers.isEmpty()) {
+        if (visitedMCTriggers.isEmpty()) {
+            return;
+        }        
+        
+        try {
             FlushStateEvent event = new FlushStateEvent();
-            
+
             for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
                 MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                                
-                try {
-                    boolean lockAcquired = false;
-                    
-                    try {
-                        lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
-                        
-                        if (lockAcquired) {
-                            trigger.processEvent(event);                    
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("There must be more interesting events "+
-                                     "to multicondition alert with trigger id="+
-                                	 trigger.getId()+" since it failed to upgrade "+
-                                	 "shared lock on flushing state.");    
-                            }                            
-                        }                        
-                    } finally {
-                        if (lockAcquired) {
-                            trigger.releaseExclusiveLock();
-                        }
+                it.remove();
+
+                if (trigger.triggeringConditionsFulfilled()) {
+                    try {   
+                        tryFlushState(event, trigger);
+                    } catch (Throwable e) {
+                        // continue flushing the other triggers
+                        log.error("Failed to flush state for multi " +
+                        		  "conditional trigger id="+trigger.getId(), e);                        
                     }
-                } catch (InterruptedException e) {
-                    // move on
-                }                 
-            }            
+                } else {
+                    trigger.releaseSharedLock();
+                }
+            }
+
+        } finally {
+            // The visitedMCTriggers list should always be empty, but release 
+            // shared locks in case it's not. This is very important. If the 
+            // shared lock isn't released then the multicondition trigger 
+            // may never fire again until the server is rebooted!
+            if (!visitedMCTriggers.isEmpty()) {
+                for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
+                    MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
+                    it.remove();
+                    trigger.releaseSharedLock();
+                }
+            }
         }
         
+    }
+
+    private void tryFlushState(FlushStateEvent event, MultiConditionTrigger trigger) 
+        throws InterruptedException, EventTypeException, ActionExecuteException {
+        
+        boolean lockAcquired = false;
+
+        try {
+            lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
+
+            if (lockAcquired) {
+                trigger.processEvent(event);                    
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("There must be more interesting events "+
+                            "to multicondition alert with trigger id="+
+                            trigger.getId()+" since we failed to upgrade "+
+                            "shared lock on flushing state. Current shared " +
+                            "lock holders: "+trigger.getCurrentSharedLockHolders());    
+                }                            
+            }                        
+        } finally {
+            if (lockAcquired) {
+                trigger.releaseExclusiveLock();
+            }
+        }
     }
     
     private void dispatchEnqueuedEvents() {

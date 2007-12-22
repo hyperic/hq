@@ -31,11 +31,11 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
-import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,10 +88,14 @@ public class MultiConditionTrigger
     public static final String OR  = "|";
     
     private final Object lock = new Object();
-    
+
+    private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
+        
     // make the lock reentrant just to be safe in preventing deadlocks
     private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
     
+    // this list must be synchronized or immutable since it will be accessed 
+    // by multiple threads    
     private List lastFulfillingEvents = Collections.EMPTY_LIST;
 
     /** Holds value of property triggerIds. */
@@ -133,11 +137,18 @@ public class MultiConditionTrigger
                 // interrupted state is cleared - retry
                 counter++;
             }            
-        }
+        }     
         
-        if (!acquired) {
+        if (acquired) {
+            currentSharedLockHolders.put(Thread.currentThread(), new Date());
+            
+            if (log.isDebugEnabled()) {
+                log.debug(Thread.currentThread()+ 
+                          " currently holds shared lock on trigger id="+getId());            
+            }                         
+        } else {
             throw new InterruptedException("thread was interrupted attempting " +
-            		"to acquire shared lock.");
+                               "to acquire shared lock: "+Thread.currentThread());           
         }
     }
     
@@ -145,8 +156,44 @@ public class MultiConditionTrigger
      * Release the shared lock for processing events.
      */
     public void releaseSharedLock() {
-        rwLock.readLock().release();
+        try {
+            rwLock.readLock().release();            
+        } finally {
+            currentSharedLockHolders.remove(Thread.currentThread());
+            
+            if (log.isDebugEnabled()) {
+                log.debug(Thread.currentThread()+ 
+                          " currently released shared lock on trigger id="+getId());            
+            }            
+        }        
     }
+    
+    /**
+     * Retrieve the map of Thread objects -> lock acquisition time currently 
+     * holding the shared lock.
+     * 
+     * @return The map of Thread objects to their lock acquisition time.
+     */
+    public Map getCurrentSharedLockHolders() {
+        Map lockHolders = null;
+
+        synchronized (currentSharedLockHolders) {
+            lockHolders = new HashMap(currentSharedLockHolders);
+        }
+
+        return lockHolders;
+    }
+
+    /**
+     * Check if the triggering conditions have been fulfilled, meaning 
+     * the state should be flushed.
+     * 
+     * @return <code>true</code> if the triggering conditions have been fulfilled; 
+     *         <code>false</code> if not.
+     */
+    public boolean triggeringConditionsFulfilled() {
+        return !lastFulfillingEvents.isEmpty();
+    }    
     
     /**
      * Release the shared lock and attempt to upgrade to an exclusive lock 
@@ -328,11 +375,24 @@ public class MultiConditionTrigger
         
         synchronized (lock) {
             if (event instanceof FlushStateEvent) {
-                if (!lastFulfillingEvents.isEmpty()) {
+                if (triggeringConditionsFulfilled()) {
                     try {
-                        target = prepareTargetEvent(lastFulfillingEvents, etracker);                        
+                        // Since prepareTargetEvent iterates through the 
+                        // lastFulfillingEvents, make a copy so we don't 
+                        // have to synchronize on the list iteration.                        
+                        List copyOfLastFulfillingEvents = null;
+                        
+                        synchronized (lastFulfillingEvents) {
+                            copyOfLastFulfillingEvents = 
+                                new ArrayList(lastFulfillingEvents);
+                        }     
+                        
+                        target = prepareTargetEvent(copyOfLastFulfillingEvents, etracker);                        
+
                     } finally {
-                        lastFulfillingEvents.clear();
+                        if (target != null) {
+                            lastFulfillingEvents.clear();                            
+                        }
                     }
                 }                            
             } else {
@@ -343,6 +403,15 @@ public class MultiConditionTrigger
         return target;
     }
     
+    /**
+     * Check if the new event fulfills the triggering conditions.
+     * 
+     * @param event The new event.
+     * @param etracker The event tracker.
+     * @return The list of fulfilling events or an empty list. This list must 
+     *          be thread-safe!
+     * @throws ActionExecuteException
+     */    
     private List checkIfNewEventFulfillsConditions(AbstractEvent event, 
                                                    EventTrackerLocal etracker) 
         throws ActionExecuteException {        
@@ -380,8 +449,8 @@ public class MultiConditionTrigger
         // If we've got nothing, then just clean up
         if (fulfilled.size() == 0 && events.size() > 0) {
             try {
-                tryDeleteTrackedEventReferences(etracker, false);                
-            } catch (Exception e) {
+                etracker.deleteReference(getId());            
+            } catch (SQLException e) {
                 // It's ok if we can't delete the old events now.
                 // We can do it next time.
                 log.warn("Failed to remove all references to trigger id="+getId(), e);                
@@ -428,7 +497,7 @@ public class MultiConditionTrigger
                     "Failed to update event references for trigger id="+getId(), e);
         }
         
-        return new ArrayList(fulfilled.values());
+        return Collections.synchronizedList(new ArrayList(fulfilled.values()));
     }
     
     private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
@@ -459,7 +528,12 @@ public class MultiConditionTrigger
               
         if (!durable) {
             // Get ready to fire, reset EventTracker
-            tryDeleteTrackedEventReferences(etracker, true);
+            try {
+                etracker.deleteReference(getId());
+            } catch (SQLException e) {
+                throw new ActionExecuteException(
+                        "Failed to delete reference for trigger id="+getId(), e);
+            }
         }                
         
         // Message string which tracks the return message
@@ -484,51 +558,6 @@ public class MultiConditionTrigger
 
         return target;
     }
-    
-    /**
-     * Try deleting the tracked events, optionally enabling exponential backoff 
-     * if the delete fails.
-     * 
-     * @param etracker
-     * @param enableExponentialBackoff
-     * @throws ActionExecuteException
-     */
-    private void tryDeleteTrackedEventReferences(EventTrackerLocal etracker, 
-                                                 boolean enableExponentialBackoff) 
-        throws ActionExecuteException {
-        long sleep = 10;
-        int numTries = 0;
-        boolean succeeded = false;
-        Exception lastException = null;
-        
-        while (succeeded==false && numTries < 10) {
-            try {
-                etracker.deleteReference(getId());
-                succeeded = true;
-            } catch (Exception e) {
-                lastException = e;
-                
-                if (enableExponentialBackoff) {
-                    numTries++;
-                    try {
-                        Thread.sleep(sleep);
-                    } catch (InterruptedException e1) {
-                        // ignore
-                    }
-                    
-                    sleep = (sleep*3/2)+1;                    
-                } else {
-                    break;
-                }
-            }                    
-        }
-        
-        if (succeeded == false) {
-            throw new ActionExecuteException("Failed to reset event tracker " +
-                                             "state for trigger id="+getId(), 
-                                             lastException);
-        }
-    }    
     
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
