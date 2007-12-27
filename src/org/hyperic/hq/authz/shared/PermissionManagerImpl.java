@@ -71,10 +71,10 @@ public class PermissionManagerImpl
         "(SELECT rt.id FROM EAM_RESOURCE_TYPE rt WHERE rt.name = ?) ";
 
     private static final String VIEWABLE_BYNAME_SQL =
-        " AND (lower(EAM_RESOURCE.name) like lower('%$$resName$$') OR " +
+        " AND (lower(EAM_RESOURCE.name) like lower('%$$resName$$%') OR " +
         " EAM_RESOURCE.instance_id in (SELECT appdef_id FROM EAM_CPROP, " +
         " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND " +
-        " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))";
+        " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))) ";
 
     private static final String ALL_RESOURCE_SQL = 
         "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
@@ -209,7 +209,6 @@ public class PermissionManagerImpl
             }
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
  
-            stmt = conn.prepareStatement(sql);
             stmt = conn.prepareStatement(sql);
             int i = 1;
             
