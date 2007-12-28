@@ -162,11 +162,10 @@ public class EmailAction extends EmailActionConfig
                 if (to[i].useHtml()) {
                     htmlBody[i] = createText(alertDef, info, resource, alert,
                                              "html_email.gsp", user);
-                } else {
-                    body[i] = createText(alertDef, info, resource, alert, 
-                                         isSms() ? "sms_email.gsp" :
-                                                   "text_email.gsp", user);
                 }
+                body[i] = createText(alertDef, info, resource, alert, 
+                                     isSms() ? "sms_email.gsp" :
+                                         "text_email.gsp", user);
             }
 
             filter.sendAlert(appEnt, to, createSubject(alertDef, alert, resource),
