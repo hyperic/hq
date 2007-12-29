@@ -328,8 +328,8 @@ public class ScheduleThread
 
             if (timeOfNext > currTime)
             {
-                String buf = TimeUtil.toString(currTime);
                 /*
+                String buf = TimeUtil.toString(currTime);
                 this.log.debug(buf + "("+currTime+"): Sleeping " +
                                (timeOfNext-System.currentTimeMillis()) +
                                " to next batch");
