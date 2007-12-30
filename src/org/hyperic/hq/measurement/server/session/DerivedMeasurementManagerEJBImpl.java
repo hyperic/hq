@@ -1406,7 +1406,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     log.info("Enabling default metrics for [" + id + "]");
                     AuthzSubject subj = aman.findSubjectById(subject.getId());
-                    enableDefaultMetrics(subj, id, false);
+                    enableDefaultMetrics(subj, id, true);
                 }
     
                 if (isCreate) {
