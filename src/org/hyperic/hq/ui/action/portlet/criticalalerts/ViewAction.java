@@ -114,7 +114,7 @@ public class ViewAction extends BaseAction {
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
 
         int count = Integer.parseInt(dashPrefs.getValue(countKey));
-        int priority = Integer.parseInt(dashPrefs.getValue(priorityKey));
+        int priority = Integer.parseInt(dashPrefs.getValue(priorityKey).trim());
         long timeRange = Long.parseLong(dashPrefs.getValue(timeKey));
         boolean all = "all".equals(dashPrefs.getValue(selOrAllKey));
 
