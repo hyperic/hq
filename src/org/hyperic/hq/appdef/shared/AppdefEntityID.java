@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.shared;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -40,9 +41,52 @@ import org.hyperic.util.StringUtil;
 public class AppdefEntityID 
     implements Serializable
 { 
+    
+    private static final long serialVersionUID = -8149143799228813017L;
+    
+    /**
+     * @deprecated HHQ-1456: Do not use this instance variable. It is present 
+     *             only to support object deserialization on HQ instances just 
+     *             upgraded from 3.1.x to 3.2.
+     */
+    private int entityType;
+    
+    /**
+     * @deprecated HHQ-1456: Do not use this instance variable. It is present 
+     *             only to support object deserialization on HQ instances just 
+     *             upgraded from 3.1.x to 3.2.
+     */
+    private int entityID;
+    
     private int _entityType;   // APPDEF_TYPE_* from AppdefEntityConstants
     private int _entityID;     // ID from the database
     
+    /**
+     * HHQ-1456: Custom deserialization is only necessary to support HQ instances 
+     * just upgraded from 3.1.x to 3.2.
+     * 
+     * @param in The input stream containing the serialized object.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+        
+        // assign the "old" 3.1.x instance variable values to the "new" 3.2 
+        // instance variables
+        if (entityType != 0) {
+            _entityType = entityType;
+            entityType = 0;
+        }
+        
+        if (entityID != 0) {
+            _entityID = entityID;
+            entityID = 0;
+        }
+    }
+        
     /**
      * build an AppdefEntityID from a string key of the form:
      *  
