@@ -75,6 +75,7 @@ public class Metric {
     private MetricProperties props = null;
     private String id = null; //for tie-in to logging
     private String category = null;
+    private long interval = -1;
 
     private Metric() {
     }
@@ -313,6 +314,14 @@ public class Metric {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public long getInterval() {
+        return this.interval;
+    }
+
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     public boolean isAvail() {
