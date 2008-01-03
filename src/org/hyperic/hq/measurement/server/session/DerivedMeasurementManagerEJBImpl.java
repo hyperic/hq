@@ -116,7 +116,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Needed for calls back into the manager that require setting up a new
-     * transaction. (i.e. creation of measurements.
+     * transaction. (i.e. creation of measurements.)
      */
     private DerivedMeasurementManagerLocal getDMManager() {
         return DerivedMeasurementManagerEJBImpl.getOne();
@@ -445,36 +445,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Create Measurement object based on its template
-     *
-     * @param template Integer template ID to add
-     * @param id Appdef ID the templates are for
-     * @param interval Millisecond interval that the measurement is polled
-     * @param config Configuration data for the instance
-     *
-     * @return an associated DerivedMeasurement object
-     * @ejb:interface-method
-     */
-    public DerivedMeasurement createMeasurement(AuthzSubject subject,
-                                                Integer template,
-                                                AppdefEntityID id,
-                                                long interval,
-                                                ConfigResponse config)
-        throws PermissionException, MeasurementCreateException,
-               TemplateNotFoundException
-    {
-        // Authz check
-        super.checkModifyPermission(subject.getId(), id);
-
-        List dmvs = createMeasurements(subject, id,
-                                       new Integer[] { template },
-                                       new long[]    { interval },
-                                       config);
-
-        return (DerivedMeasurement) dmvs.get(0);
-    }
-
-    /**
      * Update the derived measurements of a resource
      * @ejb:interface-method
      */
@@ -488,17 +458,19 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             
             // Now see which derived measurements need to be rescheduled
             List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
-                                                                  id.getID());
-            
-            for (Iterator i = mcol.iterator(); i.hasNext();) {
+                                                                  id.getID(),
+                                                                  true);
+
+            Integer[] templates = new Integer[mcol.size()];
+            long[] intervals = new long[mcol.size()];
+            int idx = 0;
+            for (Iterator i = mcol.iterator(); i.hasNext(); idx++) {
                 DerivedMeasurement dm = (DerivedMeasurement)i.next();
-                if (dm.isEnabled()) {
-                    // A little short-cut.  We just end up looking up the
-                    // derived measurement twice.
-                    Integer tid = dm.getTemplate().getId();
-                    createMeasurement(subject, tid, id, dm.getInterval(), props);
-                }
+                templates[idx] = dm.getTemplate().getId();
+                intervals[idx] = dm.getInterval();
             }
+            createMeasurements(subject, id, templates, intervals, props);
+
         } catch (TemplateNotFoundException e) {
             // Would not happen since we're creating measurements with the
             // template that we just looked up
