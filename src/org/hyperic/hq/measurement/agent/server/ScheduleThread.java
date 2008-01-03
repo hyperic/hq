@@ -54,10 +54,8 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
-import org.hyperic.util.schedule.ScheduledItem;
 import org.hyperic.util.schedule.ScheduleException;
 import org.hyperic.util.schedule.UnscheduledItemException;
-import org.hyperic.util.TimeUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -109,7 +107,6 @@ public class ScheduleThread
         this.schedule     = new Schedule();
         this.entSchedule  = new Hashtable();
         this.shouldDie    = false;
-        this.myThread     = null;
         this.interrupter  = new Object();
         this.manager      = manager;
         this.log          = LogFactory.getLog(ScheduleThread.class);
@@ -312,7 +309,6 @@ public class ScheduleThread
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
-        this.myThread = Thread.currentThread();
         ArrayList retry = new ArrayList();
         boolean debug = log.isDebugEnabled();
 
