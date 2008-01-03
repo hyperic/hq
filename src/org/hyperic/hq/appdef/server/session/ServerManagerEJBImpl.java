@@ -1412,6 +1412,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     public List getServerTypeCounts() {
         return getServerDAO().getServerTypeCounts(); 
     }
+    
+    /**
+     * Get the # of servers within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getServerCount() {
+        return getServerDAO().getServerCount();
+    }
 
     public static ServerManagerLocal getOne() {
         try {
@@ -1433,6 +1441,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new CreateException("Could not create value pager:" + e);
         }
     }
+    
 
     public void ejbRemove() { }
     public void ejbActivate() { }

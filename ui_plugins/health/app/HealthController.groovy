@@ -99,11 +99,15 @@ class HealthController
 	}
 	
 	def index(params) {
-    	render(locals:[ diags: diagnostics,
-    	                cacheSchema: cacheSchema,
-    	                metricsPerMinute: metricsPerMinute,
-    	                databaseQueries: databaseQueries,
-    	                jvmSupportsTraces: getJVMSupportsTraces() ])
+    	render(locals:[ 
+    	    diags:             diagnostics,
+    	    cacheSchema:       cacheSchema,
+    	    metricsPerMinute:  metricsPerMinute,
+    	    numPlatforms:      resourceHelper.find(count:'platforms'),
+    	    numServers:        resourceHelper.find(count:'servers'),
+    	    numServices:       resourceHelper.find(count:'services'),
+    	    databaseQueries:   databaseQueries,
+    	    jvmSupportsTraces: getJVMSupportsTraces() ])
     }
     
 	private getMetricsPerMinute() {

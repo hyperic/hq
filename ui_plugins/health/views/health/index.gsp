@@ -237,7 +237,10 @@ getSystemStats();
     </div>  
 
     <div dojoType="ContentPane" label="${l.load}">
-      ${l.metricsPerMinute}: ${metricsPerMinute}
+      ${l.metricsPerMinute}: ${metricsPerMinute}<br>
+      ${l.numPlatforms}: ${numPlatforms}<br>
+      ${l.numServers}: ${numServers}<br>
+      ${l.numServices}: ${numServices}<br>
     </div>  
     
     <div dojoType="ContentPane" label="${l.database}">

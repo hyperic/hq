@@ -230,4 +230,8 @@ public class ServerDAO extends HibernateDAO
         return getSession().createQuery(sql).list();
     }
     
+    public Number getServerCount() {
+        return (Number)getSession().createQuery("select count(*) from Server")
+            .uniqueResult();
+    }
 }

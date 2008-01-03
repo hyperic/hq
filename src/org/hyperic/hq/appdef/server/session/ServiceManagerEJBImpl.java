@@ -1686,6 +1686,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public List getServiceTypeCounts() {
         return getServiceDAO().getServiceTypeCounts(); 
     }
+    
+    /**
+     * Get the # of services within HQ inventory
+     * @ejb:interface-method
+     */
+    public Number getServiceCount() {
+        return getServiceDAO().getServiceCount();
+    }
+    
 
     public static ServiceManagerLocal getOne() {
         try {

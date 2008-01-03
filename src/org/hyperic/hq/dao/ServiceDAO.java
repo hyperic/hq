@@ -330,4 +330,9 @@ public class ServiceDAO extends HibernateDAO
         
         return getSession().createQuery(sql).list();
     }
+    
+    public Number getServiceCount() {
+        return (Number)getSession().createQuery("select count(*) from Service")
+            .uniqueResult();
+    }
 }
