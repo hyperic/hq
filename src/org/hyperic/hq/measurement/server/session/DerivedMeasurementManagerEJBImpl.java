@@ -85,6 +85,8 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -183,10 +185,25 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
     }
 
-    private void sendAgentSchedule(Serializable obj) {
-        if (obj != null) {
-            Messenger sender = new Messenger();
-            sender.sendMessage("queue/agentScheduleQueue", obj);
+    private void sendAgentSchedule(final Serializable obj) {
+
+        // Sending of the agent schedule should only occur once the current
+        // transaction is completed.
+        try {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+
+                public void beforeCommit() {
+                }
+
+                public void afterCommit(boolean success) {
+                    if (obj != null) {
+                        Messenger sender = new Messenger();
+                        sender.sendMessage("queue/agentScheduleQueue", obj);
+                    }
+                }
+            });
+        } catch (Throwable t) {
+            log.error("Unable to send agent schedule post commit", t);
         }
     }
     
