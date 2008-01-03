@@ -44,6 +44,8 @@ import org.hyperic.util.data.IDisplayDataPoint;
 public class MetricValue
     implements IDisplayDataPoint, IComparableDatapoint, Serializable 
 {
+    private static final long serialVersionUID = 8322695266759550631L;
+    
     private double  _value;
     private long    _timestamp; 
 
