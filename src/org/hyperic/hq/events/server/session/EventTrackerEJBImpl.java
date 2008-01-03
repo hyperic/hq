@@ -101,10 +101,14 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
-        // NOTE: It appears that explicit transaction management is not necessary.
-        // Effectively, the Hibernate transaction is flushing the session. Instead 
-        // of setting the Hibernate transaction boundaries, we could just flush 
-        // the session before closing it.
+        // NOTE: Explicit txn management is not strictly necessary, since the 
+        // container actually begins/commits/rollsback the txn. Effectively, 
+        // the Hibernate txn is flushing the session when the operation succeeds 
+        // (commit) and marking the txn for rollback when the operation fails 
+        // (rollback). If we let the container manage the txn (and not use 
+        // the Hibernate txn), we would need to flush the session and make sure 
+        // a SystemException is thrown on operation failure so the container 
+        // knows to rollback the txn.
         Transaction txn = null;
         
         try {
@@ -151,10 +155,14 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
-        // NOTE: It appears that explicit transaction management is not necessary.
-        // Effectively, the Hibernate transaction is flushing the session. Instead 
-        // of setting the Hibernate transaction boundaries, we could just flush 
-        // the session before closing it.
+        // NOTE: Explicit txn management is not strictly necessary, since the 
+        // container actually begins/commits/rollsback the txn. Effectively, 
+        // the Hibernate txn is flushing the session when the operation succeeds 
+        // (commit) and marking the txn for rollback when the operation fails 
+        // (rollback). If we let the container manage the txn (and not use 
+        // the Hibernate txn), we would need to flush the session and make sure 
+        // a SystemException is thrown on operation failure so the container 
+        // knows to rollback the txn.
         Transaction txn = null;
         
         try {
@@ -194,10 +202,14 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
-        // NOTE: It appears that explicit transaction management is not necessary.
-        // Effectively, the Hibernate transaction is flushing the session. Instead 
-        // of setting the Hibernate transaction boundaries, we could just flush 
-        // the session before closing it.
+        // NOTE: Explicit txn management is not strictly necessary, since the 
+        // container actually begins/commits/rollsback the txn. Effectively, 
+        // the Hibernate txn is flushing the session when the operation succeeds 
+        // (commit) and marking the txn for rollback when the operation fails 
+        // (rollback). If we let the container manage the txn (and not use 
+        // the Hibernate txn), we would need to flush the session and make sure 
+        // a SystemException is thrown on operation failure so the container 
+        // knows to rollback the txn.
         Transaction txn = null;
         
         try {
