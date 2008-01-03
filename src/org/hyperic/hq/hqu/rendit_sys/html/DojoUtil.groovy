@@ -54,9 +54,14 @@ class DojoUtil {
     * Returns the <script> block that controls the ajax updating accordion widget.
     * The accordion is built from a json map in the form of {[ ]}
     * 
-    * Example: downResources()
+    * Example: ajaxAccordionFilter(id:'SystemsDown',
+                                refresh:60,
+                                updateURL:urlFor(action:'actionName')"
+                                filterTargetId:"updateTarget" )
     */
-    static String accordionSidebar(params) {
+    static String ajaxAccordionFilter(params) {
+        def id      = "${params.id}";
+        def idVar   = "_hqu_${params.id}"
     	def res = new StringBuffer("""
             dojo.require("dojo.io.cookie");
             dojo.require("dojo.event.topic");
@@ -65,6 +70,7 @@ class DojoUtil {
 		    var currentCountFilter;
 		    var url = "";
 		    var plugin={};plugin.accordion={};plugin.ajax={};
+		    var updateKWArgs = {};
 		    
 		    plugin.ajax.getData = function(type, data, evt) {
 		        var unique = null;
@@ -97,7 +103,16 @@ class DojoUtil {
 			                        innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
 			                    }
 			                }
-			                tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+			                if (selectedItem && typeof(selectedItem) == "string" && data[x]['id'] == selectedItem) {
+			                     unique = dojo.dom.getUniqueId();
+			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
+			                } else if (selectedItem && typeof(selectedItem) == "object" && data[x]['id'] == selectedItem.getAttribute('nodeid')) {
+			                     unique = dojo.dom.getUniqueId();
+			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
+			                } else {
+			                     tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+			                }
+			                
 			            }
 			            domTree.innerHTML = tree;
 			            if(unique) {
@@ -109,12 +124,21 @@ class DojoUtil {
 		            selectedItem = dojo.byId(unique);
 		    }
 		
-		    plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded) {
+		    plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded, unique) {
 		        var expandStyle = markExpanded?"collapse":"expand";
-		        var ret = '<div class="topCat" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
-		                  + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
-		                  + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
-		                  + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
+		        var ret;
+		        if (unique) {
+		        ret = '<div class="topCat" id="'+ unique + '" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
+                          + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
+                          + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
+                          + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
+		        } else {
+		        ret = '<div class="topCat" onclick="plugin.accordion.disableSelection(this);plugin.accordion.swapSelected(this);" nodeid="'
+                          + id + '"><div class="' + expandStyle  + '" style="width:22px;height:18px;display:inline;" onclick="plugin.accordion' 
+                          + '.swapVis(this);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div><div style="display:inline;position:relative;">'
+                          + name + " ("+count+")</div></div>"  + '<div class="resourcetypelist"';
+		        }
+		        
 		        if(markExpanded) {
 		            ret += '>' ;
 		        } else {
@@ -127,8 +151,7 @@ class DojoUtil {
 		
 		    plugin.accordion.createChild = function(name, id, count, unique) {
 		        if(unique) {
-		            domId = unique;
-		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + domId + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
+		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" id="' + unique + '" nodeid="' + id + '">' + name + ' ('+count+')</div>';
 		        } else
 		            return '<div class="listItem" onclick="plugin.accordion.swapSelected(this);plugin.accordion.itemClicked(this);" nodeid="' + id + '">' + name + ' ('+count+')</div>';
 		    };
@@ -143,22 +166,100 @@ class DojoUtil {
 		       plugin.ajax.bindMixin.url = url;
 		       dojo.io.bind(plugin.ajax.bindMixin);
 		    }
-		
-		    dojo.addOnLoad(function(){
-		        if(dojo.io.cookie.getCookie("selecteditemid")) {
-		            selectedItem = dojo.io.cookie.getCookie("selecteditemid")
-		        }
-		        if(dojo.io.cookie.getCookie("filtercount")) {
-		            currentCountFilter = dojo.byId(dojo.io.cookie.getCookie("filtercount"));
-		        } else {
-		            currentCountFilter = dojo.byId("defaultCount");
-		        }
-		        plugin.ajax.bind("/hqu/systemsdown/systemsdown/summary.hqu?q=all");
-		    });
 		    
-		    setInterval(function(){
-		        plugin.ajax.bind("/hqu/systemsdown/systemsdown/summary.hqu?q=all");
-		    }, ${params.refresh}*1000);
+    
+            plugin.accordion.updateCallback = function(name){
+                return updateKWArgs;
+            }
+            
+            plugin.accordion.itemClicked = function(item) {
+                updateKWArgs = {'typeId' : item.getAttribute("nodeid")};
+            }
+        
+            plugin.accordion.swapVis = function(elem) {
+                plugin.accordion.disableSelection(elem);
+                var sib = elem.parentNode.nextSibling;
+                if (dojo.html.getStyleProperty(sib, 'display') == 'none') {
+                    sib.style.display = 'block';
+                    elem.className="collapse";
+                } else {
+                    sib.style.display = 'none';
+                    elem.className="expand";
+                }
+                //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+            }
+        
+            plugin.accordion.swapSelected = function(elem) {
+                plugin.accordion.disableSelection(elem);
+                if (selectedItem && typeof(selectedItem) == 'object') {
+                    selectedItem.style.padding = '3px 0px 3px 0px';
+                    selectedItem.style.border = '';
+                    selectedItem.style.background = '';
+                }
+                selectedItem = elem;
+                dojo.io.cookie.setCookie('selecteditemid', elem.getAttribute('nodeid'));
+                plugin.accordion.setSelected(selectedItem);
+                plugin.accordion.itemClicked(elem);
+                plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
+            }
+        
+            plugin.accordion.setSelected = function(elem) {
+                elem.style.padding = '3px 0px 3px 0px';
+                elem.style.border = '1px solid #dddddd';
+                elem.style.background = '#88BDEE none repeat scroll 0%';
+            }
+        
+            plugin.accordion.disableSelection = function(element) {
+                element.onselectstart = function() {
+                    return false;
+                };
+                element.unselectable = "on";
+                element.style.MozUserSelect = "none";
+            }
+        
+            plugin.accordion.openAll = function() {
+                var tree = document.getElementById('resourceTree');
+                var x = tree.getElementsByTagName('div');
+                for (var i = 0; i < x.length; i++) {
+                    if (x[i].className == 'resourcetypelist') {
+                        x[i].style.display = '';
+                    } else if (x[i].className == 'expand') {
+                        x[i].className = 'collapse';
+                    }
+                }
+            }
+        
+            plugin.accordion.closeAll = function() {
+                var tree = document.getElementById('resourceTree');
+                var x = tree.getElementsByTagName('div');
+                for (var i = 0; i < x.length; i++) {
+                    if (x[i].className == 'resourcetypelist') {
+                        x[i].style.display = 'none';
+                    } else if (x[i].className == 'collapse') {
+                        x[i].className = 'expand';
+                    }
+                }
+            }
+            
+    		dojo.addOnLoad(function(){
+                //Register update callback
+                 ${params.filterTargetId}_addUrlXtraCallback(plugin.accordion.updateCallback);
+                
+                if(dojo.io.cookie.getCookie("selecteditemid")) {
+                    selectedItem = dojo.io.cookie.getCookie("selecteditemid")
+                    updateKWArgs = {'typeId' : selectedItem};
+                }
+                if(dojo.io.cookie.getCookie("filtercount")) {
+                    currentCountFilter = dojo.byId(dojo.io.cookie.getCookie("filtercount"));
+                } else {
+                    currentCountFilter = dojo.byId("defaultCount");
+                }
+                plugin.ajax.bind("${params.updateURL}");
+            });
+            
+            setInterval(function(){
+                plugin.ajax.bind("${params.updateURL}");
+            }, ${params.refresh}*1000);
         """)
         res.toString();
     }

@@ -1,104 +1,7 @@
 <script type="text/javascript">
-    <%= accordionSidebar( refresh:60 ) %>
-    plugin.accordion.itemClicked = function(item) {
-        var url = '&nodeid=' + item.nodeid;
-        //mixin with the table update
-    }
-
-    plugin.accordion.swapVis = function(elem) {
-        plugin.accordion.disableSelection(elem);
-        var sib = elem.parentNode.nextSibling;
-        if (dojo.html.getStyleProperty(sib, 'display') == 'none') {
-            sib.style.display = 'block';
-            elem.className="collapse";
-        } else {
-            sib.style.display = 'none';
-            elem.className="expand";
-        }
-        //plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-    }
-
-    plugin.accordion.swapSelected = function(elem) {
-        plugin.accordion.disableSelection(elem);
-        if (selectedItem && typeof(selectedItem) == 'object') {
-            selectedItem.style.padding = '3px 0px 3px 0px';
-            selectedItem.style.border = '';
-            selectedItem.style.background = '';
-        }
-        selectedItem = elem;
-        dojo.io.cookie.setCookie('selecteditemid', elem.getAttribute('nodeid'));
-        plugin.accordion.setSelected(selectedItem);
-        plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
-    }
-
-    plugin.accordion.setSelected = function(elem) {
-        elem.style.padding = '3px 0px 3px 0px';
-        elem.style.border = '1px solid #dddddd';
-        elem.style.background = '#88BDEE none repeat scroll 0%';
-    }
-
-    plugin.accordion.disableSelection = function(element) {
-        element.onselectstart = function() {
-            return false;
-        };
-        element.unselectable = "on";
-        element.style.MozUserSelect = "none";
-    }
-
-    plugin.accordion.openAll = function() {
-        var tree = document.getElementById('resourceTree');
-        var x = tree.getElementsByTagName('div');
-        for (var i = 0; i < x.length; i++) {
-            if (x[i].className == 'resourcetypelist') {
-                x[i].style.display = '';
-                // setselColor(x[i])
-            }
-        }
-    }
-
-    plugin.accordion.closeAll = function() {
-        var tree = document.getElementById('resourceTree');
-        var x = tree.getElementsByTagName('div');
-        for (var i = 0; i < x.length; i++) {
-            if (x[i].className == 'resourcetypelist') {
-                x[i].style.display = 'none';
-                //setunselColor(x[i])
-            }
-        }
-    }
-
-    plugin.accordion.setExpandAll = function() {
-        var tree = document.getElementById('resourceTree');
-        var x = tree.getElementsByTagName('div');
-        for (var i = 0; i < x.length; i++) {
-            if (x[i].className == 'unexpand') {
-                x[i].className == 'expand';
-                //setunselColor(x[i])
-            }
-        }
-    }
-
-    plugin.accordion.setUnexpandAll = function() {
-        var tree = document.getElementById('resourceTree');
-        var x = tree.getElementsByTagName('div');
-        for (var i = 0; i < x.length; i++) {
-            if (x[i].className == 'expand') {
-                x[i].className == 'unexpand';
-                //setunselColor(x[i])
-            }
-        }
-    }
-
-    plugin.accordion.setselColor = function(elem) {
-        elem.style.backgroundColor = "#EEf3f3";
-    }
-
-    plugin.accordion.setunselColor = function(elem) {
-        elem.style.backgroundColor = "#ffffff";
-    }
-
+    <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {
-        SystemsDown_refreshTable(kwArgs);
+        SystemsDown_refreshTable();
     }
 
     function updateFilterCount(count, obj) {
@@ -138,7 +41,7 @@
     
     new plugin.MessagePanel();
     
-   
+    
 </script>
 <div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
 <div class="downContainer" style="clear:both;">
