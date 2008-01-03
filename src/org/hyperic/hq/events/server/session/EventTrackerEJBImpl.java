@@ -50,7 +50,9 @@ import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 
 /**
- * Maintains the event state for each trigger.
+ * Maintains the event state for each trigger. Event state changes are performed 
+ * within a new Hibernate session so these changes are visible immediately to 
+ * to other sessions.
  * 
  * @ejb:bean name="EventTracker"
  *      jndi-name="ejb/events/EventTracker"
@@ -99,6 +101,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
+        // NOTE: It appears that explicit transaction management is not necessary.
+        // Effectively, the Hibernate transaction is flushing the session. Instead 
+        // of setting the Hibernate transaction boundaries, we could just flush 
+        // the session before closing it.
         Transaction txn = null;
         
         try {
@@ -145,6 +151,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
+        // NOTE: It appears that explicit transaction management is not necessary.
+        // Effectively, the Hibernate transaction is flushing the session. Instead 
+        // of setting the Hibernate transaction boundaries, we could just flush 
+        // the session before closing it.
         Transaction txn = null;
         
         try {
@@ -184,6 +194,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         Session session = triggerEventDAO.getNewSession();
         
+        // NOTE: It appears that explicit transaction management is not necessary.
+        // Effectively, the Hibernate transaction is flushing the session. Instead 
+        // of setting the Hibernate transaction boundaries, we could just flush 
+        // the session before closing it.
         Transaction txn = null;
         
         try {
