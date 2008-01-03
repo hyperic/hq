@@ -104,6 +104,7 @@ public abstract class Collector implements Runnable {
 
     private int timeout = -1;
     private long startTime, endTime;
+    private long interval = -1;
     private static Map compatAliases = new HashMap();
     
     static {
@@ -399,7 +400,28 @@ public abstract class Collector implements Runnable {
     public MetricValue getValue(Metric metric, CollectorResult result) {
         return result.getMetricValue(metric.getAttributeName());
     }
-   
+
+    //interval is used to make collection to happen 1 minute before
+    //the Availability metric is scheduled to be collected
+    private static void setInterval(MeasurementPlugin plugin,
+                                    Collector collector, Metric metric) {
+        long interval = metric.getInterval();
+        boolean isAvail = 
+            metric.getAttributeName().equals(Metric.ATTR_AVAIL);
+
+        if ((isAvail || (collector.interval == -1)) &&
+            (interval > 0) &&
+            (collector.interval != interval))
+        {
+            collector.interval = metric.getInterval();
+            if (log.isDebugEnabled()) {
+                log.debug("Set itv=" + (collector.interval / MINUTE) +
+                          "min for " + plugin.getName() +
+                          " collector: " + collector);
+            }
+        }
+    }
+
     public static MetricValue getValue(MeasurementPlugin plugin,
                                        Metric metric)
         throws PluginException,
@@ -436,6 +458,7 @@ public abstract class Collector implements Runnable {
             try {
                 value = collector.getValue(metric, result);
             } finally {
+                setInterval(plugin, collector, metric); //sync
                 if (setClassLoader) {
                     PluginLoader.resetClassLoader(collector);
                 }
@@ -457,6 +480,7 @@ public abstract class Collector implements Runnable {
 
             try {
                 collector.setProperties(props);
+                setInterval(plugin, collector, metric);
                 collector.init();
             } finally {
                 if (setClassLoader) {
@@ -601,6 +625,7 @@ public abstract class Collector implements Runnable {
 
         for (int i=0; i<pluginCollectors.size(); i++) {
             Collector collector = (Collector)pluginCollectors.get(i);
+            long interval = collector.interval;
             CollectorResult result =
                 (CollectorResult)container.results.get(collector.props);
             int size;
@@ -608,12 +633,43 @@ public abstract class Collector implements Runnable {
                 !result.collected &&
                 ((size = result.values.size()) != 0))
             {
-                if (isDebug) {
-                    log.debug(collector +
-                              " ran " + lastRun(result.timestamp) +
-                              " (" + size + " values) but hasn't been collected yet, skipping.");
+                boolean shouldSkip = true;
+
+                if (interval != -1) {
+                    long delta =
+                        System.currentTimeMillis() - result.timestamp;
+                    if (delta >= (interval-MINUTE)) {
+                        //ScheduleThread should be picking this up
+                        //within the next minute, so collect now.
+                        shouldSkip = false;
+                    }
                 }
-                continue;
+                String msg = null;
+                if (isDebug) {
+                    String itv;
+                    if (interval == -1) {
+                        itv = "unknown";
+                    }
+                    else {
+                        itv = (interval / MINUTE) + "min";
+                    }
+                    msg =
+                        collector +
+                        " ran " + lastRun(result.timestamp) +
+                        " (" + size + " vals) " +
+                        itv + " itv: ";
+                }
+                if (shouldSkip) {
+                    if (isDebug) {
+                        log.debug(msg + "deferring.");
+                    }
+                    continue;
+                }
+                else {
+                    if (isDebug) {
+                        log.debug(msg + "collecting.");
+                    }
+                }
             }
 
             if (executor.isPoolable() && collector.isPoolable()) {
