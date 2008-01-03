@@ -286,10 +286,15 @@ public class ScheduleThread
         }
     }
 
-    private MetricValue getValue(String template, int type, int id, String category)
+    private MetricValue getValue(ScheduledMeasurement meas)
         throws PluginException, PluginNotFoundException,
                MetricNotFoundException, MetricUnreachableException
     {
+        String template = meas.getDSN();
+        AppdefEntityID aid = meas.getEntity();
+        int id = aid.getID();
+        int type = aid.getType();
+
         //duplicating some code from MeasurementPluginManager
         //so we can do Metric.setId
         int ix = template.indexOf(":");
@@ -297,7 +302,8 @@ public class ScheduleThread
         String metric = template.substring(ix+1, template.length());
         Metric parsedMetric = Metric.parse(metric);
         parsedMetric.setId(type, id);
-        parsedMetric.setCategory(category);
+        parsedMetric.setCategory(meas.getCategory());
+        parsedMetric.setInterval(meas.getInterval());
         return this.manager.getValue(plugin, parsedMetric);    
     }
 
@@ -435,7 +441,7 @@ public class ScheduleThread
                 //        Maybe send some kind of error back to the
                 //        bizapp?
                 try {
-                    data    = getValue(dsn, type, id, category);
+                    data    = getValue(meas);
                     success = true;
                     this.clearLogCache(dsn);
                 } catch(PluginNotFoundException exc){
