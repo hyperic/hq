@@ -86,7 +86,7 @@ public class AgentScheduleSynchronizer {
         try {
             SRNManagerEJBImpl.getOne().reschedule(eid);
         } catch(Exception e) {
-            _log.warn("Exception, scheduling [" + eid + "]", e);
+            _log.warn("Exception scheduling [" + eid + "]: " + e.getMessage());
         }
     }
 
