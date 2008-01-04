@@ -923,7 +923,7 @@
               name="MonitoringConfigForm"
               scope="request"
               type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
-        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+        <set-property property="title" value="Admin.Monitor.MetricTemplate"/>
       </action>
  
       <action path="/resource/platform/monitor/config/ConfigMetrics"
