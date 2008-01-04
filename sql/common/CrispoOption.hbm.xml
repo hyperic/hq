@@ -26,6 +26,7 @@
     </many-to-one>
     
     <list name="array" table="EAM_CRISPO_ARRAY">
+        <cache usage="read-write"/>
         <key column="OPT_ID"/>
         <list-index column="IDX"/>
         <element type="string" column="VAL" not-null="true"/>
