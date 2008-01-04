@@ -1,7 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
-import org.hyperic.hq.appdef.server.session.Agent
+import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class AgentHelper extends BaseHelper {
