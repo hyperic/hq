@@ -73,6 +73,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
              TAB_TRIGGER_EVENT + " WHERE event_id = id)";
     
     private SessionContext ctx = null;
+    
+    private final int deleteFudgeFactor = 
+        Math.max(Integer.getInteger("org.hq.eventtracker.delete.factor", 10000).intValue(), 0);
 
     ///////////////////////////////////////
     // operations
@@ -253,7 +256,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
             // have not been referenced by the triggers yet
             try {
                 stmt = conn.prepareStatement(SQL_CLEANUP);
-                stmt.setLong(1, current - 10000);
+                stmt.setLong(1, current - deleteFudgeFactor);
                 stmt.execute();
             } finally {
                 // Close the statement
