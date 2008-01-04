@@ -31,6 +31,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.ui.json.JSONResult;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
@@ -70,10 +71,16 @@ public class UpdateEscalation
             ContextUtils.getEventsBoss(context.getServletContext());
         Escalation escalation = eBoss.findEscalationById(context.getSessionId(),
                                                          id);
-        eBoss.updateEscalation(context.getSessionId(), escalation,
-                               name, desc, maxWait, pausable, notifyAll);
-        
-        JSONObject result = Escalation.getJSON(escalation);
+        JSONObject result;
+        try {
+            eBoss.updateEscalation(context.getSessionId(), escalation, name,
+                    desc, maxWait, pausable, notifyAll);
+            result = Escalation.getJSON(escalation);
+        } catch (DuplicateObjectException exception) {
+            // An escalation by this name already exists show error msg.
+            result = new JSONObject();
+            result.put("error", "An escalation with this name already exists.");
+        }
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute(Escalation.JSON_NAME, result);
     }

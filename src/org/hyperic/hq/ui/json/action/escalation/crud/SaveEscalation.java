@@ -30,6 +30,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
@@ -62,22 +63,27 @@ public class SaveEscalation
         EscalationAlertType alertType = null;
         Integer alertDefId = null;
 
-        if (aDef != null && !"undefined".equals(aDef[0])) {
+        if (aDef != null && !"undefined".equals(aDef[0]) && aDef[0].length() > 0) {
             alertType  = ClassicEscalationAlertType.CLASSIC;
             alertDefId = Integer.valueOf(aDef[0]);
-        } else if (gaDef != null && !"undefined".equals(gaDef[0])) {
+        } else if (gaDef != null && !"undefined".equals(gaDef[0]) && aDef[0].length() > 0) {
             alertType  = GalertEscalationAlertType.GALERT;
             alertDefId = Integer.valueOf(gaDef[0]);
         }
         
         EventsBoss eBoss  = 
             ContextUtils.getEventsBoss(context.getServletContext());
-
-        Escalation e = eBoss.createEscalation(context.getSessionId(), name, 
-                                              desc, pausable, maxWait, 
-                                              notifyAll, alertType, alertDefId); 
-        
-        JSONObject result = Escalation.getJSON((e));
+        JSONObject result;
+        try {
+            Escalation e = eBoss.createEscalation(context.getSessionId(), name, 
+                                                  desc, pausable, maxWait, 
+                                                  notifyAll, alertType, alertDefId); 
+             result = Escalation.getJSON((e));
+        } catch (DuplicateObjectException exception) {
+            //An escalation by this name already exists show error msg.
+            result = new JSONObject();
+            result.put("error", "An escalation with this name already exists.");
+        }
         context.setJSONResult(new JSONResult(result));
         context.getRequest().setAttribute(Escalation.JSON_NAME, result);
     }
