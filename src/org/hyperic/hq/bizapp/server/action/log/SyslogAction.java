@@ -31,6 +31,9 @@
 
 package org.hyperic.hq.bizapp.server.action.log;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -113,9 +116,10 @@ public class SyslogAction extends SyslogActionConfig
     }
 
     
-    public void send(Escalatable e, EscalationStateChange change, 
-                     String message) 
+    public Collection send(Escalatable e, EscalationStateChange change, 
+                           String message, Set notified) 
     {
         _log.info(message);
+        return null;
     }
 }

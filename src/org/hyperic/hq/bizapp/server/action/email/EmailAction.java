@@ -29,10 +29,12 @@ import java.io.File;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -266,8 +268,8 @@ public class EmailAction extends EmailActionConfig
         init(cfg);
     }
 
-    public void send(Escalatable alert, EscalationStateChange change, 
-                     String message)
+    public Collection send(Escalatable alert, EscalationStateChange change, 
+                           String message, Set notified)
         throws ActionExecuteException 
     {
         PerformsEscalations def = alert.getDefinition();
@@ -276,16 +278,25 @@ public class EmailAction extends EmailActionConfig
 
         EmailFilter filter = new EmailFilter();
 
-        for (Iterator it = addrs.keySet().iterator(); it.hasNext(); ) {
-            EmailRecipient rec = (EmailRecipient) it.next();
+        for (Iterator it = addrs.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            EmailRecipient rec = (EmailRecipient) entry.getKey();
+            
+            // Don't notify again if already notified
+            if (notified.contains(rec.getAddress())) {
+                it.remove();
+                continue;
+            }
+            
             rec.setHtml(false);
+            notified.add(rec.getAddress());
         }
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
         String[] messages = new String[addrs.size()];
         Arrays.fill(messages, message);
         
         EmailRecipient[] to = (EmailRecipient[])
-        addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
+            addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
 
         AppdefEntityID appEnt = getResource(defInfo);
         ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
@@ -296,5 +307,7 @@ public class EmailAction extends EmailActionConfig
                          createSubject(defInfo, alert.getAlertInfo(), resource)
                          + " " + change.getDescription(), 
                          messages, messages, defInfo.getPriority(), false);
+        
+        return null;
     }
 }

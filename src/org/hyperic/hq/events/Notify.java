@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.events;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.events.server.session.Action;
@@ -43,7 +46,7 @@ public interface Notify {
      * @param change  New state of the escalation
      * @param message Message about the state change
      */
-    public void send(Escalatable e, EscalationStateChange change, 
-                     String message)
+    public Collection send(Escalatable e, EscalationStateChange change, 
+                           String message, Set notified)
         throws ActionExecuteException;
 }

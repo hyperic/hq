@@ -26,8 +26,10 @@
 package org.hyperic.hq.escalation.server.session;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -696,6 +698,7 @@ public class EscalationManagerEJBImpl
         List actions = state.getEscalation().getActions();
         int idx = (notifyAll ? actions.size() : state.getNextAction()) - 1;
 
+        Set prior = new HashSet();
         while (idx >= 0) {
             EscalationAction ea = (EscalationAction)actions.get(idx--);
             Action a = (Action)ea.getAction();
@@ -708,8 +711,13 @@ public class EscalationManagerEJBImpl
                     continue;
                 
                 n = (Notify)a.getInitializedAction();
-                n.send(alert, fixed ? EscalationStateChange.FIXED :
-                                      EscalationStateChange.ACKNOWLEDGED, msg);
+                Collection notified =
+                    n.send(alert, fixed ? EscalationStateChange.FIXED :
+                                      EscalationStateChange.ACKNOWLEDGED,
+                           msg, prior);
+                
+                if (notified != null)
+                    prior.addAll(notified);
             } catch(Exception e) {
                 _log.warn("Unable to send notification alert", e);
             }
