@@ -37,6 +37,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -497,5 +498,74 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             "and st.name = 'HQ Agent' "; 
 
         return getSession().createQuery(sql).list();
+    }
+    
+    /**
+     * @see DerivedMeasurementManagerEJBImpl#findNumMetricsPerAgent()
+     */
+    Map findNumMetricsPerAgent() {
+        String platSQL = 
+            "select a.id, count(m) from Agent a " + 
+            "join a.platforms p, " +
+            "Measurement as m " + 
+            "join m.template templ " + 
+            "join templ.monitorableType monType " + 
+            "where " + 
+            " monType.appdefType = '1' and m.instanceId = p.id " + 
+            "and m.enabled = true " + 
+            "group by a";
+        String serverSQL = 
+            "select a.id, count(m) from Agent a " + 
+            "join a.platforms p " +
+            "join p.servers s, " +
+            "Measurement as m " + 
+            "join m.template templ " + 
+            "join templ.monitorableType monType " + 
+            "where " + 
+            " monType.appdefType = '2' and m.instanceId = s.id " + 
+            "and m.enabled = true " + 
+            "group by a";
+        String serviceSQL = 
+            "select a.id, count(m) from Agent a " + 
+            "join a.platforms p " +
+            "join p.servers s " +
+            "join s.services v, " +
+            "Measurement as m " + 
+            "join m.template templ " + 
+            "join templ.monitorableType monType " + 
+            "where " + 
+            " monType.appdefType = '3' and m.instanceId = v.id " + 
+            "and m.enabled = true " + 
+            "group by a";
+        String[] queries = {platSQL, serverSQL, serviceSQL};
+        Map idToCount = new HashMap();
+        
+        for (int i=0; i<queries.length; i++) {
+            List tuples = getSession().createQuery(queries[i]).list();
+            
+            for (Iterator j=tuples.iterator(); j.hasNext(); ) {
+                Object[] tuple = (Object[])j.next();
+                Integer id = (Integer)tuple[0];
+                java.lang.Number count = (java.lang.Number)tuple[1];
+                Long curCount;
+                
+                curCount = (Long)idToCount.get(id);
+                if (curCount == null) {
+                    curCount = new Long(0);
+                }
+                curCount = new Long(curCount.longValue() + count.longValue());
+                idToCount.put(id, curCount);
+            }
+        }
+        
+        Map res = new HashMap(idToCount.size());
+        for (Iterator i=idToCount.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry ent = (Map.Entry)i.next();
+            Integer id = (Integer)ent.getKey();
+            Long count = (Long)ent.getValue();
+            
+            res.put(AgentManagerEJBImpl.getOne().findAgentPojo(id), count);
+        }
+        return res;
     }
 }

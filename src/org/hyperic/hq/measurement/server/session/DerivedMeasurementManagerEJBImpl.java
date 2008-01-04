@@ -46,6 +46,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -1375,6 +1376,17 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         return getDerivedMeasurementDAO().findAgentOffsetTuples();
     }
     
+    /**
+     * Get the # of metrics that each agent is collecting.
+     * 
+     * @return a map of {@link Agent} onto Longs indicating how many metrics
+     *         that agent is collecting. 
+     * @ejb:interface-method
+     */
+    public Map findNumMetricsPerAgent() {
+        return getDerivedMeasurementDAO().findNumMetricsPerAgent();
+    }
+
     /**
      * Handle events from the {@link MeasurementEnabler}.  This method
      * is required to place the operation within a transaction (and session)
