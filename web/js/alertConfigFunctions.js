@@ -22,6 +22,18 @@
 // USA.
 
 /*-- START alertConfigFunctions.js --*/
+
+function resetNote(){
+    dojo.byId('baselineNotCalcMsg').style.display='none';
+}
+function toggleNoBaselineMessage(obj){
+	if(this.length <= 2 && obj.selectedIndex == 1){
+	   dojo.byId('baselineNotCalcMsg').style.display='inline';
+	}
+	else{
+	   dojo.byId('baselineNotCalcMsg').style.display='none';
+	}
+}
 function selectMetric(selName, hidName) {
   var sel = document.getElementsByName(selName)[0];
   var selValue = sel[sel.selectedIndex].value;
