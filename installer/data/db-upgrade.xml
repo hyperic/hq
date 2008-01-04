@@ -6866,6 +6866,10 @@ has already been defined.
       </schema-directSQL>                        
     </schemaSpec>
 
+    <schemaSpec version="3.57.1">
+      <removeOrphanedResources/>
+    </schemaSpec>
+
     <schemaSpec version="3.58">
       <schema-addColumn table="EAM_RESOURCE" column="PROTO_ID" 
                         columnType="INTEGER"/>
