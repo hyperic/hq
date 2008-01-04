@@ -311,19 +311,31 @@
     <td class="ListCellCheckboxLeftLine" nowrap>
     <span id="<c:out value="avail${metricDisplaySummary.templateId}"/>">
     <c:choose>
-      <c:when test="${metricDisplaySummary.metrics[last].value == 1}">
-      <html:img page="/images/icon_available_green.gif" width="12" height="12" alt="" border="0" align="absmiddle"/>
-      </c:when>
-      <c:when test="${metricDisplaySummary.metrics[last].value == 0}">
-      <html:img page="/images/icon_available_red.gif" width="12" height="12" alt="" border="0" align="absmiddle"/>
-      </c:when>
-      <c:when test="${metricDisplaySummary.metrics[last].value == -0.01}">
-      <html:img page="/images/icon_available_orange.gif" width="12" height="12" alt="" border="0" align="absmiddle"/>
-      </c:when>
-      <c:otherwise>
-      <html:img page="/images/icon_available_yellow.gif" width="12" height="12" alt="" border="0" align="absmiddle"/>
-      </c:otherwise>
-    </c:choose>
+         <c:when test="${metricDisplaySummary.label eq 'Availability'}">
+             <c:choose>
+                 <c:when test="${metricDisplaySummary.metrics[last].value == 1}">
+                     <html:img page="/images/icon_available_green.gif" width="12" height="12" alt="" border="0"
+                               align="absmiddle"/>
+                 </c:when>
+                 <c:when test="${metricDisplaySummary.metrics[last].value == 0}">
+                     <html:img page="/images/icon_available_red.gif" width="12" height="12" alt="" border="0"
+                               align="absmiddle"/>
+                 </c:when>
+                 <c:when test="${metricDisplaySummary.metrics[last].value == -0.01}">
+                     <html:img page="/images/icon_available_orange.gif" width="12" height="12" alt="" border="0"
+                               align="absmiddle"/>
+                 </c:when>
+                 <c:otherwise>
+                     <html:img page="/images/icon_available_yellow.gif" width="12" height="12" alt="" border="0"
+                               align="absmiddle"/>
+                 </c:otherwise>
+             </c:choose>
+         </c:when>
+         <c:otherwise>
+             <!--icon not shown for system uptime -->
+             <html:img page="/images/spacer.gif" width="12" height="12" alt="" border="0" align="absmiddle"/>
+         </c:otherwise>
+     </c:choose>
     </span>
     </td>
       </c:when>
