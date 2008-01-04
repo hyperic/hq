@@ -601,8 +601,8 @@ public abstract class Collector implements Runnable {
     private static final long HOUR   = 60 * MINUTE;
     private static final long DAY    = 24 * HOUR;
 
-    private static String lastRun(long time) {
-        long delta = System.currentTimeMillis() - time;
+    private static String lastRun(long now, long time) {
+        long delta = now - time;
 
         if ((delta / MINUTE) < 1) {
             long seconds = delta/SECOND;
@@ -642,17 +642,20 @@ public abstract class Collector implements Runnable {
 
             CollectorResult result =
                 (CollectorResult)container.results.get(collector.props);
-            int size;
+
             if ((result != null) &&
-                ((size = result.values.size()) != 0))
+                (result.values.size() != 0))
             {
+                long now = System.currentTimeMillis();
                 boolean shouldSkip = true;
                 if ((interval != -1) && (lastCollection != -1)) {
-                    long delta =
-                        System.currentTimeMillis() - lastCollection;
-                    if (delta >= (interval-MINUTE)) {
+                    if ((now - lastCollection) >= interval-MINUTE) {
                         //ScheduleThread should be picking this up
                         //within the next minute, so collect now.
+                        shouldSkip = false;
+                    }
+                    else if ((now - result.timestamp) >= interval) {
+                        //not in sync w/ ScheduleThread
                         shouldSkip = false;
                     }
                 }
@@ -672,13 +675,12 @@ public abstract class Collector implements Runnable {
                         coll = "n/a";
                     }
                     else {
-                        coll = lastRun(lastCollection);
+                        coll = lastRun(now, lastCollection);
                     }
                     msg =
                         collector +
-                        " collected " + coll + "," +
-                        " ran " + lastRun(result.timestamp) +
-                        " (" + size + " vals) " +
+                        " ran " + lastRun(now, result.timestamp) + "," +
+                        " consumed " + coll + ", " +
                         itv + " itv: ";
                 }
                 if (shouldSkip) {
