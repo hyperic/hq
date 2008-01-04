@@ -241,6 +241,7 @@ getSystemStats();
       ${l.numPlatforms}: ${numPlatforms}<br>
       ${l.numServers}: ${numServers}<br>
       ${l.numServices}: ${numServices}<br>
+      ${l.numAgents}: ${numAgents}<br>
     </div>  
     
     <div dojoType="ContentPane" label="${l.database}">
@@ -255,7 +256,14 @@ getSystemStats();
       </div>
       <div id="queryData">
       </div>
+    </div>
+    
+    <div dojoType="ContentPane" label="${l.agents}">
+      <%= dojoTable(id:'agentTable', title:l.agents,
+                    refresh:600, url:urlFor(action:'agentData'),
+                    schema:agentSchema, numRows:15) %>
     </div>  
+    
   </div>
 </div>
 

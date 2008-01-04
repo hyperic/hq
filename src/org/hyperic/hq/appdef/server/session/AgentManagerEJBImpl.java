@@ -31,11 +31,13 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.FileData;
@@ -148,6 +150,19 @@ public class AgentManagerEJBImpl
         }
     }
 
+    /**
+     * Get a paged list of agents in the system.  
+     * 
+     * @param pInfo a pager object, with an {@link AgentSortField} sort field
+     * 
+     * @return a list of {@link Agent}s
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public List findAgents(PageInfo pInfo) {
+        return getAgentDAO().findAgents(pInfo);
+    }
+    
     /**
      * Get a list of all the agents in the system
      * @ejb:interface-method

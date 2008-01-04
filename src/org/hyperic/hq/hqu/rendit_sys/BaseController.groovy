@@ -8,6 +8,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
+import org.hyperic.hq.hqu.rendit.helpers.AgentHelper
 import org.hyperic.hq.hqu.rendit.helpers.AlertHelper
 import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
@@ -225,6 +226,10 @@ abstract class BaseController {
     
     protected AuthzSubject getUser() {
         invokeArgs.user 
+    }
+    
+    protected AgentHelper getAgentHelper() {
+        new AgentHelper(user)
     }
     
     protected AlertHelper getAlertHelper() {

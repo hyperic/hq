@@ -26,11 +26,14 @@
 package org.hyperic.hq.dao;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.hibernate.Query;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.appdef.shared.AgentValue;
+import org.hyperic.hq.appdef.server.session.AgentSortField;
 
 public class AgentDAO extends HibernateDAO
 {
@@ -85,4 +88,19 @@ public class AgentDAO extends HibernateDAO
             .list();
     }
 
+    public List findAgents(PageInfo pInfo) {
+        AgentSortField sort = (AgentSortField)pInfo.getSort();
+        String sql = "select a from Agent a " +
+                     " order by " + sort.getSortString("a") + 
+                     (pInfo.isAscending() ? "" : " DESC");
+    
+        // Secondary sort by CTime
+        if (!sort.equals(AgentSortField.CTIME)) {
+            sql += ", " + AgentSortField.CTIME.getSortString("a") + " DESC"; 
+        }
+        
+        Query q = getSession().createQuery(sql);
+        
+        return pInfo.pageResults(q).list();
+    }
 }

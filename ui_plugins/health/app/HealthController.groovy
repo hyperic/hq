@@ -2,6 +2,7 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImp
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.AgentSortField
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -30,9 +31,46 @@ import net.sf.ehcache.CacheManager
 class HealthController 
 	extends BaseController
 {
+    private final DateFormat df = 
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+    
     def HealthController() {
         onlyAllowSuperUsers()
-        setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 'runQuery'])
+        setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
+                        'agentData', 'runQuery'])
+    }
+    
+    private getAgentSchema() {
+        [
+            getData: {pageInfo, params ->
+                agentHelper.find(withPaging: pageInfo)
+            },
+            defaultSort: AgentSortField.CTIME,
+            defaultSortOrder: 1,
+            rowId: {it.id},
+            columns: [
+                [field: AgentSortField.ADDR,
+                 width: '20%',
+                 label: {it.address}],
+                [field: AgentSortField.PORT,
+                 width: '20%',
+                 label: {it.port}],
+                [field: AgentSortField.VERSION,
+                 width: '20%',
+                 label: {it.version}],
+                [field: AgentSortField.CTIME,
+                 width: '20%',
+                 label: {df.format(it.creationTime)}],
+                [field:[getValue: {localeBundle.numPlatforms},
+                        description:'numPlatforms', sortable:false], 
+                 width:'20%',
+                 label:{it.platforms.size()}],
+            ],
+        ]   
+    }
+    
+    def agentData(params) {
+        DojoUtil.processTableRequest(agentSchema, params)
     }
     
     private getCacheSchema() {
@@ -102,10 +140,12 @@ class HealthController
     	render(locals:[ 
     	    diags:             diagnostics,
     	    cacheSchema:       cacheSchema,
+    	    agentSchema:       agentSchema,
     	    metricsPerMinute:  metricsPerMinute,
     	    numPlatforms:      resourceHelper.find(count:'platforms'),
     	    numServers:        resourceHelper.find(count:'servers'),
     	    numServices:       resourceHelper.find(count:'services'),
+    	    numAgents:         agentHelper.find(count:'agents'),
     	    databaseQueries:   databaseQueries,
     	    jvmSupportsTraces: getJVMSupportsTraces() ])
     }
