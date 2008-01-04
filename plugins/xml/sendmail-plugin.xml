@@ -44,7 +44,7 @@
     msgdir="/usr/spool/mqueue" &amp;&amp;
     premsgdir="/usr/spool/clientmqueue"
 
-[ -z "$msgdir" ] &amp;&amp;
+[ -z "$msgdir" -o ! -r "$msgdir" ] &amp;&amp;
     exit 1
 
 cd $msgdir
