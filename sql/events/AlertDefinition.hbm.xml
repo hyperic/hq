@@ -69,7 +69,7 @@
     </property>
 
     <property name="range" type="long">
-      <column name="RANGE"/>
+      <column name="TRANGE"/>
     </property>
 
     <property name="willRecover" type="boolean">

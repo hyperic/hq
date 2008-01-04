@@ -2841,7 +2841,8 @@ has already been defined.
            </initializer>
          </schema-addColumn>
          <schema-alterColumn table="EAM_REQUEST_STAT" quoteDefault="f" 
-                             column="VERSION_COL" default="0" nullable="NOT NULL"/>        <schema-directSQL>
+                             column="VERSION_COL" default="0" nullable="NOT NULL"/>
+        <schema-directSQL>
           <statement>
               alter table eam_action rename column alert_definition_id to alert_definition_id_orig
           </statement>
@@ -7913,6 +7914,20 @@ has already been defined.
                     ON DELETE CASCADE
       </statement>
     </schema-directSQL>    
+  </schemaSpec>
+
+  <schemaSpec version="3.91">
+    <schema-directSQL>
+      <statement targetDB="postgresql">
+          alter table EAM_ALERT_DEFINITION rename column RANGE to TRANGE
+      </statement>
+      <statement targetDB="mysql">
+          alter table EAM_ALERT_DEFINITION change RANGE TRANGE bigint(20)
+      </statement>
+      <statement targetDB="oracle">
+          alter table EAM_ALERT_DEFINITION rename column RANGE to TRANGE
+      </statement>
+    </schema-directSQL>
   </schemaSpec>
 
 </dbupgrade>
