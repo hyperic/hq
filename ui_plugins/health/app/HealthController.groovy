@@ -1,4 +1,5 @@
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
+import org.hyperic.hq.measurement.server.session.MetricDataCache
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
@@ -43,30 +44,60 @@ class HealthController
     private getAgentSchema() {
         [
             getData: {pageInfo, params ->
-                agentHelper.find(withPaging: pageInfo)
+                getAgentData(pageInfo)
             },
             defaultSort: AgentSortField.CTIME,
             defaultSortOrder: 1,
             rowId: {it.id},
             columns: [
+                [field:[getValue: {localeBundle.fqdn},
+                        description:'fqdn', sortable:false], 
+                 width: '20%',
+                 label:{it.fqdn}],
                 [field: AgentSortField.ADDR,
-                 width: '20%',
-                 label: {it.address}],
+                 width: '15%',
+                 label: {it.agent.address}],
                 [field: AgentSortField.PORT,
-                 width: '20%',
-                 label: {it.port}],
+                 width: '5%',
+                 label: {it.agent.port}],
                 [field: AgentSortField.VERSION,
-                 width: '20%',
-                 label: {it.version}],
+                 width: '10%',
+                 label: {it.agent.version}],
                 [field: AgentSortField.CTIME,
                  width: '20%',
-                 label: {df.format(it.creationTime)}],
+                 label: {df.format(it.agent.creationTime)}],
                 [field:[getValue: {localeBundle.numPlatforms},
                         description:'numPlatforms', sortable:false], 
-                 width:'20%',
-                 label:{it.platforms.size()}],
+                 width: '10%',
+                 label:{it.agent.platforms.size()}],
+                [field:[getValue: {localeBundle.timeOffset},
+                        description:'timeOffset', sortable:false], 
+                 width: '20%',
+                 label:{it.offset}],
             ],
         ]   
+    }
+    
+    private getAgentData(pageInfo) {
+        def res = []
+        def agents = agentHelper.find(withPaging: pageInfo)
+        def offsetData = DMM.one.findAgentOffsetTuples()
+        def cache = MetricDataCache.instance
+        for (a in agents) {
+            def found = false
+            for (d in offsetData) {
+                if (d[0] == a) {
+                    res << [agent:a, offset:cache.get(d[2].id, 0),
+                            fqdn:d[1].fqdn]
+                    found = true
+                    break
+                }
+            }
+            if (!found) {
+                res << [agent:a, offset:'Unknown', fqdn:'Unknown']
+            }
+        }
+        res
     }
     
     def agentData(params) {
