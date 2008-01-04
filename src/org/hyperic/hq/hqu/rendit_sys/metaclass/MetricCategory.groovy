@@ -1,14 +1,22 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement
 
 class MetricCategory {
+    static String urlFor(DerivedMeasurement d, String context) {
+        "/resource/common/monitor/Visibility.do?m=${d.template.id}&eid=${d.entityId}&mode=chartSingleMetricSingleResource"
+    }
+    
+    
     /**
      * Get the last data point for a collection of DerivedMeasurements
      *
      * @param c          A collection of DerivedMeasurement
-     * @param timeWindow Time (in millis) prior to 'now' to search for data
+     * @param timeWindow Time (in millis) that the resultant metric values
+     *                   must be greater than.  (i.e. only return metric values
+     *                   > this time value)                   
      *
      * @return a Map of the passed DerivedMeasurements onto MetricValues
      */
@@ -30,5 +38,22 @@ class MetricCategory {
             res[metric] = vals[mid]
         }
         res
+    }
+    
+    /**
+     * Get the last data point for a derived measurement.
+     *
+     * @param timeWindow The minimum timestamp (in millis) that the result 
+     *                   will have.
+     */
+    static MetricValue getLastDataPoint(DerivedMeasurement m, long timeWindow) {
+        [m].getLastDataPoints(timeWindow)[m]
+    }
+    
+    /**
+     * Get the last data point collected for a derived measurement.
+     */
+    static MetricValue getLastDataPoint(DerivedMeasurement m) {
+        m.getLastDataPoint(0)
     }
 }
