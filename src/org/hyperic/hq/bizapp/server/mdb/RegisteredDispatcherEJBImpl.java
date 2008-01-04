@@ -195,8 +195,10 @@ public class RegisteredDispatcherEJBImpl
                             trigger.releaseExclusiveLock();
                         }
                     }
-                } catch (InterruptedException e) {
-                    // move on
+                } catch (Throwable e) {
+                    // continue flushing the other triggers
+                    log.error("Failed to flush state for multi " +
+                              "conditional trigger id="+trigger.getId(), e); 
                 }                 
             }            
         }
