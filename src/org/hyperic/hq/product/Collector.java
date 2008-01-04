@@ -105,6 +105,7 @@ public abstract class Collector implements Runnable {
     private int timeout = -1;
     private long startTime, endTime;
     private long interval = -1;
+    private long lastCollection = -1;
     private static Map compatAliases = new HashMap();
     
     static {
@@ -440,6 +441,8 @@ public abstract class Collector implements Runnable {
         result = (CollectorResult)container.results.get(props);
 
         if (result != null) {
+            boolean isAvail =
+                metric.getAttributeName().equals(Metric.ATTR_AVAIL);
             result.collected = true;
             if (!result.reported && (result.level != -1)) {
                 plugin.getManager().reportEvent(metric,
@@ -457,6 +460,9 @@ public abstract class Collector implements Runnable {
 
             try {
                 value = collector.getValue(metric, result);
+                if (isAvail) {
+                    collector.lastCollection = value.getTimestamp(); 
+                }
             } finally {
                 setInterval(plugin, collector, metric); //sync
                 if (setClassLoader) {
@@ -589,13 +595,19 @@ public abstract class Collector implements Runnable {
             setValue(key, val);
         }
     }
-    
-    private static final long MINUTE = 60 * 1000;
+
+    private static final long SECOND =  1 * 1000;
+    private static final long MINUTE = 60 * SECOND;
     private static final long HOUR   = 60 * MINUTE;
     private static final long DAY    = 24 * HOUR;
 
     private static String lastRun(long time) {
         long delta = System.currentTimeMillis() - time;
+
+        if ((delta / MINUTE) < 1) {
+            long seconds = delta/SECOND;
+            return seconds + " seconds ago";
+        }
 
         if ((delta / HOUR) < 1) {
             long minutes = delta/MINUTE;
@@ -626,35 +638,45 @@ public abstract class Collector implements Runnable {
         for (int i=0; i<pluginCollectors.size(); i++) {
             Collector collector = (Collector)pluginCollectors.get(i);
             long interval = collector.interval;
+            long lastCollection = collector.lastCollection;
+
             CollectorResult result =
                 (CollectorResult)container.results.get(collector.props);
             int size;
             if ((result != null) &&
-                !result.collected &&
                 ((size = result.values.size()) != 0))
             {
                 boolean shouldSkip = true;
-
-                if (interval != -1) {
+                if ((interval != -1) && (lastCollection != -1)) {
                     long delta =
-                        System.currentTimeMillis() - result.timestamp;
+                        System.currentTimeMillis() - lastCollection;
                     if (delta >= (interval-MINUTE)) {
                         //ScheduleThread should be picking this up
                         //within the next minute, so collect now.
                         shouldSkip = false;
                     }
                 }
+                else {
+                    shouldSkip = !result.collected;
+                }
                 String msg = null;
                 if (isDebug) {
-                    String itv;
+                    String itv, coll;
                     if (interval == -1) {
                         itv = "unknown";
                     }
                     else {
                         itv = (interval / MINUTE) + "min";
                     }
+                    if (lastCollection == -1) {
+                        coll = "n/a";
+                    }
+                    else {
+                        coll = lastRun(lastCollection);
+                    }
                     msg =
                         collector +
+                        " collected " + coll + "," +
                         " ran " + lastRun(result.timestamp) +
                         " (" + size + " vals) " +
                         itv + " itv: ";
