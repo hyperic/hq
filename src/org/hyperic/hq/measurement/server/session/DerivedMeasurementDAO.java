@@ -481,7 +481,7 @@ public class DerivedMeasurementDAO extends HibernateDAO {
      * @see DerivedMeasurementManagerEJBImpl#findAgentOffsetTuples()
      */
     List findAgentOffsetTuples() {
-        String sql = "select a, p, meas from Agent a " + 
+        String sql = "select a, p, s, meas from Agent a " + 
             "join a.platforms p " + 
             "join p.platformType pt " + 
             "join p.servers s " + 
@@ -490,7 +490,8 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             "join meas.template as templ " + 
             "join templ.monitorableType as mt " + 
             "where " +  
-            "templ.name = 'Server Offset' " + 
+            "pt.plugin = 'system' " +
+            "and templ.name = 'Server Offset' " + 
             "and templ.template = 'ARG1' " + 
             "and meas.instanceId = s.id " + 
             "and st.name = 'HQ Agent' "; 

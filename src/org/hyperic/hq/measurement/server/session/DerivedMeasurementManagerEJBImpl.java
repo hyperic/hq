@@ -1363,9 +1363,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
     
     /**
-     * Find a list of tuples (of size 3) consisting of 
+     * Find a list of tuples (of size 4) consisting of 
      *   the {@link Agent}
      *   the {@link Platform} it manages 
+     *   the {@link Server} representing the Agent
      *   the {@link DerivedMeasurement} that contains the Server Offset value
      * 
      * @ejb:interface-method
