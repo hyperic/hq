@@ -640,6 +640,9 @@ class DojoUtil {
             for (c in schema.columns) {
                 def v = c.label(d)
                 
+                if (v != null && !(v in String))
+                    v = v.toString()
+                    
                 if (v == null || v.trim() == '') {
                     v = '&nbsp;' // We need this to get the bottom border on <td>
                 }
