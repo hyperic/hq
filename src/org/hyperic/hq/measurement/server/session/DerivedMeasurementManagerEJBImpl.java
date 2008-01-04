@@ -1363,6 +1363,18 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
     
     /**
+     * Find a list of tuples (of size 3) consisting of 
+     *   the {@link Agent}
+     *   the {@link Platform} it manages 
+     *   the {@link DerivedMeasurement} that contains the Server Offset value
+     * 
+     * @ejb:interface-method
+     */
+    public List findAgentOffsetTuples() {
+        return getDerivedMeasurementDAO().findAgentOffsetTuples();
+    }
+    
+    /**
      * Handle events from the {@link MeasurementEnabler}.  This method
      * is required to place the operation within a transaction (and session)
      * 
