@@ -698,7 +698,7 @@ public class EscalationManagerEJBImpl
         List actions = state.getEscalation().getActions();
         int idx = (notifyAll ? actions.size() : state.getNextAction()) - 1;
 
-        Set prior = new HashSet();
+        Set notified = new HashSet();
         while (idx >= 0) {
             EscalationAction ea = (EscalationAction)actions.get(idx--);
             Action a = (Action)ea.getAction();
@@ -711,13 +711,9 @@ public class EscalationManagerEJBImpl
                     continue;
                 
                 n = (Notify)a.getInitializedAction();
-                Collection notified =
-                    n.send(alert, fixed ? EscalationStateChange.FIXED :
+                n.send(alert, fixed ? EscalationStateChange.FIXED :
                                       EscalationStateChange.ACKNOWLEDGED,
-                           msg, prior);
-                
-                if (notified != null)
-                    prior.addAll(notified);
+                       msg, notified);
             } catch(Exception e) {
                 _log.warn("Unable to send notification alert", e);
             }

@@ -46,7 +46,7 @@ public interface Notify {
      * @param change  New state of the escalation
      * @param message Message about the state change
      */
-    public Collection send(Escalatable e, EscalationStateChange change, 
-                           String message, Set notified)
+    public void send(Escalatable e, EscalationStateChange change, 
+                     String message, Set notified)
         throws ActionExecuteException;
 }

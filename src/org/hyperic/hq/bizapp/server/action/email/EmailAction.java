@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -268,7 +267,7 @@ public class EmailAction extends EmailActionConfig
         init(cfg);
     }
 
-    public Collection send(Escalatable alert, EscalationStateChange change, 
+    public void send(Escalatable alert, EscalationStateChange change, 
                            String message, Set notified)
         throws ActionExecuteException 
     {
@@ -307,7 +306,5 @@ public class EmailAction extends EmailActionConfig
                          createSubject(defInfo, alert.getAlertInfo(), resource)
                          + " " + change.getDescription(), 
                          messages, messages, defInfo.getPriority(), false);
-        
-        return null;
     }
 }

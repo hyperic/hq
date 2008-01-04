@@ -31,7 +31,6 @@
 
 package org.hyperic.hq.bizapp.server.action.log;
 
-import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -116,10 +115,9 @@ public class SyslogAction extends SyslogActionConfig
     }
 
     
-    public Collection send(Escalatable e, EscalationStateChange change, 
+    public void send(Escalatable e, EscalationStateChange change, 
                            String message, Set notified) 
     {
         _log.info(message);
-        return null;
     }
 }
