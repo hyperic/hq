@@ -333,8 +333,10 @@ public class PermissionManagerImpl
     }
 
     public String getAlertsHQL() {
+        // Join with Resource for sorting
         return "select a from Alert a " +
                 "join a.alertDefinition d " +
+                "join d.resource r " +
           "where a.ctime between :begin and :end and " +
                 "d.priority >= :priority ";
     }
