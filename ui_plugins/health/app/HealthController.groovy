@@ -73,15 +73,19 @@ class HealthController
                  width: '10%',
                  label: {it.agent.version}],
                 [field: AgentSortField.CTIME,
-                 width: '20%',
+                 width: '18%',
                  label: {df.format(it.agent.creationTime)}],
                 [field: [getValue: {localeBundle.numPlatforms},
                          description:'numPlatforms', sortable:false], 
-                 width: '10%',
+                 width: '8%',
                  label: {it.agent.platforms.size()}],
+                [field: [getValue: {localeBundle.numMetrics},
+                         description:'numMetrics', sortable:false], 
+                 width: '10%',
+                 label: {it.numMetrics}],
                 [field: [getValue: {localeBundle.timeOffset},
                          description:'timeOffset', sortable:false], 
-                 width: '20%',
+                 width: '19%',
                  label: {
                     if (it.offset) 
                         return linkTo(it.offset.lastDataPoint.value, 
@@ -95,20 +99,25 @@ class HealthController
     
     private getAgentData(pageInfo) {
         def res = []
-        def agents = agentHelper.find(withPaging: pageInfo)
+        def agents     = agentHelper.find(withPaging: pageInfo)
         def offsetData = DMM.one.findAgentOffsetTuples()
+        def metricData = DMM.one.findNumMetricsPerAgent()
         for (a in agents) {
             def found = false
+            def numMetrics = 0
+            
+            if (metricData[a])
+                numMetrics = metricData[a]
             for (d in offsetData) {
                 if (d[0] == a) {
                     res << [agent:a, platform:d[1], server:d[2], 
-                            offset:d[3]]
+                            offset:d[3], numMetrics:numMetrics]
                     found = true
                     break
                 }
             }
             if (!found) {
-                res << [agent:a]
+                res << [agent:a, numMetrics:numMetrics]
             }
         }
         res
