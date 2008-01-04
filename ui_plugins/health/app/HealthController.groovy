@@ -1,5 +1,4 @@
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl as DMM
-import org.hyperic.hq.measurement.server.session.MetricDataCache
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
@@ -50,13 +49,23 @@ class HealthController
             defaultSortOrder: 1,
             rowId: {it.id},
             columns: [
-                [field:[getValue: {localeBundle.fqdn},
-                        description:'fqdn', sortable:false], 
+                [field: [getValue: {localeBundle.fqdn},
+                         description:'fqdn', sortable:false], 
                  width: '20%',
-                 label:{it.fqdn}],
+                 label: {
+                    if (it.platform)
+                        return linkTo(it.platform.fqdn, [resource:it.platform.resource])
+                    else
+                        return 'Unknown'
+                 }],
                 [field: AgentSortField.ADDR,
                  width: '15%',
-                 label: {it.agent.address}],
+                 label: {
+                    if (it.server)
+                        return linkTo(it.agent.address, [resource:it.server.resource])
+                    else
+                        return 'Unknown'
+                 }],
                 [field: AgentSortField.PORT,
                  width: '5%',
                  label: {it.agent.port}],
@@ -66,14 +75,20 @@ class HealthController
                 [field: AgentSortField.CTIME,
                  width: '20%',
                  label: {df.format(it.agent.creationTime)}],
-                [field:[getValue: {localeBundle.numPlatforms},
-                        description:'numPlatforms', sortable:false], 
+                [field: [getValue: {localeBundle.numPlatforms},
+                         description:'numPlatforms', sortable:false], 
                  width: '10%',
-                 label:{it.agent.platforms.size()}],
-                [field:[getValue: {localeBundle.timeOffset},
-                        description:'timeOffset', sortable:false], 
+                 label: {it.agent.platforms.size()}],
+                [field: [getValue: {localeBundle.timeOffset},
+                         description:'timeOffset', sortable:false], 
                  width: '20%',
-                 label:{it.offset}],
+                 label: {
+                    if (it.offset) 
+                        return linkTo(it.offset.lastDataPoint.value, 
+                                      [resource:it.offset])
+                    else 
+                    	return 'Unknown'
+                 }],
             ],
         ]   
     }
@@ -82,19 +97,18 @@ class HealthController
         def res = []
         def agents = agentHelper.find(withPaging: pageInfo)
         def offsetData = DMM.one.findAgentOffsetTuples()
-        def cache = MetricDataCache.instance
         for (a in agents) {
             def found = false
             for (d in offsetData) {
                 if (d[0] == a) {
-                    res << [agent:a, offset:cache.get(d[2].id, 0),
-                            fqdn:d[1].fqdn]
+                    res << [agent:a, platform:d[1], server:d[2], 
+                            offset:d[3]]
                     found = true
                     break
                 }
             }
             if (!found) {
-                res << [agent:a, offset:'Unknown', fqdn:'Unknown']
+                res << [agent:a]
             }
         }
         res
