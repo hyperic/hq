@@ -38,20 +38,26 @@
 
 
 <script type="text/javascript">
-onloads.push(requestViewEscalation);
 
- function requestViewEscalation() {
-        var alertDefId = $('alertDefId').value;
-        var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
-        url += escape('<c:out value="${param.escId}"/>');
-        url += '.do';
-        new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
-        }
+
+function toggleSubmit(e){
+    if(e && e.keyCode == 13){
+        saveNewEscalation();
+        e.stopPropagation ();
+        e.preventDefault();
+    }
+}
+
+dojo.addOnLoad(function(){
+    document.addEventListener("keypress", toggleSubmit, false);
+    document.forms[0].addEventListener("keypress", toggleSubmit, false);
+    document.forms[1].addEventListener("keypress", toggleSubmit, false);
+});
 
 function showViewEscResponse(originalRequest) {
     var tmp = eval('(' + originalRequest.responseText + ')');
     var creationTime = tmp.escalation.creationTime;
-    var notifyAll = tmp.escalation.notifyAll
+    var notifyAll = tmp.escalation.notifyAll;
     var _version_ = tmp.escalation._version_;
     var modifiedTime = tmp.escalation.modifiedTime;
     var actions = tmp.escalation.actions;
@@ -217,261 +223,270 @@ function showViewEscResponse(originalRequest) {
       $('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
    }    
 }
-    
-    function editEscalation (row) {
-        var select1 = document.createElement("select");
-        var idStr = row.parentNode.parentNode.id;
-        var getId = idStr.split('_');
-        var liID = getId[1];
-        var usersEditDiv = ('usersEditDiv_'+ getId[1]);
-        //alert(idStr);
-        var editMaxWait = $('editWait_' + getId[1]);
-        $('wait_' + getId[1]).style.display = "none";
-        $('pauseTimeText').style.display="none";
-        $('pauseTimeEdit').style.display = "";
+onloads.push(requestViewEscalation);
 
-        editMaxWait.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
-        editMaxWait.appendChild(select1);
-        select1.setAttribute('id', 'waittime_' + liID);
-        select1.name = "waittime_" + liID;
-        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
-        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
-        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
-        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
-        addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
-        addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
+function requestViewEscalation() {
+    var alertDefId = $('alertDefId').value;
+    var url = '<html:rewrite page="/escalation/jsonByEscalationId/"/>';
+    url += escape('<c:out value="${param.escId}"/>');
+    url += '.do';
+    new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+}
 
-        if($('usersList')) {
-          usersEditDiv.innerHTML = $('usersList').innerHTML;
-          var usersInputList = usersEditDiv.getElementsByTagName('input');
-          for(i=0;i < usersInputList.length; i++) {
-              var inputNamesArr = usersInputList[i];
-              inputNamesArr.name = inputNamesArr.name + "_" + liID;
-          }
-        }
+function editEscalation (row) {
+    var select1 = document.createElement("select");
+    var idStr = row.parentNode.parentNode.id;
+    var getId = idStr.split('_');
+    var liID = getId[1];
+    var usersEditDiv = ('usersEditDiv_'+ getId[1]);
+    //alert(idStr);
+    var editMaxWait = $('editWait_' + getId[1]);
+    $('wait_' + getId[1]).style.display = "none";
+    $('pauseTimeText').style.display="none";
+    $('pauseTimeEdit').style.display = "";
 
+    editMaxWait.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
+    editMaxWait.appendChild(select1);
+    select1.setAttribute('id', 'waittime_' + liID);
+    select1.name = "waittime_" + liID;
+    addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
+    addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message>');
+    addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="10"/></fmt:message>');
+    addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="20"/></fmt:message>');
+    addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="30"/></fmt:message>');
+    addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="45"/></fmt:message>');
+    addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait"><fmt:param value="60"/></fmt:message>');
 
+    if($('usersList')) {
+      usersEditDiv.innerHTML = $('usersList').innerHTML;
+      var usersInputList = usersEditDiv.getElementsByTagName('input');
+      for(i=0;i < usersInputList.length; i++) {
+          var inputNamesArr = usersInputList[i];
+          inputNamesArr.name = inputNamesArr.name + "_" + liID;
+      }
     }
 
-    function addRow() {
-        var ni = $('rowOrder');
-        var numi = document.getElementById('theValue');
-        var num = (document.getElementById('theValue').value -1)+ 2;
 
-        numi.value = num;
-        var liID = 'row'+num;
-        var escLi = document.createElement('li');
-        var remDiv = document.createElement('div');
-        var usersDiv = document.createElement('div');
-        var rolesDiv = document.createElement('div');
-        var othersDiv = document.createElement('div');
-        var emailDiv = document.createElement('div');
-        var sysDiv = document.createElement('div');
-        var snmpDiv = document.createElement('div');
-        var escTable = document.createElement('table');
-        var escTableBody = document.createElement('tbody');
-        var escTr1 = document.createElement('tr');
-        var escTr2 = document.createElement('tr');
-        var td1 = document.createElement('td');
-        var td2 = document.createElement('td');
-        var td3 = document.createElement('td');
-        var td4 = document.createElement('td');
-        var td5 = document.createElement('td');
-        var select1 = document.createElement("select");
-        var select2 = document.createElement("select");
-        var select3 = document.createElement("select");
-        var anchor = document.createElement("a");
+}
 
-        ni.appendChild(escLi);
-        escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
-        escLi.setAttribute('id','row_'+ liID);
-        //escLi.innerHTML = "here";
-
-        escLi.appendChild(remDiv);
-        remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
-        remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
-
-        escLi.appendChild(escTable);
-        escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
-        escTable.setAttribute('border', '0');
-        escTable.appendChild(escTableBody);
-
-        escTableBody.appendChild(escTr2);
-        escTableBody.appendChild(escTr1);
-
-        escTr1.appendChild(td1);
-
-        td1.setAttribute('colspan', '3');
-        td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
-
-        td1.appendChild(select1);
-        select1.setAttribute('id', 'waittime_' + liID);
-
-        select1.setAttribute('name', 'waittime_' + liID);
-        addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
-        addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="5"/>
-                                    </fmt:message>');
-        addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="10"/>
-                                    </fmt:message>');
-        addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="20"/>
-                                    </fmt:message>');
-        addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="30"/>
-                                    </fmt:message>');
-        addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="45"/>
-                                    </fmt:message>');
-        addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait">
-                                      <fmt:param value="60"/>
-                                    </fmt:message>');
-
-        escTr2.appendChild(td2);
-        td2.setAttribute('valign', 'top');
-        td2.setAttribute('class', 'td2');
-
-
-
-        td2.appendChild(select2);
-        select2.setAttribute('id', 'Email_' + liID);
-
-
-        select2.onchange = function(){onchange_handler(this);}
-        select2.setAttribute('name', 'action_' + liID);
-        addOption(select2, 'Email', 'Email');
-        addOption(select2, 'SMS', 'SMS');
-        addOption(select2, 'Syslog', 'Sys Log');
-        <c:if test="${snmpEnabled}">
-        addOption(select2, 'SNMP', 'SNMP Trap');
-        </c:if>
-
-        addOption(select2, 'NoOp', 'Suppress Alerts');
-
-        escTr2.appendChild(td3);
-        td3.setAttribute('class', 'td3');
-        td3.setAttribute('valign', 'top');
-
-        td3.appendChild(select3);
-
-        select3.setAttribute('name', 'who_' + liID);
-        select3.setAttribute('id', 'who_' + liID);
-        select3.onchange = function(){onchange_who(this);}
-        addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
-        <c:if test="${not empty AvailableRoles}">
-        addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
-        </c:if>
-        addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
-        addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
-
-        escTr2.appendChild(td4);
-        td5.setAttribute('width', '50%');
-
-        td4.appendChild(emailDiv);
-        emailDiv.setAttribute('class', 'emailDiv');
-        emailDiv.setAttribute('id', 'emailinput' + liID);
-        $('emailinput'+ liID).style.display = 'none';
-        emailDiv.setAttribute('class', 'escInput');
-        emailDiv.setAttribute('width', '40%');
-        emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
-
-        td4.appendChild(sysDiv);
-        sysDiv.setAttribute('class', 'escInput'+ liID);
-        sysDiv.setAttribute('id', 'sysloginput'+ liID);
-        $('sysloginput'+ liID).style.display = 'none';
-        sysDiv.setAttribute('width', '40%');
-        sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
-  
-        td4.appendChild(usersDiv);
-        usersDiv.setAttribute('id', 'usersDiv' + liID);
-        $('usersDiv'+ liID).style.display = 'none';
-
-        if($('usersList')) {
-          usersDiv.innerHTML = $('usersList').innerHTML;
-          var usersInputList = usersDiv.getElementsByTagName('input');
-          for(i=0;i < usersInputList.length; i++) {
-              var inputNamesArr = usersInputList[i];
-              inputNamesArr.name = inputNamesArr.name + "_" + liID;
-          }
-        }
-
-        td4.appendChild(rolesDiv);
-        rolesDiv.setAttribute('id', 'rolesDiv' + liID);
-        $('rolesDiv'+ liID).style.display = 'none';
-
-        if($('rolesList')) {
-          rolesDiv.innerHTML = $('rolesList').innerHTML;
-          var rolesInputList = rolesDiv.getElementsByTagName('input');
-           for(i=0;i < rolesInputList.length; i++) {
-                  var inputRolesArr = rolesInputList[i];
-                  inputRolesArr.name =  inputRolesArr.name + "_" + liID;
-              }
-          }
-        
-        Sortable.create('rowOrder',{ghosting:true,constraint:false});
-
-      }
-    
-      /*
-      function rowIDs(liID){
-         var rows = liID.id;
-
-        for(i=0;i < rows.length; i++) {
-              var rowIdList = rows[i].id;
-              var rowSplit = rowIdList.split('_');
-              var rowListID = rowSplit[1];
-            alert(rowListID)
-            }
-        }
-       */
-       
-      function onchange_handler(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
-        var index= el.options[el.selectedIndex].value
-
-          if (index != "Syslog") {
-          hideSyslogInput(el);
-          } else {
-          showSyslogInput(el);
-          }
-
-          if (index == "SNMP") {
-          showSnmpInput(el);
-          } else {
-          hideSnmpInput(el);
-          }
-
-         if (index == "Syslog" || index == "NoOp" || index == "SNMP") {
-            hideWhoSelect(el);
-         }
-         else {
-            showWhoSelect(el);
-         }
-      }
-
-      function onchange_who(el) {
-        //alert(el+", value="+ el.options[el.selectedIndex].value );
-        var index= el.options[el.selectedIndex].value
-        var idStr = el.id;
-        var getId = idStr.split('_');
-        var rolesDivIn = $('rolesDiv' + getId[1]);
-        var usersDivIn = $('usersDiv' + getId[1]);
-        var emailDivIn = $('emailinput' + getId[1]);
-
-        if (index == "Roles") {
-           emailDivIn.style.display = 'none';
-           configureRoles(idStr);
-         } else if (index == "Users") {
-           emailDivIn.style.display = 'none';
-           configureUsers(idStr);
-            //configureUsers(nodeId);
-         } else if (index == "Others") {
-           emailDivIn.style.display = '';
-           //configureOthers(nodeId);
-        }
-      }
+	function addRow() {
+	    var ni = $('rowOrder');
+	    var numi = document.getElementById('theValue');
+	    var num = (document.getElementById('theValue').value -1)+ 2;
+	
+	    numi.value = num;
+	    var liID = 'row'+num;
+	    var escLi = document.createElement('li');
+	    var remDiv = document.createElement('div');
+	    var usersDiv = document.createElement('div');
+	    var rolesDiv = document.createElement('div');
+	    var othersDiv = document.createElement('div');
+	    var emailDiv = document.createElement('div');
+	    var sysDiv = document.createElement('div');
+	    var snmpDiv = document.createElement('div');
+	    var escTable = document.createElement('table');
+	    var escTableBody = document.createElement('tbody');
+	    var escTr1 = document.createElement('tr');
+	    var escTr2 = document.createElement('tr');
+	    var td1 = document.createElement('td');
+	    var td2 = document.createElement('td');
+	    var td3 = document.createElement('td');
+	    var td4 = document.createElement('td');
+	    var td5 = document.createElement('td');
+	    var select1 = document.createElement("select");
+	    var select2 = document.createElement("select");
+	    var select3 = document.createElement("select");
+	    var anchor = document.createElement("a");
+	
+	    ni.appendChild(escLi);
+	    escLi.setAttribute((document.all ? 'className' : 'class'), "lineitem");
+	    escLi.setAttribute('id','row_'+ liID);
+	    //escLi.innerHTML = "here";
+	
+	    escLi.appendChild(remDiv);
+	    remDiv.setAttribute((document.all ? 'className' : 'class'), "remove");
+	    remDiv.innerHTML ='<a href="#" onclick="removeRow(this);"><html:img page="/images/tbb_delete.gif" height="16" width="46" border="0"  alt="" /></a>';
+	
+	escLi.appendChild(escTable);
+	escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
+	escTable.setAttribute('border', '0');
+	escTable.appendChild(escTableBody);
+	
+	escTableBody.appendChild(escTr2);
+	escTableBody.appendChild(escTr1);
+	
+	escTr1.appendChild(td1);
+	
+	td1.setAttribute('colspan', '3');
+	td1.appendChild(document.createTextNode('<fmt:message key="alert.config.escalation.then"/> '));
+	
+	td1.appendChild(select1);
+	select1.setAttribute('id', 'waittime_' + liID);
+	
+	select1.setAttribute('name', 'waittime_' + liID);
+	addOption(select1, '0', '<fmt:message key="alert.config.escalation.end"/>');
+	addOption(select1, '300000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="5"/>
+	                            </fmt:message>');
+	addOption(select1, '600000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="10"/>
+	                            </fmt:message>');
+	addOption(select1, '1200000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="20"/>
+	                            </fmt:message>');
+	addOption(select1, '1800000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="30"/>
+	                            </fmt:message>');
+	addOption(select1, '2700000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="45"/>
+	                            </fmt:message>');
+	addOption(select1, '3600000', '<fmt:message key="alert.config.escalation.wait">
+	                              <fmt:param value="60"/>
+	                            </fmt:message>');
+	
+	escTr2.appendChild(td2);
+	td2.setAttribute('valign', 'top');
+	td2.setAttribute('class', 'td2');
+	
+	
+	
+	td2.appendChild(select2);
+	select2.setAttribute('id', 'Email_' + liID);
+	
+	
+	select2.onchange = function(){onchange_handler(this);}
+	select2.setAttribute('name', 'action_' + liID);
+	addOption(select2, 'Email', 'Email');
+	addOption(select2, 'SMS', 'SMS');
+	addOption(select2, 'Syslog', 'Sys Log');
+	<c:if test="${snmpEnabled}">
+	addOption(select2, 'SNMP', 'SNMP Trap');
+	</c:if>
+	
+	addOption(select2, 'NoOp', 'Suppress Alerts');
+	
+	escTr2.appendChild(td3);
+	td3.setAttribute('class', 'td3');
+	td3.setAttribute('valign', 'top');
+	
+	td3.appendChild(select3);
+	
+	select3.setAttribute('name', 'who_' + liID);
+	select3.setAttribute('id', 'who_' + liID);
+	select3.onchange = function(){onchange_who(this);}
+	addOption(select3, 'Select', '<fmt:message key="alert.config.escalation.notify.who"/>');
+	<c:if test="${not empty AvailableRoles}">
+	addOption(select3, 'Roles', '<fmt:message key="monitoring.events.MiniTabs.Roles"/>')
+	</c:if>
+	addOption(select3, 'Users', '<fmt:message key="monitoring.events.MiniTabs.Users"/>');
+	addOption(select3, 'Others', '<fmt:message key="monitoring.events.MiniTabs.Others"/>');
+	
+	escTr2.appendChild(td4);
+	td5.setAttribute('width', '50%');
+	
+	td4.appendChild(emailDiv);
+	emailDiv.setAttribute('class', 'emailDiv');
+	emailDiv.setAttribute('id', 'emailinput' + liID);
+	$('emailinput'+ liID).style.display = 'none';
+	emailDiv.setAttribute('class', 'escInput');
+	emailDiv.setAttribute('width', '40%');
+	emailDiv.innerHTML = "email addresses (comma separated):<br><textarea rows=3 cols=35 id=emailinput_" + liID + " name=emailinput_" + liID + "></textarea>";
+	
+	td4.appendChild(sysDiv);
+	sysDiv.setAttribute('class', 'escInput'+ liID);
+	sysDiv.setAttribute('id', 'sysloginput'+ liID);
+	$('sysloginput'+ liID).style.display = 'none';
+	sysDiv.setAttribute('width', '40%');
+	sysDiv.innerHTML = "meta: <input type=text name=meta_" + liID + " size=40><br>" + "product: <input type=text name=product_" + liID + " size=40><br>" + "version: <input type=text name=version_" + liID + " size=40><br>";
+	  
+	        td4.appendChild(usersDiv);
+	        usersDiv.setAttribute('id', 'usersDiv' + liID);
+	        $('usersDiv'+ liID).style.display = 'none';
+	
+	        if($('usersList')) {
+	          usersDiv.innerHTML = $('usersList').innerHTML;
+	          var usersInputList = usersDiv.getElementsByTagName('input');
+	          for(i=0;i < usersInputList.length; i++) {
+	          var inputNamesArr = usersInputList[i];
+	          inputNamesArr.name = inputNamesArr.name + "_" + liID;
+	      }
+	    }
+	
+	    td4.appendChild(rolesDiv);
+	    rolesDiv.setAttribute('id', 'rolesDiv' + liID);
+	    $('rolesDiv'+ liID).style.display = 'none';
+	
+	    if($('rolesList')) {
+	      rolesDiv.innerHTML = $('rolesList').innerHTML;
+	      var rolesInputList = rolesDiv.getElementsByTagName('input');
+	       for(i=0;i < rolesInputList.length; i++) {
+	              var inputRolesArr = rolesInputList[i];
+	              inputRolesArr.name =  inputRolesArr.name + "_" + liID;
+	          }
+	      }
+	    
+	    Sortable.create('rowOrder',{ghosting:true,constraint:false});
+	
+	  }
+	
+	  /*
+	  function rowIDs(liID){
+	     var rows = liID.id;
+	
+	    for(i=0;i < rows.length; i++) {
+	          var rowIdList = rows[i].id;
+	          var rowSplit = rowIdList.split('_');
+	          var rowListID = rowSplit[1];
+	        alert(rowListID)
+	        }
+	    }
+	   */
+	   
+	  function onchange_handler(el) {
+	    //alert(el+", value="+ el.options[el.selectedIndex].value );
+	    var index= el.options[el.selectedIndex].value
+	
+	      if (index != "Syslog") {
+	      hideSyslogInput(el);
+	      } else {
+	      showSyslogInput(el);
+	      }
+	
+	      if (index == "SNMP") {
+	      showSnmpInput(el);
+	      } else {
+	      hideSnmpInput(el);
+	      }
+	
+	     if (index == "Syslog" || index == "NoOp" || index == "SNMP") {
+	        hideWhoSelect(el);
+	     }
+	     else {
+	        showWhoSelect(el);
+	     }
+	  }
+	
+	  function onchange_who(el) {
+	    //alert(el+", value="+ el.options[el.selectedIndex].value );
+	    var index= el.options[el.selectedIndex].value
+	    var idStr = el.id;
+	    var getId = idStr.split('_');
+	    var rolesDivIn = $('rolesDiv' + getId[1]);
+	    var usersDivIn = $('usersDiv' + getId[1]);
+	    var emailDivIn = $('emailinput' + getId[1]);
+	
+	    if (index == "Roles") {
+	       emailDivIn.style.display = 'none';
+	       configureRoles(idStr);
+	     } else if (index == "Users") {
+	       emailDivIn.style.display = 'none';
+	       configureUsers(idStr);
+	        //configureUsers(nodeId);
+	     } else if (index == "Others") {
+	       emailDivIn.style.display = '';
+	       //configureOthers(nodeId);
+	    }
+	  }
 
     function showWhoSelect(el) {
         var idStr = el.id;
@@ -549,14 +564,16 @@ function showViewEscResponse(originalRequest) {
     }
 
     function showResponse(originalRequest) {
-        try {
-          var escJson = eval( '(' + originalRequest.responseText + ')' );
-          document.EscalationSchemeForm.escId.value = escJson.escalation.id;
-          document.EscalationSchemeForm.submit();
-        } catch (e) {
-          $('escMsg').innerHTML ="<fmt:message key="error.Error.Tab"/>";
-          $('example').style.display= '';
-        }
+	  var escJson = eval( '(' + originalRequest.responseText + ')' );
+	  if(escJson.error){
+	      var escmsg = $('escMsg');
+	      escmsg.innerHTML = escJson.error;
+	      var example = $('example');
+	      example.style.display= '';
+	  }else{
+	      document.EscalationSchemeForm.escId.value = escJson.escalation.id;
+	      document.EscalationSchemeForm.submit();
+	  }
     }
 
     function saveNewEscalation() {
@@ -611,24 +628,24 @@ function showViewEscResponse(originalRequest) {
         var escFormSerial = Form.serialize('viewEscalation');
         var url = '<html:rewrite action="/escalation/updateEscalation"/>';
         if ($('gad')) {
-           gadId == $('gad').value;
+           gadId = $('gad').value;
         } else {
-            gadId == '';
+            gadId = '';
         }
         if ($('ad')){
-            adId == $('ad').value;
+            adId = $('ad').value;
         } else {
-            adId == '';
+            adId = '';
         }
         if ($('eid')){
             eID = $('eid').value;
         } else {
-           eId == '';
+           eId = '';
         }
         if ($('aetid')) {
             aetId = $('aetid').value;
         } else {
-            aetId == '';
+            aetId = '';
         }
 
         var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
@@ -644,24 +661,24 @@ function showViewEscResponse(originalRequest) {
         var escFormSerial = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
         if ($('gad')) {
-           gadId == $('gad').value;
+           gadId = $('gad').value;
         } else {
-            gadId == '';
+            gadId = '';
         }
         if ($('ad')){
-            adId == $('ad').value;
+            adId = $('ad').value;
         } else {
-            adId == '';
+            adId = '';
         }
         if ($('eid')){
             eID = $('eid').value;
         } else {
-           eId == '';
+           eId = '';
         }
         if ($('aetid')) {
             aetId = $('aetid').value;
         } else {
-            aetId == '';
+            aetId = '';
         }
 
         var pars = "rowOrder=0&" + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
@@ -792,6 +809,7 @@ function showViewEscResponse(originalRequest) {
          return true;
         }
      }
+
 
 
 </script>
