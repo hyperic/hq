@@ -16,6 +16,7 @@ import org.hyperic.sigar.CpuPerc
 import org.hyperic.hq.common.DiagnosticThread
 import org.hyperic.hq.common.Humidor
 import org.hyperic.util.jdbc.DBUtil
+import org.hyperic.hibernate.PageInfo
 
 import java.text.DateFormat;
 import java.sql.Connection
@@ -33,8 +34,10 @@ class HealthController
 {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-    
-    def HealthController() {
+    private final PrintfFormat agentFmt =
+        new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s")
+
+    HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
                         'agentData', 'runQuery'])
@@ -52,20 +55,10 @@ class HealthController
                 [field: [getValue: {localeBundle.fqdn},
                          description:'fqdn', sortable:false], 
                  width: '20%',
-                 label: {
-                    if (it.platform)
-                        return linkTo(it.platform.fqdn, [resource:it.platform.resource])
-                    else
-                        return 'Unknown'
-                 }],
+                 label: {it.platformHtml}],
                 [field: AgentSortField.ADDR,
                  width: '15%',
-                 label: {
-                    if (it.server)
-                        return linkTo(it.agent.address, [resource:it.server.resource])
-                    else
-                        return 'Unknown'
-                 }],
+                 label: {it.serverHtml}],
                 [field: AgentSortField.PORT,
                  width: '5%',
                  label: {it.agent.port}],
@@ -74,7 +67,7 @@ class HealthController
                  label: {it.agent.version}],
                 [field: AgentSortField.CTIME,
                  width: '18%',
-                 label: {df.format(it.agent.creationTime)}],
+                 label: {it.creationTime}],
                 [field: [getValue: {localeBundle.numPlatforms},
                          description:'numPlatforms', sortable:false], 
                  width: '8%',
@@ -86,13 +79,7 @@ class HealthController
                 [field: [getValue: {localeBundle.timeOffset},
                          description:'timeOffset', sortable:false], 
                  width: '19%',
-                 label: {
-                    if (it.offset) 
-                        return linkTo(it.offset.lastDataPoint.value, 
-                                      [resource:it.offset])
-                    else 
-                    	return 'Unknown'
-                 }],
+                 label: {it.offsetHtml}],
             ],
         ]   
     }
@@ -110,14 +97,25 @@ class HealthController
                 numMetrics = metricData[a]
             for (d in offsetData) {
                 if (d[0] == a) {
-                    res << [agent:a, platform:d[1], server:d[2], 
-                            offset:d[3], numMetrics:numMetrics]
+                    res << [agent:a, 
+                            platform:d[1].fqdn,
+                            platformHtml:linkTo(d[1].fqdn, [resource:d[1].resource]),
+                            server:a.address,
+                            serverHtml:linkTo(a.address, [resource:d[2].resource]),
+                            offset:d[3].lastDataPoint.value,
+                            offsetHtml:linkTo(d[3].lastDataPoint.value, [resource:d[3]]), 
+                            numMetrics:numMetrics,
+                            creationTime:df.format(a.creationTime)]
                     found = true
                     break
                 }
             }
             if (!found) {
-                res << [agent:a, numMetrics:numMetrics]
+                res << [agent:a, numMetrics:numMetrics,
+                        platform:'Unknown', platformHtml:'Unknown',
+                        server:a.address, serverHtml:a.address,
+                        offset:'?', offsetHtml:'?', 
+                        creationTime:df.format(a.creationTime)]
             }
         }
         res
@@ -302,9 +300,10 @@ class HealthController
     
     private printReport(params) {
         def s = Humidor.instance.sigar
-        def dateFormat = DateFormat.dateTimeInstance
-        def cmdLine = s.getProcArgs('$$')
-        def procEnv = s.getProcEnv('$$')
+        def dateFormat  = DateFormat.dateTimeInstance
+        def cmdLine     = s.getProcArgs('$$')
+        def procEnv     = s.getProcEnv('$$')
+        def agentPager  = PageInfo.getAll(AgentSortField.ADDR, true) 
         
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
@@ -323,6 +322,9 @@ class HealthController
             procEnv:          procEnv,
             cpuInfos:         s.cpuInfoList,
             jvmSupportsTraces: getJVMSupportsTraces(),
+            agentData:        getAgentData(agentPager),
+            agentFmt:         agentFmt,
+            AgentSortField:   AgentSortField,
         ] + getSystemStats([:])
     	render(locals: locals)
     }

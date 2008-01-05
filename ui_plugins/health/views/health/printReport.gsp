@@ -70,6 +70,20 @@ ${d.status}
 <% } %>
 
 
+-- Agents --
+<%= agentFmt.sprintf([l.fqdn, AgentSortField.ADDR.value, 
+                      AgentSortField.PORT.value, AgentSortField.VERSION.value,
+                      AgentSortField.CTIME.value, l.numPlatforms, 
+                      l.timeOffset, l.numMetrics] as Object[]) %>
+-----------------------------------------------------------------------                      
+<% for (a in agentData) { %>
+<%= agentFmt.sprintf([a.platform, a.server, "${a.agent.port}", a.agent.version, 
+                      a.creationTime, "${a.agent.platforms.size()}", 
+                      "${a.offset}", "${a.numMetrics}"] as Object[]) %> <% } %>
+                      
+
+
+
 <% if (jvmSupportsTraces) { %>
 -- Thread Dump --
   <% for (ent in Thread.allStackTraces) { %>
