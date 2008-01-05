@@ -162,47 +162,65 @@ public class RegisteredDispatcherEJBImpl
         } catch (InterruptedException e) {
             log.info("Thread was interrupted while processing events.");
         } finally {
-            try {
-                flushStateForVisitedMCTriggers(visitedMCTriggers);
-            } catch (Exception e) {
-                log.error("Failed to flush state for multi conditional trigger", e);
-            }
-            
+            flushStateForVisitedMCTriggers(visitedMCTriggers);            
             publishEnqueuedEvents();
         }
     }
     
-    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) 
-        throws EventTypeException, ActionExecuteException {
-        
-        if (!visitedMCTriggers.isEmpty()) {
-            FlushStateEvent event = new FlushStateEvent();
-            
+    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) {
+        if (visitedMCTriggers.isEmpty()) {
+            return;
+        }
+                
+        FlushStateEvent event = new FlushStateEvent();
+        MultiConditionTrigger trigger = null;
+                
+        try {
             for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
-                MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
+                trigger = (MultiConditionTrigger) it.next();
+                it.remove();
                                 
+                boolean lockAcquired = false;
+                
                 try {
-                    boolean lockAcquired = false;
+                    lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
                     
-                    try {
-                        lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
-                        
-                        if (lockAcquired) {
-                            trigger.processEvent(event);                    
-                        }                        
-                    } finally {
-                        if (lockAcquired) {
-                            trigger.releaseExclusiveLock();
-                        }
+                    if (lockAcquired) {
+                        trigger.processEvent(event);                    
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("There must be more interesting events "+
+                                    "to multicondition alert with trigger id="+
+                                    trigger.getId()+" since we failed to upgrade "+
+                                    "shared lock on flushing state.");    
+                        } 
                     }
-                } catch (Throwable e) {
-                    // continue flushing the other triggers
-                    log.error("Failed to flush state for multi " +
-                              "conditional trigger id="+trigger.getId(), e); 
+                } finally {
+                    if (lockAcquired) {
+                        trigger.releaseExclusiveLock();
+                    }
                 }                 
+            }             
+        } catch (Exception e) {
+            if (trigger == null) {
+                log.error("Failed to flush state for multi condition trigger", e);                                
+            } else {
+                log.error("Failed to flush state for multi " +
+                          "condition trigger id="+trigger.getId(), e);                
+            }
+        } finally {
+            // Shared locks on all the visited multi condition triggers must 
+            // be released, else these triggers may never fired again until 
+            // the server is rebooted!
+            if (!visitedMCTriggers.isEmpty()) {
+                for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
+                    trigger = (MultiConditionTrigger) it.next();
+                    it.remove();
+                    trigger.releaseSharedLock();
+                }
             }            
         }
-        
+                
     }
     
     private void publishEnqueuedEvents() {
