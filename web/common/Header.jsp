@@ -99,8 +99,6 @@
                         </html:link>
                     </c:when>
                     <c:otherwise>
-                        <fmt:message key="header.User"/>
-                        :
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
