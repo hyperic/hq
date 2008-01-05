@@ -45,6 +45,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
+import org.hyperic.util.thread.ThreadWatchdog;
 import org.jboss.ejb.Interceptor;
 import org.jboss.invocation.Invocation;
 
@@ -65,6 +66,7 @@ public class HQApp {
     private File               _restartStorage;
     private File               _resourceDir;
     private File               _webAccessibleDir;
+    private ThreadWatchdog     _watchdog;
     
     private final Object       STAT_LOCK = new Object();
     private long               _numTx;
@@ -78,7 +80,9 @@ public class HQApp {
         _callbacks = new CallbackDispatcher();
         _shutdown = (ShutdownCallback)
             _callbacks.generateCaller(ShutdownCallback.class);
+        _watchdog = new ThreadWatchdog("ThreadWatchdog");
         
+        _watchdog.initialize();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 _log.info("Running shutdown hooks");
@@ -88,6 +92,12 @@ public class HQApp {
         });
     }
 
+    public ThreadWatchdog getWatchdog() {
+        synchronized (_watchdog) {
+            return _watchdog;
+        }
+    }
+    
     public void setRestartStorageDir(File dir) {
         synchronized (_startupClasses) {
             _restartStorage = dir;
