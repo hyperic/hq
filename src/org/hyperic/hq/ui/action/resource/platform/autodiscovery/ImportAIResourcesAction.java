@@ -68,45 +68,24 @@ public class ImportAIResourcesAction extends BaseAction {
         if (aiForm.getRid() != null && aiForm.getRid().intValue() > 0) {
             params.put(Constants.ENTITY_ID_PARAM, aiForm.getEid());
         }
-        
+
+        ActionForward forward = checkSubmit(request, mapping, form,
+                                            NO_RETURN_PATH);
+
+        if (forward != null) {
+            return forward;
+        }
+
         try {
-            ActionForward forward = checkSubmit(request, mapping, form,
-                                                NO_RETURN_PATH);
-            
-            if (forward != null) { 
-                return forward;
-            }         
-
-            try {
-                importAIResource(request, aiForm.getAiPid());
-            } catch (AIQApprovalException e) {
-                RequestUtils.setError(request, 
-                                      "dash.autoDiscovery.import.Error",
-                                      e.getMessage());
-                return returnFailure(request, mapping, params);
-            }
-
-            return returnSuccess(request, mapping, params, NO_RETURN_PATH);
-            
-        }
-        catch (AIQApprovalException ae) {
-            if (ae.getReason() == AIQApprovalException.ERR_PARENT_NOT_APPROVED) {
-                RequestUtils.setError(request,
-                                      "resource.platform.inventory.autoinventory.error.NoPlatformFound");
-            } else if (ae.getReason() == AIQApprovalException.ERR_ADDED_TO_APPDEF) {
-                RequestUtils.setError(request,
-                                      "resource.platform.inventory.autoinventory.error.PlatformFound");
-            } else {
-                // don't care about any other error
-                throw ae;
-            }
-            return returnFailure(request, mapping, params);
-        }
-        catch (PlatformNotFoundException ae) {
+            importAIResource(request, aiForm.getAiPid());
+        } catch (AIQApprovalException e) {
             RequestUtils.setError(request,
-                                  "resource.platform.inventory.autoinventory.error.NoPlatformFound");
+                                  "dash.autoDiscovery.import.Error",
+                                  e.getMessage());
             return returnFailure(request, mapping, params);
         }
+
+        return returnSuccess(request, mapping, params, NO_RETURN_PATH);
     }
 
     /**

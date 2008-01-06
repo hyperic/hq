@@ -131,12 +131,6 @@ public class NewAutoDiscoveryAction extends BaseAction {
                 .setError(request,
                           "resource.platform.inventory.configProps.NoAgentConnection");
             return returnFailure(request, mapping);
-        } catch (ScheduleWillNeverFireException e) {
-            RequestUtils
-                .setError(request,
-                          "resource.platform.inventory.autoinventory.error.ScanAlreadyInPast");
-            return returnFailure(request, mapping);
-                
         } catch (InvalidOptionValsFoundException e) {
             RequestUtils.setErrors(request,errors);
             return returnFailure(request, mapping);

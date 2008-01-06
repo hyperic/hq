@@ -44,6 +44,7 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -60,8 +61,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-/**
- */
 public class ViewAction extends TilesAction {
 
     public static final Log log = LogFactory.getLog(ViewAction.class.getName());
@@ -93,7 +92,7 @@ public class ViewAction extends TilesAction {
         // always show ignored platforms and already-processed platforms
         PageList aiQueue = boss.getQueue(sessionId, true, false, true,
                                               page);
-        List queueWithStatus = getStatuses(sessionId, boss, aiQueue);
+        List queueWithStatus = getStatuses(aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
         // If the queue is empty, check to see if there are ANY agents
@@ -151,29 +150,20 @@ public class ViewAction extends TilesAction {
             log.error("Failed to approve AI report", exc);
             ActionMessage err =
                 new ActionMessage("dash.autoDiscovery.import.Error",
-                                  exc.getMessage());
+                                  exc);
             RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
         }
         return null;
     }
     
-    private List getStatuses(int sessionId, AIBoss aiBoss, PageList aiQueue) {
+    private List getStatuses(PageList aiQueue) {
         ScanStateCore ssc = null;
         AIPlatformValue aiPlatform;
         List results = new ArrayList();
 
         for (int i=0; i<aiQueue.size(); i++) {
             aiPlatform = (AIPlatformValue) aiQueue.get(i);
-            /* Don't bother getting scan status
-            try {
-                ssc = aiBoss.getScanStatusByAgentToken(sessionId,
-                                                       aiPlatform.getAgentToken());
-            } catch (Exception e) {
-                log.warn("Error getting scan status for aiplatform "
-                         + "(aiPid="+aiPlatform.getId()+"): " + e);
-                ssc = null;
-            }
-            */
+
             results.add(new AIPlatformWithStatus(aiPlatform, ssc));
         }
 

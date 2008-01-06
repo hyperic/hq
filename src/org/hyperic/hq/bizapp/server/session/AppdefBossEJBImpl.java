@@ -113,6 +113,7 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterExclude;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterGrpEntRes;
 import org.hyperic.hq.appdef.shared.pager.AppdefGroupPagerFilterMemExclude;
@@ -1614,8 +1615,10 @@ public class AppdefBossEJBImpl
                                     AIQueueConstants.Q_DECISION_PURGE);
             } catch (PlatformNotFoundException e) {
                 log.debug("AIPlatform not found: " + platformId);
+            } catch (AIQApprovalException e) {
+                log.error("Error removing from AI queue", e);
             }
-            
+
             // now, remove the platform.
             getPlatformManager().removePlatform(subject, platformId);
             

@@ -37,8 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -49,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -66,17 +63,11 @@ public class ViewResultsPrepAction extends WorkflowPrepareAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
-        Log log = LogFactory.getLog(ViewAutoDiscoveryAction.class.getName());
 
         AutoDiscoveryResultsForm aForm = (AutoDiscoveryResultsForm) form;
         
         AIPlatformValue aiVal = 
             (AIPlatformValue) request.getAttribute(Constants.AIPLATFORM_ATTR);
-        if (aiVal == null) {
-            RequestUtils.setError(request,
-                "resource.platform.inventory.autoinventory.error.NoAIPlatformFound");
-            return null;
-        }
         
         ServletContext ctx = getServlet().getServletContext();
         Integer sessionId = RequestUtils.getSessionId(request);

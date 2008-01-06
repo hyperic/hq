@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
@@ -68,6 +69,11 @@ import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.hyperic.hq.autoinventory.AutoinventoryException;
+import org.hyperic.hq.autoinventory.server.session.AIUtil;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -536,18 +542,27 @@ public class AIQueueManagerEJBImpl
         if (platformList != null) {
             for ( i=0; i<platformList.size(); i++ ) {
                 id = (Integer) platformList.get(i);
-                if (id == null) {
-                    log.error("processQueue: platform with ID=null");
-                    continue;
-                }
+
                 try {
-                    aiplatform =
-                        aiplatformLH.findById(id);
+                    aiplatform = aiplatformLH.findById(id);
                 } catch ( ObjectNotFoundException e ) {
                     if (isPurgeAction) continue;
                     else throw e;
                 }
-                visitor.visitPlatform(aiplatform, 
+
+                // Before processing platforms, ensure the agent is up since
+                // the approval process depends on being able to schedule runtime
+                // discovery and enable metrics.
+                try {
+                    AICommandsClient client =
+                        AIUtil.getClient(aiplatform.getAgentToken());
+                    client.getScanStatus();
+                } catch (Exception e) {
+                    throw new AIQApprovalException("Cannot approve platform: " +
+                                                   e.getMessage(), e);
+                }
+
+                visitor.visitPlatform(aiplatform,
                                       subject,
                                       pmLocal, configMgr, cpropMgr,
                                       createdResources);

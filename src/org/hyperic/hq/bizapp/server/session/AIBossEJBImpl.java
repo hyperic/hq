@@ -501,7 +501,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
             getAIManager().processQueue(subject,
                                         platformList, serverList, ipList,
                                         action);
-        } catch(Exception exc){
+        } catch (AIQApprovalException exc){
+            throw exc;
+        } catch (Exception exc) {
             throw new SystemException(exc);
         }
     }
