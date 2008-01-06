@@ -34,12 +34,15 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.i18n.MessageBundle;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.thoughtworks.xstream.XStream;
 
 public class LiveDataClient {
 
     private LiveDataCommandsAPI _api;
     private AgentConnection _conn;
+    private static Log _log = LogFactory.getLog(LiveDataClient.class);
 
     private static final MessageBundle BUNDLE =
         MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
@@ -80,8 +83,9 @@ public class LiveDataClient {
                 serializeData(xml);
                 return new LiveDataResult(id, xml);
             } catch (Throwable t) {
-                return new LiveDataResult(id, t,
-                                          BUNDLE.format("error.serialization"));
+                String err = BUNDLE.format("error.serialization");
+                _log.warn(err, t);
+                return new LiveDataResult(id, t, err);
             }
         } catch (Exception e) {
             return new LiveDataResult(id, e, e.getMessage());
