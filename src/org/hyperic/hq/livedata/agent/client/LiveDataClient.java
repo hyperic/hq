@@ -33,15 +33,32 @@ import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.i18n.MessageBundle;
+import com.thoughtworks.xstream.XStream;
 
 public class LiveDataClient {
 
     private LiveDataCommandsAPI _api;
     private AgentConnection _conn;
 
+    private static final MessageBundle BUNDLE =
+        MessageBundle.getBundle("org.hyperic.hq.livedata.Resources");
+
     public LiveDataClient(AgentConnection agentConnection) {
         _conn = agentConnection;
         _api = new LiveDataCommandsAPI();
+    }
+
+    /**
+     * Helper method to validate the XStream serialization on the server.  In
+     * some cases (i.e. outdated Agents) we may get objects that cannot be
+     * serialized back to their original form.
+     *
+     * @param xml The xml representation of the object.
+     */
+    private void serializeData(String xml) {
+        XStream xstream = new XStream();
+        xstream.fromXML(xml);
     }
 
     public LiveDataResult getData(AppdefEntityID id, String type,
@@ -58,7 +75,14 @@ public class LiveDataClient {
                                   _api.getVersion(), args);
             LiveData_result val = new LiveData_result(res);
             String xml = val.getResult();
-            return new LiveDataResult(id, xml);
+
+            try {
+                serializeData(xml);
+                return new LiveDataResult(id, xml);
+            } catch (Throwable t) {
+                return new LiveDataResult(id, t,
+                                          BUNDLE.format("error.serialization"));
+            }
         } catch (Exception e) {
             return new LiveDataResult(id, e, e.getMessage());
         }
