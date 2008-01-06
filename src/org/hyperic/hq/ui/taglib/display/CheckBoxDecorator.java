@@ -103,7 +103,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         String name = null;
         String value = null;
         String click = "";
-        Boolean suppress = Boolean.FALSE;
+
         try {
             name = (String) evalAttr("name", this.name, String.class);
         }
@@ -128,22 +128,23 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
             return "";
         }
 
+        if (value == null)
+            value = obj.toString();
+        
         try {
-            suppress = (Boolean) evalAttr("suppress", this.suppress,
-                                          Boolean.class);
+            String suppress = (String) evalAttr("suppress", getSuppress(),
+                                                String.class);
+            if (value.equals(suppress))
+                return "";
         }
         catch (NullAttributeException ne) {
-            suppress = Boolean.FALSE;
+            // No suppression
         }
         catch (JspException je) {
             log.debug("can't evaluate suppress [" + this.suppress + "]: ", je);
             return "";
         }
 
-        if (suppress != null && suppress.booleanValue()) {
-            return "";
-        }
-        
         try {
             click = (String) evalAttr("onclick", this.getOnclick(), String.class);
         } catch (NullAttributeException e) {
@@ -160,11 +161,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         buf.append("\" name=\"");
         buf.append(name);
         buf.append("\" value=\"");
-        if(value != null)            
-            buf.append(value);
-        else            
-            buf.append(obj.toString());
-        
+        buf.append(value);
         buf.append("\"");
         buf.append(">");
         
