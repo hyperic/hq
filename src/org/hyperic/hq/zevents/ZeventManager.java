@@ -45,6 +45,8 @@ import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
+import org.hyperic.util.thread.ThreadWatchdog;
+import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
 
 import edu.emory.mathcs.backport.java.util.Queue;
 import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
@@ -62,6 +64,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 public class ZeventManager { 
     private static final int MAX_QUEUE_ENTRIES = 100 * 1000;
     private static final long WARN_INTERVAL = 5 * 60 * 1000;
+    private static final long MAX_LISTENER_SECONDS = 60;
     private static final int QUEUE_WARN_SIZE = MAX_QUEUE_ENTRIES * 90 / 100;
     
     private final Log _log = LogFactory.getLog(ZeventManager.class);
@@ -87,10 +90,6 @@ public class ZeventManager {
     /* Map of {@link Queue} onto the target listeners using them. */
     private final WeakHashMap _registeredBuffers = new WeakHashMap();
     
-    private final ThreadGroupFactory _threadFact =
-        new ThreadGroupFactory(new LoggingThreadGroup("ZeventManager"), 
-                               "BufferedProcessor");
-
     // For diagnostics and warnings
     private long _lastWarnTime;
     private long _maxTimeInQueue;
@@ -179,8 +178,11 @@ public class ZeventManager {
     }
 
     public boolean addBufferedGlobalListener(ZeventListener listener) {
+        ThreadGroupFactory threadFact = 
+            new ThreadGroupFactory(_threadGroup, listener.toString());
+        
         listener = new TimingListenerWrapper(listener);
-        BufferedListener bListen = new BufferedListener(listener, _threadFact);
+        BufferedListener bListen = new BufferedListener(listener, threadFact);
         synchronized (_listenerLock) {
             return _globalListeners.add(new TimingListenerWrapper(bListen));
         }
@@ -226,8 +228,11 @@ public class ZeventManager {
     public ZeventListener addBufferedListener(Set eventClasses, 
                                               ZeventListener listener) 
     { 
+        ThreadGroupFactory threadFact = 
+            new ThreadGroupFactory(_threadGroup, listener.toString());
+        
         listener = new TimingListenerWrapper(listener);
-        BufferedListener bListen = new BufferedListener(listener, _threadFact); 
+        BufferedListener bListen = new BufferedListener(listener, threadFact); 
         
         for (Iterator i=eventClasses.iterator(); i.hasNext(); ) {
             addListener((Class)i.next(), bListen);
@@ -416,13 +421,26 @@ public class ZeventManager {
             }
         }
 
+        ThreadWatchdog dog = HQApp.getInstance().getWatchdog();
         for (Iterator i=listenerBatches.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             ZeventListener listener = (ZeventListener)ent.getKey();
             List batch = (List)ent.getValue();
             
             synchronized (_listenerLock) {
-                listener.processEvents(Collections.unmodifiableList(batch));
+                InterruptToken t = null;
+                try {
+                    t = dog.interruptMeIn(MAX_LISTENER_SECONDS, 
+                                          TimeUnit.SECONDS,
+                                          "Processing listener events");
+                    listener.processEvents(Collections.unmodifiableList(batch));
+                } catch(RuntimeException e) {
+                    _log.warn("Exception while invoking listener [" + 
+                              listener + "]", e);
+                } finally {
+                    if (t != null)
+                        dog.cancelInterrupt(t);
+                }
             }
         }
     }
