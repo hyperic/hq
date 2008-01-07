@@ -84,8 +84,7 @@ public class ZeventManager {
      * {@link ZeventListener}s */
     private final Map _listeners = new HashMap();
 
-    /* Map of {@link Queue} onto the target listeners using them. 
-     */
+    /* Map of {@link Queue} onto the target listeners using them. */
     private final WeakHashMap _registeredBuffers = new WeakHashMap();
     
     private final ThreadGroupFactory _threadFact =
@@ -124,6 +123,10 @@ public class ZeventManager {
         }
     }
     
+    /**
+     * Registers a buffer with the internal list, so data about its contents
+     * can be printed by the diagnostic thread.
+     */
     void registerBuffer(Queue q, ZeventListener e) {
         synchronized (_registeredBuffers) {
             _registeredBuffers.put(q, e);
@@ -176,6 +179,7 @@ public class ZeventManager {
     }
 
     public boolean addBufferedGlobalListener(ZeventListener listener) {
+        listener = new TimingListenerWrapper(listener);
         BufferedListener bListen = new BufferedListener(listener, _threadFact);
         synchronized (_listenerLock) {
             return _globalListeners.add(new TimingListenerWrapper(bListen));
@@ -222,8 +226,8 @@ public class ZeventManager {
     public ZeventListener addBufferedListener(Set eventClasses, 
                                               ZeventListener listener) 
     { 
-        BufferedListener bListen = new BufferedListener(listener, 
-                                                        _threadFact);
+        listener = new TimingListenerWrapper(listener);
+        BufferedListener bListen = new BufferedListener(listener, _threadFact); 
         
         for (Iterator i=eventClasses.iterator(); i.hasNext(); ) {
             addListener((Class)i.next(), bListen);
@@ -432,10 +436,10 @@ public class ZeventManager {
                .append("    Events Handled:    " + _numEvents + "\n")
                .append("    Max Time In Queue: " + _maxTimeInQueue + "ms\n\n")
                .append("ZEvent Listener Diagnostics:\n");
+            PrintfFormat timingFmt = 
+                new PrintfFormat("        %-30s max=%-7.2f avg=%-5.2f " + 
+                                 "num=%-5d\n");
             synchronized (_listenerLock) {
-                PrintfFormat fmt = 
-                    new PrintfFormat("        %-30s max=%-7.2f avg=%-5.2f " + 
-                                     "num=%-5d\n");
                 
                 for (Iterator i=_listeners.entrySet().iterator(); i.hasNext();){ 
                     Map.Entry ent = (Map.Entry)i.next();
@@ -453,7 +457,7 @@ public class ZeventManager {
                             new Long(l.getNumEvents())
                         };
                             
-                        res.append(fmt.sprintf(args));
+                        res.append(timingFmt.sprintf(args));
                     }
                     res.append("\n");
                 }
@@ -468,13 +472,12 @@ public class ZeventManager {
                         new Long(l.getNumEvents()),
                     };
                     
-                    res.append(fmt.sprintf(args));
+                    res.append(timingFmt.sprintf(args));
                 }
             }
             
             synchronized (_registeredBuffers) {
-                PrintfFormat fmt = 
-                    new PrintfFormat("    %-30s size=%d\n");
+                PrintfFormat fmt = new PrintfFormat("    %-30s size=%d\n"); 
                 
                 res.append("\nZevent Registered Buffers:\n");
                 for (Iterator i=_registeredBuffers.entrySet().iterator(); 
@@ -482,69 +485,24 @@ public class ZeventManager {
                 {
                     Map.Entry ent = (Map.Entry)i.next();
                     Queue q = (Queue)ent.getKey();
-                    ZeventListener targ = (ZeventListener)ent.getValue();
+                    TimingListenerWrapper targ = 
+                        (TimingListenerWrapper)ent.getValue();
 
                     res.append(fmt.sprintf(new Object[] {
                         targ.toString(),
                         new Integer(q.size()),
                     }));
+                    
+                    res.append(timingFmt.sprintf(new Object[] {
+                        "", // Target already printed above
+                        new Double(targ.getMaxTime()),
+                        new Double(targ.getAverageTime()),
+                        new Long(targ.getNumEvents()),
+                    }));
                 }
             }
             
             return res.toString();
-        }
-    }
-    
-    private static class TimingListenerWrapper 
-        implements ZeventListener
-    {
-        private ZeventListener _target;
-        private long           _maxTime   = 0;
-        private long           _totTime   = 0;
-        private long           _numEvents = 0;
-        
-        public TimingListenerWrapper(ZeventListener target) {
-            _target = target;
-        }
-        
-        public void processEvents(List events) {
-            long time, start = System.currentTimeMillis();
-            try {
-                _target.processEvents(events);
-            } finally {
-                time = System.currentTimeMillis() - start;
-                if (time > _maxTime) {
-                    _maxTime = time;
-                }
-                _totTime   += time;
-                _numEvents += events.size();
-            }
-        }
-
-        public long getMaxTime() {
-           return _maxTime;
-        }
-        
-        public double getAverageTime() {
-            if (_numEvents == 0)
-                return Double.NaN;
-            return (double)_totTime / (double)_numEvents;
-        }
-        
-        public long getNumEvents() {
-            return _numEvents;
-        }
-        
-        public boolean equals(Object obj) {
-            return _target.equals(obj);
-        }
-
-        public int hashCode() {
-            return _target.hashCode();
-        }
-
-        public String toString() {
-            return _target.toString();
         }
     }
     

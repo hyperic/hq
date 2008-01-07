@@ -22,51 +22,48 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.zevents;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.util.thread.ThreadGroupFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
-
-class BufferedListener
-    extends ThreadPoolExecutor
+public class TimingListenerWrapper 
     implements ZeventListener
 {
-    private static Log _log = LogFactory.getLog(BufferedListener.class);
+    private ZeventListener _target;
+    private long           _maxTime   = 0;
+    private long           _totTime   = 0;
+    private long           _numEvents = 0;
 
-    private final ZeventListener _target;
-    
-    BufferedListener(ZeventListener target, ThreadGroupFactory fact) {
-        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), fact);
-        ZeventManager.getInstance().registerBuffer(getQueue(), target);
+    public TimingListenerWrapper(ZeventListener target) {
         _target = target;
     }
 
-    private static class BufferedEventRunnable
-        implements Runnable 
-    {
-        private final List           _events;
-        private final ZeventListener _target;
-        
-        BufferedEventRunnable(List events, ZeventListener target) {
-            _events = events;
-            _target = target;
-        }
-        
-        public void run() {
-            _target.processEvents(_events);
+    public void processEvents(List events) {
+        long time, start = System.currentTimeMillis();
+        try {
+            _target.processEvents(events);
+        } finally {
+            time = System.currentTimeMillis() - start;
+            if (time > _maxTime) {
+                _maxTime = time;
+            }
+            _totTime   += time;
+            _numEvents += events.size();
         }
     }
 
-    public void processEvents(List events) {
-        execute(new BufferedEventRunnable(events, _target));
+    public long getMaxTime() {
+        return _maxTime;
+    }
+
+    public double getAverageTime() {
+        if (_numEvents == 0)
+            return Double.NaN;
+        return (double)_totTime / (double)_numEvents;
+    }
+
+    public long getNumEvents() {
+        return _numEvents;
     }
 
     public boolean equals(Object obj) {
@@ -76,7 +73,7 @@ class BufferedListener
     public int hashCode() {
         return _target.hashCode();
     }
-    
+
     public String toString() {
         return _target.toString();
     }
