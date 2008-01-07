@@ -16,7 +16,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="100"/>
+      <column name="NAME" not-null="true" length="255"/>
     </property>
 
     <property name="ctime" type="long">
