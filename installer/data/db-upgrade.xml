@@ -7930,6 +7930,11 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.92">
+    <schema-alterColumn table="EAM_ALERT_DEFINITION" column="NAME" precision="255"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 
