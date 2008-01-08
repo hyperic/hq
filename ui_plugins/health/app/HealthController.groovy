@@ -3,6 +3,7 @@ import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
 import org.hyperic.hq.appdef.server.session.AgentSortField
+import org.hyperic.hq.appdef.Agent
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -10,6 +11,7 @@ import org.hyperic.util.units.UnitNumber
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
+import org.hyperic.hq.hqu.rendit.util.HQUtil
 import org.hyperic.sigar.cmd.Free
 import org.hyperic.sigar.Sigar
 import org.hyperic.sigar.CpuPerc
@@ -35,7 +37,7 @@ class HealthController
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     private final PrintfFormat agentFmt =
-        new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s")
+        new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s %s")
 
     HealthController() {
         onlyAllowSuperUsers()
@@ -44,7 +46,7 @@ class HealthController
     }
     
     private getAgentSchema() {
-        [
+        def res = [
             getData: {pageInfo, params ->
                 getAgentData(pageInfo)
             },
@@ -82,6 +84,24 @@ class HealthController
                  label: {it.offsetHtml}],
             ],
         ]   
+
+        if (HQUtil.isEnterpriseEdition()) {
+            res.columns << [
+                field: [getValue: {localeBundle.licenseCount},
+                        description:'licenseCount', sortable:false],
+                width: '10%',
+                label: {it.licenseCount}]
+        }
+        
+        res
+    }
+    
+    private getLicenseCount(Agent a) {
+        if (!HQUtil.isEnterpriseEdition())
+            return ""
+            
+        def lman = com.hyperic.hq.license.LicenseManager.instance()
+        "${lman.getCountPerAgent(a)}"
     }
     
     private getAgentData(pageInfo) {
@@ -109,7 +129,8 @@ class HealthController
                             offset:metricVal,
                             offsetHtml:linkTo(metricVal, [resource:d[3]]), 
                             numMetrics:numMetrics,
-                            creationTime:df.format(a.creationTime)]
+                            creationTime:df.format(a.creationTime),
+                            licenseCount:getLicenseCount(a)]
                     found = true
                     break
                 }
@@ -119,7 +140,8 @@ class HealthController
                         platform:'Unknown', platformHtml:'Unknown',
                         server:a.address, serverHtml:a.address,
                         offset:'?', offsetHtml:'?', 
-                        creationTime:df.format(a.creationTime)]
+                        creationTime:df.format(a.creationTime),
+                        licenseCount:getLicenseCount(a)]
             }
         }
         res
@@ -329,7 +351,13 @@ class HealthController
             agentData:        getAgentData(agentPager),
             agentFmt:         agentFmt,
             AgentSortField:   AgentSortField,
+            licenseInfo:      [:],
         ] + getSystemStats([:])
+        
+        if (HQUtil.isEnterpriseEdition()) {
+            locals.licenseInfo = com.hyperic.hq.license.LicenseManager.licenseInfo
+        }
+        
     	render(locals: locals)
     }
     

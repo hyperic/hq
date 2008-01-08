@@ -70,16 +70,26 @@ ${d.status}
 <% } %>
 
 
+<% if (licenseInfo) { %>
+-- License --
+Licensee:  ${licenseInfo.licensee}
+Expire:    ${licenseInfo.licenseExpire}
+Platforms: ${licenseInfo.licensePlatforms}
+Count:     ${licenseInfo.platformCount}
+<% } %>
+
+
+
 -- Agents --
 <%= agentFmt.sprintf([l.fqdn, AgentSortField.ADDR.value, 
                       AgentSortField.PORT.value, AgentSortField.VERSION.value,
                       AgentSortField.CTIME.value, l.numPlatforms, 
-                      l.timeOffset, l.numMetrics] as Object[]) %>
+                      l.timeOffset, l.numMetrics, l.licenseCount] as Object[]) %>
 -----------------------------------------------------------------------                      
 <% for (a in agentData) { %>
 <%= agentFmt.sprintf([a.platform, a.server, "${a.agent.port}", a.agent.version, 
                       a.creationTime, "${a.agent.platforms.size()}", 
-                      "${a.offset}", "${a.numMetrics}"] as Object[]) %> <% } %>
+                      "${a.offset}", "${a.numMetrics}", a.licenseCount] as Object[]) %> <% } %>
                       
 
 
