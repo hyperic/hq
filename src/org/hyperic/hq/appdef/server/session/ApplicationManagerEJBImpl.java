@@ -231,10 +231,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
                 // fall through, will catch this later
             }
 
-            ResourceValue rv = getAuthzResource(getApplicationResourceType(),
-                                                newValue.getId());
+            Resource rv = getAuthzResource(newValue.getEntityId());
             rv.setName(newValue.getName());
-            updateAuthzResource(rv);
         }
         dao.setApplicationValue(app, newValue);
         return getApplicationById(subject, app.getId());
@@ -312,8 +310,6 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             app.setModifiedBy(who.getName());
         } catch (FinderException e) {
             throw new ApplicationNotFoundException(appId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
 
@@ -415,34 +411,30 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public PageList getAllApplications ( AuthzSubjectValue subject,
                                          PageControl pc ) 
         throws FinderException, PermissionException {
-        try {
-            Collection authzPks = getViewableApplications(subject);
-            Collection apps = null;
-            int attr = -1;
-            if(pc != null) {
-                attr = pc.getSortattribute();
-            }
-            ApplicationDAO dao = getApplicationDAO();
-            switch(attr) {
-                case SortAttribute.RESOURCE_NAME:
-                    if(pc != null) {
-                        apps = dao.findAll_orderName(!pc.isDescending());
-                    }
-                    break;
-                default:
-                    apps = dao.findAll();
-                    break;
-            }
-            for(Iterator i = apps.iterator(); i.hasNext();) {
-                Integer appPk = ((Application) i.next()).getId();
-                if(!authzPks.contains(appPk)) {
-                    i.remove();
-                }
-            }
-            return valuePager.seek(apps, pc);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        Collection authzPks = getViewableApplications(subject);
+        Collection apps = null;
+        int attr = -1;
+        if(pc != null) {
+            attr = pc.getSortattribute();
         }
+        ApplicationDAO dao = getApplicationDAO();
+        switch(attr) {
+            case SortAttribute.RESOURCE_NAME:
+                if(pc != null) {
+                    apps = dao.findAll_orderName(!pc.isDescending());
+                }
+                break;
+            default:
+                apps = dao.findAll();
+                break;
+        }
+        for(Iterator i = apps.iterator(); i.hasNext();) {
+            Integer appPk = ((Application) i.next()).getId();
+            if(!authzPks.contains(appPk)) {
+                i.remove();
+            }
+        }
+        return valuePager.seek(apps, pc);
     }
 
     /**

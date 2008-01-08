@@ -199,8 +199,10 @@ class AuthzSubjectDAO
     public Collection findByRoleId_orderName(Integer roleId, boolean asc) {
         return getSession()
             .createQuery("select s from AuthzSubject s join fetch s.roles r " +
-                         "where r.id = ? and s.system = false " +
-                         "order by s.sortName " + (asc ? "asc" : "desc"))
+                         "where r.id = ? and " +
+                         "(s.system = false or s.id = " +
+                         AuthzConstants.rootSubjectId +
+                         ") order by s.sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue())
             .list();
     }

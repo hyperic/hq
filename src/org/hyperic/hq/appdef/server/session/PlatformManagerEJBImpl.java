@@ -1077,10 +1077,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     }
 
                     // name has changed. Update authz resource table
-                    ResourceValue rv =
-                        getAuthzResource(getPlatformResourceType(), existing.getId());
+                    Resource rv = getAuthzResource(existing.getEntityId());
                     rv.setName(existing.getName());
-                    updateAuthzResource(rv);
                 }
 
                 if(! (existing.getFqdn().equals(plat.getFqdn())))  {
@@ -1174,23 +1172,17 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                     Integer platformId,
                                     AuthzSubjectValue newOwner)
         throws FinderException, PermissionException {
-        try {
-            // first lookup the platform
-            Platform platform = getPlatformDAO().findById(platformId);
-            // check if the caller can modify this platform
-            checkModifyPermission(who, platform.getEntityId());
-            // now get its authz resource
-            ResourceValue authzRes = getPlatformResourceValue(platformId);
-            // change the authz owner
-            getResourceManager().setResourceOwner(who, authzRes, newOwner);
-            // update the owner field in the appdef table -- YUCK
-            platform.setOwner(newOwner.getName());
-            platform.setModifiedBy(who.getName());
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+        // first lookup the platform
+        Platform platform = getPlatformDAO().findById(platformId);
+        // check if the caller can modify this platform
+        checkModifyPermission(who, platform.getEntityId());
+        // now get its authz resource
+        ResourceValue authzRes = getPlatformResourceValue(platformId);
+        // change the authz owner
+        getResourceManager().setResourceOwner(who, authzRes, newOwner);
+        // update the owner field in the appdef table -- YUCK
+        platform.setOwner(newOwner.getName());
+        platform.setModifiedBy(who.getName());
     }
 
     /**
@@ -1383,7 +1375,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if ((count != null) && (count.intValue() > prevCpuCount)) {
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
-        pLocal.updateWithAI(aiplatform, owner);
+        
+        pLocal.updateWithAI(aiplatform, owner,
+                            getAuthzResource(pLocal.getEntityId()));
     }
 
     /**

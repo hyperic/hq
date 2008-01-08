@@ -303,8 +303,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
         
             return (Integer[]) serviceIds.toArray(new Integer[0]);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             // There are no viewable servers
             return new Integer[0];
@@ -544,44 +542,40 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getAllClusterUnassignedServices(AuthzSubjectValue subject, 
         PageControl pc) throws FinderException, PermissionException {
-        try {
-            // get list of pks user can view
-            List authzPks = getViewableServices(subject);
-            Collection services = null;
-            Collection toBePaged = new ArrayList();
-            pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
+        // get list of pks user can view
+        List authzPks = getViewableServices(subject);
+        Collection services = null;
+        Collection toBePaged = new ArrayList();
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
-            switch( pc.getSortattribute() ) {
-                case SortAttribute.RESOURCE_NAME:
-                    if(pc != null) {
-                        services = getServiceDAO()
-                            .findAllClusterUnassigned_orderName(pc.isAscending());
-                    }
-                    break;
-                case SortAttribute.SERVICE_NAME:
-                    if(pc != null) {
-                        services = getServiceDAO()
-                            .findAllClusterUnassigned_orderName(pc.isAscending());
-                    }
-                    break;
-                default:
-                    services =
-                        getServiceDAO().findAllClusterUnassigned_orderName(true);
-                    break;
-            }
-            for(Iterator i = services.iterator(); i.hasNext();) {
-                Service aService = (Service)i.next();
-                // remove service if its not viewable
-                if(authzPks.contains(aService.getId())) {
-                    toBePaged.add(aService);
+        switch( pc.getSortattribute() ) {
+            case SortAttribute.RESOURCE_NAME:
+                if(pc != null) {
+                    services = getServiceDAO()
+                        .findAllClusterUnassigned_orderName(pc.isAscending());
                 }
-            }
-            // valuePager converts local/remote interfaces to value objects
-            // as it pages through them.
-            return valuePager.seek(toBePaged, pc);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+                break;
+            case SortAttribute.SERVICE_NAME:
+                if(pc != null) {
+                    services = getServiceDAO()
+                        .findAllClusterUnassigned_orderName(pc.isAscending());
+                }
+                break;
+            default:
+                services =
+                    getServiceDAO().findAllClusterUnassigned_orderName(true);
+                break;
         }
+        for(Iterator i = services.iterator(); i.hasNext();) {
+            Service aService = (Service)i.next();
+            // remove service if its not viewable
+            if(authzPks.contains(aService.getId())) {
+                toBePaged.add(aService);
+            }
+        }
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(toBePaged, pc);
     }
 
     /**
@@ -593,44 +587,40 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getAllClusterAppUnassignedServices(AuthzSubjectValue subject, 
         PageControl pc) throws FinderException, PermissionException {
-        try {
-            // get list of pks user can view
-            List authzPks = getViewableServices(subject);
-            Collection services = null;
-            Collection toBePaged = new ArrayList();
-            pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
+        // get list of pks user can view
+        List authzPks = getViewableServices(subject);
+        Collection services = null;
+        Collection toBePaged = new ArrayList();
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
-            switch( pc.getSortattribute() ) {
-                case SortAttribute.RESOURCE_NAME:
-                    if(pc != null) {
-                        services = getServiceDAO()
-                            .findAllClusterAppUnassigned_orderName(pc.isAscending());
-                    }
-                    break;
-                case SortAttribute.SERVICE_NAME:
-                    if(pc != null) {
-                        services = getServiceDAO()
-                            .findAllClusterAppUnassigned_orderName(pc.isAscending());
-                    }
-                    break;
-                default:
+        switch( pc.getSortattribute() ) {
+            case SortAttribute.RESOURCE_NAME:
+                if(pc != null) {
                     services = getServiceDAO()
-                        .findAllClusterAppUnassigned_orderName(true);
-                    break;
-            }
-            for(Iterator i = services.iterator(); i.hasNext();) {
-                Service aService = (Service)i.next();
-                // remove service if its not viewable
-                if(authzPks.contains(aService.getId())) {
-                    toBePaged.add(aService);
+                        .findAllClusterAppUnassigned_orderName(pc.isAscending());
                 }
-            }
-            // valuePager converts local/remote interfaces to value objects
-            // as it pages through them.
-            return valuePager.seek(toBePaged, pc);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+                break;
+            case SortAttribute.SERVICE_NAME:
+                if(pc != null) {
+                    services = getServiceDAO()
+                        .findAllClusterAppUnassigned_orderName(pc.isAscending());
+                }
+                break;
+            default:
+                services = getServiceDAO()
+                    .findAllClusterAppUnassigned_orderName(true);
+                break;
         }
+        for(Iterator i = services.iterator(); i.hasNext();) {
+            Service aService = (Service)i.next();
+            // remove service if its not viewable
+            if(authzPks.contains(aService.getId())) {
+                toBePaged.add(aService);
+            }
+        }
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(toBePaged, pc);
     }
 
     private PageList filterAndPage(Collection svcCol,
@@ -670,9 +660,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         try {
             viewableEntityIds = getViewableServiceInventory(subject);
         } catch (FinderException e) {
-            throw new ServiceNotFoundException(
-                "no viewable services for " + subject);
-        } catch (NamingException e) {
             throw new ServiceNotFoundException(
                 "no viewable services for " + subject);
         }
@@ -1301,28 +1288,24 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                  ServiceValue existing)
         throws PermissionException, UpdateException, 
                AppdefDuplicateNameException, ServiceNotFoundException {
-        try {
-            Service service =
-                getServiceDAO().findById(existing.getId());
-            checkModifyPermission(subject, service.getEntityId());
-            existing.setModifiedBy(subject.getName());
-            existing.setMTime(new Long(System.currentTimeMillis()));
-            trimStrings(existing);
+        Service service =
+            getServiceDAO().findById(existing.getId());
+        checkModifyPermission(subject, service.getEntityId());
+        existing.setModifiedBy(subject.getName());
+        existing.setMTime(new Long(System.currentTimeMillis()));
+        trimStrings(existing);
+
+        if(service.matchesValueObject(existing)) {
+            log.debug("No changes found between value object and entity");
+        } else {
             if(!existing.getName().equals(service.getName())) {
-                ResourceValue rv = getAuthzResource(getServiceResourceType(),
-                    existing.getId());
+                Resource rv = getAuthzResource(existing.getEntityId());
                 rv.setName(existing.getName());
-                updateAuthzResource(rv);
             }
-            if(service.matchesValueObject(existing)) {
-                log.debug("No changes found between value object and entity");
-            } else {
-                service.updateService(existing);
-            }
-            return service;
-        } catch (FinderException e) {
-            throw new ServiceNotFoundException(existing.getEntityId());
+
+            service.updateService(existing);
         }
+        return service;
     }
 
     /**
@@ -1334,21 +1317,17 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                    Integer serviceId,
                                    AuthzSubjectValue newOwner)
         throws FinderException, PermissionException, CreateException {
-        try {
-            // first lookup the service
-            Service service = getServiceDAO().findById(serviceId);
-            // check if the caller can modify this service
-            checkModifyPermission(who, service.getEntityId());
-            // now get its authz resource
-            ResourceValue authzRes = getServiceResourceValue(serviceId);
-            // change the authz owner
-            getResourceManager().setResourceOwner(who, authzRes, newOwner);
-            // update the owner field in the appdef table -- YUCK
-            service.setOwner(newOwner.getName());
-            service.setModifiedBy(who.getName());
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        // first lookup the service
+        Service service = getServiceDAO().findById(serviceId);
+        // check if the caller can modify this service
+        checkModifyPermission(who, service.getEntityId());
+        // now get its authz resource
+        ResourceValue authzRes = getServiceResourceValue(serviceId);
+        // change the authz owner
+        getResourceManager().setResourceOwner(who, authzRes, newOwner);
+        // update the owner field in the appdef table -- YUCK
+        service.setOwner(newOwner.getName());
+        service.setModifiedBy(who.getName());
     }
 
     /**

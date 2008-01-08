@@ -39,7 +39,6 @@ import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -578,8 +577,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         
             return (Integer[]) serverIds.toArray(new Integer[0]);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         } catch (FinderException e) {
             // There are no viewable servers
             return new Integer[0];
@@ -678,32 +675,28 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                           PageControl pc)
         throws PermissionException, FinderException {
         Collection servers;
-        try {
-            List authzPks = getViewableServers(subject);
-            int attr = -1;
-            if (pc != null) {
-                attr = pc.getSortattribute();
-            }
-            switch(attr) {
-                case SortAttribute.RESOURCE_NAME:
-                    servers = getServerDAO().findAll_orderName(
-                        pc != null ? !pc.isDescending() : true);
-                    break;
-                default:
-                    servers = getServerDAO().findAll_orderName(true);
-                    break;
-            }
-            for(Iterator i = servers.iterator(); i.hasNext();) {
-                Integer sPK = ((Server)i.next()).getId();
-                // remove server if its not viewable
-                if(!authzPks.contains(sPK)) {
-                    i.remove();
-                }
-            }
-            return servers;
-        } catch (NamingException e) {
-            throw new SystemException(e);
+        List authzPks = getViewableServers(subject);
+        int attr = -1;
+        if (pc != null) {
+            attr = pc.getSortattribute();
         }
+        switch(attr) {
+            case SortAttribute.RESOURCE_NAME:
+                servers = getServerDAO().findAll_orderName(
+                    pc != null ? !pc.isDescending() : true);
+                break;
+            default:
+                servers = getServerDAO().findAll_orderName(true);
+                break;
+        }
+        for(Iterator i = servers.iterator(); i.hasNext();) {
+            Integer sPK = ((Server)i.next()).getId();
+            // remove server if its not viewable
+            if(!authzPks.contains(sPK)) {
+                i.remove();
+            }
+        }
+        return servers;
     }
 
     private Collection getServersByPlatformImpl( AuthzSubjectValue subject,
@@ -719,8 +712,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         } catch(FinderException exc){
             throw new ServerNotFoundException(
                 "No (viewable) servers associated with platform " + platId);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
         
         List servers;
@@ -885,8 +876,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             return valuePager.seek(servers, PageControl.PAGE_ALL);
         } catch (FinderException e) {
             return new ArrayList(0);
-        } catch (NamingException e) {
-            throw new SystemException(e);
         }
     }
     
@@ -959,24 +948,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Collection appServiceCollection;
         HashMap serverCollection;
     
+        ApplicationDAO appLocalHome = getApplicationDAO();
+        
         try {
-            ApplicationDAO appLocalHome = getApplicationDAO();
-            
-            try {
-                appLocal = appLocalHome.findById(appId);
-            } catch(ObjectNotFoundException exc){
-                throw new ApplicationNotFoundException(appId, exc);
-            }
-            
-            try {
-                authzPks = getViewableServers(subject);
-            } catch (FinderException e) {
-                throw new ServerNotFoundException("No (viewable) servers " +
-                                                  "associated with " +
-                                                  "application " + appId, e);
-            }
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            appLocal = appLocalHome.findById(appId);
+        } catch(ObjectNotFoundException exc){
+            throw new ApplicationNotFoundException(appId, exc);
+        }
+        
+        try {
+            authzPks = getViewableServers(subject);
+        } catch (FinderException e) {
+            throw new ServerNotFoundException("No (viewable) servers " +
+                                              "associated with " +
+                                              "application " + appId, e);
         }
         
         serverCollection = new HashMap();
@@ -1133,20 +1118,18 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
-            if(!existing.getName().equals(server.getName())) {
-                ResourceValue rv = getAuthzResource(getServerResourceType(),
-                    existing.getId());
-                rv.setName(existing.getName());
-                updateAuthzResource(rv);
-            }
-            if(server.matchesValueObject(existing)) {
+            
+            if (server.matchesValueObject(existing)) {
                 log.debug("No changes found between value object and entity");
             } else {
+                if(!existing.getName().equals(server.getName())) {
+                    Resource rv = getAuthzResource(existing.getEntityId());
+                    rv.setName(existing.getName());
+                }
+
                 server.updateServer(existing);
             }
             return server;
-        } catch (FinderException e) {
-            throw new ServerNotFoundException(existing.getId(), e);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(existing.getId(), e);
         }
@@ -1383,7 +1366,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public ResourceValue getServerResourceValue(Integer pk)
         throws FinderException {
-        return getAuthzResource(getServerResourceType(), pk);
+        return getServerResourceValue(pk);
     }
 
     /**

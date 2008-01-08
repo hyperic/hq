@@ -3210,12 +3210,8 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException 
     {
-        try {
-            AuthzSubjectValue who = manager.getSubject(sessionId);
-            return getPlatformManager().getResourcePermissions(who, id);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        AuthzSubjectValue who = manager.getSubject(sessionId);
+        return getPlatformManager().getResourcePermissions(who, id);
     }
 
     /**

@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-import javax.ejb.CreateException;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
@@ -196,6 +195,13 @@ public abstract class AppdefSessionEJB
     }
 
     /**
+     * Retrieve the Resource POJO for a given Appdef Entity ID
+     */
+    protected Resource getAuthzResource(AppdefEntityID aeid) {
+        return getResourceManager().findResource(aeid);
+    }
+
+    /**
      * Get the authz resource type by AppdefEntityId
      */
     protected ResourceType getAuthzResourceType(AppdefEntityID id)
@@ -218,32 +224,6 @@ public abstract class AppdefSessionEJB
         }
     }
         
-    /**
-     * Get the authz resource by AppdefEntityId
-     */
-    protected ResourceValue getAuthzResource(AppdefEntityID id)
-        throws NamingException, FinderException {
-            int type = id.getType();
-            Integer instanceId = id.getId();
-            switch(type) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                        return getAuthzResource(getPlatformResourceType(),
-                            instanceId);
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        return getAuthzResource(getServerResourceType(),
-                            instanceId);
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        return getAuthzResource(getServiceResourceType(),
-                            instanceId);
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    return getAuthzResource(getApplicationResourceType(),
-                        instanceId);
-                default:
-                    throw new InvalidAppdefTypeException("Type: " +
-                        type + " unknown");
-            }
-    }
-
     /**
      * remove the authz resource entry
      */
@@ -685,9 +665,6 @@ public abstract class AppdefSessionEJB
         AppdefResourcePermissions arp;
         try {
             arp = getResourcePermissions(subject, platformID);
-        } catch (NamingException e) {
-            throw new SystemException("Unexpected error reading "
-                                         + "permissions: " + e, e);
         } catch (FinderException e) {
             throw new SystemException("Unexpected error reading "
                                          + "permissions: " + e, e);
@@ -748,7 +725,7 @@ public abstract class AppdefSessionEJB
     public AppdefResourcePermissions 
         getResourcePermissions(AuthzSubjectValue who,
                                AppdefEntityID eid)
-        throws NamingException, FinderException {
+        throws FinderException {
             boolean canView = false;
             boolean canModify = false;
             boolean canCreateChild = false;
@@ -895,7 +872,7 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ResourceValue getServerResourceValue(Integer pk)
-        throws NamingException, FinderException, CreateException {
+        throws FinderException {
         return getAuthzResource(getServerResourceType(), pk);
     }
  
@@ -939,7 +916,7 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ResourceValue getPlatformResourceValue(Integer pk)
-        throws NamingException, FinderException, CreateException
+        throws FinderException
     {
         return getAuthzResource(getPlatformResourceType(), pk);
     }
@@ -950,7 +927,7 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ResourceValue getServiceResourceValue(Integer pk)
-        throws NamingException, FinderException, CreateException
+        throws FinderException
     {
         return getAuthzResource(getServiceResourceType(), pk);
     }
@@ -961,7 +938,7 @@ public abstract class AppdefSessionEJB
      * @ejb:transaction type="Required"
      */
     public ResourceValue getApplicationResourceValue(Integer  pk)
-        throws NamingException, FinderException, CreateException
+        throws FinderException
     {
         return getAuthzResource(getApplicationResourceType(), pk);
     }
@@ -972,7 +949,7 @@ public abstract class AppdefSessionEJB
      * @return List of ServicePK's for which subject has AuthzConstants.serviceOpViewService
      */
     protected List getViewableServices(AuthzSubjectValue whoami) 
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op = 
@@ -993,7 +970,7 @@ public abstract class AppdefSessionEJB
        service inventory that the subject is authorized to see. This includes
        all services as well as all clusters */
     protected List getViewableServiceInventory (AuthzSubjectValue whoami)
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         List idList = getViewableServices(whoami);
         for (int i=0;i<idList.size();i++) {
@@ -1021,7 +998,7 @@ public abstract class AppdefSessionEJB
      * AuthzConstants.applicationOpViewApplication
      */
     protected List getViewableApplications(AuthzSubjectValue whoami)
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         Operation op = 
@@ -1043,7 +1020,7 @@ public abstract class AppdefSessionEJB
      * AuthzConstants.serverOpViewServer
      */
     protected List getViewableServers(AuthzSubjectValue whoami) 
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException
     {
         if (log.isDebugEnabled()) {
             log.debug("Checking viewable servers for subject: " +
@@ -1107,7 +1084,7 @@ public abstract class AppdefSessionEJB
      */
     protected Collection getViewablePlatforms(AuthzSubjectValue whoami, 
                                               PageControl pc)
-        throws FinderException, NamingException, PermissionException
+        throws FinderException, PermissionException, NamingException
     {
         // first find all, based on the sorting attribute passed in, or
         // with no sorting if the page control is null

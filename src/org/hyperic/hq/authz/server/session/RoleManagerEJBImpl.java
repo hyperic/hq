@@ -1515,62 +1515,6 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         }
     }
     
-    /** 
-     * List the subjects in this role.
-     * @param whoami The current running user.
-     * @param role This role.
-     * @return List of subjects in this role.
-     * @throws FinderException Unable to find a given or dependent entities.
-     * @throws PermissionException whoami is not allowed to perform 
-     * listSubjects on this role.
-     * @throws FinderException if the sort attribute is not recognized
-     * @ejb:interface-method
-     *
-     */
-    public List getSubjects(AuthzSubjectValue whoami, RoleValue roleValue, 
-                            PageControl pc) 
-        throws PermissionException, FinderException {
-        Role roleLocal = lookupRole(roleValue);
-        AuthzSubject subj = lookupSubject(whoami);
-        // check if this user is a member of this role
-        boolean roleHasUser = roleLocal.getSubjects().contains(subj);
-
-        // check whether the user can see subjects other than himself
-        try {
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            pm.check(whoami.getId(), getRootResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpViewSubject);
-        } catch (PermissionException e) {
-            // if the user does not have permission to view subjects
-            // but he is in the role, return a collection with only one 
-            // item... himself.
-            if(roleHasUser) {
-                List subjects = new ArrayList();
-                subjects.add(whoami);
-                return subjects;
-            }
-            throw e;
-        }
-
-        Collection subjects;
-        pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        int attr = pc.getSortattribute();
-        AuthzSubjectDAO dao = new AuthzSubjectDAO(DAOFactory.getDAOFactory());
-        switch (attr) {
-        case SortAttribute.SUBJECT_NAME:
-            subjects = dao.findByRoleId_orderName(roleLocal.getId(),
-                                                  pc.isDescending());
-            break;
-
-        default:
-            throw new FinderException("Unrecognized sort attribute: " + attr);
-        }
-
-
-        return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
-    }
-    
     /** List the subjects in this role.
      * @param whoami The current running user.
      * @param roleId The id of the role.

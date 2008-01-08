@@ -38,6 +38,7 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.authz.server.session.Resource;
 
 public class Platform extends PlatformBase
 {
@@ -137,11 +138,14 @@ public class Platform extends PlatformBase
      * Update an existing appdef platform with data from an AI platform.
      * @param aiplatform the AI platform object to use for data
      */
-    public void updateWithAI(AIPlatformValue aiplatform, String owner) {
+    public void updateWithAI(AIPlatformValue aiplatform, String owner,
+                             Resource resource) {
         setFqdn(aiplatform.getFqdn());
         setCertdn(aiplatform.getCertdn());
-        if (aiplatform.getName() != null) {
+        if (aiplatform.getName() != null &&
+            !aiplatform.getName().equals(getName())) {
             setName(aiplatform.getName());
+            resource.setName(aiplatform.getName());
         }
         setModifiedBy(owner);
         // setLocation("");

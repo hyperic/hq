@@ -88,10 +88,14 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -904,8 +908,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             update = true;
             // UPDATE SERVICE
             _log.info("Updating service: " + service.getName());
-            if (aiservice.getName() != null)
+            if (aiservice.getName() != null &&
+                !aiservice.getName().equals(service.getName())) {
                 service.setName(aiservice.getName().trim());
+                // Update Resource
+                Resource rv = ResourceManagerEJBImpl.getOne()
+                    .findResource(service.getEntityId());
+                rv.setName(service.getName());
+            }
             if (aiservice.getDescription() != null)
                 service.setDescription(aiservice.getDescription().trim());
             
