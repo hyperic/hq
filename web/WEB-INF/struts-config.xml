@@ -2347,7 +2347,7 @@
               
       <action path="/attach/TabPortal"
               parameter="mode"
-              input="/TabBodyAttach"
+              input="/TabBodyAttach.do"
               type="org.hyperic.hq.ui.action.attach.TabPortalAction">
       </action>
 
