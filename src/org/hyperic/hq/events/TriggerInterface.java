@@ -31,12 +31,24 @@
 package org.hyperic.hq.events;
 
 /**
+ * The trigger interface.
  */
 public interface TriggerInterface {
-    /** Process an event from the dispatcher.
+    
+    /** 
+     * Process an event from the dispatcher.
      * @param event the Event to process
-     * @throws org.hyperic.hq.events.ActionExecuteException if an action throws an exception
+     * @throws EventTypeException if the trigger does not process events of 
+     *                            the type provided
+     * @throws ActionExecuteException if an action throws an exception
      */
-    public abstract void processEvent(AbstractEvent event)
+    void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException;
+    
+    /**
+     * Retrieve the trigger id.
+     * 
+     * @return The trigger id.
+     */
+    Integer getId();
 }
