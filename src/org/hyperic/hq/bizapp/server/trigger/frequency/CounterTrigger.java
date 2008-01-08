@@ -58,6 +58,7 @@ public class CounterTrigger extends AbstractTrigger
 {
     private static final String CFG_COUNT      = "count";
 
+    private final   Object  lock = new Object();
     private Integer triggerId;
     private int     count;
     private long    timeRange;
@@ -184,52 +185,60 @@ public class CounterTrigger extends AbstractTrigger
             return; // No fire since we can't track the events
         }
         
-        Collection eventObjectDesers;
+        TriggerFiredEvent myEvent = null;
+        
+        synchronized (lock) {
+            Collection eventObjectDesers;
 
-        try {
-            // Now find out if we have the specified # within the interval
-            eventObjectDesers = eTracker.getReferencedEventStreams(getId());
-        } catch(Exception exc){
-            throw new ActionExecuteException("Failed to get referenced " +
-                                             "streams for trigger id="+
-                                             getId()+" : " + exc);
-        }
-
-        /* Make sure we only write once (either delete or add) in this function
-           otherwise, we have to make sure that things are in the same
-           user transaction, which is a pain */
-        if ((eventObjectDesers.size() + 1) >= count){
-            // Get ready to fire, reset EventTracker
             try {
-                eTracker.deleteReference(getId());                            
-            } catch (SQLException exc) {
-                throw new ActionExecuteException(
-                    "Failed to delete event references for trigger id="+getId(), exc);                  
+                // Now find out if we have the specified # within the interval
+                eventObjectDesers = eTracker.getReferencedEventStreams(getId());
+            } catch(Exception exc){
+                throw new ActionExecuteException("Failed to get referenced " +
+                                                 "streams for trigger id="+
+                                                 getId()+" : " + exc);
             }
-                        
-            TriggerFiredEvent myEvent = new TriggerFiredEvent(getId(), event);
 
-            myEvent.setMessage("Event " + triggerId + " occurred " +
-                               (eventObjectDesers.size() + 1) + " times within " +
-                               timeRange / 1000 + " seconds");
+            /* Make sure we only write once (either delete or add) in this function
+               otherwise, we have to make sure that things are in the same
+               user transaction, which is a pain */
+            if ((eventObjectDesers.size() + 1) >= count){
+                // Get ready to fire, reset EventTracker
+                try {
+                    eTracker.deleteReference(getId());                            
+                } catch (SQLException exc) {
+                    throw new ActionExecuteException(
+                        "Failed to delete event references for trigger id="+getId(), exc);                  
+                }
+                            
+                myEvent = new TriggerFiredEvent(getId(), event);
+
+                myEvent.setMessage("Event " + triggerId + " occurred " +
+                                   (eventObjectDesers.size() + 1) + " times within " +
+                                   timeRange / 1000 + " seconds");
+            } else {
+                // Throw it into the event tracker
+                try {
+                    eTracker.addReference(getId(), tfe, timeRange);                           
+                } catch (SQLException e) {
+                    throw new ActionExecuteException(
+                            "Failed to add event reference for trigger id="+
+                            getId(), e);                            
+                }
+                
+                // Now send a NotFired event
+                notFired();
+            }            
+        }
+        
+        if (myEvent != null) {
             try {
                 super.fireActions(myEvent);
             } catch(Exception exc){
                 throw new ActionExecuteException("Error firing actions: " +
                                                  exc);
-            }
-        } else {
-            // Throw it into the event tracker
-            try {
-                eTracker.addReference(getId(), tfe, timeRange);                           
-            } catch (SQLException e) {
-                throw new ActionExecuteException(
-                        "Failed to add event reference for trigger id="+
-                        getId(), e);                            
-            }
-            
-            // Now send a NotFired event
-            notFired();
+            }            
         }
+
     }
 }
