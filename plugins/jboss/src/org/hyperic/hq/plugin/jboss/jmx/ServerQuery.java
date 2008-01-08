@@ -231,7 +231,7 @@ public class ServerQuery extends JBossQuery {
             if (mbeanClass != null) {
                 try {
                     MBeanInfo info = mServer.getMBeanInfo(name);
-                    if (!mbeanClass.equals(info.getClassName())) {
+                    if (!info.getClassName().matches(mbeanClass)) {
                         if (isDebug) {
                             log.debug("[" + name + "] " + info.getClassName() +
                                       " !instanceof " + mbeanClass);
