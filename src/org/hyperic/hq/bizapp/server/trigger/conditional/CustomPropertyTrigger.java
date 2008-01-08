@@ -62,6 +62,8 @@ public class CustomPropertyTrigger extends AbstractTrigger
     
     public static final MessageFormat MESSAGE_FMT = new MessageFormat
         ("New {0} value ({1}) differs from previous property value ({2}).");
+    
+    private final Object lock = new Object();
 
     private AppdefEntityID id;
     private String         customProperty;
@@ -166,10 +168,15 @@ public class CustomPropertyTrigger extends AbstractTrigger
         try {
             TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
             StringBuffer sb = new StringBuffer();
-            MESSAGE_FMT.format(new String[] { event.getKey(),
-                                              event.getOldValue(),
-                                              event.getNewValue() },
-                               sb, null);
+            
+            synchronized (lock) {
+                MESSAGE_FMT.format(new String[] { event.getKey(),
+                                                  event.getOldValue(),
+                                                  event.getNewValue() },
+                                   sb, 
+                                   null);                
+            }
+            
             tfe.setMessage(sb.toString());
             super.fireActions(tfe);
         } catch (AlertCreateException exc) {
