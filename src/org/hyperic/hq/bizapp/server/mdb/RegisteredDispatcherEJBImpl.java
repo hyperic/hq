@@ -26,7 +26,6 @@
 package org.hyperic.hq.bizapp.server.mdb;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,9 +41,8 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -53,6 +51,7 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.EventProcessingTxnWrapperEJBImpl;
 
 
 /** The RegisteredDispatcher Message-Drive Bean registers Triggers and
@@ -67,10 +66,10 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *
- * @jboss:destination-jndi-name name="topic/eventsTopic"
+ * @ejb:transaction type="NOTSUPPORTED"
  *
+ * @jboss:destination-jndi-name name="topic/eventsTopic"
  */
-
 public class RegisteredDispatcherEJBImpl 
     implements MessageDrivenBean, MessageListener 
 {
@@ -98,17 +97,12 @@ public class RegisteredDispatcherEJBImpl
         for (Iterator i = triggers.iterator(); i.hasNext(); ) {
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
-                updateVisitedMCTriggersSet(visitedMCTriggers, trigger);
-                trigger.processEvent(event);                
-            } catch (ActionExecuteException e) {
-                // Log error
-                log.error("ProcessEvent failed to execute action", e);
-            } catch (EventTypeException e) {
-                // The trigger was not meant to process this event
-                log.debug("dispatchEvent dispatched to trigger (" +
-                        trigger.getClass() + " that's not " +
-                        "configured to handle this type of event: " +
-                        event.getClass());
+                updateVisitedMCTriggersSet(visitedMCTriggers, trigger);                
+                EventProcessingTxnWrapperEJBImpl.getOne()
+                                .processEvent(trigger, event);
+            } catch (SystemException e) {
+                log.error("Event processing failed for trigger id="+
+                           trigger.getId(), e);
             }
         }            
         
@@ -128,6 +122,8 @@ public class RegisteredDispatcherEJBImpl
             } catch (InterruptedException e) {
                 // failed to acquire shared lock - we will not visit this trigger
                 visitedMCTriggers.remove(trigger);
+                // reset the interrupted state
+                Thread.currentThread().interrupt();
                 throw e;
             }
         }
@@ -167,14 +163,15 @@ public class RegisteredDispatcherEJBImpl
             try {
                 flushStateForVisitedMCTriggers(visitedMCTriggers);
             } catch (Exception e) {
-                log.error("Failed to flush state for multi conditional trigger", e);
+                log.error("Failed to flush state for multi condition trigger", e);
             }
             
             dispatchEnqueuedEvents();
         }
     }
     
-    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) {
+    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers)  
+        throws InterruptedException {
         
         if (visitedMCTriggers.isEmpty()) {
             return;
@@ -189,11 +186,12 @@ public class RegisteredDispatcherEJBImpl
 
                 if (trigger.triggeringConditionsFulfilled()) {
                     try {   
-                        tryFlushState(event, trigger);
-                    } catch (Throwable e) {
-                        // continue flushing the other triggers
+                        tryFlushState(event, trigger);    
+                    } catch (SystemException e) {
+                        // Continue flushing the other triggers. The transaction 
+                        // wrapping the current trigger flush will be rolled back.
                         log.error("Failed to flush state for multi " +
-                        		  "conditional trigger id="+trigger.getId(), e);                        
+                        		  "condition trigger id="+trigger.getId(), e);                        
                     }
                 } else {
                     trigger.releaseSharedLock();
@@ -216,8 +214,19 @@ public class RegisteredDispatcherEJBImpl
         
     }
 
+    /**
+     * Flush the multi condition trigger state if the current thread is able 
+     * to upgrade the shared locked to an exclusive lock.
+     * 
+     * @param event The flush event.
+     * @param trigger The multi condition trigger. 
+     * @throws InterruptedException if the current thread is interrupted. If this 
+     *                              happens, then all locks on the trigger are 
+     *                              guaranteed to have been released.
+     * @throws SystemException if trigger state flushing fails.
+     */
     private void tryFlushState(FlushStateEvent event, MultiConditionTrigger trigger) 
-        throws InterruptedException, EventTypeException, ActionExecuteException {
+        throws InterruptedException, SystemException {
         
         boolean lockAcquired = false;
 
@@ -225,7 +234,8 @@ public class RegisteredDispatcherEJBImpl
             lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
 
             if (lockAcquired) {
-                trigger.processEvent(event);                    
+                EventProcessingTxnWrapperEJBImpl.getOne()
+                                    .processEvent(trigger, event);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("There must be more interesting events "+
@@ -248,64 +258,12 @@ public class RegisteredDispatcherEJBImpl
         if (enqueuedEvents.isEmpty()) {
             return;
         }
+
+        Messenger sender = new Messenger();
+        sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+                              (Serializable)enqueuedEvents);
+    }
             
-        EventsHandler eventsPublishHandler = 
-            new EventsHandler() {
-            public void handleEvents(List events) {
-                Messenger sender = new Messenger();
-                sender.publishMessage(EventConstants.EVENTS_TOPIC, 
-                                      (Serializable)events);
-            }
-        };
-        
-        handleEventsPostCommit(enqueuedEvents, 
-                               eventsPublishHandler, 
-                               true);
-    }
-        
-    /**
-     * Register the handler to handle the events post commit. If registration 
-     * fails and the flag is set to force events handling, handle the events 
-     * immediately.
-     * 
-     * @param events The events to be handled.
-     * @param handler The events handler.
-     * @param forceEventsHandling <code>true</code> to handle the events 
-     *                            immediately if registration fails.
-     */
-    private void handleEventsPostCommit(final List events, 
-                                        final EventsHandler handler, 
-                                        boolean forceEventsHandling) {
-        
-        if (events.isEmpty()) {
-            return;
-        }
-        
-        try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    handler.handleEvents(events);
-                }
-
-                public void beforeCommit() {
-                }
-            });                
-        } catch (Throwable t) {
-            log.warn("Failed to register events to be handled post commit: "+events, t);
-
-            if (forceEventsHandling) {            
-                ArrayList copyOfEvents = new ArrayList(events);
-    
-                // We want to make sure we don't handle the events twice. 
-                // To be sure, clear the list of events handled post commit.
-                events.clear();
-
-                log.warn("Forcing events to be handled now!");
-                handler.handleEvents(copyOfEvents);
-            }
-        }
-    }
-    
     /**
      * @ejb:create-method
      */
