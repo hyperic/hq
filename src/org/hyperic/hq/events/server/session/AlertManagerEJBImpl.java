@@ -345,7 +345,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
-        endTime = TimingVoodoo.closestTime(endTime, 60000);
+        endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         return getAlertDAO().findByCreateTimeAndPriority(subj,
                                                          endTime- timeRange,
                                                          endTime, priority,

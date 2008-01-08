@@ -48,6 +48,18 @@ public final class TimingVoodoo {
     }
 
     /**
+     * Given the approximate time and interval, round the time up to the nearest
+     * timestamp that coincides with the interval.
+     *
+     * @param approxTime the approximate time
+     * @param interval the collection interval
+     * @return the time, rounded up to the next interval
+     */
+    public static long roundUpTime(long approxTime, long interval) {
+        return approxTime + (interval - (approxTime % interval));
+    }
+
+    /**
      * Given the approximate time associated with a data point and the
      * interval at which that adta point is being collected, compute
      * the exact data point to which the data point corresponds.
