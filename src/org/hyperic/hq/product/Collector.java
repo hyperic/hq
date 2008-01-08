@@ -486,8 +486,8 @@ public abstract class Collector implements Runnable {
 
             try {
                 collector.setProperties(props);
-                setInterval(plugin, collector, metric);
                 collector.init();
+                setInterval(plugin, collector, metric);
             } finally {
                 if (setClassLoader) {
                     PluginLoader.resetClassLoader(collector);
