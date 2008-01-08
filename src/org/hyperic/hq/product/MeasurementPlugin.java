@@ -225,8 +225,9 @@ public class MeasurementPlugin extends GenericPlugin {
             }
 
             //templates require the plugin name prefix
-            if (!template.startsWith(info.getName())) {
-                metric.setTemplate(info.getName() + ":" + template);
+            String prefix = info.getName() + ":";
+            if (!template.startsWith(prefix)) {
+                metric.setTemplate(prefix + template);
             }
             
             //NOTE: this currently needs to happen here,
