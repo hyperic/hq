@@ -371,8 +371,8 @@
   </server>
 
   <server name="Sybase"
-          version="15.x">
-          include="12.5.x"/>
+          version="15.x"
+          include="12.5.x">
   </server>
 
   <!-- ==================== Plugin Help =========================== -->
