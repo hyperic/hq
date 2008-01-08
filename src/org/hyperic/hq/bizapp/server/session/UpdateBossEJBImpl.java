@@ -157,6 +157,8 @@ public class UpdateBossEJBImpl
         
         req.putAll(SysStats.getCpuMemStats());
         req.putAll(SysStats.getDBStats());
+        
+        BossStartupListener.getUpdateReportAppender().addProps(req);
         return req;
     }
     
