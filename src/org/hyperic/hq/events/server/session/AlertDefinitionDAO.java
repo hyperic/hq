@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.dao.HibernateDAOFactory;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -60,6 +61,11 @@ public class AlertDefinitionDAO extends HibernateDAO {
     void remove(AlertDefinition def) {
         super.remove(def.getAlertDefinitionState());
         super.remove(def);
+    }
+    
+    public Session getNewSession() {
+        return HibernateDAOFactory.getInstance()
+                .getSessionFactory().openSession();
     }
 
     public List findByAppdefEntity(int type, int id) {
@@ -154,7 +160,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
     
     /** 
-     * Find an alert definition by Id, loading from the session.
+     * Find an alert definition by Id, loading from the current session.
      * 
      * @param id The alert definition Id.
      * @param refresh <code>true</code> to force the alert def state to be 
@@ -173,8 +179,20 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return def;
     }
     
+    /**
+     * Find an alert definition by Id, loading from the given session.
+     * 
+     * @param id The alert definition Id.
+     * @param session The session to use for loading the alert definition.
+     * @return The alert definition.               
+     * @throws ObjectNotFoundException if no alert definition with the give Id exists.
+     */
+    public AlertDefinition findById(Integer id, Session session) {
+        return (AlertDefinition)session.load(getPersistentClass(), id);            
+    }
+    
     /** 
-     * Find an alert definition by Id, loading from the session.
+     * Find an alert definition by Id, loading from the current session.
      * 
      * @param id The alert definition Id.
      * @return The alert definition or <code>null</code> if no alert definition 

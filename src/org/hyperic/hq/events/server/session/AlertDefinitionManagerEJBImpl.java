@@ -42,6 +42,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -470,6 +471,40 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition def = badFindById(defId);
         
         return updateAlertDefinitionInternalEnable(subj, def, enable);
+    }
+    
+    /** 
+     * Enable/Disable an alert definition. For internal use only where the mtime 
+     * does not need to be reset on each update. This operation will always 
+     * be performed within a new transaction.
+     * 
+     * @return <code>true</code> if the enable/disable succeeded.
+     * @ejb:transaction type="REQUIRESNEW"
+     * @ejb:interface-method
+     */
+    public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubjectValue subj,
+                                                                  Integer defId, 
+                                                                  boolean enable)
+        throws PermissionException {
+        
+        // We need a new session in case we are already within an existing 
+        // session where the transaction has been marked for rollback but 
+        // not yet rolled back. Hibernate sessions were not meant to have 
+        // nested transactions.
+        AlertDefinitionDAO dao = getAlertDefDAO();
+        
+        boolean succeeded = false;
+        Session session = dao.getNewSession();
+        
+        try {
+            AlertDefinition def = dao.findById(defId, session);
+            succeeded = updateAlertDefinitionInternalEnable(subj, def, enable);
+            session.flush();  
+        } finally {
+            session.close();
+        }
+                
+        return succeeded;
     }
     
     /** 

@@ -26,6 +26,8 @@
 package org.hyperic.hq.events.ext;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
@@ -48,11 +50,14 @@ import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.TriggerFireActionsFailureHandler;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
+import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
@@ -137,9 +142,82 @@ public abstract class AbstractTrigger
         publishEvent(new TriggerNotFiredEvent(getId()));
     }
     
-    /** The utility method which fires the actions of a trigger
-     */    
-    protected final void fireActions(TriggerFiredEvent event)
+    /** 
+     * The utility method which fires the actions of a trigger. We assume 
+     * that the last trigger operation before firing actions is to clear 
+     * any trigger state. If clearing trigger state fails, then event 
+     * processing must have been aborted already and the current transaction 
+     * rolled back. This will guarantee that the trigger will be able to 
+     * resume event processing and possible action firing the next time 
+     * an interesting event is processed.
+     */   
+    protected final void fireActions(TriggerFiredEvent event) 
+        throws ActionExecuteException, AlertCreateException {
+        
+        try {
+            doFireActions(event);
+        } finally {
+            boolean addedTxnListener = false;
+            
+            try {
+                // Try adding a transaction listener that will call any 
+                // TriggerFireActionsFailureHandlers if the current 
+                // transaction is rolled back.
+                HQApp.getInstance().addTransactionListener(new TransactionListener() {
+
+                    public void afterCommit(boolean success) {
+                        if (!success) {
+                            invokeTriggerFireActionsFailureHandlers();
+                        }
+                    }
+
+                    public void beforeCommit() {
+                    }
+                    
+                });
+                
+                addedTxnListener = true;
+            } finally {
+                // If the current transaction has been marked for rollback already, 
+                // then adding the transaction listener will cause an exception.
+                // If this occurs, then invoke the TriggerFireActionsFailureHandlers 
+                // immediately.
+                if (!addedTxnListener) {
+                    invokeTriggerFireActionsFailureHandlers();
+                }
+            }             
+        }
+    }
+    
+    private void invokeTriggerFireActionsFailureHandlers() {        
+        AlertDefinitionManagerLocal aman = 
+            AlertDefinitionManagerEJBImpl.getOne();
+        Integer adId = aman.getIdFromTrigger(getId());
+            
+        if (adId == null) 
+            return;
+        
+        try {
+            AlertDefinition alertDef = aman.getByIdNoCheck(adId, false);
+            
+            Collection actions = alertDef.getActions();
+            
+            for (Iterator iter = actions.iterator(); iter.hasNext();) {
+                Action action = (Action) iter.next();
+                
+                ActionInterface actionInterface = action.getInitializedAction();
+                
+                if (actionInterface instanceof TriggerFireActionsFailureHandler) {
+                    ((TriggerFireActionsFailureHandler)actionInterface).onFailure();
+                }
+            }
+        } catch (FinderException e) {
+            // If we can't find the alert definition then there's not 
+            // much else we can do.
+        }        
+    }
+     
+    private void doFireActions(TriggerFiredEvent event)
         throws ActionExecuteException, AlertCreateException {
             
         // If the system is not ready, do nothing
@@ -253,9 +331,11 @@ public abstract class AbstractTrigger
     }
         
     private void setUncommitedAlertDefEnabledStatusToDisabled() {
+        boolean addedTxnListener = false;
+        
         try {
             uncommitedAlertDefEnabledStatus.flipEnabledStatus();
-        } finally {
+            
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
 
                 public void afterCommit(boolean success) {
@@ -266,6 +346,15 @@ public abstract class AbstractTrigger
                 }
                 
             });
+            
+            addedTxnListener = true;
+        } finally {
+            // If for any reason we can't add the transaction listener, reset the
+            // cached alert definition enabled status immediately so the trigger 
+            // will continue firing after recovering from this failure case.
+            if (!addedTxnListener) {
+                uncommitedAlertDefEnabledStatus.resetEnabledStatus();
+            }
         }
 
     }
@@ -320,6 +409,9 @@ public abstract class AbstractTrigger
         return event;
     }    
     
+    /**
+     * @see org.hyperic.hq.events.TriggerInterface#getId()
+     */
     public Integer getId() {
         if (triggerValue == null)
             return new Integer(0);
