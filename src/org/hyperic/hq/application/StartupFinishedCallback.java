@@ -25,10 +25,9 @@
 
 package org.hyperic.hq.application;
 
-public interface StartupListener {
+public interface StartupFinishedCallback {
     /**
-     * Called by the HQ Application as classes in the startup_classes.txt
-     * files are invoked.
+     * Called by HQ after all the startup listeners have been invoked. 
      */
-    void hqStarted(); 
+    void startupFinished(); 
 }

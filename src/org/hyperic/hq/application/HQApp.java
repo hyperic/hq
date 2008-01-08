@@ -72,6 +72,9 @@ public class HQApp {
     private long               _numTx;
     private long               _numTxErrors;
     
+    private StartupFinishedCallback _startupFinished;
+    
+    
     static {
         TxSnatch.setSnatcher(new Snatcher());
     }
@@ -80,6 +83,9 @@ public class HQApp {
         _callbacks = new CallbackDispatcher();
         _shutdown = (ShutdownCallback)
             _callbacks.generateCaller(ShutdownCallback.class);
+        _startupFinished = (StartupFinishedCallback)
+            _callbacks.generateCaller(StartupFinishedCallback.class);
+        
         _watchdog = new ThreadWatchdog("ThreadWatchdog");
         
         _watchdog.initialize();
@@ -373,6 +379,12 @@ public class HQApp {
             } catch(Exception e) {
                 _log.warn("Error executing startup listener [" + name + "]", e);
             }
+        }
+        
+        try {
+            _startupFinished.startupFinished();
+        } catch(Throwable t) {
+            _log.error("Error calling startup finish listener", t);
         }
     }
     
