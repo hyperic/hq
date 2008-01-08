@@ -97,13 +97,17 @@ class HealthController
                 numMetrics = metricData[a]
             for (d in offsetData) {
                 if (d[0] == a) {
+                    def metricVal = d[3].lastDataPoint?.value
+                    if (metricVal == null)
+                        metricVal = '???'
+                    
                     res << [agent:a, 
                             platform:d[1].fqdn,
                             platformHtml:linkTo(d[1].fqdn, [resource:d[1].resource]),
                             server:a.address,
                             serverHtml:linkTo(a.address, [resource:d[2].resource]),
-                            offset:d[3].lastDataPoint.value,
-                            offsetHtml:linkTo(d[3].lastDataPoint.value, [resource:d[3]]), 
+                            offset:metricVal,
+                            offsetHtml:linkTo(metricVal, [resource:d[3]]), 
                             numMetrics:numMetrics,
                             creationTime:df.format(a.creationTime)]
                     found = true
