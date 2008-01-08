@@ -39,12 +39,20 @@ public class MxControlPlugin
     private static final Log log =
         LogFactory.getLog(MxControlPlugin.class);
 
-    private String objectName;
+    private String _objectName;
+
+    public String getObjectName() {
+        return _objectName;
+    }
+
+    public void setObjectName(String objectName) {
+        _objectName = objectName;
+    }
 
     public void configure(ConfigResponse config) throws PluginException {
         super.configure(config);
 
-        this.objectName = configureObjectName(this);
+        setObjectName(configureObjectName(this));
     }
 
     static String configureObjectName(GenericPlugin plugin)
@@ -67,7 +75,7 @@ public class MxControlPlugin
         //XXX get attribute from hq-plugin.xml
         try {
             avail = (Integer)MxUtil.getValue(getConfig().toProperties(),
-                                             this.objectName,
+                                             getObjectName(),
                                              Metric.ATTR_AVAIL);
         } catch (Exception e) {
             return false;
@@ -97,7 +105,7 @@ public class MxControlPlugin
             }
             else {
                 //default to OBJECT_NAME property
-                objectName = this.objectName;
+                objectName = getObjectName();
             }
         }
         else {
