@@ -56,9 +56,10 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
  *      acknowledge-mode="Auto-acknowledge"
  *      destination-type="javax.jms.Topic"
  *
+ * @ejb:transaction type="REQUIRED"
+ *
  * @jboss:destination-jndi-name name="topic/eventsTopic"
  */
-
 public class LoggingDispatcherEJBImpl 
     implements MessageDrivenBean, MessageListener {
     private final Log log =
