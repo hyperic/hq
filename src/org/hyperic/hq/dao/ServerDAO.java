@@ -185,6 +185,16 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
+    public Server findByName(Platform plat, String name) {
+        String sql = "select s from Server s " + 
+            "where s.platform = :plat and s.sortName=:name";
+        
+        return (Server)getSession().createQuery(sql)
+            .setParameter("plat", plat)
+            .setParameter("name", name.toUpperCase())
+            .uniqueResult();
+    }
+    
     public List findByName(String name)
     {
         String sql="from Server where sortName=?";

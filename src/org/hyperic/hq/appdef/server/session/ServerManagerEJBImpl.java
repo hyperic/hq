@@ -352,6 +352,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         // as it pages through them.
         return valuePager.seek(getServerTypeDAO().findAllOrderByName(), pc);
     }
+
+    /**
+     * @ejb:interface-method
+     */
+    public Server getServerByName(Platform host, String name) {
+        return getServerDAO().findByName(host, name);
+    }
+    
         
     /**
      * Find viewable server types

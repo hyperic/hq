@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hibernate.SortField
 import org.hyperic.hibernate.PageInfo
@@ -10,11 +11,10 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
-    private appBoss = AppdefBossEJBImpl.one
     
     ResourceHelper(AuthzSubject user) {
         super(user)
@@ -22,25 +22,87 @@ class ResourceHelper extends BaseHelper {
 
     /**
      * General purpose utility method for finding resources and resource
-     * counts.
+     * counts.  This method generally returns a {@link Resource}
      *
      * To find the counts of resource types:
      *   find count:'platforms'
      *   find count:'servers'
      *   find count:'services'
      *
+     * Since servers and services do not have unique names, you must qualify
+     * them by their hosting resources.
+     *
+     * To find platforms:
+     *   find platform:'My Platform'
+     *   find platform:10001  // find the platform by ID
+     *
+     * To find servers:
+     *   find platform:'My Platform', server:'My Server'
+     *   find server:serverId
+     *
+     * To find services:
+     *   find platform:'My Platform', server:'My Server', service:'My Service'
+     *   find service:serviceId
+     *   find server:10001, service:'My Service'
      */
     def find(Map args) {
         // Initialize all used arguments to null
-        ['count'].each {args.get(it, null)}
+        ['count', 'platform', 'server', 'service'].each {args.get(it, null)}
         
-        switch (args.count) {
-        case 'platforms': return PlatMan.one.platformCount
-        case 'servers':   return ServerMan.one.serverCount
-        case 'services':  return ServiceMan.one.serviceCount
-        default:
-            throw new IllegalArgumentException('count must specify a valid ' +
-                                               'resource type')
+        if (args.count != null) {
+            switch (args.count) {
+            case 'platforms': return PlatMan.one.platformCount
+            case 'servers':   return ServerMan.one.serverCount
+            case 'services':  return ServiceMan.one.serviceCount
+            default:
+                throw new IllegalArgumentException('count must specify a ' + 
+                                                   'valid resource type')
+            }
+        }
+        
+        def plat
+        if (args.platform != null) {
+            if (args.platform in String) {
+                plat = PlatMan.one.getPlatformByName(args.platform)
+            } else {
+                try { 
+                    plat = PlatMan.one.findPlatformById(args.platform as int)
+                } catch(PlatformNotFoundException e) {
+                }
+            }
+            
+            if (args.server == null && args.service == null)
+                return plat?.resource
+        }
+        
+        def server
+        if (args.server != null) {
+            if (args.server in String) {
+                if (!plat)
+                    throw new IllegalArgumentException('Requisite platform ' + 
+                                                       'not found')
+                server = ServerMan.one.getServerByName(plat, args.server)
+            } else {
+                server = ServerMan.one.getServerById(args.server as int)
+            }
+            
+            if (args.service == null)
+                return server?.resource
+        }
+        
+        if (args.service != null) {
+            def service
+            if (args.service in String) {
+                if (!server) {
+                    throw new IllegalArgumentException('Requisite server ' +
+                                                       'not found')
+                }
+                service = ServiceMan.one.getServiceByName(server, args.service)
+            } else {
+                service = ServiceMan.one.getServiceById(args.service as int)
+            }
+            
+            return service?.resource
         }
         
         throw new IllegalArgumentException('Unknown arguments passed to find()')
@@ -107,11 +169,11 @@ class ResourceHelper extends BaseHelper {
     }
 
     Collection getDownResources(String typeId, PageInfo pInfo) {
-        appBoss.getUnavailableResources(user, typeId, pInfo)
+        AppdefBoss.one.getUnavailableResources(user, typeId, pInfo)
     }
     
     Map getDownResourcesMap() {
-    	appBoss.getUnavailableResourcesCount(user)
+    	AppdefBoss.one.getUnavailableResourcesCount(user)
     }
     
     List findResourcesOfType(String typeName, PageInfo pInfo) {

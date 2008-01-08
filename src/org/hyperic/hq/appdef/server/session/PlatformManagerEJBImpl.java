@@ -657,6 +657,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Platform getPlatformByName(String name) {
+        return getPlatformDAO().findBySortName(name);
+    }
+    
+    /**
      * Get the platform that has the specified CertDN
      */
     private Platform getPlatformByCertDN(AuthzSubjectValue subject,

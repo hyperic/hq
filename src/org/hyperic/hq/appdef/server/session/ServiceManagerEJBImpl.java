@@ -351,6 +351,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Service getServiceByName(Server server, String name) {
+        return getServiceDAO().findByName(server, name);
+    }
+    
+    
+    /**
      * Find ServiceTypeValue by Id.
      * @deprecated Use findServiceType instead.
      * @ejb:interface-method

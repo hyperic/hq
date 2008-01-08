@@ -210,8 +210,7 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    public Platform findByName(String name)
-    {
+    public Platform findByName(String name) {
         String sql = "from Platform where name=?";
         return (Platform)getSession()
             .createQuery(sql)
@@ -219,6 +218,14 @@ public class PlatformDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    public Platform findBySortName(String name) {
+        String sql = "from Platform where sortName=?";
+        return (Platform)getSession()
+            .createQuery(sql)
+            .setString(0, name.toUpperCase())
+            .uniqueResult();
+    }
+    
     public Collection findByType(Integer pid)
     {
         String sql = "select distinct p from Platform p "+
