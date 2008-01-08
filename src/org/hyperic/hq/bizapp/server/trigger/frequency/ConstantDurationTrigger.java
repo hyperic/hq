@@ -58,7 +58,7 @@ import org.hyperic.util.config.LongConfigOption;
 public class ConstantDurationTrigger extends AbstractTrigger
     implements FrequencyTriggerInterface {
     
-    private Object  lock = new Object();
+    private final Object  lock = new Object();
     private Integer triggerId;
     private long    timeRange;
     

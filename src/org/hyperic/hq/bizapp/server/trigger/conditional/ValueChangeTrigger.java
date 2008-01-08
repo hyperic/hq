@@ -73,7 +73,7 @@ public class ValueChangeTrigger extends AbstractTrigger
     public static final MessageFormat MESSAGE_FMT = new MessageFormat
         ("Current value ({0}) differs from previous value ({1}).");
 
-    private Object            lock = new Object();
+    private final Object      lock = new Object();
     private Integer           measurementId;
     private MeasurementEvent  last = null;
 

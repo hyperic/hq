@@ -65,7 +65,7 @@ public class EscalateTrigger extends AbstractTrigger {
     private static String CFG_AFTER      = "after";
     private static String CFG_TIME_RANGE = "timeRange";
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
     
     /** Holds value of property after. */
     private long after;

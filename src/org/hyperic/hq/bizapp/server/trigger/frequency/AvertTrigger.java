@@ -69,7 +69,7 @@ public class AvertTrigger extends AbstractTrigger {
     public static String CFG_TIME_RANGE    = "timeRange";
 
     /** Holds value of property lock. */
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     /** Holds value of property timeRange. */
     private long timeRange;

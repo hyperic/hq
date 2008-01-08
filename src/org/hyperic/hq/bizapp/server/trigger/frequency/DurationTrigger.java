@@ -61,7 +61,7 @@ public class DurationTrigger extends AbstractTrigger
     implements FrequencyTriggerInterface {
     private static final String CFG_COUNT      = "count";
 
-    private Object  lock = new Object();
+    private final Object  lock = new Object();
     private Integer triggerId;
     private long    count;
     private long    timeRange;
