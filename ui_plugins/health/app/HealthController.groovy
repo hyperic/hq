@@ -99,7 +99,7 @@ class HealthController
                 if (d[0] == a) {
                     def metricVal = d[3].lastDataPoint?.value
                     if (metricVal == null)
-                        metricVal = '???'
+                        metricVal = '?'
                     
                     res << [agent:a, 
                             platform:d[1].fqdn,
