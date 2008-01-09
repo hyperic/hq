@@ -7935,6 +7935,14 @@ has already been defined.
                         columnType="VARCHAR2" />
   </schemaSpec>
 
+  <schemaSpec version="3.93">
+    <schema-directSQL>
+      <statement targetDB="mysql">
+          alter table HQ_SEQUENCE add primary key (seq_name)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 

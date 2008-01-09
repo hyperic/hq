@@ -105,6 +105,8 @@ public class HQMultipleHiLoPerTableGenerator
 				.append(valueColumnName)
 				.append(" ")
 				.append( dialect.getTypeName(Types.INTEGER) )
+				.append(", ")
+				.append("primary key (" + pkColumnName + ") ")
 				.append(" ) ")
 				.toString()
 		};
