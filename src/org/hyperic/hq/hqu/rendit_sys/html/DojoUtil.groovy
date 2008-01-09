@@ -11,9 +11,12 @@ class DojoUtil {
         ResourceBundle.getBundle("org.hyperic.hq.hqu.rendit.Resources",
                                  Locale.getDefault(), 
                                  Thread.currentThread().contextClassLoader)
-    private static BundleMapFacade BUNDLE = 
-        new BundleMapFacade(RSRC_BUNDLE)
+    private static BundleMapFacade BUNDLE = new BundleMapFacade(RSRC_BUNDLE) 
 
+    // Var kept in the binding to keep track of tables on the page
+    private static final TABLE_VAR = '_DOJOTABLES'
+    private static final PANE_VAR  = '_DOJOPANES'
+    
     /**
      * Output a header which sets up the inclusion of the DOJO javascript
      * framework.  This must be called before using any other DOJO methods.
@@ -312,7 +315,7 @@ class DojoUtil {
      *                              For instance: '10%' will ensure that the 
      *                              column is 10% of the table width
      */
-    static String dojoTable(params) {
+    static String dojoTable(Binding scriptBinding, params) {
         def id           = "${params.id}"
         def tableTitle   = params.get('title', '')
         def titleHtml    = params.get('titleHtml', '')
@@ -325,6 +328,11 @@ class DojoUtil {
 	    def urlXtraVar   = "${idVar}_urlXtra"
 	    def ajaxCountVar = "${idVar}_ajaxCountVar"
 	    def pageControlStyle = 'display:none'
+
+	    def scriptMap = scriptBinding.variables['PAGE']
+	    if (!scriptMap[TABLE_VAR])
+	        scriptMap[TABLE_VAR] = []
+	    scriptMap[TABLE_VAR] << id
 	    
 	    if (params.get('pageControls', true)) {
             pageControlStyle = 'display:block'
@@ -664,5 +672,41 @@ class DojoUtil {
 		 sortOrder : sortOrder ? 1 : 0,
 		 pageNum   : pageNum,
 		 lastPage  : lastPage] as JSONObject
+    }
+
+    static dojoTabPane(Binding b, Map params, Closure yield) {
+	    def idVar  = "_hqu_TabPane_${params.id}"
+        def output = b.PAGE.getOutput()
+        output.write("<div id='${idVar}' style='display:none'>\n")
+        output.write("  <div dojoType='ContentPane' label='${params.label}'>\n")
+        yield()
+        output.write('  </div>\n')
+        output.write('</div>\n')
+        
+        if (b.PAGE[PANE_VAR] == null)
+            b.PAGE[PANE_VAR] = []
+
+	    b.PAGE[PANE_VAR] << idVar
+    }
+
+    static dojoTabContainer(Binding b, Map params, Closure yield) {
+	    def idVar  = "_hqu_TabContainer_${params.id}"
+        def output = b.PAGE.getOutput()
+        output.write('<div dojoType="TabContainer" id="${params.id}" ' +
+                     HtmlUtil.htmlOptions(params) + '>\n')
+        yield()
+        output.write('</div>\n')
+
+        output.write('<script type="text/javascript">\n')
+        if (b.PAGE[PANE_VAR] != null) {
+            output.write("  ${idVar}_start = function() {\n")
+            for (p in b.PAGE[PANE_VAR]) {
+                output.write("  dojo.html.show('${p}');\n");
+            }
+            output.write("  };\n")
+            output.write("  dojo.event.connect(window, 'onload', '${idVar}_start');\n")
+        }
+	    
+	    output.write('</script>\n')
     }
 }
