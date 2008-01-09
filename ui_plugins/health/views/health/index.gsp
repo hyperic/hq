@@ -211,8 +211,8 @@ getSystemStats();
 </div>
 
 <div id="fullBody" style="clear:both">
-  <div dojoType="TabContainer" id="bodyTabContainer" style="width: 100%; height:500px;">
-    <div dojoType="ContentPane" label="${l.diagnostics}">
+  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
+    <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       <div id="diagSelectControls">
         <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
           <option value='none'>-- ${l.selectDiag} --</option>
@@ -228,23 +228,23 @@ getSystemStats();
         <div id="diagData">
         </div>
       </pre>
-    </div>  
+    <% } %>
 
-    <div dojoType="ContentPane" label="${l.cache}">
+    <% dojoTabPane(id:'cacheTab', label:l.cache) { %>
       <%= dojoTable(id:'cacheTable', title:l.cache,
                     refresh:60, url:urlFor(action:'cacheData'),
                     schema:cacheSchema, numRows:500, pageControls:false) %>
-    </div>  
+    <% } %>
 
-    <div dojoType="ContentPane" label="${l.load}">
+    <% dojoTabPane(id:'loadTab', label:l.load) { %>
       ${l.metricsPerMinute}: ${metricsPerMinute}<br>
       ${l.numPlatforms}: ${numPlatforms}<br>
       ${l.numServers}: ${numServers}<br>
       ${l.numServices}: ${numServices}<br>
       ${l.numAgents}: ${numAgents}<br>
-    </div>  
-    
-    <div dojoType="ContentPane" label="${l.database}">
+    <% } %>
+
+    <% dojoTabPane(id:'databaseTab', label:l.database) { %>
       <div id="querySelectControls">
         <select id="querySelect" onchange='selectQuery(options[selectedIndex].value)'>
           <option value='none'>-- ${l.selectQuery} --</option>
@@ -256,15 +256,15 @@ getSystemStats();
       </div>
       <div id="queryData">
       </div>
-    </div>
+    <% } %>
     
-    <div dojoType="ContentPane" label="${l.agents}">
+    <% dojoTabPane(id:'agentTab', label:l.agents) { %>
       <%= dojoTable(id:'agentTable', title:l.agents,
-                    refresh:600, url:urlFor(action:'agentData'),
-                    schema:agentSchema, numRows:15) %>
-    </div>  
+                   refresh:600, url:urlFor(action:'agentData'),
+                   schema:agentSchema, numRows:15) %>
+    <% } %>
     
-  </div>
+  <% } %>
 </div>
 
 
