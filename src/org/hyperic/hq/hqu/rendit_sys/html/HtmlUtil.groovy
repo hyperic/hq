@@ -34,9 +34,9 @@ class HtmlUtil {
                        
         if (opts.absolute) {
             res = "${opts.absolute}/"
-            opts.remove('absolute')
         }
-
+        opts.remove('absolute')
+        
         if (opts.asset) {
             res += "public/${opts['asset']}"
             opts.remove('asset')

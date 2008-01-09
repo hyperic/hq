@@ -207,11 +207,9 @@ abstract class BaseController {
             path += invokeArgs.servletPath.split('/') as List
             if (path[-1].endsWith('.hqu'))
                 path = path[0..-3]
-        }        
+        }
         
         path = path.findAll{it}.join('/')
-        if (!path.startsWith("/"))
-            path = "/" + path
         HtmlUtil.urlFor(opts + [absolute:path])
     }
     
