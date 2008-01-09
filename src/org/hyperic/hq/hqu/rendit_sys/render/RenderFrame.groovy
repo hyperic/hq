@@ -64,27 +64,49 @@ class RenderFrame {
         this.controller = controller
         this.parent     = parent
 
+        if (opts.locals == null)
+            opts.locals = [:]
+            
+        if (opts.locals.PAGE == null) {
+            opts.locals.PAGE = [getOutput:{output}]
+        }
         def locals = new HashMap(opts['locals'])
-        locals.putAll(implicitLocals)
+        locals.putAll(getImplicitLocals(locals))
         this.opts = new HashMap(opts)
         this.opts['locals'] = locals
     }
 
-    private Map staticMethodsToMap(clazz) {
+    private Map staticMethodsToMap(varMap, clazz) {
         def res = [:]
         for (m in clazz.declaredMethods) {
-            if (m.modifiers & Modifier.STATIC && m.name != 'class$')
-                res[m.name] = new MethodClosure(clazz, m.name)
+            if (m.modifiers & Modifier.STATIC && m.name != 'class$') {
+                def meth   = new MethodClosure(clazz, m.name)
+                def params = m.parameterTypes
+                    
+                if (params.size() && params[0] == Binding) {
+                    meth = meth.curry(new Binding(varMap))
+                }
+                res[m.name] = meth
+            }
         }
         res
     }
-    
-    private Map getImplicitLocals() {
+
+    /**
+     * Get a map of implicit locals which should be included in all 
+     * generated scripts.  This primarily contains static methods in
+     * the *Util classes.
+     *
+     * Static methods imported from *Util classes get special treatment if
+     * their first parameter is a Binding.  In such a case, the method will
+     * get a binding of the variable map passed into the render method.
+     */
+    private Map getImplicitLocals(varMap) {
         def res = [formFor : this.&formFor, 
                    l       : controller.localeBundle]
 
-        res += staticMethodsToMap(DojoUtil)        
-        res += staticMethodsToMap(HtmlUtil)        
+        res += staticMethodsToMap(varMap, DojoUtil)        
+        res += staticMethodsToMap(varMap, HtmlUtil)        
         
         // Override general methods which generate links so that URLs can
         // be re-written
@@ -124,7 +146,7 @@ class RenderFrame {
         
         if (!output)
             output = createOutput()
-            
+
         // Merge locals with parent, if we have one
         if (parent) {
             def parentLocals = new HashMap(parent.opts.get('locals', [:]))
