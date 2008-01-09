@@ -35,12 +35,15 @@ import org.hyperic.util.config.ConfigResponse;
 import com.thoughtworks.xstream.XStream;
 
 public class SystemLiveDataPlugin extends LiveDataPlugin {
-
+    private static final int MAX_FILES = 500;
+    
     public static final String PROP_PID        = "process.pid";
     public static final String PROP_SIGNAL     = "process.signal";
-    public static final String PROP_FILE       = "read.file";
-    public static final String PROP_OFFSET     = "read.offset";
-    public static final String PROP_NUMBYTES   = "read.numBytes";
+    
+    public static final String PROP_NFILE      = "read.numFiles";
+    public static final String PROP_FILE       = "read.file.";
+    public static final String PROP_OFFSET     = "read.offset.";
+    public static final String PROP_NUMBYTES   = "read.numBytes.";
 
     private static final String CMD_TIME       = "time";
     private static final String CMD_READ       = "read";
@@ -70,12 +73,9 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_WHO
     };
 
-    private ReadData getReadData(ConfigResponse config) 
+    private ReadData getReadData(String file, String sOffset, String sNumBytes)
         throws PluginException
     {
-        String file      = config.getValue(PROP_FILE);
-        String sOffset   = config.getValue(PROP_OFFSET);
-        String sNumBytes = config.getValue(PROP_NUMBYTES);
         long offset;
         int numBytes;
         
@@ -96,6 +96,34 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
             throw new PluginException("Invalid numBytes: " + sNumBytes);
         }
         return ReadData.gather(file, offset, numBytes);
+    }
+    
+    private ReadData[] getReadData(ConfigResponse config) 
+        throws PluginException
+    {
+        String sNumFiles = config.getValue(PROP_NFILE);
+        int numFiles;
+        
+        try {
+            numFiles = Integer.parseInt(sNumFiles);
+        } catch(NumberFormatException e) {
+            throw new PluginException("Invalid " + PROP_NFILE, e);
+        }
+    
+        if (numFiles > MAX_FILES) {
+            throw new PluginException("Too many files.  Max=" + MAX_FILES);
+        }
+        
+        ReadData[] res = new ReadData[numFiles];
+        
+        for (int i=0; i<numFiles; i++) {
+            String file      = config.getValue(PROP_FILE + i);
+            String sOffset   = config.getValue(PROP_OFFSET + i);
+            String sNumBytes = config.getValue(PROP_NUMBYTES + i);
+            
+            res[i] = getReadData(file, sOffset, sNumBytes);
+        }
+        return res;
     }
     
     private long getPid(ConfigResponse config)
