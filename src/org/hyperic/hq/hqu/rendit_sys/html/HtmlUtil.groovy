@@ -166,4 +166,16 @@ class HtmlUtil {
         res += "</select>\n"
         res
     }
+
+    /**
+	 * Create a string of key='value' pairs, usable for tag parameters
+	 * in HTML
+	 *
+	 * @param opts A map of key/val pairs
+	 */
+	static htmlOptions(opts) {
+	    def res = ""
+	    opts.each {k, v -> res += "${k}='${v}' "}
+	    res
+	}
 }
