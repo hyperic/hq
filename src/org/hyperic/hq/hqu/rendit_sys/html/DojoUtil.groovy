@@ -717,7 +717,7 @@ class DojoUtil {
     static dojoTabContainer(Binding b, Map params, Closure yield) {
 	    def idVar  = "_hqu_TabContainer_${params.id}"
         def output = b.PAGE.getOutput()
-        output.write('<div dojoType="TabContainer" id="${params.id}" ' +
+        output.write('<div dojoType="TabContainer" ' +
                      HtmlUtil.htmlOptions(params) + '>\n')
         yield()
         output.write('</div>\n')
