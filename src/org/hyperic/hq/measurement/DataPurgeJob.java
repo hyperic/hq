@@ -26,11 +26,9 @@
 package org.hyperic.hq.measurement;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
-import javax.ejb.RemoveException;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -206,7 +204,6 @@ public class DataPurgeJob implements Job {
         // maintenance. (On postgres we just rebuild indicies
         // using an ANALYZE)
         long vacuumStart = System.currentTimeMillis();
-        Calendar cal = Calendar.getInstance();
         if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
             TimingVoodoo.roundDownTime(time_start, maintInterval)) {
             _log.info("Performing database maintenance (VACUUM ANALYZE)");
