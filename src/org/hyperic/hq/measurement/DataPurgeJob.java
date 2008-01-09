@@ -212,12 +212,6 @@ public class DataPurgeJob implements Job {
             _log.info("Performing database maintenance (VACUUM ANALYZE)");
             serverConfig.vacuum();
 
-            String reindexStr = conf.getProperty(HQConstants.DataReindex);
-            boolean reindexNightly = Boolean.valueOf(reindexStr).booleanValue();
-            if (cal.get(Calendar.HOUR_OF_DAY) == 0 && reindexNightly) {
-                _log.info("Re-indexing HQ data tables");
-                serverConfig.reindex();
-            }
             _log.info("Database maintenance completed in " +
                       ((System.currentTimeMillis() - vacuumStart)/1000) +
                       " seconds.");

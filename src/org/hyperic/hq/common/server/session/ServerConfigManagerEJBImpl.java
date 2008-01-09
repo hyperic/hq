@@ -76,8 +76,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     private Log _log = LogFactory.getLog(ServerConfigManagerEJBImpl.class);
 
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
-    //only for the metric data tables
-    private final String SQL_REINDEX = "REINDEX TABLE {0}";
 
     private final int DEFAULT_COST = 15;
 
@@ -169,11 +167,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             int oldDays = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
             int newDays = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
             ServerConfigAudit.updateDeleteDetailed(subject, newDays, oldDays);
-        } else if (key.equals(HQConstants.DataReindex)) {
-            boolean oldReindex = oldVal.equals("true");
-            boolean newReindex = newVal.equals("true");
-            ServerConfigAudit.updateNightlyReindex(subject, newReindex, 
-                                                   oldReindex);
         } else if (key.equals(HQConstants.AlertPurge)) {
             int oldPurge = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
             int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
@@ -375,47 +368,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             DBUtil.closeConnection(logCtx, conn);
         }
         return duration;
-    }
-
-    /**
-     * Run a REINDEX command on all HQ data tables
-     * @return The time it took to re-index in milliseconds, or -1 if the
-     * database is not PostgreSQL.
-     * @ejb:transaction type="NOTSUPPORTED"
-     * @ejb:interface-method
-     */
-    public long reindex() {
-        Connection conn = null;
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
-            long duration = 0;
-            if (DBUtil.isOracle(conn)) {
-                log.info("Oracle should update statistics for the " +
-                         "cost-based optimizer");
-            }
-            else {
-                if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_7) {
-                    for (int i = 0; i < DATA_TABLES.length; i++) {
-                        duration += doCommand(conn, SQL_REINDEX, DATA_TABLES[i]);
-                    }
-                }
-                else if (DBUtil.getDBType(conn) == DBUtil.DATABASE_POSTGRESQL_8)
-                    log.info("PostgreSQL 8.0 and later does not require " +
-                             "re-indexing");
-                else
-                    return -1;
-            }
-
-            return duration;
-        } catch (SQLException e) {
-            log.error("Error creating database connection", e);
-            throw new SystemException("Error reindexing database", e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }
     }
 
     /**

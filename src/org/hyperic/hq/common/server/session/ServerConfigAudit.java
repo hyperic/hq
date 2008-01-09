@@ -118,14 +118,6 @@ public class ServerConfigAudit extends Audit {
                            newVal + "", old + "");  
     }
     
-    public static ServerConfigAudit updateNightlyReindex(AuthzSubject user,
-                                                   boolean newVal,
-                                                   boolean old)
-    {
-        return createAudit(user, "auditMsg.serverConfig.nightlyReindex", 
-                           newVal + "", old + "");  
-    }
-
     public static ServerConfigAudit updateAlertPurgeInterval(AuthzSubject user, 
                                                              int newVal, int old)
     {
