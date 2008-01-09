@@ -80,7 +80,11 @@ public class NTPDCollector extends Collector {
         exec.setCommandline(argv);
 
         try {
-            exec.execute();
+            int exitStatus = exec.execute();
+            if (exitStatus != 0 || wdog.killedProcess()) {
+                setErrorMessage(ntpdc+" command failed");
+                return;
+            }
         } catch (Exception e) {
             setErrorMessage("Unable to exec process: " + e);
             return;
@@ -105,16 +109,37 @@ public class NTPDCollector extends Collector {
 
                 if (line.startsWith("jitter:")) {
                     String[] exploded = StringUtil.explodeQuoted(line);
+                    if (exploded.length < 2) {
+                        setErrorMessage(
+                            "Unable to parse ntpdc output for jitter: ");
+                        return;
+                    }
                     setValue("Jitter", Double.parseDouble(exploded[1]));
                 } else if (line.startsWith("system uptime:") ||
                            (line.startsWith("time since restart:"))) {
                     String[] exploded = StringUtil.explodeQuoted(line);
-                    setValue("Uptime", Double.parseDouble(exploded[exploded.length - 1]));
+                    if (exploded.length < 1) {
+                        setErrorMessage(
+                            "Unable to parse ntpdc output for system uptime: ");
+                        return;
+                    }
+                    setValue("Uptime",
+                        Double.parseDouble(exploded[exploded.length - 1]));
                 } else if (line.startsWith("time since reset:")) {
                     String[] exploded = StringUtil.explodeQuoted(line);
+                    if (exploded.length < 4) {
+                        setErrorMessage(
+                            "Unable to parse ntpdc output for time since reset: ");
+                        return;
+                    }
                     setValue("TimeSinceReset", Double.parseDouble(exploded[3]));
                 } else if (seenPeerHeader) {
                     String[] exploded = StringUtil.explodeQuoted(line);
+                    if (exploded.length < 8) {
+                        setErrorMessage(
+                            "Unable to parse ntpdc output for seenPeerHeader: ");
+                        return;
+                    }
 
                     peers++;
                     
