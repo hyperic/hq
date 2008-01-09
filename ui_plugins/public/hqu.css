@@ -309,7 +309,7 @@ font-weight:bold;
  .left {float:left;}
  .tree {padding:0px;height:99%;}
  .topCat {font-weight:bold;cursor:pointer;padding:3px 0px 3px 0px;}
- .resourcetypelist {padding:5px; 3px 5px 3px;margin:0px;font-size:11px;}
+ .resourcetypelist {padding:5px 3px 5px 3px;margin:0px;font-size:11px;}
  #resourceTree ul {margin:0px;padding:0px;}
 #functionPanel {background-color:#EBEDF2;padding-bottom: 3px;}
 .listItem {padding:3px 0px 3px 0px; cursor:pointer; margin-left:3px;}
@@ -359,10 +359,12 @@ font-weight:bold;
 
 /* Live Exec */
 .outerLiveDataCont {margin-top:10px;margin-left:10px;margin-bottom:5px;padding-right:10px;}
-.bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;}
-.leftbx {float:left;width:20%;height:400px;}
+.bxblueborder {border:1px solid #7BAFFF;overflow-y:auto;overflow-x: hidden;height: 400px;width:100%;}
+.leftboxborder{border:1px solid #7BAFFF;overflow-y:auto;overflow-x: hidden;height: 408px;}
+.leftbx {float:left;width:20%;height:400px;margin-right: 10px;}
 .BlockTitle {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;}
-#result {padding:0px;margin:0px;float:right;width:78%;display:inline;height: 400px;overflow-x: hidden; overflow-y: auto;}
+#result_cont {float: right;display:inline; width: 78%;* width: 77%;}
+#results_msgLive {padding:3px;padding-bottom:5px;font-weight:bold;}
 #result thead {width:100%;padding:0px;margin:0px;}
 #result table thead td {font-family: arial, sans-serif;font-size: 12px;color: #ffffff;font-weight: bold;background-color: #60A5EA;padding:3px;margin:0px;}
 #result table{width:100%;padding:0px;}

@@ -22,7 +22,7 @@ var lastSelected = undefined;
 <% } %>
 
 function showResult(eid) {
-  dojo.byId("results_msg").innerHTML = "Results of " + liveResults.command + 
+  dojo.byId("results_msgLive").innerHTML = "Results of " + liveResults.command +
                                        " for " + resInfo[eid].name;
   var results = liveResults.results;
   for (var i=0; i<results.length; i++) {
@@ -132,7 +132,7 @@ function hideErrorPanel() {
 
   <div class="leftbx">
 
-    <div class="bxblueborder">
+    <div class="leftboxborder">
 
       <div class="BlockTitle"><div style="float:left;">Execute Command</div><div class="acLoader2" id="spinner" style="display:inline;float:right;"></div>
       <br class="clearBoth">
@@ -140,7 +140,7 @@ function hideErrorPanel() {
 
       <div class="fivepad">
 
-        <div>
+        <div style="padding-left:5px;">
             <div class="instruction1">Please select a query to run:</div>
         <select id="commandSelect" onchange="runCommand()" style="margin-bottom:5px;">
         <% for (c in commands) { %>
@@ -185,8 +185,8 @@ function hideErrorPanel() {
 </div>
 
 <div id="result_cont">
-  <span id="results_msg"></span>
+  <div id="results_msgLive"></div>
   <div id="result" class="bxblueborder"></div>
 </div>
-
+ <div style="height:1px;width:1px;clear:both;">&nbsp;</div>
 </div>
