@@ -166,6 +166,12 @@ public class SybaseServerDetector
         else
             return servers;
 
+        // need to check if we are discovering the appropriate
+        // server since 12_0 does not include any of the newer
+        // versions in the hq-plugin.xml descriptor
+        if (!version.equals(getTypeInfo().getVersion()))
+            return servers;
+        
         String installdir = getParentDir(path, 3);
         ServerResource server = createServerResource(installdir);
         // Set custom properties
@@ -297,7 +303,8 @@ public class SybaseServerDetector
             int engine_col = rs.findColumn("engine");
             while (rs != null && rs.next())
             {
-                String engineNum = rs.getString(engine_col).trim().replaceAll("\\s+", "_");
+                String engineNum =
+                    rs.getString(engine_col).trim().replaceAll("\\s+", "_");
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TYPE_SP_SYSMON+"Engine");
                 service.setServiceName("engine"+engineNum);
