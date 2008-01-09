@@ -674,6 +674,18 @@ class DojoUtil {
 		 lastPage  : lastPage] as JSONObject
     }
 
+    /**
+     * Create a tab pane within a container.
+     *
+     * Example:
+     *
+     *  <% dojoTabContainer(id:'myTabs', style:'width=100%;') { %>
+     *    <% dojoTabPane(id:'feelMyPain', label:'MyPain') { %>
+     *         Here is the pane content
+     *    <% } %>
+     *  <% } %>
+     *
+     */
     static dojoTabPane(Binding b, Map params, Closure yield) {
 	    def idVar  = "_hqu_TabPane_${params.id}"
         def output = b.PAGE.getOutput()
@@ -689,6 +701,18 @@ class DojoUtil {
 	    b.PAGE[PANE_VAR] << idVar
     }
 
+     /**
+      * Create a tab pane within a container.
+      *
+      * Example:
+      *
+      *  <% dojoTabContainer(id:'myTabs', style:'width=100%;') { %>
+      *    <% dojoTabPane(id:'feelMyPain', label:'MyPain') { %>
+      *         Here is the pane content
+      *    <% } %>
+      *  <% } %>
+      *
+      */
     static dojoTabContainer(Binding b, Map params, Closure yield) {
 	    def idVar  = "_hqu_TabContainer_${params.id}"
         def output = b.PAGE.getOutput()
