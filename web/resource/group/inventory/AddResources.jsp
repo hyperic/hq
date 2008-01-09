@@ -35,12 +35,12 @@
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
 
-<tiles:insert definition=".portlet.error"/>
-
 <tiles:insert definition=".page.title.resource.group">
   <tiles:put name="titleKey" value="resource.group.inventory.AddResourcesPageTitle"/>
   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
 </tiles:insert>
+
+<tiles:insert definition=".portlet.error"/>
 
 <tiles:insert page="/resource/group/inventory/AddResourcesForm.jsp"/>
 

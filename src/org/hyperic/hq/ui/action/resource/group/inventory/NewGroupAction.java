@@ -133,9 +133,10 @@ public class NewGroupAction extends BaseAction {
             // Check for resources
             if (newForm.getEntityIds() != null) {
                 // Now add the new entities to group
-                List newIds = Arrays.asList(newForm.getEntityIds());
-                BizappUtils.addResourcesToGroup(newGroup, newIds);
-                boss.saveGroup(sessionId.intValue(), newGroup);
+                List newIds = BizappUtils.getNewResourcesForGroup(newGroup,
+                                         Arrays.asList(newForm.getEntityIds()));
+                boss.addResourcesToGroup(sessionId.intValue(), newGroup,
+                                         newIds);
             }
 
             return returnNew(request, mapping, forwardParams);

@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -113,33 +114,30 @@ public class GroupManagerEJBImpl implements javax.ejb.SessionBean {
             rgVo.setClusterId       (group.getClusterId());
 
             ResourceGroupManagerLocal rgmLoc = getResourceGroupManager();
-            rgVo = rgmLoc.createResourceGroup(subject, rgVo, roArr, reArr);
+            ResourceGroup rg =
+                rgmLoc.createResourceGroup(subject, rgVo, roArr, reArr);
 
             /* Create our return group vo */
-            group.setId            ( rgVo.getId() );
-            group.setName          ( rgVo.getName() );
-            group.setDescription   ( rgVo.getDescription() );
-            group.setLocation      ( rgVo.getLocation() );
+            group.setId            ( rg.getId() );
+            group.setName          ( rg.getName() );
+            group.setDescription   ( rg.getDescription() );
+            group.setLocation      ( rg.getLocation() );
             group.setGroupType     ( rgVo.getGroupType() );
             group.setSubject       ( subject );
-            group.setCTime         ( rgVo.getCTime() );
-            group.setMTime         ( rgVo.getMTime() );
-            group.setModifiedBy    ( rgVo.getModifiedBy() );
+            group.setCTime         ( new Long(rg.getCtime()) );
+            group.setMTime         ( new Long(rg.getMtime()) );
+            group.setModifiedBy    ( rg.getModifiedBy() );
             group.setOwner         ( subject.getName() );
 
            // Here's where we add our own group resource to our group.
-            rgmLoc.addResource(subject, rgVo, rgVo.getId(),
-                               getResourceType(authzResourceGroupName));
+            rgmLoc.addResource(subject, rg,
+                               AppdefEntityID.newGroupID(rg.getId().intValue()));
         } catch (PermissionException pe) {
             // This should NOT occur. Anyone can create groups.
             log.error("Caught PermissionException during "+
                       "self-assignment of group resource to group.", pe);
             throw new GroupCreationException ("Caught PermissionException "+
                 "during self-assignment of resource to group");
-        } catch (FinderException fe) {
-            log.error("GroupManager caught underlying finder exc "+
-                          "with findResourceTypeByName(): "+fe.getMessage());
-            throw new GroupCreationException (fe.getMessage());
         }
         return group;
     }

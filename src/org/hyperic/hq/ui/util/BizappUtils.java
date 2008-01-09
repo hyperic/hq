@@ -693,21 +693,20 @@ public class BizappUtils {
     }
 
     /**
-     * adds a list of AppdefEntityID objects to a group
-     * 
-     * if this api is used in bizapp, will use it.
+     * get a list of new AppdefEntityID objects for a group
      */
-    public static void addResourcesToGroup(AppdefGroupValue group, List ids)
+    public static List getNewResourcesForGroup(AppdefGroupValue group, List ids)
         throws GroupVisitorException {
+        List ret = new ArrayList();
         Iterator iterator = ids.iterator();
         while (iterator.hasNext()) {
             String id = (String) iterator.next();
-            List groupEntries = group.getAppdefGroupEntries();
-
             AppdefEntityID entity = new AppdefEntityID(id);
-            if (!group.existsAppdefEntity(entity))
-                group.addAppdefEntity(entity);
+            if (!group.existsAppdefEntity(entity)) {
+                ret.add(entity);
+            }            
         }
+        return ret;
     }
 
 

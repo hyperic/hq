@@ -127,9 +127,10 @@ public class AddGroupResourcesAction extends BaseAction {
             AppdefGroupValue group = boss.findGroup(sessionId.intValue(),
                                                     aeid.getId());
 
-            BizappUtils.addResourcesToGroup(group, pendingResourceIds);
+            List newIds =
+                BizappUtils.getNewResourcesForGroup(group, pendingResourceIds);
 
-            boss.saveGroup(sessionId.intValue(), group);
+            boss.addResourcesToGroup(sessionId.intValue(), group, newIds);
 
             log.trace("removing pending user list");
             SessionUtils.removeList(session,

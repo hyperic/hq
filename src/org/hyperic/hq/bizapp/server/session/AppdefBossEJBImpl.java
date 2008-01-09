@@ -2495,6 +2495,23 @@ public class AppdefBossEJBImpl
             retVal = new PageList();  // return empty list if no groups.
         return retVal;
     }
+    
+    /**
+     * Add entities to a resource group
+     * @ejb:interface-method
+     */
+    public void addResourcesToGroup(int sessionID, AppdefGroupValue gv,
+                                    List aeids)
+        throws SessionNotFoundException, SessionTimeoutException,
+               PermissionException, FinderException {
+        AuthzSubjectValue subject = manager.getSubject(sessionID);
+        ResourceGroupManagerLocal resMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroup rg = resMan.findResourceGroupById(subject, gv.getId());
+        for (Iterator it = aeids.iterator(); it.hasNext(); ) {
+            AppdefEntityID aeid = (AppdefEntityID) it.next();
+            resMan.addResource(subject, rg, aeid);
+        }
+    }
 
     /**
      * Save a group back to persistent storage.

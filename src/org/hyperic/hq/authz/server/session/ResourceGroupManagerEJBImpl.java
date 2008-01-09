@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -119,10 +120,10 @@ public class ResourceGroupManagerEJBImpl
      *                                on the given type.
      * @ejb:interface-method
      */
-    public ResourceGroupValue createResourceGroup(AuthzSubjectValue whoami,
-                                                  ResourceGroupValue group,
-                                                  RoleValue[] roles,
-                                                  ResourceValue[] resources)
+    public ResourceGroup createResourceGroup(AuthzSubjectValue whoami,
+                                             ResourceGroupValue group,
+                                             RoleValue[] roles,
+                                             ResourceValue[] resources)
         throws PermissionException 
     {
 		AuthzSubject whoamiLocal = getSubjectDAO().findById(whoami.getId());
@@ -135,7 +136,7 @@ public class ResourceGroupManagerEJBImpl
         res.setRoles(toPojos(roles));
 
         GroupingStartupListener.getCallbackObj().postGroupCreate(res);
-        return res.getResourceGroupValue();
+        return res;
     }
 
     /**
@@ -268,15 +269,13 @@ public class ResourceGroupManagerEJBImpl
      * Add a resource to a group by resource id and resource type
      * @ejb:interface-method
      */
-    public ResourceGroupValue addResource(AuthzSubjectValue whoami,
-                                          ResourceGroupValue group,
-                                          Integer instId, 
-                                          ResourceType type)
+    public ResourceGroup addResource(AuthzSubjectValue whoami,
+                                     ResourceGroup group, AppdefEntityID aeid)
         throws PermissionException 
     {
         ResourceGroupDAO dao = getResourceGroupDAO();
         // reassociate group to session
-        ResourceGroup resGroup = dao.findByName(group.getName());
+        ResourceGroup resGroup = dao.findById(group.getId());
 
         PermissionManager pm = PermissionManagerFactory.getInstance(); 
         pm.check(whoami.getId(),
@@ -285,11 +284,11 @@ public class ResourceGroupManagerEJBImpl
                  AuthzConstants.perm_modifyResourceGroup);
 
         // now look up the resource by type and id
-        ResourceType resType = getResourceTypeDAO().findByName(type.getName());
-        Resource resource = getResourceDAO().findByInstanceId(resType, instId);
+        Resource resource = getResourceDAO()
+            .findByInstanceId(aeid.getAuthzTypeId(), aeid.getId());
         resGroup.addResource(resource);
         GroupingStartupListener.getCallbackObj().groupMembersChanged(resGroup);
-        return resGroup.getResourceGroupValue();
+        return resGroup;
     }
  
     /**
