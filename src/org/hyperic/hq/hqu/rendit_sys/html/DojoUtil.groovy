@@ -702,7 +702,8 @@ class DojoUtil {
     }
 
      /**
-      * Create a tab pane within a container.
+      * Create a tab container.  Any additional attributes in 'params' 
+      * will be used to generate the attributes for the HTML tags.
       *
       * Example:
       *
