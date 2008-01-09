@@ -274,7 +274,8 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
             removeCachedConnection(url, user, pass);
 
             String msg = "Query failed for " + attr +
-                ": " + e.getMessage();
+                ", while attempting to issue query " + query +
+                ":" + e.getMessage();
 
             //XXX these two are oracle specific.
             // Catch divide by 0 errors and return 0
