@@ -25,19 +25,37 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-
 import java.util.Collection;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ApplicationValue;
+import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Application extends AppdefResource
+    implements HasAuthzOperations
 {
+    private static final Map _authOps;
+    static {
+        _authOps = new HashMap();
+        
+        _authOps.put("create",       AuthzConstants.appOpCreateApplication);
+        _authOps.put("modify",       AuthzConstants.appOpModifyApplication);
+        _authOps.put("remove",       AuthzConstants.appOpRemoveApplication);
+        _authOps.put("view",         AuthzConstants.appOpViewApplication);
+        _authOps.put("monitor",      AuthzConstants.appOpMonitorApplication);
+        _authOps.put("control",      AuthzConstants.appOpControlApplication);
+        _authOps.put("manageAlerts", AuthzConstants.appOpManageAlerts);
+    }
+    
     private String _engContact;
     private String _opsContact;
     private String _businessContact;
@@ -215,5 +233,9 @@ public class Application extends AppdefResource
 
     public AppdefResourceValue getAppdefResourceValue() {
         return getApplicationValue();
+    }
+
+    protected String _getAuthzOp(String op) {
+        return (String)_authOps.get(op);
     }
 }

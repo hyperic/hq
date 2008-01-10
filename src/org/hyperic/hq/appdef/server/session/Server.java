@@ -25,23 +25,42 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ServiceTypeValue;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.ArrayList;
+import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Server extends ServerBase
+    implements HasAuthzOperations
 {
+    private static final Map _authOps;
+    static {
+        _authOps = new HashMap();
+        
+        _authOps.put("create",       AuthzConstants.serverOpCreateServer);
+        _authOps.put("modify",       AuthzConstants.serverOpModifyServer);
+        _authOps.put("remove",       AuthzConstants.serverOpRemoveServer);
+        _authOps.put("addService",   AuthzConstants.serverOpAddService);
+        _authOps.put("view",         AuthzConstants.serverOpViewServer);
+        _authOps.put("monitor",      AuthzConstants.serverOpMonitorServer);
+        _authOps.put("control",      AuthzConstants.serverOpControlServer);
+        _authOps.put("modifyAlerts", AuthzConstants.serverOpManageAlerts);
+    }
+    
     private Platform _platform;
     private boolean _runtimeAutodiscovery;
     private boolean _wasAutodiscovered;
@@ -350,5 +369,9 @@ public class Server extends ServerBase
 
     public AppdefResourceValue getAppdefResourceValue() {
         return getServerValue();
+    }
+
+    protected String _getAuthzOp(String op) {
+        return (String)_authOps.get(op);
     }
 }

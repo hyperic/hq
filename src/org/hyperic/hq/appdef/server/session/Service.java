@@ -26,6 +26,8 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -35,9 +37,25 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceLightValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.authz.HasAuthzOperations;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Service extends AppdefResource
+    implements HasAuthzOperations
 {
+    private static final Map _authOps;
+    static {
+        _authOps = new HashMap();
+        
+        _authOps.put("create",       AuthzConstants.serviceOpCreateService);
+        _authOps.put("modify",       AuthzConstants.serviceOpModifyService);
+        _authOps.put("remove",       AuthzConstants.serviceOpRemoveService);
+        _authOps.put("view",         AuthzConstants.serviceOpViewService);
+        _authOps.put("monitor",      AuthzConstants.serviceOpMonitorService);
+        _authOps.put("control",      AuthzConstants.serviceOpControlService);
+        _authOps.put("manageAlerts", AuthzConstants.serviceOpManageAlerts);
+    }
+    
     private boolean _autodiscoveryZombie;
     private boolean _serviceRt;
     private boolean _endUserRt;
@@ -314,5 +332,9 @@ public class Service extends AppdefResource
 
     public AppdefResourceValue getAppdefResourceValue() {
         return getServiceValue();
+    }
+    
+    protected String _getAuthzOp(String op) {
+        return (String)_authOps.get(op);
     }
 }

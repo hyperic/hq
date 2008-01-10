@@ -27,8 +27,10 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
@@ -38,10 +40,27 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformLightValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.authz.HasAuthzOperations;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Platform extends PlatformBase
+    implements HasAuthzOperations
 {
+    // Map 'simple' names onto Authz operations
+    private static final Map _authOps;
+    static {
+        _authOps = new HashMap();
+        _authOps.put("create",        AuthzConstants.platformOpCreatePlatform);
+        _authOps.put("modify",        AuthzConstants.platformOpModifyPlatform);
+        _authOps.put("remove",        AuthzConstants.platformOpRemovePlatform);
+        _authOps.put("addServer",     AuthzConstants.platformOpAddServer);
+        _authOps.put("view",          AuthzConstants.platformOpViewPlatform);
+        _authOps.put("monitor",       AuthzConstants.platformOpMonitorPlatform);
+        _authOps.put("control",       AuthzConstants.platformOpControlPlatform);
+        _authOps.put("modifyAlerts",  AuthzConstants.platformOpManageAlerts);
+    }
+    
     private String _commentText;
     private PlatformType _platformType;
     private ConfigResponseDB _configResponse;
@@ -321,5 +340,9 @@ public class Platform extends PlatformBase
 
     public AppdefResourceValue getAppdefResourceValue() {
         return getPlatformValue();
+    }
+
+    protected String _getAuthzOp(String op) {
+        return (String)_authOps.get(op);
     }
 }
