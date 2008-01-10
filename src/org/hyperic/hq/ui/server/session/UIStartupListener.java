@@ -104,7 +104,11 @@ public class UIStartupListener implements StartupListener {
 
             File[] plugins = pluginDir.listFiles();
             for (int i = 0; i < plugins.length; i++) {
-                cb.fileAdded(plugins[i]);
+                try {
+                    cb.fileAdded(plugins[i]);
+                } catch(Throwable t) {
+                    _log.error("Error loading plugin [" + plugins[i] + "]", t);
+                }
             }
 
             // Watch for plugin updates
