@@ -124,14 +124,6 @@ public class AIConversionUtil {
     }
 
     public static void sendNewConfigEvent(AuthzSubjectValue subject,
-                                          AppdefEntityID aid) {
-        AppdefEvent event = new AppdefEvent(subject, aid,
-                                            AppdefEvent.ACTION_NEWCONFIG);
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
-    }
-
-    public static void sendNewConfigEvent(AuthzSubjectValue subject,
                                           AppdefEntityID aid,
                                           AllConfigResponses config) {
         AppdefEvent event = new AppdefEvent(subject, aid,

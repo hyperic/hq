@@ -1702,7 +1702,7 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService)
-        throws NamingException, PermissionException, ValidationException,
+        throws PermissionException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                FinderException, UpdateException, AppdefDuplicateNameException
     {
@@ -1721,7 +1721,7 @@ public class AppdefBossEJBImpl
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService,
                                       Map cProps)
-        throws NamingException, FinderException, ValidationException,
+        throws FinderException, ValidationException,
                SessionTimeoutException, SessionNotFoundException,
                PermissionException, UpdateException,
                AppdefDuplicateNameException, CPropKeyNotFoundException
@@ -1740,9 +1740,7 @@ public class AppdefBossEJBImpl
         } catch (Exception e) {
             log.error("Error updating service: " + aService.getId());
             rollback();
-            if(e instanceof NamingException) {
-                throw (NamingException)e;
-            } else if (e instanceof CreateException) {
+            if (e instanceof CreateException) {
                 // change to a update exception as this only occurs
                 // if there was a failure instantiating the session
                 // bean
@@ -3512,77 +3510,89 @@ public class AppdefBossEJBImpl
         throws EncodingException, FinderException, PermissionException,
                ConfigFetchException, PluginException, ApplicationException
     {
+        AppdefEntityID entityId = allConfigs.getResource().getEntityId();
+        ProductBossLocal productBossLocal = getProductBoss();
+        AppdefEntityID[] ids;
         try {
-            AppdefEntityID entityId = allConfigs.getResource().getEntityId();
-            ProductBossLocal productBossLocal = getProductBoss();
-            AppdefEntityID[] ids;
-            try {
-                if (entityId.isPlatform()) {
-                    updatePlatform(sessionInt,
-                                   (PlatformValue) allConfigs.getResource());
-                } else if (entityId.isService()) {
-                    updateService(sessionInt,
-                                  (ServiceValue) allConfigs.getResource());
-                }
-
-                AuthzSubjectValue subj = subject.getAuthzSubjectValue();
-                ids = getConfigManager().configureResource(
-                    subj, entityId,
-                    ConfigResponse.safeEncode(allConfigs.getProductConfig()),
-                    ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
-                    ConfigResponse.safeEncode(allConfigs.getControlConfig()),
-                    ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                    Boolean.TRUE, !doValidation, force);
-                
-                if (doValidation) {
-                    Set validationTypes = new HashSet();
-
-                    if (allConfigs.shouldConfigProduct()) {
-                        validationTypes.add(ProductPlugin.TYPE_CONTROL);
-                        validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                        validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
-                    }
-
-                    if (allConfigs.shouldConfigMetric()) {
-                        validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
-                    }
-
-                    if (allConfigs.shouldConfigRt()) {
-                        validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                    }
-
-                    if (allConfigs.shouldConfigControl()) {
-                        validationTypes.add(ProductPlugin.TYPE_CONTROL);
-                    }
-
-                    Iterator validations = validationTypes.iterator();
-                    while (validations.hasNext()) {
-                        productBossLocal.doValidation(subject, 
-                                                      (String) validations.next(),
-                                                      ids);
-                    }
-                    
-                    List events = new ArrayList(ids.length);
-                    for (int i = 0; i < ids.length; i++)
-                        events.add(new ResourceUpdatedZevent(subj, ids[i]));
-                    
-                    ZeventManager.getInstance().enqueueEventsAfterCommit(events);
-
-                }
-
-                if(entityId.isServer() || entityId.isService()) {
-                    getAIBoss().toggleRuntimeScan(sessionInt, entityId,
-                                                  allConfigs.getEnableRuntimeAIScan());
-                }
-            } catch (UpdateException e) {
-                log.error("Error while updating resource " +
-                          allConfigs.getResource().getName());
-                throw new ApplicationException(e);
+            if (entityId.isPlatform()) {
+                updatePlatform(sessionInt,
+                               (PlatformValue) allConfigs.getResource());
+            } else if (entityId.isService()) {
+                updateService(sessionInt,
+                              (ServiceValue) allConfigs.getResource());
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
 
+            AuthzSubjectValue subj = subject.getAuthzSubjectValue();
+            ids = getConfigManager().configureResource(
+                subj, entityId,
+                ConfigResponse.safeEncode(allConfigs.getProductConfig()),
+                ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
+                ConfigResponse.safeEncode(allConfigs.getControlConfig()),
+                ConfigResponse.safeEncode(allConfigs.getRtConfig()),
+                Boolean.TRUE, !doValidation, force);
+            
+            if (doValidation) {
+                Set validationTypes = new HashSet();
+
+                if (allConfigs.shouldConfigProduct()) {
+                    validationTypes.add(ProductPlugin.TYPE_CONTROL);
+                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
+                    validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                }
+
+                if (allConfigs.shouldConfigMetric()) {
+                    validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                }
+
+                // Need to set the flags on the service so that they
+                // can be looked up immediately and RtEnabler to work
+                if (entityId.isService()) {
+                    ServiceManagerLocal svcMan = getServiceManager();
+                    Service svc = svcMan.findServiceById(entityId.getId());
+                    
+                    // These flags
+                    if (allConfigs.getEnableServiceRT() != svc.isServiceRt() ||
+                        allConfigs.getEnableEuRT() != svc.isEndUserRt()) {
+                        allConfigs.setShouldConfig(
+                            ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, true);
+                        svc.setServiceRt(allConfigs.getEnableServiceRT());
+                        svc.setEndUserRt(allConfigs.getEnableEuRT());
+                    }
+                }
+
+                if (allConfigs.shouldConfigRt()) {
+                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
+                }
+
+                if (allConfigs.shouldConfigControl()) {
+                    validationTypes.add(ProductPlugin.TYPE_CONTROL);
+                }
+
+                Iterator validations = validationTypes.iterator();
+                while (validations.hasNext()) {
+                    productBossLocal.doValidation(subject, 
+                                                  (String) validations.next(),
+                                                  ids);
+                }
+                
+                List events = new ArrayList(ids.length);
+                for (int i = 0; i < ids.length; i++)
+                    events.add(new ResourceUpdatedZevent(subj, ids[i]));
+                
+                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+
+            }
+
+            if (entityId.isServer() || entityId.isService()) {
+                getAIBoss()
+                    .toggleRuntimeScan(sessionInt, entityId,
+                                       allConfigs.getEnableRuntimeAIScan());
+            }
+        } catch (UpdateException e) {
+            log.error("Error while updating resource " +
+                      allConfigs.getResource().getName());
+            throw new ApplicationException(e);
+        }
     }
 
     /**

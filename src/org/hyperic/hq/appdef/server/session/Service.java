@@ -77,28 +77,12 @@ public class Service extends AppdefResource
         return _serviceRt;
     }
 
-    /**
-     * legacy EJB getter
-     * @deprecated use isServiceRt() instead
-     */
-    public boolean getServiceRt() {
-        return isServiceRt();
-    }
-
     public void setServiceRt(boolean serviceRt) {
         _serviceRt = serviceRt;
     }
 
     public boolean isEndUserRt() {
         return _endUserRt;
-    }
-
-    /**
-     * legacy EJB getter
-     * @deprecated use isEndUserRt() instead
-     */
-    public boolean getEndUserRt() {
-        return isEndUserRt();
     }
 
     public void setEndUserRt(boolean endUserRt) {
@@ -193,8 +177,8 @@ public class Service extends AppdefResource
     {
         _serviceLightValue.setSortName(getSortName());
         _serviceLightValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        _serviceLightValue.setServiceRt(getServiceRt());
-        _serviceLightValue.setEndUserRt(getEndUserRt());
+        _serviceLightValue.setServiceRt(isServiceRt());
+        _serviceLightValue.setEndUserRt(isEndUserRt());
         _serviceLightValue.setModifiedBy(getModifiedBy());
         _serviceLightValue.setOwner(getOwner());
         _serviceLightValue.setLocation(getLocation());
@@ -228,8 +212,8 @@ public class Service extends AppdefResource
     {
         _serviceValue.setSortName(getSortName());
         _serviceValue.setAutodiscoveryZombie(getAutodiscoveryZombie());
-        _serviceValue.setServiceRt(getServiceRt());
-        _serviceValue.setEndUserRt(getEndUserRt());
+        _serviceValue.setServiceRt(isServiceRt());
+        _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
         _serviceValue.setOwner(getOwner());
         _serviceValue.setLocation(getLocation());
@@ -279,8 +263,8 @@ public class Service extends AppdefResource
                 : (obj.getLocation() == null)) &&
             (getOwner() != null ? getOwner().equals(obj.getOwner())
                 : (obj.getOwner() == null)) &&
-            (getEndUserRt() == obj.getEndUserRt()) &&
-            (getServiceRt() == obj.getServiceRt());
+            (isEndUserRt() == obj.getEndUserRt()) &&
+            (isServiceRt() == obj.getServiceRt());
         return matches;
     }
 
