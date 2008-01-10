@@ -76,7 +76,7 @@ class ConsoleController extends BaseController {
 			}
 			res = eng.run(script, new Binding())
 			log.info "Result: [${res}]"
-		} catch(Exception e) {
+		} catch(Throwable e) {
 		    log.info "Exception thrown", e
 		    def sw = new StringWriter()
 		    def pw = new PrintWriter(sw)
