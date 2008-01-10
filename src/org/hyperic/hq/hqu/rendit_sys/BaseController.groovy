@@ -2,7 +2,6 @@ package org.hyperic.hq.hqu.rendit
 
 import java.text.SimpleDateFormat
 
-import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
@@ -37,7 +36,7 @@ abstract class BaseController {
     String             template        // Default template when rendering
     
     private beforeFilters = []         // Closures to run prior to any actions
-    private RequestInvocationBindings invokeArgs  // Info about the request
+    private invokeArgs                 // Info about the request
     private File    viewDir            // Path to plugin/app/views
     private boolean rendered           // Have we already performed a render?
     private         localeBundle = [:] // l10n bundle, must support getAt()
@@ -105,24 +104,11 @@ abstract class BaseController {
 	    def start  = System.currentTimeMillis()
 		def params = invokeArgs.request.parameterMap
 		if (log.debugEnabled) {
-		    log.debug "Dispatching Request: action=${action} params=${params}"
+		    log.debug "Parameter map is ${params}"
 		}
 
 	    rendered = false
-
-	    def lowestClass = this.metaClass.theClass
-	    def meth = this.metaClass.methods.find {n -> 
-            // XXX:  Comparing the classes directly seems not to work, so 
-	        //       comparing the names for now.
-	        n.name == action && n.declaringClass.name == lowestClass.name 
-	    }
 	    
-	    if (!meth) {
-	        log.error "404!   Action [${this.class.name}.${action}] not found"
-	        invokeArgs.response.sendError(404)
-	        return
-	    }
-	   
 	    try {
 	        for (f in beforeFilters) {
 	        	if (f(params))
@@ -227,8 +213,8 @@ abstract class BaseController {
         HtmlUtil.urlFor(opts + [absolute:path])
     }
     
-    public String buttonTo(opts) {
-        HtmlUtil.buttonTo(opts + [urlFor:this.&urlFor])
+    public String buttonTo(text, opts) {
+        HtmlUtil.buttonTo(text, opts + [urlFor:this.&urlFor])
     }
     
     public String linkTo(text, opts) {
