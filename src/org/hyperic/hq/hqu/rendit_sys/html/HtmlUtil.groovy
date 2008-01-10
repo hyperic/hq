@@ -112,32 +112,61 @@ class HtmlUtil {
 	 * buttons which do destructive things (POSTs to delete objects, for
 	 * instance).  
 	 *
-	 * text:  Text within the button
-	 * opts:  Options for the link (see urlFor).  If the opts contains a
-	 *        key called 'confirm', clicking the button will also open a 
-	 *        confirmation dialog with the value of the confirm.
+	 * The parameter map contains:
+	 *     text:       label within the button
+	 *     confirm:    (optional) Presents a confirmation message whe button 
+	 *                            is clicked.  If user presses 'ok', the button 
+     *                            is submitted.
+     *     action:      (optional) Controller action to post to
+	 *     afterAction: (optional) After the button is clicked, invoke
+	 *                             javascript to invoke.
+	 *
+	 * Additional parameters are passed to urlFor() to add query parameters.
 	 */
-	static String buttonTo(text, opts) {
-	    def passOpts = opts + [:]
-	    def confirmOpt = ""
-	    
-	    if (passOpts.confirm) {
-	        def eMsg = escapeHtml(opts.confirm)
-			confirmOpt = "onclick=\"return confirm('${eMsg}')\""
-			passOpts.remove('confirm')
+	static String buttonTo(p) {
+        p = [:] + p 
+	    def text        = p.remove('text')
+	    def confirmMsg  = p.remove('confirm')
+	    def action      = p['action']
+	    def afterAction = p.remove('afterAction')
+	    def urlFor      = p.remove('urlFor')
+	    def htmlId      = p.remove('htmlId')
+        
+	    def confirmHtml = ""
+	    if (confirmMsg) {
+	        def eMsg = escapeHtml(confirmMsg)
+			confirmHtml = "onclick=\"return confirm('${eMsg}')\""
 	    }
-	    
-	    def useUrlFor = HtmlUtil.&urlFor
-	    if (passOpts.urlFor) {
-	        useUrlFor = passOpts.urlFor
-	        passOpts.remove('urlFor')
-	    }
-	    
-		"<form method='post' action='${useUrlFor(passOpts)}'>" + 
-		"  <div>" + 
-		"    <input ${confirmOpt} value='${escapeHtml(text)}' type='submit'/>" + 
-		"  </div>" +
-		"</form>"
+        
+        def useUrlFor = HtmlUtil.&urlFor
+        if (urlFor) 
+            useUrlFor = urlFor
+        
+        def res    = new StringBuffer()
+        def funcid = "_hqu_buttonTo_${htmlId}"
+        res << """
+            <script type="text/javascript">
+              function ${funcid}() {
+                  dojo.io.bind({
+                      url: '${useUrlFor(p)}',
+                      method: "post",
+                      mimetype: "text/json-comment-filtered",
+                      load: function(type, data, evt) {
+                          ${afterAction};
+                      }
+                   });
+               }
+            </script>
+        """
+        
+        res << """
+           <form method='post' action='javascript: ${funcid}()'> 
+		     <div> 
+		       <input ${confirmHtml} value='${escapeHtml(text)}'  
+                       type='submit'/>  
+		     </div> 
+		   </form> 
+        """
 	}
 
 	/**
