@@ -376,9 +376,13 @@ public class HQApp {
      
                 _log.info("Executing startup: " + name);
                 l.hqStarted();
-            } catch(Exception e) {
+            } catch(Throwable e) {
                 _log.warn("Error executing startup listener [" + name + "]", e);
-            }
+                if (e instanceof Error)
+                    throw (Error)e;
+                if (e instanceof RuntimeException)
+                    throw (RuntimeException)e;
+            } 
         }
         
         try {
