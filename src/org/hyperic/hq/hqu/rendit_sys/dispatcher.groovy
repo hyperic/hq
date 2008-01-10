@@ -63,6 +63,9 @@ class Dispatcher implements IDispatcher {
         def parentLoader = Thread.currentThread().contextClassLoader
         def cl           = new GroovyClassLoader(parentLoader) 
 
+        cl.addURL(new File(pluginDir, 'app').toURL())
+        cl.addURL(new File(pluginDir, 'etc').toURL())
+        
         Class c = cl.parseClass(new File(pluginDir, 'Plugin.groovy'))
         plugin  = c.newInstance()
         plugin.initialize(pluginDir)
