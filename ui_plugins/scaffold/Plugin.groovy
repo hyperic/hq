@@ -1,6 +1,6 @@
 import org.hyperic.hq.hqu.rendit.HQUPlugin
 
-import SampleController
+import @CONTROLLER_NAME@Controller
 
 class Plugin extends HQUPlugin {
     Plugin() {
@@ -16,7 +16,7 @@ class Plugin extends HQUPlugin {
         /*
         addView(description:  'A Groovy HQU-@PLUGIN_NAME@',
                 attachType:   'masthead', 
-                controller:   SampleController,
+                controller:   @CONTROLLER_NAME@Controller,
                 action:       'index', 
                 category:     'tracker')
          */

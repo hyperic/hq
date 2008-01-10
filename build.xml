@@ -624,25 +624,50 @@
     
     
   <target name="hqu-gen-scaffold" depends="init">
-    <fail unless="plugin.name">
-		You must use -Dplugin.name=my_plugin to specify the plugin name
+    <echo>
+    Use this task to generate a basic HQ plugin.
+    
+    Syntax:  hqu-gen-scaffold -Dplugin=cool -Dcontroller=Registry -DcontrollerDir=registry
+    
+    Where:  -Dplugin=         used to specify the short, plugin directory name
+            -Dcontroller=     Must be upper-case, specifies controlller in /app
+            -DcontrollerDir=  must be lower-case, specifies views in /views/{dir}
+    </echo>
+
+    <fail unless="plugin"/>
+    <fail unless="controller"/>
+    <fail unless="controllerDir"/>
+    
+    <property name="targetDir" value="${basedir}/ui_plugins/${plugin}"/>
+    <available property="target.exists" file="${targetDir}"/>
+    <fail if="target.exists">
+       Plugin at ${targetDir} already exists.  
     </fail>
-    <copy todir="${basedir}/ui_plugins/${plugin.name}" verbose="true">
+    
+    <copy todir="${basedir}/ui_plugins/${plugin}" overwrite="false" 
+          verbose="true">
       <fileset dir="${basedir}/ui_plugins/scaffold"/>
     </copy>
   	
-  	<replace dir="${basedir}/ui_plugins/${plugin.name}" 
-  		     token="@PLUGIN_NAME@" value="${plugin.name}"/>
-  	<replace dir="${basedir}/ui_plugins/${plugin.name}" 
-  		     token="@NEW_PLUGIN_PATH@" 
-  		     value="${basedir}/ui_plugins/${plugin.name}"/>
+  	<replace dir="${targetDir}" token="@PLUGIN_NAME@" value="${plugin}"/>
+    <replace dir="${targetDir}" token="@CONTROLLER_NAME@" value="${controller}"/>
+    <replace dir="${targetDir}" token="@CONTROLLER_DIR@" value="${controllerDir}"/>
+  	<replace dir="${targetDir}" token="@NEW_PLUGIN_PATH@" 
+  		     value="${targetDir}"/>
 
-    <move file="${basedir}/ui_plugins/${plugin.name}/etc/scaffold_i18n.properties"
-          tofile="${basedir}/ui_plugins/${plugin.name}/etc/${plugin.name}_i18n.properties"/>
+    <move file="${targetDir}/etc/scaffold_i18n.properties" overwrite="false"
+          tofile="${targetDir}/etc/${plugin}_i18n.properties"/>
+    
+    <move file="${targetDir}/app/SampleController.groovy" overwrite="false"
+          tofile="${targetDir}/app/${controller}Controller.groovy"/>
+    
+    <move file="${targetDir}/views/sample" overwrite="false"
+          tofile="${targetDir}/views/${controllerDir}"/>
+    
   	<echo>
- 		Your plugin is in ${basedir}/ui_plugins/${plugin.name}
+ 		Your plugin is in:           ${targetDir}
   		To deploy it to your server:  ant hqu-deploy
-  		The URL to access it:  localhost:7080/hqu/${plugin.name}/sample/index.hqu
+  		The URL to access it:  localhost:7080/hqu/${plugin}/${controllerDir}/index.hqu
   	</echo>
   </target>
 	  	
