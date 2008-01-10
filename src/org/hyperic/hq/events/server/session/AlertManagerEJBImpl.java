@@ -555,35 +555,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             case EventConstants.TYPE_CHANGE:
                 dm = dmDao.findById(new Integer(cond.getMeasurementId()));
                 text.append(cond.getName()).append(" value changed");
-                // Parse out old value. This is a hack.
-                // Basically, we use the MessageFormat from the
-                // ValueChangeTrigger class to parse out the
-                // arguments from the event's message which was
-                // created from the same message format. This is
-                // the best we can do until we track previous
-                // values more explicitly. (JW)
-                text.append(" (");
-                try {
-                    Object[] values = ValueChangeTrigger.MESSAGE_FMT
-                            .parse(logs[i].getValue());
-                    text.append("old value = ");
-                    if (log.isTraceEnabled()) {
-                        log.trace("event message = " + logs[i].getValue());
-                        for (int x = 0; x < values.length; ++x) {
-                            log.trace("values[" + x + "] = " + values[x]);
-                        }
-                    }
-                    if (2 == values.length) {
-                        text.append(values[1]);
-                    } else {
-                        text.append(NOTAVAIL);
-                    }
-                } catch (ParseException e) {
-                    text.append(NOTAVAIL);
-                }
-                
-                String newValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
-                text.append(", new value = ").append(newValue).append(")");
+                text.append(" (New value: ")
+                    .append(logs[i].getValue())
+                    .append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
                 text.append(cond.getName()).append(" value changed");
