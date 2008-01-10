@@ -1,5 +1,6 @@
 package org.hyperic.hq.hqu.rendit
 
+import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.apache.catalina.Globals
 import org.hyperic.hq.hqu.rendit.i18n.BundleMapFacade
 import org.apache.commons.logging.Log
@@ -14,10 +15,12 @@ import org.apache.commons.logging.LogFactory
 class DefaultControllerDispatcher {
 	Log log = LogFactory.getLog(DefaultControllerDispatcher.class)
 	
-	def invoke(HQUPlugin p, invokeArgs) {
+	def invoke(HQUPlugin p, RequestInvocationBindings invokeArgs) {
         def path = invokeArgs.requestURI.split('/')[-3..-1]
 
-        log.debug "Request: ${path}"
+        if (log.isDebugEnabled())
+            log.debug "Request: ${path}"
+            
         if (path.size() < 3)
             return false
         
