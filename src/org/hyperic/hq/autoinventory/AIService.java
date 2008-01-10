@@ -249,4 +249,8 @@ public class AIService extends AppdefResource
     public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
+
+    protected String _getAuthzOp(String op) {
+        throw new IllegalArgumentException("No operation supported");
+    }
 }

@@ -273,4 +273,10 @@ public class AIServer extends ServerBase
    public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
+   
+   protected String _getAuthzOp(String op) {
+       throw new IllegalArgumentException("No supported operations");
+   }
+   
 }
+

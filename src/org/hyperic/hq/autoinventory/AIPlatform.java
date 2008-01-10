@@ -361,4 +361,8 @@ public class AIPlatform extends PlatformBase
    public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
+
+    protected String _getAuthzOp(String op) {
+        throw new IllegalArgumentException("No supported operations");
+    }
 }
