@@ -1177,7 +1177,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), id);        
 
         List mcol = getDerivedMeasurementDAO().findByInstance(id.getType(),
-                                                              id.getID());
+                                                              id.getID(),
+                                                              true);
         Integer[] mids = new Integer[mcol.size()];
         Iterator it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
