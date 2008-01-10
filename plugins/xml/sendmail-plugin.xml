@@ -94,8 +94,12 @@ echo MessagesAwaitingPreprocessing=$premessfiles
 
     <service name="SendMail Message Submission Process">
       <config>
+        <option name="user"
+                default="smmsp"
+                description="SendMail Message Submission Process User"/>
+
         <option name="process.query"
-                default="State.Name.eq=sendmail,CredName.User.ne=root"
+                default="State.Name.eq=sendmail,CredName.User.eq=%user%"
                 description="PTQL for SendMail Message Submission Process"/>
       </config>
 
