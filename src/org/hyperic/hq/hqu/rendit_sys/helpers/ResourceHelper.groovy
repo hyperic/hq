@@ -1,5 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.appdef.server.session.AppdefResource
+import org.hyperic.hq.authz.shared.PermissionException
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
@@ -12,6 +14,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
+import org.hyperic.hq.authz.HasAuthzOperations
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
@@ -22,9 +25,12 @@ class ResourceHelper extends BaseHelper {
 
     /**
      * General purpose utility method for finding resources and resource
-     * counts.  This method generally returns a {@link Resource}
+     * counts.  View-Permission checking is performed on the resource 
+     * (throwing PermissionException if denied) unless the permCheck = false 
      *
-     * To find the counts of resource types:
+     * This method generally returns a {@link Resource}
+     *
+     * To find the counts of resource types:  (no perm checking done)
      *   find count:'platforms'
      *   find count:'servers'
      *   find count:'services'
@@ -32,8 +38,8 @@ class ResourceHelper extends BaseHelper {
      * Since servers and services do not have unique names, you must qualify
      * them by their hosting resources.
      *
-     * To find platforms:
-     *   find platform:'My Platform'
+     * To find platforms: 
+     *   find platform:'My Platform', permCheck:false
      *   find platform:10001  // find the platform by ID
      *
      * To find servers:
@@ -44,10 +50,19 @@ class ResourceHelper extends BaseHelper {
      *   find platform:'My Platform', server:'My Server', service:'My Service'
      *   find service:serviceId
      *   find server:10001, service:'My Service'
+     *
+     * See also: AppdefCategory.checkPerms
+     *
+     * TODO: 
+     *  Currently, this does not take permissions into account whe returning
+     *  the count:* methods
      */
     def find(Map args) {
+        args = args + [:]  // Don't modify caller's map 
         // Initialize all used arguments to null
         ['count', 'platform', 'server', 'service'].each {args.get(it, null)}
+        args.get('user', user)         // Use default user  
+        args.get('operation', 'view')  // Default permission required
         
         if (args.count != null) {
             switch (args.count) {
@@ -72,7 +87,7 @@ class ResourceHelper extends BaseHelper {
             }
             
             if (args.server == null && args.service == null)
-                return plat?.resource
+                return plat?.checkPerms(args)
         }
         
         def server
@@ -87,7 +102,7 @@ class ResourceHelper extends BaseHelper {
             }
             
             if (args.service == null)
-                return server?.resource
+                return server?.checkPerms(args)
         }
         
         if (args.service != null) {
@@ -102,12 +117,12 @@ class ResourceHelper extends BaseHelper {
                 service = ServiceMan.one.getServiceById(args.service as int)
             }
             
-            return service?.resource
+            return service?.checkPerms(args)
         }
-        
+
         throw new IllegalArgumentException('Unknown arguments passed to find()')
     }
-    
+     
     /**
      * Find a subset of all platforms
      *
