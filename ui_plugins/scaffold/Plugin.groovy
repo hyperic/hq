@@ -1,21 +1,25 @@
 import org.hyperic.hq.hqu.rendit.HQUPlugin
 
+import SampleController
+
 class Plugin extends HQUPlugin {
     Plugin() {
-        /*
-         * Uncomment the following to add a link to the plugin in the
-         * Administration section.class
+        /**
+         * The following can be un-commented to have the plugin's view rendered in HQ.
          *
-         * The params are:
-         *   autoAttach:  Attach this view automatically
-         *   path:        The internal request to make to render the view
-         *                (translates to http://localhost:7080/hqu/console/index.hqu)
-         *                This should be a full request to a controller in /app
-         *                ex:  If /app/BankController.groovy had a method 'debit'
-         *                    '/bank/debit.hqu'
-         *    
-         *   name:        A description of the view, only used in the database.
+         * description:  The brief name of the view (e.g.: "Fast Executor")
+         * attachType:   one of ['masthead', 'admin']
+         * controller:   The controller to invoke when the view is to be generated
+         * action:       The method within 'controller' to invoke
+         * category:     (optional)  If set, specifies either 'tracker' or 'resource' menu
          */
-        // addAdminView(true, '/console/index.hqu', 'Groovy Console')
+        /*
+        addView(description:  'A Groovy HQU-@PLUGIN_NAME@',
+                attachType:   'masthead', 
+                controller:   SampleController,
+                action:       'index', 
+                category:     'tracker')
+         */
     }
 }
+

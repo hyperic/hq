@@ -52,6 +52,42 @@ class HQUPlugin implements IHQUPlugin {
         this.log = LogFactory.getLog("hqu.plugin.${name}")
     }
     
+    /**
+     * Add a view to be linked & viewed within HQ.
+     *
+     * The target URL which will be executed by HQ to render the view is
+     * typically:  localhost:7080/hqu/pluginName/foo/myAction.hqu
+     *                (given a controller of FooController)
+     *
+     * description:  The brief name of the view (e.g.: "Fast Executor")
+     * attachType:   one of ['masthead', 'admin']
+     * controller:   The controller to invoke when the view is to be generated
+     * action:       The method within 'controller' to invoke
+     * category:     (optional)  If set, specifies either 'tracker' or 'resource' menu
+     */
+    protected void addView(Map p) {
+        def autoAttach  = p.get('autoAttach', true)
+        def type        = p['attachType']
+        def controller  = p['controller']
+        def action      = p['action']
+        def description = p['description']
+        def category    = p['category']
+        
+        assert controller.name.endsWith('Controller'), 'Your controller must'+
+               ' be named FooController'
+        def controllerName = controller.name[0..-11].toLowerCase()
+        def path = "/${controllerName}/${action}.hqu"
+        if (type == 'masthead') {
+            addMastheadView(autoAttach, path, description, category) 
+        } else if (type == 'admin') {
+            addAdminView(autoAttach, path, description)
+        } else {
+            throw new IllegalArgumentException("type: must be ['masthead', " + 
+                                               "'admin']")
+        }
+                            
+    }
+    
     protected void addMastheadView(boolean autoAttach, String path,
                                    String description, String category)
     {
