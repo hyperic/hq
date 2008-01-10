@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -58,4 +58,6 @@ public interface UnitsConstants {
     public static final int SCALE_MILLI = 13;
     public static final int SCALE_MICRO = 14;
     public static final int SCALE_NANO  = 15;
+
+    public static final int SCALE_BIT   = 16;
 }

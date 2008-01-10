@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,6 +34,7 @@ import org.hyperic.util.ArrayUtil;
 
 class UnitsUtil implements UnitsConstants {
     static final BigDecimal FACT_NONE = new BigDecimal(Integer.toString(1));
+    static final BigDecimal FACT_BIT  = new BigDecimal(0.125);
 
     // Binary scaling factors
     static final BigDecimal FACT_KILO_BIN =
@@ -75,23 +76,24 @@ class UnitsUtil implements UnitsConstants {
     }
 
     static void checkValidScale(int scale){
-        if(!(scale >= SCALE_NONE && scale <= SCALE_NANO))
+        if(!(scale >= SCALE_NONE && scale <= SCALE_BIT))
             throw new IllegalArgumentException("Invalid scale specified");
     }
 
     static void checkValidScaleForUnits(int unit, int scale){
-        if(!(scale == SCALE_NONE ||
+        if(scale == SCALE_NONE || (unit == UNIT_BITS && scale == SCALE_BIT) ||
              ((unit == UNIT_BYTES || unit == UNIT_BITS || unit == UNIT_BYTES2BITS) &&
               scale >= SCALE_KILO && scale <= SCALE_PETA) ||
              ((unit == UNIT_DURATION || unit == UNIT_DATE ||
                unit == UNIT_APPROX_DUR) &&
               scale >= SCALE_YEAR && scale <= SCALE_NANO) ||
              (unit == UNIT_PERCENTAGE && scale != SCALE_NONE) ||
-             (unit == UNIT_NONE && scale != SCALE_NONE)))
+             (unit == UNIT_NONE && scale != SCALE_NONE))
         {
-            throw new IllegalArgumentException("Scale is not valid for the " +
-                                               "specified units");
+            return;
         }
+        throw new IllegalArgumentException("Scale is not valid for the " +
+                                           "specified units");
     }
 
     /**

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -207,6 +207,8 @@ public abstract class BinaryFormatter
         switch(scale){
         case UnitsConstants.SCALE_NONE:
             return UnitsUtil.FACT_NONE;
+        case UnitsConstants.SCALE_BIT:
+            return UnitsUtil.FACT_BIT;
         case UnitsConstants.SCALE_KILO:
             return UnitsUtil.FACT_KILO_BIN;
         case UnitsConstants.SCALE_MEGA:

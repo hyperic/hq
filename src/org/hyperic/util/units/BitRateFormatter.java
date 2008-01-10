@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 package org.hyperic.util.units;
 
-import java.text.Format;
 import java.text.ParseException;
 
 public class BitRateFormatter 
@@ -44,7 +43,7 @@ public class BitRateFormatter
         if(tag.equalsIgnoreCase("b") ||
            tag.equalsIgnoreCase("b/sec"))
         {
-            scale = UnitsConstants.SCALE_NONE;
+            scale = UnitsConstants.SCALE_BIT;
         } else if(tag.equalsIgnoreCase("k") ||
                   tag.equalsIgnoreCase("kb") ||
                   tag.equalsIgnoreCase("kb/sec"))
