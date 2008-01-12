@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -49,83 +49,113 @@ public class DatabaseInitializer {
     private String logCtx = DatabaseInitializer.class.getName();
     private Log log = LogFactory.getLog(logCtx);
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
-                                MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
+        MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
     public static void init() {
         new DatabaseInitializer();
     }
-    
+
     private DatabaseInitializer() {
         InitialContext ic;
         try {
             ic = new InitialContext();
         } catch (NamingException e) {
             log.error("Could not get InitialContext", e);
-            return;     // Can't do anything
+            return; // Can't do anything
         }
 
         Connection conn = null;
-        
+
         try {
             conn = DBUtil.getConnByContext(ic, HQConstants.DATASOURCE);
-            
+
             DatabaseRoutines[] dbrs = getDBRoutines(conn);
-            
+
             for (int i = 0; i < dbrs.length; i++) {
                 dbrs[i].runRoutines(conn);
             }
         } catch (SQLException e) {
-            log.error("SQLException creating connection to " +
-                      HQConstants.DATASOURCE, e);
+            log.error("SQLException creating connection to "
+                + HQConstants.DATASOURCE, e);
         } catch (NamingException e) {
-            log.error("NamingException creating connection to " +
-                      HQConstants.DATASOURCE, e);
+            log.error("NamingException creating connection to "
+                + HQConstants.DATASOURCE, e);
         } finally {
             DBUtil.closeConnection(DatabaseInitializer.class, conn);
-        }        
+        }
     }
-    
+
     interface DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException;
     }
 
     private DatabaseRoutines[] getDBRoutines(Connection conn)
         throws SQLException {
-        ArrayList routines = new ArrayList(2);
-        
+        ArrayList routines = new ArrayList();
+
+        if (DBUtil.isMySQL(conn))
+            routines.add(new MySQLRoutines());
+
         routines.add(new CommonRoutines());
-        
+
         return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
     }
-    
+
+    class MySQLRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            String nextseqval =
+                "CREATE FUNCTION nextseqval(iname CHAR(255), initHi int) "
+                + "RETURNS INT "
+                + "DETERMINISTIC "
+                + "BEGIN "
+                + "SET @new_seq_val = 0;"
+                + "INSERT IGNORE into HQ_SEQUENCE (seq_name, seq_val)"
+                + " VALUES (iname, initHi);"
+                + "UPDATE HQ_SEQUENCE set seq_val = @new_seq_val:=seq_val+1 "
+                + "WHERE seq_name=iname; " + "RETURN @new_seq_val;" + "END;";
+
+            Statement stmt = null;
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(nextseqval);
+            } catch (SQLException e) {
+                // Function + Procedure already exist, continue
+                if (log.isDebugEnabled()) {
+                    log.debug("MySQLRoutines SQLException", e);
+                }
+            } finally {
+                DBUtil.closeStatement(logCtx, stmt);
+            }
+        }
+    }
+
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
-            final String UNION_BODY =
-                "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL " +
-                "SELECT * FROM HQ_METRIC_DATA_8D_1S";
-            
-            final String HQ_METRIC_DATA_VIEW =
-                "CREATE VIEW "+MEAS_VIEW+" AS " + UNION_BODY;
-                        
-            final String EAM_METRIC_DATA_VIEW =
-                "CREATE VIEW "+TAB_DATA+" AS " + UNION_BODY +
-                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
+            final String UNION_BODY = "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL "
+                + "SELECT * FROM HQ_METRIC_DATA_8D_1S";
+
+            final String HQ_METRIC_DATA_VIEW = "CREATE VIEW " + MEAS_VIEW
+                + " AS " + UNION_BODY;
+
+            final String EAM_METRIC_DATA_VIEW = "CREATE VIEW " + TAB_DATA
+                + " AS " + UNION_BODY
+                + " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
 
             Statement stmt = null;
             try {
@@ -140,6 +170,6 @@ public class DatabaseInitializer {
             } finally {
                 DBUtil.closeStatement(logCtx, stmt);
             }
-        } 
+        }
     }
 }
