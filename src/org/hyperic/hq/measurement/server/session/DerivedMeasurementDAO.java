@@ -429,19 +429,43 @@ public class DerivedMeasurementDAO extends HibernateDAO {
     }
     
     List findMetricsCountMismatch(String plugin) {
-        return getSession().createSQLQuery("select appdef_type, instance_id " +
-            "from (select mt.id, mt.appdef_type, m.instance_id, " +
-                         "count(m.id) as count " +
-                  "from EAM_MONITORABLE_TYPE mt, EAM_MEASUREMENT_TEMPL t, " +
-                       "EAM_MEASUREMENT m " +
-                  "where monitorable_type_id = mt.id and template_id = t.id " +
-                        "and mt.plugin = :plugin " +
-                  "group by mt.id, mt.appdef_type, m.instance_id) mt, " +
-                 "(select mt.id, count(*) as count " +
-                  "from EAM_MONITORABLE_TYPE mt, EAM_MEASUREMENT_TEMPL t " +
-                  "where mt.id = t.monitorable_type_id and " +
-                        "mt.plugin = :plugin group by mt.id) t " +
-            "where mt.id = t.id and not mt.count = t.count")
+        return getSession().createSQLQuery(
+            "select mt.appdef_type, s.id from eam_monitorable_type mt, " +
+                                             "eam_platform_type st " +
+                "inner join eam_platform s on platform_type_id = st.id " +
+            "where st.plugin = mt.plugin and mt.plugin = :plugin and " +
+                  "mt.name = st.name and " +
+                  "(select count(m.*) from eam_measurement m " +
+                       "inner join eam_measurement_templ t " +
+                       "on m.template_id = t.id and " +
+                          "t.monitorable_type_id = mt.id " +
+                   "where instance_id = s.id) < " +
+                  "(select count(*) from eam_measurement_templ t " +
+                   "where monitorable_type_id = mt.id) union " +
+            "select mt.appdef_type, s.id from eam_monitorable_type mt, " +
+                                             "eam_server_type st " +
+                "inner join eam_server s on server_type_id = st.id " +
+            "where st.plugin = mt.plugin and mt.plugin = :plugin and " +
+                  "mt.name = st.name and " +
+                  "(select count(m.*) from eam_measurement m " +
+                       "inner join eam_measurement_templ t " +
+                       "on m.template_id = t.id and " +
+                          "t.monitorable_type_id = mt.id " +
+                   "where instance_id = s.id) < " +
+                  "(select count(*) from eam_measurement_templ t " +
+                   "where monitorable_type_id = mt.id) union " +
+            "select mt.appdef_type, s.id from eam_monitorable_type mt, " +
+                                             "eam_service_type st " +
+                "inner join eam_service s on service_type_id = st.id " +
+            "where st.plugin = mt.plugin and mt.plugin = :plugin and " +
+                  "mt.name = st.name and " +
+                  "(select count(m.*) from eam_measurement m " +
+                      "inner join eam_measurement_templ t " +
+                      "on m.template_id = t.id and " +
+                         "t.monitorable_type_id = mt.id " +
+                   "where instance_id = s.id) < " +
+                  "(select count(*) from eam_measurement_templ t " +
+                   "where monitorable_type_id = mt.id)")
             .setString("plugin", plugin)
             .list();
     }

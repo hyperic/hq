@@ -1342,6 +1342,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         
             try {
+                log.info("syncPluginMetrics sync'ing metrics for " + aeid);
                 enableDefaultMetrics(overlord, aeid, false);
             } catch (AppdefEntityNotFoundException e) {
                 // Move on since we did this query based on measurement table
