@@ -393,7 +393,8 @@ public class SenderThread
             srnList = (SRN[])this.schedule.getSRNs().toArray(new SRN[0]);
             if (srnList.length == 0) {
                 log.error("Agent does not have valid SRNs, but has metric " +
-                          "data to send, measurement report blocked");
+                          "data to send, removing measurements");
+                removeMeasurements(numUsed);
                 return null;
             }
             
@@ -459,26 +460,7 @@ public class SenderThread
         }
         
         if(success){
-            int j = 0;
-            
-            for(Iterator i=this.storage.getListIterator(DATA_LISTNAME);
-                i != null && i.hasNext() && j < numUsed;
-                j++)
-            {
-                i.next();
-                i.remove();
-            }
-            
-            try {
-                this.storage.flush();
-            } catch(AgentStorageException exc){
-                this.log.error("Failed to flush agent storage", exc);
-            }
-            
-            if(j != numUsed){
-                this.log.error("Failed to remove " + (numUsed - j) + 
-                               "records");
-            }
+            removeMeasurements(numUsed);
 
             this.stat_numBatchesSent++;
             this.stat_totBatchSendTime += (batchEnd - batchStart);
@@ -491,6 +473,35 @@ public class SenderThread
             }
         }
         return null;
+    }
+
+    /**
+     * @return The number of measurements removed from the metric storage.
+     *
+     * @param num The maximum number of datapoints to remove.
+     */
+    private int removeMeasurements(int num) {
+        int j = 0;
+
+        for (Iterator i = this.storage.getListIterator(DATA_LISTNAME);
+             i != null && i.hasNext() && j < num;
+             j++) {
+            i.next();
+            i.remove();
+        }
+
+        try {
+            this.storage.flush();
+        } catch (AgentStorageException exc) {
+            this.log.error("Failed to flush agent storage", exc);
+        }
+
+        if(j != num){
+            this.log.error("Failed to remove " + (num - j) +
+                           "records");
+        }
+
+        return j;
     }
 
     /**
