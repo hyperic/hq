@@ -474,11 +474,11 @@ public class SRNManagerEJBImpl extends SessionEJB
                MonitorAgentException, PermissionException,
                MeasurementUnscheduleException
     {
-        if (_log.isDebugEnabled())
-            _log.debug("Reschedule metrics for " + eid);
-        
         List dms = getDMan().findEnabledMeasurements(getOverlord(), eid, null);
-                
+
+        if (_log.isDebugEnabled())
+            _log.debug("Reschedule " + dms.size() + " metrics for " + eid);
+
         if (dms.size() > 0)
             reschedule(eid, dms);
         else
