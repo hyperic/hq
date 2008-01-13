@@ -247,8 +247,8 @@ public class MeasurementProcessorEJBImpl
             AgentValue aconn = getAgentConnection(agentToken);
             unschedule(aconn, entIds);
         } catch (MonitorAgentException e) {
+            log.warn("Error unscheduling metrics: " + e.getMessage());
         }
-
     }
     
     /** Unschedule metrics of multiple appdef entities
@@ -264,6 +264,7 @@ public class MeasurementProcessorEJBImpl
             AgentValue aconn = getAgentConnection(agentEnt);
             unschedule(aconn, entIds);
         } catch (MonitorAgentException e) {
+            log.warn("Error unscheduling metrics: " + e.getMessage());
         }
     }
 
@@ -404,9 +405,8 @@ public class MeasurementProcessorEJBImpl
     private RawMeasurement getRMByTemplateAndInstance(Integer tid,
                                                       int instanceId)
         throws FinderException {
-        RawMeasurement rm = getRawMeasurementDAO().
+        return getRawMeasurementDAO().
             findByTemplateForInstance(tid, new Integer(instanceId));
-        return rm;
     }
 
     private void logTime (String method, long start) {
