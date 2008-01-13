@@ -1594,13 +1594,13 @@ public class AppdefBossEJBImpl
             AppdefEntityID[] toDeleteIds = (AppdefEntityID[])
                 toDeleteIdsList.toArray(new AppdefEntityID[0]);
 
-            // now remove the measurements
-            // First remove all the Derived Measurements
-            getMetricManager()
-                .removeMeasurements(subject, plat.getEntityId(), toDeleteIds);
-            
-            // Then remove the Raw Measurements
-            getRawMeasurementManager().removeMeasurements(toDeleteIds);
+            // Disable all measurements for this platform.  We don't actually
+            // remove the measurements here to avoid delays in deleting
+            // resources.
+            MeasurementBossLocal mBoss = getMeasurementBoss();
+            for (int i = 0; i < toDeleteIds.length; i++) {
+                mBoss.disableMeasurements(sessionId, toDeleteIds[i]);
+            }
 
             // Remove from AI queue
             try {
@@ -1915,7 +1915,6 @@ public class AppdefBossEJBImpl
                 svcMgrLoc.getServicesByServer(subject, serverId,
                                               PageControl.PAGE_ALL));
 
-
             MeasurementBossLocal measBoss = getMeasurementBoss();
                 
             for (Iterator i=unscheduleList.iterator();i.hasNext();) {
@@ -1923,7 +1922,7 @@ public class AppdefBossEJBImpl
                     ((AppdefResourceValue)i.next()).getEntityId();
 
                 // now remove the measurements
-                measBoss.removeMeasurements(sessionId, thisId);
+                measBoss.disableMeasurements(sessionId, thisId);
 
                 // remove any log or config track plugins
                 measBoss.removeTrackers(sessionId, thisId);
@@ -1972,7 +1971,7 @@ public class AppdefBossEJBImpl
 
             // now remove any measurements associated with the service
             MeasurementBossLocal measBoss = getMeasurementBoss();
-            measBoss.removeMeasurements(sessionId, id);
+            measBoss.disableMeasurements(sessionId, id);
 
             // remove any log or config track plugins
             measBoss.removeTrackers(sessionId, id);

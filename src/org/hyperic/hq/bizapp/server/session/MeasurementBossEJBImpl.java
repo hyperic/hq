@@ -610,23 +610,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             createMeasurements(sessionId, kid, tids, interval);
         }
     }
-    
-    /** Remove all measurements for an instance
-     * @param id the appdef entity ID
-     * @ejb:interface-method
-     */
-    public void removeMeasurements(int sessionId, AppdefEntityID id)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException, RemoveException {
-        AuthzSubjectValue subject = manager.getSubject(sessionId);
-        
-        // First remove all the Derived Measurements
-        AppdefEntityID[] ids = new AppdefEntityID[] { id };
-        getMetricManager().removeMeasurements(subject, id, ids);
-
-        // Then remove the Raw Measurements
-        getRawMeasurementManager().removeMeasurements(ids);
-    }
 
     /**
      * Disable all measurements for an instance
@@ -640,7 +623,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         getMetricManager().disableMeasurements(subject, id);
     }
 
-    /** 
+    /**
+     * Disable all measurements for the given resources.
+     *
+     * @param agentId The entity id to use to look up the agent connection
+     * @param ids The list of entitys to unschedule
+     * @ejb:interface-method
+     * 
+     * NOTE: This method requires all entity ids to be monitored by the same
+     * agent as specified by the agentId
+     */
+    public void disableMeasurements(int sessionId, AppdefEntityID agentId,
+                                    AppdefEntityID[] ids)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubject subject = manager.getSubjectPojo(sessionId);
+        getMetricManager().disableMeasurements(subject, agentId, ids);
+    }
+
+    /**
      * Disable measurements so that they no longer collect data
      * @param mids the array of measurement ID's
      * @ejb:interface-method

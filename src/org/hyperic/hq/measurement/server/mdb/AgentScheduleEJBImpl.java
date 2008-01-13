@@ -35,10 +35,7 @@ import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer;
-import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.UnScheduleArgs;
 
 /**
  * <p>The AgentSchedule class runs as a daemon that asynchronously schedules
@@ -73,31 +70,18 @@ public class AgentScheduleEJBImpl
 
             if (o instanceof AppdefEntityID) {
                 AgentScheduleSynchronizer.scheduleSynchronous((AppdefEntityID) o);
-            }
-            else if (o instanceof UnScheduleArgs) {
-                UnScheduleArgs args = (UnScheduleArgs) o;
-                log.info("Unscheduling metrics for: " + args);
-                MeasurementProcessorEJBImpl.getOne()
-                    .unschedule(args.getAgentEntityID(),
-                                args.getUnscheduleEntities());
-            }
-            else {
+            } else {
                 log.error("Unknown message type: " + o);
             }
         } catch (JMSException e) {
             log.debug("Could not get message.", e);
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Failed to unschedule measurements", e);
         }
     }
 
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() {
-        log.debug ("AgentScheduleEJBImpl lifecycle event: creation");
-    }
-
+    public void ejbCreate() {}
     public void ejbPostCreate() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}

@@ -69,6 +69,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
@@ -88,6 +89,8 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -509,12 +512,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         MetricDeleteCallback cb = 
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-        /* Authz check should be performed on entity removal
-        for (int i = 0; i < entIds.length; i++) {
-            // Authz check
-            checkDeletePermission(subject, entIds[i]);
-        }
-        */
 
         for (Iterator i=dao.findByInstances(entIds).iterator(); i.hasNext(); ) {
             DerivedMeasurement dm = (DerivedMeasurement)i.next();
@@ -522,11 +519,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             cb.beforeMetricDelete(dm);
             dao.remove(dm);
         }
-
-        // send queue message to unschedule
-        UnScheduleArgs unschBean = new UnScheduleArgs(agentEnt, entIds);
-        log.debug("Sending unschedule message to SCHEDULE_QUEUE: " + unschBean);
-        sendAgentSchedule(unschBean);
     }
 
     /** 
@@ -1078,17 +1070,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Enable or Disable measurement in a new transaction.  We need to have the
-     * transaction finalized before sending out messages
-     * @ejb:transaction type="REQUIRESNEW"
-     * @ejb:interface-method
-     */
-    public void enableMeasurement(DerivedMeasurement m, boolean enabled)
-        throws MeasurementNotFoundException {
-        m.setEnabled(enabled);
-    }
-
-    /**
      * Set the interval of Measurements based their ID's
      *
      * @ejb:interface-method
@@ -1167,7 +1148,49 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     } 
 
     /**
-     * Disable all derived measurement EJBs for an instance
+     * Disable all measurements for the given resources.
+     *
+     * @param agentId The entity id to use to look up the agent connection
+     * @param ids The list of entitys to unschedule
+     * @ejb:interface-method
+     *
+     * NOTE: This method requires all entity ids to be monitored by the same
+     * agent as specified by the agentId
+     */
+    public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
+                                    AppdefEntityID[] ids)
+        throws PermissionException {
+
+        for (int i = 0; i < ids.length; i++) {
+            checkModifyPermission(subject.getId(), ids[i]);
+
+            List mcol = getDerivedMeasurementDAO().findByInstance(ids[i].getType(),
+                                                                  ids[i].getID(),
+                                                                  true);
+            Integer[] mids = new Integer[mcol.size()];
+            Iterator it = mcol.iterator();
+            for (int j = 0; it.hasNext(); j++) {
+                DerivedMeasurement dm = (DerivedMeasurement) it.next();
+                dm.setEnabled(false);
+                mids[j] = dm.getId();
+            }
+
+            // Now unschedule the DerivedMeasurment
+            unscheduleJobs(mids);
+        }
+
+        // Unscheduling of all metrics for a resource could indicate that
+        // the resource is getting removed.  Send the unschedule synchronously
+        // so that all the necessary plumbing is in place.
+        try {
+            MeasurementProcessorEJBImpl.getOne().unschedule(agentId, ids);
+        } catch (MeasurementUnscheduleException e) {
+            log.error("Unable to disable measurements", e);           
+        }
+    }
+
+    /**
+     * Disable all derived measurement's for a resource
      *
      * @ejb:interface-method
      */
@@ -1183,20 +1206,21 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         Iterator it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
             DerivedMeasurement dm = (DerivedMeasurement)it.next();
-            try {
-                // Call back into ourselves to force a new transaction to be
-                // created.
-                getDMManager().enableMeasurement(dm, false);
-            } catch (MeasurementNotFoundException e) {
-                // This is quite impossible, as we have just looked it up
-                throw new SystemException(e);
-            }
+            dm.setEnabled(false);
             mids[i] = dm.getId();
         }
 
         // Now unschedule the DerivedMeasurment
         unscheduleJobs(mids);
-        sendAgentSchedule(id);
+
+        // Unscheduling of all metrics for a resource could indicate that
+        // the resource is getting removed.  Send the unschedule synchronously
+        // so that all the necessary plumbing is in place.
+        try {
+            MeasurementProcessorEJBImpl.getOne().unschedule(id);
+        } catch (MeasurementUnscheduleException e) {
+            log.error("Unable to disable measurements", e);
+        }
     }
 
     /**
@@ -1222,9 +1246,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 aid = getAppdefEntityId(m);
                 checkModifyPermission(subject.getId(), aid);
             }
-            // Call back into ourselves to force a new transaction to be
-            // created.
-            getDMManager().enableMeasurement(m, false);
+            m.setEnabled(false);
         }
 
         // Now unschedule the DerivedMeasurment
@@ -1257,14 +1279,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             if (tidSet != null && 
                 !tidSet.contains(dm.getTemplate().getId()))
                     continue;
-                
-            try {
-                enableMeasurement(dm, false);
-            } catch (MeasurementNotFoundException e) {
-                // This is quite impossible, we just looked it up
-                throw new SystemException(e);
-            }
-            
+
+            dm.setEnabled(false);
             toUnschedule.add(dm.getId());
         }
 
