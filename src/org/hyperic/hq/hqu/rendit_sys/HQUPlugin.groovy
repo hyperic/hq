@@ -5,12 +5,14 @@ import org.apache.commons.logging.LogFactory
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
 import org.hyperic.hq.hqu.AttachmentDescriptor
 import org.hyperic.hq.hqu.SimpleAttachmentDescriptor
 import org.hyperic.hq.hqu.ViewDescriptor
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as uiManImpl
+import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as PluginMan 
 import org.hyperic.hq.hqu.server.session.AttachType
 import org.hyperic.hq.hqu.server.session.View
 import org.hyperic.hq.hqu.server.session.ViewAdmin
@@ -74,18 +76,20 @@ class HQUPlugin implements IHQUPlugin {
         def category    = p['category']
         
         assert controller.name.endsWith('Controller'), 'Your controller must'+
-               ' be named FooController'
+               ' be end with Controller (e.g. FooController)'
         def controllerName = controller.name[0..-11].toLowerCase()
         def path = "/${controllerName}/${action}.hqu"
+        p['path'] = path
         if (type == 'masthead') {
             addMastheadView(autoAttach, path, description, category) 
         } else if (type == 'admin') {
             addAdminView(autoAttach, path, description)
+        } else if (type == 'resource') {
+            views[description] = [type: 'resource'] + p
         } else {
             throw new IllegalArgumentException("type: must be ['masthead', " + 
                                                "'admin']")
         }
-                            
     }
     
     protected void addMastheadView(boolean autoAttach, String path,
@@ -117,6 +121,8 @@ class HQUPlugin implements IHQUPlugin {
                     createAndAttachMasthead(me, name, parms)
                 else if (parms.type == 'admin') 
                     createAndAttachAdmin(me, name, parms)
+                else if (parms.type == 'resource')
+                    createAndAttachResource(me, name, parms)
                 else
                     log.error("Unknown view type ${parms.type}")
             }
@@ -132,40 +138,99 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     private void createAndAttachAdmin(UIPlugin me, String name, Map parms) {
-        def uiMan = uiManImpl.one
+        def pMan = PluginMan.one
         ViewAdmin view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
             AttachType atype = AttachType.ADMIN
             ViewDescriptor vd = new ViewDescriptor(parms.path, 
                                                    parms.description, atype)
-            view = uiMan.createAdminView(me, vd)
+            view = pMan.createAdminView(me, vd)
         }
                 
         if (view.attachments.empty) {
             ViewAdminCategory cat = 
                 ViewAdminCategory.findByDescription(parms.category)
-            uiMan.attachView(view, cat)
+            pMan.attachView(view, cat)
         }
     }
     
     private void createAndAttachMasthead(UIPlugin me, String name, Map parms) {
-        def uiMan = uiManImpl.one
+        def pMan= PluginMan.one
         ViewMasthead view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
             AttachType atype = AttachType.MASTHEAD
             ViewDescriptor vd = new ViewDescriptor(parms.path, 
                                                    parms.description, atype)
-            view = uiMan.createMastheadView(me, vd)
+            view = pMan.createMastheadView(me, vd)
         }
                 
         if (view.attachments.empty) {
             ViewMastheadCategory cat = 
                 ViewMastheadCategory.findByDescription(parms.category)
-            uiMan.attachView(view, cat)
+            pMan.attachView(view, cat)
         }
     }
+    
+    /**
+     * Create and attach a Resource view
+     *
+     * e.g.:
+         addView(description:  'LiveExec',
+                 attachType:   'resource',
+                 toRoot:       true,
+                 platforms:    'all',
+                 controller:   LiveController,
+                 action:       'index',
+                 showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})        
+     *
+     *
+     * toRoot:  If true, also attach to the root resource 
+     *          (i.e. all resources)                                                           
+     * platforms: 'all'  (only possible value, currently)
+     */
+    private void createAndAttachResource(UIPlugin me, String name, Map p) {
+        def pMan = PluginMan.one
+
+        ViewResource view
+        if (me.views.empty) {
+            def vd = new ViewDescriptor(p.path, p.description,
+                                        AttachType.RESOURCE)
+            view = pMan.createResourceView(me, vd)
+        } else {
+            view = me.views.iterator().next()
+        }
+
+        if (p.platforms == 'all') {
+            def platMan   = PlatMan.one
+            for (pt in platMan.findAllPlatformTypes()) {
+                if (p.byPlugin && pt.plugin != p.byPlugin)
+                    continue
+            
+                def r = platMan.findResource(pt)
+                if (resourceAttached(view, r))
+                    continue
+
+                pMan.attachView(view, ViewResourceCategory.VIEWS, r)
+            }
+        }
+        
+        if (p.toRoot) {
+            def root = ResourceMan.one.findRootResource()
+            if (!resourceAttached(view, root))
+                pMan.attachView(view, ViewResourceCategory.VIEWS, root)
+        }
+    }
+    
+    private boolean resourceAttached(view, resource) {
+        for (a in view.attachments) {
+            if (a.resource == resource)
+                return true
+        }
+        return false
+    }
+    
     
     Properties getDescriptor() {
         return this.descriptor
@@ -174,10 +239,21 @@ class HQUPlugin implements IHQUPlugin {
     String getName() {
         descriptor.getProperty('plugin.name')
     }
-
+    
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
                                                  AuthzSubject u) 
     { 
+        // If the view was setup via addView* from above, this should be
+        // non-null
+        def view = views[a.view?.description]
+        
+        if (view.type == 'resource') {
+            if (view.showAttachmentIf in Closure) {
+                if (!view.showAttachmentIf(a, r, u))
+                    return null
+            }
+        }
+                        
         new SimpleAttachmentDescriptor(a, 
                                        descriptor.getProperty('plugin.helpTag'), 
                                        description)
@@ -185,7 +261,7 @@ class HQUPlugin implements IHQUPlugin {
     
     String getDescription() {
         def loader = this.class.classLoader
-        def subloader = new URLClassLoader([new File(pluginDir, 'etc').toURL()] as URL[],
+        def subloader = new URLClassLoader([new File((File)pluginDir, 'etc').toURL()] as URL[],
                                            loader)
         
         def file = "${name}_i18n"
