@@ -32,23 +32,22 @@ class ManageController
         columns: [
             [field: [getValue: {localeBundle.Name},
                      description:'name', sortable:false], 
-             width: '330%',
+             width: '33%',
              label: {it.name}],
             [field: [getValue: {localeBundle.Version},
                      description:'version', sortable:false], 
-             width: '330%',
-             label: {it.name}],
-             /*
-            [field: [getValue: {},
-                     description:'name', 
+             width: '33%',
+             label: {it.pluginVersion}],
+            [field: [getValue: {''},
+                     description:'deleteButton', 
                      sortable:false], 
-             width: '340%',
+             width: '34%',
              label: {
                 buttonTo text:'Delete', action:'deletePlugin',
+                         afterAction:'refreshAll()',
                          id:it, htmlId:it.id, 
                          confirm:'Are you sure?'
             }]
-            */
         ]]
     }
     

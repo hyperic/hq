@@ -1,5 +1,13 @@
+<link rel=stylesheet href="/hqu/public/hqu.css" type="text/css">
+
 <h3>UI Plugin Management</h3>
 
+<script type="text/javascript">
+function refreshAll() {
+    pluginTable_refreshTable();
+};
+
+</script>
 
 <%= dojoTable(id:'pluginTable', title:l.Plugins,
               refresh:10, url:urlFor(action:'pluginData'),
