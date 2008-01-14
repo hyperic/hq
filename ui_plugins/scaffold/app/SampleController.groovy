@@ -4,6 +4,7 @@ class @CONTROLLER_NAME@Controller
 	extends BaseController
 {
     def @CONTROLLER_NAME@Controller() {
+        onlyAllowSuperUsers()
     }
     
     def index(params) {
