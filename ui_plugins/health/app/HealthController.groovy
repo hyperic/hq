@@ -415,7 +415,7 @@ class HealthController
     }
     
     private h(str) {
-        HtmlUtil.escapeHtml(str)
+        str.toString().toHtml()
     }
     
     private getJVMSupportsTraces() {

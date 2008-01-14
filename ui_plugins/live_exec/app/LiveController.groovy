@@ -1,7 +1,6 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl as ldmi
-import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.FormatType
 import org.hyperic.hq.livedata.shared.LiveDataCommand
@@ -98,13 +97,13 @@ class LiveController
             def val
             if (l.hasError()) {
                 val = [rid: "${l.appdefEntityID}", 
-                       error: HtmlUtil.escapeHtml(l.errorMessage)] as JSONObject 
+                       error: l.errorMessage.toString().toHtml()] as JSONObject 
             } else {
                 def txt = formatter.format(fmtCmd, FormatType.HTML,
                                            new ConfigResponse(), 
                                            l.objectResult)
                 if (fmtId == 'toString')
-                    txt = HtmlUtil.escapeHtml(txt)
+                    txt = txt.toString().toHtml() 
                 
                 val = [rid: "${l.appdefEntityID}", result: txt] as JSONObject
                 

@@ -1,4 +1,3 @@
-import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.application.HQApp
 import org.hyperic.hq.product.GenericPlugin
@@ -50,8 +49,7 @@ class ConsoleController extends BaseController {
     }
     
     def execute(params) {
-        def code = params.getOne('code')
-        [result: HtmlUtil.escapeHtml(executeCode(code))]
+        [result: executeCode(params.getOne('code')).toString().toHtml()]
     }
     
     private def executeCode(code) {

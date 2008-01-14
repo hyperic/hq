@@ -1,4 +1,4 @@
-<link rel=stylesheet href="/hqu/public/hqu.css" type="text/css">
+<%= hquStylesheets() %>
 
 <h3>UI Plugin Management</h3>
 

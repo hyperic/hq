@@ -3,7 +3,7 @@
                  "dojo.widget.ContentPane",
                  "dojo.widget.TabContainer",
                  "dojo.widget.FilteringTable"]) %>
-<link rel=stylesheet href="/hqu/public/hqu.css" type="text/css">
+<%= hquStylesheets() %>
 
 <script type="text/javascript">
 function getSystemStats() {
