@@ -611,9 +611,6 @@ public class ControlScheduleManagerEJBImpl
         while (i.hasNext()) {
             ControlHistory history = (ControlHistory) i.next();
             if (history.getStatus().equals(ControlConstants.STATUS_INPROGRESS)){
-                history.setDuration(System.currentTimeMillis() -
-                                   history.getStartTime());
-
                 return history;
             }
         }
@@ -638,11 +635,6 @@ public class ControlScheduleManagerEJBImpl
             local = hLocalHome.findById(id);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
-        }
-        
-        if (local.getStatus().equals(ControlConstants.STATUS_INPROGRESS)) {
-            local.setDuration(System.currentTimeMillis() -
-                              local.getStartTime());
         }
 
         return local;
@@ -949,7 +941,6 @@ public class ControlScheduleManagerEJBImpl
         }
 
         local.setEndTime(endTime);
-        local.setDuration(endTime - local.getStartTime());
         local.setStatus(status);
         local.setMessage(message);
     }

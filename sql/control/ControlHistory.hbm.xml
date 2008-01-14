@@ -53,10 +53,6 @@
       <column name="ENDTIME" not-null="true"/>
     </property>
 
-    <property name="duration" type="long">
-      <column name="DURATION" not-null="true"/>
-    </property>
-
     <property name="description" type="string">
       <column name="DESCRIPTION" length="500"/>
     </property>

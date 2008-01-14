@@ -75,7 +75,6 @@ public class ControlHistoryDAO extends HibernateDAO
         h.setStartTime(startTime);
         h.setEndTime(endTime);
         h.setDateScheduled(dateScheduled);
-        h.setDuration(endTime - startTime);
         h.setStatus(status);
         h.setDescription(description);
         h.setAction(action);

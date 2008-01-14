@@ -7943,6 +7943,14 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.94">
+    <schema-directSQL>
+      <statement>
+        ALTER TABLE EAM_CONTROL_HISTORY DROP COLUMN DURATION
+      </statement>
+    </schema-directSQL>    
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 

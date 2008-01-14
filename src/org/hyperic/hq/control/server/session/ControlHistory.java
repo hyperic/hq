@@ -28,6 +28,7 @@ package org.hyperic.hq.control.server.session;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.control.shared.ControlHistoryValue;
+import org.hyperic.hq.control.shared.ControlConstants;
 
 public class ControlHistory extends PersistedObject
 {
@@ -171,12 +172,11 @@ public class ControlHistory extends PersistedObject
 
     public long getDuration()
     {
-        return this.duration;
-    }
-
-    protected void setDuration(long duration)
-    {
-        this.duration = duration;
+        if (getStatus().equals(ControlConstants.STATUS_INPROGRESS)) {
+            return System.currentTimeMillis() - getStartTime();
+        } else {
+            return getEndTime() - getStartTime();
+        }
     }
 
     public String getDescription()
@@ -268,25 +268,6 @@ public class ControlHistory extends PersistedObject
         controlHistoryValue.setArgs(
             (getArgs() == null) ? "" : getArgs());
         return controlHistoryValue;
-    }
-
-    protected void setControlHistoryValue(ControlHistoryValue valueHolder)
-    {
-        setGroupId( valueHolder.getGroupId() );
-        setBatchId( valueHolder.getBatchId() );
-        setEntityType( valueHolder.getEntityType() );
-        setEntityId( valueHolder.getEntityId() );
-        setSubject( valueHolder.getSubject() );
-        setScheduled( valueHolder.getScheduled() );
-        setDateScheduled( valueHolder.getDateScheduled() );
-        setStartTime( valueHolder.getStartTime() );
-        setEndTime( valueHolder.getEndTime() );
-        setDuration( valueHolder.getDuration() );
-        setMessage( valueHolder.getMessage() );
-        setDescription( valueHolder.getDescription() );
-        setStatus( valueHolder.getStatus() );
-        setAction( valueHolder.getAction() );
-        setArgs( valueHolder.getArgs() );
     }
 
     public boolean equals(Object obj)

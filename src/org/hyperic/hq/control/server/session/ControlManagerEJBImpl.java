@@ -520,7 +520,6 @@ public class ControlManagerEJBImpl implements SessionBean {
         cLocal.setStatus(status);
         cLocal.setStartTime(startTime);
         cLocal.setEndTime(endTime);
-        cLocal.setDuration(duration);
         cLocal.setMessage(msg);
 
         // Send a control event
