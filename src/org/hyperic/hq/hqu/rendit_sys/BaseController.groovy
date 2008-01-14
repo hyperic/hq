@@ -2,6 +2,8 @@ package org.hyperic.hq.hqu.rendit
 
 import java.text.SimpleDateFormat
 
+import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl as TxMan
+
 import org.hyperic.hq.hqu.rendit.RequestInvocationBindings
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
@@ -15,6 +17,8 @@ import org.hyperic.hq.hqu.rendit.helpers.AuditHelper
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.rendit.render.RenderFrame
 
+import org.hyperic.util.Runnee
+
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
 import org.hyperic.hq.hqu.server.session.Attachment
 
@@ -22,6 +26,8 @@ import org.json.JSONObject
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+
+import groovy.xml.MarkupBuilder
 
 /**
  * The base controller is invoked by the dispatcher when it detects that
@@ -42,7 +48,8 @@ abstract class BaseController {
     private boolean rendered           // Have we already performed a render?
     private         localeBundle = [:] // l10n bundle, must support getAt()
     private         jsonMethods = []   /* Names of methods which will 
-                                          automatically encode JSON */ 
+                                          automatically encode JSON */
+    private         xmlMethods= []     /* Names of methods going to XML */
     
     /**
      * Add a closure that will be executed prior to any controller action 
@@ -62,6 +69,10 @@ abstract class BaseController {
      */
     protected void setJSONMethods(List meths) {
         jsonMethods = meths
+    }
+    
+    protected void setXMLMethods(List meths) {
+        xmlMethods = meths
     }
 
     protected boolean getDumpScripts() {
@@ -129,12 +140,25 @@ abstract class BaseController {
 	        	    return;
 	        }
 	        
-			def methRes = invokeMethod(action, params)
+	        def methRes
+	        def xmlWriter
+	        def xmlBuilder
+			if (action in xmlMethods) {
+			    xmlWriter  = new StringWriter()
+			    xmlBuilder = new MarkupBuilder(xmlWriter) 
+			    methRes    = invokeMethod(action, [xmlBuilder] + params)
+			} else {
+			    methRes = invokeMethod(action, params)
+			}
+			    
     		if (!rendered) {
     		    if (action in jsonMethods) {
     		        def json = methRes as JSONObject
     				render(inline:"/* ${json} */", 
     				       contentType:'text/json-comment-filtered')
+    		    } else if (action in xmlMethods) {
+    		        render(inline:"${xmlWriter}",
+    		               contentType:'text/xml')
     		    } else {
     		        render([action : action])
     		    }

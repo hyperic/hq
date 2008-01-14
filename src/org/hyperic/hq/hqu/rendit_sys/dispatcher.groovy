@@ -22,6 +22,7 @@ import org.hyperic.hq.hqu.rendit.metaclass.MapCategory
 import org.hyperic.hq.hqu.rendit.metaclass.MetricCategory
 import org.hyperic.hq.hqu.rendit.metaclass.ResourceCategory
 import org.hyperic.hq.hqu.rendit.metaclass.ResourceGroupCategory
+import org.hyperic.hq.hqu.rendit.metaclass.RoleCategory
 import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 
 import org.apache.commons.logging.Log
@@ -41,8 +42,8 @@ class Dispatcher implements IDispatcher {
     private final CATEGORIES = [AuthzSubjectCategory, AlertCategory, 
                                 AppdefCategory, DownCategory,
                                 EscalationCategory, MapCategory, MetricCategory, 
-                                ResourceCategory, ResourceGroupCategory, 
-                                StringCategory]   
+                                ResourceCategory, ResourceGroupCategory,
+                                RoleCategory, StringCategory]   
     
     private Log log = LogFactory.getLog(Dispatcher.class);
 
