@@ -620,9 +620,18 @@ class DojoUtil {
         }
         
         if (sortColumn == null) {
-            sortColumn = schema.defaultSort
+            if (schema.defaultSort != null) {
+            	sortColumn = schema.defaultSort
+            } else {
+                for (c in schema.columns) {
+                    if (c.field.sortable) {
+                        sortColumn = c.field
+                        break
+                    }
+                }
+            }
         }
-            
+
         def pageNum  = new Integer(params.getOne("pageNum", "0"))
         def pageSize = new Integer(params.getOne("pageSize", "20"))
 
@@ -645,6 +654,7 @@ class DojoUtil {
         for (d in data) {
             def val = [:]
             val.id = rowId(d)
+            
             for (c in schema.columns) {
                 def v = c.label(d)
                 
@@ -653,6 +663,14 @@ class DojoUtil {
                     
                 if (v == null || v.trim() == '') {
                     v = '&nbsp;' // We need this to get the bottom border on <td>
+                }
+                
+                if (!c.field) {
+                    throw new IllegalArgumentException("Column with no field")
+                }
+                
+                if (!c.field.description) {
+                    throw new IllegalArgumentException("No column description")
                 }
                 val[c.field.description] = v
             }
@@ -666,9 +684,9 @@ class DojoUtil {
             }
             jsonData.put(val)
         }
-        
+                    
 		[data      : jsonData, 
-		 sortField : sortColumn.description,
+		 sortField : sortColumn?.description,
 		 sortOrder : sortOrder ? 1 : 0,
 		 pageNum   : pageNum,
 		 lastPage  : lastPage] as JSONObject
