@@ -3,6 +3,10 @@ package org.hyperic.hq.hqu.rendit.html
 import org.apache.commons.lang.StringEscapeUtils
 
 class HtmlUtil {
+    static String hquStylesheets() {
+        '<link rel="stylesheet" href="/hqu/public/hqu.css" type="text/css">'
+    }
+    
     static String escapeHtml(o) {
     	StringEscapeUtils.escapeHtml(o.toString())    
     }
