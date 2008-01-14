@@ -654,6 +654,13 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public Role findRoleById(int id){
         return getRoleDAO().findById(new Integer(id));
     }
+
+    /**
+     * @ejb:interface-method
+     */
+    public Role findRoleByName(String name) {
+        return getRoleDAO().findByName(name);
+    }
     
     /**
      * Create a calendar under a role for a specific type.  Calendars created
