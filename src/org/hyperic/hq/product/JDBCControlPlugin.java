@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -45,21 +45,16 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
     protected String table = null;
     protected String index = null;
 
-    public void configure(ConfigResponse config)
-        throws PluginException
-    {
+    public void configure(ConfigResponse config) throws PluginException {
         super.configure(config);
 
         // Initialize configuration.
         this.url = config.getValue(JDBCMeasurementPlugin.PROP_URL);
         this.user = config.getValue(JDBCMeasurementPlugin.PROP_USER);
-        this.password = 
-            config.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
+        this.password = config.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
         // Optional
-        this.table = 
-            config.getValue(JDBCMeasurementPlugin.PROP_TABLE);
-        this.index =
-            config.getValue(JDBCMeasurementPlugin.PROP_INDEX);
+        this.table = config.getValue(JDBCMeasurementPlugin.PROP_TABLE);
+        this.index = config.getValue(JDBCMeasurementPlugin.PROP_INDEX);
 
         // Validate.
         Connection conn = null;
@@ -68,21 +63,20 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
             getDriver();
             conn = getConnection(url, user, password);
         } catch (ClassNotFoundException e) {
-            // No driver.  Should not happen.
-            throw new PluginException("Unable to load JDBC " +
-                                      "Driver: " + e.getMessage());
+            // No driver. Should not happen.
+            throw new PluginException("Unable to load JDBC " + "Driver: "
+                + e.getMessage());
         } catch (SQLException e) {
             // Invalid configuration.
-            throw new PluginException("Unable to obtain JDBC " +
-                                      "Connection: " + 
-                                      e.getMessage());
+            throw new PluginException("Unable to obtain JDBC " + "Connection: "
+                + e.getMessage());
         } finally {
             if (conn != null) {
-                try { 
+                try {
                     conn.close();
                 } catch (Exception e) {
-                    getLog().warn("Error closing connection: " +
-                                  e.getMessage());
+                    getLog()
+                        .warn("Error closing connection: " + e.getMessage());
                 }
             }
         }
@@ -98,38 +92,37 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
             return false;
         } finally {
             if (conn != null) {
-                try { 
+                try {
                     conn.close();
                 } catch (Exception e) {
-                    getLog().warn("Error closing connection: " +
-                                  e.getMessage());
+                    getLog()
+                        .warn("Error closing connection: " + e.getMessage());
                 }
             }
         }
     }
 
     /**
-     * The plugin must preform the Class.forName so its
-     * ClassLoader is used to find the driver.
+     * The plugin must preform the Class.forName so its ClassLoader is used to
+     * find the driver.
      */
-    protected abstract Class getDriver()
-        throws ClassNotFoundException;
+    protected abstract Class getDriver() throws ClassNotFoundException;
+
+    public void doAction(String action, String[] args) throws PluginException {
+
+        doAction(action);
+    }
 
     /**
      * The plugin must preform the DriverManager.getConnection so its
      * ClassLoader is used to find the driver.
      */
-    protected abstract Connection getConnection(String url,
-                                                String user,
-                                                String password)
-        throws SQLException;
+    protected abstract Connection getConnection(String url, String user,
+        String password) throws SQLException;
 
-    public abstract void doAction(String action)
-        throws PluginException;
+    public abstract void doAction(String action) throws PluginException;
 
-    public void execute(String query)
-        throws PluginException
-    {
+    public void execute(String query) throws PluginException {
         Connection conn = null;
         Statement stmt = null;
 
@@ -149,9 +142,7 @@ public abstract class JDBCControlPlugin extends ControlPlugin {
         }
     }
 
-    public void executeQuery(String query)
-        throws PluginException
-    {
+    public void executeQuery(String query) throws PluginException {
         Connection conn = null;
         Statement stmt = null;
 
