@@ -419,6 +419,7 @@ font-weight:bold;
 }
 
 /* HQ Health */
+
 #cacheTable  {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
@@ -494,7 +495,8 @@ _white-space: pre; /* IE only hack to re-specify in addition to word-wrap */
 font-family:monospace;
 font-size:12px;
 }
-.printButton {margin-top:5px;padding:3px 10px; border:1px solid #ccc; background-color:#eee;width:35px;}
+
+.printButton {border:1px solid #cccccc;padding:2px 6px 2px 6px;margin-left:5px;margin-top:5px;background-color:#F2F4F7;width:35px;}
 
 
 

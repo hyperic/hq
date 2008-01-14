@@ -168,9 +168,9 @@ getSystemStats();
   
   <div id="mailLinks" class="metricGroup">
     <div class="metricCatLabel">Actions</div>
-      <blockquote>
-        <span>${linkTo('Print', [action:'printReport'])}</span>
-      </blockquote>
+
+        <div class="printButton">${linkTo('Print', [action:'printReport'])}</div>
+      
   </div>
 </div>
 
