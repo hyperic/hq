@@ -223,6 +223,7 @@ z-index:2;
 
 .headBotNav {
     background-color:#336699;
+    border-bottom:1px solid #336699;
 }
 
 #loading {
@@ -1148,6 +1149,8 @@ background-color: #dbe3f5
 
 .waitTd {
 }
+
+#deleteBtn a:hover, a:link, a:visited {text-decoration: none;}
 
 /* Dashboard Portlets */
 
