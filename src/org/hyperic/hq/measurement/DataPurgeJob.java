@@ -41,6 +41,8 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
+import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.RawMeasurementManagerEJBImpl;
 import org.hyperic.util.TimeUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -170,11 +172,7 @@ public class DataPurgeJob implements Job {
     {
         // Once compression finishes, we check to see if databae maintaince
         // should be performed.  This is defaulted to 1 hour, so it should
-        // always run unless changed by the user.  This is only a safeguard,
-        // as usually an ANALYZE only takes a fraction of what a full VACUUM
-        // takes.
-        //
-        // VACUUM will occur every day at midnight.
+        // always run unless changed by the user.
 
         long time_start = System.currentTimeMillis();
         Properties conf;
@@ -199,10 +197,6 @@ public class DataPurgeJob implements Job {
             return;
         }
 
-        // At midnight we always perform a VACUUM, otherwise we
-        // check to see if it is time to perform normal database
-        // maintenance. (On postgres we just rebuild indicies
-        // using an ANALYZE)
         long vacuumStart = System.currentTimeMillis();
         if (TimingVoodoo.roundDownTime(time_start, HOUR) ==
             TimingVoodoo.roundDownTime(time_start, maintInterval)) {
@@ -220,8 +214,23 @@ public class DataPurgeJob implements Job {
     protected void purge(Properties conf, long now)
         throws CreateException, NamingException {
         DataPurgeJob.purgeEventLogs(conf, now);
+        DataPurgeJob.purgeMeasurements();
     }
-    
+
+    /**
+     * Remove measurements no longer associated with a resource.
+     */
+    private static void purgeMeasurements() {
+        long start = System.currentTimeMillis();
+        int dcount =
+            DerivedMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
+        int rcount =
+            RawMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
+        _log.info("Removed " + dcount + " derived, " + rcount + " raw " +
+                  "measurements in " +
+                  ((System.currentTimeMillis() - start)/60000) + " seconds.");
+    }
+
     /**
      * Purge Event Log data
      */

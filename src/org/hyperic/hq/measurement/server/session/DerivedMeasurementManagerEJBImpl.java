@@ -500,25 +500,23 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Remove all measurements for multiple instances
+     * Remove all measurements no longer associated with a resource.
      *
      * @ejb:interface-method
      */
-    public void removeMeasurements(AuthzSubjectValue subject,
-                                   AppdefEntityID agentEnt,
-                                   AppdefEntityID[] entIds)
-        throws RemoveException, PermissionException
-    {
+    public int removeOrphanedMeasurements() {
         MetricDeleteCallback cb = 
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
 
-        for (Iterator i=dao.findByInstances(entIds).iterator(); i.hasNext(); ) {
-            DerivedMeasurement dm = (DerivedMeasurement)i.next();
-
+        List mids = dao.findOrphanedMeasurements();
+        for (Iterator i=mids.iterator(); i.hasNext(); ) {
+            DerivedMeasurement dm = dao.get((Integer)i.next());
             cb.beforeMetricDelete(dm);
             dao.remove(dm);
         }
+
+        return mids.size();
     }
 
     /** 

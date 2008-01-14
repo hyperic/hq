@@ -292,22 +292,24 @@ public class RawMeasurementManagerEJBImpl
     }
 
     /**
-     * Remove all measurements for an instance
+     * Remove all measurements no longer associated with a resource.
      *
      * @ejb:interface-method
      */
-    public void removeMeasurements(AppdefEntityID[] ids) {
+    public int removeOrphanedMeasurements() {
         MetricDeleteCallback cb = 
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         RawMeasurementDAO dao = getRawMeasurementDAO();
-        Collection metrics = dao.findByInstances(ids);
 
-        for (Iterator i=metrics.iterator(); i.hasNext(); ) {
-            RawMeasurement m = (RawMeasurement)i.next();
+        List mids = dao.findOrphanedMeasurements();
+        for (Iterator i=mids.iterator(); i.hasNext(); ) {
+            RawMeasurement m = dao.get((Integer)i.next());
             
             cb.beforeMetricDelete(m);
             dao.remove(m);
         }
+
+        return mids.size();
     }
 
     public static RawMeasurementManagerLocal getOne() {

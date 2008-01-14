@@ -45,6 +45,10 @@ public class RawMeasurementDAO extends HibernateDAO {
         return (RawMeasurement)super.findById(id);
     }
 
+    public RawMeasurement get(Integer id) {
+        return (RawMeasurement)super.get(id);
+    }
+
     void remove(Integer id) {
         RawMeasurement m = findById(id);
         remove(m);
@@ -158,5 +162,26 @@ public class RawMeasurementDAO extends HibernateDAO {
 
         return getSession().createQuery(sql)
                 .setInteger(0, did.intValue()).list();
+    }
+
+    /**
+     * Find a list of Measurement ID's that are no longer associated with a
+     * resource.
+     *
+     * @return A List of DerivedMeasurement ID's.
+     */
+    List findOrphanedMeasurements() {
+        String sql =
+            "SELECT M.ID FROM EAM_MEASUREMENT M, EAM_MEASUREMENT_TEMPL T, " +
+            "EAM_MONITORABLE_TYPE MT WHERE M.TEMPLATE_ID = T.ID AND " +
+            "T.MONITORABLE_TYPE_ID = MT.ID AND M.MEASUREMENT_CLASS='R' AND " +
+            "((MT.APPDEF_TYPE = 1 AND M.INSTANCE_ID NOT IN " +
+            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301)) OR " +
+            "(MT.APPDEF_TYPE = 2 AND M.INSTANCE_ID NOT IN " +
+            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303)) OR " +
+            "(MT.APPDEF_TYPE = 3 AND M.INSTANCE_ID NOT IN " +
+            "(SELECT INSTANCE_ID FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305)))";
+
+        return getSession().createSQLQuery(sql).list();
     }
 }
