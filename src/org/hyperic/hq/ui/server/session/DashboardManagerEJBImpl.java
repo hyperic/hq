@@ -323,6 +323,9 @@ public class DashboardManagerEJBImpl implements SessionBean {
                     public void roleRemoved(Role r) {
                         RoleDashboardConfig cfg = _dashDAO.findDashboard(r);
                         
+                        if (cfg == null)
+                            return;
+                        
                         CrispoManagerLocal crispMgr =
                             CrispoManagerEJBImpl.getOne();
                         
