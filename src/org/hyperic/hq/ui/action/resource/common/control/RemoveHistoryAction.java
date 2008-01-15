@@ -48,8 +48,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
  */
 public class RemoveHistoryAction extends BaseAction {
 
-    // ---------------------------------------------------- Public Methods
-
     /** 
      * removes controlactions from a resource
      */
@@ -59,7 +57,8 @@ public class RemoveHistoryAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
             
-        Log log = LogFactory.getLog(RemoveHistoryAction.class.getName());
+        Log log = LogFactory.getLog(RemoveHistoryAction.class);
+
         HashMap parms = new HashMap(2);
         
         RemoveHistoryForm rmForm = (RemoveHistoryForm)form;
@@ -69,6 +68,12 @@ public class RemoveHistoryAction extends BaseAction {
         parms.put(Constants.RESOURCE_PARAM, aeid.getId());
         parms.put(Constants.RESOURCE_TYPE_ID_PARAM,
                   new Integer(aeid.getType()));
+
+        ActionForward forward = checkSubmit(request, mapping, form, parms);
+
+        if (forward != null) {
+            return forward;
+        }
 
         if (actions == null || actions.length == 0){
             return this.returnSuccess(request, mapping, parms);

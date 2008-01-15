@@ -1676,6 +1676,7 @@
               input="/resource/group/Control.do?mode=history">
         <forward name="failure" path="/resource/group/Control.do?mode=history" redirect="true" />
         <forward name="success" path="/resource/group/Control.do?mode=history" redirect="true" />
+        <forward name="cancel" path="/resource/group/Control.do?mode=history" redirect="true" />
      </action>
  
      <action path="/resource/group/control/RemoveCurrentStatus"
