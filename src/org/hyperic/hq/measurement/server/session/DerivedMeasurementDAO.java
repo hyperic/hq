@@ -435,11 +435,11 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 "INNER JOIN EAM_PLATFORM S ON PLATFORM_TYPE_ID = ST.ID " +
             "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
                   "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M " +
-                       "INNER JOIN EAM_MEASUREMENT_TEMPL T " +
-                       "ON M.TEMPLATE_ID = T.ID AND " +
-                          "T.MONITORABLE_TYPE_ID = MT.ID " +
-                   "WHERE INSTANCE_ID = S.ID) < " +
+                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "EAM_MEASUREMENT_TEMPL T " +
+                   "WHERE M.TEMPLATE_ID = T.ID AND " +
+                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                         "INSTANCE_ID = S.ID) < " +
                   "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
                    "WHERE MONITORABLE_TYPE_ID = MT.ID) UNION " +
             "SELECT MT.APPDEF_TYPE, S.ID FROM EAM_MONITORABLE_TYPE MT, " +
@@ -447,11 +447,11 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 "INNER JOIN EAM_SERVER S ON SERVER_TYPE_ID = ST.ID " +
             "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
                   "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M " +
-                       "INNER JOIN EAM_MEASUREMENT_TEMPL T " +
-                       "ON M.TEMPLATE_ID = T.ID AND " +
-                          "T.MONITORABLE_TYPE_ID = MT.ID " +
-                   "WHERE INSTANCE_ID = S.ID) < " +
+                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "EAM_MEASUREMENT_TEMPL T " +
+                   "WHERE M.TEMPLATE_ID = T.ID AND " +
+                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                         "INSTANCE_ID = S.ID) < " +
                   "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
                    "WHERE MONITORABLE_TYPE_ID = MT.ID) UNION " +
             "SELECT MT.APPDEF_TYPE, S.ID FROM EAM_MONITORABLE_TYPE MT, " +
@@ -459,11 +459,11 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                 "INNER JOIN EAM_SERVICE S ON SERVICE_TYPE_ID = ST.ID " +
             "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
                   "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M " +
-                      "INNER JOIN EAM_MEASUREMENT_TEMPL T " +
-                      "ON M.TEMPLATE_ID = T.ID AND " +
-                         "T.MONITORABLE_TYPE_ID = MT.ID " +
-                   "WHERE INSTANCE_ID = S.ID) < " +
+                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "EAM_MEASUREMENT_TEMPL T " +
+                   "WHERE M.TEMPLATE_ID = T.ID AND " +
+                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                         "INSTANCE_ID = S.ID) < " +
                   "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
                    "WHERE MONITORABLE_TYPE_ID = MT.ID)")
             .setString("plugin", plugin)
