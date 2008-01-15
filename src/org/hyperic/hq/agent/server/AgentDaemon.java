@@ -38,6 +38,8 @@ import java.util.jar.Manifest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
@@ -643,6 +645,27 @@ public class AgentDaemon
         }
     }
 
+    private PrintStream newLogStream(String stream, Properties props) {
+        Logger logger = Logger.getLogger(stream);
+        String logLevel = props.getProperty("agent.logLevel." + stream);
+        if (logLevel == null) {
+            return null;
+        }
+        Level level = Level.toLevel(logLevel);
+        return new PrintStream(new LoggingOutputStream(logger, level), true);
+    }
+
+    private void redirectStreams(Properties props) {
+        //redirect System.{out,err} to log4j appender
+        PrintStream stream;
+        if ((stream = newLogStream("SystemOut", props)) != null) { 
+            System.setOut(stream);
+        }
+        if ((stream = newLogStream("SystemErr", props)) != null) {
+            System.setErr(stream);    
+        }
+    }
+
     /**
      * Start the Agent's listening process.  This routine blocks for the
      * entire execution of the Agent.  
@@ -671,6 +694,7 @@ public class AgentDaemon
         this.monitorClients = new Hashtable();
         this.registerMonitor("agent", this);
         this.registerMonitor("agent.commandListener", this.listener);
+        redirectStreams(bootProps);
 
         try {
             this.startPluginManagers();
