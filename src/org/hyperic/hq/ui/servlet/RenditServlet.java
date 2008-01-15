@@ -111,8 +111,11 @@ public class RenditServlet
             _log.debug("Request path [" + fullPath + "]");
         }
 
-        if (((String)fullPath.get(pathSize - 1)).endsWith(".groovy"))
-            throw new ServletException("Unable to view .groovy files");
+        if (((String)fullPath.get(pathSize - 1)).endsWith(".groovy")) {
+            _log.warn(".groovy file requested [" + fullPath + "]");
+            throw new ServletException("Illegal request path [" + fullPath + 
+                                       "]");
+        }
         
         if (pathSize < 4 || !fullPath.get(pathSize - 4).equals("hqu")) {
             throw new ServletException("Illegal request path [" + fullPath + 
