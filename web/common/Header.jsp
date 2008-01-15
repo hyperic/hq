@@ -124,19 +124,15 @@
                 </tiles:insert>
                 <div dojoType="MenuItem2" caption="<fmt:message key=".dashContent.recentResources"/>"
                      submenuId="submenu3"></div>
-
             </div>
-
             <div dojoType="PopupMenu2" widgetId="submenu2">
                 <tiles:insert definition=".header.optional.tabs">
                     <tiles:put name="location" value="tracking"/>
                 </tiles:insert>
             </div>
-
             <div dojoType="PopupMenu2" widgetId="submenu3">
                 <tiles:insert definition=".toolbar.recentResources"/>
             </div>
-
             <div dojoType="MenuBar2">
                 <div dojoType="MenuBarItem2" caption="<fmt:message key="dash.home.PageTitle"/>"
                      onClick="location.href='<html:rewrite page="/Dashboard.do"/>'"></div>
@@ -156,7 +152,6 @@
                 </div>
             </c:if>
         </div>
-
     </div>
 </div>
 
