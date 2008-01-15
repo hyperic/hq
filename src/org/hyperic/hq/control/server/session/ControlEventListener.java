@@ -53,7 +53,7 @@ public class ControlEventListener
             try {
                 cM.removeScheduledJobs(subject, id);
             } catch (Exception e) {
-                _log.error("Unable to remove scheduled jobs", e);
+                _log.error("Unable to remove scheduled jobs for " + id , e);
             }
         }
     }
