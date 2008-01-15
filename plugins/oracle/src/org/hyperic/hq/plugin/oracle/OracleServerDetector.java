@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.FileServerDetector;
+import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
@@ -87,8 +88,14 @@ public class OracleServerDetector
 
     // Tablespace
     static final String TABLESPACE = "Tablespace";
-    static final String TABLESPACE_QUERY =
-        "SELECT * FROM DBA_TABLESPACES";
+    static final String TABLESPACE_QUERY = "SELECT * FROM DBA_TABLESPACES";
+
+    // Table
+    static final String SEGMENT = "Segment";
+    static final String SEGMENT_QUERY = "select SEGMENT_NAME, TABLESPACE_NAME" +
+                                        " FROM USER_SEGMENTS" +
+                                        " WHERE SEGMENT_NAME not like 'BIN$%'" +
+                                        " and SEGMENT_NAME not like 'SYS_%'";
 
     // Server custom props
     static final String VERSION_QUERY = 
@@ -174,14 +181,12 @@ public class OracleServerDetector
             ServerResource server = createServerResource(path);
             productConfig.setValue("installpath", path);
             // Set custom properties
-//            ConfigResponse cprop = new ConfigResponse();
-//            cprop.setValue("version", version);
-//            server.setCustomProperties(cprop);
+            ConfigResponse cprop = new ConfigResponse();
+            cprop.setValue("version", version);
+            server.setCustomProperties(cprop);
             setProductConfig(server, productConfig);
             server.setMeasurementConfig();
-//            server.setName(SERVER_NAME+" "+version);
             servers.add(server);
-//            servers.add(createServerResource(path));
         }
 
         return servers;
@@ -291,6 +296,14 @@ public class OracleServerDetector
             stmt = conn.createStatement();
             services.addAll(getUserServices(stmt, instance));
             services.addAll(getTablespaceServices(stmt, instance));
+            // turning this off by default.
+            // There are too many table that this will discover
+            // most of which the user probably won't care about.
+            // Also work needs to be done by the user to enable
+            // scheduled control actions to do an Anaylze per table
+            // so that the system info gets updated before the
+            // size is calc'd.
+            //services.addAll(getSegmentServices(stmt, instance));
             services.addAll(getProcessServices(config));
             services.addAll(getTnsServices(config));
             setCustomProps(stmt);
@@ -392,6 +405,44 @@ public class OracleServerDetector
         return rtn;
     }
 
+    private List getSegmentServices(Statement stmt, String instance)
+        throws SQLException
+    {
+        List rtn = new ArrayList();
+        ResultSet rs = null;
+        try
+        {
+            // Discover tables
+            rs = stmt.executeQuery(SEGMENT_QUERY);
+            int segment_col = rs.findColumn("SEGMENT_NAME");
+            int ts_col = rs.findColumn("TABLESPACE_NAME");
+            while (rs != null && rs.next())
+            {
+                String segment = rs.getString(segment_col);
+                String tablespace = rs.getString(ts_col);
+                ServiceResource service = new ServiceResource();
+                service.setType(this, SEGMENT);
+                service.setServiceName(segment);
+                service.setDescription("Segment in the " + instance +
+                                       " database instance");
+                ConfigResponse productConfig = new ConfigResponse();
+                ConfigResponse metricConfig = new ConfigResponse();
+                productConfig.setValue(OracleMeasurementPlugin.PROP_SEGMENT,
+                                       segment);
+                productConfig.setValue(OracleMeasurementPlugin.PROP_TABLESPACE,
+                                       tablespace);
+                service.setProductConfig(productConfig);
+                service.setMeasurementConfig(metricConfig);
+                service.setControlConfig();
+                rtn.add(service);
+            }
+        }
+        finally {
+            DBUtil.closeResultSet(log, rs);
+        }
+        return rtn;
+    }
+
     private List getTablespaceServices(Statement stmt, String instance)
         throws SQLException
     {
@@ -401,9 +452,10 @@ public class OracleServerDetector
         {
             // Discover tablespaces
             rs = stmt.executeQuery(TABLESPACE_QUERY);
+            int ts_col = rs.findColumn("TABLESPACE_NAME");
             while (rs != null && rs.next())
             {
-                String tablespace = rs.getString("TABLESPACE_NAME");
+                String tablespace = rs.getString(ts_col);
                 ServiceResource service = new ServiceResource();
                 service.setType(this, TABLESPACE);
                 service.setServiceName(tablespace);

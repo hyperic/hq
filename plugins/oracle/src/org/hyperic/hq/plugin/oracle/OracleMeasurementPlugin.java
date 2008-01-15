@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -63,18 +63,21 @@ public class OracleMeasurementPlugin
     public static final String PROP_USER     = "jdbcUser";
     public static final String PROP_PASSWORD = "jdbcPassword";
 
-    private static final String JDBC_DRIVER =
-        "oracle.jdbc.driver.OracleDriver";
+    static final String JDBC_DRIVER = "oracle.jdbc.driver.OracleDriver";
 
     static final String PROP_USERNAME   = "user";
     static final String PROP_TABLESPACE = "tablespace";
+    static final String PROP_SEGMENT    = "segment";
 
     private static HashMap ora8Queries    = null;  // Oracle 8i only
     private static HashMap ora9Queries    = null;  // Oracle 9i only
+    private static HashMap ora10Queries   = null;  // Oracle 10g only
     private static HashMap genericQueries = null;  // Any
 
     private static final String TABLESPACE_QUERY =
         "SELECT * FROM DBA_TABLESPACES WHERE TABLESPACE_NAME=";
+    private static final String SEGMENT_QUERY = "select SEGMENT_NAME" +
+        " FROM USER_SEGMENTS WHERE SEGMENT_NAME=";
 
     protected void getDriver()
         throws ClassNotFoundException {
@@ -119,6 +122,7 @@ public class OracleMeasurementPlugin
          */
         ora8Queries = new HashMap();
         ora9Queries = new HashMap();
+        ora10Queries = new HashMap();
         genericQueries = new HashMap();
 
         String baseQuery = "SELECT value FROM V$SYSSTAT WHERE name = ";
@@ -347,6 +351,16 @@ public class OracleMeasurementPlugin
                         "t2.name = 'sorts memory' AND " +
                         "t3.name = 'sorts disk'");
 
+        // Oracle 10g queries
+        ora10Queries.put("SegmentSize", "select sum(bytes)" +
+            " FROM USER_SEGMENTS" +
+            " WHERE SEGMENT_NAME not like 'BIN$%'" +
+            " and SEGMENT_NAME not like 'SYS_%'" +
+            " and SEGMENT_NAME = '%segment%'");
+        ora10Queries.put("NumberOfRows", "select num_rows" +
+            " FROM %tablename%" +
+            " WHERE %identifier% = '%segment%'");
+
         // Alias for avail.
         // If we can fetch any metric, consider the server/service available
         //
@@ -354,17 +368,44 @@ public class OracleMeasurementPlugin
                            genericQueries.get("PhysicalReads"));
     }
 
+    private String getSegmentQuery(Metric metric)
+    {
+        String segment = metric.getObjectProperty(PROP_SEGMENT);
+        String tablespace = metric.getObjectProperty(PROP_TABLESPACE);
+        String sql = (String)ora10Queries.get(metric.getAttributeName());
+        sql = StringUtil.replace(sql, "%segment%", segment);
+        try {
+            Connection conn = getCachedConnection(metric);
+            if (OracleControlPlugin.isTable(conn, segment, tablespace)) {
+                sql = StringUtil.replace(sql, "%tablename%", "all_tables");
+                sql = StringUtil.replace(sql, "%identifier%", "table_name");
+            }
+            else {
+                sql = StringUtil.replace(sql, "%tablename%", "all_indexes");
+                sql = StringUtil.replace(sql, "%identifier%", "index_name");
+            }
+        } catch (SQLException e) {
+            _log.error(e.getMessage(), e);
+        }
+        return sql;
+    }
+
     protected String getQuery(Metric metric)
     {
-        String queryVal = metric.getAttributeName();
-        String query = (String)genericQueries.get(queryVal);
+        String alias = metric.getAttributeName();
+        String objName = metric.getObjectName();
+        if (-1 != objName.indexOf("Type=Segment")) {
+            return getSegmentQuery(metric);
+        }
+
+        String query = (String)genericQueries.get(alias);
         Properties props = metric.getObjectProperties();
 
         if (query == null) {
             // Not in the generic queries, check the version specific table
             // XXX: grab the version from the Metric, this will currently ignore
             //      any Oracle 9i specific Metric
-            query = (String)ora8Queries.get(queryVal);
+            query = (String)ora8Queries.get(alias);
         }
 
         //XXX: Would have been nice to put the processed query to execute in the
@@ -430,13 +471,14 @@ public class OracleMeasurementPlugin
 
     /**
      * Override for tablespace avail.
+     * AND segment avail.
      */
     protected double getQueryValue(Metric metric)
         throws MetricNotFoundException, PluginException,
                MetricUnreachableException
     {
-        String attr = metric.getAttributeName();
-        boolean isAvail = attr.equals(AVAIL_ATTR);
+        String alias = metric.getAttributeName();
+        boolean isAvail = alias.equalsIgnoreCase(AVAIL_ATTR);
 
         if (!isAvail) {
             return super.getQueryValue(metric);
@@ -444,8 +486,13 @@ public class OracleMeasurementPlugin
 
         String tablespace = metric.getObjectProperties().
             getProperty(PROP_TABLESPACE);
-        if (tablespace == null) {
+        String segment = metric.getObjectProperties().
+            getProperty(PROP_SEGMENT);
+        if (tablespace == null && segment == null) {
             return super.getQueryValue(metric);
+        } else if (tablespace != null) {
+            return (tablespaceIsOffline(tablespace, metric)) ?
+                MeasurementConstants.AVAIL_DOWN : MeasurementConstants.AVAIL_UP;
         }
 
         // else, tablespace avail
@@ -461,23 +508,15 @@ public class OracleMeasurementPlugin
 
         try {
             conn = getCachedConnection(url, user, pass);
-            String query = TABLESPACE_QUERY + "'" + tablespace + "'";
+            String query = SEGMENT_QUERY + "'" + segment + "'";
             ps = conn.prepareStatement(query);
             rs = ps.executeQuery();
 
             if (rs != null && rs.next()) {
-                String status = rs.getString("STATUS");
-                if (status.equals("ONLINE")) {
-                    return MeasurementConstants.AVAIL_UP;
-                } else {
-                    return MeasurementConstants.AVAIL_DOWN;
-                }
+                return MeasurementConstants.AVAIL_UP;
+            } else {
+                return MeasurementConstants.AVAIL_DOWN;
             }
-
-            // Shouldn't happen
-            getLog().error("Encoutered empty result set for query=" + query);
-            return MeasurementConstants.AVAIL_DOWN;
-
         } catch (SQLException e) {
 
             if (isAvail) {
@@ -488,7 +527,7 @@ public class OracleMeasurementPlugin
             // Remove this connection from the cache.
             removeCachedConnection(url, user, pass);
 
-            String msg = "Query failed for " + attr +
+            String msg = "Query failed for " + alias +
                 ": " + e.getMessage();
 
             // Catch divide by 0 errors and return 0

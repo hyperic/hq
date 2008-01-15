@@ -473,7 +473,6 @@ fi
                  description="Oracle Version"/>
     </properties>
 
-    <!-- Define user service -->
     <service name="User Instance">
       <plugin type="measurement"
               class="OracleMeasurementPlugin"/>
@@ -555,7 +554,40 @@ fi
           include="8i"/>
 
   <server name="Oracle" version="10g"
-          include="9i"/>
+          include="9i">
+
+    <!-- Define user service -->
+    <service name="Segment">
+      <config>
+        <option name="segment"
+                description="Name of the Segment (Table or Index)"/>
+        <option name="tablespace"
+                description="Name of the Tablespace"/>
+      </config>
+      <filter name="template"
+              value="${domain}:Type=Segment,segment=%segment%,tablespace=%tablespace%:${alias}"/>
+      <metric name="Availability"
+              alias="Availability"
+              category="AVAILABILITY"
+              indicator="true"
+              units="percentage"
+              collectionType="dynamic"/>
+      <metric name="Disk Space Used"
+              alias="SegmentSize"
+              category="UTILIZATION"
+              indicator="true"
+              units="B"
+              collectionType="dynamic"/>
+      <metric name="Number Of Rows"
+              category="UTILIZATION"
+              indicator="true"
+              units="none"
+              collectionType="dynamic"/>
+      <plugin type="control"
+              class="OracleControlPlugin"/>
+      <actions include="Analyze"/>
+    </service>
+  </server>
 
   <!-- ==================== Plugin Help =========================== -->
 
@@ -618,6 +650,18 @@ fi
       CREATE USER ${jdbcUser} IDENTIFIED BY MYPASSWORD;
       GRANT CONNECT TO ${jdbcUser};
       GRANT SELECT ANY DICTIONARY TO ${jdbcUser};
+    </pre>
+    <p>
+    ${product.version} provides segment size metrics for indexes and tables, and must be
+    created manually.
+    </p>
+    <pre>
+    To create:
+    1) create new service (tools menu -> new service) &quot;Oracle ${product.version} Segment&quot;
+        and enter the appropriate information.
+    2) in order for oracle to have up to date information on tables / indexes, create
+        a scheduled control action to &quot;Analyze&quot; the table every day for each
+        segment.
     </pre>
     ]]>
   </help>
