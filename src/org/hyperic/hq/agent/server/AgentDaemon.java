@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.PrintStream;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
@@ -69,6 +70,7 @@ public class AgentDaemon
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
 
+    private static final PrintStream SYSTEM_ERR = System.err;
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();
 
@@ -727,9 +729,9 @@ public class AgentDaemon
             try {
                 cfg = AgentConfig.newInstance(propFile);
             } catch(Exception exc){
-                System.err.println("Unable to configure agent: " + 
+                SYSTEM_ERR.println("Unable to configure agent: " + 
                                    exc.getMessage());
-                exc.printStackTrace();
+                exc.printStackTrace(SYSTEM_ERR);
                 return;
             }
   
@@ -742,11 +744,11 @@ public class AgentDaemon
                 agent = AgentDaemon.newInstance(cfg);
                 agent.start();
             } catch(AgentConfigException exc) {
-                System.err.println("Unable to configure agent: " + 
+                SYSTEM_ERR.println("Unable to configure agent: " + 
                                    exc.getMessage());
                 System.exit(-1);
             } catch(AgentStartException exc) {
-                System.err.println("Agent startup error: " + exc.getMessage());
+                SYSTEM_ERR.println("Agent startup error: " + exc.getMessage());
                 System.exit(-1);
             }
         }

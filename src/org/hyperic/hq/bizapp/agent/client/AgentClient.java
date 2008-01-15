@@ -80,6 +80,9 @@ import sun.misc.SignalHandler;
  * the agent.
  */
 public class AgentClient {
+    private static final PrintStream SYSTEM_ERR = System.err;
+    private static final PrintStream SYSTEM_OUT = System.out;
+
     private static final String PRODUCT = "HQ";
 
     // The following QPROP_* defines are properties which can be
@@ -174,16 +177,16 @@ public class AgentClient {
         try {
             pInfo = this.camCommands.getProviderInfo();
         } catch(AgentConnectionException exc){
-            System.err.println("Unable to contact agent: " + exc.getMessage());
+            SYSTEM_ERR.println("Unable to contact agent: " + exc.getMessage());
             return -1;
         } catch(AgentRemoteException exc){
-            System.err.println("Error executing remote method: " +
+            SYSTEM_ERR.println("Error executing remote method: " +
                                exc.getMessage());
             return -1;
         }
 
         if(pInfo == null || (address = pInfo.getProviderAddress()) == null){
-            System.out.println("Agent not yet setup");
+            SYSTEM_OUT.println("Agent not yet setup");
             return 0;
         }
         
@@ -192,19 +195,19 @@ public class AgentClient {
 
             url = new URL(address);
 
-            System.out.println("Server IP address: " + url.getHost());
+            SYSTEM_OUT.println("Server IP address: " + url.getHost());
             proto = url.getProtocol();
             if(proto.equalsIgnoreCase("https"))
-                System.out.print("Server (SSL) port: ");
+                SYSTEM_OUT.print("Server (SSL) port: ");
             else
-                System.out.print("Server port:       ");
-            System.out.println(url.getPort());
+                SYSTEM_OUT.print("Server port:       ");
+            SYSTEM_OUT.println(url.getPort());
         } catch(Exception exc){
-            System.out.println("Unable to parse provider info (" + 
+            SYSTEM_OUT.println("Unable to parse provider info (" + 
                                address + "): " + exc.getMessage());
         }
         
-        System.out.println("Agent listen port: " + 
+        SYSTEM_OUT.println("Agent listen port: " + 
                            this.config.getListenPort());
         return 0;
     }
@@ -229,7 +232,7 @@ public class AgentClient {
             } catch(AgentConnectionException exc){
                 return;  // Success!
             } catch(AgentRemoteException exc){
-                exc.printStackTrace(System.err);
+                exc.printStackTrace(SYSTEM_ERR);
                 throw exc;  // Something bizarro occurred
             }
             try {
@@ -258,16 +261,16 @@ public class AgentClient {
         bootProp = this.config.getBootProperties().getProperty(questionProp);
 
         while(true){
-            System.out.print(question);
+            SYSTEM_OUT.print(question);
             if(def != null){
-                System.out.print(" [default=" + def + "]");
+                SYSTEM_OUT.print(" [default=" + def + "]");
             }
             
-            System.out.print(": ");
+            SYSTEM_OUT.print(": ");
 
             if(invis){
                 if(bootProp != null){
-                    System.out.println("**Not echoing value**");
+                    SYSTEM_OUT.println("**Not echoing value**");
                     return bootProp;
                 }
                 return Sigar.getPassword("");
@@ -277,7 +280,7 @@ public class AgentClient {
                         bootProp = def;
                     }
                     
-                    System.out.println(bootProp);
+                    SYSTEM_OUT.println(bootProp);
                     return bootProp;
                 }
 
@@ -337,7 +340,7 @@ public class AgentClient {
                                                 "'no'");
             }
 
-            System.out.println("- Value must be 'yes' or 'no'");
+            SYSTEM_OUT.println("- Value must be 'yes' or 'no'");
         }
     }
 
@@ -364,7 +367,7 @@ public class AgentClient {
                     throw new AutoQuestionException("Property '" + 
                                     questionProp +"' must be a valid integer");
                 }
-                System.out.println("- Value must be an integer");
+                SYSTEM_OUT.println("- Value must be an integer");
             }
         }
     }
@@ -395,16 +398,16 @@ public class AgentClient {
        
         while (true) {
             String sec = secure ? "secure" : "insecure";
-            System.out.print("- Testing " + sec  + " connection ... ");
+            SYSTEM_OUT.print("- Testing " + sec  + " connection ... ");
 
             try {
                 bizapp = this.testProvider(provider);
-                System.out.println("Success");
+                SYSTEM_OUT.println("Success");
                 return bizapp;
             } catch (AgentCallbackClientException exc) {
                 String msg = exc.getMessage();
                 if (msg.indexOf("is still starting") != -1) {
-                    System.err.println("HQ is still starting " +
+                    SYSTEM_ERR.println("HQ is still starting " +
                                        "(retrying in 10 seconds)");
                     try {
                         Thread.sleep(10 * 1000);
@@ -428,7 +431,7 @@ public class AgentClient {
                                                         propTimeout);
                     }
 
-                    System.err.println("Failure (retrying in 10 seconds)");
+                    SYSTEM_ERR.println("Failure (retrying in 10 seconds)");
                     if (start + timeout > System.currentTimeMillis()) {
                         try {
                             Thread.sleep(10 * 1000);
@@ -438,7 +441,7 @@ public class AgentClient {
                     }
                 }
 
-                System.err.println("Failure");
+                SYSTEM_ERR.println("Failure");
 
                 if (bootP.getProperty(QPROP_IPADDR) != null ||
                     bootP.getProperty(QPROP_PORT) != null ||
@@ -505,13 +508,13 @@ public class AgentClient {
         try {
             this.cmdPing(1);
         } catch(AgentConnectionException exc){
-            System.err.println("Unable to setup agent: " + exc.getMessage());
-            System.err.println("The Agent must be running prior to running " +
+            SYSTEM_ERR.println("Unable to setup agent: " + exc.getMessage());
+            SYSTEM_ERR.println("The Agent must be running prior to running " +
                                "setup");
             return;
         }
 
-        System.out.println("[ Running agent setup ]");
+        SYSTEM_OUT.println("[ Running agent setup ]");
 
         // If not, ask the appropriate questions
 
@@ -563,12 +566,12 @@ public class AgentClient {
                 if(bizapp.userIsValid(user, pword))
                     break;
             } catch(AgentCallbackClientException exc){
-                System.err.println("Error validating user: " + 
+                SYSTEM_ERR.println("Error validating user: " + 
                                    exc.getMessage());
                 return;
             }
             
-            System.err.println("- Invalid username/password");
+            SYSTEM_ERR.println("- Invalid username/password");
             if(bootP.getProperty(QPROP_LOGIN) != null ||
                bootP.getProperty(QPROP_PWORD) != null)
             {
@@ -589,7 +592,7 @@ public class AgentClient {
                 localHost.getHostAddress();
                 break;
             } catch(UnknownHostException exc){
-                System.err.println("- Unable to resolve host");
+                SYSTEM_ERR.println("- Unable to resolve host");
             }
         } 
 
@@ -599,7 +602,7 @@ public class AgentClient {
                                             this.config.getListenPort(),
                                             QPROP_AGENTPORT);
             if(agentPort < 1 || agentPort > 65535){
-                System.err.println("- Invalid port");
+                SYSTEM_ERR.println("- Invalid port");
             } else {
                 break;
             }
@@ -613,7 +616,7 @@ public class AgentClient {
         {
             boolean setupTokens;
 
-            System.out.println("- Agent is already setup for " +
+            SYSTEM_OUT.println("- Agent is already setup for " +
                                PRODUCT + " @ " +
                                providerInfo.getProviderAddress());
             setupTokens =
@@ -623,17 +626,17 @@ public class AgentClient {
                 // Here we basically just need to inform the server that the 
                 // agent with a given AgentToken will re-use that, but
                 // with a different IP address
-                System.out.println("- Informing " + PRODUCT +
+                SYSTEM_OUT.println("- Informing " + PRODUCT +
                                    " about agent setup changes");
                 try {
                     response = bizapp.updateAgent(providerInfo.getAgentToken(),
                                                   user, pword, agentIP, 
                                                   agentPort);
                     if(response != null)
-                        System.err.println("- Error updating agent: " +
+                        SYSTEM_ERR.println("- Error updating agent: " +
                                            response);
                 } catch(Exception exc){
-                    System.err.println("- Error updating agent: " + 
+                    SYSTEM_ERR.println("- Error updating agent: " + 
                                        exc.getMessage());
                 }
                 return;
@@ -644,16 +647,16 @@ public class AgentClient {
         try {
             InetAddress.getByName(host);
         } catch(UnknownHostException exc){
-            System.err.println("Unable to resolve provider (strange): " +
+            SYSTEM_ERR.println("Unable to resolve provider (strange): " +
                                exc.getMessage());
             return;
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
         
-        System.out.println("- Received temporary auth token from agent");
+        SYSTEM_OUT.println("- Received temporary auth token from agent");
 
         // Ask server to verify agent
-        System.out.println("- Registering agent with " + PRODUCT);
+        SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
         try {
             result = bizapp.registerAgent(user, pword, tokenRes.getToken(), 
@@ -662,7 +665,7 @@ public class AgentClient {
                                           getCpuCount());
             response = result.response;
             if(!response.startsWith("token:")){
-                System.err.println("- Unable to register agent: " + response);
+                SYSTEM_ERR.println("- Unable to register agent: " + response);
                 return;
             }
 
@@ -670,27 +673,27 @@ public class AgentClient {
             // to use to contact it
             agentToken = response.substring("token:".length());
         } catch(Exception exc){
-            exc.printStackTrace();
-            System.err.println("- Error registering agent: "+exc.getMessage());
+            exc.printStackTrace(SYSTEM_ERR);
+            SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
             return;
         }
         
-        System.out.println("- " + PRODUCT +
+        SYSTEM_OUT.println("- " + PRODUCT +
                            " gave us the following agent token");
-        System.out.println("    " + agentToken);
-        System.out.println("- Informing agent of new " + PRODUCT + " server");
+        SYSTEM_OUT.println("    " + agentToken);
+        SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
         this.camCommands.setProviderInfo(new ProviderInfo(provider, agentToken));
-        System.out.println("- Validating");
+        SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
         if(providerInfo == null || 
            providerInfo.getProviderAddress().equals(provider) == false ||
            providerInfo.getAgentToken().equals(agentToken) == false)
         {
             if(providerInfo == null){
-                System.err.println(" - Failure - Agent is reporting no " +
+                SYSTEM_ERR.println(" - Failure - Agent is reporting no " +
                                    "" + PRODUCT + " provider information");
             } else {
-                System.err.println("- Failure - Agent is using " +
+                SYSTEM_ERR.println("- Failure - Agent is using " +
                                    PRODUCT + " server '" + 
                                    providerInfo.getProviderAddress() + 
                                    "' with token '" +
@@ -698,7 +701,7 @@ public class AgentClient {
             }
 
         } else {
-            System.out.println("- Successfully setup agent");
+            SYSTEM_OUT.println("- Successfully setup agent");
         }
 
         redirectOutputs(); //win32
@@ -744,7 +747,7 @@ public class AgentClient {
         }
 
         try {
-            System.err.println("Received interrupt while starting.  " +
+            SYSTEM_ERR.println("Received interrupt while starting.  " +
                                "Shutting agent down ...");
             this.cmdDie(10);
         } catch (Exception e){
@@ -776,7 +779,7 @@ public class AgentClient {
             System.setErr(os);
             System.setOut(os);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(SYSTEM_ERR);
         }
     }
 
@@ -820,7 +823,7 @@ public class AgentClient {
         // Try to ping the agent one time to see if the agent is already up
         try {
             this.cmdPing(1);
-            System.out.println("Agent already running");
+            SYSTEM_OUT.println("Agent already running");
             return -1;
         } catch(AgentConnectionException exc){ 
             // Normal operation 
@@ -940,12 +943,12 @@ public class AgentClient {
         }
 
         invokeCmdL.add(AGENT_CLASS);
-        System.err.println("- Invoking agent");
+        SYSTEM_ERR.println("- Invoking agent");
 
         this.logFileStartup = logFile + ".startup";
 
         if (this.isProcess) {
-            System.err.println("- Starting agent process");
+            SYSTEM_ERR.println("- Starting agent process");
             handleSIGINT();
             this.log.debug("Invoking agent: " + invokeCmdL);
             try {
@@ -967,7 +970,7 @@ public class AgentClient {
                                String.valueOf(startupSock.getLocalPort()));
             Thread t = new Thread(new AgentDaemon.RunnableAgent());
             t.start();
-            System.err.println("- Agent thread running");
+            SYSTEM_ERR.println("- Agent thread running");
         }
 
         /* Now comes the painful task of figuring out if the agent
@@ -984,9 +987,9 @@ public class AgentClient {
                                            "agent is still running");
         }
 
-        System.out.println("Agent successfully started");
+        SYSTEM_OUT.println("Agent successfully started");
         if(providerInfo == null){
-            System.out.println();
+            SYSTEM_OUT.println();
             return FORCE_SETUP;
         }
 
@@ -1017,11 +1020,11 @@ public class AgentClient {
         try {
             cfg = AgentConfig.newInstance(propFile);
         } catch(IOException exc){
-            System.err.println("Error: " + exc);
+            SYSTEM_ERR.println("Error: " + exc);
             System.exit(-1);
             return null;
         } catch(AgentConfigException exc){
-            System.err.println("Agent Properties error: " + exc.getMessage());
+            SYSTEM_ERR.println("Agent Properties error: " + exc.getMessage());
             System.exit(-1);
             return null;
         }
@@ -1040,7 +1043,7 @@ public class AgentClient {
                 connIp = InetAddress.getByName(listenIp).getHostAddress();
             }
         } catch(UnknownHostException exc){
-            System.err.println("Failed to lookup agent address '" + 
+            SYSTEM_ERR.println("Failed to lookup agent address '" + 
                                listenIp + "'");
             System.exit(-1);
             return null;
@@ -1050,7 +1053,7 @@ public class AgentClient {
         try {
             authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
         } catch(FileNotFoundException exc){
-            System.err.print("- Unable to load agent token file.  Generating" +
+            SYSTEM_ERR.print("- Unable to load agent token file.  Generating" +
                              " a new one ... ");
             try {
                 String nToken = SecurityUtil.generateRandomToken();
@@ -1058,14 +1061,14 @@ public class AgentClient {
                 AgentClientUtil.generateNewTokenFile(tokenFile, nToken);
                 authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
             } catch(IOException oexc){
-                System.err.println("Unable to setup preliminary agent auth " +
+                SYSTEM_ERR.println("Unable to setup preliminary agent auth " +
                                    "tokens: " + exc.getMessage());
                 System.exit(-1);
                 return null;
             }
-            System.err.println("Done");
+            SYSTEM_ERR.println("Done");
         } catch(IOException exc){
-            System.err.println("Unable to get necessary authentication tokens"+
+            SYSTEM_ERR.println("Unable to get necessary authentication tokens"+
                                " to talk to agent: " + exc.getMessage());
             System.exit(-1);
             return null;
@@ -1087,7 +1090,7 @@ public class AgentClient {
              args[0].equals("status") ||
              args[0].equals("setup")))
         {
-            System.err.println("Syntax: program " +
+            SYSTEM_ERR.println("Syntax: program " +
                                "<ping [numAttempts] | die [dieTime] | start " +
                                "| setup>");
             System.exit(-1);
@@ -1113,13 +1116,13 @@ public class AgentClient {
                 } else {
                     nWait = 1;
                 }
-                System.out.println("Stopping agent ... ");
+                SYSTEM_OUT.println("Stopping agent ... ");
                 try {
                     client.cmdDie(nWait);
-                    System.out.println("Success -- agent is stopped!");
+                    SYSTEM_OUT.println("Success -- agent is stopped!");
                     errVal = 0;
                 } catch(Exception exc){
-                    System.out.println("Failed to stop agent: " +
+                    SYSTEM_OUT.println("Failed to stop agent: " +
                                        exc.getMessage());
                     errVal = -1;
                 }
@@ -1136,22 +1139,22 @@ public class AgentClient {
             } else
                 throw new IllegalStateException("Unhandled condition");
         } catch(AutoQuestionException exc){
-            System.err.println("Unable to automatically setup: " +
+            SYSTEM_ERR.println("Unable to automatically setup: " +
                                exc.getMessage());
             errVal = -1;
         } catch(AgentInvokeException exc){
-            System.err.println("Error invoking agent: " + exc.getMessage());
+            SYSTEM_ERR.println("Error invoking agent: " + exc.getMessage());
             errVal = -1;
         } catch(AgentConnectionException exc){
-            System.err.println("Error contacting agent: " + exc.getMessage());
+            SYSTEM_ERR.println("Error contacting agent: " + exc.getMessage());
             errVal = -1;
         } catch(AgentRemoteException exc){
-            System.err.println("Error executing remote method: " +
+            SYSTEM_ERR.println("Error executing remote method: " +
                                exc.getMessage());
             errVal = -1;
         } catch(Exception exc){
-            System.err.println("Error: " + exc.getMessage());
-            exc.printStackTrace();
+            SYSTEM_ERR.println("Error: " + exc.getMessage());
+            exc.printStackTrace(SYSTEM_ERR);
             errVal = -1;
         }
 
@@ -1167,7 +1170,7 @@ public class AgentClient {
         File logDir = logFile.getParentFile();
         if (!logDir.exists()) {
             if (!logDir.mkdirs()) {
-                System.err.println("Log directory does not exist and " 
+                SYSTEM_ERR.println("Log directory does not exist and " 
                                    + "could not be created: "
                                    + logDir.getAbsolutePath() 
                                    + "\nCannot start HQ agent.");
@@ -1176,7 +1179,7 @@ public class AgentClient {
             }
         }
         if (!logDir.canWrite()) {
-            System.err.println("Cannot write to log directory: " 
+            SYSTEM_ERR.println("Cannot write to log directory: " 
                                + logDir.getAbsolutePath() 
                                + "\nMake sure this directory is owned by user '"
                                + System.getProperty("user.name") + "' and is "
@@ -1186,7 +1189,7 @@ public class AgentClient {
             return;
         }
         if (logFile.exists() && !logFile.canWrite()) {
-            System.err.println("Cannot write to log file: " 
+            SYSTEM_ERR.println("Cannot write to log file: " 
                                + logFile.getAbsolutePath() 
                                + "\nMake sure this file is owned by user '"
                                + System.getProperty("user.name") + "' and is "
