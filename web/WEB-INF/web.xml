@@ -194,6 +194,10 @@
     <url-pattern>*.hqu</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+    <servlet-name>hqu</servlet-name>
+    <url-pattern>*.groovy</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>metricdata</servlet-name>
     <url-pattern>/resource/MetricData</url-pattern>
   </servlet-mapping>
