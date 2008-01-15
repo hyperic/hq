@@ -190,11 +190,19 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public int getAgentCount()
-    {
+    public int getAgentCount() {
         return getAgentDAO().size();
     }
 
+    /**
+     * Get a count of the agents which are actually used (i.e. have platforms)
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public int getAgentCountUsed() {
+        return getAgentDAO().countUsed();
+    }
+    
     /**
      * Get a list of all the unused agents in the system plus the one agent 
      * used by the platform whose id = input.

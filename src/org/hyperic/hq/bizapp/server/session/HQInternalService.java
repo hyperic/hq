@@ -44,7 +44,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public int getAgentCount() {
-        return AgentManagerEJBImpl.getOne().getAgentCount();
+        return AgentManagerEJBImpl.getOne().getAgentCountUsed();
     }
 
     public double getMetricsCollectedPerMinute() { 

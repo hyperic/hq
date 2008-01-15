@@ -62,6 +62,13 @@ public class AgentDAO extends HibernateDAO
         return ag;
     }
 
+    public int countUsed() {
+        return ((Number)getSession()
+            .createQuery("select count(distinct a) from Platform p " +
+                         "join p.agent a").uniqueResult()).intValue();
+            
+    }
+    
     public Agent findByIpAndPort(String address, int port) {
         String sql = "from Agent where address=? and port=?";
         return (Agent)getSession().createQuery(sql)
@@ -90,7 +97,8 @@ public class AgentDAO extends HibernateDAO
 
     public List findAgents(PageInfo pInfo) {
         AgentSortField sort = (AgentSortField)pInfo.getSort();
-        String sql = "select a from Agent a " +
+        String sql = "select distinct a from Platform p " + 
+                     "join p.agent a" +
                      " order by " + sort.getSortString("a") + 
                      (pInfo.isAscending() ? "" : " DESC");
     
