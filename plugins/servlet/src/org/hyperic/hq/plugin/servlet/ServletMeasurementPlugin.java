@@ -85,7 +85,17 @@ public class ServletMeasurementPlugin
             //<help name="Tomcat 5.0 JBoss embedded" ...>
             String helpName = info.getName() + " JBoss embedded";
 
-            File jbossDir = new File(installpath).getParentFile().getParentFile();
+            //File jbossDir = new File(installpath).getParentFile().getParentFile();
+            File jbossDir = new File(installpath);
+            File parent = jbossDir.getParentFile();
+            if (parent != null) {
+                jbossDir = parent;
+                parent = jbossDir.getParentFile();
+                if (parent != null) {
+                    jbossDir = parent;
+                }
+            }
+
             File logDir = new File(jbossDir, "log");
             Map helpProps = new HashMap();
             helpProps.putAll(props);
