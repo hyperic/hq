@@ -957,7 +957,7 @@ public class AgentClient {
                 invokeCmd = (String[])invokeCmdL.toArray(new String[0]);
 
                 Background.exec(invokeCmd, new File(this.logFileStartup), false,
-                                new File(this.logFileStartup), false);
+                                new File(this.logFileStartup), true);
             } catch(IOException exc){
                 try {startupSock.close();} catch(IOException iexc){}
                 throw new AgentInvokeException("Unable to start background " +
