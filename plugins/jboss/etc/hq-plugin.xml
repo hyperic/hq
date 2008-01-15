@@ -744,23 +744,16 @@
         <option name="name"
                 description="JNDI Name"
                 default="DefaultDS"/>
-        <option name="descriptor"
-                description="Descriptor File"
-                default="default-ds.xml"/>
       </config>
 
-      <property name="SERVICE"
-                value="DataSourceBinding"/>
-
       <property name="OBJECT_NAME"
-                value="jboss.jca:name=%name%,service=${SERVICE}"/>
+                value="jboss.jca:name=%name%,service=DataSourceBinding"/>
 
       <metric name="Availability"
               template="${OBJECT_NAME}:StateString"
               indicator="true"/>
 
-      <plugin type="autoinventory"
-              class="${package}.jmx.DataSourceQuery"/>
+      <plugin type="autoinventory"/>
 
       <plugin type="control"
               class="JBossStateServiceControlPlugin"/>
