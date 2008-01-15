@@ -53,13 +53,8 @@ loadDBPort () {
 
 checkPort () {
   PORTNUM=${1}
-  PROCNAME=${2}
   if [ "x${PORTNUM}" = "x" ] ; then
     infoOut "No port specified to checkPort function."
-    exit 127
-  fi
-  if [ "x${PROCNAME}" = "x" ] ; then
-    infoOut "No process name specified to checkPort function."
     exit 127
   fi
 
@@ -67,7 +62,7 @@ checkPort () {
   ISLISTENING=0
   case "x${THISOS}" in
     xLinux)
-      ISLISTENING=`netstat -nlp 2> /dev/null | grep ":${PORTNUM}" | grep ${PROCNAME} | wc -l | tr -d ' '`
+      ISLISTENING=`netstat -nlp 2> /dev/null | grep ":${PORTNUM}" | wc -l | tr -d ' '`
       ;;
     *)
       # Works on Solaris, HP-UX, Darwin and FreeBSD, possibly AIX
@@ -77,7 +72,7 @@ checkPort () {
   debugOut "checkPort: ISLISTENING=${ISLISTENING}"
   if [ ${ISLISTENING} -gt 0 ] ; then return 1; fi
   if [ ${ISLISTENING} -eq 0 ] ; then return 0; fi
-  infoOut "Error checking for ${PROCNAME} listening on port ${PORTNUM}"
+  infoOut "Error checking for process listening on port ${PORTNUM}"
   exit 4
 }
 
@@ -110,25 +105,20 @@ waitForPid () {
 waitForPort () {
 
   PORTNUM=${1}
-  PROCNAME=${2}
-  MAXTRIES=${3}
+  MAXTRIES=${2}
   if [ "x${PORTNUM}" = "x" ] ; then
     infoOut "No port specified to waitForPort function."
-    exit 127
-  fi
-  if [ "x${PROCNAME}" = "x" ] ; then
-    infoOut "No process name specified to waitForPort function."
     exit 127
   fi
   if [ "x${MAXTRIES}" = "x" ] ; then
     MAXTRIES=10
   fi
-  ERRMSG=${4}
-  ERRFILE=${5}
-  if [ "x${ERRFILE}" = "xx" ] ; then
+  ERRMSG=${3}
+  ERRFILE=${4}
+  if [ "x${ERRFILE}" = "x" ] ; then
     ERRFILE=""
   fi
-  EXPECTEDUP=${6}
+  EXPECTEDUP=${5}
   if [ "x${EXPECTEDUP}" = "x" ] ; then
     EXPECTEDUP=1
   fi
@@ -139,12 +129,12 @@ waitForPort () {
 
   WASSTARTED=0
   TRIES=0
-  debugOut "waitForPort ${PORTNUM}/${PROCNAME}/${EXPECTEDUP}, entering wait loop: TRIES=${TRIES}, MAXTRIES=${MAXTRIES}"
+  debugOut "waitForPort ${PORTNUM}/${EXPECTEDUP}, entering wait loop: TRIES=${TRIES}, MAXTRIES=${MAXTRIES}"
   while [ 1 -eq 1 ] ; do
-    debugOut "checking port: ${PORTNUM}/${PROCNAME}/${EXPECTEDUP}..."
-    checkPort ${PORTNUM} ${PROCNAME}
+    debugOut "checking port: ${PORTNUM}/${EXPECTEDUP}..."
+    checkPort ${PORTNUM} 
     WASSTARTED=$?
-    debugOut "status of ${PORTNUM}/${PROCNAME}/${EXPECTEDUP} == ${WASSTARTED}"
+    debugOut "status of ${PORTNUM}/${EXPECTEDUP} == ${WASSTARTED}"
     
     if [ ${WASSTARTED} -eq ${EXPECTEDUP} ] ; then
       debugOut "port was as expected: wasStarted=${WASSTARTED} -eq expectedUp=${EXPECTEDUP}"
@@ -159,7 +149,7 @@ waitForPort () {
   done
   if [ ${WASSTARTED} -ne ${EXPECTEDUP} ] ; then
     if [ "x${ERRMSG}" = "x" ] ; then
-      infoOut "Error: Process ${PROCNAME} did not ${ACTION} listening on port ${PORTNUM}"
+      infoOut "Error: Process did not ${ACTION} listening on port ${PORTNUM}"
     else 
       infoOut "${ERRMSG}"
     fi
@@ -197,7 +187,7 @@ startBuiltinDB () {
     debugOut "loading dbport..."
     DBPORT=`loadDBPort`
     debugOut "loaded dbport=${DBPORT}"
-    waitForPort ${DBPORT} "post" 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
+    waitForPort ${DBPORT} 10 'HQ built-in database failed to start:' '${SERVER_HOME}/hqdb/data/hqdb.log' 1
     if [ $? -eq 0 ] ; then
       exit 1
     fi
@@ -279,7 +269,7 @@ JBOSSHOME=${ENGINE_HOME} \
   debugOut "Waiting for webapp port to come up..."
   WEBAPP_PORT=`loadWebappPort`
   debugOut "Loaded WEBAPP_PORT=${WEBAPP_PORT}"
-  waitForPort ${WEBAPP_PORT} "java" 90 'HQ failed to start' '${SERVER_LOG}' 1
+  waitForPort ${WEBAPP_PORT}  90 'HQ failed to start' '${SERVER_LOG}' 1
   if [ $? -eq 0 ] ; then
     exit 1
   fi
@@ -322,7 +312,7 @@ doStopSignal () {
       infoOut "Stopping HQ built-in database..."
       ${SERVER_HOME}/bin/db-stop.sh
       DBPORT=`loadDBPort`
-      waitForPort ${DBPORT} "postmaster" 30 'HQ built-in database failed to stop:' '${SERVER_HOME}/logs/hqdb.log' 0
+      waitForPort ${DBPORT} 30 'HQ built-in database failed to stop:' '${SERVER_HOME}/logs/hqdb.log' 0
       if [ $? -eq 0 ] ; then
         exit 1
       fi
