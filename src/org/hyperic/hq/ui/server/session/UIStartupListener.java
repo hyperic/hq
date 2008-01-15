@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.server.session;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,8 +48,11 @@ public class UIStartupListener implements StartupListener {
     private static boolean INITIALIZED;
 
     public void hqStarted() {
-        ZeventManager.getInstance().addListener(ResourceDeletedZevent.class,
-                                                ResourceDeleteWatcher.getInstance());
+        HashSet events = new HashSet();
+        events.add(ResourceDeletedZevent.class);
+        ZeventManager.getInstance().
+            addBufferedListener(events, ResourceDeleteWatcher.getInstance());
+
         HQApp app = HQApp.getInstance();
         
         app.registerCallbackListener(PluginsDeployedCallback.class,

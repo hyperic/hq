@@ -1801,7 +1801,9 @@ public class EventsBossEJBImpl
         
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
-        ZeventManager.getInstance().addListener(ResourceDeletedZevent.class,
+        HashSet events = new HashSet();
+        events.add (ResourceDeletedZevent.class);
+        ZeventManager.getInstance().addBufferedListener(events,
             new ZeventListener() {
                 public void processEvents(List events) {
                     AlertDefinitionManagerLocal adm = getADM();

@@ -29,14 +29,19 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 
+import java.util.HashSet;
+
 public class ControlStartupListener implements StartupListener {
 
     public void hqStarted() {
 
         // Add listener to remove scheduled control actions after resources
         // are deleted.
-        ZeventManager.getInstance().addListener(ResourceDeletedZevent.class,
-                                                new ControlEventListener());
+        HashSet events = new HashSet();
+        events.add(ResourceDeletedZevent.class);
+        ZeventManager.getInstance().
+            addBufferedListener(events,
+                                new ControlEventListener());
 
     }
 }
