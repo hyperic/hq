@@ -324,7 +324,7 @@ class HealthController
         ]
     }
     
-    private printReport(params) {
+    def printReport(params) {
         def s = Humidor.instance.sigar
         def dateFormat  = DateFormat.dateTimeInstance
         def cmdLine     = s.getProcArgs('$$')
