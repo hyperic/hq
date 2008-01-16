@@ -636,22 +636,6 @@ public class ClientShellEntityFetcher {
                                             new Integer(metricID));
     }
 
-    public void enableMetrics(Integer[] templates, AppdefEntityID id,
-                              int interval)
-        throws ClientShellAuthenticationException, NamingException,
-               SessionTimeoutException, SessionNotFoundException,
-               TemplateNotFoundException, AppdefEntityNotFoundException,
-               GroupNotCompatibleException, MeasurementCreateException,
-               ConfigFetchException, PermissionException, RemoteException,
-               EncodingException
-    {
-        MeasurementBoss boss;
-
-        boss = this.bossManager.getMeasurementBoss();
-        boss.createMeasurements(this.auth.getAuthToken(), id, templates, 
-                                (long)interval * 1000L);
-    }
-
     public void disableMetrics(AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                NamingException, MeasurementConfigException, PermissionException,
