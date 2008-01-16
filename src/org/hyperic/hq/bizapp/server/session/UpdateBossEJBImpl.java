@@ -46,6 +46,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -78,29 +79,10 @@ public class UpdateBossEJBImpl
         "http://updates.hyperic.com/hq-updates"; 
         
     private static final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
-    
-    private static Properties getTweakProperties() 
-        throws Exception
-    {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = 
-            loader.getResourceAsStream("META-INF/tweak.properties");
-        Properties res = new Properties();
 
-        if (is == null)
-            return res;
-        
-        try {
-            res.load(is);
-        } finally {
-            try {is.close();} catch(IOException e) {}
-        }
-        return res;
-    }
-    
     private static String getCheckURL() {
         try {
-            Properties p = getTweakProperties();
+            Properties p = HQApp.getInstance().getTweakProperties();
             String res = p.getProperty("hq.updateNotify.url");
             if (res != null)
                 return res;
@@ -112,7 +94,7 @@ public class UpdateBossEJBImpl
     
     private static long getCheckInterval() {
         try {
-            Properties p = getTweakProperties();
+            Properties p = HQApp.getInstance().getTweakProperties();
             String res = p.getProperty("hq.updateNotify.interval");
             if (res != null)
                 return Long.parseLong(res);
