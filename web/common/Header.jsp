@@ -107,7 +107,7 @@
                         <html:link action="/Logout"><fmt:message key="admin.user.generalProperties.Logout"/></html:link>
                         </span>
                   </span>
-                <span style="font-size:0.95em;"> <html:link href="" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;">
+                <span style="font-size:0.95em;padding-right:10px;"> <html:link href="" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;">
                     <fmt:message key="common.label.Tutorials"/>
                 </html:link></span>
                 <span style="padding-right:10;font-size:0.95em;"> <html:link href="" onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
