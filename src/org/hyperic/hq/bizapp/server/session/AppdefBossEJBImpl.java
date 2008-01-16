@@ -3887,6 +3887,7 @@ public class AppdefBossEJBImpl
                 }
                 catch (AppdefEntityNotFoundException e) {
                     log.warn("Could not find ", e);
+                    res.remove(id);
                 }
             }
         }
@@ -3956,25 +3957,6 @@ public class AppdefBossEJBImpl
             }
         }
         
-        // Sort the result set if not previously sorted
-        if (!sortByValue) {
-            if (sf.equals(CPropResourceSortField.RESOURCE)) {
-                for (Iterator it = services.iterator(); it.hasNext(); ) {
-                    AppdefResourceValue appRes =
-                        (AppdefResourceValue) it.next();
-                    if (res.containsKey(appRes.getId())) {
-                        ret.add(res.get(appRes.getId()));
-                    }
-                }
-            }
-            else {
-                for (Iterator it = cprops.iterator(); it.hasNext(); ) {
-                    Cprop prop = (Cprop) it.next();
-                    ret.add(res.get(prop.getAppdefId()));
-                }
-            }
-        }
-
         // Now get their last events
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
         List events =
@@ -3987,6 +3969,29 @@ public class AppdefBossEJBImpl
             cpRes.setLastEvent(log);
         }
         
+        // Sort the result set if not previously sorted
+        if (!sortByValue && sf.equals(CPropResourceSortField.RESOURCE)) {
+            for (Iterator it = services.iterator(); it.hasNext(); ) {
+                AppdefResourceValue appRes = (AppdefResourceValue) it.next();
+                if (res.containsKey(appRes.getId()))
+                    ret.add(res.get(appRes.getId()));
+            }
+        }
+        else {
+            // First clear out any that we've already added to the return array
+            for (Iterator it = ret.iterator(); it.hasNext(); ) {
+                CPropResource cpRes = (CPropResource) it.next();
+                res.remove(cpRes.getEntityId().getId());
+            }
+            
+            // Now add the rest of the resources
+            for (Iterator it = cprops.iterator(); it.hasNext(); ) {
+                Cprop prop = (Cprop) it.next();
+                if (res.containsKey(prop.getAppdefId()))
+                    ret.add(res.get(prop.getAppdefId()));
+            }
+        }
+
         return ret;
     }
     
