@@ -679,8 +679,46 @@ public class EscalationManagerEJBImpl
             sendNotifications(state, esc, subject, 
                               state.getEscalation().isNotifyAll(), fixed,
                               moreInfo);
+        else if (fixed)         // The alert's escalation chain has completed
+            sendFixedNotifications(subject, esc, moreInfo);
     }
 
+    private String getNotificationMessage(AuthzSubject subject, boolean fixed,
+                                          Escalatable alert, String moreInfo) {
+        return subject.getFullName() + " has " + 
+            (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
+            alert.getDefinition().getName() + "] " + moreInfo;
+    }
+    
+    /**
+     * Send a fixed notification for an alert whose escalation has ended
+     */
+    private void sendFixedNotifications(AuthzSubject subject, Escalatable alert,
+                                        String moreInfo) {
+        Escalation esc = alert.getDefinition().getEscalation();
+        if (esc == null) // nothing to do
+            return;
+        
+        String msg = getNotificationMessage(subject, true, alert, moreInfo);        
+        List actions = esc.getActions();
+        Set notified = new HashSet();
+        for (Iterator it = actions.iterator(); it.hasNext(); ) {
+            EscalationAction ea = (EscalationAction) it.next();
+            Action a = (Action) ea.getAction();
+            try {
+                Class c = Class.forName(a.getClassName());
+                
+                if (!Notify.class.isAssignableFrom(c))
+                    continue;
+                
+                Notify n = (Notify) a.getInitializedAction();
+                n.send(alert, EscalationStateChange.FIXED, msg, notified);
+            } catch(Exception e) {
+                _log.warn("Unable to send fixed notification alert", e);
+            }
+        }
+    }
+    
     /**
      * Send an acknowledge or fixed notification to the actions.
      *  
@@ -691,9 +729,7 @@ public class EscalationManagerEJBImpl
                                    AuthzSubject subject, boolean notifyAll, 
                                    boolean fixed, String moreInfo)
     {
-        String msg = subject.getFullName() + " has " + 
-            (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
-            alert.getDefinition().getName() + "] " + moreInfo;
+        String msg = getNotificationMessage(subject, fixed, alert, moreInfo);
 
         List actions = state.getEscalation().getActions();
         int idx = (notifyAll ? actions.size() : state.getNextAction()) - 1;
