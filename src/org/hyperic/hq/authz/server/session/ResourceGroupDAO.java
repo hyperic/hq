@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -233,5 +234,29 @@ public class ResourceGroupDAO extends HibernateDAO
             .setCacheable(true)
             .setCacheRegion("ResourceGroup.getMaxCollectionInterval")
             .uniqueResult();
+    }
+
+    /**
+     * Return a List of Measurements that are not collecting for the given
+     * template ID and group.
+     *
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId A list of Measurement objects with the given template
+     * id in the group that are not set to be collected.
+     */
+    public List getMetricsNotCollecting(ResourceGroup g, Integer templateId) {
+        String sql =
+            "select m from DerivedMeasurement m, " +
+            "ResourceGroup g join g.resourceSet r " +
+            "where m.instanceId = r.instanceId and "+
+            "g = ? and m.template.id = ? and m.enabled = false";
+
+        return getSession().createQuery(sql)
+            .setParameter(0, g)
+            .setInteger(1, templateId.intValue())
+            .setCacheable(true)
+            .setCacheRegion("ResourceGroup.getMetricsNotCollecting")
+            .list();
     }
 }
