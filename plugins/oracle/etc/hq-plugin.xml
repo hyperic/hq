@@ -602,6 +602,19 @@ fi
     JDBC.  In order to access the catalog for reading, an account needs to 
     be created, or designated with the following privileges:
     </p>
+    <p>
+    For the TNS Listener Ping Service to work properly the HQ Agent user must
+    have the appropriate oracle env vars, permissions to read the tnsnames.ora
+    file and execution permission to run tnsping.
+    <br>
+    An example of oracle env vars are:
+    </p>
+    <pre>
+      ORACLE_HOME=/oracle
+      export ORACLE_HOME
+      PATH="${ORACLE_HOME}/bin:${PATH}"
+      export PATH
+    </pre>
     ]]>
   </help>  
 
