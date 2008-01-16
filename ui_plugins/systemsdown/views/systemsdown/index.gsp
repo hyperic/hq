@@ -6,13 +6,11 @@
 
     function updateFilterCount(count, obj) {
         if (currentCountFilter) {
-            if (currentCountFilter == obj) {
-                return;
-            }
             currentCountFilter.style.color = '#003399';
             currentCountFilter.style.cursor = 'pointer';
             currentCountFilter.style.fontWeight = 'bold';
-        }
+        }else
+            return;
         dojo.io.cookie.setCookie('filtercount', obj.id);
         currentCountFilter = obj;
         currentCountFilter.style.color = '#000000';
@@ -66,7 +64,7 @@
     </div>
     <div class="downTableContainer" id="downCont">
         <div id="systemsDownTable">
-        <%def headerHTML = '<div style="float: right; margin-top:5px;padding-right:15px;">Show Most Recent:&nbsp;<span id="defaultCount" onclick="updateFilterCount(50, this)">50</span>&nbsp;|&nbsp;<span id="onehundred" onclick="updateFilterCount(100,this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="onethousand"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
+        <%def headerHTML = '<div style="float: right; margin-top:5px;padding-right:15px;">Show Most Recent:&nbsp;<span id="50" onclick="updateFilterCount(50, this)" class="countLinksActive">50</span>&nbsp;|&nbsp;<span id="100" onclick="updateFilterCount(100, this)" class="countLinksActive">100</span>&nbsp;|&nbsp;<span id="1000"  onclick="updateFilterCount(1000,this)" class="countLinksActive">1000</span></div>'%>
 
         <%= dojoTable(id:'SystemsDown', title:l.SystemsDownTitle,
             refresh:60, pageControls:false, url:urlFor(action:'data'),
