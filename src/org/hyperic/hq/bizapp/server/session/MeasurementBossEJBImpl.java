@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,12 +33,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -51,7 +48,6 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.server.session.AppdefGroupManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -63,7 +59,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefGroupManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -500,19 +495,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Create list of measurements for a resource
      * @param id the resource ID
-     */
-    private void createMeasurements(int sessionId, AppdefEntityID id,
-                                   Integer[] tids)
-        throws SessionTimeoutException, SessionNotFoundException,
-               ConfigFetchException, EncodingException, PermissionException,
-               TemplateNotFoundException, AppdefEntityNotFoundException,
-               GroupNotCompatibleException, MeasurementCreateException {
-        createMeasurements(sessionId, id, tids, 0);
-    }
-
-    /**
-     * Create list of measurements for a resource
-     * @param id the resource ID
      * @ejb:interface-method
      */
     public void createMeasurements(int sessionId, AppdefEntityID id,
@@ -520,7 +502,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                ConfigFetchException, EncodingException, PermissionException,
                TemplateNotFoundException, AppdefEntityNotFoundException,
-               GroupNotCompatibleException, MeasurementCreateException {
+               GroupNotCompatibleException, MeasurementCreateException,
+               MeasurementNotFoundException {
         AuthzSubject subject = manager.getSubjectPojo(sessionId);
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // Recursively do this for each of the group members
@@ -528,14 +511,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 GroupUtil.getCompatGroupMembers(subject, id, null,
                                                 PageControl.PAGE_ALL);
         
-            for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
-                AppdefEntityID aeid = (AppdefEntityID) it.next();
-                
-                if (interval > 0)
-                    createMeasurements(sessionId, aeid, tids, interval);
-                else
-                    createMeasurements(sessionId, aeid, tids);
+            AppdefEntityID[] aeids = new AppdefEntityID[grpMembers.size()];
+            int i = 0;
+            for (Iterator it = grpMembers.iterator(); it.hasNext(); i++) {
+                aeids[i] = (AppdefEntityID) it.next();
             }
+            getMetricManager().enableMeasurements(subject, aeids, tids,
+                                                  interval);
         }
         else {
             ConfigResponse mergedCR = getConfigManager()

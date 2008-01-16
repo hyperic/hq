@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,7 +40,6 @@ import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -48,15 +47,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -68,8 +71,8 @@ import org.hyperic.hq.measurement.EvaluationException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.depgraph.DerivedNode;
 import org.hyperic.hq.measurement.ext.depgraph.Graph;
@@ -87,10 +90,6 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -1134,14 +1133,25 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                    Integer[] mtids, long interval)
         throws MeasurementNotFoundException, MeasurementCreateException,
                TemplateNotFoundException, PermissionException {
-        
-        long[] intervals = new long[mtids.length];
-        Arrays.fill(intervals, interval);
-        
-        for (int i = 0; i < aeids.length; i++) {
-            AppdefEntityID id = aeids[i];
 
-            createMeasurements(subject, id, mtids, intervals, null);
+        DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
+        // Create a list of IDs
+        Integer[] iids = new Integer[aeids.length];
+        for (int i = 0; i < aeids.length; i++) {
+            iids[i] = aeids[i].getId();
+        }
+        
+        List mids = new ArrayList(aeids.length * mtids.length);
+        for (int i = 0; i < mtids.length; i++) {
+            mids.addAll(dao.findIdsByTemplateForInstances(mtids[i], iids));
+        }
+
+        // Do the update in bulk
+        dao.updateInterval(mids, interval);
+        
+        // Update the agent schedule
+        for (int i = 0; i < aeids.length; i++) {
+            sendAgentSchedule(aeids[i]);
         }
     } 
 

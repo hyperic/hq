@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -203,6 +202,23 @@ public class DerivedMeasurementDAO extends HibernateDAO {
                     .setBoolean("isEnabled", template.isDefaultOn())
                     .setInteger("tid", template.getId().intValue())
                     .executeUpdate();
+    }
+    
+    /**
+     * Set the interval for all metrics to the specified interval
+     */
+    void updateInterval(List mids, long interval) {
+        if (mids.size() == 0)
+            return;
+        
+        String sql = "UPDATE DerivedMeasurement " +
+                     "SET enabled = true, interval = :interval " +
+                     "WHERE id IN (:ids)";
+
+        getSession().createQuery(sql)
+            .setLong("interval", interval)
+            .setParameterList("ids", mids)
+            .executeUpdate();
     }
 
     Map findByInstance(AppdefEntityID[] aeids)
