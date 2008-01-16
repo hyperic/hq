@@ -372,6 +372,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="ResourceGroup.getMaxCollectionInterval"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.authz.server.session.ResourceGroup.resourceSet"
          maxElementsInMemory="100"
          eternal="true"

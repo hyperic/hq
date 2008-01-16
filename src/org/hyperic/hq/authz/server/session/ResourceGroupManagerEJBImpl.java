@@ -739,6 +739,19 @@ public class ResourceGroupManagerEJBImpl
         groupLocal.setModifiedBy(whoami.getName());
     }
 
+    /**
+     * Get the maximum collection interval for a scheduled metric within a
+     * compatible group of resources.
+     *
+     * @return The maximum collection time in milliseconds or -1 if the maximum
+     * interval could not be computed.
+     * @ejb:interface-method
+     */
+    public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
+
+        return getResourceGroupDAO().getMaxCollectionInterval(g, templateId);   
+    }
+
     public static ResourceGroupManagerLocal getOne() {
         try {
             return ResourceGroupManagerUtil.getLocalHome().create();
