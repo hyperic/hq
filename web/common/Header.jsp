@@ -91,8 +91,7 @@
 
             <div id="headUsrName">
                 <c:choose>
-                    <fmt:message key="header.User"/>
-                    :
+                    <!--<fmt:message key="header.User"/> :-->
                     <c:when test="${useroperations['viewSubject']}">
                         <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
                             <c:out value="${sessionScope.webUser.username}"/>
@@ -102,14 +101,16 @@
                         <c:out value="${sessionScope.webUser.username}"/>
                     </c:otherwise>
                 </c:choose>
-               <span style="padding-left:10px;font-size:0.95em;">
-                <html:link action="/Logout">
-                    <span style="color:#333333;">[</span>
-                    <fmt:message key="admin.user.generalProperties.Logout"/>
-                    <span style="color:#333333;">]</span>
+               <span style="font-size:0.95em;">
+                   <span style="color:#333333;"> - </span>
+                        <span style="padding-right:10px;">
+                        <html:link action="/Logout"><fmt:message key="admin.user.generalProperties.Logout"/></html:link>
+                        </span>
+                  </span>
+                <span style="font-size:0.95em;"> <html:link href="" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;">
+                    <fmt:message key="common.label.Tutorials"/>
                 </html:link></span>
-                <span style="padding-left:10px;font-size:0.95em;"> <html:link href=""
-                                                                              onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
+                <span style="padding-right:10;font-size:0.95em;"> <html:link href="" onclick="helpWin=window.open(help,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;">
                     <fmt:message key="common.label.Help"/>
                 </html:link></span>
             </div>
