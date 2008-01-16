@@ -743,13 +743,21 @@ public class ResourceGroupManagerEJBImpl
      * Get the maximum collection interval for a scheduled metric within a
      * compatible group of resources.
      *
-     * @return The maximum collection time in milliseconds or -1 if the maximum
-     * interval could not be computed.
+     * @return The maximum collection time in milliseconds.
      * @ejb:interface-method
      */
     public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
 
-        return getResourceGroupDAO().getMaxCollectionInterval(g, templateId);   
+        Long max =
+            getResourceGroupDAO().getMaxCollectionInterval(g, templateId);
+
+        if (max == null) {
+            throw new IllegalArgumentException("Invalid template id =" +
+                                               templateId + " for resource " +
+                                               "group " + g.getId());
+        }
+
+        return max.longValue();
     }
 
     public static ResourceGroupManagerLocal getOne() {

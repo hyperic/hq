@@ -218,27 +218,20 @@ public class ResourceGroupDAO extends HibernateDAO
      *
      * @param g The group in question.
      * @param templateId The measurement template to query.
-     * @return templateId The maximum collection time in milliseconds or -1
-     * if the maximum interval could not be computed.
+     * @return templateId The maximum collection time in milliseconds.
      */
-    public long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
+    public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
         String sql =
             "select max(m.interval) from DerivedMeasurement m, " +
             "ResourceGroup g join g.resourceSet r " +
             "where m.instanceId = r.instanceId and "+
             "g = ? and m.template.id = ?";
 
-        Long max = (Long)getSession().createQuery(sql)
+        return (Long)getSession().createQuery(sql)
             .setParameter(0, g)
             .setInteger(1, templateId.intValue())
             .setCacheable(true)
             .setCacheRegion("ResourceGroup.getMaxCollectionInterval")
             .uniqueResult();
-
-        if (max == null) {
-            return -1;
-        } else {
-            return max.longValue();
-        }
     }
 }
