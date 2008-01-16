@@ -26,8 +26,6 @@
 package org.hyperic.hq.application;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -74,8 +71,6 @@ public class HQApp {
     private final Object       STAT_LOCK = new Object();
     private long               _numTx;
     private long               _numTxErrors;
-
-    private long               _methWarnTime;
     
     private StartupFinishedCallback _startupFinished;
     
@@ -101,28 +96,8 @@ public class HQApp {
                 _log.info("Done running shutdown hooks");
             }
         });
-        
-        try {
-            Properties p = HQApp.readTweakProperties();
-            _methWarnTime = Long.parseLong(p.getProperty("hq.methodWarn.time"));
-        } catch(Exception e) {
-            _log.error("Unable to read tweak properties", e);
-            _methWarnTime = 60 * 1000;
-        }
     }
 
-    public void setMethodWarnTime(long warnTime) {
-        synchronized (STAT_LOCK) {
-            _methWarnTime = warnTime;
-        }
-    }
-    
-    public long getMethodWarnTime() {
-        synchronized (STAT_LOCK) {
-            return _methWarnTime;
-        }
-    }
-    
     public ThreadWatchdog getWatchdog() {
         synchronized (_watchdog) {
             return _watchdog;
@@ -177,27 +152,6 @@ public class HQApp {
         }
     }
 
-    public Properties getTweakProperties() throws IOException {
-        return readTweakProperties();
-    }
-    
-    private static Properties readTweakProperties() throws IOException { 
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = 
-            loader.getResourceAsStream("META-INF/tweak.properties");
-        Properties res = new Properties();
-
-        if (is == null)
-            return res;
-    
-        try {
-            res.load(is);
-        } finally {
-            try {is.close();} catch(IOException e) {}
-        }
-        return res;
-    }
-    
     /**
      * @see CallbackDispatcher#generateCaller(Class)
      */
@@ -248,55 +202,6 @@ public class HQApp {
         synchronized (STAT_LOCK) {
             return _numTxErrors;
         }
-    }
-
-    private static void warnMethodTooLong(long total, long warnTime,
-                                          Invocation v, Object methodRes,
-                                          boolean failed, String methName,
-                                          String className)
-    {
-        Map txPayload = v.getTransientPayload();
-        
-        if (txPayload.containsKey("hq.methodWarned"))
-            return;
-        
-        txPayload.put("hq.methodWarned", Boolean.TRUE);
-        StringBuffer warn = new StringBuffer("Method ran a long time.\n");
-        warn.append("Class:   ")
-            .append(className)
-            .append("\nMethod:  ")
-            .append(methName)
-            .append("\nRunTime: ")
-            .append(total)
-            .append("\n");
-        
-        if (!_log.isDebugEnabled()) {
-            _log.warn(warn);
-            return;
-        }
-        
-        // if debug is enabled, log a lot more verbose stuff
-        if (methodRes == null) {
-            warn.append("Result:  null");
-        } else {
-            warn.append("Result:  (")
-                .append(methodRes.getClass())
-                .append(") ")
-                .append(methodRes.toString());
-        }
-        warn.append("\nArguments: \n");
-        
-        Object[] args = v.getArguments();
-        for (int i=0; i<args.length; i++) {
-            warn.append("    Arg[")
-                .append(i)
-                .append("]: (")
-                .append(args[i].getClass())
-                .append(") ")
-                .append(args[i].toString())
-                .append("\n");
-        }
-        _log.warn(warn);
     }
     
     private static class TxSynch implements Synchronization, Serializable {
@@ -388,33 +293,13 @@ public class HQApp {
                     readWrite = true;
                     SessionManager.setSessionReadWrite();
                 }
-
-                long startTime = System.currentTimeMillis();
-                Object res = null;
-                boolean failed = true;
-                try {
-                    if (proxyNext != null) 
-                        res = proxyNext.invoke(v);
-                    else if (isHome)
-                        res = next.invokeHome(v);
-                    else
-                        res = next.invoke(v);
-                    failed = false;
-                } finally {
-                    long total = System.currentTimeMillis() - startTime;
-                    long warnTime = HQApp.getInstance().getMethodWarnTime();
-                    
-                    if (warnTime != -1 && total > warnTime) {
-                        try {
-                            HQApp.warnMethodTooLong(total, warnTime, v, res,
-                                                    failed, methName,
-                                                    className);
-                        } catch(Throwable t) {
-                            _log.warn("Error while warning.  Ugly", t);
-                        }
-                    }
-                }
-                return res;
+                
+                if (proxyNext != null) 
+                    return proxyNext.invoke(v);
+                if (isHome)
+                    return next.invokeHome(v);
+                else
+                    return next.invoke(v);
             } catch(Throwable e) { 
                 flush = false;
                 throw e;
