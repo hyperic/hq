@@ -25,8 +25,10 @@
 
 package org.hyperic.hq.plugin.jboss.jmx;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -38,7 +40,7 @@ class GenericServiceQuery extends ServiceQuery {
 
     private String type;
     private Map props;
-    private String propName = "name"; //ConfigSchema name
+    private ArrayList names;
 
     GenericServiceQuery() { }
 
@@ -56,7 +58,7 @@ class GenericServiceQuery extends ServiceQuery {
         
         query.type = this.type;
         query.props = this.props;
-        query.propName = this.propName;
+        query.names = this.names;
 
         return query;
     }
@@ -73,6 +75,10 @@ class GenericServiceQuery extends ServiceQuery {
         return buf;
     }
 
+    private boolean isAutoValue(String val) {
+        return val.startsWith("%") && val.endsWith("%");
+    }
+
     private ObjectName getObjectNameProperty() {
         String name = getProperty(PROP_OBJECT_NAME);
         if (name == null) {
@@ -82,8 +88,12 @@ class GenericServiceQuery extends ServiceQuery {
                 PROP_OBJECT_NAME;
             throw new IllegalArgumentException(msg);
         }
+
+        this.names = new ArrayList();
+        ObjectName oName;
+
         try {
-            return new ObjectName(name);
+            oName = new ObjectName(name);
         } catch (MalformedObjectNameException e) {
             String msg =
                 this.type +
@@ -91,6 +101,19 @@ class GenericServiceQuery extends ServiceQuery {
                 PROP_OBJECT_NAME + "=" + name;
             throw new IllegalArgumentException(msg);
         }        
+
+        Map props = oName.getKeyPropertyList();
+        for (Iterator it=props.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            String key = (String)entry.getKey();
+            String val = (String)entry.getValue();
+
+            if (isAutoValue(val)) {
+                this.names.add(key);
+            }
+        }
+
+        return oName;
     }
 
     public String getQueryName() {
@@ -106,9 +129,8 @@ class GenericServiceQuery extends ServiceQuery {
             Map.Entry entry = (Map.Entry)it.next();
             String key = (String)entry.getKey();
             String val = (String)entry.getValue();
-            if (val.startsWith("%") && val.endsWith("%")) {
+            if (isAutoValue(val)) {
                 this.props.put(key, "*");
-                this.propName = key;
                 isPattern = true;
                 continue;
             }
@@ -159,7 +181,45 @@ class GenericServiceQuery extends ServiceQuery {
     }
 
     protected String getPropertyName() {
-        return this.propName;
+        return "name";
+    }
+
+    public Properties getResourceConfig() {
+        ObjectName name = getObjectName();
+        Properties config = new Properties();
+
+        for (Iterator it=this.props.keySet().iterator();
+             it.hasNext(); )
+        {
+            String key = (String)it.next();
+            if (!this.props.get(key).equals("*")) {
+                continue;
+            }
+            String val = name.getKeyProperty(key);
+            if (val != null) {
+                config.setProperty(key, val);
+            }
+        }
+
+        return config;
+    }
+
+    public String getName() {
+        ObjectName oName = getObjectName();
+        if (oName == null) {
+            return null; //XXX happens duing cloneInstance()
+        }
+
+        StringBuffer name = new StringBuffer();
+
+        for (Iterator it=this.names.iterator(); it.hasNext();) {
+            name.append(oName.getKeyProperty((String)it.next()));
+            if (it.hasNext()) {
+                name.append(' ');
+            }
+        }
+
+        return name.toString();
     }
 
     public boolean hasControl() {
