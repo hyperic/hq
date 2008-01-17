@@ -50,6 +50,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.StringConstants;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.BaseActionMapping;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -145,12 +146,10 @@ public class AddResourcesPrepareAction extends Action {
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
-        PageControl pcAvail =
-            RequestUtils.getPageControl(request, "psa", "pna",
-                                        "soa", "sca");
-        PageControl pcPending =
-            RequestUtils.getPageControl(request, "psp", "pnp",
-                                        "sop", "scp");
+        PageControl pcAvail = RequestUtils.getPageControl(request, "psa", "pna",
+                                                          "soa", "sca");
+        PageControl pcPending = RequestUtils.getPageControl(request, "psp",
+                                                            "pnp", "sop", "scp");
 
 
         /* pending resources are those on the right side of the "add
@@ -264,13 +263,13 @@ public class AddResourcesPrepareAction extends Action {
 
         filteredAvailList.setTotalSize( avail.getTotalSize() );
 
-        request.setAttribute(Constants.AVAIL_RESOURCES_ATTR,
-                             avail);
+        request.setAttribute(Constants.AVAIL_RESOURCES_ATTR, avail);
         request.setAttribute(Constants.NUM_AVAIL_RESOURCES_ATTR,
                              new Integer(filteredAvailList.getTotalSize()));
 
         log.debug("get the available resources user can filter by");                                                
-        setDropDowns(boss, addForm, request, sessionId.intValue(), appdefType, compat); 
+        setDropDowns(boss, addForm, request, sessionId.intValue(), appdefType,
+                     compat, (BaseActionMapping) mapping); 
 
         return null;
 
@@ -345,7 +344,8 @@ public class AddResourcesPrepareAction extends Action {
                               HttpServletRequest request,
                               int sessionId,
                               int appdefType,
-                              boolean compat)
+                              boolean compat,
+                              BaseActionMapping mapping)
     throws Exception{
 
         //just need  a blank one for this stuff
@@ -355,19 +355,31 @@ public class AddResourcesPrepareAction extends Action {
         String[][] entityTypes = boss.getAppdefTypeStrArrMap();
 
         // CAM's group constructs suck, so we do sucky things to support them
+        boolean pss = "platform-server-service".equals(mapping.getWorkflow());
+        
         if (entityTypes != null){
-            for (int i=0; i<entityTypes.length; i++) {
-                if (entityTypes[i][0].equals(Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP)))
-                    continue; // suck: for the portlet's purposes, explicitly call "Groups" "Mixed Groups"
+            for (int i = 0; i < entityTypes.length; i++) {
+                int type = Integer.parseInt(entityTypes[i][0]);
+                if (pss && type > AppdefEntityConstants.APPDEF_TYPE_SERVICE)
+                    continue;
+                
+                // suck: for the portlet's purposes, explicitly call
+                // "Groups" "Mixed Groups"
+                if (type == AppdefEntityConstants.APPDEF_TYPE_GROUP)
+                    continue;
+                
                 addForm.addFunction(new LabelValueBean(entityTypes[i][1],
                                                        entityTypes[i][0]));
 
             } 
-            // there are two "major" types of groups, suckah mofo
-            addForm.addFunction( new LabelValueBean("mixedGroups", 
-                    Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP) ) );
-            addForm.addFunction( new LabelValueBean("compatibleGroups", 
-                    Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC ) ) );
+            
+            if (!pss) {
+                // there are two "major" types of groups, suckah mofo
+                addForm.addFunction( new LabelValueBean("mixedGroups", 
+                        Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP)));
+                addForm.addFunction( new LabelValueBean("compatibleGroups", 
+                        Integer.toString(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC ) ) );
+            }
         }
         
         if(appdefType == AppdefEntityConstants.APPDEF_TYPE_GROUP){

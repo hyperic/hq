@@ -1968,6 +1968,14 @@
         <set-property property="title" value="Dashboard.FavoriteResources.Add"/>
       </action>
 
+      <action path="/dashboard/availSummary/AddResourcesPrepareAction"
+              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction"
+              name="DashboardAddResourceHealthForm"
+              scope="request">
+        <set-property property="title" value="Dashboard.FavoriteResources.Add"/>
+        <set-property property="workflow" value="platform-server-service"/>
+      </action>
+
       <action path="/dashboard/*/AddResourcesAction"
               type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
               name="DashboardAddResourceHealthForm"

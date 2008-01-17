@@ -118,7 +118,7 @@
               <put name="portletName" value=".dashContent.availSummary" />
   </definition>
   <definition name=".dashContent.admin.availSummary.addResources"
-              controllerUrl="/dashboard/AddResourcesPrepareAction.do"
+              controllerUrl="/dashboard/availSummary/AddResourcesPrepareAction.do"
               path="/portlet/availSummary/AddResources.jsp"/>
 
   <definition name=".dashContent.metricViewer"
