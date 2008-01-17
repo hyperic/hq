@@ -34,6 +34,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
+import org.hyperic.hq.zevents.ZeventManager;
 
 public class HQInternalService implements HQInternalServiceMBean {
     public double getMetricInsertsPerMinute() {
@@ -79,5 +80,13 @@ public class HQInternalService implements HQInternalServiceMBean {
     
     public int getAgentConnections() {
         return AgentManagerEJBImpl.getOne().getNumConnectedAgents();
+    }
+
+    public long getZeventMaxWaitTime() {
+        return ZeventManager.getInstance().getMaxTimeInQueue();
+    }
+
+    public long getZeventsProcessed() {
+        return ZeventManager.getInstance().getZeventsProcessed();
     }
 }

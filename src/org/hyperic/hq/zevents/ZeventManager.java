@@ -192,6 +192,18 @@ public class ZeventManager {
         _processorThread.interrupt();
         _processorThread.join(5000);
     }
+
+    public long getMaxTimeInQueue() {
+        synchronized (INIT_LOCK) {
+            return _maxTimeInQueue;
+        }
+    }
+    
+    public long getZeventsProcessed() {
+        synchronized (INIT_LOCK) {
+            return _numEvents;
+        }
+    }
     
     private long getWarnSize() {
         synchronized (INIT_LOCK) {
