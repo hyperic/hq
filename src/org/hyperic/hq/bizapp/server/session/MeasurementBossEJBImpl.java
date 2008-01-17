@@ -2369,6 +2369,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                      watch.reset());
         
         // Throughput a.k.a. Usage
+        /*
         try {
             Map midMap = getMetricManager()
                 .findDesignatedMeasurementIds(subject, ids,
@@ -2399,7 +2400,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         } catch (MeasurementNotFoundException e) {
             // No throughput data
         }
-
+        */
         if (_log.isDebugEnabled())
             _log.debug("END setResourceTypeDisplaySummary -- " +
                     watch.getElapsed() + " msec");

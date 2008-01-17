@@ -410,6 +410,20 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .list();
     }
 
+    List findAvailabilityIdsByInstances(int type, Integer[] ids) {
+        String sql =
+            "select m.instanceId, m.id from DerivedMeasurement m " +
+            "join m.template t " +
+            "join t.monitorableType mt " +
+            "where mt.appdefType = :type and m.instanceId in (:ids) and " +
+            "t.name = 'Availability'";
+
+        return getSession().createQuery(sql)
+            .setInteger("type", type)
+            .setParameterList("ids", ids)
+            .list();
+    }
+
     List findByRawExcludeIdentity(Integer rid) {
         String sql =
             "select distinct d from DerivedMeasurement d " +

@@ -956,43 +956,48 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         throws MeasurementNotFoundException {
 
         Map midMap = new HashMap();
-        for (int i = 0; i < ids.length; i++) {
-            AppdefEntityID id = ids[i];
-            try {
-                List metrics = getDerivedMeasurementDAO().
-                    findDesignatedByInstanceForCategory(id.getType(),
-                                                        id.getID(), cat);
-
-                if (metrics.size() == 0)
-                    throw new FinderException("No metrics found");
+        if (ids.length == 0)
+            return midMap;
+        
+        if (MeasurementConstants.CAT_AVAILABILITY.equals(cat)) {
+            int type = ids[0].getType();
+            Integer[] iids = new Integer[ids.length];
+            for (int i = 0; i < ids.length; i++) {
+                AppdefEntityID id = ids[i];
+                iids[i] = id.getId();
+            }
+            List metricIds =
+                getDerivedMeasurementDAO().findAvailabilityIdsByInstances(type,
+                                                                          iids);
+            for (Iterator it = metricIds.iterator(); it.hasNext();) {
+                Object[] ret = (Object[]) it.next();
+                Integer iid = (Integer) ret[0];
+                Integer mid = (Integer) ret[1];
                 
-                DerivedMeasurement dm = null;
-                if (metrics.size() > 1 &&
-                    MeasurementConstants.CAT_AVAILABILITY.equals(cat)) {
-                    // We'll check for the right template
-                    for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                        DerivedMeasurement dmIt =(DerivedMeasurement) it.next();
-                        if (dmIt.getTemplate().getAlias().
-                            compareToIgnoreCase(
-                            MeasurementConstants.CAT_AVAILABILITY) == 0) {
-                            dm = dmIt;
-                            break;
-                        }
-                    }
+                midMap.put(new AppdefEntityID(type, iid), mid);
+            }
+        }
+        else {
+            for (int i = 0; i < ids.length; i++) {
+                AppdefEntityID id = ids[i];
+                try {
+                    List metrics = getDerivedMeasurementDAO().
+                        findDesignatedByInstanceForCategory(id.getType(),
+                                                            id.getID(), cat);
+    
+                    if (metrics.size() == 0)
+                        throw new FinderException("No metrics found");
+                    
+                    DerivedMeasurement dm = (DerivedMeasurement) metrics.get(0);    
+                    midMap.put(id, dm.getId());
+                } catch (FinderException e) {
+                    // Throw an exception if we're only looking for one measurement
+                    if (ids.length == 1)
+                        throw new MeasurementNotFoundException(cat +
+                                                               " metric for " +
+                                                               id +
+                                                               " not found");
                 }
-
-                if (dm == null) {
-                    // We'll take the first one
-                    dm = (DerivedMeasurement) metrics.get(0);
-                }
-
-                midMap.put(id, dm.getId());
-                
-            } catch (FinderException e) {
-                // Throw an exception if we're only looking for one measurement
-                if (ids.length == 1)
-                    throw new MeasurementNotFoundException(
-                                                           cat + " metric for " + id + " not found");
             }
         }
         return midMap;
