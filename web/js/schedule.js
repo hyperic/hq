@@ -183,8 +183,12 @@ function getAllDaysInMonth(monthNum, yearNum)  {
 
 function setSelect(selId, index) {
   var sel = document.getElementById(selId);
-  if(sel){
-    sel.selectedIndex = index;
+  if (sel) {
+    if (index >= 0) {
+      sel.selectedIndex = index;
+    } else {
+      sel.selectedIndex = 0;
+    }
   }
 }
 
@@ -219,8 +223,14 @@ function getSelectIndex(selId) {
 
 function getSelectValue(sel) {
   var indexSel = sel.selectedIndex;
-  if (indexSel) {
-  return sel[indexSel].value;
+  if (indexSel != undefined){
+    if (indexSel >= 0) {
+      return sel[indexSel].value;
+    } else {
+      return sel[0].value;
+    }
+  } else {
+      return 0;
   }
 }
 
