@@ -553,13 +553,15 @@ public class AIQueueManagerEJBImpl
                 // Before processing platforms, ensure the agent is up since
                 // the approval process depends on being able to schedule runtime
                 // discovery and enable metrics.
-                try {
-                    AICommandsClient client =
-                        AIUtil.getClient(aiplatform.getAgentToken());
-                    client.getScanStatus();
-                } catch (Exception e) {
-                    throw new AIQApprovalException("Cannot approve platform: " +
-                                                   e.getMessage(), e);
+                if (isApproveAction) {
+                    try {
+                        AICommandsClient client =
+                            AIUtil.getClient(aiplatform.getAgentToken());
+                        client.getScanStatus();
+                    } catch (Exception e) {
+                        throw new AIQApprovalException("Cannot approve platform: " +
+                                                       e.getMessage(), e);
+                    }
                 }
 
                 visitor.visitPlatform(aiplatform,
