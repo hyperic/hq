@@ -42,6 +42,9 @@ import java.util.Map;
 
 public class PluginLoader extends URLClassLoader {
 
+    //XXX WAS 6.1 seems to have an issue with %20
+    private static final boolean ESCAPE_SPACES =
+        !"false".equals(System.getProperty("PluginLoader.ESCAPE_SPACES"));
     private static final ClassLoader defaultClassLoader = getClassLoader();
     private Map addedURLs = new HashMap();
     private ClassLoader previousClassLoader = null;
@@ -49,7 +52,10 @@ public class PluginLoader extends URLClassLoader {
     private String pluginClassName = null;
 
     private static String toFileURL(String file) {
-        return "file:" + StringUtil.replace(file, " ", "%20"); //escape spaces        
+        if (ESCAPE_SPACES) {
+            file = StringUtil.replace(file, " ", "%20");
+        }
+        return "file:" + file;
     }
 
     private static URL toJarURL(String file)
