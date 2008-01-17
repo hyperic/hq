@@ -78,6 +78,7 @@ public class OracleServerDetector
     static final String VERSION_8i = "8i";
     static final String VERSION_9i = "9i";
     static final String VERSION_10g = "10g";
+    static final String VERSION_11g = "11g";
 
     // User instance
     static final String USER_INSTANCE = "User Instance";
@@ -143,19 +144,28 @@ public class OracleServerDetector
             path = getParentDir(path, 2);
         }
 
-        File oracle = new File(path, "bin/oracle");
-        File dgmgrl = new File(path, "bin/dgmgrl");
+        File oracle  = new File(path, "bin/oracle");
+        File dgmgrl  = new File(path, "bin/dgmgrl");
         File trcsess = new File(path, "bin/trcsess");
+        File adrci   = new File(path, "bin/adrci");
 
         // Make sure that oracle exists, and is a normal file
         if (oracle.exists() && oracle.isFile()) {
 
-            if (trcsess.exists()) {
+            if (adrci.exists()) {
+                if (getTypeInfo().getVersion().
+                    equals(VERSION_11g)) {
+                    version = VERSION_11g;
+                } else {
+                    // 8i, 9i or 10g detector
+                    return servers;
+                }
+            } else if (trcsess.exists()) {
                 if (getTypeInfo().getVersion().
                     equals(VERSION_10g)) {
                     version = VERSION_10g;
                 } else {
-                    // 8i or 9i detector
+                    // 8i, 9i or 11g detector
                     return servers;
                 }
             } else if (dgmgrl.exists()) {
@@ -163,7 +173,7 @@ public class OracleServerDetector
                     equals(VERSION_9i)) {
                     version = VERSION_9i;
                 } else {
-                    // 10g or 8i detector
+                    // 10g, 8i or 11g detector
                     return servers;
                 }
             } else {
