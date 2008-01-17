@@ -152,4 +152,8 @@ public final class ClassicEscalationAlertType
         }
         return null;
     }
+
+    protected Collection getPerformersOfEscalation(Escalation escalation) {
+        return AlertDefinitionManagerEJBImpl.getOne().getUsing(escalation);
+    }
 }

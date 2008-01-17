@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -92,4 +94,22 @@ public abstract class EscalationAlertType
      * Return the note from the last alert instance where the alert was fixed.
      */
     protected abstract String getLastFixedNote(PerformsEscalations def);
+    
+    /**
+     *  Returns a Collection of {@link PerformsEscalations}, which are
+     *  using the passed escalation. 
+     */
+    protected abstract Collection 
+        getPerformersOfEscalation(Escalation escalation);
+    
+    /**
+     *  Returns true if the escalation is in use. 
+     */
+    protected boolean escalationInUse(Escalation escalation) {
+        return !getPerformersOfEscalation(escalation).isEmpty();
+    }
+    
+    public static List getAll() {
+        return HypericEnum.getAll(EscalationAlertType.class);
+    }
 }

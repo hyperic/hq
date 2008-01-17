@@ -40,6 +40,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -393,6 +394,12 @@ public class AlertDefinitionDAO extends HibernateDAO {
         Query q = getSession().createQuery(sql);
         
         return pInfo.pageResults(q).list();
+    }
+    
+    List getUsing(Escalation e) {
+        return getSession()
+            .createQuery("from AlertDefinition where escalation = :esc")
+            .setParameter("esc", e).list();
     }
 
 }

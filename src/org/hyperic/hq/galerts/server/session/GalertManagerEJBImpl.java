@@ -701,6 +701,14 @@ public class GalertManagerEJBImpl
     }
     
     /**
+     * Returns a list of {@link GalertDef}s using the passed escalation.
+     * @ejb:interface-method
+     */
+    public Collection getUsing(Escalation e) {
+        return _defDAO.getUsing(e);
+    }
+    
+    /**
      * Start an escalation for a group alert definition.
      *
      * @ejb:interface-method

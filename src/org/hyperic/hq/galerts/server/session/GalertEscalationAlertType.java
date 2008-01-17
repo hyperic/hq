@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.galerts.server.session;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 
@@ -105,5 +106,9 @@ public final class GalertEscalationAlertType
             return fixedNote;
         }
         return null;
+    }
+
+    protected Collection getPerformersOfEscalation(Escalation escalation) {
+        return getGalertMan().getUsing(escalation);
     }
 }

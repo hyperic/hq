@@ -1435,7 +1435,7 @@ public class EventsBossEJBImpl
      */
     public void deleteEscalationByName(int sessionID, String name)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
+               PermissionException, ApplicationException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         Escalation e = getEscMan().findByName(name);
@@ -1448,7 +1448,7 @@ public class EventsBossEJBImpl
      */
     public void deleteEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
+               PermissionException, ApplicationException
     {
         deleteEscalationById(sessionID, new Integer[]{id});
     }
@@ -1459,7 +1459,7 @@ public class EventsBossEJBImpl
      */
     public void deleteEscalationById(int sessionID, Integer[] ids)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
+               PermissionException, ApplicationException
     {
         AuthzSubject subject = manager.getSubjectPojo(sessionID);
         EscalationManagerLocal escMan = getEscMan();

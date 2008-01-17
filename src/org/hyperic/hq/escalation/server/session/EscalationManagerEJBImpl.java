@@ -40,6 +40,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
@@ -202,9 +203,29 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method  
      */
     public void deleteEscalation(AuthzSubject subject, Escalation e) 
-        throws PermissionException
+        throws PermissionException, ApplicationException
     {
         SessionBase.canRemoveEscalation(subject.getId());
+        
+        List alertTypes = EscalationAlertType.getAll();
+        for (Iterator i=alertTypes.iterator(); i.hasNext(); ) {
+            EscalationAlertType aType = (EscalationAlertType)i.next();
+            
+            if (aType.escalationInUse(e)) {
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Escalation [" + e.getId() + ", " + e.getName() +
+                               "] in use by:");
+                    Collection performers = aType.getPerformersOfEscalation(e);
+                    for (Iterator j=performers.iterator(); j.hasNext(); ) {
+                        PerformsEscalations p = (PerformsEscalations)j.next();
+                        
+                        _log.debug("[" + p.getName() + " id=" + p.getId() +"]");
+                    }
+                }
+                throw new ApplicationException("The escalation is currently " +
+                                               "in use");
+            }
+        }
         _esclDAO.remove(e);
     }
     

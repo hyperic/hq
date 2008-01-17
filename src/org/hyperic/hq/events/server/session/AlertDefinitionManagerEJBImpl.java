@@ -526,6 +526,15 @@ public class AlertDefinitionManagerEJBImpl
         def.setMtime(System.currentTimeMillis());
     }
 
+    /**
+     * Returns the {@link AlertDefinition}s using the passed escalation. 
+     * @ejb:interface-method
+     */
+    public Collection getUsing(Escalation e) {
+        return getAlertDefDAO().getUsing(e);
+    }
+
+        
     /** 
      * Remove alert definitions
      * @ejb:interface-method

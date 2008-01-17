@@ -36,6 +36,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
 
 class GalertDefDAO
@@ -141,4 +142,11 @@ class GalertDefDAO
             .setParameter("type", strat)
             .uniqueResult()).intValue();
     }
+    
+    Collection getUsing(Escalation e) {
+        return getSession()
+            .createQuery("from GalertDef where escalation = :esc")
+            .setParameter("esc", e).list();
+    }
+    
 }
