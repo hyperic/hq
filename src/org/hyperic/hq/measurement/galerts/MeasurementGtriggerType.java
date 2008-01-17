@@ -40,6 +40,7 @@ public class MeasurementGtriggerType
     public static final String CFG_SIZE_COMPAR  = "sizeComparison";
     public static final String CFG_NUM_RESOURCE = "numResources";
     public static final String CFG_IS_PERCENT   = "isPercent";
+    public static final String CFG_IS_NOT_REPORTING_OFFENDING = "isNotReportingOffending";
     public static final String CFG_TEMPLATE_ID  = "templateId";
     public static final String CFG_COMP_OPER    = "comparisonOperator";
     public static final String CFG_METRIC_VAL   = "metricValue";
