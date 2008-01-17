@@ -126,6 +126,31 @@ function hideErrorPanel() {
             dojo.byId("messagePanelMessage").innerHTML = '';
             }
 }
+
+var legends = {};
+legends['cpuinfo'] = '${l.cpuinfo}';
+legends['cpuperc'] = '${l.cpuperc}';
+legends['df'] = '${l.df}';
+legends['ifconfig'] = '${l.ifconfig}';
+legends['netstat'] = '${l.netstat}';
+legends['top'] = '${l.top}';
+legends['who'] = '${l.who}';
+
+
+function updateLegend(select){
+    var legendDiv = dojo.byId("legend");
+    if(select.selectedIndex <= 0){
+        legendDiv.innerHTML = "";
+        return;
+    }
+    legendDiv.innerHTML = legends[select.options[select.selectedIndex].value];
+}
+
+dojo.addOnLoad(function(){
+    updateLegend(dojo.byId("commandSelect"));
+});
+
+
 </script>
 <div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
 <div class="outerLiveDataCont" style="clear:both;">
@@ -142,13 +167,13 @@ function hideErrorPanel() {
 
         <div style="padding-left:5px;">
             <div class="instruction1">Please select a query to run:</div>
-        <select id="commandSelect" onchange="runCommand()" style="margin-bottom:5px;">
+        <select id="commandSelect" onchange="runCommand();updateLegend(this);" style="margin-bottom:5px;">
         <% for (c in commands) { %>
           <option value="${c}">${h c}</option>
         <% } %>
       </select>
       </div>
-      
+      <div id="legend" style="padding: 1px 5px 5px 2px; font-style: italic;"></div>
       <% if (isGroup) { %>
         <div class="grpmembertext">Group Members</div>
         <div id="groupMembers" class="pendingData">
