@@ -74,6 +74,7 @@ public class DBUtil {
     public static final int DATABASE_ORACLE_8 = 3;
     public static final int DATABASE_ORACLE_9 = 4;
     public static final int DATABASE_ORACLE_10 = 8;
+    public static final int DATABASE_ORACLE_11 = 10;
     public static final int DATABASE_MYSQL5 = 9;
 
     private static Map _dbTypes = new HashMap();
@@ -172,6 +173,7 @@ public class DBUtil {
             case DATABASE_ORACLE_8:
             case DATABASE_ORACLE_9:
             case DATABASE_ORACLE_10:
+            case DATABASE_ORACLE_11:
                 query = "SELECT " + table + "_" + key + "_seq.nextval "
                     + "FROM DUAL";
                 break;
@@ -235,6 +237,8 @@ public class DBUtil {
                     dbType = DATABASE_ORACLE_9;
                 } else if (dbVersion.startsWith("oracle database 10g")) {
                     dbType = DATABASE_ORACLE_10;
+                } else if (dbVersion.startsWith("oracle database 11g")) {
+                    dbType = DATABASE_ORACLE_11;
                 }
             } else if (dbName.indexOf("mysql") != -1) {
                 dbType = DATABASE_MYSQL5;
@@ -271,7 +275,7 @@ public class DBUtil {
 
     public static boolean isOracle(int type) {
         return (type == DATABASE_ORACLE_8 || type == DATABASE_ORACLE_9
-            || type == DATABASE_ORACLE_10);
+            || type == DATABASE_ORACLE_10 || type == DATABASE_ORACLE_11);
     }
 
     /**
@@ -311,6 +315,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_ORACLE_11:
                 rval = OracleBlobColumn.doSelect(rs, columnIndex);
                 break;
             case DBUtil.DATABASE_POSTGRESQL_7:
@@ -340,6 +345,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_ORACLE_11:
                 return "NUMBER(1)";
             case DBUtil.DATABASE_MYSQL5:
                 return "BIT";
@@ -374,6 +380,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_ORACLE_11:
             case DBUtil.DATABASE_MYSQL5:
                 return bool ? "1" : "0";
             default:
@@ -397,6 +404,7 @@ public class DBUtil {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_ORACLE_11:
             case DBUtil.DATABASE_MYSQL5:
                 ps.setInt(idx, (bool) ? 1 : 0);
                 return;
