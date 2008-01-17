@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -62,12 +63,7 @@ import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
  * rollback additions of listeners if the transaction fails. 
  */
 public class ZeventManager { 
-    private static final int MAX_QUEUE_ENTRIES = 100 * 1000;
-    private static final long WARN_INTERVAL = 5 * 60 * 1000;
-    private static final long MAX_LISTENER_SECONDS = 60;
-    private static final int QUEUE_WARN_SIZE = MAX_QUEUE_ENTRIES * 90 / 100;
-    
-    private final Log _log = LogFactory.getLog(ZeventManager.class);
+    private static final Log _log = LogFactory.getLog(ZeventManager.class);
     
     private static final Object INIT_LOCK = new Object();
     private static ZeventManager INSTANCE;
@@ -92,17 +88,100 @@ public class ZeventManager {
     
     // For diagnostics and warnings
     private long _lastWarnTime;
+    private long _listenerTimeout;
+    private long _warnSize;
+    private long _warnInterval;
     private long _maxTimeInQueue;
     private long _numEvents;
     
     private QueueProcessor _queueProcessor;
-    private BlockingQueue  _eventQueue = 
-        new LinkedBlockingQueue(MAX_QUEUE_ENTRIES);
+    private BlockingQueue  _eventQueue; 
 
     
     private ZeventManager() {
         _threadGroup = new LoggingThreadGroup("ZEventProcessor");
         _threadGroup.setDaemon(true);
+    }
+
+    private long getProp(Properties p, String propName, long defaultVal) {
+        String val = p.getProperty(propName, "" + defaultVal);
+        long res;
+        
+        if (val == null) {
+            _log.debug("tweak.properties:[" + propName + "] not set.  Using " +
+                       defaultVal);
+            res = defaultVal;
+        } else {
+            val = val.trim();
+            try {
+                res = Long.parseLong(val);
+            } catch(NumberFormatException e) {
+                _log.warn("tweak.properties:[" + propName + "] not a number.  "+
+                          "( was " + val + ")  Using " + defaultVal);
+                res = defaultVal;
+            }
+        }
+        
+        _log.info("[" + propName + "] = " + res);
+        return res;
+    }
+    
+    private void initialize() {
+        Properties props = new Properties();
+        try {
+            props = HQApp.getInstance().getTweakProperties();
+        } catch(Exception e) {
+            _log.warn("Unable to get tweak properties", e);
+        }
+        
+        // Maximum number of entries the queue can support
+        long maxQueue  = getProp(props, "hq.zevent.maxQueueEnts", 100 * 1000);
+        
+        // Amount of time to warn between full zevent queue 
+        // (shouldn't need to change this)
+        _warnInterval = getProp(props, "hq.zevent.warnInterval", 5 * 60 * 1000); 
+        
+        // How many zevents are processed and dispatched at once?
+        // (also dictates the maximum # of events a listener may receive in a 
+        // single batch)
+        long batchSize = getProp(props, "hq.zevent.batchSize", 100);
+        
+        // The # of entries needed in the queue in order to warn that it's
+        // getting full.
+        _warnSize = getProp(props, "hq.zevent.warnSize", maxQueue * 90 / 100); 
+        
+        _listenerTimeout = getProp(props, "hq.zevent.listenerTimeout", 60); 
+        
+        _eventQueue = new LinkedBlockingQueue((int)maxQueue);
+        
+
+        QueueProcessor p = new QueueProcessor(this, _eventQueue, 
+                                              (int)batchSize);
+                                              
+        _queueProcessor = p;
+        _processorThread = new Thread(_threadGroup, p, "ZeventProcessor"); 
+        _processorThread.setDaemon(true);
+        _processorThread.start();
+
+        DiagnosticObject myDiag = new DiagnosticObject() {
+            public String getStatus() {
+                return ZeventManager.getInstance().getDiagnostics();
+            }
+            
+            public String toString() {
+                return "ZEvent Subsystem";
+            }
+
+            public String getName() {
+                return "ZEvents";
+            }
+
+            public String getShortName() {
+                return "zevents";
+            }
+        };
+        
+        DiagnosticThread.addDiagnosticObject(myDiag);
     }
     
     public void shutdown() throws InterruptedException {
@@ -112,6 +191,24 @@ public class ZeventManager {
         }
         _processorThread.interrupt();
         _processorThread.join(5000);
+    }
+    
+    private long getWarnSize() {
+        synchronized (INIT_LOCK) {
+            return _warnSize;
+        }
+    }
+    
+    private long getListenerTimeout() {
+        synchronized (INIT_LOCK) {
+            return _listenerTimeout;
+        }
+    }
+
+    private long getWarnInterval() {
+        synchronized (INIT_LOCK) {
+            return _warnInterval;
+        }
     }
     
     private void assertClassIsZevent(Class c) {
@@ -289,8 +386,8 @@ public class ZeventManager {
      *                              interrupted
      */
     public void enqueueEvents(List events) throws InterruptedException {
-        if (_eventQueue.size() > QUEUE_WARN_SIZE && 
-            (System.currentTimeMillis() - _lastWarnTime) > WARN_INTERVAL)
+        if (_eventQueue.size() > getWarnSize() && 
+            (System.currentTimeMillis() - _lastWarnTime) > getWarnInterval())
         {
             _lastWarnTime = System.currentTimeMillis();
             _log.warn("Your event queue is having a hard time keeping up.  " +
@@ -430,7 +527,7 @@ public class ZeventManager {
             synchronized (_listenerLock) {
                 InterruptToken t = null;
                 try {
-                    t = dog.interruptMeIn(MAX_LISTENER_SECONDS, 
+                    t = dog.interruptMeIn(getListenerTimeout(), 
                                           TimeUnit.SECONDS,
                                           "Processing listener events");
                     listener.processEvents(Collections.unmodifiableList(batch));
@@ -528,34 +625,7 @@ public class ZeventManager {
         synchronized (INIT_LOCK) {
             if (INSTANCE == null) {
                 INSTANCE = new ZeventManager();
-                QueueProcessor p = new QueueProcessor(INSTANCE, 
-                                                      INSTANCE._eventQueue,
-                                                      100);
-                INSTANCE._queueProcessor = p;
-                INSTANCE._processorThread = new Thread(INSTANCE._threadGroup, 
-                                                       p, "ZeventProcessor");
-                INSTANCE._processorThread.setDaemon(true);
-                INSTANCE._processorThread.start();
-
-                DiagnosticObject myDiag = new DiagnosticObject() {
-                    public String getStatus() {
-                        return ZeventManager.getInstance().getDiagnostics();
-                    }
-                    
-                    public String toString() {
-                        return "ZEvent Subsystem";
-                    }
-
-                    public String getName() {
-                        return "ZEvents";
-                    }
-
-                    public String getShortName() {
-                        return "zevents";
-                    }
-                };
-                
-                DiagnosticThread.addDiagnosticObject(myDiag);
+                INSTANCE.initialize();
             }
         }
         return INSTANCE;
