@@ -43,6 +43,10 @@ import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -80,6 +84,7 @@ import org.hyperic.hq.measurement.ext.depgraph.InvalidGraphException;
 import org.hyperic.hq.measurement.ext.depgraph.Node;
 import org.hyperic.hq.measurement.ext.depgraph.RawNode;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
+import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerUtil;
@@ -961,20 +966,38 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         
         if (MeasurementConstants.CAT_AVAILABILITY.equals(cat)) {
             int type = ids[0].getType();
-            Integer[] iids = new Integer[ids.length];
+            
+            List toget = new ArrayList();
+            Cache cache =
+                CacheManager.getInstance().getCache("AvailabilitySummary");
+            
             for (int i = 0; i < ids.length; i++) {
-                AppdefEntityID id = ids[i];
-                iids[i] = id.getId();
-            }
-            List metricIds =
-                getDerivedMeasurementDAO().findAvailabilityIdsByInstances(type,
-                                                                          iids);
-            for (Iterator it = metricIds.iterator(); it.hasNext();) {
-                Object[] ret = (Object[]) it.next();
-                Integer iid = (Integer) ret[0];
-                Integer mid = (Integer) ret[1];
+                Element e = cache.get(ids[i]);
                 
-                midMap.put(new AppdefEntityID(type, iid), mid);
+                if (e != null) {
+                    CacheEntry entry = (CacheEntry) e.getObjectValue();
+                    midMap.put(ids[i], entry.getMetricId());
+                    continue;
+                }
+                
+                toget.add(ids[i].getId());
+            }
+            
+            if (toget.size() > 0) {
+                Integer[] iids =
+                    (Integer[]) toget.toArray(new Integer[toget.size()]);
+
+                List metrics = getDerivedMeasurementDAO()
+                    .findAvailabilityByInstances(type, iids);
+                for (Iterator it = metrics.iterator(); it.hasNext();) {
+                    DerivedMeasurement dm = (DerivedMeasurement) it.next();
+                    AppdefEntityID aeid =
+                        new AppdefEntityID(type, dm.getInstanceId());
+
+                    midMap.put(aeid, dm.getId());
+                    CacheEntry res = new CacheEntry(dm);
+                    cache.put(new Element(aeid, res));
+                }
             }
         }
         else {

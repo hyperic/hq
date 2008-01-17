@@ -410,9 +410,9 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             .list();
     }
 
-    List findAvailabilityIdsByInstances(int type, Integer[] ids) {
+    List findAvailabilityByInstances(int type, Integer[] ids) {
         String sql =
-            "select m.instanceId, m.id from DerivedMeasurement m " +
+            "select m from DerivedMeasurement m " +
             "join m.template t " +
             "join t.monitorableType mt " +
             "where mt.appdefType = :type and m.instanceId in (:ids) and " +

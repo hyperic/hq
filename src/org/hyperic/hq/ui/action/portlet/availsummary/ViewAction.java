@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,6 +56,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -88,6 +89,7 @@ public class ViewAction extends BaseAction {
         WebUser user = (WebUser)
         request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+        AppdefBoss appBoss = ContextUtils.getAppdefBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);
@@ -162,6 +164,12 @@ public class ViewAction extends BaseAction {
 
             // If no avail measurement is scheduled, skip this resource
             if (ent != null) {
+                if (ent.getType() == null) {
+                    AppdefResourceValue resVal = appBoss.findById(sessionId,
+                                                                arrayIds[i]);
+                    ent.setType(resVal.getAppdefResourceTypeValue());
+                }
+                
                 String name = ent.getType().getName();
                 AvailSummary summary = (AvailSummary) res.get(name);
                 if (summary == null) {
@@ -280,8 +288,7 @@ public class ViewAction extends BaseAction {
         throws AppdefEntityNotFoundException
     {
         Cache cache = CacheManager.getInstance().getCache("AvailabilitySummary");
-        CacheKey key = new CacheKey(sessionId, id);
-        Element e = cache.get(key);
+        Element e = cache.get(id);
 
         if (e != null) {
             return (CacheEntry)e.getObjectValue();
@@ -289,19 +296,14 @@ public class ViewAction extends BaseAction {
 
         // Otherwise, load from the backend
         ServletContext ctx = getServlet().getServletContext();
-        AppdefBoss      aBoss = ContextUtils.getAppdefBoss(ctx);
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
 
         try {
-            AppdefResourceValue val = aBoss.findById(sessionId, id);
             DerivedMeasurement m = mBoss.findAvailabilityMetric(sessionId, id);
 
-            CacheEntry res = new CacheEntry(val.getAppdefResourceTypeValue(),
-                                            m);
-            cache.put(new Element(key, res));
+            CacheEntry res = new CacheEntry(m);
+            cache.put(new Element(id, res));
             return res;
-        } catch (AppdefEntityNotFoundException ex) {
-            throw ex;
         } catch (Exception ex) {
             _log.debug("Caught exception loading data: " + ex, ex);
             return null;
@@ -314,11 +316,6 @@ public class ViewAction extends BaseAction {
         private AppdefEntityID _id;
         private int _sessionId;
 
-        public CacheKey(int sessionId, AppdefEntityID id) {
-            _sessionId = sessionId;
-            _id = id;
-        }
-
         public boolean equals(Object o) {
             return (o instanceof CacheKey) &&
                 ((CacheKey)o)._id.equals(_id) &&
@@ -327,38 +324,6 @@ public class ViewAction extends BaseAction {
 
         public int hashCode() {
             return _id.hashCode() + _sessionId;
-        }
-    }
-
-    public class CacheEntry {
-        private AppdefResourceTypeValue _type;
-        private Integer _metricId;
-        private long _interval;
-
-        public CacheEntry(AppdefResourceTypeValue tval,
-                          DerivedMeasurement metric) {
-            _type = tval;
-            
-            if (metric == null) {
-                _metricId = null;
-                _interval = 0;
-            }
-            else {
-                _metricId = metric.getId();
-                _interval = metric.getInterval();
-            }
-        }
-
-        public AppdefResourceTypeValue getType() {
-            return _type;
-        }
-
-        public Integer getMetricId() {
-            return _metricId;
-        }
-
-        public long getInterval() {
-            return _interval;
         }
     }
 }
