@@ -48,11 +48,15 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
+import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AgentValue;
@@ -702,8 +706,10 @@ public class LatherDispatcher
                                 LatherValue arg)
         throws LatherRemoteException
     {
-        log.debug("Request for " + method + "() from " +
-                       ctx.getCallerIP());
+        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
+        Integer agentId = null;
+        
+        log.debug("Request for " + method + "() from " + ctx.getCallerIP());
         
         if(secureCommands.contains(method)){
             if(!(arg instanceof SecureAgentLatherValue)){
@@ -713,9 +719,29 @@ public class LatherDispatcher
                 throw new LatherRemoteException("Unauthorized agent denied");
             }
 
-            validateAgent(ctx, ((SecureAgentLatherValue)arg).getAgentToken());
+            String agentToken = ((SecureAgentLatherValue)arg).getAgentToken(); 
+            validateAgent(ctx, agentToken);
+            try {
+                Agent a = agentMan.getAgentPojo(agentToken);
+                agentId = a.getId();
+            } catch(Exception e) {
+            }
         }
-
+        
+        AgentConnection conn = null;
+        try {
+            conn = agentMan.agentConnected(method, ctx.getCallerIP(), agentId);             
+            return _dispatch(ctx, method, arg);
+        } finally {
+            if (conn != null)
+                agentMan.agentDisconnected(conn);
+        }
+    }
+    
+    private LatherValue _dispatch(LatherContext ctx, String method,
+                                  LatherValue arg)
+        throws LatherRemoteException
+    {
         if(method.equals(CommandInfo.CMD_PING)){
             return cmdPing(arg);
         } else if(method.equals(CommandInfo.CMD_USERISVALID)){

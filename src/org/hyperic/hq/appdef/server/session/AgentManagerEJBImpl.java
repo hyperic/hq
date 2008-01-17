@@ -43,6 +43,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
@@ -334,6 +335,49 @@ public class AgentManagerEJBImpl
         }
     }
 
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public AgentConnection agentConnected(String method, String connIp,
+                                          Integer agentId) 
+    {
+        return AgentConnections.getInstance().agentConnected(method, connIp, 
+                                                             agentId);
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void agentDisconnected(AgentConnection a) {
+        AgentConnections.getInstance().agentDisconnected(a);
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public Collection getConnectedAgents() {
+        return AgentConnections.getInstance().getConnected();
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public int getNumConnectedAgents() {
+        return AgentConnections.getInstance().getNumConnected();
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public long getTotalConnectedAgents() {
+        return AgentConnections.getInstance().getTotalConnections();
+    }
+    
     /**
      * Find an agent listening on a specific IP & port
      *

@@ -74,6 +74,15 @@
             collectionType="trendsup"
             defaultOn="true"/>
 
+    <metric name="Agent Connections"
+            indicator="false" 
+            interval="60000"
+            defaultOn="true"/>
             
+    <metric name="Agent Requests"
+            indicator="false" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
   </service>
 </plugin>

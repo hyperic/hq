@@ -32,4 +32,6 @@ public interface HQInternalServiceMBean {
     long getTransactionCount();
     long getTransactionFailureCount();
     double getMetricsCollectedPerMinute();
+    int getAgentConnections();
+    long getAgentRequests();
 }

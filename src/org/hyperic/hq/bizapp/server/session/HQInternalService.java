@@ -72,4 +72,12 @@ public class HQInternalService implements HQInternalServiceMBean {
     public long getTransactionFailureCount() {
         return HQApp.getInstance().getTransactionsFailed();
     }
+
+    public long getAgentRequests() {
+        return AgentManagerEJBImpl.getOne().getTotalConnectedAgents();
+    }
+    
+    public int getAgentConnections() {
+        return AgentManagerEJBImpl.getOne().getNumConnectedAgents();
+    }
 }
