@@ -404,21 +404,23 @@ public abstract class Collector implements Runnable {
 
     //interval is used to make collection to happen 1 minute before
     //the Availability metric is scheduled to be collected
-    private static void setInterval(MeasurementPlugin plugin,
-                                    Collector collector, Metric metric) {
-        long interval = metric.getInterval();
+    protected void setInterval(MeasurementPlugin plugin, Metric metric) {
+        if (!isPoolable()) {
+            return; //XXX apply only to netservices and exec for now.
+        }
+        long itv = metric.getInterval();
         boolean isAvail = 
             metric.getAttributeName().equals(Metric.ATTR_AVAIL);
 
-        if ((isAvail || (collector.interval == -1)) &&
-            (interval > 0) &&
-            (collector.interval != interval))
+        if ((isAvail || (this.interval == -1)) &&
+            (itv > 0) &&
+            (this.interval != itv))
         {
-            collector.interval = metric.getInterval();
+            this.interval = metric.getInterval();
             if (log.isDebugEnabled()) {
-                log.debug("Set itv=" + (collector.interval / MINUTE) +
+                log.debug("Set itv=" + (this.interval / MINUTE) +
                           "min for " + plugin.getName() +
-                          " collector: " + collector);
+                          " collector: " + this);
             }
         }
     }
@@ -464,7 +466,7 @@ public abstract class Collector implements Runnable {
                     collector.lastCollection = value.getTimestamp(); 
                 }
             } finally {
-                setInterval(plugin, collector, metric); //sync
+                collector.setInterval(plugin, metric); //sync
                 if (setClassLoader) {
                     PluginLoader.resetClassLoader(collector);
                 }
@@ -487,7 +489,7 @@ public abstract class Collector implements Runnable {
             try {
                 collector.setProperties(props);
                 collector.init();
-                setInterval(plugin, collector, metric);
+                collector.setInterval(plugin, metric);
             } finally {
                 if (setClassLoader) {
                     PluginLoader.resetClassLoader(collector);
