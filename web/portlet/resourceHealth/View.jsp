@@ -56,11 +56,8 @@ onloads.push(requestFavoriteResources);
 		<th width="50%" class="tableRowInactive">
 			<fmt:message key="dash.home.TableHeader.ResourceName"/>
 		</th>
-		<th width="20%" class="tableRowInactive">
+		<th width="30%" class="tableRowInactive">
 			<fmt:message key="dash.home.TableHeader.Type"/>
-		</th>
-		<th width="10%" align="center" class="tableRowInactive">
-			<fmt:message key="resource.common.monitor.visibility.PerformanceTH"/>
 		</th>
 		<th width="10%" align="center" class="tableRowInactive">
 			<fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/>
@@ -87,7 +84,7 @@ onloads.push(requestFavoriteResources);
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
 
           <tr>
-              <td colspan="4" id="modifiedFavoriteTime" class="modifiedDate">Updated: </td>
+              <td id="modifiedFavoriteTime" class="modifiedDate">Updated: </td>
           </tr>
 
     </table>

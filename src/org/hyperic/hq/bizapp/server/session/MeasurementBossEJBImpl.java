@@ -2365,43 +2365,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         if (_log.isDebugEnabled())
-            _log.debug("setResourceTypeDisplaySummary() getAvailability: " +
-                     watch.reset());
-        
-        // Throughput a.k.a. Usage
-        /*
-        try {
-            Map midMap = getMetricManager()
-                .findDesignatedMeasurementIds(subject, ids,
-                                           MeasurementConstants.CAT_THROUGHPUT);
-
-            if (midMap.size() > 0) {
-                Integer[] mids =
-                    (Integer[]) midMap.values().toArray(new Integer[0]);
-
-                double[] data =
-                    getDataMan().getAggregateData(mids, begin,end);
-                _log.trace("getting usage data took: " + watch.getElapsed());
-                summary.setThroughput(
-                    new Double(data[MeasurementConstants.IND_AVG]));
-                if (summary.getThroughput() != null && 
-                    summary.getThroughput().intValue() > 0) {
-                    for (int i = 0; i < mids.length ; i++) {
-                        DerivedMeasurement dmv =
-                            getMetricManager().getMeasurement(mids[i]);
-                        
-                        summary.setThroughputUnits(
-                                dmv.getTemplate().getUnits());
-                        
-                        break;
-                    }
-                }
-            }
-        } catch (MeasurementNotFoundException e) {
-            // No throughput data
-        }
-        */
-        if (_log.isDebugEnabled())
             _log.debug("END setResourceTypeDisplaySummary -- " +
                     watch.getElapsed() + " msec");
     }

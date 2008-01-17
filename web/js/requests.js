@@ -508,7 +508,6 @@
                     var trTime = document.createElement('tr');
                     var td1 = document.createElement('td');
                     var td2 = document.createElement('td');
-                    var td3 = document.createElement('td');
                     var td4 = document.createElement('td');
                     var td5 = document.createElement('td');
                     var td6 = document.createElement('td');
@@ -546,18 +545,6 @@
                     } else {
                         // XXX: use common.value.notavail
                         td2.innerHTML = "N/A";
-                    }
-
-                    tr.appendChild(td3);
-                    td3.setAttribute((document.all ? 'className' : 'class'), "throughput");
-                    td3.setAttribute("id", (fList[i].throughput));
-
-                    if (fList[i].throughput) {
-                        td3.appendChild(document.createTextNode(fList[i].throughput));
-
-                    } else {
-                        // XXX: use common.value.notavail
-                        td3.innerHTML = "N/A";
                     }
 
                     tr.appendChild(td4);
