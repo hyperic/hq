@@ -1598,9 +1598,8 @@ public class AppdefBossEJBImpl
             // remove the measurements here to avoid delays in deleting
             // resources.
             MeasurementBossLocal mBoss = getMeasurementBoss();
-            for (int i = 0; i < toDeleteIds.length; i++) {
-                mBoss.disableMeasurements(sessionId, toDeleteIds[i]);
-            }
+            mBoss.disableMeasurements(sessionId, plat.getEntityId(),
+                                      toDeleteIds);
 
             // Remove from AI queue
             try {
@@ -1916,17 +1915,22 @@ public class AppdefBossEJBImpl
                                               PageControl.PAGE_ALL));
 
             MeasurementBossLocal measBoss = getMeasurementBoss();
-                
-            for (Iterator i=unscheduleList.iterator();i.hasNext();) {
+
+            AppdefEntityID[] toUnschedule =
+                new AppdefEntityID[unscheduleList.size()];
+            Iterator it = unscheduleList.iterator();
+            for (int i = 0; it.hasNext(); i++) {
                 AppdefEntityID thisId =
-                    ((AppdefResourceValue)i.next()).getEntityId();
+                    ((AppdefResourceValue)it.next()).getEntityId();
 
-                // now remove the measurements
-                measBoss.disableMeasurements(sessionId, thisId);
-
+                toUnschedule[i] = thisId;
                 // remove any log or config track plugins
                 measBoss.removeTrackers(sessionId, thisId);
             }
+
+            // now remove the measurements
+            measBoss.disableMeasurements(sessionId, serverRes.getEntityId(),
+                                         toUnschedule);
 
             try {
                 AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
