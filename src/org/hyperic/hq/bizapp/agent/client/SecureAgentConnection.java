@@ -53,6 +53,9 @@ import javax.net.ssl.X509TrustManager;
 public class SecureAgentConnection 
     extends AgentConnection
 {
+    private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
+    private static final int READ_TIMEOUT = 60000;
+
     private String agentAddress;
     private int    agentPort;
     private String authToken;
@@ -134,9 +137,18 @@ public class SecureAgentConnection
         }
 
         try {
+            // Check for configured agent read timeout from System properties
+            int timeout;
+            String readTimeout = System.getProperty(PROP_READ_TIMEOUT);
+            try {
+                timeout = Integer.parseInt(readTimeout);
+            } catch (NumberFormatException e) {
+                timeout = READ_TIMEOUT;
+            }
+
             factory = context.getSocketFactory();
             sock = getSSLSocket(factory, this.agentAddress,
-                                this.agentPort, 10 * 1000);
+                                this.agentPort, timeout);
         } catch(IOException exc){
             throw new AgentConnectionException("Unable to connect to " +
                                                this.agentAddress + ":" +
