@@ -59,7 +59,8 @@ public class HQMultipleHiLoPerTableGenerator
 	extends TransactionHelper
 	implements PersistentIdentifierGenerator, Configurable {
 	
-	private static final Log log = LogFactory.getLog(HQMultipleHiLoPerTableGenerator.class);
+	private static final Log log =
+	    LogFactory.getLog(HQMultipleHiLoPerTableGenerator.class);
 	
 	public static final String ID_TABLE = "table";
 	public static final String PK_COLUMN_NAME = "primary_key_column";
@@ -80,6 +81,7 @@ public class HQMultipleHiLoPerTableGenerator
 	private String query;
 	private String insert;
 	private String update;
+	private String keyValue;
 
 	//hilo params
 	public static final String MAX_LO = "max_lo";
@@ -191,15 +193,25 @@ public class HQMultipleHiLoPerTableGenerator
 			//keep the behavior consistent even for boundary usages
 			int val = ( (Integer) doWorkInNewTransaction(session) ).intValue();
 			if (val == 0) val = ( (Integer) doWorkInNewTransaction(session) ).intValue();
-			return IdentifierGeneratorFactory.createNumber( val, returnClass );
+			Number num =
+			    IdentifierGeneratorFactory.createNumber( val, returnClass );
+			if (log.isTraceEnabled()) {
+			    log.trace(this + " created seq: " + keyValue + " / " + num);
+			}
+			return num;
 		}
-		if (lo>maxLo) {
+		else if (lo>maxLo) {
 			int hival = ( (Integer) doWorkInNewTransaction(session) ).intValue();
 			lo = (hival == 0) ? 1 : 0;
 			hi = hival * (maxLo+1);
 			log.debug("new hi value: " + hival);
 		}
-		return IdentifierGeneratorFactory.createNumber( hi + lo++, returnClass );
+		Number num =
+		    IdentifierGeneratorFactory.createNumber( hi + lo++, returnClass );
+		if (log.isTraceEnabled()) {
+		    log.trace(this + " created seq: " + keyValue + " / " + num);
+		}
+		return num;
 	}
 
 	public void configure(Type type, Properties params, Dialect dialect) throws MappingException {
@@ -210,7 +222,7 @@ public class HQMultipleHiLoPerTableGenerator
 		String schemaName = params.getProperty(SCHEMA);
 		String catalogName = params.getProperty(CATALOG);
 		keySize = PropertiesHelper.getInt(PK_LENGTH_NAME, params, DEFAULT_PK_LENGTH);
-		String keyValue = PropertiesHelper.getString(PK_VALUE_NAME, params, params.getProperty(TABLE) );
+		keyValue = PropertiesHelper.getString(PK_VALUE_NAME, params, params.getProperty(TABLE) );
 
 		if ( tableName.indexOf( '.' )<0 ) {
 			tableName = Table.qualify( catalogName, schemaName, tableName );
