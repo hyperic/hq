@@ -235,7 +235,7 @@ function getSelectValue(sel) {
 }
 
 function changeMonthDropdown (monthDropDown, selectedMonthValue, startMonthIndex){
-  var newMonthIndex = selectedMonthValue - startMonthIndex;
+  var newMonthIndex = selectedMonthValue -1;
 
   monthDropDown.options.length = 0;
   monthDropDown.options.length = 12-startMonthIndex;

@@ -108,18 +108,18 @@
 					<td><html:radio property="startTime" value="onDate" onclick="turnOnRecurrence(true)"/>&nbsp;</td>
 					<td nowrap>
 						<html:select property="startMonth" styleId="startMonth" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
-							<html:option value="0">01 (Jan)</html:option>
-							<html:option value="1">02 (Feb)</html:option>
-							<html:option value="2">03 (Mar)</html:option>
-							<html:option value="3">04 (Apr)</html:option>
-							<html:option value="4">05 (May)</html:option>
-							<html:option value="5">06 (Jun)</html:option>
-							<html:option value="6">07 (Jul)</html:option>
-							<html:option value="7">08 (Aug)</html:option>
-							<html:option value="8">09 (Sep)</html:option>
-							<html:option value="9">10 (Oct)</html:option>
-							<html:option value="10">11 (Nov)</html:option>
-							<html:option value="11">12 (Dec)</html:option>
+							<html:option value="1">01 (Jan)</html:option>
+							<html:option value="2">02 (Feb)</html:option>
+							<html:option value="3">03 (Mar)</html:option>
+							<html:option value="4">04 (Apr)</html:option>
+							<html:option value="5">05 (May)</html:option>
+							<html:option value="6">06 (Jun)</html:option>
+							<html:option value="7">07 (Jul)</html:option>
+							<html:option value="8">08 (Aug)</html:option>
+							<html:option value="9">09 (Sep)</html:option>
+							<html:option value="10">10 (Oct)</html:option>
+							<html:option value="11">11 (Nov)</html:option>
+							<html:option value="12">12 (Dec)</html:option>
 						</html:select>
 						/
 						<html:select property="startDay" styleId="startDay" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1); changeDropDown('startMonth', 'startDay', 'startYear');">
@@ -345,52 +345,52 @@
 								<td nowrap>
 									<html:radio property="endTime" value="onDate"/>
 									<html:select property="endMonth" styleId="endMonth" onchange="toggleRadio('endTime', 1); changeDropDown('endMonth', 'endDay', 'endYear');">
-										<html:option value="0">01 (Jan)</html:option>
-										<html:option value="1">02 (Feb)</html:option>
-										<html:option value="2">03 (Mar)</html:option>
-										<html:option value="3">04 (Apr)</html:option>
-										<html:option value="4">05 (May)</html:option>
-										<html:option value="5">06 (Jun)</html:option>
-										<html:option value="6">07 (Jul)</html:option>
-										<html:option value="7">08 (Aug)</html:option>
-										<html:option value="8">09 (Sep)</html:option>
-										<html:option value="9">10 (Oct)</html:option>
-										<html:option value="10">11 (Nov)</html:option>
-										<html:option value="11">12 (Dec)</html:option>
+										<html:option value="1">01 (Jan)</html:option>
+                                        <html:option value="2">02 (Feb)</html:option>
+                                        <html:option value="3">03 (Mar)</html:option>
+                                        <html:option value="4">04 (Apr)</html:option>
+                                        <html:option value="5">05 (May)</html:option>
+                                        <html:option value="6">06 (Jun)</html:option>
+                                        <html:option value="7">07 (Jul)</html:option>
+                                        <html:option value="8">08 (Aug)</html:option>
+                                        <html:option value="9">09 (Sep)</html:option>
+                                        <html:option value="10">10 (Oct)</html:option>
+                                        <html:option value="11">11 (Nov)</html:option>
+                                        <html:option value="12">12 (Dec)</html:option>
 									</html:select>
 									/
 									<html:select property="endDay" styleId="endDay" onchange="toggleRadio('endTime', 1);">
-										<html:option value="0">01</html:option>
-										<html:option value="1">02</html:option>
-										<html:option value="2">03</html:option>
-										<html:option value="3">04</html:option>
-										<html:option value="4">05</html:option>
-										<html:option value="5">06</html:option>
-										<html:option value="7">07</html:option>
-										<html:option value="8">08</html:option>
-										<html:option value="9">09</html:option>
-										<html:option value="10">10</html:option>
-										<html:option value="11">11</html:option>
-										<html:option value="12">12</html:option>
-										<html:option value="13">13</html:option>
-										<html:option value="14">14</html:option>
-										<html:option value="15">15</html:option>
-										<html:option value="16">16</html:option>
-										<html:option value="17">17</html:option>
-										<html:option value="18">18</html:option>
-										<html:option value="19">19</html:option>
-										<html:option value="20">20</html:option>
-										<html:option value="21">21</html:option>
-										<html:option value="22">22</html:option>
-										<html:option value="23">23</html:option>
-										<html:option value="24">24</html:option>
-										<html:option value="25">25</html:option>
-										<html:option value="26">26</html:option>
-										<html:option value="27">27</html:option>
-										<html:option value="28">28</html:option>
-										<html:option value="29">29</html:option>
-										<html:option value="30">30</html:option>
-										<html:option value="31">31</html:option>
+										<html:option value="1">01</html:option>
+                                        <html:option value="2">02</html:option>
+                                        <html:option value="3">03</html:option>
+                                        <html:option value="4">04</html:option>
+                                        <html:option value="5">05</html:option>
+                                        <html:option value="6">06</html:option>
+                                        <html:option value="7">07</html:option>
+                                        <html:option value="8">08</html:option>
+                                        <html:option value="9">09</html:option>
+                                        <html:option value="10">10</html:option>
+                                        <html:option value="11">11</html:option>
+                                        <html:option value="12">12</html:option>
+                                        <html:option value="13">13</html:option>
+                                        <html:option value="14">14</html:option>
+                                        <html:option value="15">15</html:option>
+                                        <html:option value="16">16</html:option>
+                                        <html:option value="17">17</html:option>
+                                        <html:option value="18">18</html:option>
+                                        <html:option value="19">19</html:option>
+                                        <html:option value="20">20</html:option>
+                                        <html:option value="21">21</html:option>
+                                        <html:option value="22">22</html:option>
+                                        <html:option value="23">23</html:option>
+                                        <html:option value="24">24</html:option>
+                                        <html:option value="25">25</html:option>
+                                        <html:option value="26">26</html:option>
+                                        <html:option value="27">27</html:option>
+                                        <html:option value="28">28</html:option>
+                                        <html:option value="29">29</html:option>
+                                        <html:option value="30">30</html:option>
+                                        <html:option value="31">31</html:option>
 									</html:select>
 									/
 									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1); changeDropDown('endMonth', 'endDay', 'endYear');">
