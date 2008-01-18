@@ -718,7 +718,7 @@ public class GalertManagerEJBImpl
     }
 
     /**
-     * Start an escalation for a group alert definition.
+     * Remove all the galert defs associated with this resource group.
      *
      * @ejb:interface-method
      */
