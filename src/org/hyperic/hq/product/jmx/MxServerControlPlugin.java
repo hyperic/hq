@@ -122,20 +122,51 @@ public class MxServerControlPlugin extends ServerControlPlugin {
             restart();
         }
         else {
-            invokeMethod(getObjectName(), action, args);
+            int status = invokeMethod(getObjectName(), action, args);
+            if (status != RESULT_SUCCESS && action.equals("stop")) {
+                stop();
+            }
         }
     }
 
     public int start() {
-        return doCommand(getArgs("start"));
+        int status = doCommand(getArgs("start"));
+        if (status == RESULT_SUCCESS) {
+            setMessage("start executed successfully!");
+        }
+        return status;
     }
 
     public int stop() {
-        return doCommand(getArgs("stop"));
+        int status = doCommand(getArgs("stop"));
+        if (status == RESULT_SUCCESS) {
+            setMessage("stop executed successfully!");
+        }
+        return status;
     }
 
     public int restart() {
-        stop();
-        return start();
+        int stopStatus = stop();
+        try {
+            // don't like doing this, but we need to wait sometime for
+            // process cleanup to occur like network ports freeing up
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
+        int startStatus = start();
+        if (startStatus == RESULT_SUCCESS && stopStatus == RESULT_SUCCESS) {
+            setMessage("restart executed successfully!");
+            return RESULT_SUCCESS;
+        } else if (startStatus != RESULT_SUCCESS &&
+                   stopStatus != RESULT_SUCCESS) {
+            setMessage("restart failed");
+        } else if (startStatus == RESULT_SUCCESS &&
+                   stopStatus != RESULT_SUCCESS) {
+            setMessage("stop failed but start succeeded");
+        } else if (startStatus != RESULT_SUCCESS &&
+                   stopStatus == RESULT_SUCCESS) {
+            setMessage("stop succeeded but start failed");
+        }
+        return RESULT_FAILURE;
     }
 }

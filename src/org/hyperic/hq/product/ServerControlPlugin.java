@@ -314,7 +314,11 @@ public abstract class ServerControlPlugin extends ControlPlugin {
     }
 
     protected File getWorkingDirectory() {
-        return new File(getControlProgram()).getParentFile();
+        File file = new File(getControlProgram()).getParentFile();
+        if (file == null || !file.isAbsolute()) {
+            file = new File(installPrefix);
+        }
+        return file;
     }
 
     protected String getControlProgramDir() {
@@ -439,6 +443,10 @@ public abstract class ServerControlPlugin extends ControlPlugin {
         }
 
         String prefix = getControlProgramPrefix();
+        //try our best to figure out the prefix of the control program
+        if (prefix == null || prefix.trim().length() == 0) {
+            prefix = installPrefix;
+        }
         if (prefix != null && prefix.length() != 0) {
             try {
                 String[] prefixArgs = 
@@ -462,7 +470,10 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             }
         }
 
-        args.add(program);
+        if (new File(program).isAbsolute())
+            args.add(program);
+        else
+            args.add(installPrefix+File.separator+program);
 
         if (params != null) {
             for (int i=0; i<params.length; i++) {
