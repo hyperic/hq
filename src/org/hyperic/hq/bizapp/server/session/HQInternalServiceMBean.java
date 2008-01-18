@@ -34,6 +34,6 @@ public interface HQInternalServiceMBean {
     double getMetricsCollectedPerMinute();
     int getAgentConnections();
     long getAgentRequests();
-    long getZeventMaxWaitTime();
+    long getZeventMaxWait();
     long getZeventsProcessed();
 }

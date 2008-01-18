@@ -82,7 +82,7 @@ public class HQInternalService implements HQInternalServiceMBean {
         return AgentManagerEJBImpl.getOne().getNumConnectedAgents();
     }
 
-    public long getZeventMaxWaitTime() {
+    public long getZeventMaxWait() {
         return ZeventManager.getInstance().getMaxTimeInQueue();
     }
 
