@@ -47,27 +47,27 @@ public class MeasurementGtriggerType
     
     private final Log _log = LogFactory.getLog(MeasurementGtriggerType.class);
 
-    public Gtrigger createTrigger(ConfigResponse cfg) {
-        int sizeCompareCode, numResources, templateId, comparatorCode; 
-        ComparisonOperator comparator;
-        SizeComparator sizeCompare;
-        boolean isPercent;
-        float metricValue;
-        
-        sizeCompareCode = Integer.parseInt(cfg.getValue(CFG_SIZE_COMPAR));
-        sizeCompare     = SizeComparator.findByCode(sizeCompareCode);
-        numResources    = Integer.parseInt(cfg.getValue(CFG_NUM_RESOURCE));
-        isPercent       = Boolean.valueOf(cfg.getValue(CFG_IS_PERCENT))
-                                 .booleanValue();
+    public Gtrigger createTrigger(ConfigResponse cfg) {        
+        int sizeCompareCode = Integer.parseInt(cfg.getValue(CFG_SIZE_COMPAR));
+        SizeComparator sizeCompare = SizeComparator.findByCode(sizeCompareCode);
+        int numResources = Integer.parseInt(cfg.getValue(CFG_NUM_RESOURCE));
+        boolean isPercent = 
+            Boolean.valueOf(cfg.getValue(CFG_IS_PERCENT)).booleanValue();
+        boolean isNotReportingOffending = 
+            Boolean.valueOf(cfg.getValue(CFG_IS_NOT_REPORTING_OFFENDING)).booleanValue();
                                                
-        templateId      = Integer.parseInt(cfg.getValue(CFG_TEMPLATE_ID));
-        comparatorCode  = Integer.parseInt(cfg.getValue(CFG_COMP_OPER));
-        comparator      = ComparisonOperator.findByCode(comparatorCode);
-        metricValue     = Float.parseFloat(cfg.getValue(CFG_METRIC_VAL));
+        int templateId = Integer.parseInt(cfg.getValue(CFG_TEMPLATE_ID));
+        int comparatorCode = Integer.parseInt(cfg.getValue(CFG_COMP_OPER));
+        ComparisonOperator comparator = ComparisonOperator.findByCode(comparatorCode);
+        float metricValue = Float.parseFloat(cfg.getValue(CFG_METRIC_VAL));
         
-        return new MeasurementGtrigger(sizeCompare, numResources, 
-                                       isPercent, templateId,
-                                       comparator, metricValue);
+        return new MeasurementGtrigger(sizeCompare, 
+                                       numResources, 
+                                       isPercent, 
+                                       templateId,
+                                       comparator, 
+                                       metricValue, 
+                                       isNotReportingOffending);
     }
 
     public ConfigSchema getSchema() {
