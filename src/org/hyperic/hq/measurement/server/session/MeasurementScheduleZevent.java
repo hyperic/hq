@@ -27,8 +27,8 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 
 public class MeasurementScheduleZevent extends Zevent 
 {
@@ -55,7 +55,10 @@ public class MeasurementScheduleZevent extends Zevent
         }
 
         public int hashCode() {
-            return _id;
+            int result = 17;
+            result = 37*result+_id;
+            result = 37*result+this.getClass().toString().hashCode();
+            return result;
         }
 
         public boolean equals(Object o) {
@@ -91,4 +94,5 @@ public class MeasurementScheduleZevent extends Zevent
         super(new MeasurementScheduleZeventSource(measId),
               new MeasurementScheduleZeventPayload(interval));
     }
+
 }

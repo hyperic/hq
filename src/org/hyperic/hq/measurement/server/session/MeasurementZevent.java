@@ -55,7 +55,10 @@ public class MeasurementZevent
         }
         
         public int hashCode() {
-            return _id;
+            int result = 17;
+            result = 37*result+_id;
+            result = 37*result+this.getClass().toString().hashCode();
+            return result;
         }
         
         public boolean equals(Object o) {
