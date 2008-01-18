@@ -761,18 +761,18 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * Return a List of Measurements that are not collecting for the given
+     * Return a List of Measurements that are collecting for the given
      * template ID and group.
      *
      * @param g The group in question.
      * @param templateId The measurement template to query.
      * @return templateId A list of Measurement objects with the given template
-     * id in the group that are not set to be collected.
+     * id in the group that are set to be collected.
      * @ejb:interface-method
      */
-    public List getMetricsNotCollecting(ResourceGroup g, Integer templateId) {
+    public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
 
-        return getResourceGroupDAO().getMetricsNotCollecting(g, templateId);
+        return getResourceGroupDAO().getMetricsCollecting(g, templateId);
     }
     
     public static ResourceGroupManagerLocal getOne() {

@@ -237,26 +237,26 @@ public class ResourceGroupDAO extends HibernateDAO
     }
 
     /**
-     * Return a List of Measurements that are not collecting for the given
+     * Return a List of Measurements that are collecting for the given
      * template ID and group.
      *
      * @param g The group in question.
      * @param templateId The measurement template to query.
      * @return templateId A list of Measurement objects with the given template
-     * id in the group that are not set to be collected.
+     * id in the group that are set to be collected.
      */
-    public List getMetricsNotCollecting(ResourceGroup g, Integer templateId) {
+    public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql =
             "select m from DerivedMeasurement m, " +
             "ResourceGroup g join g.resourceSet r " +
             "where m.instanceId = r.instanceId and "+
-            "g = ? and m.template.id = ? and m.enabled = false";
+            "g = ? and m.template.id = ? and m.enabled = true";
 
         return getSession().createQuery(sql)
             .setParameter(0, g)
             .setInteger(1, templateId.intValue())
             .setCacheable(true)
-            .setCacheRegion("ResourceGroup.getMetricsNotCollecting")
+            .setCacheRegion("ResourceGroup.getMetricsCollecting")
             .list();
     }
 }
