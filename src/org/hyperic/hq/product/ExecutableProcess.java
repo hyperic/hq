@@ -198,7 +198,7 @@ public class ExecutableProcess extends Collector {
             parseResults(getMessage());
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.error(e.getMessage(), e);
+                log.error(this + ": " + e.getMessage(), e);
             }
 
             setMessage(e.toString());
@@ -216,18 +216,19 @@ public class ExecutableProcess extends Collector {
 
         setLogLevel(getLogLevel(res));
         double avail = getAvailValue(res);
+        String msg = this + ": " + getMessage();
 
         switch (getLogLevel()) {
             case LogTrackPlugin.LOGLEVEL_ERROR:
-                log.error(getMessage());
+                log.error(msg);
                 break;
             case LogTrackPlugin.LOGLEVEL_WARN:
-                log.warn(getMessage());
+                log.warn(msg);
                 break;
             case LogTrackPlugin.LOGLEVEL_INFO:
             case LogTrackPlugin.LOGLEVEL_DEBUG:
             default:
-                log.debug(getMessage());
+                log.debug(msg);
                 break;
         }
 
