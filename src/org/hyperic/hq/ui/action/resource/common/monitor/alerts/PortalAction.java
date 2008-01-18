@@ -99,19 +99,8 @@ public class PortalAction extends ResourceController {
             log.debug(pne);
         }
         
-        Portal portal = Portal.createPortal();
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
-        setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
-        portal.setDialog(false);
-        if (aeid.isGroup()) {
-            portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
-        } else {
-            portal.addPortlet(new Portlet(".events.alert.list"), 1);
-        }
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        
+        GregorianCalendar cal = new GregorianCalendar();
         try {
-            GregorianCalendar cal = new GregorianCalendar();
             Integer year = RequestUtils.getIntParameter(request, "year");
             Integer month = RequestUtils.getIntParameter(request, "month");
             Integer day = RequestUtils.getIntParameter(request, "day");
@@ -122,7 +111,33 @@ public class PortalAction extends ResourceController {
         } catch (ParameterNotFoundException e) {
             request.setAttribute("date", new Long(System.currentTimeMillis()));
         }
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
 
+        Portal portal = Portal.createPortal();
+        AppdefEntityID aeid = RequestUtils.getEntityId(request);
+        setTitle(aeid, portal, "alerts.alert.platform.AlertList.Title");
+        portal.setDialog(false);
+        if (aeid.isGroup()) {
+            portal.addPortlet(new Portlet(".events.group.alert.list"), 1);
+            
+            // Set the total alerts
+            ServletContext ctx = getServlet().getServletContext();
+            int sessionId = RequestUtils.getSessionId(request).intValue();
+            GalertBoss gBoss = ContextUtils.getGalertBoss(ctx);
+            
+            request.setAttribute("listSize",
+                new Integer(gBoss.countAlertLogs(sessionId,
+                                                 aeid.getId(),
+                                                 cal.getTimeInMillis(),
+                                                 cal.getTimeInMillis() +
+                                                 Constants.DAYS)));
+        } else {
+            portal.addPortlet(new Portlet(".events.alert.list"), 1);
+        }
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        
         return null;
     }
 

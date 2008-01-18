@@ -294,6 +294,34 @@ public class GalertBossEJBImpl
     }
 
     /**
+     * Count the total number of galerts in the time frame
+     * @ejb:interface-method
+     */
+    public int countAlertLogs(int sessionId, Integer gid, long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException
+    {
+        AuthzSubjectValue subj = _sessMan.getSubject(sessionId);
+
+        ResourceGroup g;
+        try {
+            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
+                                                                           gid);
+        } catch (FinderException e) {
+            throw new SystemException(e);
+        }
+        
+        // Don't need to have any results
+        PageControl pc = new PageControl();
+        pc.setPagesize(0);
+        
+        PageList alertLogs =
+            _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+        
+        return alertLogs.getTotalSize();
+    }
+    
+    /**
      * retrieve all escalation policy names as a Array of JSONObject.
      *
      * Escalation json finders begin with json* to be consistent with
@@ -310,12 +338,8 @@ public class GalertBossEJBImpl
 
         ResourceGroup g;
         try {
-            g = ResourceGroupManagerUtil.getLocalHome().create()
-                .findResourceGroupById(subj, gid);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
+            g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
+                                                                           gid);
         } catch (FinderException e) {
             throw new SystemException(e);
         }

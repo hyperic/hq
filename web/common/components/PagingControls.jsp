@@ -84,12 +84,12 @@
         <td width="100%" align="right">&nbsp;</td>
       </c:otherwise>
     </c:choose>
-    <td><c:if test="${not empty listItems}">
+    <td>
       <hq:paginate action="${pageNumAction}" items="${listItems}"
         defaultSortColumn="${defaultSortColumn}" listTotalSize="${listSize}"
         pageValue="${pageNumParam}" pageNumber="${pageNumber}"
         pageSizeValue="${pageSizeParam}" />
-    </c:if></td>
+    </td>
   </tr>
 </table>
 </td>
