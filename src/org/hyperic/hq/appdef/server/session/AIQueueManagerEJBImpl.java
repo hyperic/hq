@@ -543,6 +543,11 @@ public class AIQueueManagerEJBImpl
             for ( i=0; i<platformList.size(); i++ ) {
                 id = (Integer) platformList.get(i);
 
+                if (id == null) {
+                    log.error("processQueue: platform with ID=null");
+                    continue;
+                }
+
                 try {
                     aiplatform = aiplatformLH.findById(id);
                 } catch ( ObjectNotFoundException e ) {
