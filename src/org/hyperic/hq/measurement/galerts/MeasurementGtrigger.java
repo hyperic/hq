@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,16 +45,20 @@ import org.hyperic.hq.appdef.shared.AppdefGroupManagerUtil;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
+import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
@@ -61,6 +66,7 @@ import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.HeartBeatZevent.HeartBeatZeventSource;
 
 
 /**
@@ -72,66 +78,324 @@ public class MeasurementGtrigger
 {
     private static final Log _log = 
         LogFactory.getLog(MeasurementGtrigger.class);
-
+    
+    /**
+     * The minimum assumed measurement collection interval. This 
+     * value doesn't have to be exact since it's only used to 
+     * estimate the time window if we have the case where none 
+     * of the resources in the group are collecting on the metric.
+     */
+    private static final int MIN_COLLECTION_INTERVAL=60*1000;
+    
     private final SizeComparator     _sizeCompare;
     private final int                _numResources; // Num needed to match
     private final boolean            _isPercent;
-    private final int                _templateId;
+    private final Integer            _templateId;
     private final ComparisonOperator _comparator;
     private final Float              _metricVal;
     private final Set                _interestedEvents;
-    private final Map                _processedEvents;
-    private       int                _groupSize;  // The total size of our group
+    private final Map                _trackedResources;
+    private final boolean            _isNotReportingEventsOffending;
+    private final TreeSet            _chronSortedMetricTimestamps;
+    private       String             _name;
+    private       long               _maxCollectionInterval;
+    private       boolean            _processedFirstEvent;
+    private       boolean            _isWithinFirstTimeWindow;
+    private       long               _startOfTimeWindow;
     private       String             _metricName;
+    private       int                _groupSize;  // The total size of our group    
+    private       ResourceGroup      _resourceGroup;
     
-    MeasurementGtrigger(SizeComparator sizeCompare, int numResources,
-                        boolean isPercent, int templateId,
-                        ComparisonOperator comparator, float metricVal) 
+    // These are the resources that have the metric collection interval set
+    private final Map                _srcId2CollectionInterval;
+    
+    MeasurementGtrigger(SizeComparator sizeCompare, 
+                        int numResources,
+                        boolean isPercent, 
+                        int templateId,
+                        ComparisonOperator comparator, 
+                        float metricVal, 
+                        boolean isNotReportingOffending) 
     {
         _sizeCompare      = sizeCompare;
         _numResources     = numResources;
         _isPercent        = isPercent;
-        _templateId       = templateId;
+        _templateId       = new Integer(templateId);
         _comparator       = comparator;
         _metricVal        = new Float(metricVal);
         _interestedEvents = new HashSet();
-        _processedEvents  = new HashMap(_numResources);
-        _groupSize        = 0; 
+        _trackedResources  = new HashMap();
         _metricName       = "Unknown";
+        _groupSize        = 0;
+        _isNotReportingEventsOffending = isNotReportingOffending;
+        _srcId2CollectionInterval = new HashMap();
+        _isWithinFirstTimeWindow = true;
+        _startOfTimeWindow = System.currentTimeMillis();
+        _chronSortedMetricTimestamps = new TreeSet();
+        _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+        setTriggerName();
     }
     
     public Set getInterestedEvents() {
         return Collections.unmodifiableSet(_interestedEvents);
     }
-
+    
     public void processEvent(Zevent event) {
-        MeasurementZevent me = (MeasurementZevent)event;
-        MeasurementZeventPayload val = (MeasurementZeventPayload)me.getPayload(); 
+        // Process measurement schedule changes.
+        if (isMeasurementScheduleEvent(event)) {
+            metricCollectionIntervalChanged();
+            return;
+        }
+        
+        // Evaluate the sliding time window boundary.
+        boolean inFirstTimeWindow = isInFirstTimeWindow();
+        evaluateNextStartOfTimeWindow(inFirstTimeWindow);
+        long endOfTimeWindow = _startOfTimeWindow+2*_maxCollectionInterval;
+        
+        // Track the measurement events.
+        if (isMeasurementEvent(event)) {         
+            MeasurementZevent me = (MeasurementZevent)event;
             
-        _processedEvents.put(me.getSourceId(), val.getValue());
-        tryToFire();
+            if (!isOlderThanTimeWindowStartTime(me, _startOfTimeWindow)) {
+                track(me);       
+            }
+        }
+        
+        // Try to fire.
+        Map srcId2ViolatingMetricValue = 
+            evaluateTimeWindowAndReturnViolators(_trackedResources, 
+                                                 _startOfTimeWindow, 
+                                                 endOfTimeWindow);
+        
+        if (srcId2ViolatingMetricValue.size() > 0) {
+            int numCollectingMetrics = _srcId2CollectionInterval.size();
+            
+            tryToFire(srcId2ViolatingMetricValue, numCollectingMetrics);            
+        }
+    }
+    
+    /**
+     * Is this a measurement schedule event?
+     * 
+     * @param event The event.
+     * @return <code>true</code> if this is a {@link MeasurementScheduleZevent}.
+     */
+    private boolean isMeasurementScheduleEvent(Zevent event) {
+        return event instanceof MeasurementScheduleZevent;
+    }
+    
+    /**
+     * Is this a measurement event?
+     * 
+     * @param event The event.
+     * @return <code>true</code> if this is a {@link MeasurementZevent}.
+     */
+    private boolean isMeasurementEvent(Zevent event) {
+        return event instanceof MeasurementZevent;
+    }
+        
+    /**
+     * Process the collection interval change.
+     */
+    private void metricCollectionIntervalChanged() {
+        // It's safer to pull directly from the database than to 
+        // use the measurement schedule event, since we may have 
+        // missed a prior measurement schedule event.
+        List derivedMeas = getMeasurementsCollecting();
+
+        _srcId2CollectionInterval.clear();
+        
+        _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+        
+        for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
+            DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+            int mid = meas.getId().intValue();
+            Long interval = new Long(meas.getInterval());
+            _srcId2CollectionInterval.put(
+                    new MeasurementZeventSource(mid), interval);
+            _maxCollectionInterval = 
+                Math.max(_maxCollectionInterval, meas.getInterval());
+        }
     }
 
-    private void tryToFire() {
-        int numMatched;
-        
-        // Can't process anything unless we have all the resources
-        if (_processedEvents.size() != _groupSize) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Processed events size ["+_processedEvents.size()+
-                            "] != group size ["+_groupSize+"] for alerting condition "+
-                            _metricName+" "+_comparator+" "+_metricVal);                
-            }            
-            
-            return;            
+    /**
+     * @return <code>true</code> if we are still in the first time window.
+     */
+    private boolean isInFirstTimeWindow() {
+        if (_isWithinFirstTimeWindow) {
+            if (System.currentTimeMillis()<_startOfTimeWindow+2*_maxCollectionInterval) {
+                // still in first time window
+                _isWithinFirstTimeWindow = true;
+            } else {
+                _isWithinFirstTimeWindow = false;
+            }   
         }
-
         
-        numMatched = 0;
-        for (Iterator i=_processedEvents.values().iterator(); i.hasNext(); ) {
+        return _isWithinFirstTimeWindow;
+    }
+    
+    /**
+     * Evaluate the next start of the time window. If this is the first event 
+     * then the start of the time window is the current time. If we are still 
+     * in the first time window, then the start time doesn't change from the 
+     * previous value. Otherwise, the start of the time window is the timestamp 
+     * of the oldest tracked metric value (or the current time if no metrics 
+     * have been tracked yet).
+     * 
+     * @param inFirstTimeWindow <code>true</code> if we are still within the 
+     *                          first time window.
+     */
+    private void evaluateNextStartOfTimeWindow(boolean inFirstTimeWindow) {        
+        if (_processedFirstEvent) {
+            if (inFirstTimeWindow) {
+                // don't change start of time window yet - use the old value
+            } else {
+                if (_chronSortedMetricTimestamps.isEmpty() || 
+                    _chronSortedMetricTimestamps.first() == null) {
+                    // It's as though we are in the very first time window 
+                    // and just processed the first event.
+                    _isWithinFirstTimeWindow = true;
+                    _startOfTimeWindow = System.currentTimeMillis();
+                    _processedFirstEvent = true;                    
+                } else {
+                    Long timestamp = (Long)_chronSortedMetricTimestamps.first();
+                    _startOfTimeWindow = timestamp.longValue();
+                    _chronSortedMetricTimestamps.remove(timestamp);
+                }
+            }
+        } else {
+            _startOfTimeWindow = System.currentTimeMillis();
+            _processedFirstEvent = true;
+        }
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Start of time window for trigger ["+_name+
+                       "] ="+_startOfTimeWindow);               
+        }
+    }
+    
+    /**
+     * Is this measurement event older than the start of the time window?
+     * 
+     * @param event The measurement event.
+     * @param startTime The start timestamp for the time window.
+     * @return <code>true</code> if this is an old measurement event.
+     */
+    private boolean isOlderThanTimeWindowStartTime(MeasurementZevent event, 
+                                                   long startTime) {
+        MeasurementZeventPayload val = 
+            (MeasurementZeventPayload)event.getPayload();
+
+        if (val.getValue().getTimestamp() < startTime) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("Trigger ["+_name+
+                        "] is rejecting event older than time window: " +
+                        event+"; "+val.getValue().getTimestamp()+
+                        " < "+startTime);                    
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Track this measurement event.
+     * 
+     * @param event The measurement event.
+     */
+    private void track(MeasurementZevent event) {
+        MeasurementZeventPayload val = 
+            (MeasurementZeventPayload)event.getPayload();
+        
+        ResourceMetricTracker tracker = 
+            (ResourceMetricTracker)_trackedResources.get(event.getSourceId());
+                
+        if (tracker == null) {
+            tracker = 
+                new ResourceMetricTracker(_comparator,
+                                          _metricVal, 
+                                          _isNotReportingEventsOffending);
+            _trackedResources.put(event.getSourceId(), tracker);
+        }     
+        
+        tracker.trackMetricValue(val.getValue());
+        
+        _chronSortedMetricTimestamps.add(
+                new Long(val.getValue().getTimestamp()));
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Tracking measurement for trigger ["+_name+
+                       "]: "+event.getSourceId()+", "+val);                 
+        }
+    }
+    
+    /**
+     * Evaluate the time window and return the first found violating metric 
+     * value for each of the tracked resources.
+     * 
+     * @param trackedResources The tracked resources.
+     * @param startTime The start timestamp for the time window.
+     * @param endTime The end timestamp for the time window.
+     * @return The map of {@link MeasurementZeventSource}Ids to {@link MetricValue}s.
+     */
+    private Map evaluateTimeWindowAndReturnViolators(Map trackedResources,
+                                                     long startTime,
+                                                     long endTime) {
+        
+        boolean debug = _log.isDebugEnabled();
+        
+        Map srcId2MetricValue = new HashMap();
+        
+        if (debug) {
+            _log.debug("Checking for violating measurements for trigger ["+_name+
+                       "] with time window; start="+startTime+", end="+endTime);                 
+        }
+        
+        for (Iterator iter = trackedResources.entrySet().iterator(); iter.hasNext();) {      
+            Map.Entry entry = (Map.Entry) iter.next();
+            MeasurementZeventSource srcId = (MeasurementZeventSource)entry.getKey();
+            ResourceMetricTracker tracker = (ResourceMetricTracker)entry.getValue();
+            
+            // Scrub out resources that are not scheduled to collect 
+            // and don't have any remaining tracked metrics.
+            if (tracker.getNumberOfTrackedMetrics()==0 && 
+                !_srcId2CollectionInterval.containsKey(srcId)) {
+                if (debug) {
+                    _log.debug("Found unscheduled measurement for trigger ["+_name+
+                            "]: "+srcId);                        
+                }
+                
+                iter.remove();
+                continue;
+            }
+
+            MetricValue violatingValue = 
+                tracker.searchForViolatingMetricInWindow(startTime, endTime);
+            
+            if (violatingValue != null) {
+                srcId2MetricValue.put(srcId, violatingValue);
+                
+                if (debug) {
+                    _log.debug("Found violating measurement for trigger ["+_name+
+                               "]: "+srcId+", "+violatingValue);                 
+                }
+            }
+        } 
+        
+        return srcId2MetricValue;
+    }
+    
+    private void tryToFire(Map srcId2MetricValue, int numCollectingMetrics) {                
+        int numMatched = 0;
+        
+        for (Iterator i=srcId2MetricValue.values().iterator(); i.hasNext(); ) {
             MetricValue val = (MetricValue)i.next();
             
-            if (_comparator.isTrue(new Float(val.getValue()), _metricVal)) { 
+            // Offending resources always add towards the number matched
+            if (val.equals(MetricValue.NONE) || 
+                _comparator.isTrue(new Float(val.getValue()), _metricVal)) { 
                 numMatched++;
             }
         }
@@ -139,21 +403,50 @@ public class MeasurementGtrigger
         String leftHandStr, numMatchStr;
         int leftHand;
         
-        if (_isPercent) {
-            leftHand    = numMatched * 100 / _groupSize;
-            numMatchStr = leftHand + "%"; 
-            leftHandStr = (_numResources * 100 / _groupSize) + "%";
+        // We have to be aware of the case where the number of collecting 
+        // metrics has recently changed, but the time window has not 
+        // caught up yet with that point in time. Especially since 
+        // we may not be collecting any metrics in the group (division by zero!).
+        if (_isPercent) { 
+            if (numCollectingMetrics == 0) {
+                // Metric collection has been turned off recently.
+                // Use the full group size.
+                leftHand = (numMatched * 100 / _groupSize);
+            } else if (numCollectingMetrics == _groupSize) {
+                // All the resources in the group are collecting.
+                // Use the full group size.
+                leftHand = (numMatched * 100 / _groupSize);
+            } else if (numCollectingMetrics < _groupSize) {
+                // Some of the resources in the group are not collecting.
+                // Use the current collecting resource size.
+                leftHand = (numMatched * 100 / numCollectingMetrics);
+            } else { // numCollectingMetrics > _groupSize
+                // This shouldn't happen. Log it and make a best guess.
+                // Use the current collecting resource size.
+                _log.warn("Trigger ["+_name+"] encountered case where num of " +
+                		 "collecting metrics > group size! num collecting="+
+                		 numCollectingMetrics+", group size="+_groupSize);
+                leftHand = (numMatched * 100 / numCollectingMetrics);
+            }
+            
+            // Shouldn't be larger than 100%
+            leftHand = Math.max(leftHand, 100);
+            numMatchStr = leftHand + "%";
+            leftHandStr = _numResources + "%";
         } else {
             leftHand    = numMatched;
             numMatchStr = leftHand + "";
             leftHandStr = "" + _numResources;  
         }
         
-        _log.debug("Checking if " + _sizeCompare + " " + _numResources +
-                   (_isPercent ? "%" : "") +
-                   " of the resources reported " + _metricName + 
-                   " " + _comparator + " " + _metricVal);
-        _log.debug("Number of resources matching condition: " + numMatched);
+        if (_log.isDebugEnabled()) {
+            _log.debug("Checking if " + _sizeCompare + " " + _numResources +
+                    (_isPercent ? "%" : "") +
+                    " of the resources reported " + _metricName + 
+                    " " + _comparator + " " + _metricVal);
+            _log.debug("Number of resources matching condition="+
+                       numMatched+", number collecting="+numCollectingMetrics);            
+        }
         
         if (!_sizeCompare.isTrue(leftHand, _numResources)) {
             setNotFired();
@@ -184,31 +477,44 @@ public class MeasurementGtrigger
             .append(_comparator)
             .append(" ")
             .append(_metricVal);
+        
+        long firedTime = System.currentTimeMillis();
 
         setFired(new FireReason(sr.toString(), lr.toString(), 
-                                formulateAuxLogs()));
+                    formulateAuxLogs(srcId2MetricValue, firedTime)));
     }
 
-    private List formulateAuxLogs() {
+    private List formulateAuxLogs(Map srcId2MetricValue, long firedTime) {
         // Assemble the aux info
         List auxLogs = new ArrayList();
         DerivedMeasurementManagerLocal dmMan = getDMMan();
         AuthzSubjectValue overlord = 
             AuthzSubjectManagerEJBImpl.getOne().findOverlord();
-        for (Iterator i=_processedEvents.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator i=srcId2MetricValue.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             MeasurementZeventSource src = (MeasurementZeventSource)ent.getKey();
             MetricValue val = (MetricValue)ent.getValue();
             SimpleAlertAuxLog baseLog; 
-            DerivedMeasurement metric;
             AppdefEntityValue entVal;
             AppdefEntityID entId;
             String descr, entName, metricName;
             
-            if (!_comparator.isTrue(new Float(val.getValue()), _metricVal)) 
-                continue;
+            // We know that offending resources violate the conditions.
+            // No need to do the comparison in this case.
+            if (!val.equals(MetricValue.NONE)) {
+                if (!_comparator.isTrue(new Float(val.getValue()), _metricVal)) 
+                    continue;                
+            }
             
-            metric = dmMan.getMeasurement(new Integer(src.getId()));
+            DerivedMeasurement metric = 
+                dmMan.getMeasurement(new Integer(src.getId()));
+            
+            if (metric == null) {
+                // HQ-1117: The resource has already been deleted
+                // Don't consider this resource
+                continue;
+            }
+            
             entId  = new AppdefEntityID(metric.getAppdefType(), 
                                         metric.getInstanceId());
             entVal = new AppdefEntityValue(entId, overlord);
@@ -222,11 +528,17 @@ public class MeasurementGtrigger
                     " = " + val.getValue();
                       
             baseLog = new SimpleAlertAuxLog(descr, val.getTimestamp());
-            baseLog.addChild(new MetricAuxLog(metricName + " chart", 
-                                              val.getTimestamp(), metric));
-                                              
-            baseLog.addChild(new ResourceAuxLog(entName, val.getTimestamp(), 
-                                                entId));
+            
+            if (val.equals(MetricValue.NONE)) {
+                // Offending resources have no metric aux log.
+                baseLog.addChild(new ResourceAuxLog(entName, firedTime, entId));
+            } else {
+                baseLog.addChild(new MetricAuxLog(metricName + " chart", 
+                        val.getTimestamp(), metric));                
+                baseLog.addChild(new ResourceAuxLog(entName, val.getTimestamp(), 
+                        entId));
+            }
+            
             auxLogs.add(baseLog);
         }
         
@@ -237,7 +549,13 @@ public class MeasurementGtrigger
         return DerivedMeasurementManagerEJBImpl.getOne();
     }
     
+    private ResourceGroupManagerLocal getRGMan() {
+        return ResourceGroupManagerEJBImpl.getOne();
+    }
+    
     public void setGroup(ResourceGroup rg) {
+        _resourceGroup = rg;
+        
         _interestedEvents.clear();
         try {
             // Not sure this is the best way to do this.  It essentially ties us
@@ -246,44 +564,63 @@ public class MeasurementGtrigger
                 AppdefGroupManagerUtil.getLocalHome().create();
             AuthzSubjectManagerLocal sMan = 
                 AuthzSubjectManagerUtil.getLocalHome().create();
-            DerivedMeasurementManagerLocal dMan = getDMMan();
             TemplateManagerLocal tMan = 
                 TemplateManagerUtil.getLocalHome().create();
             
             AppdefGroupValue g = gMan.findGroup(sMan.getOverlord(), rg.getId());
-            List instanceIds = new ArrayList();
             
             _groupSize = g.getTotalSize();
             
-            _log.debug("The group size was set to "+_groupSize+" for resource group id="+rg.getId());
+            _log.debug("Resource group set: id="+rg.getId()+", size="+_groupSize);
             
-            for (Iterator i=g.getAppdefGroupEntries().iterator(); i.hasNext(); ) 
-            {
-                AppdefEntityID ent = (AppdefEntityID)i.next();
+            List derivedMeas = getMeasurementsCollecting();
+            
+            _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
+            
+            for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
+                DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+                int mid = meas.getId().intValue();
+                Long interval = new Long(meas.getInterval());
                 
-                instanceIds.add(ent.getId());
-            }
-
-            Integer[] iids = new Integer[instanceIds.size()];
-            instanceIds.toArray(iids);
-            Integer[] mIds = dMan.findMeasurementIds(sMan.getOverlordPojo(), 
-                                                     new Integer(_templateId), 
-                                                     iids);
-                                    
-            for (int i = 0; i<mIds.length; i++) {
-                int mid = mIds[i].intValue();
-                _interestedEvents.add(new MeasurementZeventSource(mid));
+                _maxCollectionInterval = 
+                    Math.max(_maxCollectionInterval, meas.getInterval());
+                
+                MeasurementZeventSource srcId = new MeasurementZeventSource(mid);
+                _interestedEvents.add(srcId);
+                _srcId2CollectionInterval.put(srcId, interval);
+                
+                MeasurementScheduleZeventSource scheduleSrcId = 
+                    new MeasurementScheduleZeventSource(mid);
+                _interestedEvents.add(scheduleSrcId);
             }
             
-            if (_interestedEvents.size() != _groupSize) {
-                _log.warn("Listening to different # events than resources. " +
-                          " This probably means that not everyone in the " + 
-                          " group is monitoring something");
+            _interestedEvents.add(HeartBeatZeventSource.getInstance());
+            
+            if (derivedMeas.size() != _groupSize) {
+                _log.warn("Listening to different # measurement events ("+
+                           derivedMeas.size()+") than resources ("+
+                          _groupSize+"). This probably means that not " +
+                          "everyone in the group is monitoring something");
             }
             
-            _metricName = tMan.getTemplate(new Integer(_templateId)).getName();
+            _metricName = tMan.getTemplate(_templateId).getName();
+            
+            setTriggerName();
         } catch(Exception e) {
             throw new SystemException(e);
         }
+    }
+    
+    /**
+     * Get the measurements collecting for each resource in the group.
+     * 
+     * @return The list of {@link DerivedMeasurement} objects.
+     */
+    private List getMeasurementsCollecting() {
+        return getRGMan().getMetricsCollecting(_resourceGroup, _templateId);
+    }
+    
+    private void setTriggerName() {
+        _name = _metricName+" "+_comparator+" "+_metricVal;
     }
 }
