@@ -229,7 +229,7 @@ public class CalendarForm extends BaseValidatorForm  {
         } else {
             this.startAmPm = PM;
         }
-        this.startDay = new Integer(cal.get(Calendar.DAY_OF_WEEK));        
+        this.startDay = new Integer(cal.get(Calendar.DAY_OF_WEEK_IN_MONTH));        
         this.startMonth = new Integer(cal.get(Calendar.MONTH));        
         this.startYear = new Integer(Calendar.YEAR);
         
