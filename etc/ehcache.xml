@@ -373,13 +373,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ResourceGroup.getMaxCollectionInterval"
-         maxElementsInMemory="100"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="ResourceGroup.getMetricsNotCollecting"
-         maxElementsInMemory="100"
+  <cache name="ResourceGroup.getMetricsCollecting"
+         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
