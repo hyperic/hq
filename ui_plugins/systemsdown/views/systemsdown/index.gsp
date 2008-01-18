@@ -1,7 +1,7 @@
 <script type="text/javascript">
     <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {
-        SystemsDown_refreshTable();
+        SystemsDown_refreshTable({numRows: kwArgs.numRows});
     }
 
     function updateFilterCount(count, obj) {
