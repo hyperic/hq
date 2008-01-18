@@ -132,7 +132,7 @@ public class MxServerControlPlugin extends ServerControlPlugin {
     public int start() {
         int status = doCommand(getArgs("start"));
         if (status == RESULT_SUCCESS) {
-            setMessage("start executed successfully!");
+            setMessage("start executed successfully");
         }
         return status;
     }
@@ -140,7 +140,7 @@ public class MxServerControlPlugin extends ServerControlPlugin {
     public int stop() {
         int status = doCommand(getArgs("stop"));
         if (status == RESULT_SUCCESS) {
-            setMessage("stop executed successfully!");
+            setMessage("stop executed successfully");
         }
         return status;
     }
@@ -155,7 +155,7 @@ public class MxServerControlPlugin extends ServerControlPlugin {
         }
         int startStatus = start();
         if (startStatus == RESULT_SUCCESS && stopStatus == RESULT_SUCCESS) {
-            setMessage("restart executed successfully!");
+            setMessage("restart executed successfully");
             return RESULT_SUCCESS;
         } else if (startStatus != RESULT_SUCCESS &&
                    stopStatus != RESULT_SUCCESS) {
