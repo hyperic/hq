@@ -65,6 +65,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
+import org.hyperic.hq.measurement.shared.CacheEntry;
 import org.hyperic.hq.measurement.shared.MeasurementTemplateValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -348,11 +349,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(ids.length);        
         for (int i = 0; i < ids.length; i++) {
-            DerivedMeasurement dmv = findAvailabilityMetric(subject, ids[i]);
+            CacheEntry dmv =  getMetricManager()
+                .getAvailabilityCacheEntry(subject, ids[i]);
     
             if (dmv != null) {
                 liveMillis = Math.max(liveMillis, 3 * dmv.getInterval());
-                midMap.put(ids[i], dmv.getId());
+                midMap.put(ids[i], dmv.getMetricId());
             }
         }
         

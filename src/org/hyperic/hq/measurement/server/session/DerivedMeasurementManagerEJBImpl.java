@@ -924,6 +924,33 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @throws MeasurementNotFoundException
      * @ejb:interface-method
      */
+    public CacheEntry getAvailabilityCacheEntry(AuthzSubject subject,
+                                                        AppdefEntityID id) {
+        Cache cache =
+            CacheManager.getInstance().getCache("AvailabilitySummary");
+        Element e = cache.get(id);
+
+        if (e != null) {
+            return (CacheEntry) e.getObjectValue();
+        }
+        
+        DerivedMeasurement dm;
+        try {
+            dm = getAvailabilityMeasurement(subject, id);
+        } catch (MeasurementNotFoundException e1) {
+            return null;
+        }
+        
+        CacheEntry entry = new CacheEntry(dm);
+        cache.put(new Element(id, entry));
+        return entry;
+    }
+        
+    /**
+     * Look up an availability measurement EJBs for an instance
+     * @throws MeasurementNotFoundException
+     * @ejb:interface-method
+     */
     public DerivedMeasurement getAvailabilityMeasurement(AuthzSubject subject,
                                                          AppdefEntityID id)
         throws MeasurementNotFoundException
