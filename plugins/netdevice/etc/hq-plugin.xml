@@ -158,6 +158,30 @@
             template="${snmp.template},Avail=true:ifOperStatus:${if.config}"
             indicator="true"/>
 
+    <!--
+        up(1),        - ready to pass packets
+        down(2),
+        testing(3),   - in some test mode
+        unknown(4),   - status can not be determined
+                      - for some reason.
+        dormant(5),
+        notPresent(6),    - some component is missing
+        lowerLayerDown(7) - down due to state of
+                          - lower-layer interface(s)
+    -->
+    <metric name="Operational Status"
+            template="${snmp.template}:ifOperStatus:${if.config}"
+            category="AVAILABILITY"/>
+
+    <!--
+        up(1),       - ready to pass packets
+        down(2),
+        testing(3)   - in some test mode
+    -->
+    <metric name="Admin Status"
+            template="${snmp.template}:ifAdminStatus:${if.config}"
+            category="AVAILABILITY"/>
+
     <metric name="Last Change"
             template="${snmp.template}:ifLastChange:${if.config}"
             category="AVAILABILITY"
