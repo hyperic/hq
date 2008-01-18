@@ -27,6 +27,8 @@ package org.hyperic.hq.events;
 
 import java.util.Date;
 
+import org.hyperic.hq.zevents.HeartBeatZevent;
+
 public class HeartBeatEvent extends AbstractEvent
     implements java.io.Serializable {
     
@@ -61,5 +63,15 @@ public class HeartBeatEvent extends AbstractEvent
      */
     public void setBeat(Date beat) {
         this.beat = beat;
+        setTimestamp(beat.getTime());
+    }
+    
+    /**
+     * Convert this heart beat event into an equivalent zevent.
+     * 
+     * @return A heart beat zevent.
+     */
+    public HeartBeatZevent toZevent() {
+        return new HeartBeatZevent(this.getBeat());
     }
 }

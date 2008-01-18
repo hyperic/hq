@@ -32,6 +32,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
+import org.hyperic.hq.zevents.ZeventManager;
 
 /**
  * MBean class that is called by the Scheduler to send a HeartBeat
@@ -75,16 +76,23 @@ public class HeartBeatService
     }
     
     protected void hitInSession(Date lDate) {
+        HeartBeatEvent event = new HeartBeatEvent(lDate);
+        
         try {
             // Try to see if RegisteredTriggerManager is available
             RegisteredTriggerManagerUtil.getLocalHome();
             
-            // Create and send a hearbeat event
-            HeartBeatEvent event = new HeartBeatEvent(lDate);
+            // Send the heart beat event
             Messenger sender = new Messenger();
             sender.publishMessage(topicName, event);
         } catch (Exception e) {
-            // Do not send out hearbeat if services are not up
+            // Do not send out heart beat if services are not up
+        }
+        
+        try {
+            ZeventManager.getInstance().enqueueEvent(event.toZevent());
+        } catch(InterruptedException e) {
+            // Do not send out heart beat if thread is interrupted
         }
     }
 
