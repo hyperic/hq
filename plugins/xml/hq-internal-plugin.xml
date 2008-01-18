@@ -96,6 +96,11 @@
             interval="60000"
             collectionType="trendsup"
             defaultOn="true"/>
+
+    <metric name="Zevent Queue Size"
+            indicator="false" 
+            interval="60000"
+            defaultOn="true"/>
             
   </service>
 </plugin>

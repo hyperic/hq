@@ -184,6 +184,10 @@ public class ZeventManager {
         DiagnosticThread.addDiagnosticObject(myDiag);
     }
     
+    public long getQueueSize() {
+        return _eventQueue.size();
+    }
+    
     public void shutdown() throws InterruptedException {
         while (!_eventQueue.isEmpty()) {
             System.out.println("Waiting for empty queue: " + _eventQueue.size());

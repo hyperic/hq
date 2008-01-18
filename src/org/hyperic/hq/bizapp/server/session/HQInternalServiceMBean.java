@@ -36,4 +36,5 @@ public interface HQInternalServiceMBean {
     long getAgentRequests();
     long getZeventMaxWait();
     long getZeventsProcessed();
+    long getZeventQueueSize();
 }

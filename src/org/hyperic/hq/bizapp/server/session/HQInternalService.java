@@ -89,4 +89,8 @@ public class HQInternalService implements HQInternalServiceMBean {
     public long getZeventsProcessed() {
         return ZeventManager.getInstance().getZeventsProcessed();
     }
+
+    public long getZeventQueueSize() {
+        return ZeventManager.getInstance().getQueueSize();
+    }
 }
