@@ -72,7 +72,6 @@ public abstract class ServerControlPlugin extends ControlPlugin {
     private String controlProgramPrefix = null;
     private String pidFile = null;
     private int backgroundWaitTime = 0;
-    private String installPath = null;
 
     private Sigar sigar = null;
 
@@ -142,9 +141,9 @@ public abstract class ServerControlPlugin extends ControlPlugin {
             setTimeout(val);
         }
 
-        installPath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        if (installPath != null) {
-            setInstallPrefix(installPath);
+        val = config.getValue(ProductPlugin.PROP_INSTALLPATH);
+        if (val != null) {
+            setInstallPrefix(val);
         }
 
         val = config.getValue(PROP_PROGRAM);
@@ -317,7 +316,7 @@ public abstract class ServerControlPlugin extends ControlPlugin {
     protected File getWorkingDirectory() {
         File file = new File(getControlProgram()).getParentFile();
         if (file == null || !file.isAbsolute()) {
-            file = new File(installPath);
+            file = new File(installPrefix);
         }
         return file;
     }
@@ -470,7 +469,7 @@ public abstract class ServerControlPlugin extends ControlPlugin {
         if (new File(program).isAbsolute())
             args.add(program);
         else
-            args.add(installPath+File.separator+program);
+            args.add(installPrefix+File.separator+program);
 
         if (params != null) {
             for (int i=0; i<params.length; i++) {
