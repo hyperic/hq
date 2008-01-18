@@ -254,8 +254,10 @@ class DojoUtil {
                 }
                 if(dojo.io.cookie.getCookie("filtercount")) {
                     currentCountFilter = dojo.byId(dojo.io.cookie.getCookie("filtercount"));
+                    updateKWArgs.numRows = currentCountFilter.id;
                 } else {
                     currentCountFilter = dojo.byId("50");
+                    updateKWArgs.numRows = 50;
                 }
                 updateFilterCount(currentCountFilter.id, currentCountFilter);
                 plugin.ajax.bind("${params.updateURL}");

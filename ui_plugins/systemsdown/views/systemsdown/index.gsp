@@ -1,10 +1,13 @@
 <script type="text/javascript">
     <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {
-        SystemsDown_refreshTable({numRows: kwArgs.numRows});
+        if(kwArgs.numRows)
+            updateKWArgs.numRows = kwArgs.numRows;
+        SystemsDown_refreshTable(updateKWArgs);
     }
 
     function updateFilterCount(count, obj) {
+        updateKWArgs.numRows=count;
         if (currentCountFilter) {
             currentCountFilter.style.color = '#003399';
             currentCountFilter.style.cursor = 'pointer';
@@ -38,7 +41,6 @@
     }
     
     new plugin.MessagePanel();
-    
     
 </script>
 <div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
