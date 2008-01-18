@@ -114,7 +114,18 @@ public class ViewAction extends BaseAction {
             titleKey += token;
         }
 
-        List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        List entityIds =
+            DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
+        
+        // Can only do Platforms, Servers, and Services
+        for (Iterator it = entityIds.iterator(); it.hasNext(); ) {
+            AppdefEntityID aeid = (AppdefEntityID) it.next();
+            
+            if (aeid.isPlatform() || aeid.isServer() || aeid.isService())
+                continue;
+            
+            it.remove();
+        }
 
         AppdefEntityID[] arrayIds =
             (AppdefEntityID[])entityIds.toArray(new AppdefEntityID[0]);
