@@ -62,6 +62,7 @@ import org.hyperic.hq.measurement.monitor.MonitorCreateException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.zevents.ZeventManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,7 +125,8 @@ public class MeasurementProcessorEJBImpl
             List toScheduleDerived = new ArrayList();
             
             long minInterval = Long.MAX_VALUE;
-            
+
+            ArrayList events = new ArrayList();
             for (int i = 0; i < graphs.length; i++) {
                 // for each derived template node in the graph, schedule
                 // its raw template measurements with the agent and then
@@ -155,6 +157,11 @@ public class MeasurementProcessorEJBImpl
 
                         dm.setInterval(interval);
                         dm.setEnabled(interval != 0);
+
+                        MeasurementScheduleZevent event =
+                            new MeasurementScheduleZevent(dm.getId().intValue(),
+                                                          interval);
+                        events.add(event);
                     }
                     
                     // Do not continue if interval was 0
@@ -193,6 +200,9 @@ public class MeasurementProcessorEJBImpl
             // Schedule the measurements
             int srnNumber = srnManager.incrementSrn(entId, minInterval);
             scheduleRawMeasurements(entId, toScheduleRaw, srnNumber);
+
+            ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+
         } catch (FinderException e) {
             throw new MeasurementScheduleException(e);
         } catch (PermissionException e) {

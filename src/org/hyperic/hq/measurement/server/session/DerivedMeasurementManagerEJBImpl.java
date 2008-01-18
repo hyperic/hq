@@ -95,6 +95,7 @@ import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -150,6 +151,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         m.setEnabled(interval != 0);
         m.setInterval(interval);
+
+        MeasurementScheduleZevent event =
+            new MeasurementScheduleZevent(m.getId().intValue(),
+                                          interval);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+
         return m;
     }
 
