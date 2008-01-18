@@ -176,7 +176,7 @@ class DojoUtil {
             }
             
             plugin.accordion.itemClicked = function(item) {
-                updateKWArgs = {'typeId' : item.getAttribute("nodeid")};
+                updateKWArgs.typeId = item.getAttribute("nodeid");
             }
         
             plugin.accordion.swapVis = function(elem) {
@@ -250,7 +250,7 @@ class DojoUtil {
                 
                 if(dojo.io.cookie.getCookie("selecteditemid")) {
                     selectedItem = dojo.io.cookie.getCookie("selecteditemid")
-                    updateKWArgs = {'typeId' : selectedItem};
+                    updateKWArgs.typeId = selectedItem;
                 }
                 if(dojo.io.cookie.getCookie("filtercount")) {
                     currentCountFilter = dojo.byId(dojo.io.cookie.getCookie("filtercount"));
