@@ -92,13 +92,14 @@ class ResourceMetricTracker {
      * @param startTime The start timestamp for the window (inclusive). 
      *                  Any metric value older than this timestamp will be 
      *                  removed from tracking.
-     * @param endTime The end timestamp for the window (inclusive).
+     * @param endTime The end timestamp for the window (exclusive).
      * @return The violating metric value or <code>null</code> if no metric 
      *         violated in the time window. {@link MetricValue#NONE} is returned 
      *         if not reporting resources are considered offending and there 
      *         is no metric value in the time window.
      */
     public MetricValue searchForViolatingMetricInWindow(long startTime, long endTime) {
+        boolean debug = _log.isDebugEnabled();
         boolean hasReportedInWindow = false;
         
         for (Iterator iter = _chronOrderedValues.iterator(); iter.hasNext();) {
@@ -107,10 +108,14 @@ class ResourceMetricTracker {
             long metricTimestamp = metric.getTimestamp();
             
             if (metricTimestamp < startTime) {
-                _log.warn("there shouldn't be any metrics currently " +
-                		  "older than the window start time");
+                if (debug) {
+                    _log.debug("There shouldn't be any metrics currently " +
+                               "older than the window start time: metric timestamp="+
+                               metricTimestamp+", start time="+startTime);                    
+                }
+                
                 iter.remove();
-            } else if (metric.getTimestamp() <= endTime) {
+            } else if (metric.getTimestamp() < endTime) {
                 hasReportedInWindow = true;
                 
                 if (_comparator.isTrue(new Float(metric.getValue()),
@@ -130,11 +135,11 @@ class ResourceMetricTracker {
     
     
     /**
-     * If there are any newer (or with the same timestamp) tracked metrics as 
+     * If there are any newer (or with the same timestamp) tracked metrics than 
      * this one that just came in, remove those newer tracked metrics. This 
      * accounts for the backfilled case where the backfilled metrics reported 
      * one value, but then the agent starts reporting again with the "real" 
-     * value.
+     * values that should preempt the backfilled values.
      * 
      * @param value The metric value that just came in.
      */
