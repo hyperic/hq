@@ -27,6 +27,8 @@ package org.hyperic.hq.events.server.mbean;
 
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
@@ -44,6 +46,8 @@ public class HeartBeatService
     extends SessionMBeanBase
     implements HeartBeatServiceMBean 
 {
+    private final Log log = LogFactory.getLog(HeartBeatService.class);
+    
     private String topicName = EventConstants.EVENTS_TOPIC;
 
     /**
@@ -76,6 +80,11 @@ public class HeartBeatService
     }
     
     protected void hitInSession(Date lDate) {
+        if (log.isDebugEnabled()) {
+            log.debug("Heart Beat Service is dispatching a heart beat: "+lDate+
+                      ", timestamp="+lDate.getTime());            
+        }
+        
         HeartBeatEvent event = new HeartBeatEvent(lDate);
         
         try {
