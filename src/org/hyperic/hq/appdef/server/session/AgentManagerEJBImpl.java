@@ -446,7 +446,8 @@ public class AgentManagerEJBImpl
                     platform = getPlatformDAO().findById(aID.getId());
                     break;
                 default:
-                    throw new SystemException("Request for agent from an " +
+                    throw new AgentNotFoundException(
+                                              "Request for agent from an " +
                                               "entity which can return " +
                                               "multiple agents");
             }
