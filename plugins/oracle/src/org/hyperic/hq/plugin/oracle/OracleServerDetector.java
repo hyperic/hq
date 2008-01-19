@@ -315,7 +315,9 @@ public class OracleServerDetector
             // size is calc'd.
             //services.addAll(getSegmentServices(stmt, instance));
             services.addAll(getProcessServices(config));
-            services.addAll(getTnsServices(config));
+            // this requires extra config on the user side to set ORACLE_HOME
+            // env var, so to avoid confusion disabling
+            //services.addAll(getTnsServices(config));
             setCustomProps(stmt);
         }
         catch (SQLException e)
