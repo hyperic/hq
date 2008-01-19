@@ -142,8 +142,17 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
+    <property name="DEFAULT_PROGRAM"
+              value="bin/catalina.sh"/>
+
     <plugin type="control"
             class="org.hyperic.hq.product.jmx.MxServerControlPlugin"/>
+
+    <property name="start.args"
+              value="start"/> 
+
+    <property name="stop.args"
+              value="stop"/>
 
     <config>
       <option name="jmx.url"
@@ -499,15 +508,16 @@
   <br>
   in <installpath>/bin/catalina.sh add:
   <br>
-  JAVA_OPTS="-Dcom.sun.management.jmxremote \
+  [ $1 != "stop" ] &amp;&amp;
+    JAVA_OPTS="-Dcom.sun.management.jmxremote \
   <br>
-  -Dcom.sun.management.jmxremote.port=6969 \
+    -Dcom.sun.management.jmxremote.port=6969 \
   <br>
-  -Dcom.sun.management.jmxremote.ssl=false \
+    -Dcom.sun.management.jmxremote.ssl=false \
   <br>
-  -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTS"
+    -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTS"
   <br>
-  export JAVA_OPTS
+    export JAVA_OPTS
   <br>
   From there restart Tomcat and that is it.
   </p>
