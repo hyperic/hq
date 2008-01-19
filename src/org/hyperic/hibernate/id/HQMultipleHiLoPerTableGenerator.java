@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.LinkedList;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -61,6 +62,8 @@ public class HQMultipleHiLoPerTableGenerator
 	
 	private static final Log log =
 	    LogFactory.getLog(HQMultipleHiLoPerTableGenerator.class);
+	
+	private LinkedList seqs = new LinkedList();
 	
 	public static final String ID_TABLE = "table";
 	public static final String PK_COLUMN_NAME = "primary_key_column";
@@ -186,13 +189,23 @@ public class HQMultipleHiLoPerTableGenerator
 		while (rows==0);
 		return new Integer(result);
 	}
-
+	
 	public synchronized Serializable generate(SessionImplementor session, Object obj)
 		throws HibernateException {
+	    Number num;
+	    do {
+	        num = _generate(session, obj);
+	    } while (!numberIsValid(num));
+		return num;
+	}
+
+	private synchronized Number _generate(SessionImplementor session, Object obj)
+		throws HibernateException {
 		if (maxLo < 1) {
-			//keep the behavior consistent even for boundary usages
+	        //keep the behavior consistent even for boundary usages
 			int val = ( (Integer) doWorkInNewTransaction(session) ).intValue();
-			if (val == 0) val = ( (Integer) doWorkInNewTransaction(session) ).intValue();
+			if (val == 0)
+			    val = ( (Integer) doWorkInNewTransaction(session) ).intValue();
 			Number num =
 			    IdentifierGeneratorFactory.createNumber( val, returnClass );
 			if (log.isTraceEnabled()) {
@@ -212,6 +225,20 @@ public class HQMultipleHiLoPerTableGenerator
 		    log.trace(this + " created seq: " + keyValue + " / " + num);
 		}
 		return num;
+	}
+	
+	private synchronized boolean numberIsValid(Number num) {
+        if (seqs.contains(num)) {
+            log.warn("sequence generator generated sequence "
+                + keyValue + "/" + num +
+                " which is a duplicate sequence, retrying");
+            return false;
+        }
+        seqs.add(num);
+        while (seqs.size() >= 10) {
+            seqs.removeLast();
+        }
+	    return true;
 	}
 
 	public void configure(Type type, Properties params, Dialect dialect) throws MappingException {
