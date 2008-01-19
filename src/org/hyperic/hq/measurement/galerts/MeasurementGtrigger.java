@@ -54,6 +54,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
+import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
@@ -99,7 +100,6 @@ public class MeasurementGtrigger
     private final TreeSet            _chronSortedMetricTimestamps;
     private       String             _name;
     private       long               _maxCollectionInterval;
-    private       boolean            _processedFirstEvent;
     private       boolean            _isWithinFirstTimeWindow;
     private       long               _startOfTimeWindow;
     private       String             _metricName;
@@ -130,7 +130,7 @@ public class MeasurementGtrigger
         _isNotReportingEventsOffending = isNotReportingOffending;
         _srcId2CollectionInterval = new HashMap();
         _isWithinFirstTimeWindow = true;
-        _startOfTimeWindow = System.currentTimeMillis();
+        _startOfTimeWindow = timingVoodoo(System.currentTimeMillis());
         _chronSortedMetricTimestamps = new TreeSet();
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
         setTriggerName();
@@ -161,16 +161,23 @@ public class MeasurementGtrigger
             }
         }
         
+        if (!shouldStartEvaluatingMetrics()) {
+            return;
+        }
+        
         // Try to fire.
         Map srcId2ViolatingMetricValue = 
-            evaluateTimeWindowAndReturnViolators(_trackedResources, 
-                                                 _startOfTimeWindow, 
-                                                 endOfTimeWindow);
+            evaluateResourceMetricsAndReturnViolators(_trackedResources, 
+                                                      _startOfTimeWindow, 
+                                                      endOfTimeWindow);
         
         if (srcId2ViolatingMetricValue.size() > 0) {
             int numCollectingMetrics = _srcId2CollectionInterval.size();
             
-            tryToFire(srcId2ViolatingMetricValue, numCollectingMetrics);            
+            // The alert fired time should be the end of the time window.
+            tryToFire(srcId2ViolatingMetricValue, 
+                      numCollectingMetrics, 
+                      endOfTimeWindow);            
         }
     }
     
@@ -223,7 +230,8 @@ public class MeasurementGtrigger
      */
     private boolean isInFirstTimeWindow() {
         if (_isWithinFirstTimeWindow) {
-            if (System.currentTimeMillis()<_startOfTimeWindow+2*_maxCollectionInterval) {
+            if (System.currentTimeMillis() <
+                _startOfTimeWindow+2*_maxCollectionInterval) {
                 // still in first time window
                 _isWithinFirstTimeWindow = true;
             } else {
@@ -235,43 +243,59 @@ public class MeasurementGtrigger
     }
     
     /**
-     * Evaluate the next start of the time window. If this is the first event 
-     * then the start of the time window is the current time. If we are still 
-     * in the first time window, then the start time doesn't change from the 
-     * previous value. Otherwise, the start of the time window is the timestamp 
-     * of the oldest tracked metric value (or the current time if no metrics 
-     * have been tracked yet).
+     * If we are in the first time window, then the start time doesn't change 
+     * from the previous value. Otherwise, the start of the time window is the 
+     * timestamp of the oldest tracked metric value (or the current time if no 
+     * metrics are currently being tracked).
      * 
-     * @param inFirstTimeWindow <code>true</code> if we are still within the 
-     *                          first time window.
+     * @param inFirstTimeWindow <code>true</code> if we are in the first time window.
      */
-    private void evaluateNextStartOfTimeWindow(boolean inFirstTimeWindow) {        
-        if (_processedFirstEvent) {
-            if (inFirstTimeWindow) {
-                // don't change start of time window yet - use the old value
-            } else {
-                if (_chronSortedMetricTimestamps.isEmpty() || 
-                    _chronSortedMetricTimestamps.first() == null) {
-                    // It's as though we are in the very first time window 
-                    // and just processed the first event.
-                    _isWithinFirstTimeWindow = true;
-                    _startOfTimeWindow = System.currentTimeMillis();
-                    _processedFirstEvent = true;                    
-                } else {
-                    Long timestamp = (Long)_chronSortedMetricTimestamps.first();
-                    _startOfTimeWindow = timestamp.longValue();
-                    _chronSortedMetricTimestamps.remove(timestamp);
-                }
-            }
+    private void evaluateNextStartOfTimeWindow(boolean inFirstTimeWindow) {
+        if (inFirstTimeWindow) {
+            // don't change start of time window yet - use the old value
         } else {
-            _startOfTimeWindow = System.currentTimeMillis();
-            _processedFirstEvent = true;
+            if (_chronSortedMetricTimestamps.isEmpty() || 
+                _chronSortedMetricTimestamps.first() == null) {
+                // There are no metrics currently tracked. It's as though 
+                // we are in the very first time window.
+                _isWithinFirstTimeWindow = true;
+                _startOfTimeWindow = timingVoodoo(System.currentTimeMillis());                  
+            } else {
+                Long timestamp = (Long)_chronSortedMetricTimestamps.first();
+                // The metric timestamp is already timing voodooed.
+                _startOfTimeWindow = timestamp.longValue();
+                _chronSortedMetricTimestamps.remove(timestamp);
+            }
         }
         
         if (_log.isDebugEnabled()) {
             _log.debug("Start of time window for trigger ["+_name+
-                       "] ="+_startOfTimeWindow);               
+                       "] ="+_startOfTimeWindow+
+                       ", first time window="+_isWithinFirstTimeWindow);               
         }
+    }
+    
+    /**
+     * Timing voodoo the timestamp down to the assumed minimum collection 
+     * interval (1 minute). We do this because the reported metrics are 
+     * timing voodoo.
+     * 
+     * @param timestamp The timestamp.
+     * @return The timing voodooed timestamp.
+     */
+    private long timingVoodoo(long timestamp) {
+        return TimingVoodoo.roundDownTime(timestamp, MIN_COLLECTION_INTERVAL);
+    }
+    
+    /**
+     * @return <code>true</code> if we should start evaluating the tracked metrics.
+     */
+    private boolean shouldStartEvaluatingMetrics() {
+        // If we are in the first time window, then give the trigger through 
+        // the end of that time window to track metric history without 
+        // evaluating metrics. That way, we'll know if a resource that should 
+        // be reporting isn't actually reporting.
+        return _isWithinFirstTimeWindow == false;
     }
     
     /**
@@ -332,17 +356,17 @@ public class MeasurementGtrigger
     }
     
     /**
-     * Evaluate the time window and return the first found violating metric 
-     * value for each of the tracked resources.
+     * Evaluate the metrics within the time window and return the first found 
+     * violating metric value for each of the tracked resources.
      * 
      * @param trackedResources The tracked resources.
-     * @param startTime The start timestamp for the time window.
-     * @param endTime The end timestamp for the time window.
+     * @param startTime The start timestamp for the time window (inclusive).
+     * @param endTime The end timestamp for the time window (exclusive).
      * @return The map of {@link MeasurementZeventSource}Ids to {@link MetricValue}s.
      */
-    private Map evaluateTimeWindowAndReturnViolators(Map trackedResources,
-                                                     long startTime,
-                                                     long endTime) {
+    private Map evaluateResourceMetricsAndReturnViolators(Map trackedResources,
+                                                          long startTime,
+                                                          long endTime) {
         
         boolean debug = _log.isDebugEnabled();
         
@@ -358,13 +382,15 @@ public class MeasurementGtrigger
             MeasurementZeventSource srcId = (MeasurementZeventSource)entry.getKey();
             ResourceMetricTracker tracker = (ResourceMetricTracker)entry.getValue();
             
-            // Scrub out resources that are not scheduled to collect 
-            // and don't have any remaining tracked metrics.
+            // Remove resources that are not scheduled to collect and don't 
+            // have any remaining tracked metrics so we don't accidentally 
+            // consider them violating the trigger conditions (if non reporting 
+            // resources are considered violating).
             if (tracker.getNumberOfTrackedMetrics()==0 && 
                 !_srcId2CollectionInterval.containsKey(srcId)) {
                 if (debug) {
                     _log.debug("Found unscheduled measurement for trigger ["+_name+
-                            "]: "+srcId);                        
+                               "]: "+srcId);                        
                 }
                 
                 iter.remove();
@@ -387,7 +413,9 @@ public class MeasurementGtrigger
         return srcId2MetricValue;
     }
     
-    private void tryToFire(Map srcId2MetricValue, int numCollectingMetrics) {                
+    private void tryToFire(Map srcId2MetricValue, 
+                           int numCollectingMetrics, 
+                           long firedTime) {                
         int numMatched = 0;
         
         for (Iterator i=srcId2MetricValue.values().iterator(); i.hasNext(); ) {
@@ -477,8 +505,6 @@ public class MeasurementGtrigger
             .append(_comparator)
             .append(" ")
             .append(_metricVal);
-        
-        long firedTime = System.currentTimeMillis();
 
         setFired(new FireReason(sr.toString(), lr.toString(), 
                     formulateAuxLogs(srcId2MetricValue, firedTime)));
