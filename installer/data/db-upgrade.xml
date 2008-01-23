@@ -6917,33 +6917,39 @@ has already been defined.
       <schema-directSQL>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 9000, 0, 601, id, id, 0, 0, name, sort_name, 1 
-            from eam_platform_type
+            select (select count(*) from eam_platform_type st2 where st2.id &lt; st1.id) + 9000 as id,
+            0, 601, id, id, 0, 0, name, sort_name, 1
+            from eam_platform_type st1
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 9000, 0, 601, id, id, 0, 0, name, sort_name, true 
-            from eam_platform_type
+            select (select count(*) from eam_platform_type st2 where st2.id &lt; st1.id) + 9000 as id,
+            0, 601, id, id, 0, 0, name, sort_name, true
+            from eam_platform_type st1
         </statement>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7000, 0, 602, id, id, 0, 0, name, sort_name, 1 
-            from eam_server_type
+            select (select count(*) from eam_server_type st2 where st2.id &lt; st1.id) + 7000 as id,
+            0, 602, id, id, 0, 0, name, sort_name, 1
+            from eam_server_type st1
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 7000, 0, 602, id, id, 0, 0, name, sort_name, true 
-            from eam_server_type
+            select (select count(*) from eam_server_type st2 where st2.id &lt; st1.id) + 7000 as id,
+            0, 602, id, id, 0, 0, name, sort_name, true
+            from eam_server_type st1
         </statement>
         <statement targetDB="oracle">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 5000, 0, 603, id, id, 0, 0, name, sort_name, 1 
-            from eam_service_type
+            select (select count(*) from eam_service_type st2 where st2.id &lt; st1.id) + 5000 as id,
+            0, 603, id, id, 0, 0, name, sort_name, 1
+            from eam_service_type st1
         </statement>
         <statement targetDB="postgresql">
             insert into eam_resource (id, version_col, resource_type_id, instance_id, cid, subject_id, proto_id, name, sort_name, fsystem)
-            select id - 5000, 0, 603, id, id, 0, 0, name, sort_name, true 
-            from eam_service_type
+            select (select count(*) from eam_service_type st2 where st2.id &lt; st1.id) + 5000 as id,
+            0, 603, id, id, 0, 0, name, sort_name, true
+            from eam_service_type st1
         </statement>
 
         <statement>
