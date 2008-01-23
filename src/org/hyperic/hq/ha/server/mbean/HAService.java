@@ -28,6 +28,8 @@ package org.hyperic.hq.ha.server.mbean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.hq.application.StartupFinishedCallback;
+import org.hyperic.hq.application.HQApp;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -38,7 +40,7 @@ import javax.management.ObjectName;
  * @jmx:mbean name="hyperic.jmx:type=Service,name=HAService"
  */
 public class HAService
-    implements HAServiceMBean
+    implements HAServiceMBean, StartupFinishedCallback
 {
     private static Log _log = LogFactory.getLog(HAService.class);
 
@@ -49,9 +51,12 @@ public class HAService
         MBeanServer server = MBeanUtil.getMBeanServer();
         try {
             startDataPurgeService(server);
-            startHeartbeatService(server);
             startAvailCheckService(server);
             startAgentAIScanService(server);
+
+            HQApp.getInstance().
+                registerCallbackListener(StartupFinishedCallback.class, this);
+
         } catch (Exception e) {
             _log.error("Error starting services", e);
         }
@@ -98,5 +103,14 @@ public class HAService
         ObjectName o = new ObjectName(mbean);
         _log.info("Invoking " + o.getCanonicalName() + "." + method);
         server.invoke(o, method, new Object[] {}, new String[] {});
+    }
+
+    public void startupFinished() {
+        try {
+            MBeanServer server = MBeanUtil.getMBeanServer();
+            startHeartbeatService(server);
+        } catch (Exception e) {
+            _log.error("Error starting services", e);
+        }
     }
 }
