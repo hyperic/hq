@@ -223,7 +223,10 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
     }
     
     private void unscheduleJobs(Integer[] mids) {
+        MetricDataCache cache = MetricDataCache.getInstance();
         for (int i = 0; i < mids.length; i++) {
+            cache.remove(mids[i]);
+            
             // Remove the job
             String jobName =
                 CalculateDerivedMeasurementJob.getJobName(mids[i]);
@@ -254,7 +257,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 }
             } catch (SchedulerException e) {
                 log.debug("No schedule for " + schedName);
-            }            
+            }
         }
     }
 
