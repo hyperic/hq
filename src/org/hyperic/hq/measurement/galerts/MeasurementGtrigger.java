@@ -160,7 +160,12 @@ public class MeasurementGtrigger
         // Track heart beat events
         if (isHeartBeatEvent(event)) {
             HeartBeatZevent hb = (HeartBeatZevent)event;
-            track(hb);
+            
+            long hbTimestamp = adjustHeartBeatTimestamp(hb);
+            
+            if (!isOlderThanTimeWindowStartTime(hb, _startOfTimeWindow, hbTimestamp)) {
+                track(hb, hbTimestamp);                
+            }
         }
         
         // Track the measurement events.
@@ -340,15 +345,16 @@ public class MeasurementGtrigger
      */
     private boolean isOlderThanTimeWindowStartTime(MeasurementZevent event, 
                                                    long startTime) {
-        MeasurementZeventPayload val = 
+        MeasurementZeventPayload payload = 
             (MeasurementZeventPayload)event.getPayload();
+        
+        MetricValue val = payload.getValue();
 
-        if (val.getValue().getTimestamp() < startTime) {
+        if (val.getTimestamp() < startTime) {
             if (_log.isDebugEnabled()) {
                 _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
-                           "] is rejecting event older than time window: "+
-                           event+"; "+val.getValue().getTimestamp()+
-                           " < "+startTime);                    
+                           "] is rejecting measurement event older than time window: "+
+                           event+"; "+val.getTimestamp()+" < "+startTime);                    
             }
 
             return true;
@@ -358,30 +364,61 @@ public class MeasurementGtrigger
     }
     
     /**
+     * Is this heart beat event older than the start of the time window?
+     * 
+     * @param event The heart beat event.
+     * @param startTime The start timestamp for the time window.
+     * @param heartBeatTimestamp The heart beat timestamp after adjustment 
+     *                           for the agent send interval and time voodooing.
+     * @return <code>true</code> if this is an old heart beat event.
+     */
+    private boolean isOlderThanTimeWindowStartTime(HeartBeatZevent event, 
+                                                   long startTime, 
+                                                   long heartBeatTimestamp) {
+        if (heartBeatTimestamp < startTime) {
+            if (_log.isDebugEnabled()) {
+                _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
+                           "] is rejecting heart beat event older than time window: "+
+                           event+"; "+heartBeatTimestamp+" < "+startTime);                    
+            }
+
+            return true;
+        } else {
+            return false;
+        }        
+    }
+    
+    /**
+     * Adjust the heart beat event timestamp so that it is "equivalent" to 
+     * a measurement event timestamp. This includes subtracting 1 minute 
+     * from the timestamp to adjust for the agent metric send interval of 
+     * 1 minute and time voodooing that result down.
+     * 
+     * @param event The heart beat event.
+     * @return The adjusted heart beat timestamp.
+     */
+    private long adjustHeartBeatTimestamp(HeartBeatZevent event) {
+        long agentEquivalentTime = event.getTimestamp()-ONE_MINUTE;
+        
+        // the heart beat interval is every 1/2 minute.
+        return TimingVoodoo.roundDownTime(agentEquivalentTime, ONE_MINUTE/2);
+    }
+    
+    /**
      * Track this heart beat event. Heart beats are used to move the time 
      * window forward even when there are no processed measurement events.
      * 
      * @param event The heart beat event.
+     * @param heartBeatTimestamp The heart beat timestamp after adjustment 
+     *                           for the agent send interval and time voodooing.
      */
-    private void track(HeartBeatZevent event) {
-        // Subtract 1 minute from the heart beat timestamp to set the 
-        // value equivalent to the minimum it would be if the heart 
-        // beat originated on an agent (the agent metric send interval 
-        // is 1 minute).
-        long agentEquivalentTime = event.getTimestamp()-ONE_MINUTE;
-
-        // The heart beat timestamp should be timing voodooed down to the 
-        // previous 1/2 minute (heart beats are sent every 30 seconds).
-        // This makes the timestamps from heart beats equivalent to 
-        // timestamps from measurement events (which are also timing voodooed
-        // down).
-        long timestamp = 
-            TimingVoodoo.roundDownTime(agentEquivalentTime, ONE_MINUTE/2);
+    private void track(HeartBeatZevent event, long heartBeatTimestamp) {        
+        _nextStartOfTimeWindow.add(new Long(heartBeatTimestamp));  
         
-        // The next start of time window should be at least greater than 
-        // the current start of time window!
-        if (timestamp > _startOfTimeWindow) {
-            _nextStartOfTimeWindow.add(new Long(timestamp));            
+        if (_log.isDebugEnabled()) {
+            _log.debug("Tracking heart beat for trigger ["+
+                       getTriggerNameWithPartitionDesc()+
+                       "]: "+event+", timestamp="+heartBeatTimestamp);                 
         }
     }
     
@@ -390,10 +427,7 @@ public class MeasurementGtrigger
      * 
      * @param event The measurement event.
      */
-    private void track(MeasurementZevent event) {
-        MeasurementZeventPayload val = 
-            (MeasurementZeventPayload)event.getPayload();
-        
+    private void track(MeasurementZevent event) {        
         ResourceMetricTracker tracker = 
             (ResourceMetricTracker)_trackedResources.get(event.getSourceId());
                 
@@ -403,17 +437,21 @@ public class MeasurementGtrigger
                                           _metricVal, 
                                           _isNotReportingEventsOffending);
             _trackedResources.put(event.getSourceId(), tracker);
-        }     
+        }
         
-        tracker.trackMetricValue(val.getValue());
+        MeasurementZeventPayload payload = 
+            (MeasurementZeventPayload)event.getPayload();
         
-        _nextStartOfTimeWindow.add(
-                new Long(val.getValue().getTimestamp()));
+        MetricValue val = payload.getValue();
+        
+        tracker.trackMetricValue(val);
+        
+        _nextStartOfTimeWindow.add(new Long(val.getTimestamp()));
         
         if (_log.isDebugEnabled()) {
             _log.debug("Tracking measurement for trigger ["+
                        getTriggerNameWithPartitionDesc()+
-                       "]: "+event.getSourceId()+", "+val);                 
+                       "]: "+event+", timestamp="+val.getTimestamp());                 
         }
     }
     
@@ -460,16 +498,16 @@ public class MeasurementGtrigger
                 continue;
             }
 
-            MetricValue violatingValue = 
+            MetricValue val = 
                 tracker.searchForViolatingMetricInWindow(startTime, endTime);
             
-            if (violatingValue != null) {
-                srcId2MetricValue.put(srcId, violatingValue);
+            if (val != null) {
+                srcId2MetricValue.put(srcId, val);
                 
                 if (debug) {
                     _log.debug("Found violating measurement for trigger ["+
                                getTriggerNameWithPartitionDesc()+"]: "+srcId+
-                               ", "+violatingValue);                 
+                               ", "+val+", timestamp="+val.getTimestamp());                 
                 }
             }
         } 

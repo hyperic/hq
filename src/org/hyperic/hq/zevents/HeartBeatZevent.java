@@ -76,6 +76,10 @@ public class HeartBeatZevent extends Zevent {
         public long getTimestamp() {
             return _timestamp;
         }
+        
+        public String toString() {
+            return String.valueOf(_timestamp);
+        }
     }
 
     public long getTimestamp() {
