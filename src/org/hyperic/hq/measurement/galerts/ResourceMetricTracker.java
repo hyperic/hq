@@ -87,11 +87,10 @@ class ResourceMetricTracker {
     
     /**
      * Search for the first metric value violating the trigger condition in 
-     * the given time window.
+     * the given time window. Any metric value older than the window start 
+     * time will be removed from tracking automatically.
      * 
-     * @param startTime The start timestamp for the window (inclusive). 
-     *                  Any metric value older than this timestamp will be 
-     *                  removed from tracking.
+     * @param startTime The start timestamp for the window (inclusive).
      * @param endTime The end timestamp for the window (exclusive).
      * @return The violating metric value or <code>null</code> if no metric 
      *         violated in the time window. {@link MetricValue#NONE} is returned 
@@ -109,8 +108,8 @@ class ResourceMetricTracker {
             
             if (metricTimestamp < startTime) {
                 if (debug) {
-                    _log.debug("There shouldn't be any metrics currently " +
-                               "older than the window start time: metric timestamp="+
+                    _log.debug("Aging out metrics older than the current " +
+                    		   "window start time: metric timestamp="+
                                metricTimestamp+", start time="+startTime);                    
                 }
                 
