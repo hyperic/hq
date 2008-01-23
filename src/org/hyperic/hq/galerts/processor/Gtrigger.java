@@ -62,8 +62,24 @@ public abstract class Gtrigger {
         _strategy = strat;
     }
     
-    ExecutionStrategy getStrategy() {
+    /**
+     * @return The execution strategy for this trigger or <code>null</code> if 
+     *         the strategy has not been set yet.
+     */
+    protected ExecutionStrategy getStrategy() {
         return _strategy;
+    }
+    
+    /**
+     * @return The alert definition name or <code>null</code> if the alert 
+     *         definition has not been set yet.
+     */
+    protected String getAlertDefName() {
+        if (_alertDef != null) {
+            return _alertDef.getName();
+        } else { 
+            return null;
+        }
     }
     
     /**
