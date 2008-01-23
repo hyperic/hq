@@ -241,7 +241,9 @@ public class ServerDAO extends HibernateDAO
     }
     
     public Number getServerCount() {
-        return (Number)getSession().createQuery("select count(*) from Server")
-            .uniqueResult();
+        String sql =
+            "select count(*) from Server s join s.serverType st " +
+            "where st.virtual=false";
+        return (Number)getSession().createQuery(sql).uniqueResult();
     }
 }

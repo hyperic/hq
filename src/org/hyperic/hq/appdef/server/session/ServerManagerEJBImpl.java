@@ -1405,7 +1405,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
-     * Get the # of servers within HQ inventory
+     * Get the # of servers within HQ inventory.  This method ingores virtual
+     * server types.
      * @ejb:interface-method
      */
     public Number getServerCount() {
