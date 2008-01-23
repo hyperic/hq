@@ -54,6 +54,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
 import org.hyperic.hq.galerts.processor.Gtrigger;
+import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurement;
 import org.hyperic.hq.measurement.server.session.DerivedMeasurementManagerEJBImpl;
@@ -66,6 +67,7 @@ import org.hyperic.hq.measurement.shared.DerivedMeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.HeartBeatZevent.HeartBeatZeventSource;
 
@@ -80,13 +82,15 @@ public class MeasurementGtrigger
     private static final Log _log = 
         LogFactory.getLog(MeasurementGtrigger.class);
     
+    private static final int ONE_MINUTE = 60*1000;
+    
     /**
      * The minimum assumed measurement collection interval. This 
      * value doesn't have to be exact since it's only used to 
      * estimate the time window if we have the case where none 
      * of the resources in the group are collecting on the metric.
      */
-    private static final int MIN_COLLECTION_INTERVAL=60*1000;
+    private static final int MIN_COLLECTION_INTERVAL=ONE_MINUTE;
     
     private final SizeComparator     _sizeCompare;
     private final int                _numResources; // Num needed to match
@@ -97,11 +101,13 @@ public class MeasurementGtrigger
     private final Set                _interestedEvents;
     private final Map                _trackedResources;
     private final boolean            _isNotReportingEventsOffending;
-    private final TreeSet            _chronSortedMetricTimestamps;
-    private       String             _name;
+    private final TreeSet            _nextStartOfTimeWindow;
+    private       String             _triggerName;
+    private       String             _partitionDescription;
     private       long               _maxCollectionInterval;
     private       boolean            _isWithinFirstTimeWindow;
-    private       long               _startOfTimeWindow;
+    private       long               _startOfTimeWindowExact; // the start of the time window
+    private       long               _startOfTimeWindow;  // the start of the time window, voodooed down
     private       String             _metricName;
     private       int                _groupSize;  // The total size of our group    
     private       ResourceGroup      _resourceGroup;
@@ -129,9 +135,8 @@ public class MeasurementGtrigger
         _groupSize        = 0;
         _isNotReportingEventsOffending = isNotReportingOffending;
         _srcId2CollectionInterval = new HashMap();
-        _isWithinFirstTimeWindow = true;
-        _startOfTimeWindow = timingVoodoo(System.currentTimeMillis());
-        _chronSortedMetricTimestamps = new TreeSet();
+        setStartOfFirstTimeWindow(System.currentTimeMillis());
+        _nextStartOfTimeWindow = new TreeSet();
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
         setTriggerName();
     }
@@ -151,6 +156,12 @@ public class MeasurementGtrigger
         boolean inFirstTimeWindow = isInFirstTimeWindow();
         evaluateNextStartOfTimeWindow(inFirstTimeWindow);
         long endOfTimeWindow = _startOfTimeWindow+2*_maxCollectionInterval;
+        
+        // Track heart beat events
+        if (isHeartBeatEvent(event)) {
+            HeartBeatZevent hb = (HeartBeatZevent)event;
+            track(hb);
+        }
         
         // Track the measurement events.
         if (isMeasurementEvent(event)) {         
@@ -172,13 +183,19 @@ public class MeasurementGtrigger
                                                       endOfTimeWindow);
         
         if (srcId2ViolatingMetricValue.size() > 0) {
-            int numCollectingMetrics = _srcId2CollectionInterval.size();
-            
             // The alert fired time should be the end of the time window.
-            tryToFire(srcId2ViolatingMetricValue, 
-                      numCollectingMetrics, 
-                      endOfTimeWindow);            
+            tryToFire(srcId2ViolatingMetricValue, endOfTimeWindow);            
         }
+    }
+    
+    /**
+     * Is this a heart beat event?
+     * 
+     * @param event The event.
+     * @return <code>true</code> if this is a {@link HeartBeatZevent}.
+     */
+    private boolean isHeartBeatEvent(Zevent event) {
+        return event instanceof HeartBeatZevent;
     }
     
     /**
@@ -231,7 +248,7 @@ public class MeasurementGtrigger
     private boolean isInFirstTimeWindow() {
         if (_isWithinFirstTimeWindow) {
             if (System.currentTimeMillis() <
-                _startOfTimeWindow+2*_maxCollectionInterval) {
+                _startOfTimeWindowExact+2*_maxCollectionInterval) {
                 // still in first time window
                 _isWithinFirstTimeWindow = true;
             } else {
@@ -251,40 +268,56 @@ public class MeasurementGtrigger
      * @param inFirstTimeWindow <code>true</code> if we are in the first time window.
      */
     private void evaluateNextStartOfTimeWindow(boolean inFirstTimeWindow) {
+        boolean debug = _log.isDebugEnabled();
+        
         if (inFirstTimeWindow) {
             // don't change start of time window yet - use the old value
         } else {
-            if (_chronSortedMetricTimestamps.isEmpty() || 
-                _chronSortedMetricTimestamps.first() == null) {
-                // There are no metrics currently tracked. It's as though 
-                // we are in the very first time window.
-                _isWithinFirstTimeWindow = true;
-                _startOfTimeWindow = timingVoodoo(System.currentTimeMillis());                  
+            if (_nextStartOfTimeWindow.isEmpty() || 
+                _nextStartOfTimeWindow.first() == null) {
+
+                // The next start of time window is unknown! It's as though we 
+                // are in the very first time window.
+                if (debug) {
+                    _log.debug("The next start of time window is unknown! " +
+                               "Resetting time window for trigger ["+
+                               getTriggerNameWithPartitionDesc()+"]");                        
+                }
+                
+                setStartOfFirstTimeWindow(System.currentTimeMillis());                
             } else {
-                Long timestamp = (Long)_chronSortedMetricTimestamps.first();
-                // The metric timestamp is already timing voodooed.
+                Long timestamp = (Long)_nextStartOfTimeWindow.first();
                 _startOfTimeWindow = timestamp.longValue();
-                _chronSortedMetricTimestamps.remove(timestamp);
+                _nextStartOfTimeWindow.remove(timestamp);
             }
         }
         
-        if (_log.isDebugEnabled()) {
-            _log.debug("Start of time window for trigger ["+_name+
-                       "] ="+_startOfTimeWindow+
-                       ", first time window="+_isWithinFirstTimeWindow);               
+        if (debug) {
+            _log.debug("Start of time window for trigger ["+
+                       getTriggerNameWithPartitionDesc()+"] ="+
+                       _startOfTimeWindow+", in first time window="+
+                       _isWithinFirstTimeWindow);               
         }
     }
     
     /**
-     * Timing voodoo the timestamp down to the assumed minimum collection 
-     * interval (1 minute). We do this because the reported metrics are 
-     * timing voodoo.
+     * When determining if we've moved beyond the first time window, use the 
+     * exact time. When calculating the time window bounds and whether or not 
+     * an event is older than the bounds, use the voodooed time, since the 
+     * measurement and heart beat event timestamps are voodooed.
      * 
      * @param timestamp The timestamp.
-     * @return The timing voodooed timestamp.
      */
-    private long timingVoodoo(long timestamp) {
-        return TimingVoodoo.roundDownTime(timestamp, MIN_COLLECTION_INTERVAL);
+    private void setStartOfFirstTimeWindow(long timestamp) {
+        _isWithinFirstTimeWindow = true;
+        _startOfTimeWindowExact = timestamp;
+        
+        // Even if we are timing voodooing down, we don't want to move back 
+        // in time. Use the max of the last start of time window and the 
+        // new value. Timing voodoo down to the nearest 30 seconds since 
+        // this is the finest resolution we have (for heart beat events).
+        _startOfTimeWindow = Math.max(_startOfTimeWindow,
+            TimingVoodoo.roundDownTime(timestamp, ONE_MINUTE/2));
     }
     
     /**
@@ -312,15 +345,43 @@ public class MeasurementGtrigger
 
         if (val.getValue().getTimestamp() < startTime) {
             if (_log.isDebugEnabled()) {
-                _log.debug("Trigger ["+_name+
-                        "] is rejecting event older than time window: " +
-                        event+"; "+val.getValue().getTimestamp()+
-                        " < "+startTime);                    
+                _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
+                           "] is rejecting event older than time window: "+
+                           event+"; "+val.getValue().getTimestamp()+
+                           " < "+startTime);                    
             }
 
             return true;
         } else {
             return false;
+        }
+    }
+    
+    /**
+     * Track this heart beat event. Heart beats are used to move the time 
+     * window forward even when there are no processed measurement events.
+     * 
+     * @param event The heart beat event.
+     */
+    private void track(HeartBeatZevent event) {
+        // Subtract 1 minute from the heart beat timestamp to set the 
+        // value equivalent to the minimum it would be if the heart 
+        // beat originated on an agent (the agent metric send interval 
+        // is 1 minute).
+        long agentEquivalentTime = event.getTimestamp()-ONE_MINUTE;
+
+        // The heart beat timestamp should be timing voodooed down to the 
+        // previous 1/2 minute (heart beats are sent every 30 seconds).
+        // This makes the timestamps from heart beats equivalent to 
+        // timestamps from measurement events (which are also timing voodooed
+        // down).
+        long timestamp = 
+            TimingVoodoo.roundDownTime(agentEquivalentTime, ONE_MINUTE/2);
+        
+        // The next start of time window should be at least greater than 
+        // the current start of time window!
+        if (timestamp > _startOfTimeWindow) {
+            _nextStartOfTimeWindow.add(new Long(timestamp));            
         }
     }
     
@@ -346,11 +407,12 @@ public class MeasurementGtrigger
         
         tracker.trackMetricValue(val.getValue());
         
-        _chronSortedMetricTimestamps.add(
+        _nextStartOfTimeWindow.add(
                 new Long(val.getValue().getTimestamp()));
         
         if (_log.isDebugEnabled()) {
-            _log.debug("Tracking measurement for trigger ["+_name+
+            _log.debug("Tracking measurement for trigger ["+
+                       getTriggerNameWithPartitionDesc()+
                        "]: "+event.getSourceId()+", "+val);                 
         }
     }
@@ -373,8 +435,9 @@ public class MeasurementGtrigger
         Map srcId2MetricValue = new HashMap();
         
         if (debug) {
-            _log.debug("Checking for violating measurements for trigger ["+_name+
-                       "] with time window; start="+startTime+", end="+endTime);                 
+            _log.debug("Checking for violating measurements for trigger ["+
+                       getTriggerNameWithPartitionDesc()+"] with time window; start="+
+                       startTime+", end="+endTime);                 
         }
         
         for (Iterator iter = trackedResources.entrySet().iterator(); iter.hasNext();) {      
@@ -389,8 +452,8 @@ public class MeasurementGtrigger
             if (tracker.getNumberOfTrackedMetrics()==0 && 
                 !_srcId2CollectionInterval.containsKey(srcId)) {
                 if (debug) {
-                    _log.debug("Found unscheduled measurement for trigger ["+_name+
-                               "]: "+srcId);                        
+                    _log.debug("Stopped tracking unscheduled measurement for trigger ["+
+                               getTriggerNameWithPartitionDesc()+"]: "+srcId);                        
                 }
                 
                 iter.remove();
@@ -404,8 +467,9 @@ public class MeasurementGtrigger
                 srcId2MetricValue.put(srcId, violatingValue);
                 
                 if (debug) {
-                    _log.debug("Found violating measurement for trigger ["+_name+
-                               "]: "+srcId+", "+violatingValue);                 
+                    _log.debug("Found violating measurement for trigger ["+
+                               getTriggerNameWithPartitionDesc()+"]: "+srcId+
+                               ", "+violatingValue);                 
                 }
             }
         } 
@@ -413,9 +477,7 @@ public class MeasurementGtrigger
         return srcId2MetricValue;
     }
     
-    private void tryToFire(Map srcId2MetricValue, 
-                           int numCollectingMetrics, 
-                           long firedTime) {                
+    private void tryToFire(Map srcId2MetricValue, long firedTime) {                
         int numMatched = 0;
         
         for (Iterator i=srcId2MetricValue.values().iterator(); i.hasNext(); ) {
@@ -431,34 +493,9 @@ public class MeasurementGtrigger
         String leftHandStr, numMatchStr;
         int leftHand;
         
-        // We have to be aware of the case where the number of collecting 
-        // metrics has recently changed, but the time window has not 
-        // caught up yet with that point in time. Especially since 
-        // we may not be collecting any metrics in the group (division by zero!).
         if (_isPercent) { 
-            if (numCollectingMetrics == 0) {
-                // Metric collection has been turned off recently.
-                // Use the full group size.
-                leftHand = (numMatched * 100 / _groupSize);
-            } else if (numCollectingMetrics == _groupSize) {
-                // All the resources in the group are collecting.
-                // Use the full group size.
-                leftHand = (numMatched * 100 / _groupSize);
-            } else if (numCollectingMetrics < _groupSize) {
-                // Some of the resources in the group are not collecting.
-                // Use the current collecting resource size.
-                leftHand = (numMatched * 100 / numCollectingMetrics);
-            } else { // numCollectingMetrics > _groupSize
-                // This shouldn't happen. Log it and make a best guess.
-                // Use the current collecting resource size.
-                _log.warn("Trigger ["+_name+"] encountered case where num of " +
-                		 "collecting metrics > group size! num collecting="+
-                		 numCollectingMetrics+", group size="+_groupSize);
-                leftHand = (numMatched * 100 / numCollectingMetrics);
-            }
-            
             // Shouldn't be larger than 100%
-            leftHand = Math.max(leftHand, 100);
+            leftHand = Math.min((numMatched * 100 / _groupSize), 100);
             numMatchStr = leftHand + "%";
             leftHandStr = _numResources + "%";
         } else {
@@ -468,12 +505,12 @@ public class MeasurementGtrigger
         }
         
         if (_log.isDebugEnabled()) {
-            _log.debug("Checking if " + _sizeCompare + " " + _numResources +
-                    (_isPercent ? "%" : "") +
-                    " of the resources reported " + _metricName + 
-                    " " + _comparator + " " + _metricVal);
+            _log.debug("For trigger ["+getTriggerNameWithPartitionDesc()+
+                       "] checking if "+_sizeCompare+" "+_numResources+
+                       (_isPercent ? "%" : "")+" of the resources reported "+
+                       _metricName+" "+_comparator+" "+_metricVal);
             _log.debug("Number of resources matching condition="+
-                       numMatched+", number collecting="+numCollectingMetrics);            
+                       numMatched+", group size="+_groupSize);            
         }
         
         if (!_sizeCompare.isTrue(leftHand, _numResources)) {
@@ -632,6 +669,10 @@ public class MeasurementGtrigger
             _metricName = tMan.getTemplate(_templateId).getName();
             
             setTriggerName();
+            
+            // reset the start of the first time window to now since we 
+            // can't even start processing events until the group is set
+            setStartOfFirstTimeWindow(System.currentTimeMillis());
         } catch(Exception e) {
             throw new SystemException(e);
         }
@@ -646,7 +687,27 @@ public class MeasurementGtrigger
         return getRGMan().getMetricsCollecting(_resourceGroup, _templateId);
     }
     
-    private void setTriggerName() {
-        _name = _metricName+" "+_comparator+" "+_metricVal;
+    private String getTriggerNameWithPartitionDesc() {
+        if (_partitionDescription == null) {
+            ExecutionStrategy strategy = getStrategy();
+            
+            if (strategy != null) {
+                if (strategy.getPartition() != null) {
+                    _partitionDescription = 
+                        strategy.getPartition().getDescription();
+                }
+            }            
+        }
+        
+        if (_partitionDescription != null) {
+            return _triggerName+" "+_partitionDescription;
+        } else {
+            return _triggerName;            
+        }
     }
+    
+    private void setTriggerName() {
+        _triggerName = getAlertDefName()+" ["+_metricName+" "+_comparator+" "+_metricVal+"]";
+    }
+    
 }
