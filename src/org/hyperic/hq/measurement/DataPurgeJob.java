@@ -222,13 +222,19 @@ public class DataPurgeJob implements Job {
      */
     private static void purgeMeasurements() {
         long start = System.currentTimeMillis();
-        int dcount =
-            DerivedMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
-        int rcount =
-            RawMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
-        _log.info("Removed " + dcount + " derived, " + rcount + " raw " +
-                  "measurements in " +
-                  ((System.currentTimeMillis() - start)/60000) + " seconds.");
+        try {
+            int dcount =
+                DerivedMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
+            int rcount =
+                RawMeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
+            _log.info("Removed " + dcount + " derived, " + rcount + " raw " +
+                      "measurements in " +
+                      ((System.currentTimeMillis() - start)/1000) + " seconds.");
+        } catch (Throwable t) {
+            // Do not allow errors to cause other maintenance functions to
+            // not run.
+            _log.error("Error removing measurements", t);
+        }
     }
 
     /**
