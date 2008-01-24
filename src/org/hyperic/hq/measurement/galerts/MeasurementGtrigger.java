@@ -188,8 +188,9 @@ public class MeasurementGtrigger
                                                       endOfTimeWindow);
         
         if (srcId2ViolatingMetricValue.size() > 0) {
-            // The alert fired time should be the end of the time window.
-            tryToFire(srcId2ViolatingMetricValue, endOfTimeWindow);            
+            long firedTime = getAlertFiredTime(_startOfTimeWindow, endOfTimeWindow);
+            
+            tryToFire(srcId2ViolatingMetricValue, firedTime);            
         }
     }
     
@@ -514,6 +515,18 @@ public class MeasurementGtrigger
         
         return srcId2MetricValue;
     }
+    
+    /**
+     * The alert fired time is the average timestamp for the current time 
+     * window.
+     * 
+     * @param startTime The start timestamp for the time window (inclusive).
+     * @param endTime The end timestamp for the time window (exclusive).
+     * @return The alert fired time.
+     */
+    private long getAlertFiredTime(long startTime, long endTime) {
+        return (endTime-startTime)/2;
+    }    
     
     private void tryToFire(Map srcId2MetricValue, long firedTime) {                
         int numMatched = 0;
