@@ -79,6 +79,7 @@ class DojoUtil {
 		        var unique = null;
 		        if (data) {
                     if (data.length == 0) {
+                        document.getElementById('resourceTree').innerHTML = '';
                         dojo.event.topic.publish("XHRComplete", "NO_DATA_RETURNED");
                     }else{
                         dojo.event.topic.publish("XHRComplete", "DATA_RETURNED");
