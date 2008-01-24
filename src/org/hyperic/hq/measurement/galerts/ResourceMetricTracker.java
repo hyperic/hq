@@ -91,7 +91,7 @@ class ResourceMetricTracker {
      * time will be removed from tracking automatically.
      * 
      * @param startTime The start timestamp for the window (inclusive).
-     * @param endTime The end timestamp for the window (exclusive).
+     * @param endTime The end timestamp for the window (inclusive).
      * @return The violating metric value or <code>null</code> if no metric 
      *         violated in the time window. {@link MetricValue#NONE} is returned 
      *         if not reporting resources are considered offending and there 
@@ -114,7 +114,7 @@ class ResourceMetricTracker {
                 }
                 
                 iter.remove();
-            } else if (metric.getTimestamp() < endTime) {
+            } else if (metric.getTimestamp() <= endTime) {
                 hasReportedInWindow = true;
                 
                 if (_comparator.isTrue(new Float(metric.getValue()),

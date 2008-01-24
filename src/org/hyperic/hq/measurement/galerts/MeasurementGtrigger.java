@@ -462,7 +462,7 @@ public class MeasurementGtrigger
      * 
      * @param trackedResources The tracked resources.
      * @param startTime The start timestamp for the time window (inclusive).
-     * @param endTime The end timestamp for the time window (exclusive).
+     * @param endTime The end timestamp for the time window (inclusive).
      * @return The map of {@link MeasurementZeventSource}Ids to {@link MetricValue}s.
      */
     private Map evaluateResourceMetricsAndReturnViolators(Map trackedResources,
