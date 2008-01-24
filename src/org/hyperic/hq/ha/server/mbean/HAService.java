@@ -28,11 +28,12 @@ package org.hyperic.hq.ha.server.mbean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.hq.application.StartupFinishedCallback;
+import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.hq.application.HQApp;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import java.util.List;
 
 /**
  * The HAService starts all internal HQ processes.
@@ -40,7 +41,7 @@ import javax.management.ObjectName;
  * @jmx:mbean name="hyperic.jmx:type=Service,name=HAService"
  */
 public class HAService
-    implements HAServiceMBean, StartupFinishedCallback
+    implements HAServiceMBean, PluginsDeployedCallback
 {
     private static Log _log = LogFactory.getLog(HAService.class);
 
@@ -55,7 +56,7 @@ public class HAService
             startAgentAIScanService(server);
 
             HQApp.getInstance().
-                registerCallbackListener(StartupFinishedCallback.class, this);
+                registerCallbackListener(PluginsDeployedCallback.class, this);
 
         } catch (Exception e) {
             _log.error("Error starting services", e);
@@ -105,7 +106,7 @@ public class HAService
         server.invoke(o, method, new Object[] {}, new String[] {});
     }
 
-    public void startupFinished() {
+    public void pluginsDeployed(List plugins) {
         try {
             MBeanServer server = MBeanUtil.getMBeanServer();
             startHeartbeatService(server);
