@@ -122,6 +122,7 @@ public class UpdateBossEJBImpl
         req.setProperty("hq.version", ProductProperties.getVersion());
         req.setProperty("hq.build", ProductProperties.getBuild());
         req.setProperty("hq.guid", guid);
+        req.setProperty("hq.flavour", ProductProperties.getFlavour());
         req.setProperty("platform.time", "" + System.currentTimeMillis());
         req.setProperty("os.name", System.getProperty("os.name"));
         req.setProperty("os.arch", System.getProperty("os.arch"));
