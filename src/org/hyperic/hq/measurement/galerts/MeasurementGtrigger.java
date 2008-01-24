@@ -79,10 +79,7 @@ import org.hyperic.hq.zevents.HeartBeatZevent.HeartBeatZeventSource;
 public class MeasurementGtrigger 
     extends Gtrigger
 {
-    private static final Log _log = 
-        LogFactory.getLog(MeasurementGtrigger.class);
-    
-    private static final int ONE_MINUTE = 60*1000;
+    private static final Log _log = LogFactory.getLog(MeasurementGtrigger.class);
     
     /**
      * The minimum assumed measurement collection interval. This 
@@ -90,7 +87,7 @@ public class MeasurementGtrigger
      * estimate the time window if we have the case where none 
      * of the resources in the group are collecting on the metric.
      */
-    private static final int MIN_COLLECTION_INTERVAL=ONE_MINUTE;
+    private static final int MIN_COLLECTION_INTERVAL=60*1000;
     
     private final SizeComparator     _sizeCompare;
     private final int                _numResources; // Num needed to match
@@ -101,7 +98,7 @@ public class MeasurementGtrigger
     private final Set                _interestedEvents;
     private final Map                _trackedResources;
     private final boolean            _isNotReportingEventsOffending;
-    private final TreeSet            _nextStartOfTimeWindow;
+    private final TreeSet            _trackedHeartBeatTimestamps;
     private       String             _triggerName;
     private       String             _partitionDescription;
     private       long               _maxCollectionInterval;
@@ -136,7 +133,7 @@ public class MeasurementGtrigger
         _isNotReportingEventsOffending = isNotReportingOffending;
         _srcId2CollectionInterval = new HashMap();
         setStartOfFirstTimeWindow(System.currentTimeMillis());
-        _nextStartOfTimeWindow = new TreeSet();
+        _trackedHeartBeatTimestamps = new TreeSet();
         _maxCollectionInterval = MIN_COLLECTION_INTERVAL;
         setTriggerName();
     }
@@ -154,17 +151,20 @@ public class MeasurementGtrigger
         
         // Evaluate the sliding time window boundary.
         boolean inFirstTimeWindow = isInFirstTimeWindow();
-        evaluateNextStartOfTimeWindow(inFirstTimeWindow);
+        
+        // We only move the time window forward when a heart beat is processed.
+        if (isHeartBeatEvent(event)) {
+            evaluateNextStartOfTimeWindow(inFirstTimeWindow);            
+        }
+        
         long endOfTimeWindow = _startOfTimeWindow+2*_maxCollectionInterval;
         
         // Track heart beat events
         if (isHeartBeatEvent(event)) {
             HeartBeatZevent hb = (HeartBeatZevent)event;
-            
-            long hbTimestamp = adjustHeartBeatTimestamp(hb);
-            
-            if (!isOlderThanTimeWindowStartTime(hb, _startOfTimeWindow, hbTimestamp)) {
-                track(hb, hbTimestamp);                
+                        
+            if (!isOlderThanTimeWindowStartTime(hb, _startOfTimeWindow)) {
+                track(hb);                
             }
         }
         
@@ -268,8 +268,8 @@ public class MeasurementGtrigger
     /**
      * If we are in the first time window, then the start time doesn't change 
      * from the previous value. Otherwise, the start of the time window is the 
-     * timestamp of the oldest tracked metric value (or the current time if no 
-     * metrics are currently being tracked).
+     * timestamp of the oldest tracked heart beat (or the current time if no 
+     * heart beats are currently being tracked).
      * 
      * @param inFirstTimeWindow <code>true</code> if we are in the first time window.
      */
@@ -279,8 +279,8 @@ public class MeasurementGtrigger
         if (inFirstTimeWindow) {
             // don't change start of time window yet - use the old value
         } else {
-            if (_nextStartOfTimeWindow.isEmpty() || 
-                _nextStartOfTimeWindow.first() == null) {
+            if (_trackedHeartBeatTimestamps.isEmpty() || 
+                _trackedHeartBeatTimestamps.first() == null) {
 
                 // The next start of time window is unknown! It's as though we 
                 // are in the very first time window.
@@ -292,9 +292,12 @@ public class MeasurementGtrigger
                 
                 setStartOfFirstTimeWindow(System.currentTimeMillis());                
             } else {
-                Long timestamp = (Long)_nextStartOfTimeWindow.first();
-                _startOfTimeWindow = timestamp.longValue();
-                _nextStartOfTimeWindow.remove(timestamp);
+                Long timestamp = (Long)_trackedHeartBeatTimestamps.first();
+                _trackedHeartBeatTimestamps.remove(timestamp);
+                
+                // Make sure we don't move back in time!
+                _startOfTimeWindow = 
+                    Math.max(_startOfTimeWindow, timestamp.longValue());
             }
         }
         
@@ -308,9 +311,8 @@ public class MeasurementGtrigger
     
     /**
      * When determining if we've moved beyond the first time window, use the 
-     * exact time. When calculating the time window bounds and whether or not 
-     * an event is older than the bounds, use the voodooed time, since the 
-     * measurement and heart beat event timestamps are voodooed.
+     * exact time. When calculating the time window lower bound use the voodooed 
+     * time, since the measurement and heart beat event timestamps are voodooed.
      * 
      * @param timestamp The timestamp.
      */
@@ -323,7 +325,8 @@ public class MeasurementGtrigger
         // new value. Timing voodoo down to the nearest 30 seconds since 
         // this is the finest resolution we have (for heart beat events).
         _startOfTimeWindow = Math.max(_startOfTimeWindow,
-            TimingVoodoo.roundDownTime(timestamp, ONE_MINUTE/2));
+            TimingVoodoo.roundDownTime(timestamp, 
+                    HeartBeatZevent.HEART_BEAT_INTERVAL_MILLIS));
     }
     
     /**
@@ -369,18 +372,15 @@ public class MeasurementGtrigger
      * 
      * @param event The heart beat event.
      * @param startTime The start timestamp for the time window.
-     * @param heartBeatTimestamp The heart beat timestamp after adjustment 
-     *                           for the agent send interval and time voodooing.
      * @return <code>true</code> if this is an old heart beat event.
      */
     private boolean isOlderThanTimeWindowStartTime(HeartBeatZevent event, 
-                                                   long startTime, 
-                                                   long heartBeatTimestamp) {
-        if (heartBeatTimestamp < startTime) {
+                                                   long startTime) {
+        if (event.getVoodooedTimestamp() < startTime) {
             if (_log.isDebugEnabled()) {
                 _log.debug("Trigger ["+getTriggerNameWithPartitionDesc()+
                            "] is rejecting heart beat event older than time window: "+
-                           event+"; "+heartBeatTimestamp+" < "+startTime);                    
+                           event+"; "+event.getVoodooedTimestamp()+" < "+startTime);                    
             }
 
             return true;
@@ -388,38 +388,26 @@ public class MeasurementGtrigger
             return false;
         }        
     }
-    
-    /**
-     * Adjust the heart beat event timestamp so that it is "equivalent" to 
-     * a measurement event timestamp. This includes subtracting 1 minute 
-     * from the timestamp to adjust for the agent metric send interval of 
-     * 1 minute and time voodooing that result down.
-     * 
-     * @param event The heart beat event.
-     * @return The adjusted heart beat timestamp.
-     */
-    private long adjustHeartBeatTimestamp(HeartBeatZevent event) {
-        long agentEquivalentTime = event.getTimestamp()-ONE_MINUTE;
         
-        // the heart beat interval is every 1/2 minute.
-        return TimingVoodoo.roundDownTime(agentEquivalentTime, ONE_MINUTE/2);
-    }
-    
     /**
      * Track this heart beat event. Heart beats are used to move the time 
-     * window forward even when there are no processed measurement events.
+     * window forward since they are timestamped "reliably" every 30 minutes, 
+     * less than the minimum measurement collection interval. Also, since 
+     * heart beats share the same zevent queue as the measurement events, if 
+     * they are processed slower by the trigger, the time window will move 
+     * forward slower. In that respect, they serve to throttle the time 
+     * window velocity in case the system is bogged down, minimizing the 
+     * loss of measurement events that may spend a long time in the zevent 
+     * queue.
      * 
      * @param event The heart beat event.
-     * @param heartBeatTimestamp The heart beat timestamp after adjustment 
-     *                           for the agent send interval and time voodooing.
      */
-    private void track(HeartBeatZevent event, long heartBeatTimestamp) {        
-        _nextStartOfTimeWindow.add(new Long(heartBeatTimestamp));  
+    private void track(HeartBeatZevent event) {        
+        _trackedHeartBeatTimestamps.add(new Long(event.getVoodooedTimestamp()));  
         
         if (_log.isDebugEnabled()) {
             _log.debug("Tracking heart beat for trigger ["+
-                       getTriggerNameWithPartitionDesc()+
-                       "]: "+event+", timestamp="+heartBeatTimestamp);                 
+                       getTriggerNameWithPartitionDesc()+"]: "+event);                 
         }
     }
     
@@ -446,8 +434,6 @@ public class MeasurementGtrigger
         MetricValue val = payload.getValue();
         
         tracker.trackMetricValue(val);
-        
-        _nextStartOfTimeWindow.add(new Long(val.getTimestamp()));
         
         if (_log.isDebugEnabled()) {
             _log.debug("Tracking measurement for trigger ["+

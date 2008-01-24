@@ -28,7 +28,11 @@ package org.hyperic.hq.zevents;
 import java.io.ObjectStreamException;
 import java.util.Date;
 
+import org.hyperic.hq.measurement.TimingVoodoo;
+
 public class HeartBeatZevent extends Zevent {
+    
+    public static final int HEART_BEAT_INTERVAL_MILLIS=30*1000;
 
     static {
         ZeventManager.getInstance().
@@ -68,22 +72,33 @@ public class HeartBeatZevent extends Zevent {
         implements ZeventPayload
     {
         private final long _timestamp;
-
+        private final long _voodooedTimestamp;
+        
         public HeartBeatZeventPayload(Date beat) {
             _timestamp = beat.getTime();
+            _voodooedTimestamp = 
+                TimingVoodoo.roundDownTime(_timestamp, HEART_BEAT_INTERVAL_MILLIS);
         }
 
         public long getTimestamp() {
             return _timestamp;
         }
         
+        public long getVoodooedTimeStamp() {
+            return _voodooedTimestamp;
+        }
+        
         public String toString() {
-            return String.valueOf(_timestamp);
+            return ""+getTimestamp()+"; voodooed="+getVoodooedTimeStamp();
         }
     }
 
     public long getTimestamp() {
         return ((HeartBeatZeventPayload)getPayload()).getTimestamp();
+    }
+    
+    public long getVoodooedTimestamp() {
+        return ((HeartBeatZeventPayload)getPayload()).getVoodooedTimeStamp();
     }
     
     public HeartBeatZevent(Date beat) {
