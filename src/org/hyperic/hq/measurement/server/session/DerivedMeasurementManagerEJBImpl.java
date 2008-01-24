@@ -101,6 +101,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
+import org.hyperic.util.timer.StopWatch;
 import org.quartz.SchedulerException;
 
 /** The DerivedMeasurementManagerEJB class is a stateless session bean that can
@@ -519,17 +520,19 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public int removeOrphanedMeasurements() {
+        StopWatch watch = new StopWatch();
         MetricDeleteCallback cb = 
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-
         List mids = dao.findOrphanedMeasurements();
-        for (Iterator i=mids.iterator(); i.hasNext(); ) {
-            DerivedMeasurement dm = dao.get((Integer)i.next());
-            cb.beforeMetricDelete(dm);
-            dao.remove(dm);
-        }
+        cb.beforeMetricsDelete(mids);
+        getBaselineDAO().deleteByIds(mids);
+        dao.deleteByIds(mids);
 
+        if (log.isDebugEnabled()) {
+            log.debug("DerivedMeasurementManager.removeOrphanedMeasurements() "+
+            		  watch);
+        }
         return mids.size();
     }
 
@@ -1556,19 +1559,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 try {
                     mtype = av.getMonitorableType();
                 } catch (AppdefEntityNotFoundException e) {
-                    // Non existent resource, we should actually remove its
-                    // metrics
-                    MetricDeleteCallback cb = 
-                        MeasurementStartupListener.getMetricDeleteCallbackObj();
-                    DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
-
-                    for (Iterator i = dao.findByInstance(id.getType(),
-                                                         id.getID()).iterator();
-                         i.hasNext(); ) {
-                        DerivedMeasurement dm = (DerivedMeasurement)i.next();
-                        cb.beforeMetricDelete(dm);
-                        dao.remove(dm);
-                    }
+                    // Non existent resource, we'll clean it up in
+                    // removeOrphanedMeasurements()
                     return;
                 }
             }

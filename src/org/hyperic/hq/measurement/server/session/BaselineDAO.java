@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.dao.DAOFactory;
@@ -90,5 +91,12 @@ public class BaselineDAO extends HibernateDAO {
         return (Baseline)getSession().createQuery(sql)
             .setInteger(0, mtId.intValue())
             .setInteger(1, instanceId.intValue()).uniqueResult();
+    }
+
+    int deleteByIds(Collection ids) {
+        return getSession()
+            .createQuery("delete from Baseline where derivedMeasurement.id in (:ids)")
+            .setParameterList("ids", ids)
+            .executeUpdate();
     }
 }

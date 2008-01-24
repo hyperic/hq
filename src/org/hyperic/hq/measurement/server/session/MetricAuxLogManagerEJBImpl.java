@@ -38,6 +38,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
+import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
@@ -97,20 +98,21 @@ public class MetricAuxLogManagerEJBImpl
     }
 
     /**
-     * Callback, invoked when a metric is deleted.  Since we still want to keep
+     * Callback, invoked when metrics are deleted.  Since we still want to keep
      * the measurement around, we delete the value from the metric_aux_log and
      * transform the entry in the galert_aux_log to a regular entry.
      * 
      * @ejb:interface-method
      */
-    public void metricDeleted(DerivedMeasurement m) {
-        Collection metAuxLogs = getDAO().find(m);
- 
-        for (Iterator i=metAuxLogs.iterator(); i.hasNext(); ) {
-            MetricAuxLogPojo p = (MetricAuxLogPojo)i.next();
-            
-            getDAO().remove(p);
-            GalertManagerEJBImpl.getOne().resetLogLink(p.getAuxLog());
+    public void metricsDeleted(Collection mids) {
+        MetricAuxLogDAO dao = getDAO();
+        Collection metAuxLogs = dao.find(mids);
+
+        GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
+        for (Iterator i = metAuxLogs.iterator(); i.hasNext();) {
+            MetricAuxLogPojo p = (MetricAuxLogPojo) i.next();
+            dao.remove(p);
+            gam.resetLogLink(p.getAuxLog());
         }
     }
 

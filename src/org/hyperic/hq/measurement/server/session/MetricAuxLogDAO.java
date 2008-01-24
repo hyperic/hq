@@ -56,11 +56,11 @@ public class MetricAuxLogDAO extends HibernateDAO {
             .uniqueResult();
     }
     
-    Collection find(DerivedMeasurement m) {
-        String sql = "from MetricAuxLogPojo p where p.metric = :metric";
+    Collection find(Collection mids) {
+        String sql = "from MetricAuxLogPojo p where p.metric.id in (:metrics)";
         
         return getSession().createQuery(sql) 
-                           .setParameter("metric", m)
+                           .setParameterList("metrics", mids)
                            .list();
     }
     

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
+
 public interface MetricDeleteCallback {
     /**
      * Called before metrics are deleted.
@@ -34,5 +36,5 @@ public interface MetricDeleteCallback {
     /**
      * Called before metrics are deleted.
      */
-    void beforeMetricDelete(DerivedMeasurement m);
+    void beforeMetricsDelete(Collection mids);
 }

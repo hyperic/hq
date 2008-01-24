@@ -450,7 +450,7 @@ public abstract class SessionEJB {
         }
     }
 
-    protected void deleteMetricProblems(Integer mid) {
-        getMetricProblemDAO().deleteByMetricId(mid);
+    protected void deleteMetricProblems(Collection mids) {
+        getMetricProblemDAO().deleteByMetricIds(mids);
     }
 }

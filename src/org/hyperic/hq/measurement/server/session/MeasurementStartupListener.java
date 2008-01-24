@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -93,8 +94,8 @@ public class MeasurementStartupListener
             public void beforeMetricDelete(RawMeasurement m) {
             }
 
-            public void beforeMetricDelete(DerivedMeasurement m) {
-                MetricAuxLogManagerEJBImpl.getOne().metricDeleted(m);
+            public void beforeMetricsDelete(Collection mids) {
+                MetricAuxLogManagerEJBImpl.getOne().metricsDeleted(mids);
             }
         });
 

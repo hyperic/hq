@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -305,6 +306,13 @@ public class DerivedMeasurementDAO extends HibernateDAO {
             remove((DerivedMeasurement)i.next());
         }
         return v.size();
+    }
+    
+    int deleteByIds(Collection ids) {
+        return getSession()
+            .createQuery("delete from DerivedMeasurement where id in (:ids)")
+            .setParameterList("ids", ids)
+            .executeUpdate();
     }
 
     public List findByInstance(int type, int id, boolean enabled) {

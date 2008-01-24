@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -54,11 +56,11 @@ public class MetricProblemDAO extends HibernateDAO {
         return p;
     }
     
-    int deleteByMetricId(Integer id) {
-        String sql = "delete MetricProblem where measurement_id = :id";
+    int deleteByMetricIds(Collection ids) {
+        String sql = "delete MetricProblem where measurement_id in (:ids)";
 
         return getSession().createQuery(sql)
-            .setInteger("id", id.intValue())
+            .setParameterList("ids", ids)
             .executeUpdate();
     }
 }
