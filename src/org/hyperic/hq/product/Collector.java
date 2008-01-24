@@ -104,7 +104,8 @@ public abstract class Collector implements Runnable {
 
     private int timeout = -1;
     private long startTime, endTime;
-    private long interval = -1;
+    //use a ref to Metric: ScheduleThread.unscheduleMetric unsets interval
+    private Metric intervalMetric;
     private long lastCollection = -1;
     private static Map compatAliases = new HashMap();
     
@@ -402,6 +403,19 @@ public abstract class Collector implements Runnable {
         return result.getMetricValue(metric.getAttributeName());
     }
 
+    private long getInterval() {
+        if (this.intervalMetric == null) {
+            return -1;
+        }
+        else {
+            return this.intervalMetric.getInterval();
+        }
+    }
+
+    private void setInterval(Metric metric) {
+        this.intervalMetric = metric;
+    }
+
     //interval is used to make collection to happen 1 minute before
     //the Availability metric is scheduled to be collected
     protected void setInterval(MeasurementPlugin plugin, Metric metric) {
@@ -412,13 +426,13 @@ public abstract class Collector implements Runnable {
         boolean isAvail = 
             metric.getAttributeName().equals(Metric.ATTR_AVAIL);
 
-        if ((isAvail || (this.interval == -1)) &&
+        if ((isAvail || (getInterval() == -1)) &&
             (itv > 0) &&
-            (this.interval != itv))
+            (getInterval() != itv))
         {
-            this.interval = metric.getInterval();
+            setInterval(metric);
             if (log.isDebugEnabled()) {
-                log.debug("Set itv=" + (this.interval / MINUTE) +
+                log.debug("Set itv=" + (getInterval() / MINUTE) +
                           "min for " + plugin.getName() +
                           " collector: " + this);
             }
@@ -639,7 +653,7 @@ public abstract class Collector implements Runnable {
 
         for (int i=0; i<pluginCollectors.size(); i++) {
             Collector collector = (Collector)pluginCollectors.get(i);
-            long interval = collector.interval;
+            long interval = collector.getInterval();
             long lastCollection = collector.lastCollection;
 
             CollectorResult result =

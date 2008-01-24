@@ -154,7 +154,7 @@ public class Schedule {
      * @throws UnscheduledItemException indicating the ID was not found.
      */
 
-    public synchronized void unscheduleItem(long id) 
+    public synchronized ScheduledItem unscheduleItem(long id) 
         throws UnscheduledItemException 
     {
         int i, size = this.schedule.size();
@@ -163,8 +163,7 @@ public class Schedule {
             ScheduledItem item = (ScheduledItem) this.schedule.get(i);
 
             if(item.getId() == id){
-                this.schedule.remove(i);
-                return;
+                return (ScheduledItem)this.schedule.remove(i);
             }
         }
 

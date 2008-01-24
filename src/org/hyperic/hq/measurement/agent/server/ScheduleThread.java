@@ -55,6 +55,7 @@ import org.hyperic.util.collection.IntHashMap;
 import org.hyperic.util.schedule.EmptyScheduleException;
 import org.hyperic.util.schedule.Schedule;
 import org.hyperic.util.schedule.ScheduleException;
+import org.hyperic.util.schedule.ScheduledItem;
 import org.hyperic.util.schedule.UnscheduledItemException;
 
 import org.apache.commons.logging.Log;
@@ -151,7 +152,9 @@ public class ScheduleThread
                 Long mID = (Long)mIDList.get(i);
 
                 try {
-                    this.schedule.unscheduleItem(mID.longValue());
+                    ScheduledItem item =
+                        this.schedule.unscheduleItem(mID.longValue());
+                    unscheduleMetric((ScheduledMeasurement)item.getObj());
                 } catch(UnscheduledItemException exc){
                     throw new AgentAssertionException("Tried to unschedule " +
                                                       "something which wasnt" +
@@ -283,25 +286,42 @@ public class ScheduleThread
         }
     }
 
+    private class ParsedTemplate {
+        String plugin;
+        Metric metric;
+    }
+
+    private ParsedTemplate getParsedTemplate(ScheduledMeasurement meas) {
+        ParsedTemplate tmpl = new ParsedTemplate();
+        String template = meas.getDSN();
+        //duplicating some code from MeasurementPluginManager
+        //so we can do Metric.setId
+        int ix = template.indexOf(":");
+        tmpl.plugin = template.substring(0, ix);
+        String metric = template.substring(ix+1, template.length());
+        tmpl.metric = Metric.parse(metric);
+        return tmpl;
+    }
+
     private MetricValue getValue(ScheduledMeasurement meas)
         throws PluginException, PluginNotFoundException,
                MetricNotFoundException, MetricUnreachableException
     {
-        String template = meas.getDSN();
         AppdefEntityID aid = meas.getEntity();
         int id = aid.getID();
         int type = aid.getType();
 
-        //duplicating some code from MeasurementPluginManager
-        //so we can do Metric.setId
-        int ix = template.indexOf(":");
-        String plugin = template.substring(0, ix);
-        String metric = template.substring(ix+1, template.length());
-        Metric parsedMetric = Metric.parse(metric);
-        parsedMetric.setId(type, id);
-        parsedMetric.setCategory(meas.getCategory());
-        parsedMetric.setInterval(meas.getInterval());
-        return this.manager.getValue(plugin, parsedMetric);    
+        ParsedTemplate tmpl = getParsedTemplate(meas);
+        tmpl.metric.setId(type, id);
+        tmpl.metric.setCategory(meas.getCategory());
+        tmpl.metric.setInterval(meas.getInterval());
+        return this.manager.getValue(tmpl.plugin, tmpl.metric);
+    }
+
+    //For plugin/Collector awareness
+    private void unscheduleMetric(ScheduledMeasurement meas) {
+        ParsedTemplate tmpl = getParsedTemplate(meas);
+        tmpl.metric.setInterval(-1);
     }
 
     /**
