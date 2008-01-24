@@ -881,12 +881,10 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                FinderException
     {
         AIServiceValue aiservice = sInfo.aiservice;
+        Server server = _serverMan.getServerById(sInfo.serverId);
         
-        Service service = null;
-        if (aiservice.getId() != null) {
-            service = _serviceMan.getServiceById(aiservice.getId()); 
-        }
-        
+        Service service = _serviceMan.getServiceByName(server, 
+                                                       aiservice.getName());
         boolean update = false;
 
         if (service == null) {
@@ -896,7 +894,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             String typeName = aiservice.getServiceTypeName();
             ServiceType serviceType = 
                 _serviceMan.findPojoServiceTypeByName(typeName);
-            Server server = _serverMan.getServerById(sInfo.serverId);
             service = _serviceMan.createService(sInfo.subject, server, 
                                                 serviceType, 
                                                 aiservice.getName(),
@@ -918,8 +915,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
             if (aiservice.getDescription() != null)
                 service.setDescription(aiservice.getDescription().trim());
-            
-            //_serviceMan.updateService(sInfo.subject, foundAppdefService);
         }
                 
         // CONFIGURE SERVICE

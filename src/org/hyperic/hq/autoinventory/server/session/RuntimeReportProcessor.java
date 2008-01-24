@@ -513,10 +513,6 @@ public class RuntimeReportProcessor {
                                                     "%serverName%",
                                                  foundAppdefServer.getName());
                 aiSvc.setName(newName);
-                
-                // Service IDs are initially set to null, and later set to
-                // the id of the real resource, if they are found
-                aiSvc.setId(null); 
             }
             
             
@@ -530,7 +526,6 @@ public class RuntimeReportProcessor {
                     
                     if (aiSvc.getName().equals(appdefSvc.getName())) {
                         found = true;
-                        aiSvc.setId(appdefSvc.getId());
                         break;
                     }
                 }
