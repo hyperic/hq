@@ -1471,6 +1471,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         List entities =
             getDerivedMeasurementDAO().findMetricsCountMismatch(plugin);
         
+        AuthzSubject overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        
         for (Iterator it = entities.iterator(); it.hasNext(); ) {
             Object[] vals = (Object[]) it.next();
             
@@ -1479,9 +1482,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             AppdefEntityID aeid =
                 new AppdefEntityID(type.intValue(), id.intValue());
 
-            AuthzSubject overlord =
-                AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        
             try {
                 log.info("syncPluginMetrics sync'ing metrics for " + aeid);
                 enableDefaultMetrics(overlord, aeid, false);
