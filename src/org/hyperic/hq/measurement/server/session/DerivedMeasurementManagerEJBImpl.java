@@ -557,9 +557,12 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
             MeasurementStartupListener.getMetricDeleteCallbackObj();
         DerivedMeasurementDAO dao = getDerivedMeasurementDAO();
         List mids = dao.findOrphanedMeasurements();
-        cb.beforeMetricsDelete(mids);
-        getBaselineDAO().deleteByIds(mids);
-        dao.deleteByIds(mids);
+        
+        if (mids.size() > 0) {
+            cb.beforeMetricsDelete(mids);
+            getBaselineDAO().deleteByIds(mids);
+            dao.deleteByIds(mids);
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("DerivedMeasurementManager.removeOrphanedMeasurements() "+
