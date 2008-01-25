@@ -85,6 +85,10 @@ public class MeasurementScheduleZevent extends Zevent
             _interval = interval;
         }
 
+        /**
+         * @return The measurement collection interval; <code>0</code> if 
+         *         collection has been disabled.
+         */
         public long getInterval() {
             return _interval;
         }
