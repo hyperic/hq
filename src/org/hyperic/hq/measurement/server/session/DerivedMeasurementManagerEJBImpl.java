@@ -153,12 +153,44 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         m.setEnabled(interval != 0);
         m.setInterval(interval);
 
-        MeasurementScheduleZevent event =
-            new MeasurementScheduleZevent(m.getId().intValue(),
-                                          interval);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        enqueueZeventForMeasScheduleChange(m, interval);
 
         return m;
+    }
+    
+    /**
+     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
+     * corresponding to the change in schedule for the derived measurement.
+     * 
+     * @param dm The derived measurement.
+     * @param interval The new collection interval.
+     */
+    private void enqueueZeventForMeasScheduleChange(DerivedMeasurement dm, 
+                                                    long interval) {
+        
+        MeasurementScheduleZevent event =
+            new MeasurementScheduleZevent(dm.getId().intValue(), interval);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+    }
+    
+    /**
+     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
+     * corresponding to collection disabled for the derived measurements.
+     * 
+     * @param mids The derived measurement ids.
+     */
+    private void enqueueZeventsForMeasScheduleCollectionDisabled(Integer[] mids) {
+        List events = new ArrayList(mids.length);
+        
+        for (int i = 0; i < mids.length; i++) {
+            Integer mid = mids[i];
+            
+            if (mid != null) {
+                events.add(new MeasurementScheduleZevent(mid.intValue(), 0));                
+            }
+        }
+        
+        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
     private Integer getRawIdByTemplateAndInstance(Integer tid, Integer iid) {
@@ -1253,6 +1285,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
             // Now unschedule the DerivedMeasurment
             unscheduleJobs(mids);
+            
+            enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
 
         // Unscheduling of all metrics for a resource could indicate that
@@ -1288,6 +1322,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         // Now unschedule the DerivedMeasurment
         unscheduleJobs(mids);
+        
+        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
 
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed.  Send the unschedule synchronously
@@ -1327,6 +1363,9 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
 
         // Now unschedule the DerivedMeasurment
         unscheduleJobs(mids);
+        
+        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+        
         sendAgentSchedule(aid);
     }
 
@@ -1361,7 +1400,13 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         }
 
         // Now unschedule the DerivedMeasurment
-        unscheduleJobs((Integer[])toUnschedule.toArray(new Integer[0]));
+        Integer[] mids = 
+            (Integer[])toUnschedule.toArray(new Integer[toUnschedule.size()]);
+        
+        unscheduleJobs(mids);
+        
+        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+        
         sendAgentSchedule(id);
     }
 
