@@ -509,7 +509,8 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                 intervals[i] = 0;
         }
 
-        return createMeasurements(subject, id, tids, intervals, props);
+        return getDMManager().createMeasurements(subject, id, tids, intervals,
+                                                 props);
     }
 
     /**
@@ -1595,8 +1596,6 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
                                      AppdefEntityID id, boolean verify) 
         throws AppdefEntityNotFoundException, PermissionException 
     {
-        RawMeasurementManagerLocal rawMan =
-            RawMeasurementManagerEJBImpl.getOne();
         ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
         ConfigResponse config;
         String mtype;
@@ -1632,7 +1631,7 @@ public class DerivedMeasurementManagerEJBImpl extends SessionEJB
         // Check the configuration
         if (verify) {
             try {
-                rawMan.checkConfiguration(subj, id, config);
+                getRmMan().checkConfiguration(subj, id, config);
             } catch (InvalidConfigException e) {
                 log.warn("Error turning on default metrics, configuration (" +
                           config + ") " + "couldn't be validated", e);
