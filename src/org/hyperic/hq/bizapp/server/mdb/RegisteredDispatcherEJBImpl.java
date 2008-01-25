@@ -52,6 +52,7 @@ import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.server.session.EventProcessingTxnWrapperEJBImpl;
+import org.hyperic.hq.events.shared.EventProcessingTxnWrapperLocal;
 
 
 /** The RegisteredDispatcher Message-Drive Bean registers Triggers and
@@ -84,8 +85,11 @@ public class RegisteredDispatcherEJBImpl
      * @param visitedMCTriggers The set of visited multicondition triggers 
      *                          that will be updated if a trigger of this type 
      *                          processes this event.
+     * @param txnWrapper The event processing txn wrapper.                       
      */
-    private void dispatchEvent(AbstractEvent event, Set visitedMCTriggers) 
+    private void dispatchEvent(AbstractEvent event, 
+                               Set visitedMCTriggers, 
+                               EventProcessingTxnWrapperLocal txnWrapper) 
         throws InterruptedException {        
         // Get interested triggers
         Collection triggers =
@@ -98,8 +102,7 @@ public class RegisteredDispatcherEJBImpl
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
                 updateVisitedMCTriggersSet(visitedMCTriggers, trigger);                
-                EventProcessingTxnWrapperEJBImpl.getOne()
-                                .processEvent(trigger, event);
+                txnWrapper.processEvent(trigger, event);
             } catch (SystemException e) {
                 log.error("Event processing failed for trigger id="+
                            trigger.getId(), e);
@@ -140,6 +143,9 @@ public class RegisteredDispatcherEJBImpl
         // Just to be safe, start with a fresh queue.
         Messenger.resetThreadLocalQueue();
         final Set visitedMCTriggers = new HashSet();
+        
+        EventProcessingTxnWrapperLocal txnWrapper = 
+            EventProcessingTxnWrapperEJBImpl.getOne();
 
         try {
             ObjectMessage om = (ObjectMessage) inMessage;
@@ -147,12 +153,12 @@ public class RegisteredDispatcherEJBImpl
                        
             if (obj instanceof AbstractEvent) {
                 AbstractEvent event = (AbstractEvent) obj;
-                dispatchEvent(event, visitedMCTriggers);
+                dispatchEvent(event, visitedMCTriggers, txnWrapper);
             } else if (obj instanceof Collection) {
                 Collection events = (Collection) obj;
                 for (Iterator it = events.iterator(); it.hasNext(); ) {
                     AbstractEvent event = (AbstractEvent) it.next();
-                    dispatchEvent(event, visitedMCTriggers);
+                    dispatchEvent(event, visitedMCTriggers, txnWrapper);
                 }
             }
         } catch (JMSException e) {
@@ -161,7 +167,7 @@ public class RegisteredDispatcherEJBImpl
             log.info("Thread was interrupted while processing events.");
         } finally {
             try {
-                flushStateForVisitedMCTriggers(visitedMCTriggers);
+                flushStateForVisitedMCTriggers(visitedMCTriggers, txnWrapper);
             } catch (Exception e) {
                 log.error("Failed to flush state for multi condition trigger", e);
             }
@@ -170,7 +176,8 @@ public class RegisteredDispatcherEJBImpl
         }
     }
     
-    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers)  
+    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers, 
+                                    EventProcessingTxnWrapperLocal txnWrapper)  
         throws InterruptedException {
         
         if (visitedMCTriggers.isEmpty()) {
@@ -186,7 +193,7 @@ public class RegisteredDispatcherEJBImpl
 
                 if (trigger.triggeringConditionsFulfilled()) {
                     try {   
-                        tryFlushState(event, trigger);    
+                        tryFlushState(event, trigger, txnWrapper);    
                     } catch (SystemException e) {
                         // Continue flushing the other triggers. The transaction 
                         // wrapping the current trigger flush will be rolled back.
@@ -223,9 +230,12 @@ public class RegisteredDispatcherEJBImpl
      * @throws InterruptedException if the current thread is interrupted. If this 
      *                              happens, then all locks on the trigger are 
      *                              guaranteed to have been released.
+     * @param txnWrapper The event processing txn wrapper.
      * @throws SystemException if trigger state flushing fails.
      */
-    private void tryFlushState(FlushStateEvent event, MultiConditionTrigger trigger) 
+    private void tryFlushState(FlushStateEvent event, 
+                               MultiConditionTrigger trigger,
+                               EventProcessingTxnWrapperLocal txnWrapper) 
         throws InterruptedException, SystemException {
         
         boolean lockAcquired = false;
@@ -234,8 +244,7 @@ public class RegisteredDispatcherEJBImpl
             lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
 
             if (lockAcquired) {
-                EventProcessingTxnWrapperEJBImpl.getOne()
-                                    .processEvent(trigger, event);
+                txnWrapper.processEvent(trigger, event);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("There must be more interesting events "+
