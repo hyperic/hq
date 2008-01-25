@@ -149,6 +149,9 @@ class ResourceMetricTracker {
         
         if (value.getTimestamp() <= 
             ((MetricValue)_chronOrderedValues.getLast()).getTimestamp()) {
+            
+            _log.debug("Removing tracked metrics newer than timestamp="+
+                        value.getTimestamp());   
 
             ListIterator iter = 
                 _chronOrderedValues.listIterator(_chronOrderedValues.size());
