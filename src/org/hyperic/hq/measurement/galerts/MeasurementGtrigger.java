@@ -228,7 +228,25 @@ public class MeasurementGtrigger
         // use the measurement schedule event, since we may have 
         // missed a prior measurement schedule event.
         List derivedMeas = getMeasurementsCollecting();
-
+        
+        // Find resources that are just starting to collect and create 
+        // a resource metric tracker for those resources.
+        for (Iterator iter = derivedMeas.iterator(); iter.hasNext();) {
+            DerivedMeasurement meas = (DerivedMeasurement) iter.next();
+            int mid = meas.getId().intValue();
+            MeasurementZeventSource srcId = new MeasurementZeventSource(mid);
+            
+            if (!_srcId2CollectionInterval.containsKey(srcId)) {
+                _log.debug("Start tracking newly scheduled measurement " +
+                           "for trigger ["+getTriggerNameWithPartitionDesc()+
+                           "]: "+srcId);
+                
+                getResourceTrackerAddIfNecessary(srcId);    
+            }
+        }
+        
+        // Now we can rebuild the collection interval map and reset the 
+        // max collection interval.
         _srcId2CollectionInterval.clear();
         
         long oldInterval = _maxCollectionInterval;
@@ -414,21 +432,39 @@ public class MeasurementGtrigger
     }
     
     /**
+     * Retrieve the resource metric tracker for a given resource, adding it 
+     * to the map of tracked resources if it does not already exist there.
+     * 
+     * @param sourceId The measurement source id.
+     * @return The resource tracker.
+     */
+    private ResourceMetricTracker getResourceTrackerAddIfNecessary(
+                                        MeasurementZeventSource sourceId) {
+        
+        ResourceMetricTracker tracker = 
+            (ResourceMetricTracker)_trackedResources.get(sourceId);
+        
+        if (tracker==null) {
+            tracker = new ResourceMetricTracker(_comparator, 
+                                                _metricVal, 
+                                                _isNotReportingEventsOffending);
+      
+            _trackedResources.put(sourceId, tracker);                    
+        }
+        
+        return tracker;
+    }
+        
+    /**
      * Track this measurement event.
      * 
      * @param event The measurement event.
      */
-    private void track(MeasurementZevent event) {        
-        ResourceMetricTracker tracker = 
-            (ResourceMetricTracker)_trackedResources.get(event.getSourceId());
-                
-        if (tracker == null) {
-            tracker = 
-                new ResourceMetricTracker(_comparator,
-                                          _metricVal, 
-                                          _isNotReportingEventsOffending);
-            _trackedResources.put(event.getSourceId(), tracker);
-        }
+    private void track(MeasurementZevent event) {
+        MeasurementZeventSource sourceId = 
+            (MeasurementZeventSource)event.getSourceId();
+        
+        ResourceMetricTracker tracker = getResourceTrackerAddIfNecessary(sourceId);
         
         MeasurementZeventPayload payload = 
             (MeasurementZeventPayload)event.getPayload();
@@ -701,6 +737,13 @@ public class MeasurementGtrigger
                 MeasurementZeventSource srcId = new MeasurementZeventSource(mid);
                 _interestedEvents.add(srcId);
                 _srcId2CollectionInterval.put(srcId, interval);
+                
+                // HQ-1165: Create a resource metric tracker for this resource 
+                // right now in case we have decided that not reporting resources 
+                // are offending and a metric is never reported for that resource. 
+                // We don't want to depend on receiving at least one metric for 
+                // that resource before we can determine that it isn't reporting.
+                getResourceTrackerAddIfNecessary(srcId);
                 
                 MeasurementScheduleZeventSource scheduleSrcId = 
                     new MeasurementScheduleZeventSource(mid);
